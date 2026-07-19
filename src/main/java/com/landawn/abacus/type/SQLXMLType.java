@@ -23,8 +23,11 @@ import java.sql.SQLXML;
 /**
  * Type handler for {@link java.sql.SQLXML} objects. Provides JDBC support for reading SQLXML values
  * from a {@link ResultSet} and binding them to {@link PreparedStatement}/{@link CallableStatement} parameters.
- * SQLXML instances are database-managed and cannot be created from or converted to a plain string;
- * {@link #stringOf(SQLXML)} and {@link #valueOf(String)} therefore throw {@link UnsupportedOperationException}.
+ * This handler deliberately limits database-managed SQLXML instances to JDBC transfer;
+ * {@link #stringOf(SQLXML)} and {@link #valueOf(String)} throw {@link UnsupportedOperationException}. Callers that
+ * need the XML text can use {@link SQLXML#getString()} directly and handle its {@link SQLException} and lifecycle.
+ * Callers retain ownership of retrieved values and must invoke {@link SQLXML#free()} when the value is no longer
+ * needed; this handler does not release a value passed to or returned from a JDBC operation.
  */
 public class SQLXMLType extends AbstractType<SQLXML> {
 
@@ -76,8 +79,8 @@ public class SQLXMLType extends AbstractType<SQLXML> {
 
     /**
      * Converts a SQLXML object to its string representation.
-     * This operation is not supported for SQL XML types as they are database-specific
-     * and require special handling for XML data extraction.
+     * This operation is not supported by this JDBC-locator handler. Use {@link SQLXML#getString()} directly when
+     * extracting XML text, retaining responsibility for checked exceptions and locator cleanup.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -88,7 +91,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      *
      * @param x the SQLXML object to convert
      * @return never returns normally
-     * @throws UnsupportedOperationException always thrown as SQLXML cannot be directly converted to string
+     * @throws UnsupportedOperationException always thrown because text extraction is outside this handler's contract
      */
     @Override
     public String stringOf(final SQLXML x) throws UnsupportedOperationException {

@@ -90,8 +90,8 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * List<Type<?>> paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.size());        // Output: 1
-     * System.out.println(paramTypes.get(0).name()); // Output: long
+     * System.out.println(paramTypes.size());          // Output: 1
+     * System.out.println(paramTypes.get(0).name());   // Output: long
      * }</pre>
      *
      * @return an immutable list containing the primitive {@code long} Type that describes the elements of this list type
@@ -188,6 +188,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * type.appendTo(nullSb, null);
      * System.out.println(nullSb.toString());   // Output: null
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -235,6 +236,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * type.serializeTo(nullWriter, null, config);
      * System.out.println(nullWriter.toString());   // Output: null
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization

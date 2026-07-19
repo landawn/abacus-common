@@ -70,7 +70,8 @@ import com.landawn.abacus.util.TypeReference;
  *
  * <p><b>WARNING - Type Safety:</b>
  * <ul>
- *   <li>All Type instances are <b>immutable</b> and thread-safe</li>
+ *   <li>Type handlers are expected to be immutable and thread-safe; custom implementations must uphold this contract.
+ *       {@link #isImmutable()} describes values of the represented Java type, not the handler itself</li>
  *   <li>Type operations preserve type safety through generic parameters</li>
  *   <li>{@code null} and empty input is generally tolerated (yielding {@code null} or the type's default value),
  *       while malformed input typically throws an appropriate exception</li>
@@ -1202,15 +1203,14 @@ public interface Type<T> {
      * Converts a value of this type to its string representation.
      * This is the standard way to serialize values as strings.
      *
-     * <p>Unlike {@link Object#toString()}, the returned string is a <i>formatted</i>, serializable
-     * representation (for example, a JSON-format string for collections, maps, arrays and beans) that is
-     * designed to be parsed back into an equivalent value via {@link #valueOf(String)}; that is, {@code stringOf}
-     * and {@code valueOf} are inverse operations that round-trip, so {@code type.valueOf(type.stringOf(x))} should
-     * yield a value equal to the original {@code x}. By contrast, {@code toString()} only produces a human-readable
-     * representation that generally cannot be converted back into the original object.</p>
+     * <p>Unlike {@link Object#toString()}, implementations generally return a type-defined formatted representation
+     * (for example, JSON for collections, maps, arrays and beans). Many serializable types can parse this output with
+     * {@link #valueOf(String)}, but this interface does not promise a lossless round-trip for every type: a handler may
+     * normalize precision or other state, provide a display-only representation, or reject string conversion entirely.
+     * Consult the concrete type's contract and {@link #isSerializable()}.</p>
      *
      * @param x the value to convert; may be {@code null}
-     * @return the string representation (round-trippable via {@link #valueOf(String)}), or {@code null} if {@code x} is {@code null}
+     * @return the type-defined string representation; many implementations return {@code null} when {@code x} is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -1220,11 +1220,10 @@ public interface Type<T> {
      * Parses a string to create a value of this type.
      * This is the standard way to deserialize values from strings.
      *
-     * <p>This method is the inverse of {@code stringOf}: it parses the formatted string produced by {@code stringOf}
-     * (for example, a JSON-format string for collections, maps, arrays and beans) back into a value of this type. The
-     * two methods are designed to round-trip, so {@code type.valueOf(type.stringOf(x))} should yield a value equal to
-     * the original {@code x}. This generally does not hold for strings produced by {@link Object#toString()}, which are
-     * not guaranteed to be parseable back into the original object.</p>
+     * <p>For handlers that support string deserialization, this method parses the type-defined representation. It often
+     * accepts the output of {@link #stringOf(Object)}, but exact round-trip behavior is implementation-specific and may
+     * be lossy for representations that normalize precision or omit state. Strings produced by {@link Object#toString()}
+     * are not generally guaranteed to be accepted.</p>
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed value, or {@code null} (or the type's default) when {@code str} is {@code null} or empty

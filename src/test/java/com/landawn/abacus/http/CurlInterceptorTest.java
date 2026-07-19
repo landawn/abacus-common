@@ -317,6 +317,25 @@ public class CurlInterceptorTest extends TestBase {
     }
 
     @Test
+    public void testInterceptSupportsExtensionHttpMethod() throws IOException {
+        final AtomicReference<String> capturedCurl = new AtomicReference<>();
+        final OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new CurlInterceptor(capturedCurl::set)).build();
+        final MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody("OK"));
+        server.start();
+
+        try {
+            final Request request = new Request.Builder().url(server.url("/dav")).method("PROPFIND", null).build();
+
+            try (Response ignored = client.newCall(request).execute()) {
+                assertTrue(capturedCurl.get().contains("curl -X PROPFIND"));
+            }
+        } finally {
+            server.shutdown();
+        }
+    }
+
+    @Test
     public void testInterceptWithDoubleQuotes() throws IOException {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor('"', capturedCurl::set);

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
@@ -147,6 +148,11 @@ import com.landawn.abacus.util.function.UnaryOperator;
 import com.landawn.abacus.util.stream.Collectors;
 
 public class FnTest extends TestBase {
+
+    @Test
+    public void testUtilityConstructorIsPrivate() throws NoSuchMethodException {
+        assertTrue(Modifier.isPrivate(Fn.class.getDeclaredConstructor().getModifiers()));
+    }
 
     public static class MyCloseable implements AutoCloseable {
         private final AtomicInteger closeCount = new AtomicInteger(0);
@@ -673,6 +679,43 @@ public class FnTest extends TestBase {
     }
 
     @Test
+    public void testShutdownRejectsInvalidArgumentsBeforeCreatingAction() {
+        assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(null, 1, TimeUnit.SECONDS));
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        try {
+            assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(service, -1, TimeUnit.SECONDS));
+            assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(service, 1, null));
+            assertFalse(service.isShutdown());
+        } finally {
+            service.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testShutdownCanBeRetriedWhenExecutorRejectsFirstAttempt() {
+        AtomicInteger attempts = new AtomicInteger();
+        ExecutorService service = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()) {
+            @Override
+            public void shutdown() {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new SecurityException("denied once");
+                }
+
+                super.shutdown();
+            }
+        };
+
+        Runnable shutdown = Fn.shutdown(service);
+        assertThrows(SecurityException.class, shutdown::run);
+        assertFalse(service.isShutdown());
+        shutdown.run();
+        assertTrue(service.isShutdown());
+        assertEquals(2, attempts.get());
+    }
+
+    @Test
     public void doNothing() {
         assertDoesNotThrow(() -> {
             Fn.emptyConsumer().accept(1);
@@ -706,6 +749,7 @@ public class FnTest extends TestBase {
     @Test
     public void testThrowException() {
         assertThrows(IllegalStateException.class, () -> Fn.throwException(IllegalStateException::new).accept("test"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.throwException(null));
     }
 
     @Test
@@ -836,6 +880,8 @@ public class FnTest extends TestBase {
         assertDoesNotThrow(() -> Fn.rateLimiter(10.0).accept("test"));
         RateLimiter limiter = RateLimiter.create(10);
         assertDoesNotThrow(() -> Fn.rateLimiter(limiter).accept("test"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.rateLimiter(0));
+        assertThrows(IllegalArgumentException.class, () -> Fnn.rateLimiter(Double.NaN));
     }
 
     @Test
@@ -1079,7 +1125,8 @@ public class FnTest extends TestBase {
         Function<String, Wrapper<String>> wrapFunc = Fn.wrap(s -> 1, String::equals);
         Wrapper<String> wrapped = wrapFunc.apply("test");
         assertEquals(1, wrapped.hashCode());
-        assertTrue(wrapped.equals(Wrapper.of("test")));
+        assertEquals(wrapped, wrapFunc.apply("test"));
+        assertFalse(wrapped.equals(Wrapper.of("test")));
     }
 
     @Test
@@ -4481,12 +4528,29 @@ public class FnTest extends TestBase {
     public void testApplyIfNotNullOrElseGetWithNullMappers() {
         assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::length, () -> 0));
         assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, () -> 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::length, null));
 
         assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::trim, String::length, () -> 0));
         assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, String::length, () -> 0));
         assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, null, () -> 0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, String::length, null));
 
         assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, s -> s, s -> s, s -> s, () -> 'a'));
+        assertThrows(IllegalArgumentException.class,
+                () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, s -> s.substring(0, 1), s -> s.charAt(0), null));
+    }
+
+    @Test
+    public void testApplyIfNotNullOrElseGetAcceptsCovariantSupplier() {
+        Supplier<Double> fallback = () -> -1d;
+
+        Function<String, Number> twoMappers = Fn.applyIfNotNullOrElseGet(String::trim, String::length, fallback);
+        Function<String, Number> threeMappers = Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, String::length, fallback);
+        Function<String, Number> fourMappers = Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, s -> s.substring(0, 1), String::length, fallback);
+
+        assertEquals(-1d, twoMappers.apply(null));
+        assertEquals(-1d, threeMappers.apply(null));
+        assertEquals(-1d, fourMappers.apply(null));
     }
 
     @Test
@@ -6678,6 +6742,7 @@ public class FnTest extends TestBase {
         };
         Callable<String> errorCallable = Fn.cc(exceptionCallable);
         assertThrows(RuntimeException.class, errorCallable::call);
+        assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.Callable<String, Exception>) null));
     }
 
     @Test
@@ -7498,6 +7563,7 @@ public class FnTest extends TestBase {
         };
         Runnable errorRunnable = Fn.rr(exceptionRunnable);
         assertThrows(RuntimeException.class, errorRunnable::run);
+        assertThrows(IllegalArgumentException.class, () -> Fn.rr((Throwables.Runnable<Exception>) null));
     }
 
     @Test

@@ -24,9 +24,13 @@ public class IntToFloatFunctionTest extends TestBase {
 
     @Test
     public void test_DEFAULT() {
-        assertEquals(100f, IntToFloatFunction.DEFAULT.applyAsFloat(100), 0.001f);
-        assertEquals(0f, IntToFloatFunction.DEFAULT.applyAsFloat(0), 0.001f);
-        assertEquals(-50f, IntToFloatFunction.DEFAULT.applyAsFloat(-50), 0.001f);
+        assertEquals(100f, IntToFloatFunction.DEFAULT.applyAsFloat(100));
+        assertEquals(0f, IntToFloatFunction.DEFAULT.applyAsFloat(0));
+        assertEquals(-50f, IntToFloatFunction.DEFAULT.applyAsFloat(-50));
+        assertEquals(16_777_216f, IntToFloatFunction.DEFAULT.applyAsFloat(16_777_217));
+        assertEquals(16_777_218f, IntToFloatFunction.DEFAULT.applyAsFloat(16_777_218));
+        assertEquals((float) Integer.MAX_VALUE, IntToFloatFunction.DEFAULT.applyAsFloat(Integer.MAX_VALUE));
+        assertEquals((float) Integer.MIN_VALUE, IntToFloatFunction.DEFAULT.applyAsFloat(Integer.MIN_VALUE));
     }
 
     @Test

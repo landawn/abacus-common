@@ -80,7 +80,9 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * @param min the minimum {@code float} value
      * @param max the maximum {@code float} value
      * @param sum the sum of all values as a {@code double}
-     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
+     * @throws IllegalArgumentException if {@code count} is negative, the empty state is not canonical,
+     *         {@code min} is greater than {@code max}, or the NaN states of {@code min}, {@code max},
+     *         and {@code sum} are inconsistent
      */
     public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
         if (count < 0) {
@@ -91,8 +93,8 @@ public class FloatSummaryStatistics implements FloatConsumer {
             if (min != Float.POSITIVE_INFINITY || max != Float.NEGATIVE_INFINITY || sum != 0D) {
                 throw new IllegalArgumentException("Invalid empty state: min, max, and sum must be canonical");
             }
-        } else if (N.compare(min, max) > 0) {
-            throw new IllegalArgumentException("minimum is greater than maximum");
+        } else if (N.compare(min, max) > 0 || Float.isNaN(min) != Float.isNaN(max) || Float.isNaN(min) != Double.isNaN(sum)) {
+            throw new IllegalArgumentException("minimum, maximum, and sum are inconsistent");
         }
 
         summation.combine(count, sum);

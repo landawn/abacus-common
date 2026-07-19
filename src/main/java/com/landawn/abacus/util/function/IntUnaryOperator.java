@@ -14,7 +14,6 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -87,13 +86,13 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *               Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is null
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.IntUnaryOperator)
      */
     @Override
     default IntUnaryOperator compose(final java.util.function.IntUnaryOperator before) {
-        N.checkArgNotNull(before, cs.before);
+        java.util.Objects.requireNonNull(before, cs.before);
         return (final int v) -> applyAsInt(before.applyAsInt(v));
     }
 
@@ -118,13 +117,13 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *              Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws NullPointerException if {@code after} is null
      *
      * @see #compose(java.util.function.IntUnaryOperator)
      */
     @Override
     default IntUnaryOperator andThen(final java.util.function.IntUnaryOperator after) {
-        N.checkArgNotNull(after, cs.after);
+        java.util.Objects.requireNonNull(after, cs.after);
         return (final int t) -> after.applyAsInt(applyAsInt(t));
     }
 

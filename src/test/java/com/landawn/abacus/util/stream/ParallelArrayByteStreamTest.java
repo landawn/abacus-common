@@ -11,7 +11,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -468,6 +471,50 @@ public class ParallelArrayByteStreamTest extends TestBase {
         assertTrue(result4.isPresent());
         assertEquals(10, result4.get());
         stream4.close();
+    }
+
+    @Test
+    public void testReduceWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch slowWorkerStarted = new CountDownLatch(1);
+        final AtomicBoolean slowWorkerFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedWorker = new AtomicBoolean();
+        final ByteStream stream = createStream((byte) 1, (byte) 2).onClose(() -> closeObservedFinishedWorker.set(slowWorkerFinished.get()));
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> stream.reduce((byte) 0, (left, right) -> {
+            if (right == 2) {
+                slowWorkerStarted.countDown();
+                sleepForWorkerOverlap();
+                slowWorkerFinished.set(true);
+                return (byte) (left + right);
+            }
+
+            awaitWorkerStart(slowWorkerStarted);
+            throw new IllegalStateException("worker failure");
+        }));
+
+        assertEquals("worker failure", thrown.getMessage());
+        assertTrue(slowWorkerFinished.get());
+        assertTrue(closeObservedFinishedWorker.get());
+    }
+
+    private static void awaitWorkerStart(final CountDownLatch latch) {
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void sleepForWorkerOverlap() {
+        try {
+            Thread.sleep(200);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
 
     @Test

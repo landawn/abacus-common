@@ -12,12 +12,18 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.util.StreamReaderDelegate;
 import javax.xml.transform.Transformer;
 
 import org.junit.jupiter.api.Assertions;
@@ -26,6 +32,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.helpers.DefaultHandler;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedException;
@@ -132,6 +139,55 @@ public class XmlUtilTest extends TestBase {
         Assertions.assertNotNull(p);
         Assertions.assertEquals("Alice", p.getName());
         Assertions.assertEquals(30, p.getAge());
+    }
+
+    @Test
+    public void testUnmarshalPublicEntryPointDoesNotResolveExternalEntities() throws Exception {
+        final String marker = "XXE_PUBLIC_UNMARSHAL_MARKER_2026";
+        final File externalEntityFile = File.createTempFile("xmlutil-unmarshal-xxe-", ".txt");
+
+        try {
+            Files.write(externalEntityFile.toPath(), marker.getBytes(Charsets.UTF_8));
+
+            final String maliciousXml = "<?xml version=\"1.0\"?>" + "<!DOCTYPE person [<!ENTITY xxe SYSTEM \"" + externalEntityFile.toURI() + "\">]>"
+                    + "<person><name>&xxe;</name><age>25</age></person>";
+            Assertions.assertThrows(RuntimeException.class, () -> XmlUtil.unmarshal(Person.class, maliciousXml));
+        } finally {
+            //noinspection ResultOfMethodCallIgnored
+            externalEntityFile.delete();
+        }
+    }
+
+    @Test
+    public void testUnmarshal_malformedXmlClosesReaderAndPreservesParsingFailure() {
+        final AtomicBoolean closed = new AtomicBoolean();
+        final XMLStreamReader delegate = XmlUtil.createXMLStreamReader(new StringReader("<person><name>Alice</person>"));
+        final XMLStreamReader trackingReader = new StreamReaderDelegate(delegate) {
+            @Override
+            public void close() throws XMLStreamException {
+                closed.set(true);
+                super.close();
+            }
+        };
+
+        Assertions.assertThrows(RuntimeException.class, () -> XmlUtil.unmarshalAndClose(Person.class, trackingReader));
+        Assertions.assertTrue(closed.get());
+    }
+
+    @Test
+    public void testUnmarshal_closesReaderAfterSuccess() {
+        final AtomicBoolean closed = new AtomicBoolean();
+        final XMLStreamReader delegate = XmlUtil.createXMLStreamReader(new StringReader("<person><name>Alice</name><age>25</age></person>"));
+        final XMLStreamReader trackingReader = new StreamReaderDelegate(delegate) {
+            @Override
+            public void close() throws XMLStreamException {
+                closed.set(true);
+                super.close();
+            }
+        };
+
+        Assertions.assertEquals(new Person("Alice", 25), XmlUtil.unmarshalAndClose(Person.class, trackingReader));
+        Assertions.assertTrue(closed.get());
     }
 
     @Test
@@ -250,6 +306,31 @@ public class XmlUtilTest extends TestBase {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    public void testRecycleContentParserRejectsForeignAndDuplicateInstances() throws Exception {
+        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
+        poolField.setAccessible(true);
+        Queue<DocumentBuilder> pool = (Queue<DocumentBuilder>) poolField.get(null);
+        synchronized (pool) {
+            pool.clear();
+        }
+
+        DocumentBuilder foreign = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        XmlUtil.recycleContentParser(foreign);
+        synchronized (pool) {
+            Assertions.assertTrue(pool.isEmpty(), "A caller-supplied parser must not enter the hardened pool");
+        }
+
+        DocumentBuilder owned = XmlUtil.createContentParser();
+        XmlUtil.recycleContentParser(owned);
+        XmlUtil.recycleContentParser(owned);
+        synchronized (pool) {
+            Assertions.assertEquals(1, pool.size(), "The same non-thread-safe parser must not be pooled twice");
+            pool.clear();
+        }
+    }
+
+    @Test
     public void testCreateSAXParser() {
         SAXParser parser = XmlUtil.createSAXParser();
         Assertions.assertNotNull(parser);
@@ -287,6 +368,50 @@ public class XmlUtilTest extends TestBase {
         XmlUtil.recycleSAXParser(sp1);
         XmlUtil.recycleSAXParser(sp2);
         Assertions.assertNotNull(XmlUtil.createSAXParser());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRecycleSAXParserRejectsForeignAndDuplicateInstances() throws Exception {
+        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("saxParserPool");
+        poolField.setAccessible(true);
+        Queue<SAXParser> pool = (Queue<SAXParser>) poolField.get(null);
+        synchronized (pool) {
+            pool.clear();
+        }
+
+        SAXParser foreign = SAXParserFactory.newInstance().newSAXParser();
+        XmlUtil.recycleSAXParser(foreign);
+        synchronized (pool) {
+            Assertions.assertTrue(pool.isEmpty(), "A caller-supplied parser must not enter the hardened pool");
+        }
+
+        SAXParser owned = XmlUtil.createSAXParser();
+        XmlUtil.recycleSAXParser(owned);
+        XmlUtil.recycleSAXParser(owned);
+        synchronized (pool) {
+            Assertions.assertEquals(1, pool.size(), "The same non-thread-safe parser must not be pooled twice");
+            pool.clear();
+        }
+    }
+
+    @Test
+    public void testDomAndSaxParsersRejectDoctype() throws Exception {
+        byte[] hostileXml = "<!DOCTYPE root [<!ENTITY xxe SYSTEM \"file:///definitely-not-readable-abacus-xxe\">]><root>&xxe;</root>".getBytes(Charsets.UTF_8);
+
+        DocumentBuilder documentBuilder = XmlUtil.createContentParser();
+        try {
+            Assertions.assertThrows(Exception.class, () -> documentBuilder.parse(new ByteArrayInputStream(hostileXml)));
+        } finally {
+            XmlUtil.recycleContentParser(documentBuilder);
+        }
+
+        SAXParser saxParser = XmlUtil.createSAXParser();
+        try {
+            Assertions.assertThrows(Exception.class, () -> saxParser.parse(new ByteArrayInputStream(hostileXml), new DefaultHandler()));
+        } finally {
+            XmlUtil.recycleSAXParser(saxParser);
+        }
     }
 
     @Test
@@ -329,31 +454,17 @@ public class XmlUtilTest extends TestBase {
             final String maliciousXml = "<?xml version=\"1.0\"?>" + "<!DOCTYPE root [<!ENTITY xxe SYSTEM \"" + externalEntityFile.toURI() + "\">]>"
                     + "<root>&xxe;</root>";
 
-            final StringBuilder parsedText = new StringBuilder();
-            boolean blockedByException = false;
-
-            try {
+            Assertions.assertThrows(Exception.class, () -> {
                 final XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(new StringReader(maliciousXml));
 
                 try {
                     while (xmlReader.hasNext()) {
-                        if (xmlReader.getEventType() == XMLStreamConstants.CHARACTERS) {
-                            parsedText.append(xmlReader.getText());
-                        }
-
                         xmlReader.next();
                     }
                 } finally {
                     xmlReader.close();
                 }
-            } catch (Exception e) {
-                // With SUPPORT_DTD=false the parser may throw a (checked) XMLStreamException for
-                // an undeclared entity, or it may silently emit no characters. Either way, the
-                // marker must not be exfiltrated.
-                blockedByException = true;
-            }
-
-            Assertions.assertTrue(blockedByException || !parsedText.toString().contains(marker));
+            });
         } finally {
             //noinspection ResultOfMethodCallIgnored
             externalEntityFile.delete();
@@ -393,6 +504,37 @@ public class XmlUtilTest extends TestBase {
         XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(baos, "UTF-8");
 
         Assertions.assertNotNull(xmlWriter);
+    }
+
+    @Test
+    public void testConcurrentStaxReaderAndWriterCreation() {
+        Assertions.assertDoesNotThrow(() -> java.util.stream.IntStream.range(0, 200).parallel().forEach(i -> {
+            XMLStreamReader reader = null;
+            XMLStreamWriter writer = null;
+
+            try {
+                reader = XmlUtil.createXMLStreamReader(new StringReader("<root><value>" + i + "</value></root>"));
+                writer = XmlUtil.createXMLStreamWriter(new StringWriter());
+                Assertions.assertEquals(XMLStreamConstants.START_DOCUMENT, reader.getEventType());
+                writer.writeStartDocument();
+                writer.writeEmptyElement("root");
+                writer.writeEndDocument();
+            } catch (Exception e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            } finally {
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+
+                    if (writer != null) {
+                        writer.close();
+                    }
+                } catch (Exception e) {
+                    throw ExceptionUtil.toRuntimeException(e, true);
+                }
+            }
+        }));
     }
 
     @Test
@@ -503,6 +645,12 @@ public class XmlUtilTest extends TestBase {
 
         Assertions.assertNotNull(children);
         Assertions.assertEquals(2, children.size());
+        Assertions.assertEquals("1", children.get(0).getTextContent());
+        Assertions.assertEquals("2", children.get(1).getTextContent());
+
+        List<Element> allDirectChildren = XmlUtil.getElementsByTagName(root, "*");
+        Assertions.assertEquals(3, allDirectChildren.size());
+        Assertions.assertEquals(List.of("child", "child", "other"), allDirectChildren.stream().map(Element::getTagName).toList());
     }
 
     @Test
@@ -639,6 +787,20 @@ public class XmlUtilTest extends TestBase {
         Assertions.assertEquals("30", data.get("age"));
         Assertions.assertTrue(data.containsKey("person.name"));
         Assertions.assertTrue(data.containsKey("person.city"));
+    }
+
+    @Test
+    public void testReadElement_qualifiesNestedAttributesWithElementPath() throws Exception {
+        String xml = "<?xml version=\"1.0\"?><person id=\"7\"><home zip=\"10001\"/><work zip=\"94105\"/></person>";
+        DocumentBuilder builder = XmlUtil.createDOMParser();
+        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
+
+        Map<String, String> data = XmlUtil.readElement(doc.getDocumentElement());
+
+        Assertions.assertEquals("7", data.get("id"));
+        Assertions.assertEquals("10001", data.get("person.home.zip"));
+        Assertions.assertEquals("94105", data.get("person.work.zip"));
+        Assertions.assertFalse(data.containsKey("person.zip"));
     }
 
     @Test

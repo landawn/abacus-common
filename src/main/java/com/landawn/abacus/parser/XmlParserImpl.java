@@ -1583,9 +1583,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 try {
                     xmlReader = createXMLStreamReader(source);
 
-                    for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
-                        // do nothing.
-                    }
+                    moveToRootElement(xmlReader);
 
                     if (targetType == null && N.notEmpty(nodeTypes)) {
                         String nodeName = null;
@@ -1684,9 +1682,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 try {
                     xmlReader = createXMLStreamReader(source);
 
-                    for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
-                        // do nothing.
-                    }
+                    moveToRootElement(xmlReader);
 
                     if (targetType == null && N.notEmpty(nodeTypes)) {
                         String nodeName = null;

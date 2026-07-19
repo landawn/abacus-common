@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +18,13 @@ public class FileSystemUtilTest extends TestBase {
             return constructor.newInstance();
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static final class SilentSlowProcess {
+
+        public static void main(final String[] args) throws InterruptedException {
+            Thread.sleep(3000);
         }
     }
 
@@ -185,6 +193,23 @@ public class FileSystemUtilTest extends TestBase {
     @Test
     public void testFreeSpaceWindowsRejectsQuotedPathBeforeProcessExecution() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> newFileSystemUtil().freeSpaceWindows("C:\\tmp\"bad", 0));
+    }
+
+    @Test
+    public void testPerformCommandEnforcesTimeoutWhileOutputIsSilent() throws Exception {
+        final String executable = System.getProperty("java.home") + File.separator + "bin" + File.separator
+                + (System.getProperty("os.name").toLowerCase().contains("windows") ? "java.exe" : "java");
+        final String testClasses = new File(FileSystemUtilTest.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+        final String[] command = { executable, "-cp", testClasses, SilentSlowProcess.class.getName() };
+        final long start = System.nanoTime();
+
+        final IOException exception = Assertions.assertThrows(IOException.class, () -> newFileSystemUtil().performCommand(command, 1, 100));
+        final long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
+        final boolean interrupted = Thread.interrupted(); // Read and clear so a failure cannot contaminate later tests.
+
+        Assertions.assertTrue(exception.getMessage().contains("timed out"));
+        Assertions.assertTrue(elapsedMillis < 2000, "Timeout took " + elapsedMillis + " ms");
+        Assertions.assertFalse(interrupted, "A command timeout must not interrupt its caller");
     }
 
 }

@@ -94,9 +94,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param typeName the type name string (may include generic parameters)
      * @param typeClass the class of the type to handle
-     * @throws RuntimeException if {@code @JsonXmlValue} and {@code @JsonXmlCreator} annotations
-     *                          are not present as a matched pair, or if the creator/value-type
-     *                          constraints are violated
+     * @throws IllegalArgumentException if only one side of the {@code @JsonXmlValue}/{@code @JsonXmlCreator}
+     *                                  pair is present, if multiple annotated members are present for either role,
+     *                                  or if an annotated member violates its signature constraints
      */
     @SuppressWarnings("null")
     protected SingleValueType(final String typeName, final Class<T> typeClass) {
@@ -122,74 +122,89 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         final Method[] methods = typeClass.getDeclaredMethods();
 
         for (final Method m : methods) {
-            if (m.isAnnotationPresent(JsonXmlCreator.class)) {
-                localJsonCreatorMethod = m;
-            } else if (m.isAnnotationPresent(JsonXmlValue.class)) {
-                localJsonValueMethod = m;
-            } else {
-                try {
-                    if (m.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonCreator.class)) {
-                        localJsonCreatorMethod = m;
-                    }
-                } catch (final Throwable e) {
-                    // ignore
-                }
+            boolean isCreator = m.isAnnotationPresent(JsonXmlCreator.class);
+            boolean isValue = m.isAnnotationPresent(JsonXmlValue.class);
 
-                try {
-                    if (m.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)
-                            && m.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value()) {
-                        localJsonValueMethod = m;
-                    }
-                } catch (final Throwable e) {
-                    // ignore
-                }
+            try {
+                final com.fasterxml.jackson.annotation.JsonCreator annotation = m.getAnnotation(com.fasterxml.jackson.annotation.JsonCreator.class);
+                isCreator |= annotation != null && annotation.mode() != com.fasterxml.jackson.annotation.JsonCreator.Mode.DISABLED;
+            } catch (final Throwable e) {
+                // Jackson is optional.
             }
 
-            if (localJsonCreatorMethod != null && localJsonValueMethod != null) {
-                break;
+            try {
+                isValue |= m.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)
+                        && m.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value();
+            } catch (final Throwable e) {
+                // Jackson is optional.
+            }
+
+            if (isCreator) {
+                if (localJsonCreatorMethod != null) {
+                    throw new IllegalArgumentException("Multiple JsonCreator methods are defined in class: " + typeClass);
+                }
+
+                localJsonCreatorMethod = m;
+            }
+
+            if (isValue) {
+                if (localJsonValueMethod != null) {
+                    throw new IllegalArgumentException("Multiple JsonValue members are defined in class: " + typeClass);
+                }
+
+                localJsonValueMethod = m;
             }
         }
 
-        if (localJsonValueMethod == null) {
-            for (final Field field : typeClass.getDeclaredFields()) {
-                if (field.isAnnotationPresent(JsonXmlValue.class)) {
-                    localJsonValueField = field;
-                } else {
-                    try {
-                        if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)
-                                && field.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value()) {
-                            localJsonValueField = field;
-                        }
-                    } catch (final Throwable e) {
-                        // ignore
-                    }
+        for (final Field field : typeClass.getDeclaredFields()) {
+            boolean isValue = field.isAnnotationPresent(JsonXmlValue.class);
+
+            try {
+                isValue |= field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)
+                        && field.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value();
+            } catch (final Throwable e) {
+                // Jackson is optional.
+            }
+
+            if (isValue) {
+                if (localJsonValueField != null || localJsonValueMethod != null) {
+                    throw new IllegalArgumentException("Multiple JsonValue members are defined in class: " + typeClass);
                 }
 
-                if (localJsonValueField != null) {
-                    break;
-                }
+                localJsonValueField = field;
             }
         }
 
         if ((localJsonValueField != null || localJsonValueMethod != null) == (localJsonCreatorMethod == null)) {
-            throw new RuntimeException("Json annotation 'JsonValue' and 'JsonCreator' are not added in pair in class: " + typeClass);
+            throw new IllegalArgumentException("Json annotations 'JsonValue' and 'JsonCreator' must be declared as a pair in class: " + typeClass);
+        }
+
+        if (localJsonValueField != null && Modifier.isStatic(localJsonValueField.getModifiers())) {
+            throw new IllegalArgumentException("The 'JsonValue' field must not be static in class: " + typeClass);
+        }
+
+        if (localJsonValueMethod != null && (Modifier.isStatic(localJsonValueMethod.getModifiers()) || localJsonValueMethod.getParameterCount() != 0
+                || localJsonValueMethod.getReturnType() == void.class)) {
+            throw new IllegalArgumentException(
+                    "The 'JsonValue' method must be a non-static, no-argument method with a value return type in class: " + typeClass);
         }
 
         if (localJsonCreatorMethod != null) {
             localJsonValueType = localJsonValueMethod == null ? localJsonValueField.getType() : localJsonValueMethod.getReturnType();
 
             if (!typeClass.isAssignableFrom(localJsonCreatorMethod.getReturnType())) {
-                throw new RuntimeException(
-                        "The result type of 'JsonCreator' method: " + localJsonCreatorMethod + " is not assigned to target class: " + typeClass);
+                throw new IllegalArgumentException(
+                        "The return type of 'JsonCreator' method " + localJsonCreatorMethod + " is not assignable to target class: " + typeClass.getName());
             }
 
             if (!Modifier.isStatic(localJsonCreatorMethod.getModifiers())) {
-                throw new RuntimeException("The 'JsonCreator' method: " + localJsonCreatorMethod + " is not static in class: " + typeClass);
+                throw new IllegalArgumentException("The 'JsonCreator' method must be static: " + localJsonCreatorMethod);
             }
 
-            if (N.len(localJsonCreatorMethod.getParameterTypes()) != 1 || !localJsonCreatorMethod.getParameterTypes()[0].isAssignableFrom(localJsonValueType)) {
-                throw new RuntimeException("The parameter type of 'JsonCreator' method: " + localJsonCreatorMethod
-                        + " is not assigned from the return type of 'JsonValue' in class " + typeClass);
+            if (N.len(localJsonCreatorMethod.getParameterTypes()) != 1
+                    || !ClassUtil.wrap(localJsonCreatorMethod.getParameterTypes()[0]).isAssignableFrom(ClassUtil.wrap(localJsonValueType))) {
+                throw new IllegalArgumentException("The 'JsonCreator' method must take exactly one parameter compatible with the 'JsonValue' type "
+                        + localJsonValueType.getName() + ": " + localJsonCreatorMethod);
             }
         }
 
@@ -328,14 +343,19 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to parse
-     * @return an instance of type T, or the string itself (cast to {@code T}) if no creator is available
+     * @param str the string to parse; may be {@code null}
+     * @return an instance of type T, {@code null} when {@code str} is {@code null}, or the string itself
+     *         (cast to {@code T}) if no creator is available
      * @see #valueOf(Object)
      * @see #stringOf(Object)
      */
     @Override
     public T valueOf(final String str) {
         // throw new UnsupportedOperationException();
+
+        if (str == null) {
+            return null;
+        }
 
         if (jsonValueType != null) {
             try {
@@ -356,19 +376,23 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param rs the ResultSet containing the query results
      * @param columnIndex the index of the column to retrieve (1-based)
-     * @return an instance of type T; when no creator is configured, {@code null} if the database value is null (with a JSON creator or factory creator, the creator is invoked with the null value and its result is returned)
+     * @return an instance of type T, or {@code null} if the database value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType != null) {
             try {
-                return (T) jsonCreatorMethod.invoke(null, jsonValueType.get(rs, columnIndex));
+                final Object value = jsonValueType.get(rs, columnIndex);
+
+                return value == null ? null : (T) jsonCreatorMethod.invoke(null, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
         } else if (creator != null) {
-            return creator.apply(rs.getString(columnIndex));
+            final String value = rs.getString(columnIndex);
+
+            return value == null ? null : creator.apply(value);
         } else {
             final Object obj = rs.getObject(columnIndex);
 
@@ -382,19 +406,23 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param rs the ResultSet containing the query results
      * @param columnName the label of the column to retrieve
-     * @return an instance of type T; when no creator is configured, {@code null} if the database value is null (with a JSON creator or factory creator, the creator is invoked with the null value and its result is returned)
+     * @return an instance of type T, or {@code null} if the database value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
     public T get(final ResultSet rs, final String columnName) throws SQLException {
         if (jsonValueType != null) {
             try {
-                return (T) jsonCreatorMethod.invoke(null, jsonValueType.get(rs, columnName));
+                final Object value = jsonValueType.get(rs, columnName);
+
+                return value == null ? null : (T) jsonCreatorMethod.invoke(null, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
         } else if (creator != null) {
-            return creator.apply(rs.getString(columnName));
+            final String value = rs.getString(columnName);
+
+            return value == null ? null : creator.apply(value);
         } else {
             final Object obj = rs.getObject(columnName);
 

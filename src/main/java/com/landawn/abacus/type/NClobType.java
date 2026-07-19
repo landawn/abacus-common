@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.util.ClassUtil;
 
 /**
  * Type handler for {@link NClob} (National Character Large Object) objects, providing
@@ -45,13 +46,13 @@ public class NClobType extends AbstractType<NClob> {
 
     /**
      * Package-private constructor for {@code NClobType} bound to a specific {@link NClob}
-     * implementation class. Allows handling of custom {@link NClob} subclasses while still
-     * registering under the {@code "NClob"} type name.
+     * implementation class. The handler name is derived from {@code clazz}, so a driver-specific
+     * implementation remains distinguishable from the standard {@code NClob} interface in type metadata.
      *
      * @param clazz the specific {@link NClob} class or subclass to handle; must not be {@code null}
      */
     NClobType(final Class<? extends NClob> clazz) {
-        super(NCLOB);
+        super(ClassUtil.getSimpleClassName(clazz));
         this.clazz = (Class<NClob>) clazz;
     }
 

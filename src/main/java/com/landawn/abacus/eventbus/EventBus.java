@@ -315,7 +315,7 @@ public class EventBus {
      * @return a snapshot list of subscribers registered for the specified event type and ID
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
-    public List<Object> subscribers(final String eventId, final Class<?> eventType) {
+    public List<Object> subscribers(final String eventId, final Class<?> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, "eventType");
 
         final List<Object> eventSubs = new ArrayList<>();
@@ -396,7 +396,7 @@ public class EventBus {
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
      * @see #countOfSubscribers()
      */
-    public boolean hasSubscribers(final Class<?> eventType) {
+    public boolean hasSubscribers(final Class<?> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, "eventType");
 
         synchronized (registeredSubMap) {
@@ -526,7 +526,7 @@ public class EventBus {
      * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
-    public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
+    public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) throws IllegalArgumentException {
         N.checkArgNotNull(subscriber, cs.subscriber);
 
         if (!isSupportedThreadMode(threadMode)) {
@@ -848,7 +848,7 @@ public class EventBus {
 
     /**
      * Posts an event with an optional event ID.
-     * When {@code eventId} is non-null and non-empty, the event will only be delivered to subscribers
+     * When {@code eventId} is {@code non-null} and non-empty, the event will only be delivered to subscribers
      * associated with that event ID, including those registered with that ID directly and those whose
      * {@link Subscribe} annotation specifies that event ID.
      * When {@code eventId} is {@code null} or empty, the event is delivered to all subscribers that
@@ -865,7 +865,7 @@ public class EventBus {
      * @return this {@code EventBus} instance for method chaining
      * @throws IllegalArgumentException if {@code event} is {@code null}
      */
-    public EventBus post(final String eventId, final Object event) {
+    public EventBus post(final String eventId, final Object event) throws IllegalArgumentException {
         N.checkArgNotNull(event, cs.event);
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
@@ -976,7 +976,7 @@ public class EventBus {
      * @return this {@code EventBus} instance for method chaining
      * @throws IllegalArgumentException if {@code event} is {@code null}
      */
-    public EventBus postSticky(final String eventId, final Object event) {
+    public EventBus postSticky(final String eventId, final Object event) throws IllegalArgumentException {
         N.checkArgNotNull(event, cs.event);
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
@@ -1084,7 +1084,7 @@ public class EventBus {
      * @return {@code true} if one or more events were removed, {@code false} otherwise
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
-    public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
+    public boolean removeStickyEvents(final String eventId, final Class<?> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, "eventType");
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
@@ -1175,7 +1175,7 @@ public class EventBus {
      * @return a list of sticky events matching both the type and event ID
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
-    public <T> List<T> stickyEvents(final String eventId, final Class<T> eventType) {
+    public <T> List<T> stickyEvents(final String eventId, final Class<T> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, "eventType");
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
@@ -1271,7 +1271,7 @@ public class EventBus {
             if (sub.intervalMillis > 0 || sub.deduplicate) {
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized (sub) { //NOSONAR
-                    if (sub.intervalMillis > 0 && System.currentTimeMillis() - sub.lastPostTime < sub.intervalMillis) {
+                    if (sub.intervalMillis > 0 && sub.lastPostTime != 0 && System.currentTimeMillis() - sub.lastPostTime < sub.intervalMillis) {
                         // ignore.
                         if (logger.isDebugEnabled()) {
                             logger.debug("Ignoring event: {} to subscriber: {} because it is within the interval: {}", N.toString(event), N.toString(sub),
@@ -1359,7 +1359,10 @@ public class EventBus {
          */
         final boolean isPossibleLambdaSubscriber;
 
-        /** The system time (in milliseconds) when the last event was delivered to this subscriber. */
+        /**
+         * The system time (in milliseconds) when the last event was delivered to this subscriber;
+         * {@code 0} means that no event has been delivered yet.
+         */
         long lastPostTime = 0;
 
         /** The most recently delivered event, used for deduplication when {@link #deduplicate} is {@code true}. */

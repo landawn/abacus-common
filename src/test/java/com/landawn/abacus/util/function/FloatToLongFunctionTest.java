@@ -50,4 +50,15 @@ public class FloatToLongFunctionTest extends TestBase {
 
         assertEquals(42L, function.applyAsLong(42.5f));
     }
+
+    @Test
+    public void testDEFAULT_SpecialValuesAndSaturation() {
+        final FloatToLongFunction function = FloatToLongFunction.DEFAULT;
+
+        assertEquals(0L, function.applyAsLong(Float.NaN));
+        assertEquals(Long.MAX_VALUE, function.applyAsLong(Float.POSITIVE_INFINITY));
+        assertEquals(Long.MIN_VALUE, function.applyAsLong(Float.NEGATIVE_INFINITY));
+        assertEquals(Long.MAX_VALUE, function.applyAsLong(Float.MAX_VALUE));
+        assertEquals(Long.MIN_VALUE, function.applyAsLong(-Float.MAX_VALUE));
+    }
 }

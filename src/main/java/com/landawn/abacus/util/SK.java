@@ -48,7 +48,7 @@ public final class SK {
     }
 
     /**
-     * Represents the null character: {@code (char) 0}.
+     * Represents the {@code null} character: {@code (char) 0}.
      * This is the character with ASCII value 0, often used as a string terminator in C.
      */
     public static final char CHAR_ZERO = (char) 0;
@@ -419,24 +419,24 @@ public final class SK {
     public static final String BRACKET_R = "]";
 
     /**
-     * Represents the left curly brace character: <code>{</code>.
+     * Represents the left curly brace character: <code>'&#123;'</code>.
      * Used for block delimiters and object literals.
      */
     public static final char _BRACE_L = '{';
 
     /**
-     * Represents the left curly brace string: <code>"{"</code>.
+     * Represents the left curly brace string: <code>"&#123;"</code>.
      */
     public static final String BRACE_L = "{";
 
     /**
-     * Represents the right curly brace character: <code>}</code>.
+     * Represents the right curly brace character: <code>'&#125;'</code>.
      * Used for block delimiters and object literals.
      */
     public static final char _BRACE_R = '}';
 
     /**
-     * Represents the right curly brace string: <code>"}"</code>.
+     * Represents the right curly brace string: <code>"&#125;"</code>.
      */
     public static final String BRACE_R = "}";
 
@@ -872,7 +872,7 @@ public final class SK {
 
     /**
      * SQL EXISTS keyword: {@code "EXISTS"}.
-     * Used to test whether a subquery returns any rows; returns true if at least one row exists.
+     * Used to test whether a subquery returns any rows; returns {@code true} if at least one row exists.
      *
      */
     public static final String EXISTS = "EXISTS";
@@ -886,7 +886,7 @@ public final class SK {
 
     /**
      * SQL AND keyword: {@code "AND"}.
-     * Logical AND operator that combines multiple conditions; returns true only if all conditions are true.
+     * Logical AND operator that combines multiple conditions; returns {@code true} only if all conditions are {@code true}.
      *
      */
     public static final String AND = "AND";
@@ -900,7 +900,7 @@ public final class SK {
 
     /**
      * SQL OR keyword: {@code "OR"}.
-     * Logical OR operator that combines multiple conditions; returns true if at least one condition is true.
+     * Logical OR operator that combines multiple conditions; returns {@code true} if at least one condition is {@code true}.
      *
      */
     public static final String OR = "OR";
@@ -914,14 +914,14 @@ public final class SK {
 
     /**
      * SQL XOR keyword: {@code "XOR"}.
-     * Exclusive OR operator that returns true if exactly one of the conditions is true, but not both.
+     * Exclusive OR operator that returns {@code true} if exactly one of the conditions is {@code true}, but not both.
      *
      */
     public static final String XOR = "XOR";
 
     /**
      * SQL NOT keyword: {@code "NOT"}.
-     * Logical NOT operator that negates a condition; returns true if the condition is false.
+     * Logical NOT operator that negates a condition; returns {@code true} if the condition is {@code false}.
      *
      */
     public static final String NOT = "NOT";
@@ -942,7 +942,7 @@ public final class SK {
 
     /**
      * SQL IS NOT clause: {@code "IS NOT"}.
-     * Used to test for non-NULL values; returns true if the value is not NULL.
+     * Used to test for non-NULL values; returns {@code true} if the value is not NULL.
      *
      */
     public static final String IS_NOT = "IS NOT";
@@ -1019,14 +1019,14 @@ public final class SK {
 
     /**
      * SQL NOT EXISTS clause: {@code "NOT EXISTS"}.
-     * Tests whether a subquery returns no rows; returns true if the subquery is empty.
+     * Tests whether a subquery returns no rows; returns {@code true} if the subquery is empty.
      *
      */
     public static final String NOT_EXISTS = "NOT EXISTS";
 
     /**
      * SQL NOT LIKE clause: {@code "NOT LIKE"}.
-     * Tests for pattern non-matching with wildcards; returns true if pattern doesn't match.
+     * Tests for pattern non-matching with wildcards; returns {@code true} if pattern doesn't match.
      *
      */
     public static final String NOT_LIKE = "NOT LIKE";
@@ -1096,14 +1096,14 @@ public final class SK {
 
     /**
      * SQL ANY keyword: {@code "ANY"}.
-     * Used with comparison operators and subqueries; returns true if any subquery value satisfies the condition.
+     * Used with comparison operators and subqueries; returns {@code true} if any subquery value satisfies the condition.
      *
      */
     public static final String ANY = "ANY";
 
     /**
      * SQL ALL keyword: {@code "ALL"}.
-     * Used with comparison operators and subqueries; returns true if all subquery values satisfy the condition.
+     * Used with comparison operators and subqueries; returns {@code true} if all subquery values satisfy the condition.
      *
      */
     public static final String ALL = "ALL";

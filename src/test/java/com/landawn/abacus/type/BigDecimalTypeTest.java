@@ -158,6 +158,17 @@ public class BigDecimalTypeTest extends TestBase {
     }
 
     @Test
+    public void test_serializeTo_nullAsZero() throws Exception {
+        CharacterWriter writer = mock(BufferedJsonWriter.class);
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
+
+        type.serializeTo(writer, null, config);
+
+        verify(writer).write('0');
+    }
+
+    @Test
     public void test_name() {
         assertEquals("BigDecimal", type.name());
     }

@@ -233,6 +233,29 @@ public class HBaseColumnTest extends TestBase {
     }
 
     @Test
+    public void testCompareToIsAntisymmetricForBaseAndSubclassValues() {
+        class BaseValue implements Comparable<BaseValue> {
+            @Override
+            public int compareTo(BaseValue other) {
+                return 1;
+            }
+        }
+
+        class SubValue extends BaseValue {
+            // Deliberately inherits BaseValue.compareTo. The old one-way isInstance check invoked
+            // it for BaseValue -> SubValue but not for SubValue -> BaseValue.
+        }
+
+        HBaseColumn<BaseValue> base = new HBaseColumn<>(new BaseValue(), 100L);
+        HBaseColumn<BaseValue> sub = new HBaseColumn<>(new SubValue(), 100L);
+
+        int forward = Integer.signum(base.compareTo(sub));
+        int reverse = Integer.signum(sub.compareTo(base));
+        Assertions.assertNotEquals(0, forward);
+        Assertions.assertEquals(-forward, reverse);
+    }
+
+    @Test
     public void testHashCode() {
         HBaseColumn<String> col1 = new HBaseColumn<>("test", 12345L);
         HBaseColumn<String> col2 = new HBaseColumn<>("test", 12345L);

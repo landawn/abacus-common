@@ -48,7 +48,6 @@ public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeE
      * @param u the object operand of type {@code T}
      * @return the {@code int}-valued result of applying this operator to the given operands
      */
-    // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
     int applyAsInt(int t, T u);
 

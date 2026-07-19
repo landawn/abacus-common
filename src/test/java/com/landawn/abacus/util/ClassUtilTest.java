@@ -40,7 +40,7 @@ import com.landawn.abacus.util.function.Predicate;
 
 public class ClassUtilTest extends TestBase {
 
-    class OuterClass {
+    public static class OuterClass {
         int x = 10;
 
         class InnerClass {
@@ -1746,6 +1746,32 @@ public class ClassUtilTest extends TestBase {
                 // Expected for some method types
             }
         });
+    }
+
+    @Test
+    public void testCreateMethodHandle_preservesOrdinaryInvocationSemantics() throws Throwable {
+        final Method staticMethod = Integer.class.getDeclaredMethod("parseInt", String.class);
+        final MethodHandle staticHandle = ClassUtil.createMethodHandle(staticMethod);
+
+        assertEquals(42, (int) staticHandle.invokeExact("42"));
+
+        class Base {
+            String value() {
+                return "base";
+            }
+        }
+
+        class Derived extends Base {
+            @Override
+            String value() {
+                return "derived";
+            }
+        }
+
+        final Method virtualMethod = Base.class.getDeclaredMethod("value");
+        final MethodHandle virtualHandle = ClassUtil.createMethodHandle(virtualMethod);
+
+        assertEquals("derived", (String) virtualHandle.invokeExact((Base) new Derived()));
     }
 
     @Test

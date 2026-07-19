@@ -594,6 +594,11 @@ public class AbstractFloatStreamTest extends TestBase {
     }
 
     @Test
+    public void testJoinToRejectsNullForEmptyStream() {
+        assertThrows(IllegalArgumentException.class, () -> createFloatStream().joinTo(null));
+    }
+
+    @Test
     public void testCollect() {
         List<Float> result = stream.collect(ArrayList::new, (list, val) -> list.add(val));
         assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f, 4.0f, 5.0f), result);
@@ -619,6 +624,27 @@ public class AbstractFloatStreamTest extends TestBase {
         assertEquals(4, stats.getCount());
         assertTrue(Float.isNaN(stats.getMin()), "min should be NaN when input contains NaN");
         assertTrue(Float.isNaN(stats.getMax()), "max should be NaN when input contains NaN");
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
+        FloatIteratorEx reversed = (FloatIteratorEx) createFloatStream(new float[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        assertEquals(5, reversed.toArray().length);
+        assertFalse(reversed.hasNext());
+        assertEquals(0, reversed.toArray().length);
+
+        FloatIteratorEx rotated = (FloatIteratorEx) createFloatStream(new float[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        rotated.nextFloat();
+        assertEquals(4, rotated.toArray().length);
+        assertFalse(rotated.hasNext());
+        assertEquals(0, rotated.toArray().length);
+
+        FloatIteratorEx reverseSorted = (FloatIteratorEx) createFloatStream(new float[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        reverseSorted.nextFloat();
+        reverseSorted.nextFloat();
+        assertEquals(3, reverseSorted.toArray().length);
+        assertFalse(reverseSorted.hasNext());
+        assertEquals(0, reverseSorted.toArray().length);
     }
 
     @Test

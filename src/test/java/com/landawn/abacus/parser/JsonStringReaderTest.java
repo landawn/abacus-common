@@ -568,6 +568,24 @@ public class JsonStringReaderTest extends TestBase {
     }
 
     @Test
+    public void testReadEscapedString_OneCharacterBufferCanGrow() {
+        JsonReader reader = JsonStringReader.parse("\"a\\nb\"", new char[1]);
+
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals("a\nb", reader.getText());
+    }
+
+    @Test
+    public void testReadEscapedString_EmptyBufferCanGrow() {
+        JsonReader reader = JsonStringReader.parse("\"\\n\"", new char[0]);
+
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals("\n", reader.getText());
+    }
+
+    @Test
     public void testThrowExceptionDueToUnexpectedNonStringToken() {
         ExposedJsonStringReader reader = new ExposedJsonStringReader("{invalid", new char[32]);
 

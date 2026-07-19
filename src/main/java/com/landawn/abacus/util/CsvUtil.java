@@ -552,14 +552,10 @@ public final class CsvUtil {
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter) throws UncheckedIOException {
-        Reader reader = null;
-
-        try {
-            reader = IOUtil.newFileReader(source);
-
+        try (Reader reader = IOUtil.newFileReader(source)) {
             return load(reader, selectColumnNames, offset, count, rowFilter);
-        } finally {
-            IOUtil.closeQuietly(reader);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -902,14 +898,10 @@ public final class CsvUtil {
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws UncheckedIOException {
-        Reader reader = null;
-
-        try {
-            reader = IOUtil.newFileReader(source);
-
+        try (Reader reader = IOUtil.newFileReader(source)) {
             return load(reader, selectColumnNames, offset, count, rowFilter, beanClassForColumnType);
-        } finally {
-            IOUtil.closeQuietly(reader);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -1164,7 +1156,8 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
+     * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty.
+     *        Missing columns and entries mapped to {@code null} default to {@link String}
      * @return a Dataset with explicitly typed columns
      * @throws IllegalArgumentException if {@code columnTypeMap} is {@code null} or empty
      * @throws UncheckedIOException if an I/O error occurs
@@ -1194,7 +1187,8 @@ public final class CsvUtil {
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
-     * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
+     * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty.
+     *        Missing columns and entries mapped to {@code null} default to {@link String}
      * @return a Dataset with typed columns
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
      *         {@code columnTypeMap} is {@code null} or empty, or if any name in {@code selectColumnNames}
@@ -1240,14 +1234,10 @@ public final class CsvUtil {
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Map<String, ? extends Type<?>> columnTypeMap) throws UncheckedIOException {
-        Reader reader = null;
-
-        try {
-            reader = IOUtil.newFileReader(source);
-
+        try (Reader reader = IOUtil.newFileReader(source)) {
             return load(reader, selectColumnNames, offset, count, rowFilter, columnTypeMap);
-        } finally {
-            IOUtil.closeQuietly(reader);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -1271,7 +1261,8 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data, must not be {@code null}
-     * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
+     * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty.
+     *        Missing columns and entries mapped to {@code null} default to {@link String}
      * @return a Dataset with explicitly typed columns
      * @throws IllegalArgumentException if {@code columnTypeMap} is {@code null} or empty
      * @throws UncheckedIOException if an I/O error occurs
@@ -1391,14 +1382,16 @@ public final class CsvUtil {
                 columnNameList.addAll(Arrays.asList(titles));
 
                 for (int i = 0; i < columnCount; i++) {
-                    columnTypes[i] = columnTypeMapToUse.getOrDefault(titles[i], strType);
+                    final Type<?> columnType = columnTypeMapToUse.get(titles[i]);
+                    columnTypes[i] = columnType == null ? strType : columnType;
                     columnList.add(new ArrayList<>());
                 }
             } else {
                 for (int i = 0; i < columnCount; i++) {
                     if (selectPropNameSet.remove(titles[i])) {
                         columnNameList.add(titles[i]);
-                        columnTypes[i] = columnTypeMapToUse.getOrDefault(titles[i], strType);
+                        final Type<?> columnType = columnTypeMapToUse.get(titles[i]);
+                        columnTypes[i] = columnType == null ? strType : columnType;
                         // isColumnSelected[i] = true;
                         columnList.add(new ArrayList<>());
                     }
@@ -1584,14 +1577,10 @@ public final class CsvUtil {
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor) throws UncheckedIOException {
-        Reader reader = null;
-
-        try {
-            reader = IOUtil.newFileReader(source);
-
+        try (Reader reader = IOUtil.newFileReader(source)) {
             return load(reader, selectColumnNames, offset, count, rowFilter, rowExtractor);
-        } finally {
-            IOUtil.closeQuietly(reader);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -1744,6 +1733,7 @@ public final class CsvUtil {
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
+        N.checkArgNotNull(rowExtractor, "rowExtractor");
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
@@ -1850,7 +1840,7 @@ public final class CsvUtil {
      *   <li>A bean class - rows are converted to bean instances</li>
      *   <li>Map - rows are converted to Map&lt;String, Object&gt;</li>
      *   <li>Collection - rows are converted to collections of column values</li>
-     *   <li>Object[] - rows are converted to object arrays</li>
+     *   <li>A reference array - each selected field is converted to the array component type</li>
      *   <li>A single value type (e.g. String, Integer, LocalDate) - when only one column is selected</li>
      * </ul>
      *
@@ -2169,14 +2159,15 @@ public final class CsvUtil {
                 Function<String[], T> mapper = null;
 
                 if (type.isObjectArray()) {
-                    final Class<?> componentType = targetType.getComponentType();
+                    final Class<?> componentClass = targetType.getComponentType();
+                    final Type<?> componentType = Type.of(componentClass);
 
                     mapper = values -> {
-                        final Object[] result = N.newArray(componentType, selectColumnCount);
+                        final Object[] result = N.newArray(componentClass, selectColumnCount);
 
                         for (int i = 0, j = 0; i < columnCount; i++) {
                             if (isColumnSelected[i]) {
-                                result[j++] = values[i];
+                                result[j++] = componentType.valueOf(values[i]);
                             }
                         }
 
@@ -2837,7 +2828,7 @@ public final class CsvUtil {
      * @see #csvToJson(File, Collection, File)
      */
     public static long csvToJson(final File csvFile, final Collection<String> selectColumnNames, final File jsonFile,
-            final Class<?> beanClassForColumnTypeInference) throws UncheckedIOException {
+            final Class<?> beanClassForColumnTypeInference) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(csvFile, "csvFile");
         N.checkArgNotNull(jsonFile, "jsonFile");
 
@@ -3113,7 +3104,8 @@ public final class CsvUtil {
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, File)
      */
-    public static long jsonToCsv(final File jsonFile, final Collection<String> selectCsvHeaders, final File csvFile) throws UncheckedIOException {
+    public static long jsonToCsv(final File jsonFile, final Collection<String> selectCsvHeaders, final File csvFile)
+            throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(csvFile, "csvFile");
         N.checkArgNotNull(jsonFile, "jsonFile");
 
@@ -3348,7 +3340,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if headerParser is {@code null}
          */
-        public This setHeaderParser(final Function<String, String[]> headerParser) {
+        public This setHeaderParser(final Function<String, String[]> headerParser) throws IllegalArgumentException {
             N.checkArgNotNull(headerParser, "headerParser");
 
             this.headerParser = headerParser;
@@ -3391,7 +3383,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if lineParser is {@code null}
          */
-        public This setLineParser(final BiConsumer<String, String[]> lineParser) {
+        public This setLineParser(final BiConsumer<String, String[]> lineParser) throws IllegalArgumentException {
             N.checkArgNotNull(lineParser, "lineParser");
 
             this.lineParser = lineParser;
@@ -3461,7 +3453,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if source is {@code null} or if a Reader source is already set
          */
-        public This source(final File source) {
+        public This source(final File source) throws IllegalArgumentException {
             N.checkArgNotNull(source, "sourceFile");
 
             if (sourceReader != null) {
@@ -3503,7 +3495,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if source is {@code null} or if a File source is already set
          */
-        public This source(final Reader source) {
+        public This source(final Reader source) throws IllegalArgumentException {
             N.checkArgNotNull(source, "sourceReader");
 
             if (sourceFile != null) {
@@ -3576,14 +3568,16 @@ public final class CsvUtil {
          *     .source(new File("data.csv"))
          *     .load();
          *
-         * // Negative offset throws IllegalArgumentException at load time
-         * // CsvUtil.loader().offset(-1).source(file).load();
+         * // Negative offset throws IllegalArgumentException immediately
+         * // CsvUtil.loader().offset(-1);
          * }</pre>
          *
          * @param offset the number of rows to skip
          * @return this instance for method chaining
+         * @throws IllegalArgumentException if {@code offset} is negative
          */
         public This offset(final long offset) {
+            N.checkArgNotNegative(offset, cs.offset);
             this.offset = offset;
 
             return (This) this;
@@ -3619,14 +3613,16 @@ public final class CsvUtil {
          *     .source(new File("data.csv"))
          *     .load();
          *
-         * // Negative count throws IllegalArgumentException at load time
-         * // CsvUtil.loader().count(-10).source(file).load();
+         * // Negative count throws IllegalArgumentException immediately
+         * // CsvUtil.loader().count(-10);
          * }</pre>
          *
          * @param count the maximum number of rows to process
          * @return this instance for method chaining
+         * @throws IllegalArgumentException if {@code count} is negative
          */
         public This count(final long count) {
+            N.checkArgNotNegative(count, cs.count);
             this.count = count;
 
             return (This) this;
@@ -3660,7 +3656,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null}
          */
-        public This beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) {
+        public This beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) throws IllegalArgumentException {
             N.checkArgNotNull(beanClassForColumnTypeInference, "beanClassForColumnTypeInference");
 
             this.beanClassForColumnTypeInference = beanClassForColumnTypeInference;
@@ -3761,7 +3757,7 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null} or if columnTypeMap is already set
          */
         @Override
-        public CsvLoader beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) {
+        public CsvLoader beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) throws IllegalArgumentException {
             N.checkArgNotNull(beanClassForColumnTypeInference, "beanClassForColumnTypeInference");
 
             if (columnTypeMap != null) {
@@ -3808,7 +3804,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if columnTypeMap is {@code null} or if beanClassForColumnTypeInference is already set
          */
-        public CsvLoader columnTypeMap(final Map<String, ? extends Type<?>> columnTypeMap) {
+        public CsvLoader columnTypeMap(final Map<String, ? extends Type<?>> columnTypeMap) throws IllegalArgumentException {
             N.checkArgNotNull(columnTypeMap, "columnTypeMap");
 
             if (beanClassForColumnTypeInference != null) {
@@ -3855,7 +3851,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if rowFilter is {@code null}
          */
-        public CsvLoader rowFilter(final Predicate<? super String[]> rowFilter) {
+        public CsvLoader rowFilter(final Predicate<? super String[]> rowFilter) throws IllegalArgumentException {
             N.checkArgNotNull(rowFilter, "rowFilter");
 
             this.rowFilter = rowFilter;
@@ -4075,7 +4071,7 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if {@code rowMapper} is {@code null} or no source has been set
          */
         public <T> Stream<T> stream(BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
-                final boolean closeReaderWhenStreamIsClosed) {
+                final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
             N.checkArgNotNull(rowMapper, "rowMapper");
 
             if (headerParser == null && lineParser == null && escapeCharToBackSlashForWrite == null) {
@@ -4203,7 +4199,7 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if outputJsonFile is {@code null} or source is not set
          * @throws UncheckedIOException if an I/O error occurs
          */
-        public long csvToJson(File outputJsonFile) throws UncheckedIOException {
+        public long csvToJson(File outputJsonFile) throws IllegalArgumentException, UncheckedIOException {
             N.checkArgNotNull(outputJsonFile, "outputJsonFile");
 
             final Callable<Long> action = () -> {
@@ -4260,7 +4256,7 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if outputJsonWriter is {@code null} or source is not set
          * @throws UncheckedIOException if an I/O error occurs
          */
-        public long csvToJson(Writer outputJsonWriter) throws UncheckedIOException {
+        public long csvToJson(Writer outputJsonWriter) throws IllegalArgumentException, UncheckedIOException {
             N.checkArgNotNull(outputJsonWriter, "outputJsonWriter");
 
             final Callable<Long> action = () -> {
@@ -4313,7 +4309,7 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if outputCsvFile is {@code null} or source is not set
          * @throws UncheckedIOException if an I/O error occurs
          */
-        public long jsonToCsv(File outputCsvFile) throws UncheckedIOException {
+        public long jsonToCsv(File outputCsvFile) throws IllegalArgumentException, UncheckedIOException {
             N.checkArgNotNull(outputCsvFile, "outputCsvFile");
 
             final Callable<Long> action = () -> {
@@ -4372,7 +4368,7 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if outputCsvWriter is {@code null} or source is not set
          * @throws UncheckedIOException if an I/O error occurs
          */
-        public long jsonToCsv(Writer outputCsvWriter) throws UncheckedIOException {
+        public long jsonToCsv(Writer outputCsvWriter) throws IllegalArgumentException, UncheckedIOException {
             N.checkArgNotNull(outputCsvWriter, "outputCsvWriter");
 
             final Callable<Long> action = () -> {

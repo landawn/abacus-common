@@ -1019,17 +1019,18 @@ public class TupleTest extends TestBase {
     @Test
     public void testTuple0_HashCode() {
         Tuple.Tuple0 t0a = Tuple.from(new Object[0]);
-        Tuple.Tuple0 t0b = Tuple.from((Object[]) null);
-        // Same singleton, same hashCode
+        Tuple.Tuple0 t0b = new Tuple.Tuple0();
+        Assertions.assertNotSame(t0a, t0b);
         Assertions.assertEquals(t0a.hashCode(), t0b.hashCode());
     }
 
     @Test
     public void testTuple0_Equals() {
         Tuple.Tuple0 t0a = Tuple.from(new Object[0]);
-        Tuple.Tuple0 t0b = Tuple.from((Object[]) null);
-        Assertions.assertSame(t0a, t0b);
+        Tuple.Tuple0 t0b = new Tuple.Tuple0();
+        Assertions.assertNotSame(t0a, t0b);
         Assertions.assertEquals(t0a, t0b);
+        Assertions.assertEquals(t0b, t0a);
     }
 
     @Test
@@ -2455,6 +2456,23 @@ public class TupleTest extends TestBase {
 
         Tuple.Tuple1<String> t1Null = new Tuple.Tuple1<>(null);
         Assertions.assertNull(t1Null._1);
+    }
+
+    @Test
+    public void testArrayElementsUseContentEqualityAndAreStoredShallowly() {
+        int[] firstArray = { 1, 2 };
+        int[] secondArray = { 1, 2 };
+        Tuple2<int[], Object[]> first = Tuple.of(firstArray, new Object[] { new int[] { 3, 4 } });
+        Tuple2<int[], Object[]> second = Tuple.of(secondArray, new Object[] { new int[] { 3, 4 } });
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+
+        Object[] exported = first.toArray();
+        Assertions.assertSame(firstArray, exported[0]);
+        firstArray[0] = 9;
+        Assertions.assertEquals(9, first._1[0]);
+        assertNotEquals(first, second);
     }
 
 }

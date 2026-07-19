@@ -64,8 +64,12 @@ public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.Binar
     T apply(T t, T u);
 
     /**
-     * Converts this {@code BinaryOperator} to a {@code Throwables.BinaryOperator} that can throw a checked exception.
-     * This method provides a way to use this operator in contexts that require explicit exception handling.
+     * Returns this operator as a {@link Throwables.BinaryOperator} view.
+     *
+     * <p>The returned operator has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.BinaryOperator}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -73,8 +77,8 @@ public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.Binar
      * var throwableOp = concatenator.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned operator can throw
-     * @return a {@code Throwables.BinaryOperator} view of this operator that can throw exceptions of type {@code E}
+     * @param <E> the target exception type for compatibility with {@code Throwables.BinaryOperator}
+     * @return a {@code Throwables.BinaryOperator} view of this operator
      */
     @Override
     default <E extends Throwable> Throwables.BinaryOperator<T, E> toThrowable() {

@@ -30,7 +30,6 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -151,6 +150,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <ul>
  *   <li><b>Performance First:</b> Extensive caching and optimization for high-throughput reflection operations</li>
  *   <li><b>Type Safety Priority:</b> Strong typing support with comprehensive type conversion capabilities</li>
+ *
  *   <li><b>Cache Efficiency:</b> Intelligent caching strategies to balance memory usage and performance</li>
  *   <li><b>Security Conscious:</b> Proper access control and security manager integration</li>
  *   <li><b>Framework Integration:</b> Designed for seamless integration with enterprise frameworks</li>
@@ -301,7 +301,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Primitive Wrapping:</b> Automatic conversion between primitive types and their wrapper classes</li>
  *   <li><b>Type Compatibility:</b> Intelligent type compatibility checking and conversion</li>
  *   <li><b>Collection Types:</b> Support for generic collection type handling and conversion</li>
- *   <li><b>Null Safety:</b> Proper null handling in type conversion operations</li>
+ *   <li><b>Null Safety:</b> Proper {@code null} handling in type conversion operations</li>
  *   <li><b>Custom Converters:</b> Extensible type conversion system for custom types</li>
  * </ul>
  *
@@ -729,7 +729,7 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param clazz the class whose source code location is to be retrieved
-     * @return the path to the code-source location of the specified class, with URL encoding removed,
+     * @return the file system path of the class's code source (classes directory or JAR file),
      *         or {@code null} if unavailable
      * @throws NullPointerException if {@code clazz} is {@code null}
      */
@@ -1213,14 +1213,14 @@ public final class ClassUtil {
      * </ul>
      *
      * @param pkgName the fully qualified name of the package to scan for classes (e.g., "com.example.services").
-     *                Must not be null or empty. JDK packages (java.*, javax.*) are not supported.
+     *                Must not be {@code null} or empty. JDK packages (java.*, javax.*) are not supported.
      * @param isRecursive if {@code true}, recursively scans sub-packages within the specified package hierarchy.
      *                    If {@code false}, scans only the immediate package without descending into sub-packages.
      * @param skipClassLoadingException if {@code true}, continues scanning when individual classes fail to load,
      *                                  logging warnings for failed attempts. If {@code false}, throws an exception
      *                                  immediately when any class loading operation fails.
      * @param predicate a filtering predicate applied to each successfully loaded class. Only classes for which
-     *                  this predicate returns {@code true} are included in the result list. Must not be null.
+     *                  this predicate returns {@code true} are included in the result list. Must not be {@code null}.
      *                  Use {@code Fn.alwaysTrue()} to include all discovered classes without filtering.
      * @return a list containing all classes found in the specified package that satisfy the predicate filter.
      *         Returns an empty list if no matching classes are found. The list is modifiable and preserves
@@ -1915,7 +1915,7 @@ public final class ClassUtil {
      *
      * <p><b>Error Handling and Edge Cases:</b>
      * <ul>
-     *   <li><b>Null Input:</b> Handles null input gracefully without throwing exceptions</li>
+     *   <li><b>Null Input:</b> Handles {@code null} input gracefully without throwing exceptions</li>
      *   <li><b>Empty Strings:</b> Processes empty type names appropriately</li>
      *   <li><b>Malformed Names:</b> Robust handling of unexpected type name formats</li>
      *   <li><b>Unicode Characters:</b> Proper handling of Unicode characters in type names</li>
@@ -2349,13 +2349,6 @@ public final class ClassUtil {
         return accessibleObject.isAccessible() == flag;
     }
 
-    //    /**
-
-    static boolean isPossibleImmutable(final Class<?> cls) {
-        return Strings.containsAnyIgnoreCase(getSimpleClassName(cls), "Immutable", "Unmodifiable") //
-                || getAllSuperclasses(cls).stream().anyMatch(c -> Strings.containsAnyIgnoreCase(getSimpleClassName(c), "Immutable", "Unmodifiable"));
-    }
-
     /**
      * Checks if the specified class is a bean class.
      * Returns {@code false} if {@code cls} is {@code null}.
@@ -2614,6 +2607,9 @@ public final class ClassUtil {
      * Object result = handle.invoke(myInstance);
      * }</pre>
      *
+     * <p>The returned handle follows the method's ordinary invocation semantics: static methods
+     * produce static handles and instance methods use normal virtual/interface dispatch.</p>
+     *
      * @param method the method for which the MethodHandle is to be created
      * @return the MethodHandle for the specified method
      * @throws NullPointerException if {@code method} is {@code null}
@@ -2627,21 +2623,20 @@ public final class ClassUtil {
         try {
             lookup = MethodHandles.privateLookupIn(declaringClass, MethodHandles.lookup());
 
-            return lookup.in(declaringClass).unreflectSpecial(method, declaringClass);
+            return lookup.in(declaringClass).unreflect(method);
         } catch (final Exception e) {
             try {
                 final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
                 ClassUtil.setAccessible(constructor, true);
 
-                return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
+                return constructor.newInstance(declaringClass).in(declaringClass).unreflect(method);
             } catch (final Exception ex) {
                 try {
                     if (lookup == null) {
                         lookup = MethodHandles.lookup();
                     }
 
-                    return lookup.findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-                            declaringClass);
+                    return lookup.unreflect(method);
                 } catch (final Exception exx) {
                     throw new UnsupportedOperationException(exx);
                 }

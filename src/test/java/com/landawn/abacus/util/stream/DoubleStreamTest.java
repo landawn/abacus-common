@@ -49,6 +49,17 @@ public class DoubleStreamTest extends TestBase {
         return DoubleStream.of(a);
     }
 
+    @Test
+    public void testToJdkStreamCloseRunsArraySourceHandlersOnce() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final DoubleStream source = createDoubleStream(1d, 2d, 3d).onClose(closeCount::incrementAndGet);
+
+        source.toJdkStream().close();
+        source.close();
+
+        assertEquals(1, closeCount.get());
+    }
+
     protected DoubleStream createDoubleStream(double[] a, int fromIndex, int toIndex) {
         return DoubleStream.of(a, fromIndex, toIndex);
     }
@@ -3655,6 +3666,21 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testConcatCollectionSnapshotsSources() {
+        List<DoubleStream> sources = new ArrayList<>(Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(3.0, 4.0)));
+        DoubleStream concatenated = DoubleStream.concat(sources);
+
+        sources.clear();
+
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, concatenated.toArray());
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        assertEquals(0, DoubleStream.merge(Arrays.asList((DoubleStream) null), (a, b) -> MergeResult.TAKE_FIRST).count());
+    }
+
+    @Test
     public void testConcatIteratorVarargs() {
         DoubleIterator iter1 = DoubleIterator.of(new double[] { 1.0, 2.0 });
         DoubleIterator iter2 = DoubleIterator.of(new double[] { 3.0, 4.0 });
@@ -4081,5 +4107,34 @@ public class DoubleStreamTest extends TestBase {
                 () -> DoubleStream.of(1.0, 2.0, 3.0).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> DoubleStream.of(1.0, 2.0, 3.0).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
+
+    @Test
+    public void testRepeatIteratorRemainsExhaustedAfterFailedNext() {
+        final DoubleIteratorEx iter = DoubleStream.repeat(1.5, 10).iteratorEx();
+        iter.advance(Long.MAX_VALUE);
+
+        assertThrows(NoSuchElementException.class, iter::nextDouble);
+        assertEquals(0, iter.count());
+        assertArrayEquals(new double[0], iter.toArray(), 0.0);
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        DoubleIterator iter = DoubleStream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 1.0).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextDouble);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = DoubleStream.iterate(1.0, () -> conditionCalls.getAndIncrement() > 0, value -> value + 1.0).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextDouble);
+        assertEquals(1, conditionCalls.get());
     }
 }

@@ -53,6 +53,60 @@ public class IntFunctionsTest extends TestBase {
         private static final long serialVersionUID = 1L;
     }
 
+    public static class CustomConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class CustomIdentityHashMap<K, V> extends IdentityHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class CountingCollection<E> extends ArrayList<E> {
+        private static final long serialVersionUID = 1L;
+        static int constructorCalls;
+
+        public CountingCollection(final int initialCapacity) {
+            super(initialCapacity);
+            constructorCalls++;
+        }
+    }
+
+    public static class CountingMap<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+        static int constructorCalls;
+
+        public CountingMap(final int initialCapacity) {
+            super(initialCapacity);
+            constructorCalls++;
+        }
+    }
+
+    public static class CountingNoArgCollection<E> extends ArrayList<E> {
+        private static final long serialVersionUID = 1L;
+        static int constructorCalls;
+
+        public CountingNoArgCollection() {
+            constructorCalls++;
+        }
+    }
+
+    public static class CountingNoArgMap<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+        static int constructorCalls;
+
+        public CountingNoArgMap() {
+            constructorCalls++;
+        }
+    }
+
+    public abstract static class CustomAbstractSortedSet<E> extends AbstractSet<E> implements SortedSet<E> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public abstract static class CustomAbstractSortedMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
     @Test
     public void testOf() {
         IntFunction<String> result = IntFunctions.of(size -> "Size: " + size);
@@ -904,6 +958,13 @@ public class IntFunctionsTest extends TestBase {
         Assertions.assertNotNull(intArray);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testOfDisposableArrayRejectsInvalidComponentTypeEagerly() {
+        Assertions.assertThrows(NullPointerException.class, () -> IntFunctions.ofDisposableArray(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofDisposableArray((Class) int.class));
+    }
+
     @Test
     public void testOfCollectionWithAbstractClasses() {
         IntFunction<? extends Collection<String>> func1 = IntFunctions.ofCollection(Collection.class);
@@ -1031,6 +1092,42 @@ public class IntFunctionsTest extends TestBase {
         IntFunction<? extends Map<String, Integer>> mapCreator = IntFunctions.<String, Integer> ofMap(CustomConcurrentSkipListMap.class);
         Map<String, Integer> map = mapCreator.apply(10);
         Assertions.assertTrue(map instanceof CustomConcurrentSkipListMap, map.getClass().getName());
+    }
+
+    @Test
+    public void testCustomMapTypesPreserveRequestedRuntimeType() {
+        Map<String, Integer> concurrentMap = IntFunctions.<String, Integer> ofMap(CustomConcurrentHashMap.class).apply(10);
+        Assertions.assertTrue(concurrentMap instanceof CustomConcurrentHashMap, concurrentMap.getClass().getName());
+
+        Map<String, Integer> identityMap = IntFunctions.<String, Integer> ofMap(CustomIdentityHashMap.class).apply(10);
+        Assertions.assertTrue(identityMap instanceof CustomIdentityHashMap, identityMap.getClass().getName());
+    }
+
+    @Test
+    public void testDynamicFactoriesDoNotProbeByInstantiation() {
+        CountingCollection.constructorCalls = 0;
+        IntFunction<? extends Collection<String>> collectionFactory = IntFunctions.ofCollection(CountingCollection.class);
+        Assertions.assertEquals(0, CountingCollection.constructorCalls);
+        Assertions.assertTrue(collectionFactory.apply(7) instanceof CountingCollection);
+        Assertions.assertEquals(1, CountingCollection.constructorCalls);
+
+        CountingMap.constructorCalls = 0;
+        IntFunction<? extends Map<String, Integer>> mapFactory = IntFunctions.ofMap(CountingMap.class);
+        Assertions.assertEquals(0, CountingMap.constructorCalls);
+        Assertions.assertTrue(mapFactory.apply(7) instanceof CountingMap);
+        Assertions.assertEquals(1, CountingMap.constructorCalls);
+
+        CountingNoArgCollection.constructorCalls = 0;
+        IntFunction<? extends Collection<String>> noArgCollectionFactory = IntFunctions.ofCollection(CountingNoArgCollection.class);
+        Assertions.assertEquals(0, CountingNoArgCollection.constructorCalls);
+        Assertions.assertTrue(noArgCollectionFactory.apply(7) instanceof CountingNoArgCollection);
+        Assertions.assertEquals(1, CountingNoArgCollection.constructorCalls);
+
+        CountingNoArgMap.constructorCalls = 0;
+        IntFunction<? extends Map<String, Integer>> noArgMapFactory = IntFunctions.ofMap(CountingNoArgMap.class);
+        Assertions.assertEquals(0, CountingNoArgMap.constructorCalls);
+        Assertions.assertTrue(noArgMapFactory.apply(7) instanceof CountingNoArgMap);
+        Assertions.assertEquals(1, CountingNoArgMap.constructorCalls);
     }
 
     @Test
@@ -1227,6 +1324,19 @@ public class IntFunctionsTest extends TestBase {
                 IntFunctions.ofCollection(java.util.concurrent.ConcurrentSkipListSet.class).apply(8).getClass());
         Assertions.assertEquals(java.util.concurrent.ConcurrentSkipListMap.class,
                 IntFunctions.ofMap(java.util.concurrent.ConcurrentSkipListMap.class).apply(8).getClass());
+    }
+
+    @Test
+    public void testCustomAbstractSortedTypesAreNotDowngradedToIncompatibleJdkTypes() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(CustomAbstractSortedSet.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap(CustomAbstractSortedMap.class));
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testRegistrationRejectsRawNonCollectionAndNonMapClasses() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForCollection((Class) String.class, size -> new ArrayList<>()));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForMap((Class) String.class, size -> new HashMap<>()));
     }
 
 }

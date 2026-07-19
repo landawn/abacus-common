@@ -168,6 +168,17 @@ public class LoggerFactoryTest extends TestBase {
     }
 
     @Test
+    public void testBackendDiscoveryDoesNotSwallowFatalErrors() {
+        final OutOfMemoryError outOfMemory = new OutOfMemoryError("simulated");
+        final ThreadDeath threadDeath = new ThreadDeath();
+
+        assertSame(outOfMemory, assertThrows(OutOfMemoryError.class, () -> LoggerFactory.rethrowIfFatal(outOfMemory)));
+        assertSame(threadDeath, assertThrows(ThreadDeath.class, () -> LoggerFactory.rethrowIfFatal(threadDeath)));
+        assertDoesNotThrow(() -> LoggerFactory.rethrowIfFatal(new LinkageError("optional backend unavailable")));
+        assertDoesNotThrow(() -> LoggerFactory.rethrowIfFatal(new RuntimeException("optional backend failed")));
+    }
+
+    @Test
     @DisplayName("Bug: Android platform detection must not be locale-sensitive (Turkish 'i' issue)")
     public void testAndroidDetectionIsLocaleIndependent() throws Exception {
         final String androidVendor = "The Android Project";

@@ -2,6 +2,7 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -178,6 +179,19 @@ public class NConsumerTest extends TestBase {
         assertEquals("first", result.get(0));
         assertEquals("second", result.get(1));
         assertEquals("third", result.get(2));
+    }
+
+    @Test
+    public void testAndThenForwardsSameArray() {
+        String[][] seen = new String[2][];
+        NConsumer<String> first = args -> seen[0] = args;
+        NConsumer<String> second = args -> seen[1] = args;
+        String[] values = { "a", "b" };
+
+        first.andThen(second).accept(values);
+
+        assertSame(values, seen[0]);
+        assertSame(values, seen[1]);
     }
 
     @Test

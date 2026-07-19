@@ -852,6 +852,22 @@ public class ByteIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
     }
 
+    @Test
+    public void testIndexedWithStartIndexOverflow() {
+        ObjIterator<IndexedByte> indexed = ByteIterator.of((byte) 1, (byte) 2).indexed(Long.MAX_VALUE);
+
+        IndexedByte first = indexed.next();
+        assertEquals(Long.MAX_VALUE, first.longIndex());
+        assertEquals((byte) 1, first.value());
+        assertTrue(indexed.hasNext());
+        assertThrows(ArithmeticException.class, indexed::next);
+
+        ObjIterator<IndexedByte> exhausted = ByteIterator.of((byte) 1).indexed(Long.MAX_VALUE);
+        exhausted.next();
+        assertFalse(exhausted.hasNext());
+        assertThrows(NoSuchElementException.class, exhausted::next);
+    }
+
     // =================================================
     // forEachRemaining() [deprecated]
     // =================================================

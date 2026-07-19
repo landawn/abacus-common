@@ -22,8 +22,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,9 +39,13 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * This class provides a comprehensive set of static methods for converting Java objects to JSON and parsing JSON back
  * to Java objects from various sources including strings, files, streams, and URLs.
  *
- * <p>The class maintains an internal pool of JsonMapper instances for performance optimization, reusing mappers
- * when custom configurations are needed. All methods handle exceptions internally and wrap them in RuntimeExceptions
- * for simplified error handling.</p>
+ * <p>The class maintains bounded caches of configuration-bound JsonMapper instances. A cached mapper is never
+ * reconfigured after its first use, preventing Jackson's serializer and root-deserializer caches from leaking one
+ * call's configuration into another. Checked processing and I/O exceptions are wrapped in runtime exceptions.</p>
+ *
+ * <p><b>Security:</b> Default polymorphic typing is not enabled by this class. Enabling it in a caller-provided
+ * {@link DeserializationConfig} can allow JSON input to select Java implementation types; use an appropriately
+ * restrictive polymorphic type validator and never enable unrestricted polymorphic deserialization for untrusted input.</p>
  *
  * <p>Key features:</p>
  * <ul>
@@ -82,7 +86,18 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  */
 public final class JsonMappers {
     private static final int POOL_SIZE = 128;
-    private static final List<JsonMapper> mapperPool = new ArrayList<>(POOL_SIZE);
+    private static final Map<SerializationConfig, JsonMapper> serializationMapperPool = new LinkedHashMap<>(POOL_SIZE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<SerializationConfig, JsonMapper> eldest) {
+            return size() > POOL_SIZE;
+        }
+    };
+    private static final Map<DeserializationConfig, JsonMapper> deserializationMapperPool = new LinkedHashMap<>(POOL_SIZE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<DeserializationConfig, JsonMapper> eldest) {
+            return size() > POOL_SIZE;
+        }
+    };
 
     private static final JsonMapper defaultJsonMapper = new JsonMapper();
     private static final JsonMapper defaultJsonMapperForPretty;
@@ -100,14 +115,6 @@ public final class JsonMappers {
         temp.enable(SerializationFeature.INDENT_OUTPUT);
         defaultJsonMapperForPretty = temp;
 
-        // Jackson's MapperConfigBase#with()/#without() returns "this" (the same shared instance) when the
-        // requested feature already has that value, instead of a new copy. To hand callers of
-        // createSerializationConfig()/createDeserializationConfig() a genuinely independent config instance
-        // (rather than the shared defaultSerializationConfig/defaultDeserializationConfig singleton), find a
-        // feature that is disabled by default, flip it on here, then flip it back off in
-        // createSerializationConfig()/createDeserializationConfig(); the round trip forces Jackson to build a
-        // real copy. If every feature happens to already be enabled by default, no such feature exists and the
-        // shared singleton is used as-is (no copy needed).
         {
             SerializationFeature tmp = null;
             for (final SerializationFeature serializationFeature : SerializationFeature.values()) {
@@ -147,6 +154,11 @@ public final class JsonMappers {
         // Utility class - prevent instantiation
     }
 
+    private static void checkByteRange(final byte[] json, final int offset, final int len) {
+        N.checkArgNotNull(json, "json");
+        N.checkFromIndexSize(offset, len, json.length);
+    }
+
     /**
      * Serializes the specified object to a JSON string using default configuration.
      * This method provides the simplest way to convert a Java object to JSON format.
@@ -163,6 +175,7 @@ public final class JsonMappers {
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
      * @return a JSON string representation of the object
+     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see #toJson(Object, boolean)
      * @see #toJson(Object, SerializationFeature, SerializationFeature...)
@@ -246,6 +259,9 @@ public final class JsonMappers {
      * @see #toJson(Object, SerializationConfig)
      */
     public static String toJson(final Object obj, final SerializationFeature first, final SerializationFeature... features) {
+        N.checkArgNotNull(first, "first");
+        N.checkArgNotNull(features, "features");
+
         return toJson(obj, defaultSerializationConfig.with(first, features));
     }
 
@@ -253,8 +269,9 @@ public final class JsonMappers {
      * Serializes the specified object to a JSON string using a custom serialization configuration.
      * This method provides maximum flexibility by accepting a complete SerializationConfig object.
      *
-     * <p>Use this method when you need complex configuration that cannot be achieved with
-     * individual features, such as custom serializers, date formats, or visibility settings.</p>
+     * <p>The supplied configuration controls Jackson's serialization settings. It does not transfer
+     * mapper-level components such as registered modules, serializer factories, or a custom JSON factory.
+     * Use {@link #wrap(ObjectMapper)} when those mapper-level customizations are required.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -612,10 +629,14 @@ public final class JsonMappers {
      * @param len the number of bytes to read from the offset
      * @param targetType the class of the object to deserialize to
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws RuntimeException if deserialization fails, the JSON is invalid, or the array bounds are invalid
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+     * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
+     * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see #fromJson(byte[], Class)
      */
     public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
+        checkByteRange(json, offset, len);
+
         try {
             return defaultJsonMapper.readValue(json, offset, len, targetType);
         } catch (final IOException e) {
@@ -698,12 +719,16 @@ public final class JsonMappers {
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply (optional)
      * @return the deserialized object; {@code null} if JSON string is "null"
+     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
      * @throws RuntimeException if deserialization fails
      * @see DeserializationFeature
      * @see #fromJson(String, Class, DeserializationConfig)
      */
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final DeserializationFeature first,
             final DeserializationFeature... features) {
+        N.checkArgNotNull(first, "first");
+        N.checkArgNotNull(features, "features");
+
         return fromJson(json, targetType, defaultDeserializationConfig.with(first, features));
     }
 
@@ -711,9 +736,9 @@ public final class JsonMappers {
      * Deserializes JSON from a string using a custom deserialization configuration.
      * This method provides maximum control over the deserialization process.
      *
-     * <p>Use this method when you need complex configuration that cannot be achieved
-     * with individual features, such as custom deserializers, date formats, or
-     * visibility settings.</p>
+     * <p>The supplied configuration controls Jackson's deserialization settings. It does not transfer
+     * mapper-level components such as registered modules, deserializer factories, or a custom JSON factory.
+     * Use {@link #wrap(ObjectMapper)} when those mapper-level customizations are required.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1195,11 +1220,15 @@ public final class JsonMappers {
      * @param len the number of bytes to read from the offset
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws RuntimeException if deserialization fails, the JSON is invalid, or the array bounds are invalid
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+     * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
+     * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see TypeReference
      * @see #fromJson(byte[], int, int, Class)
      */
     public static <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType) {
+        checkByteRange(json, offset, len);
+
         try {
             return defaultJsonMapper.readValue(json, offset, len, targetType);
         } catch (final IOException e) {
@@ -1278,6 +1307,7 @@ public final class JsonMappers {
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply (optional)
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
      * @throws RuntimeException if deserialization fails
      * @see TypeReference
      * @see DeserializationFeature
@@ -1285,6 +1315,9 @@ public final class JsonMappers {
      */
     public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType, final DeserializationFeature first,
             final DeserializationFeature... features) {
+        N.checkArgNotNull(first, "first");
+        N.checkArgNotNull(features, "features");
+
         return fromJson(json, targetType, defaultDeserializationConfig.with(first, features));
     }
 
@@ -1734,64 +1767,43 @@ public final class JsonMappers {
         return defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);
     }
 
-    static JsonMapper getJsonMapper(final SerializationConfig config) {
+    private static JsonMapper getJsonMapper(final SerializationConfig config) {
         if (config == null) {
             return defaultJsonMapper;
         }
 
-        JsonMapper mapper = null;
-
-        synchronized (mapperPool) {
-            if (mapperPool.size() > 0) {
-                mapper = mapperPool.remove(mapperPool.size() - 1);
-            }
-
+        synchronized (serializationMapperPool) {
+            JsonMapper mapper = serializationMapperPool.get(config);
             if (mapper == null) {
                 mapper = new JsonMapper();
+                mapper.setConfig(config);
+                serializationMapperPool.put(config, mapper);
             }
 
-            mapper.setConfig(config);
+            return mapper;
         }
-
-        return mapper;
     }
 
-    static JsonMapper getJsonMapper(final DeserializationConfig config) {
+    private static JsonMapper getJsonMapper(final DeserializationConfig config) {
         if (config == null) {
             return defaultJsonMapper;
         }
 
-        JsonMapper mapper = null;
-
-        synchronized (mapperPool) {
-            if (mapperPool.size() > 0) {
-                mapper = mapperPool.remove(mapperPool.size() - 1);
-            }
-
+        synchronized (deserializationMapperPool) {
+            JsonMapper mapper = deserializationMapperPool.get(config);
             if (mapper == null) {
                 mapper = new JsonMapper();
+                mapper.setConfig(config);
+                deserializationMapperPool.put(config, mapper);
             }
 
-            mapper.setConfig(config);
+            return mapper;
         }
-
-        return mapper;
     }
 
-    static void recycle(final JsonMapper mapper) {
-        if (mapper == null || mapper == defaultJsonMapper || mapper == defaultJsonMapperForPretty) {
-            return;
-        }
-
-        mapper.setConfig(defaultSerializationConfig);
-        mapper.setConfig(defaultDeserializationConfig);
-
-        synchronized (mapperPool) {
-            if (mapperPool.size() < POOL_SIZE) {
-
-                mapperPool.add(mapper);
-            }
-        }
+    private static void recycle(@SuppressWarnings("unused") final JsonMapper mapper) {
+        // Configuration-bound mappers are retained in the bounded caches above. Reconfiguring a
+        // mapper after use is unsafe because Jackson retains serializers and root deserializers.
     }
 
     /**
@@ -1799,8 +1811,9 @@ public final class JsonMappers {
      * This method allows using a custom ObjectMapper with specific configurations while benefiting from
      * the simplified API provided by the {@link One} wrapper.
      *
-     * <p>The wrapped mapper will be used for all JSON operations performed through the returned One instance.
-     * A separate mapper instance with pretty printing enabled is automatically created for formatted output.</p>
+     * <p>The supplied mapper remains caller-owned and is used directly for compact output and all reads; this
+     * class neither resets nor closes it. A copied snapshot with pretty printing enabled is created for formatted
+     * output. Configure the mapper completely before wrapping and do not mutate it while the wrapper is in use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1821,7 +1834,7 @@ public final class JsonMappers {
      * @see ObjectMapper
      */
     public static One wrap(final ObjectMapper jsonMapper) {
-        return new One(jsonMapper);
+        return new One(N.requireNonNull(jsonMapper, "jsonMapper"));
     }
 
     /**
@@ -1838,7 +1851,8 @@ public final class JsonMappers {
      * </ul>
      *
      * <p>This class is typically obtained through {@link JsonMappers#wrap(ObjectMapper)} rather than
-     * instantiated directly.</p>
+     * instantiated directly. Configure the supplied mapper before wrapping it and do not mutate it while this
+     * wrapper is in use. The pretty-printing mapper is a snapshot made when the wrapper is constructed.</p>
      *
      * @see JsonMappers#wrap(ObjectMapper)
      */
@@ -2024,6 +2038,8 @@ public final class JsonMappers {
          * @param json byte array containing JSON data
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+         * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
@@ -2051,9 +2067,13 @@ public final class JsonMappers {
          * @param len the number of bytes to read
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+         * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
+            checkByteRange(json, offset, len);
+
             try {
                 return jsonMapper.readValue(json, offset, len, targetType);
             } catch (final IOException e) {
@@ -2258,6 +2278,8 @@ public final class JsonMappers {
          * @see TypeReference
          */
         public <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType) {
+            checkByteRange(json, offset, len);
+
             try {
                 return jsonMapper.readValue(json, offset, len, targetType);
             } catch (final IOException e) {

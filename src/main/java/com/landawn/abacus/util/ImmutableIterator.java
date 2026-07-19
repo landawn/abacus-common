@@ -17,6 +17,7 @@
 package com.landawn.abacus.util;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -24,15 +25,17 @@ import com.landawn.abacus.annotation.Beta;
 
 /**
  * An abstract base class for immutable iterators that do not support element removal.
- * This class implements the Iterator interface but throws {@link UnsupportedOperationException}
- * for the {@link #remove()} operation, ensuring genuine immutability.
+ * This class implements the Iterator interface but its base implementation throws
+ * {@link UnsupportedOperationException} for {@link #remove()}.
  *
  * <p>ImmutableIterator provides additional utility methods for converting the remaining
  * elements to various collection types, including immutable collections. It serves as
  * the base class for iterators returned by immutable collection implementations.</p>
  *
- * <p>Subclasses must implement the {@link #hasNext()} and {@link #next()} methods to provide iteration
- * functionality. The {@link #remove()} method always throws {@link UnsupportedOperationException}.</p>
+ * <p>Iterators are stateful cursors, not immutable values: traversal consumes their remaining
+ * elements. Subclasses must implement {@link #hasNext()} and {@link #next()}. Because this class is
+ * extensible, a subclass can override {@code remove()}; APIs requiring a guaranteed read-only
+ * iterator must wrap untrusted iterator implementations rather than returning them directly.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -54,10 +57,8 @@ import com.landawn.abacus.annotation.Beta;
  *
  * @param <T> the type of elements returned by this iterator
  * @see java.util.Iterator
- * @see Immutable
  */
-@com.landawn.abacus.annotation.Immutable
-abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable {
+abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
 
     /**
      * This operation is not supported by {@code ImmutableIterator}.
@@ -113,7 +114,9 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * @throws NullPointerException if {@code supplier} is {@code null} or if {@code supplier.get()} returns {@code null}
      */
     public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) {
-        final C c = supplier.get();
+        Objects.requireNonNull(supplier, "supplier");
+
+        final C c = Objects.requireNonNull(supplier.get(), "supplier.get()");
 
         while (hasNext()) {
             c.add(next());

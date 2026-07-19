@@ -2,6 +2,8 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -262,6 +264,29 @@ public class CollectionTypeTest extends TestBase {
     }
 
     @Test
+    public void testAppendTo_PropagatesWriterIOException() {
+        final IOException failure = new IOException("write failure");
+        final Writer writer = new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw failure;
+            }
+
+            @Override
+            public void flush() {
+                // no-op
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+
+        assertSame(failure, assertThrows(IOException.class, () -> listType.appendTo(writer, List.of("test"))));
+    }
+
+    @Test
     public void testSerializeTo_Null() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         listType.serializeTo(mockWriter, null, null);
@@ -313,5 +338,17 @@ public class CollectionTypeTest extends TestBase {
         StringBuilder sb = new StringBuilder();
         listType.appendTo(sb, list);
         org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
+    }
+
+    @Test
+    public void testSerializeTo_NullElementHonorsElementConfig() throws IOException {
+        com.landawn.abacus.util.BufferedJsonWriter actualWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            listType.serializeTo(actualWriter, Arrays.asList((String) null), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullStringAsEmpty(true));
+            assertEquals("[\"\"]", actualWriter.toString());
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(actualWriter);
+        }
     }
 }

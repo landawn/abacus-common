@@ -221,4 +221,33 @@ public class JdkOptionalTypeTest extends TestBase {
 
         assertNull(optionalIntegerType.stringOf(null));
     }
+
+    @Test
+    public void testStringOfUsesDeclaredElementTypeForSubtype() {
+        TypeFactory.registerType(JdkOptionalBaseValue.class, value -> "base:" + value.value, str -> new JdkOptionalBaseValue(str.substring(5)));
+        TypeFactory.registerType(JdkOptionalDerivedValue.class, value -> "derived:" + value.value, str -> new JdkOptionalDerivedValue(str.substring(8)));
+
+        final JdkOptionalType<JdkOptionalBaseValue> type = new JdkOptionalType<>(TypeFactory.getType(JdkOptionalBaseValue.class).name());
+        final JdkOptionalBaseValue value = new JdkOptionalDerivedValue("test");
+
+        final String str = type.stringOf(Optional.of(value));
+        final Optional<JdkOptionalBaseValue> roundTripped = type.valueOf(str);
+
+        assertEquals("base:test", str);
+        assertEquals("test", roundTripped.orElseThrow().value);
+    }
+
+    public static class JdkOptionalBaseValue {
+        final String value;
+
+        JdkOptionalBaseValue(final String value) {
+            this.value = value;
+        }
+    }
+
+    public static final class JdkOptionalDerivedValue extends JdkOptionalBaseValue {
+        JdkOptionalDerivedValue(final String value) {
+            super(value);
+        }
+    }
 }

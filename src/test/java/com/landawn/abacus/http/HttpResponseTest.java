@@ -48,6 +48,16 @@ public class HttpResponseTest extends TestBase {
     }
 
     @Test
+    public void testResponseWithNullCharsetDefaultsToUtf8() {
+        final byte[] utf8Body = "caf\u00e9".getBytes(StandardCharsets.UTF_8);
+        final HttpResponse response = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", Collections.emptyMap(), utf8Body,
+                ContentFormat.NONE, null);
+
+        assertEquals("caf\u00e9", response.body(String.class));
+        assertEquals("caf\u00e9", response.body(Type.of(String.class)));
+    }
+
+    @Test
     public void testResponseWithXMLFormat() {
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", Collections.singletonList("application/xml"));
@@ -256,6 +266,19 @@ public class HttpResponseTest extends TestBase {
         Map<String, String> result = response.body(Map.class);
         assertEquals("John", result.get("name"));
         assertEquals("30", result.get("age"));
+    }
+
+    @Test
+    public void testFormUrlEncodedBodyUsesResponseCharsetForPercentEscapes() {
+        String formData = "name=caf%E9";
+        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), formData.getBytes(StandardCharsets.ISO_8859_1),
+                ContentFormat.FORM_URL_ENCODED, StandardCharsets.ISO_8859_1);
+
+        Map<String, String> byClass = response.body(Map.class);
+        Map<String, String> byType = response.body(Type.of("Map<String, String>"));
+
+        assertEquals("café", byClass.get("name"));
+        assertEquals("café", byType.get("name"));
     }
 
     @Test
@@ -520,6 +543,22 @@ public class HttpResponseTest extends TestBase {
 
         assertNotEquals(response1, "not a response");
         assertNotEquals(response1, null);
+    }
+
+    @Test
+    public void testEqualsAndHashCodeIncludeResponseCharset() {
+        final Map<String, List<String>> headers = Collections.singletonMap("Content-Type", Collections.singletonList("text/plain"));
+        final byte[] body = "test".getBytes(StandardCharsets.UTF_8);
+        final HttpResponse utf8 = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", headers, body, ContentFormat.NONE, StandardCharsets.UTF_8);
+        final HttpResponse sameUtf8 = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", headers, body, ContentFormat.NONE,
+                StandardCharsets.UTF_8);
+        final HttpResponse latin1 = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", headers, body, ContentFormat.NONE,
+                StandardCharsets.ISO_8859_1);
+
+        assertEquals(utf8, sameUtf8);
+        assertEquals(utf8.hashCode(), sameUtf8.hashCode());
+        assertNotEquals(utf8, latin1);
+        assertNotEquals(utf8.hashCode(), latin1.hashCode());
     }
 
     @Test

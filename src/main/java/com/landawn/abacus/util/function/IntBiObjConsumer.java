@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -60,7 +60,6 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
      * @param t the first object argument
      * @param u the second object argument
      */
-    // @ai-ignore BiIntObj*/IntBiObj*/BiObjInt*/ObjBiInt* argument order convention - intentional: class name prefix determines parameter order. BiIntObj* has two ints first; IntBiObj* has int then two objects; BiObjInt* has two objects then int; ObjBiInt* has object then two ints. Do not suggest reordering.
     @Override
     void accept(int i, T t, U u);
 

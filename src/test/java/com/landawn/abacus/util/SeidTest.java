@@ -182,6 +182,18 @@ public class SeidTest extends TestBase {
         assertEquals(1, seid.size());
     }
 
+    @Test
+    public void testPropertyNamesAreValidatedEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> Seid.of(null, 1));
+
+        Seid seid = Seid.of("User.id", 1);
+        assertThrows(IllegalArgumentException.class, () -> seid.get(null));
+        assertThrows(IllegalArgumentException.class, () -> seid.get("id", null));
+        assertThrows(IllegalArgumentException.class, () -> seid.containsKey(null));
+        assertThrows(IllegalArgumentException.class, () -> seid.set(null, 2));
+        assertEquals(1, (int) seid.get("id"));
+    }
+
     // ==================== create(Map) ====================
 
     @Test
@@ -223,6 +235,17 @@ public class SeidTest extends TestBase {
     public void testCreate_entity_withIdPropNames_empty() {
         SimpleUser user = new SimpleUser(1, "Bob");
         assertThrows(IllegalArgumentException.class, () -> Seid.create(user, java.util.Collections.emptyList()));
+    }
+
+    @Test
+    public void testCreate_entity_withUnknownIdProperty() {
+        final SimpleUser user = new SimpleUser(1, "Bob");
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> Seid.create(user, java.util.Collections.singletonList("missing")));
+
+        assertTrue(exception.getMessage().contains("missing"));
+        assertTrue(exception.getMessage().contains("SimpleUser"));
     }
 
     // ==================== entityName() ====================
@@ -383,6 +406,21 @@ public class SeidTest extends TestBase {
         assertEquals(42, (int) seid.get("id"));
     }
 
+    @Test
+    public void testSet_mapInvalidPropertyIsAtomic() {
+        Seid seid = Seid.of("User.id", 1);
+        String rendered = seid.toString();
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("name", "Alice");
+        props.put(null, 2);
+
+        assertThrows(IllegalArgumentException.class, () -> seid.set(props));
+        assertEquals(1, seid.size());
+        assertEquals(1, (int) seid.get("id"));
+        assertFalse(seid.containsKey("name"));
+        assertEquals(rendered, seid.toString());
+    }
+
     // ==================== containsKey(String propName) ====================
 
     @Test
@@ -421,6 +459,16 @@ public class SeidTest extends TestBase {
         assertTrue(seid.keySet().isEmpty());
     }
 
+    @Test
+    public void testKeySetCannotMutateIdentifierOrStaleCachedString() {
+        Seid seid = Seid.of("User.id", 123, "User.name", "John");
+        String rendered = seid.toString();
+
+        assertThrows(UnsupportedOperationException.class, () -> seid.keySet().remove("id"));
+        assertEquals(2, seid.size());
+        assertEquals(rendered, seid.toString());
+    }
+
     // ==================== entrySet() ====================
 
     @Test
@@ -431,6 +479,18 @@ public class SeidTest extends TestBase {
         Map.Entry<String, Object> entry = entries.iterator().next();
         assertEquals("id", entry.getKey());
         assertEquals(123, entry.getValue());
+    }
+
+    @Test
+    public void testEntrySetCannotMutateIdentifierOrStaleCachedString() {
+        Seid seid = Seid.of("User.id", 123, "User.name", "John");
+        String rendered = seid.toString();
+        Set<Map.Entry<String, Object>> entries = seid.entrySet();
+
+        assertThrows(UnsupportedOperationException.class, () -> entries.iterator().next().setValue("changed"));
+        assertThrows(UnsupportedOperationException.class, entries::clear);
+        assertEquals(2, seid.size());
+        assertEquals(rendered, seid.toString());
     }
 
     // ==================== size() ====================

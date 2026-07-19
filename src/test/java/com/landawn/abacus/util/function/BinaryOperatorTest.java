@@ -148,4 +148,11 @@ public class BinaryOperatorTest extends TestBase {
         Integer result = throwableOperator.apply(50, 8);
         assertEquals(42, result);
     }
+
+    @Test
+    public void testAndThenNullThrowsImmediately() {
+        BinaryOperator<Integer> operator = Integer::sum;
+
+        assertThrows(NullPointerException.class, () -> operator.andThen(null));
+    }
 }

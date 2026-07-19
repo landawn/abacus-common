@@ -145,6 +145,24 @@ public class JsonStreamReaderTest extends TestBase {
     }
 
     @Test
+    public void testParseRejectsUnusableReadInputsInsteadOfSilentlyReturningEof() {
+        assertThrows(IllegalArgumentException.class, () -> JsonStreamReader.parse(new StringReader("{}"), new char[0], new char[8]));
+        assertThrows(IllegalArgumentException.class, () -> JsonStreamReader.parse(null, new char[8], new char[8]));
+        assertThrows(IllegalArgumentException.class, () -> JsonStreamReader.parse(new StringReader("{}"), null, new char[8]));
+        assertThrows(IllegalArgumentException.class, () -> JsonStreamReader.parse(new StringReader("{}"), new char[8], null));
+    }
+
+    @Test
+    public void testParseSupportsEmptyTokenBufferByGrowingItOnDemand() {
+        final JsonReader reader = JsonStreamReader.parse(new StringReader("\"escaped\\ntext\""), new char[2], new char[0]);
+
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals("escaped\ntext", reader.getText());
+        reader.close();
+    }
+
+    @Test
     public void test_hasText() {
         String json = "\"test\"";
         StringReader stringReader = new StringReader(json);

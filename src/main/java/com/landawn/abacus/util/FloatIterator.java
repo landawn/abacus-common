@@ -28,9 +28,10 @@ import com.landawn.abacus.util.stream.FloatStream;
  * This abstract class provides a base implementation for iterating over float values
  * with additional functional operations like filtering, limiting, and skipping.
  *
- * <p>FloatIterator is immutable and all transformation methods return new iterator instances.
- * It extends {@code ImmutableIterator<Float>} but provides primitive-specific methods
- * to avoid autoboxing.</p>
+ * <p>The iterator does not support element removal, but it is stateful and is consumed as values
+ * are read. Transformation methods return wrappers over this same source iterator; consuming a
+ * wrapper also advances the source. It extends {@code ImmutableIterator<Float>} to express the
+ * unsupported mutation operation, and provides primitive-specific methods to avoid autoboxing.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -350,8 +351,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f);
-     * Float boxed = iter.next();           // returns 1.0f (boxed) — avoid this
-     * float primitive = iter.nextFloat();  // returns 2.0f — prefer this
+     * Float boxed = iter.next();            // returns 1.0f (boxed) — avoid this
+     * float primitive = iter.nextFloat();   // returns 2.0f — prefer this
      * }</pre>
      *
      * @return the next element as a {@link Float} object
@@ -644,15 +645,17 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param startIndex the starting index value; must be non-negative
      * @return an {@code ObjIterator} of {@link IndexedFloat} objects with indices beginning at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
-    public ObjIterator<IndexedFloat> indexed(final long startIndex) {
+    public ObjIterator<IndexedFloat> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final FloatIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -661,7 +664,24 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
             @Override
             public IndexedFloat next() {
-                return IndexedFloat.of(iter.nextFloat(), idx++);
+                if (indexOverflow) {
+                    if (iter.hasNext()) {
+                        throw new ArithmeticException("long overflow");
+                    }
+
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final float value = iter.nextFloat();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedFloat.of(value, currentIndex);
             }
         };
     }
@@ -683,7 +703,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Float> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Float> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 

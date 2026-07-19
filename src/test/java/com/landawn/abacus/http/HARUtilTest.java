@@ -30,6 +30,9 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+
 public class HARUtilTest extends TestBase {
 
     private String sampleHAR;
@@ -562,6 +565,21 @@ public class HARUtilTest extends TestBase {
         assertEquals("Mozilla/5.0", headers.get("User-Agent"));
     }
 
+    @Test
+    public void testGetHeadersByRequestEntrySkipsNullEntry() {
+        final Map<String, Object> requestEntry = new HashMap<>();
+        final List<Map<String, String>> headersList = new ArrayList<>();
+        headersList.add(null);
+        headersList.add(Map.of("value", "missing-name"));
+        headersList.add(Map.of("name", "Accept", "value", "application/json"));
+        requestEntry.put("headers", headersList);
+
+        final HttpHeaders headers = HARUtil.getHeadersByRequestEntry(requestEntry);
+
+        assertEquals(1, headers.headerNames().size());
+        assertEquals("application/json", headers.get("Accept"));
+    }
+
     // --- getBodyAndMimeTypeByRequestEntry ---
 
     @Test
@@ -605,6 +623,23 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
+    public void testReplayPreservesMimeTypeForEmptyBody() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("ok"));
+
+            final Map<String, Object> requestEntry = new HashMap<>();
+            requestEntry.put("method", "POST");
+            requestEntry.put("url", server.url("/empty").toString());
+            requestEntry.put("headers", List.of());
+            requestEntry.put("postData", Map.of("text", "", "mimeType", "application/json"));
+
+            assertEquals("ok", HARUtil.sendRequestByRequestEntry(requestEntry, String.class));
+            assertEquals("application/json", server.takeRequest().getHeader("Content-Type"));
+        }
+    }
+
+    @Test
     public void testGetBodyAndMimeTypeByRequestEntryWithParams() {
         Map<String, Object> requestEntry = new HashMap<>();
         Map<String, Object> postData = new HashMap<>();
@@ -620,6 +655,20 @@ public class HARUtilTest extends TestBase {
         assertNotNull(result);
         assertEquals("a=1&b=two+words", result._1);
         assertEquals("application/x-www-form-urlencoded", result._2);
+    }
+
+    @Test
+    public void testSynthesizedParamBodyDoesNotRetainIncompatibleMultipartMimeType() {
+        Map<String, Object> requestEntry = new HashMap<>();
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("params", List.of(Map.of("name", "a", "value", "two words")));
+        postData.put("mimeType", "multipart/form-data; boundary=missing-from-har");
+        requestEntry.put("postData", postData);
+
+        Tuple2<String, String> result = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
+
+        assertEquals("a=two+words", result._1);
+        assertEquals(HttpHeaders.Values.APPLICATION_URL_ENCODED, result._2);
     }
 
     @Test
@@ -707,6 +756,17 @@ public class HARUtilTest extends TestBase {
         Optional<Map<String, Object>> result = HARUtil.findRequestEntry(harWithoutEntries, url -> true);
         assertNotNull(result);
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFindRequestEntrySkipsMalformedEntries() {
+        String har = "{\"log\":{\"entries\":[null, {}, {\"request\":\"not-an-object\"}, {\"request\":{}},"
+                + "{\"request\":{\"method\":\"GET\",\"url\":\"https://api.example.com/valid\",\"headers\":[]}}]}}";
+
+        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(har, url -> url.endsWith("/valid"));
+
+        assertTrue(result.isPresent());
+        assertEquals("https://api.example.com/valid", result.get().get("url"));
     }
 
     @Test

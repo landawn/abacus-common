@@ -627,6 +627,18 @@ public class AbstractTypeTest extends TestBase {
         assertEquals(2, parts.length);
     }
 
+    @Test
+    public void testSplit_WithLiteralGroupingSeparators() {
+        TestSplitType helper = new TestSplitType();
+
+        assertEquals(List.of("a", "b", "c"), Arrays.asList(helper.splitForTest("a[b[c", "[")));
+        assertEquals(List.of("a", "b", "c"), Arrays.asList(helper.splitForTest("a]b]c", "]")));
+        assertEquals(List.of("a", "b", "c"), Arrays.asList(helper.splitForTest("a(b(c", "(")));
+        assertEquals(List.of("a", "b", "c"), Arrays.asList(helper.splitForTest("a)b)c", ")")));
+        assertEquals(List.of("a", "b", "c"), Arrays.asList(helper.splitForTest("a{b{c", "{")));
+        assertEquals(List.of("a", "b", "c"), Arrays.asList(helper.splitForTest("a}b}c", "}")));
+    }
+
     // Cover optimized numeric parsing paths used by primitive type implementations.
     @Test
     public void testParseInt_CharArrayWithSuffixAndOffset() {

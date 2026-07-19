@@ -28,8 +28,10 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  * An immutable implementation of the {@link SortedSet} interface.
- * Once created, the contents of an {@code ImmutableSortedSet} cannot be modified.
+ * The contents of an {@code ImmutableSortedSet} cannot be modified through its API.
  * All mutating operations inherited from the parent interfaces throw {@link UnsupportedOperationException}.
+ * An instance created by {@link #wrap(SortedSet)} reflects external changes to its backing set;
+ * use {@link #copyOf(Collection)} when an independent immutable value is required.
  *
  * <p>This class maintains elements in sorted order according to their natural ordering
  * (if they implement {@link Comparable}) or by a {@link Comparator} provided at set creation time.
@@ -83,27 +85,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     public static <E> ImmutableSortedSet<E> empty() {
         return EMPTY;
     }
-
-    //    /**
-    //     * Returns an ImmutableSortedSet containing a single element.
-    //     * The element must implement Comparable to determine its natural ordering.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ImmutableSortedSet<Integer> singletonSet = ImmutableSortedSet.just(42);
-    //     * System.out.println(singletonSet.first());   // 42
-    //     * }</pre>
-    //     *
-    //     * @param <E> the type of element, must extend Comparable
-    //     * @param e the element to be contained in the set
-    //     * @return an ImmutableSortedSet containing only the specified element
-    //     * @throws ClassCastException if the element does not implement Comparable
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> just(final E e) {
-    //        return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e)));
-    //    }
 
     /**
      * Returns an ImmutableSortedSet containing a single element in sorted order.
@@ -389,7 +370,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *
      * @param <E> the type of elements in the collection
      * @param c the collection whose elements are to be placed into this set
-     * @return an {@code ImmutableSortedSet} containing the elements of the specified collection, or the same instance if it is already an {@code ImmutableSortedSet}, or an empty instance if {@code c} is {@code null} or empty
+     * @return an {@code ImmutableSortedSet} containing the elements of the specified collection, or the same instance if it is already an
+     *         {@code ImmutableSortedSet}. The comparator of a {@code SortedSet} source is retained even when the source is empty; a {@code null}
+     *         or empty non-sorted source returns the shared empty instance.
      * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
      * @throws NullPointerException if the collection contains a {@code null} element and natural ordering is used
      * @see #wrap(SortedSet)
@@ -397,10 +380,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     public static <E> ImmutableSortedSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableSortedSet) {
             return (ImmutableSortedSet<E>) c;
-        } else if (N.isEmpty(c)) {
-            return empty();
         } else if (c instanceof SortedSet sortedSet) {
             return new ImmutableSortedSet<>(new TreeSet<>(sortedSet));
+        } else if (N.isEmpty(c)) {
+            return empty();
         } else {
             return new ImmutableSortedSet<>(new TreeSet<>(c));
         }

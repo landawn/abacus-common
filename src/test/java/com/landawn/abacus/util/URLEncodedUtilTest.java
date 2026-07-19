@@ -473,6 +473,12 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
+    public void testRequiredEncodingTargetsAreValidatedForEmptyInput() {
+        assertThrows(NullPointerException.class, () -> URLEncodedUtil.encode(null, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE, null));
+        assertThrows(NullPointerException.class, () -> URLEncodedUtil.encode((String) null, null, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
+    }
+
+    @Test
     public void test_encode_object_charset_namingPolicy_appendable_arrayOddLength() {
         Object[] params = new Object[] { "name", "John", "age" };
         StringBuilder sb = new StringBuilder();
@@ -678,6 +684,12 @@ public class URLEncodedUtilTest extends AbstractTest {
 
         Assertions.assertTrue(linkedResult instanceof LinkedHashMap);
         Assertions.assertEquals(3, linkedResult.size());
+    }
+
+    @Test
+    public void testDecodeMapSupplierValidationIsEager() {
+        assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, (Supplier<Map<String, String>>) null));
+        assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, () -> null));
     }
 
     @Test
@@ -1111,6 +1123,20 @@ public class URLEncodedUtilTest extends AbstractTest {
         String value = "ab" + emoji + "cd";
         Map<String, String> decoded = URLEncodedUtil.decode("q=" + value);
         assertEquals(value, decoded.get("q"));
+    }
+
+    @Test
+    public void testDecodeWithCharsetWhoseEncoderCanEmitMoreThanFourBytesPerCharacter() {
+        Charset charset = Charset.forName("ISO-2022-JP");
+
+        // The previous content.length() * 4 byte buffer overflows once several literal
+        // characters are each encoded with ISO-2022-JP's shift sequences.
+        assertEquals("あいうえお", URLEncodedUtil.decode("q=あいうえお", charset).get("q"));
+    }
+
+    @Test
+    public void testDecodePreservesInvalidPercentEscapeBeforeUnicode() {
+        assertEquals("%雪x", URLEncodedUtil.decode("q=%雪x").get("q"));
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---

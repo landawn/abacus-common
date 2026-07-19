@@ -25,6 +25,8 @@ import java.sql.SQLException;
  * Type handler for NCLOB (National Character Large Object) database values accessed as
  * character {@link java.io.Reader} streams.
  * This type automatically converts NCLOB database values to Reader objects.
+ * Callers must close readers returned by the {@code get} methods; closing a returned reader also
+ * releases the internally acquired {@code NClob} locator.
  */
 public class NClobReaderType extends ReaderType {
 
@@ -42,12 +44,12 @@ public class NClobReaderType extends ReaderType {
     /**
      * Retrieves an {@link java.sql.NClob} from the specified column in the {@link ResultSet}
      * and converts it to a {@link java.io.Reader} via {@link java.sql.NClob#getCharacterStream()}.
-     * The {@code NClob} itself is not freed by this method; callers are responsible for
-     * closing the returned {@code Reader} and releasing any associated database resources.
+     * Closing the returned {@code Reader} closes the character stream and releases the
+     * internally acquired {@code NClob} locator.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column to retrieve the {@code NClob} from
-     * @return a {@code Reader} for the {@code NClob} character stream,
+     * @return a {@code Reader} for the {@code NClob} character stream; closing it also releases the NClob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
@@ -60,12 +62,12 @@ public class NClobReaderType extends ReaderType {
     /**
      * Retrieves an {@link java.sql.NClob} from the specified column in the {@link ResultSet}
      * and converts it to a {@link java.io.Reader} via {@link java.sql.NClob#getCharacterStream()}.
-     * The {@code NClob} itself is not freed by this method; callers are responsible for
-     * closing the returned {@code Reader} and releasing any associated database resources.
+     * Closing the returned {@code Reader} closes the character stream and releases the
+     * internally acquired {@code NClob} locator.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
-     * @return a {@code Reader} for the {@code NClob} character stream,
+     * @return a {@code Reader} for the {@code NClob} character stream; closing it also releases the NClob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
@@ -134,18 +136,14 @@ public class NClobReaderType extends ReaderType {
 
     /**
      * Converts an NClob object to a Reader by extracting its character stream.
-     * The NClob is not freed by this method; the caller is responsible
-     * for managing the NClob lifecycle.
+     * Closing the returned reader closes the delegate and calls {@link NClob#free()}.
+     * This method therefore assumes ownership of a non-null {@code clob}.
      *
      * @param clob the NClob to convert to a Reader
      * @return a Reader for the NClob character stream, or {@code null} if the input NClob is {@code null}
      * @throws SQLException if a database access error occurs while accessing the NClob
      */
     static Reader clobToReader(final NClob clob) throws SQLException {
-        if (clob != null) {
-            return clob.getCharacterStream();
-        }
-
-        return null; // NOSONAR
+        return Utils.openCharacterStream(clob);
     }
 }

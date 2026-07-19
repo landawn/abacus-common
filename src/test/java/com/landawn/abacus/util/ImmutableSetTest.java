@@ -24,6 +24,10 @@ import com.landawn.abacus.TestBase;
 
 public class ImmutableSetTest extends TestBase {
 
+    private static final class MutableImmutableNamedSet<E> extends HashSet<E> {
+        private static final long serialVersionUID = 1L;
+    }
+
     @Test
     public void test_empty() {
         ImmutableSet<String> empty = ImmutableSet.empty();
@@ -649,6 +653,20 @@ public class ImmutableSetTest extends TestBase {
         mutableSet.add("added");
         Assertions.assertEquals(2, wrapped.size());
         Assertions.assertTrue(wrapped.contains("added"));
+    }
+
+    @Test
+    public void testWrapDoesNotTrustBackingSetClassNameForImmutability() {
+        MutableImmutableNamedSet<String> backing = new MutableImmutableNamedSet<>();
+        backing.add("a");
+
+        ImmutableSet<String> wrapped = ImmutableSet.wrap(backing);
+        Iterator<String> iterator = wrapped.iterator();
+        iterator.next();
+
+        Assertions.assertThrows(UnsupportedOperationException.class, iterator::remove);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.remove("a"));
+        Assertions.assertTrue(backing.contains("a"));
     }
 
     @Test

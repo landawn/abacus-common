@@ -3327,6 +3327,15 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
+    public void testIntervalRejectsInvalidTiming() {
+        assertThrows(IllegalArgumentException.class, () -> LongStream.interval(-1, 1, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalArgumentException.class, () -> LongStream.interval(0, 0, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalArgumentException.class, () -> LongStream.interval(0, -1, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalArgumentException.class, () -> LongStream.interval(0, 1, TimeUnit.NANOSECONDS));
+        assertThrows(NullPointerException.class, () -> LongStream.interval(0, 1, null));
+    }
+
+    @Test
     public void testIterate() {
         LongStream stream = LongStream.iterate(1L, n -> n * 2).limit(5);
         assertArrayEquals(new long[] { 1L, 2L, 4L, 8L, 16L }, stream.toArray());
@@ -3491,6 +3500,21 @@ public class LongStreamTest extends TestBase {
     public void testConcatStreamCollection() {
         Collection<LongStream> streams = Arrays.asList(LongStream.of(1L, 2L), LongStream.of(3L, 4L), LongStream.of(5L));
         assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, LongStream.concat(streams).toArray());
+    }
+
+    @Test
+    public void testConcatCollectionSnapshotsSources() {
+        List<LongStream> sources = new ArrayList<>(Arrays.asList(LongStream.of(1L, 2L), LongStream.of(3L, 4L)));
+        LongStream concatenated = LongStream.concat(sources);
+
+        sources.clear();
+
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L }, concatenated.toArray());
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        assertEquals(0, LongStream.merge(Arrays.asList((LongStream) null), (a, b) -> MergeResult.TAKE_FIRST).count());
     }
 
     @Test
@@ -4455,5 +4479,24 @@ public class LongStreamTest extends TestBase {
                 () -> LongStream.of(1L, 2L, 3L).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> LongStream.of(1L, 2L, 3L).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        LongIterator iter = LongStream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 1L).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextLong);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = LongStream.iterate(1L, () -> conditionCalls.getAndIncrement() > 0, value -> value + 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextLong);
+        assertEquals(1, conditionCalls.get());
     }
 }

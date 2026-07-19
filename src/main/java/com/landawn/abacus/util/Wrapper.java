@@ -16,14 +16,13 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 /**
- * An immutable wrapper class that provides custom hashCode and equals implementations for wrapped objects.
+ * A wrapper with a fixed value reference and equality strategy that provides custom {@code hashCode}
+ * and {@code equals} implementations for wrapped objects.
  * This is particularly useful for using arrays or other objects with non-standard equality semantics
  * as keys in HashMaps or elements in HashSets.
  *
@@ -36,7 +35,8 @@ import java.util.function.ToIntFunction;
  *   <li>Special handling for arrays with deep equality and hash code computation</li>
  *   <li>Support for custom hash and equals functions</li>
  *   <li>Object pooling for zero-length arrays to reduce memory allocation</li>
- *   <li>Immutable design to ensure collection safety</li>
+ *   <li>The wrapper reference and strategy cannot change; collection safety still requires that
+ *       equality-relevant state in the wrapped value is not mutated</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -57,13 +57,11 @@ import java.util.function.ToIntFunction;
  * );
  * }</pre>
  *
- * <p><b>Note:</b> {@link #equals(Object)} compares against any {@code Wrapper} instance regardless of which
- * factory produced it. Equality therefore relies on the wrapped value's hash/equals functions
- * being consistent across the two wrappers. Mixing the deep-equality factory ({@link #of(Object)})
- * with the custom-function factory ({@link #of(Object, ToIntFunction, BiPredicate)}) for the same
- * value type is only safe when the custom functions agree with deep equality; supplying custom
- * functions that diverge from deep equality can make {@code a.equals(b)} and {@code b.equals(a)}
- * disagree, because each side applies its own comparison function.
+ * <p><b>Note:</b> wrappers are comparable only when they use the same equality strategy. Wrappers
+ * created by {@link #of(Object)} use the built-in deep strategy and compare with one another.
+ * Custom wrappers compare only when they were created with the same hash-function and
+ * equality-function instances. Keeping incompatible strategies separate preserves the symmetry,
+ * transitivity, and equal-hash requirements of {@link Object#equals(Object)}.
  *
  * @param <T> the type of the object that this wrapper will hold.
  * @see Keyed
@@ -121,15 +119,16 @@ public abstract class Wrapper<T> implements Immutable {
      *              any non-array object, or {@code null}.
      * @return a {@code Wrapper} instance for the given value with deep equality semantics.
      */
+    @SuppressWarnings("unchecked")
     public static <T> Wrapper<T> of(final T value) {
         if (value == null) {
-            return ArrayWrapper.WRAPPER_FOR_NULL_ARRAY;
+            return (Wrapper<T>) ArrayWrapper.WRAPPER_FOR_NULL_ARRAY;
         }
 
         if (value.getClass().isArray() && java.lang.reflect.Array.getLength(value) == 0) {
-            // Cache one shared wrapper per component type for zero-length arrays. computeIfAbsent makes the
-            // check-and-create atomic so concurrent first access cannot hand out distinct instances.
-            return ArrayWrapper.WRAPPER_POOL.computeIfAbsent(value.getClass().getComponentType(), k -> new ArrayWrapper<>(value));
+            // ClassValue provides atomic per-component-type identity without retaining component classes
+            // (and their defining class loaders) solely because an empty array was wrapped once.
+            return (Wrapper<T>) ArrayWrapper.WRAPPER_POOL.get(value.getClass().getComponentType());
         }
 
         // return new Wrapper<T>(checkArray(value), arrayHashFunction, arrayEqualsFunction);
@@ -147,9 +146,10 @@ public abstract class Wrapper<T> implements Immutable {
      * ignoring certain properties, or using custom comparison logic.</p>
      *
      * <p><b>&#9888;&#65039; Custom equality:</b> The supplied functions must obey the Java
-     * {@code equals}/{@code hashCode} contract for every wrapper that may be compared with this
-     * wrapper. In particular, equality must be symmetric and transitive, and values considered
-     * equal by {@code equalsFunction} must produce the same hash from {@code hashFunction}.</p>
+     * {@code equals}/{@code hashCode} contract. Custom wrappers compare only with wrappers
+     * created using the same hash-function and equality-function instances. In particular,
+     * equality must be symmetric and transitive, and values considered equal by
+     * {@code equalsFunction} must produce the same hash from {@code hashFunction}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -200,9 +200,8 @@ public abstract class Wrapper<T> implements Immutable {
      * comparison logic and debugging output.</p>
      *
      * <p><b>&#9888;&#65039; Custom equality:</b> The supplied hash and equality functions must obey the
-     * Java {@code equals}/{@code hashCode} contract for every wrapper that may be compared with
-     * this wrapper. Mixing wrappers that use incompatible custom equality functions can make
-     * equality non-symmetric.</p>
+     * Java {@code equals}/{@code hashCode} contract. Custom wrappers compare only with wrappers
+     * created using the same hash-function and equality-function instances.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -316,12 +315,13 @@ public abstract class Wrapper<T> implements Immutable {
      * <p>The comparison depends on how this wrapper was created:</p>
      * <ul>
      *   <li>For wrappers created by {@link #of(Object)}: uses deep equality via
-     *       {@link N#deepEquals(Object, Object)}, so two array wrappers whose arrays have
-     *       equal contents (including nested arrays) are considered equal.</li>
+     *       {@link N#deepEquals(Object, Object)}, so arrays compare by content (including
+     *       nested arrays) while non-array values retain their normal equality semantics.</li>
      *   <li>For wrappers created by {@link #of(Object, ToIntFunction, BiPredicate)} or
      *       {@link #of(Object, ToIntFunction, BiPredicate, Function)}: delegates to the
-     *       caller-supplied equals function. A {@link ClassCastException} during comparison
-     *       is silently treated as {@code false}.</li>
+     *       caller-supplied equals function when both wrappers have the same hash-function and
+     *       equality-function instances. A {@link ClassCastException} during comparison is
+     *       silently treated as {@code false}.</li>
      * </ul>
      *
      * <p>Returns {@code false} if {@code obj} is not a {@code Wrapper} instance.</p>
@@ -375,16 +375,18 @@ public abstract class Wrapper<T> implements Immutable {
             return hashFunction.applyAsInt(value);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(final Object obj) {
             if (obj == this) {
                 return true;
             }
 
-            if (obj instanceof Wrapper<?> other) {
+            if (obj instanceof AnyWrapper<?> other && hashFunction == other.hashFunction && equalsFunction == other.equalsFunction) {
                 try {
-                    return equalsFunction.test(value, (T) other.value);
+                    @SuppressWarnings("unchecked")
+                    final BiPredicate<Object, Object> predicate = (BiPredicate<Object, Object>) equalsFunction;
+
+                    return predicate.test(value, other.value);
                 } catch (final ClassCastException e) {
                     return false;
                 }
@@ -395,31 +397,31 @@ public abstract class Wrapper<T> implements Immutable {
 
         @Override
         public String toString() {
-            return String.format("Wrapper[%s]", toStringFunction.apply(value));
+            return "Wrapper[" + toStringFunction.apply(value) + "]";
         }
     }
 
     /**
-     * A {@link Wrapper} implementation that uses deep-equality semantics (via
-     * {@link N#deepHashCode(Object)} and {@link N#deepEquals(Object, Object)}) for arrays.
-     * Created by {@link Wrapper#of(Object)} and used for all array-typed values, including
-     * {@code null}. Zero-length arrays are pooled to reduce allocation.
+     * A {@link Wrapper} implementation that provides the default semantics of
+     * {@link Wrapper#of(Object)} through {@link N#deepHashCode(Object)} and
+     * {@link N#deepEquals(Object, Object)}. These methods preserve normal behavior for
+     * non-array values and compare arrays by content. The {@code null} wrapper is shared, and
+     * zero-length array wrappers are pooled by component type to reduce allocation.
      *
-     * @param <T> the type of the wrapped (array) value
+     * @param <T> the type of the wrapped value
      */
     static final class ArrayWrapper<T> extends Wrapper<T> {
 
         /** Shared instance used when {@code null} is passed to {@link Wrapper#of(Object)}. */
-        @SuppressWarnings("rawtypes")
-        static final Wrapper WRAPPER_FOR_NULL_ARRAY = new ArrayWrapper<>(null);
+        static final Wrapper<?> WRAPPER_FOR_NULL_ARRAY = new ArrayWrapper<>(null);
 
-        /** Pool of cached wrappers for zero-length arrays, keyed by component type and populated lazily. */
-        @SuppressWarnings("rawtypes")
-        static final Map<Object, Wrapper> WRAPPER_POOL = new ConcurrentHashMap<>();
-
-        static {
-            WRAPPER_POOL.put(boolean.class, new ArrayWrapper<>(new boolean[0]));
-        }
+        /** Pool of cached wrappers for zero-length arrays, without preventing component-class unloading. */
+        static final ClassValue<Wrapper<?>> WRAPPER_POOL = new ClassValue<>() {
+            @Override
+            protected Wrapper<?> computeValue(final Class<?> componentType) {
+                return new ArrayWrapper<>(java.lang.reflect.Array.newInstance(componentType, 0));
+            }
+        };
 
         ArrayWrapper(final T value) {
             super(value);
@@ -432,12 +434,21 @@ public abstract class Wrapper<T> implements Immutable {
 
         @Override
         public boolean equals(final Object obj) {
-            return (obj == this) || (obj instanceof Wrapper && arrayEqualsFunction.test(value, ((Wrapper<T>) obj).value));
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj instanceof ArrayWrapper<?> other) {
+                return arrayEqualsFunction.test(value, other.value);
+            }
+
+            return false;
         }
 
         @Override
         public String toString() {
-            return String.format("Wrapper[%s]", defaultToStringFunction.apply(value));
+            return "Wrapper[" + defaultToStringFunction.apply(value) + "]";
         }
     }
+
 }

@@ -184,7 +184,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON string to parse; may be {@code null} or empty
-     * @return a new multiset instance containing the parsed elements with their counts,
+     * @return the deserialized multiset
      *         or {@code null} if {@code str} is {@code null} or empty
      * @see #valueOf(Object)
      * @see #stringOf(Multiset)

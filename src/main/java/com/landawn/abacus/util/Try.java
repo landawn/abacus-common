@@ -57,6 +57,14 @@ import java.util.function.Supplier;
  *    .run(writer -> writer.write("Hello, World!"));
  * }</pre>
  *
+ * <p>Each instance operation closes the resource it uses. A {@code Try} created with an
+ * already-open resource should therefore normally execute only one operation; invoking another
+ * operation reuses the same, already-closed object. A supplier-backed instance may be reused when
+ * its supplier returns a fresh, non-null resource for every invocation.</p>
+ *
+ * <p>If an {@link InterruptedException} is converted, handled, or replaced with a fallback value,
+ * the current thread's interrupted status is restored before control is passed to user recovery code.</p>
+ *
  * @param <T> the type of the resource that extends {@link AutoCloseable}
  * @see Throwables
  * @see ExceptionUtil
@@ -79,6 +87,42 @@ public final class Try<T extends AutoCloseable> {
         this.finalAction = finalAction;
     }
 
+    private T acquireResource() throws Exception {
+        final T resource = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource;
+        return N.checkArgNotNull(resource, cs.targetResource);
+    }
+
+    private <R> R executeWithFinalAction(final Throwables.Callable<R, RuntimeException> operation) {
+        Throwable primaryFailure = null;
+
+        try {
+            return operation.call();
+        } catch (final RuntimeException | Error e) {
+            primaryFailure = e;
+            throw e;
+        } finally {
+            if (finalAction != null) {
+                try {
+                    finalAction.run();
+                } catch (final RuntimeException | Error finalActionFailure) {
+                    if (primaryFailure == null) {
+                        throw finalActionFailure;
+                    }
+
+                    if (primaryFailure != finalActionFailure) {
+                        primaryFailure.addSuppressed(finalActionFailure);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void restoreInterruptedStatusIfNeeded(final Exception e) {
+        if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     /**
      * Creates a new Try instance with the specified AutoCloseable resource.
      *
@@ -98,7 +142,7 @@ public final class Try<T extends AutoCloseable> {
      * @param <T> the type of the resource that extends AutoCloseable.
      * @param targetResource the resource to be managed by the Try instance.
      * @return a new Try instance managing the specified target resource.
-     * @throws IllegalArgumentException if the targetResource is null.
+     * @throws IllegalArgumentException if the targetResource is {@code null}.
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, cs.targetResource);
@@ -126,7 +170,7 @@ public final class Try<T extends AutoCloseable> {
      * @param targetResource the resource to be managed by the Try instance.
      * @param finalAction the action to be executed after the resource is closed.
      * @return a new Try instance managing the specified target resource and final action.
-     * @throws IllegalArgumentException if the targetResource or finalAction is null.
+     * @throws IllegalArgumentException if the targetResource or finalAction is {@code null}.
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, cs.targetResource);
@@ -152,9 +196,11 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <T> the type of the resource that extends AutoCloseable.
-     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null.
+     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance;
+     *                               neither the supplier nor the resource it returns may be {@code null}
      * @return a new Try instance managing the specified target resource supplier.
-     * @throws IllegalArgumentException if the targetResourceSupplier is null.
+     * @throws IllegalArgumentException if the targetResourceSupplier is {@code null}; a {@code null}
+     *         supplied resource is rejected when an operation attempts to acquire it
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier)
             throws IllegalArgumentException {
@@ -178,10 +224,12 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <T> the type of the resource that extends AutoCloseable.
-     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null.
-     * @param finalAction the action to be executed after the resource is closed, must not be null.
+     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance;
+     *                               neither the supplier nor the resource it returns may be {@code null}
+     * @param finalAction the action to be executed after the resource is closed, must not be {@code null}.
      * @return a new Try instance managing the specified target resource supplier and final action.
-     * @throws IllegalArgumentException if the targetResourceSupplier or finalAction is null.
+     * @throws IllegalArgumentException if the targetResourceSupplier or finalAction is {@code null}; a
+     *         {@code null} supplied resource is rejected when an operation attempts to acquire it
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction)
             throws IllegalArgumentException {
@@ -214,7 +262,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
      * @see Throwables#run(Throwables.Runnable)
      */
-    public static void run(final Throwables.Runnable<? extends Exception> cmd) {
+    public static void run(final Throwables.Runnable<? extends Exception> cmd) throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
@@ -249,13 +297,15 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null}.
      * @see Throwables#run(Throwables.Runnable, Consumer)
      */
-    public static void run(final Throwables.Runnable<? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
+    public static void run(final Throwables.Runnable<? extends Exception> cmd, final Consumer<? super Exception> actionOnError)
+            throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             cmd.run();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
             actionOnError.accept(e);
         }
     }
@@ -282,7 +332,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
      * @see Throwables#call(Throwables.Callable)
      */
-    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd) throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
@@ -320,13 +370,15 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null}.
      * @see Throwables#call(Throwables.Callable, Function)
      */
-    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Function<? super Exception, ? extends R> actionOnError) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Function<? super Exception, ? extends R> actionOnError)
+            throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             return cmd.call();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
             return actionOnError.apply(e);
         }
     }
@@ -359,13 +411,14 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if {@code cmd} or {@code supplier} is {@code null}.
      * @see Throwables#call(Throwables.Callable, Supplier)
      */
-    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Supplier<R> supplier) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Supplier<R> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(supplier, cs.supplier);
 
         try {
             return cmd.call();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
             return supplier.get();
         }
     }
@@ -395,13 +448,15 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see #call(java.util.concurrent.Callable, Supplier)
      */
-    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<? extends R> cmd, final R defaultValue) {
+    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<? extends R> cmd, final R defaultValue)
+            throws IllegalArgumentException {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             return cmd.call();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
             return defaultValue;
         }
     }
@@ -438,7 +493,8 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
      * @see Throwables#call(Throwables.Callable, Predicate, Supplier)
      */
-    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.predicate);
         N.checkArgNotNull(supplier, cs.supplier);
@@ -446,6 +502,8 @@ public final class Try<T extends AutoCloseable> {
         try {
             return cmd.call();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
+
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
@@ -487,7 +545,7 @@ public final class Try<T extends AutoCloseable> {
      * @see #call(java.util.concurrent.Callable, Predicate, Supplier)
      */
     public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<? extends R> cmd, final Predicate<? super Exception> predicate,
-            final R defaultValue) {
+            final R defaultValue) throws IllegalArgumentException {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.predicate);
@@ -495,6 +553,8 @@ public final class Try<T extends AutoCloseable> {
         try {
             return cmd.call();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
+
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
@@ -521,20 +581,26 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param cmd the consumer that operates on the managed resource; must not be {@code null}
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}; validation occurs before
+     *         the resource is acquired or closed
      * @throws RuntimeException if an exception occurs while creating the resource, executing the
      *         {@code cmd}, or closing the resource. Checked exceptions are converted via
-     *         {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}.
+     *         {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}. If the final action
+     *         also fails while another failure is being propagated, its failure is suppressed on
+     *         the primary failure.
      */
-    public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) {
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            cmd.accept(closeable);
-        } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
+    public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+
+        executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                cmd.accept(closeable);
+            } catch (final Exception e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
-        }
+
+            return null;
+        });
     }
 
     /**
@@ -555,17 +621,24 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd the consumer that operates on the managed resource; must not be {@code null}
      * @param actionOnError the error handler invoked with any exception thrown while creating the
      *                      resource, executing the {@code cmd}, or closing the resource; must not be {@code null}
+     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null};
+     *         validation occurs before the resource is acquired or closed
      */
-    public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            cmd.accept(closeable);
-        } catch (final Exception e) {
-            actionOnError.accept(e);
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
+    public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
+
+        executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                cmd.accept(closeable);
+            } catch (final Exception e) {
+                restoreInterruptedStatusIfNeeded(e);
+                actionOnError.accept(e);
             }
-        }
+
+            return null;
+        });
     }
 
     /**
@@ -586,20 +659,22 @@ public final class Try<T extends AutoCloseable> {
      * @param <R> the type of the result.
      * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
      * @return the result produced by the function.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}; validation occurs before
+     *         the resource is acquired or closed
      * @throws RuntimeException if an exception occurs while creating the resource, executing the
      *         {@code cmd}, or closing the resource. Checked exceptions are converted via
      *         {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}.
      */
-    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(closeable);
-        } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+
+        return executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                return cmd.apply(closeable);
+            } catch (final Exception e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
-        }
+        });
     }
 
     /**
@@ -621,18 +696,22 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
      * @param actionOnError the function to transform exceptions into return values; must not be {@code null}
      * @return the result from the command or from the error handler if an exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null};
+     *         validation occurs before the resource is acquired or closed
      */
-    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
-            final Function<? super Exception, ? extends R> actionOnError) {
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(closeable);
-        } catch (final Exception e) {
-            return actionOnError.apply(e);
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Function<? super Exception, ? extends R> actionOnError)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
+
+        return executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                return cmd.apply(closeable);
+            } catch (final Exception e) {
+                restoreInterruptedStatusIfNeeded(e);
+                return actionOnError.apply(e);
             }
-        }
+        });
     }
 
     /**
@@ -654,17 +733,21 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
      * @param supplier the supplier to provide a fallback value if an exception occurs; must not be {@code null}
      * @return the result from the command or from the supplier if an exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} or {@code supplier} is {@code null};
+     *         validation occurs before the resource is acquired or closed
      */
-    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Supplier<R> supplier) {
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(closeable);
-        } catch (final Exception e) {
-            return supplier.get();
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
+    public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Supplier<R> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(supplier, cs.supplier);
+
+        return executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                return cmd.apply(closeable);
+            } catch (final Exception e) {
+                restoreInterruptedStatusIfNeeded(e);
+                return supplier.get();
             }
-        }
+        });
     }
 
     /**
@@ -685,19 +768,23 @@ public final class Try<T extends AutoCloseable> {
      * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
      * @param defaultValue the value to return if an exception occurs; may be {@code null}
      * @return the result from the command or the default value if an exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}; validation occurs before
+     *         the resource is acquired or closed
      * @see #call(Throwables.Function, Supplier)
      */
-    public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue) {
+    public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue)
+            throws IllegalArgumentException {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(closeable);
-        } catch (final Exception e) {
-            return defaultValue;
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
+        N.checkArgNotNull(cmd, cs.cmd);
+
+        return executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                return cmd.apply(closeable);
+            } catch (final Exception e) {
+                restoreInterruptedStatusIfNeeded(e);
+                return defaultValue;
             }
-        }
+        });
     }
 
     /**
@@ -721,23 +808,29 @@ public final class Try<T extends AutoCloseable> {
      * @param predicate the predicate to test exceptions; must not be {@code null}
      * @param supplier the supplier to provide a fallback value for matching exceptions; must not be {@code null}
      * @return the result from the command or from the supplier if a matching exception occurs.
+     * @throws IllegalArgumentException if {@code cmd}, {@code predicate}, or {@code supplier} is
+     *         {@code null}; validation occurs before the resource is acquired or closed
      * @throws RuntimeException if an exception occurs that doesn't match the predicate.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
-            final Supplier<R> supplier) {
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(closeable);
-        } catch (final Exception e) {
-            if (predicate.test(e)) {
-                return supplier.get();
-            } else {
-                throw ExceptionUtil.toRuntimeException(e, true);
+            final Supplier<R> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(predicate, cs.predicate);
+        N.checkArgNotNull(supplier, cs.supplier);
+
+        return executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                return cmd.apply(closeable);
+            } catch (final Exception e) {
+                restoreInterruptedStatusIfNeeded(e);
+
+                if (predicate.test(e)) {
+                    return supplier.get();
+                } else {
+                    throw ExceptionUtil.toRuntimeException(e, true);
+                }
             }
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
-            }
-        }
+        });
     }
 
     /**
@@ -761,24 +854,29 @@ public final class Try<T extends AutoCloseable> {
      * @param predicate the predicate to test exceptions; must not be {@code null}
      * @param defaultValue the value to return for matching exceptions; may be {@code null}
      * @return the result from the command or the default value if a matching exception occurs.
+     * @throws IllegalArgumentException if {@code cmd} or {@code predicate} is {@code null};
+     *         validation occurs before the resource is acquired or closed
      * @throws RuntimeException if an exception occurs that doesn't match the predicate.
      * @see #call(Throwables.Function, Predicate, Supplier)
      */
     public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
-            final Predicate<? super Exception> predicate, final R defaultValue) {
+            final Predicate<? super Exception> predicate, final R defaultValue) throws IllegalArgumentException {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
-        try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
-            return cmd.apply(closeable);
-        } catch (final Exception e) {
-            if (predicate.test(e)) {
-                return defaultValue;
-            } else {
-                throw ExceptionUtil.toRuntimeException(e, true);
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(predicate, cs.predicate);
+
+        return executeWithFinalAction(() -> {
+            try (final T closeable = acquireResource()) {
+                return cmd.apply(closeable);
+            } catch (final Exception e) {
+                restoreInterruptedStatusIfNeeded(e);
+
+                if (predicate.test(e)) {
+                    return defaultValue;
+                } else {
+                    throw ExceptionUtil.toRuntimeException(e, true);
+                }
             }
-        } finally {
-            if (finalAction != null) {
-                finalAction.run();
-            }
-        }
+        });
     }
 }

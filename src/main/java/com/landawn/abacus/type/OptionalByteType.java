@@ -269,6 +269,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * type.appendTo(sb, OptionalByte.empty());
      * // sb.toString() equals "null"
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
@@ -313,6 +314,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * type.serializeTo(writer, OptionalByte.empty(), null);
      * // Writes: null
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.

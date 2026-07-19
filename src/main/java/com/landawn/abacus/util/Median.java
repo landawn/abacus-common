@@ -15,8 +15,8 @@
  */
 package com.landawn.abacus.util;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -36,8 +36,8 @@ import com.landawn.abacus.util.u.OptionalShort;
 /**
  * A high-performance utility class providing efficient median calculation methods for arrays and collections
  * without requiring full sorting operations. This class implements optimized algorithms using priority queues
- * to find median values in O(n log n) time complexity while using O(n/2) space, making it more memory-efficient
- * than sorting-based approaches for median-only calculations.
+ * to find median values in O(n log n) time complexity while using O(n) auxiliary space (approximately half
+ * the input size for the normal heap-based path).
  *
  * <p>The median is the middle value in a dataset when arranged in sorted order. For datasets with an odd number
  * of elements, there is exactly one median value. For datasets with an even number of elements, there are two
@@ -50,18 +50,18 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Type Safety:</b> Specialized methods for all primitive types with corresponding Optional return types</li>
  *   <li><b>Flexible Input:</b> Support for arrays, collections, and custom comparators</li>
  *   <li><b>Range Support:</b> Ability to calculate median for subarrays and subcollections</li>
- *   <li><b>Null Safety:</b> Null or empty inputs are rejected with {@link IllegalArgumentException}; null element handling depends on the comparator used</li>
- *   <li><b>Memory Efficient:</b> Minimal memory overhead with bounded heap data structures</li>
- *   <li><b>Thread Safe:</b> Stateless design ensuring safe concurrent access</li>
- *   <li><b>Zero Dependencies:</b> Self-contained implementation without external algorithm libraries</li>
+ *   <li><b>Null Safety:</b> Null or empty inputs are rejected with {@link IllegalArgumentException}; {@code null} element handling depends on the comparator used</li>
+ *   <li><b>Bounded Heap:</b> Retains only the half of the input needed to identify the middle value(s)</li>
+ *   <li><b>Thread Safe:</b> Holds no shared mutable state; callers must not concurrently mutate inputs
+ *       and must provide thread-safe comparators when sharing them</li>
  * </ul>
  *
  * <p><b>Algorithm Strategy:</b>
  * <ul>
  *   <li><b>Priority Queue Based:</b> Uses min-heap of size k = (length / 2) + 1 for efficient median finding</li>
- *   <li><b>Single Pass:</b> Processes input data in a single iteration without multiple scans</li>
- *   <li><b>Bounded Memory:</b> Memory usage independent of input size, only depends on median position</li>
- *   <li><b>Adaptive Algorithm:</b> Optimizes behavior based on input size and type characteristics</li>
+ *   <li><b>Heap Scan:</b> The normal path scans the selected input range once while maintaining the bounded heap</li>
+ *   <li><b>Linear Memory:</b> The heap size grows to approximately half of the selected input range</li>
+ *   <li><b>Null Fallback:</b> Object inputs containing {@code null} are copied and sorted with the supplied comparator</li>
  * </ul>
  *
  * <p><b>Return Value Convention:</b>
@@ -71,6 +71,10 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Primitive Types:</b> Use specialized Optional types (OptionalInt, OptionalLong, etc.)</li>
  *   <li><b>Object Types:</b> Use generic Optional&lt;T&gt; for the second median value</li>
  * </ul>
+ * <p><b>Null upper median:</b> For object inputs that permit {@code null}, a {@code null} upper
+ * median is represented by an empty {@code Optional}, because {@code Optional} cannot contain
+ * {@code null}. Consequently, presence of the right value alone does not identify input parity
+ * when {@code null} elements are allowed.</p>
  *
  * <p><b>Supported Data Types:</b>
  * <ul>
@@ -91,7 +95,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Handle odd vs even length results
  * if (median2.isPresent()) {
  *     // Even number of elements - two medians
- *     double average = (median1 + median2.get()) / 2.0;
+ *     double average = median1 / 2.0 + median2.get() / 2.0;
  *     System.out.println("Average of medians: " + average);
  * } else {
  *     // Odd number of elements - single median
@@ -118,7 +122,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Pair<Double, OptionalDouble> doubleResult = Median.of(measurements);
  * double primaryMedian = doubleResult.left();
  * doubleResult.right().ifPresent(secondMedian -> {
- *     double traditionalMedian = (primaryMedian + secondMedian) / 2.0;
+ *     double traditionalMedian = primaryMedian / 2.0 + secondMedian / 2.0;
  *     System.out.println("Traditional median: " + traditionalMedian);
  * });
  *
@@ -144,9 +148,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <ul>
  *   <li><b>Time Complexity:</b> O(n log n) where n is the number of elements (each of the n elements may trigger a heap operation costing O(log k) where k = n/2 + 1)</li>
  *   <li><b>Space Complexity:</b> O(k) where k = (n/2 + 1), typically about half of n. Note: for object arrays or collections that contain {@code null} elements, the implementation falls back to copying and sorting the whole range, which uses O(n) auxiliary space (and O(n log n) time).</li>
- *   <li><b>Comparison Count:</b> At most n heap operations, each costing O(log k) comparisons</li>
- *   <li><b>Memory Allocation:</b> Single priority queue allocation, no additional arrays</li>
- *   <li><b>Cache Efficiency:</b> Sequential access pattern for optimal cache performance</li>
+ *   <li><b>Comparison Count:</b> O(n log k), where k = n/2 + 1</li>
+ *   <li><b>Memory Allocation:</b> A priority queue on the normal path; object inputs containing {@code null} additionally require a copied array for sorting</li>
+ *   <li><b>Access Pattern:</b> Sequentially scans the selected input range while updating the heap</li>
  * </ul>
  *
  * <p><b>Algorithm Details:</b>
@@ -154,7 +158,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Min-Heap Strategy:</b> Maintains a min-heap of the largest (n/2 + 1) elements</li>
  *   <li><b>Heap Size:</b> Bounded heap size ensures constant space complexity relative to position</li>
  *   <li><b>Single Traversal:</b> Processes each element exactly once in the input order</li>
- *   <li><b>Early Termination:</b> No unnecessary processing after heap reaches optimal size</li>
+ *   <li><b>Complete Scan:</b> Every selected element is examined; after the heap reaches its target size,
+ *       an element is retained only when it belongs in the larger half</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
@@ -167,7 +172,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li><b>IllegalArgumentException:</b> Thrown for null or empty input arrays/collections</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown for {@code null} or empty input arrays/collections</li>
  *   <li><b>IndexOutOfBoundsException:</b> Thrown for invalid range parameters in range-based methods</li>
  *   <li><b>ClassCastException:</b> Thrown when elements don't implement Comparable and no Comparator provided</li>
  *   <li><b>Null Elements:</b> Handled gracefully based on Comparator null-handling behavior</li>
@@ -183,9 +188,10 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Memory Management:</b>
  * <ul>
- *   <li><b>Bounded Allocation:</b> Memory usage independent of input size beyond median position</li>
+ *   <li><b>Bounded Allocation:</b> The normal path retains at most {@code n / 2 + 1} elements</li>
  *   <li><b>Efficient Heap:</b> Priority queue automatically manages memory for optimal performance</li>
- *   <li><b>No Copying:</b> Processes input data in-place without creating sorted copies</li>
+ *   <li><b>Conditional Copying:</b> The normal path does not copy the input; object inputs containing
+ *       {@code null} are copied before sorting because {@link PriorityQueue} rejects null elements</li>
  *   <li><b>Garbage Collection:</b> Minimal object creation reduces GC pressure</li>
  * </ul>
  *
@@ -243,7 +249,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *         // Calculate median efficiently
  *         Pair<Double, OptionalDouble> medianResult = Median.of(dataset);
  *         double median = medianResult.right().isPresent()
- *             ? (medianResult.left() + medianResult.right().get()) / 2.0
+ *             ? medianResult.left() / 2.0 + medianResult.right().get() / 2.0
  *             : medianResult.left();
  *
  *         // Use median for further analysis
@@ -253,7 +259,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  *         Pair<Double, OptionalDouble> madResult = Median.of(deviationsFromMedian);
  *         double medianAbsoluteDeviation = madResult.right().isPresent()
- *             ? (madResult.left() + madResult.right().get()) / 2.0
+ *             ? madResult.left() / 2.0 + madResult.right().get() / 2.0
  *             : madResult.left();
  *
  *         return new StatisticalSummary(median, medianAbsoluteDeviation, detectOutliers(dataset, median));
@@ -356,7 +362,7 @@ public final class Median {
      * @see N#median(char[], int, int)
      */
     public static Pair<Character, OptionalChar> of(final char[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1"); //NOSONAR
         }
 
@@ -469,7 +475,7 @@ public final class Median {
      * @see N#median(byte[], int, int)
      */
     public static Pair<Byte, OptionalByte> of(final byte[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
@@ -582,7 +588,7 @@ public final class Median {
      * @see N#median(short[], int, int)
      */
     public static Pair<Short, OptionalShort> of(final short[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
@@ -639,8 +645,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Integer, OptionalInt> median = Median.of(10, 5, 20, 15);
-     * int lowerMedian = median.left();         // returns 10
-     * int upperMedian = median.right().get();  // returns 15
+     * int lowerMedian = median.left();          // returns 10
+     * int upperMedian = median.right().get();   // returns 15
      * }</pre>
      *
      * @param source the array of integers to find the median from. Must not be {@code null} or empty.
@@ -696,7 +702,7 @@ public final class Median {
      * @see N#median(int[], int, int)
      */
     public static Pair<Integer, OptionalInt> of(final int[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
@@ -753,8 +759,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Long, OptionalLong> median = Median.of(1000L, 500L, 1500L, 750L);
-     * long lowerMedian = median.left();         // returns 750
-     * long upperMedian = median.right().get();  // returns 1000
+     * long lowerMedian = median.left();          // returns 750
+     * long upperMedian = median.right().get();   // returns 1000
      * }</pre>
      *
      * @param source the array of long integers to find the median from. Must not be {@code null} or empty.
@@ -810,7 +816,7 @@ public final class Median {
      * @see N#median(long[], int, int)
      */
     public static Pair<Long, OptionalLong> of(final long[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
@@ -926,7 +932,7 @@ public final class Median {
      * @see N#median(float[], int, int)
      */
     public static Pair<Float, OptionalFloat> of(final float[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
@@ -986,8 +992,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Double, OptionalDouble> median = Median.of(10.5, 5.2, 20.8, 15.1);
-     * double lowerMedian = median.left();         // returns 10.5
-     * double upperMedian = median.right().get();  // returns 15.1
+     * double lowerMedian = median.left();          // returns 10.5
+     * double upperMedian = median.right().get();   // returns 15.1
      * }</pre>
      *
      * @param source the array of double values to find the median from. Must not be {@code null} or empty.
@@ -1045,7 +1051,7 @@ public final class Median {
      * @see N#median(double[], int, int)
      */
     public static Pair<Double, OptionalDouble> of(final double[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
@@ -1176,7 +1182,7 @@ public final class Median {
      *
      * <p><strong>Note:</strong> If {@code cmp} is {@code null}, this method uses nulls-first natural ordering.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
-     * contains null elements.</p>
+     * contains {@code null} elements.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -1222,7 +1228,7 @@ public final class Median {
      *
      * <p><strong>Note:</strong> If {@code cmp} is {@code null}, this method uses nulls-first natural ordering.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
-     * contains null elements.</p>
+     * contains {@code null} elements.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -1259,7 +1265,7 @@ public final class Median {
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Optional<T>> of(final T[] source, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
@@ -1272,8 +1278,8 @@ public final class Median {
         if (len == 1) {
             return Pair.of(source[fromIndex], Optional.empty());
         } else if (len == 2) {
-            return cmp.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], Optional.of(source[fromIndex + 1]))
-                    : Pair.of(source[fromIndex + 1], Optional.of(source[fromIndex]));
+            return cmp.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], Optional.ofNullable(source[fromIndex + 1]))
+                    : Pair.of(source[fromIndex + 1], Optional.ofNullable(source[fromIndex]));
         } else if (len == 3) {
             return Pair.of(N.median(source, fromIndex, toIndex, cmp), Optional.empty());
         } else {
@@ -1290,7 +1296,7 @@ public final class Median {
                 final T[] copy = N.copyOfRange(source, fromIndex, toIndex);
                 Arrays.sort(copy, cmp);
 
-                return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], Optional.of(copy[len / 2])) : Pair.of(copy[len / 2], Optional.empty());
+                return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], Optional.ofNullable(copy[len / 2])) : Pair.of(copy[len / 2], Optional.empty());
             }
 
             final int k = len / 2 + 1;
@@ -1366,7 +1372,7 @@ public final class Median {
      *
      * <p><strong>Note:</strong> If {@code cmp} is {@code null}, this method uses nulls-first natural ordering.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
-     * contains null elements.</p>
+     * contains {@code null} elements.</p>
      *
      * <p>For collections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -1410,7 +1416,7 @@ public final class Median {
             final Iterator<? extends T> iter = source.iterator();
             final T first = iter.next();
             final T second = iter.next();
-            return cmp.compare(first, second) <= 0 ? Pair.of(first, Optional.of(second)) : Pair.of(second, Optional.of(first));
+            return cmp.compare(first, second) <= 0 ? Pair.of(first, Optional.ofNullable(second)) : Pair.of(second, Optional.ofNullable(first));
         } else if (len == 3) {
             return Pair.of(N.median(source, cmp), Optional.empty());
         } else {
@@ -1430,7 +1436,7 @@ public final class Median {
                 final List<T> copy = new ArrayList<>(source);
                 copy.sort(cmp);
 
-                return len % 2 == 0 ? Pair.of(copy.get(len / 2 - 1), Optional.of(copy.get(len / 2))) : Pair.of(copy.get(len / 2), Optional.empty());
+                return len % 2 == 0 ? Pair.of(copy.get(len / 2 - 1), Optional.ofNullable(copy.get(len / 2))) : Pair.of(copy.get(len / 2), Optional.empty());
             }
 
             final int k = len / 2 + 1;
@@ -1515,7 +1521,7 @@ public final class Median {
      *
      * <p><strong>Note:</strong> If {@code cmp} is {@code null}, this method uses nulls-first natural ordering.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
-     * contains null elements.</p>
+     * contains {@code null} elements.</p>
      *
      * <p>For subcollections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -1549,8 +1555,9 @@ public final class Median {
      * @see #of(Collection, int, int)
      * @see N#median(Collection, int, int, Comparator)
      */
-    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
-        if (N.isEmpty(source) || toIndex - fromIndex < 1) {
+    public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException {
+        if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source collection is null/empty, or the range is empty: toIndex - fromIndex must be >= 1"); //NOSONAR
         }
 

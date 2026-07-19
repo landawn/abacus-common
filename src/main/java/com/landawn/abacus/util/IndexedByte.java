@@ -127,7 +127,7 @@ public final class IndexedByte extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) index + value * 31;
+        return 31 * Byte.hashCode(value) + hashLong(index);
     }
 
     /**

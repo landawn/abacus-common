@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -1352,6 +1353,18 @@ public class JsonUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnwrapJSONObjectConvertsMapKeysToKeyType() {
+        JSONObject json = new JSONObject();
+        json.put("123", "value");
+
+        Type<Map<Integer, String>> type = N.typeOf("Map<Integer, String>");
+        Map<Integer, String> map = JsonUtil.unwrap(json, type);
+
+        assertEquals("value", map.get(123));
+        assertFalse(map.containsKey("123"));
+    }
+
+    @Test
     public void testToListWithNestedListType() {
         JSONArray inner = new JSONArray();
         inner.put(7);
@@ -1384,6 +1397,22 @@ public class JsonUtilTest extends TestBase {
         assertEquals("first", list.get(0));
         assertNull(list.get(1));
         assertEquals("third", list.get(2));
+    }
+
+    @Test
+    public void testRequiredUnwrapArgumentsAreValidated() {
+        final JSONObject object = new JSONObject();
+        final JSONArray array = new JSONArray();
+
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap((JSONObject) null, Map.class));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(object, (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(object, (Type<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap((JSONArray) null, List.class));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(array, (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(array, (Type<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.toList(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.toList(array, (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.toList(array, (Type<Object>) null));
     }
 
 }

@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -72,7 +72,6 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
      * @param t the object to receive or contextualize the side effect
      * @param value the byte value supplied to the operation
      */
-    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjByte* has object first, byte second. Do not suggest reordering.
     @Override
     void accept(T t, byte value);
 

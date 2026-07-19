@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyChar;
@@ -15,6 +17,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -175,6 +178,29 @@ public class ObjectArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void testAppendToPropagatesWriterIOException() {
+        final IOException failure = new IOException("write failure");
+        final Writer writer = new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw failure;
+            }
+
+            @Override
+            public void flush() {
+                // no-op
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+
+        assertSame(failure, assertThrows(IOException.class, () -> stringArrayType.appendTo(writer, new String[] { "test" })));
+    }
+
+    @Test
     public void testSerializeToWithNull() throws IOException {
         stringArrayType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
@@ -192,6 +218,18 @@ public class ObjectArrayTypeTest extends TestBase {
         String[] array = { "test" };
         stringArrayType.serializeTo(writer, array, config);
         verify(writer, atLeastOnce()).write(anyChar());
+    }
+
+    @Test
+    public void testSerializeTo_NullStringElementHonorsWriteNullStringAsEmpty() throws IOException {
+        com.landawn.abacus.util.BufferedJsonWriter actualWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            stringArrayType.serializeTo(actualWriter, new String[] { null }, com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullStringAsEmpty(true));
+            assertEquals("[\"\"]", actualWriter.toString());
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(actualWriter);
+        }
     }
 
     @Test

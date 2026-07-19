@@ -71,7 +71,7 @@ import com.landawn.abacus.util.function.LongObjFunction;
  *   <li><b>Time Zone Handling:</b> Comprehensive time zone support with UTC, GMT, and system default zones</li>
  *   <li><b>Type Conversion:</b> Conversion among the legacy date/time types, plus parsing/formatting of modern Java time types via the nested {@link DTF} formatter class</li>
  *   <li><b>High Performance:</b> Optimized parsing and formatting with object pooling for thread safety</li>
- *   <li><b>Null Safety:</b> Graceful handling of null inputs with appropriate return values</li>
+ *   <li><b>Null Safety:</b> Graceful handling of {@code null} inputs with appropriate return values</li>
  *   <li><b>SQL Integration:</b> Native support for SQL Date, Time, and Timestamp types</li>
  *   <li><b>Calendar Operations:</b> Rich set of calendar arithmetic and manipulation operations</li>
  *   <li><b>Fragment Analysis:</b> Detailed time fragment extraction and analysis capabilities</li>
@@ -194,7 +194,7 @@ import com.landawn.abacus.util.function.LongObjFunction;
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Thread-safe Operations:</b> Public static operations can be called concurrently</li>
  *   <li><b>Object Pooling:</b> Internal object pools use thread-safe concurrent collections</li>
  *   <li><b>Controlled Mutable State:</b> Internal caches and creator registries use concurrent collections</li>
  *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
@@ -202,7 +202,7 @@ import com.landawn.abacus.util.function.LongObjFunction;
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li><b>Null Safety:</b> Most methods handle null inputs gracefully, returning null or appropriate defaults</li>
+ *   <li><b>Null Safety:</b> Most methods handle {@code null} inputs gracefully, returning {@code null} or appropriate defaults</li>
  *   <li><b>Parse Failure Handling:</b> Parsing methods return {@code null} for {@code null}, empty, or {@code "null"} input, and throw {@code IllegalArgumentException} when a non-empty string cannot be parsed. Explicit ISO-8601 UTC formats must match the entire input; other {@link java.text.SimpleDateFormat}-backed explicit formats keep their legacy prefix parsing behavior</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid parameters that violate method contracts</li>
  *   <li><b>Logging:</b> Internal operations are logged for debugging and monitoring purposes</li>
@@ -309,6 +309,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Default {@code TimeZone} of the Java virtual machine.
+     *
+     * <p>This is a snapshot taken when {@code Dates} is initialized. {@code TimeZone} is mutable even
+     * though this field is {@code final}; callers must not mutate this shared instance. Use
+     * {@code (TimeZone) DEFAULT_TIME_ZONE.clone()} when a mutable copy is needed. Internal operations
+     * use a private snapshot and are therefore not affected by accidental mutation of this field.</p>
      */
     public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
 
@@ -316,6 +321,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * UTC, or Coordinated Universal Time, is the time standard that the world uses to regulate clocks and time.
      * It does not change with the seasons (i.e., it doesn't observe Daylight Saving Time) and is the same everywhere.
      * It's often used as a reference point for time zones around the world.
+     *
+     * <p>{@code TimeZone} is mutable even though this field is {@code final}; callers must not mutate
+     * this shared instance. Use {@code (TimeZone) UTC_TIME_ZONE.clone()} when a mutable copy is needed.
+     * Internal UTC parsing and formatting use a private snapshot and are not affected by accidental
+     * mutation of this field.</p>
      */
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
@@ -325,8 +335,17 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * GMT is often used in various contexts, including aviation, computing, and international communications.
      * In many regions, GMT is replaced by Coordinated Universal Time (UTC), which is similar but more precise.
      * When comparing other time zones, you can express them as offsets from GMT/UTC, such as GMT+2 or GMT-5.
+     *
+     * <p>{@code TimeZone} is mutable even though this field is {@code final}; callers must not mutate
+     * this shared instance. Use {@code (TimeZone) GMT_TIME_ZONE.clone()} when a mutable copy is needed.</p>
      */
     public static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
+
+    // Public TimeZone constants cannot be made immutable without breaking the API. Keep all internal
+    // date logic on private snapshots so external mutation cannot corrupt parsers, formatters, or pools.
+    private static final TimeZone INTERNAL_DEFAULT_TIME_ZONE = (TimeZone) DEFAULT_TIME_ZONE.clone();
+
+    private static final TimeZone INTERNAL_UTC_TIME_ZONE = (TimeZone) UTC_TIME_ZONE.clone();
 
     /**
      * Default {@code ZoneId} of the Java virtual machine.
@@ -803,11 +822,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * class MyDate extends java.util.Date {
      *     MyDate(long millis) { super(millis); }
      * }
-     * Dates.registerDateCreator(MyDate.class, MyDate::new);   // returns true (first registration)
-     * Dates.registerDateCreator(MyDate.class, MyDate::new);   // returns false (already registered)
+     * Dates.registerDateCreator(MyDate.class, MyDate::new);                           // returns true (first registration)
+     * Dates.registerDateCreator(MyDate.class, MyDate::new);                           // returns false (already registered)
      *
-     * Dates.registerDateCreator(java.util.Date.class, java.util.Date::new);   // returns false (java.* is restricted)
-     * Dates.registerDateCreator(java.sql.Timestamp.class, java.sql.Timestamp::new); // returns false (java.* is restricted)
+     * Dates.registerDateCreator(java.util.Date.class, java.util.Date::new);           // returns false (java.* is restricted)
+     * Dates.registerDateCreator(java.sql.Timestamp.class, java.sql.Timestamp::new);   // returns false (java.* is restricted)
      * }</pre>
      *
      * @param <T> the type of the date class extending {@code java.util.Date}.
@@ -816,20 +835,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        the time in milliseconds. Not {@code null}.
      * @return {@code true} if the date creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
+     *         Registration is atomic for a given class, so at most one concurrent caller can succeed.
      * @throws IllegalArgumentException if {@code dateClass} or {@code dateCreator} is {@code null}.
      * @see #registerCalendarCreator(Class, LongObjFunction)
      */
-    public static <T extends java.util.Date> boolean registerDateCreator(final Class<? extends T> dateClass, final LongFunction<? extends T> dateCreator) {
+    public static <T extends java.util.Date> boolean registerDateCreator(final Class<? extends T> dateClass, final LongFunction<? extends T> dateCreator)
+            throws IllegalArgumentException {
         N.checkArgNotNull(dateClass, cs.dateClass);
         N.checkArgNotNull(dateCreator, cs.dateCreator);
 
-        if (dateCreatorPool.containsKey(dateClass) || isRestrictedCreatorPackage(dateClass)) {
+        if (isRestrictedCreatorPackage(dateClass)) {
             return false;
         }
 
-        dateCreatorPool.put(dateClass, dateCreator);
-
-        return true;
+        return dateCreatorPool.putIfAbsent(dateClass, dateCreator) == null;
     }
 
     /**
@@ -861,21 +880,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        the time in milliseconds and a {@code Calendar} template. Not {@code null}.
      * @return {@code true} if the calendar creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
+     *         Registration is atomic for a given class, so at most one concurrent caller can succeed.
      * @throws IllegalArgumentException if {@code calendarClass} or {@code calendarCreator} is {@code null}.
      * @see #registerDateCreator(Class, LongFunction)
      */
     public static <T extends java.util.Calendar> boolean registerCalendarCreator(final Class<? extends T> calendarClass,
-            final LongObjFunction<? super Calendar, ? extends T> calendarCreator) {
+            final LongObjFunction<? super Calendar, ? extends T> calendarCreator) throws IllegalArgumentException {
         N.checkArgNotNull(calendarClass, cs.calendarClass);
         N.checkArgNotNull(calendarCreator, cs.calendarCreator);
 
-        if (calendarCreatorPool.containsKey(calendarClass) || isRestrictedCreatorPackage(calendarClass)) {
+        if (isRestrictedCreatorPackage(calendarClass)) {
             return false;
         }
 
-        calendarCreatorPool.put(calendarClass, calendarCreator);
-
-        return true;
+        return calendarCreatorPool.putIfAbsent(calendarClass, calendarCreator) == null;
     }
 
     private static boolean isRestrictedCreatorPackage(final Class<?> cls) {
@@ -916,10 +934,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Time t = Dates.currentTime();      // returns a new Time for now
-     * (t != null);                       // returns true (never null)
-     * Time t2 = Dates.currentTime();     // returns another Time instance
-     * (t != t2);                         // returns true (each call returns a new object)
+     * Time t = Dates.currentTime();    // returns a new Time for now
+     * (t != null);                     // returns true (never null)
+     * Time t2 = Dates.currentTime();   // returns another Time instance
+     * (t != t2);                       // returns true (each call returns a new object)
      * }</pre>
      *
      * @return a new {@code java.sql.Time} instance representing the current time.
@@ -933,10 +951,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date d = Dates.currentDate();      // returns a new Date for today
-     * (d != null);                       // returns true (never null)
-     * Date d2 = Dates.currentDate();     // returns another Date instance
-     * (d != d2);                         // returns true (each call returns a new object)
+     * Date d = Dates.currentDate();    // returns a new Date for today
+     * (d != null);                     // returns true (never null)
+     * Date d2 = Dates.currentDate();   // returns another Date instance
+     * (d != d2);                       // returns true (each call returns a new object)
      * }</pre>
      *
      * @return a new {@code java.sql.Date} instance representing the current date.
@@ -950,10 +968,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Timestamp ts = Dates.currentTimestamp();   // returns a new Timestamp for now
-     * (ts != null);                              // returns true (never null)
-     * Timestamp ts2 = Dates.currentTimestamp();  // returns another Timestamp instance
-     * (ts != ts2);                               // returns true (each call returns a new object)
+     * Timestamp ts = Dates.currentTimestamp();    // returns a new Timestamp for now
+     * (ts != null);                               // returns true (never null)
+     * Timestamp ts2 = Dates.currentTimestamp();   // returns another Timestamp instance
+     * (ts != ts2);                                // returns true (each call returns a new object)
      * }</pre>
      *
      * @return a new {@code java.sql.Timestamp} instance representing the current date and time with millisecond precision.
@@ -967,10 +985,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * java.util.Date d = Dates.currentJUDate();   // returns a new java.util.Date for now
-     * (d != null);                                // returns true (never null)
-     * java.util.Date d2 = Dates.currentJUDate();  // returns another java.util.Date instance
-     * (d != d2);                                  // returns true (each call returns a new object)
+     * java.util.Date d = Dates.currentJUDate();    // returns a new java.util.Date for now
+     * (d != null);                                 // returns true (never null)
+     * java.util.Date d2 = Dates.currentJUDate();   // returns another java.util.Date instance
+     * (d != d2);                                   // returns true (each call returns a new object)
      * }</pre>
      *
      * @return a new {@code java.util.Date} instance representing the current date and time.
@@ -1179,12 +1197,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar cal = Dates.createCalendar(0L);                 // cal is at epoch millis
-     * java.util.Date d = Dates.createJUDate(cal);              // d is at the same instant as cal
-     * (d.getTime() == cal.getTimeInMillis());                  // returns true
-     * (d.getTime() == 0L);                                     // returns true
+     * Calendar cal = Dates.createCalendar(0L);      // cal is at epoch millis
+     * java.util.Date d = Dates.createJUDate(cal);   // d is at the same instant as cal
+     * (d.getTime() == cal.getTimeInMillis());       // returns true
+     * (d.getTime() == 0L);                          // returns true
      *
-     * Dates.createJUDate((Calendar) null);                    // throws IllegalArgumentException
+     * Dates.createJUDate((Calendar) null);          // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar providing the time value, not {@code null}.
@@ -1209,7 +1227,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * (copy.getTime() == 1000L);                            // returns true
      * (copy != original);                                   // returns true (distinct object)
      *
-     * Dates.createJUDate((java.util.Date) null);           // throws IllegalArgumentException
+     * Dates.createJUDate((java.util.Date) null);            // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date providing the time value, not {@code null}.
@@ -1229,8 +1247,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * java.util.Date d = Dates.createJUDate(0L);    // d is at epoch millis
-     * (d.getTime() == 0L);                          // returns true
+     * java.util.Date d = Dates.createJUDate(0L);   // d is at epoch millis
+     * (d.getTime() == 0L);                         // returns true
      *
      * java.util.Date d2 = Dates.createJUDate(1736937045000L);
      * (d2.getTime() == 1736937045000L);             // returns true (echoes the input millis)
@@ -1245,7 +1263,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createTime(long)
      * @see #createTimestamp(long)
      */
-    public static java.util.Date createJUDate(final long timeInMillis) {
+    public static java.util.Date createJUDate(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1260,12 +1278,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar cal = Dates.createCalendar(0L);            // cal is at epoch millis
-     * java.sql.Date sqlDate = Dates.createDate(cal);      // sqlDate is at the same instant as cal
-     * (sqlDate.getTime() == cal.getTimeInMillis());       // returns true
-     * (sqlDate.getTime() == 0L);                          // returns true
+     * Calendar cal = Dates.createCalendar(0L);         // cal is at epoch millis
+     * java.sql.Date sqlDate = Dates.createDate(cal);   // sqlDate is at the same instant as cal
+     * (sqlDate.getTime() == cal.getTimeInMillis());    // returns true
+     * (sqlDate.getTime() == 0L);                       // returns true
      *
-     * Dates.createDate((Calendar) null);                 // throws IllegalArgumentException
+     * Dates.createDate((Calendar) null);               // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar providing the time value, not {@code null}.
@@ -1311,12 +1329,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * java.sql.Date d = Dates.createDate(0L);    // d is at epoch millis
-     * (d.getTime() == 0L);                       // returns true
+     * java.sql.Date d = Dates.createDate(0L);   // d is at epoch millis
+     * (d.getTime() == 0L);                      // returns true
      *
      * java.sql.Date d2 = Dates.createDate(1736937045000L);
-     * (d2.getTime() == 1736937045000L);          // returns true (echoes the input millis, no truncation)
-     * (Dates.createDate(-1L).getTime() == -1L);  // returns true (negative millis = before the epoch)
+     * (d2.getTime() == 1736937045000L);           // returns true (echoes the input millis, no truncation)
+     * (Dates.createDate(-1L).getTime() == -1L);   // returns true (negative millis = before the epoch)
      * }</pre>
      *
      * <p>Note: the given milliseconds are used as-is. Formatted-string parsing through
@@ -1332,7 +1350,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createTimestamp(long)
      * @see #parseDate(String)
      */
-    public static Date createDate(final long timeInMillis) {
+    public static Date createDate(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1347,12 +1365,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar cal = Dates.createCalendar(0L);       // cal is at epoch millis
-     * Time time = Dates.createTime(cal);             // time is at the same instant as cal
-     * (time.getTime() == cal.getTimeInMillis());     // returns true
-     * (time.getTime() == 0L);                        // returns true
+     * Calendar cal = Dates.createCalendar(0L);     // cal is at epoch millis
+     * Time time = Dates.createTime(cal);           // time is at the same instant as cal
+     * (time.getTime() == cal.getTimeInMillis());   // returns true
+     * (time.getTime() == 0L);                      // returns true
      *
-     * Dates.createTime((Calendar) null);             // throws IllegalArgumentException
+     * Dates.createTime((Calendar) null);           // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar providing the time value, not {@code null}.
@@ -1374,10 +1392,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date utilDate = new java.util.Date(1000L);
-     * Time time = Dates.createTime(utilDate);   // converts to java.sql.Time, same instant
-     * (time.getTime() == 1000L);                // returns true
+     * Time time = Dates.createTime(utilDate);    // converts to java.sql.Time, same instant
+     * (time.getTime() == 1000L);                 // returns true
      *
-     * Dates.createTime((java.util.Date) null);  // throws IllegalArgumentException
+     * Dates.createTime((java.util.Date) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date providing the time value, not {@code null}.
@@ -1398,12 +1416,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Time t = Dates.createTime(0L);             // t is at epoch millis
-     * (t.getTime() == 0L);                       // returns true
+     * Time t = Dates.createTime(0L);              // t is at epoch millis
+     * (t.getTime() == 0L);                        // returns true
      *
-     * Time t2 = Dates.createTime(52245000L);     // t2 is 52,245,000 ms after epoch
-     * (t2.getTime() == 52245000L);               // returns true (echoes the input millis)
-     * (Dates.createTime(-1L).getTime() == -1L);  // returns true (negative millis = before the epoch)
+     * Time t2 = Dates.createTime(52245000L);      // t2 is 52,245,000 ms after epoch
+     * (t2.getTime() == 52245000L);                // returns true (echoes the input millis)
+     * (Dates.createTime(-1L).getTime() == -1L);   // returns true (negative millis = before the epoch)
      * }</pre>
      *
      * <p>Note: the given milliseconds are used as-is. Formatted-string parsing through
@@ -1419,7 +1437,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createTimestamp(long)
      * @see #parseTime(String)
      */
-    public static Time createTime(final long timeInMillis) {
+    public static Time createTime(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1434,12 +1452,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar cal = Dates.createCalendar(0L);                // cal is at epoch millis
-     * Timestamp ts = Dates.createTimestamp(cal);              // ts is at the same instant as cal
-     * (ts.getTime() == cal.getTimeInMillis());                // returns true
-     * (ts.getTime() == 0L);                                   // returns true
+     * Calendar cal = Dates.createCalendar(0L);     // cal is at epoch millis
+     * Timestamp ts = Dates.createTimestamp(cal);   // ts is at the same instant as cal
+     * (ts.getTime() == cal.getTimeInMillis());     // returns true
+     * (ts.getTime() == 0L);                        // returns true
      *
-     * Dates.createTimestamp((Calendar) null);                // throws IllegalArgumentException
+     * Dates.createTimestamp((Calendar) null);      // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar providing the time value, not {@code null}.
@@ -1485,12 +1503,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Timestamp ts = Dates.createTimestamp(0L);    // ts is at epoch millis
-     * (ts.getTime() == 0L);                        // returns true
+     * Timestamp ts = Dates.createTimestamp(0L);   // ts is at epoch millis
+     * (ts.getTime() == 0L);                       // returns true
      *
      * Timestamp ts2 = Dates.createTimestamp(1736937045123L);
-     * (ts2.getTime() == 1736937045123L);             // returns true (millisecond precision preserved)
-     * (Dates.createTimestamp(-1L).getTime() == -1L); // returns true (negative millis = before the epoch)
+     * (ts2.getTime() == 1736937045123L);               // returns true (millisecond precision preserved)
+     * (Dates.createTimestamp(-1L).getTime() == -1L);   // returns true (negative millis = before the epoch)
      * }</pre>
      *
      * @param timeInMillis the time in milliseconds since the epoch (January 1, 1970, 00:00:00 GMT).
@@ -1499,7 +1517,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createTimestamp(java.util.Date)
      * @see #createTime(long)
      */
-    public static Timestamp createTimestamp(final long timeInMillis) {
+    public static Timestamp createTimestamp(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1515,12 +1533,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar source = Dates.createCalendar(0L);            // source is at epoch millis
-     * Calendar copy = Dates.createCalendar(source);          // copy is at the same instant as source
-     * (copy.getTimeInMillis() == source.getTimeInMillis());  // returns true
-     * (copy.getTimeInMillis() == 0L);                        // returns true
+     * Calendar source = Dates.createCalendar(0L);             // source is at epoch millis
+     * Calendar copy = Dates.createCalendar(source);           // copy is at the same instant as source
+     * (copy.getTimeInMillis() == source.getTimeInMillis());   // returns true
+     * (copy.getTimeInMillis() == 0L);                         // returns true
      *
-     * Dates.createCalendar((Calendar) null);                 // throws IllegalArgumentException
+     * Dates.createCalendar((Calendar) null);                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar providing the time value, not {@code null}.
@@ -1543,10 +1561,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = new java.util.Date(1000L);
-     * Calendar cal = Dates.createCalendar(date);   // cal is at the same instant as date
-     * (cal.getTimeInMillis() == 1000L);            // returns true
+     * Calendar cal = Dates.createCalendar(date);     // cal is at the same instant as date
+     * (cal.getTimeInMillis() == 1000L);              // returns true
      *
-     * Dates.createCalendar((java.util.Date) null); // throws IllegalArgumentException
+     * Dates.createCalendar((java.util.Date) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date providing the time value, not {@code null}.
@@ -1568,8 +1586,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar cal = Dates.createCalendar(0L);     // cal is at epoch millis in the default time zone
-     * (cal.getTimeInMillis() == 0L);               // returns true
+     * Calendar cal = Dates.createCalendar(0L);   // cal is at epoch millis in the default time zone
+     * (cal.getTimeInMillis() == 0L);             // returns true
      *
      * Calendar cal2 = Dates.createCalendar(1736937045000L);
      * (cal2.getTimeInMillis() == 1736937045000L);  // returns true (echoes the input millis)
@@ -1583,7 +1601,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createGregorianCalendar(long)
      * @see #createXMLGregorianCalendar(long)
      */
-    public static Calendar createCalendar(final long timeInMillis) {
+    public static Calendar createCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1603,13 +1621,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * Calendar cal = Dates.createCalendar(0L, utc);   // cal is at epoch millis in UTC
-     * (cal.getTimeInMillis() == 0L);                  // returns true
-     * (cal.get(Calendar.YEAR) == 1970);               // returns true (1970-01-01 in UTC)
-     * (cal.get(Calendar.HOUR_OF_DAY) == 0);           // returns true
+     * Calendar cal = Dates.createCalendar(0L, utc);    // cal is at epoch millis in UTC
+     * (cal.getTimeInMillis() == 0L);                   // returns true
+     * (cal.get(Calendar.YEAR) == 1970);                // returns true (1970-01-01 in UTC)
+     * (cal.get(Calendar.HOUR_OF_DAY) == 0);            // returns true
      *
-     * Calendar def = Dates.createCalendar(0L, null);  // uses the default time zone
-     * (def.getTimeInMillis() == 0L);                  // returns true
+     * Calendar def = Dates.createCalendar(0L, null);   // uses the default time zone
+     * (def.getTimeInMillis() == 0L);                   // returns true
      * }</pre>
      *
      * @param timeInMillis the time in milliseconds since the epoch (January 1, 1970, 00:00:00 GMT).
@@ -1619,7 +1637,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createCalendar(Calendar)
      * @see #createCalendar(java.util.Date)
      */
-    public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) {
+    public static Calendar createCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1644,7 +1662,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * (gregCal.getTimeInMillis() == source.getTimeInMillis());             // returns true
      * (gregCal.getTimeInMillis() == 0L);                                   // returns true
      *
-     * Dates.createGregorianCalendar((Calendar) null);              // throws IllegalArgumentException
+     * Dates.createGregorianCalendar((Calendar) null);                      // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar providing the time value, not {@code null}.
@@ -1670,7 +1688,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * GregorianCalendar gregCal = Dates.createGregorianCalendar(date);   // gregCal is at the same instant as date
      * (gregCal.getTimeInMillis() == 1000L);                              // returns true
      *
-     * Dates.createGregorianCalendar((java.util.Date) null);             // throws IllegalArgumentException
+     * Dates.createGregorianCalendar((java.util.Date) null);              // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date providing the time value, not {@code null}.
@@ -1707,7 +1725,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createCalendar(long)
      * @see #createXMLGregorianCalendar(long)
      */
-    public static GregorianCalendar createGregorianCalendar(final long timeInMillis) {
+    public static GregorianCalendar createGregorianCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1731,8 +1749,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * (gregCal.getTimeInMillis() == 0L);                                    // returns true
      * (gregCal.get(Calendar.YEAR) == 1970);                                 // returns true (1970-01-01 in UTC)
      *
-     * GregorianCalendar def = Dates.createGregorianCalendar(0L, null);     // uses the default time zone
-     * (def.getTimeInMillis() == 0L);                                       // returns true
+     * GregorianCalendar def = Dates.createGregorianCalendar(0L, null);      // uses the default time zone
+     * (def.getTimeInMillis() == 0L);                                        // returns true
      * }</pre>
      *
      * @param timeInMillis the time in milliseconds since the epoch (January 1, 1970, 00:00:00 GMT).
@@ -1742,7 +1760,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createGregorianCalendar(Calendar)
      * @see #createGregorianCalendar(java.util.Date)
      */
-    public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) {
+    public static GregorianCalendar createGregorianCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1792,9 +1810,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * java.util.Date date = new java.util.Date(0L);
      * XMLGregorianCalendar xmlCal = Dates.createXMLGregorianCalendar(date);
-     * (xmlCal.toGregorianCalendar().getTimeInMillis() == 0L);   // returns true (same instant)
+     * (xmlCal.toGregorianCalendar().getTimeInMillis() == 0L);    // returns true (same instant)
      *
-     * Dates.createXMLGregorianCalendar((java.util.Date) null);  // throws IllegalArgumentException
+     * Dates.createXMLGregorianCalendar((java.util.Date) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date providing the time value, not {@code null}.
@@ -1833,7 +1851,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createCalendar(long)
      * @see #createGregorianCalendar(long)
      */
-    public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) {
+    public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1854,8 +1872,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * XMLGregorianCalendar xmlCal = Dates.createXMLGregorianCalendar(0L, utc);
-     * (xmlCal.getYear() == 1970);                                 // returns true (1970-01-01 in UTC)
-     * (xmlCal.toString().equals("1970-01-01T00:00:00.000Z"));     // returns true
+     * (xmlCal.getYear() == 1970);                                              // returns true (1970-01-01 in UTC)
+     * (xmlCal.toString().equals("1970-01-01T00:00:00.000Z"));                  // returns true
      *
      * XMLGregorianCalendar def = Dates.createXMLGregorianCalendar(0L, null);   // uses the default time zone
      * (def != null);                                                           // returns true
@@ -1869,7 +1887,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #createXMLGregorianCalendar(Calendar)
      * @see #createXMLGregorianCalendar(java.util.Date)
      */
-    public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis, final TimeZone tz) {
+    public static XMLGregorianCalendar createXMLGregorianCalendar(final long timeInMillis, final TimeZone tz) throws IllegalArgumentException {
         //    N.checkArgPositive(timeInMillis, "timeInMillis");
         //
         //    if (timeInMillis == 0) {
@@ -1920,8 +1938,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseJUDate("2025-01-15T10:30:45Z", Dates.ISO_8601_DATE_TIME_FORMAT).getTime();
      *                                                  // returns 1736937045000
      *
-     * Dates.parseJUDate((String) null, "dd/MM/yyyy");  // returns null
-     * Dates.parseJUDate("not-a-date", "yyyy-MM-dd");   // throws IllegalArgumentException
+     * Dates.parseJUDate((String) null, "dd/MM/yyyy");   // returns null
+     * Dates.parseJUDate("not-a-date", "yyyy-MM-dd");    // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the string representation of the date to be parsed.
@@ -1950,8 +1968,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseJUDate("2025-10-22", "yyyy-MM-dd", utc).getTime();
      *                                                          // returns 1761091200000 (midnight UTC)
      *
-     * Dates.parseJUDate((String) null, "yyyy-MM-dd", utc);     // returns null
-     * Dates.parseJUDate("bad", "yyyy-MM-dd", utc);             // throws IllegalArgumentException
+     * Dates.parseJUDate((String) null, "yyyy-MM-dd", utc);   // returns null
+     * Dates.parseJUDate("bad", "yyyy-MM-dd", utc);           // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Note: input carrying the ISO 8601 UTC designator {@code 'Z'} is always interpreted in UTC.
@@ -2064,8 +2082,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.parseDate("22/10/2025", "dd/MM/yyyy"), "yyyy-MM-dd");
      *                                                  // returns "2025-10-22"
      *
-     * Dates.parseDate((String) null, "dd/MM/yyyy");    // returns null
-     * Dates.parseDate("bad", "dd/MM/yyyy");            // throws IllegalArgumentException
+     * Dates.parseDate((String) null, "dd/MM/yyyy");   // returns null
+     * Dates.parseDate("bad", "dd/MM/yyyy");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the string representation of the date to be parsed.
@@ -2094,8 +2112,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseDate("2025-01-15 10:30:45", "yyyy-MM-dd HH:mm:ss", utc).getTime();
      *                                                          // returns 1736899200000 (still truncated to midnight)
      *
-     * Dates.parseDate((String) null, "yyyy-MM-dd", utc);       // returns null
-     * Dates.parseDate("bad", "yyyy-MM-dd", utc);               // throws IllegalArgumentException
+     * Dates.parseDate((String) null, "yyyy-MM-dd", utc);   // returns null
+     * Dates.parseDate("bad", "yyyy-MM-dd", utc);           // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Note: input carrying the ISO 8601 UTC designator {@code 'Z'} is always interpreted in UTC;
@@ -2143,7 +2161,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     private static long truncateMillisToDate(final long millis, final TimeZone timeZone) {
         // DEFAULT_TIME_ZONE (not the live default): the parsing step resolved a null zone to
         // DEFAULT_TIME_ZONE, and one parse call must use a single zone end to end.
-        final TimeZone zone = timeZone == null ? DEFAULT_TIME_ZONE : timeZone;
+        final TimeZone zone = timeZone == null ? INTERNAL_DEFAULT_TIME_ZONE : timeZone;
         final Calendar cal = Calendar.getInstance(zone);
         cal.setTimeInMillis(millis);
         cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -2193,8 +2211,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.parseTime("14:30:45", "HH:mm:ss"), "HH:mm:ss");
      *                                                  // returns "14:30:45"
      *
-     * Dates.parseTime((String) null, "HH:mm:ss");      // returns null
-     * Dates.parseTime("bad", "HH:mm:ss");              // throws IllegalArgumentException
+     * Dates.parseTime((String) null, "HH:mm:ss");   // returns null
+     * Dates.parseTime("bad", "HH:mm:ss");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the string representation of the time to be parsed.
@@ -2223,8 +2241,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.parseTime("14:30:45", "HH:mm:ss", utc), "HH:mm:ss", utc);
      *                                                  // returns "14:30:45"
      *
-     * Dates.parseTime((String) null, "HH:mm:ss", utc); // returns null
-     * Dates.parseTime("bad", "HH:mm:ss", utc);         // throws IllegalArgumentException
+     * Dates.parseTime((String) null, "HH:mm:ss", utc);   // returns null
+     * Dates.parseTime("bad", "HH:mm:ss", utc);           // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Note: input carrying the ISO 8601 UTC designator {@code 'Z'} is always interpreted in UTC;
@@ -2273,7 +2291,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     private static long normalizeMillisToTime(final long millis, final TimeZone timeZone) {
         // DEFAULT_TIME_ZONE (not the live default): the parsing step resolved a null zone to
         // DEFAULT_TIME_ZONE, and one parse call must use a single zone end to end.
-        final TimeZone zone = timeZone == null ? DEFAULT_TIME_ZONE : timeZone;
+        final TimeZone zone = timeZone == null ? INTERNAL_DEFAULT_TIME_ZONE : timeZone;
         final Calendar cal = Calendar.getInstance(zone);
         cal.setTimeInMillis(millis);
         if (cal.get(Calendar.YEAR) == 1970 && cal.get(Calendar.MONTH) == Calendar.JANUARY && cal.get(Calendar.DAY_OF_MONTH) == 1) {
@@ -2296,14 +2314,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dates.parseTimestamp("2025-01-15T10:30:45.123Z").getTime();        // returns 1736937045123 (ISO-8601 UTC, with millis)
-     * Dates.parseTimestamp("1736937045123").getTime();                   // returns 1736937045123 (numeric = epoch millis)
-     * Dates.parseTimestamp("2025-01-15 10:30:45.123456789").getNanos();  // returns 123456789 (Timestamp.toString() format, nanosecond precision)
-     * Dates.parseTimestamp("2025-01-15 10:30:45.5").getNanos();          // returns 500000000 (fractional second, not milliseconds)
+     * Dates.parseTimestamp("2025-01-15T10:30:45.123Z").getTime();         // returns 1736937045123 (ISO-8601 UTC, with millis)
+     * Dates.parseTimestamp("1736937045123").getTime();                    // returns 1736937045123 (numeric = epoch millis)
+     * Dates.parseTimestamp("2025-01-15 10:30:45.123456789").getNanos();   // returns 123456789 (Timestamp.toString() format, nanosecond precision)
+     * Dates.parseTimestamp("2025-01-15 10:30:45.5").getNanos();           // returns 500000000 (fractional second, not milliseconds)
      *
-     * Dates.parseTimestamp((String) null);                          // returns null
-     * Dates.parseTimestamp("");                                     // returns null
-     * Dates.parseTimestamp("null");                                 // returns null
+     * Dates.parseTimestamp((String) null);                                // returns null
+     * Dates.parseTimestamp("");                                           // returns null
+     * Dates.parseTimestamp("null");                                       // returns null
      * }</pre>
      *
      * @param date the string representation of the timestamp to be parsed.
@@ -2327,8 +2345,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.parseTimestamp("2025-01-15 10:30:45.123", "yyyy-MM-dd HH:mm:ss.SSS"),
      *         "yyyy-MM-dd HH:mm:ss.SSS");                       // returns "2025-01-15 10:30:45.123" (default zone round-trip)
      *
-     * Dates.parseTimestamp((String) null, "yyyy-MM-dd HH:mm:ss.SSS"); // returns null
-     * Dates.parseTimestamp("bad", "yyyy-MM-dd HH:mm:ss.SSS");         // throws IllegalArgumentException
+     * Dates.parseTimestamp((String) null, "yyyy-MM-dd HH:mm:ss.SSS");   // returns null
+     * Dates.parseTimestamp("bad", "yyyy-MM-dd HH:mm:ss.SSS");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the string representation of the timestamp to be parsed.
@@ -2355,8 +2373,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseTimestamp("2025-01-15 10:30:45.123", "yyyy-MM-dd HH:mm:ss.SSS", utc).getTime();
      *                                                          // returns 1736937045123
      *
-     * Dates.parseTimestamp((String) null, "yyyy-MM-dd HH:mm:ss.SSS", utc); // returns null
-     * Dates.parseTimestamp("bad", "yyyy-MM-dd HH:mm:ss.SSS", utc);         // throws IllegalArgumentException
+     * Dates.parseTimestamp((String) null, "yyyy-MM-dd HH:mm:ss.SSS", utc);   // returns null
+     * Dates.parseTimestamp("bad", "yyyy-MM-dd HH:mm:ss.SSS", utc);           // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Note: input carrying the ISO 8601 UTC designator {@code 'Z'} is always interpreted in UTC;
@@ -2406,9 +2424,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseCalendar("2025-01-15T10:30:45Z").getTimeInMillis();   // returns 1736937045000
      * Dates.parseCalendar("1736937045000").getTimeInMillis();          // returns 1736937045000 (numeric = epoch millis)
      *
-     * Dates.parseCalendar((String) null);                             // returns null
-     * Dates.parseCalendar("");                                        // returns null
-     * Dates.parseCalendar("null");                                    // returns null
+     * Dates.parseCalendar((String) null);                              // returns null
+     * Dates.parseCalendar("");                                         // returns null
+     * Dates.parseCalendar("null");                                     // returns null
      * }</pre>
      *
      * @param calendar the string representation of the date/time to be parsed.
@@ -2433,8 +2451,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.parseCalendar("22/10/2025 14:30", "dd/MM/yyyy HH:mm"), "dd/MM/yyyy HH:mm");
      *                                                  // returns "22/10/2025 14:30" (default zone round-trip)
      *
-     * Dates.parseCalendar((String) null, "dd/MM/yyyy HH:mm"); // returns null
-     * Dates.parseCalendar("bad", "dd/MM/yyyy HH:mm");         // throws IllegalArgumentException
+     * Dates.parseCalendar((String) null, "dd/MM/yyyy HH:mm");   // returns null
+     * Dates.parseCalendar("bad", "dd/MM/yyyy HH:mm");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the string representation of the date/time to be parsed.
@@ -2461,8 +2479,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseCalendar("2025-01-15 10:30:45", "yyyy-MM-dd HH:mm:ss", utc).getTimeInMillis();
      *                                                          // returns 1736937045000
      *
-     * Dates.parseCalendar((String) null, "yyyy-MM-dd HH:mm:ss", utc); // returns null
-     * Dates.parseCalendar("bad", "yyyy-MM-dd HH:mm:ss", utc);         // throws IllegalArgumentException
+     * Dates.parseCalendar((String) null, "yyyy-MM-dd HH:mm:ss", utc);   // returns null
+     * Dates.parseCalendar("bad", "yyyy-MM-dd HH:mm:ss", utc);           // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Note: input carrying the ISO 8601 UTC designator {@code 'Z'} is always interpreted in UTC;
@@ -2502,9 +2520,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseGregorianCalendar("2025-01-15T10:30:45Z").getTimeInMillis();   // returns 1736937045000
      * Dates.parseGregorianCalendar("1736937045000").getTimeInMillis();          // returns 1736937045000
      *
-     * Dates.parseGregorianCalendar((String) null);                            // returns null
-     * Dates.parseGregorianCalendar("");                                       // returns null
-     * Dates.parseGregorianCalendar("null");                                   // returns null
+     * Dates.parseGregorianCalendar((String) null);                              // returns null
+     * Dates.parseGregorianCalendar("");                                         // returns null
+     * Dates.parseGregorianCalendar("null");                                     // returns null
      * }</pre>
      *
      * @param calendar the string representation of the date/time to be parsed.
@@ -2528,8 +2546,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.parseGregorianCalendar("22/10/2025 14:30", "dd/MM/yyyy HH:mm"), "dd/MM/yyyy HH:mm");
      *                                                  // returns "22/10/2025 14:30" (default zone round-trip)
      *
-     * Dates.parseGregorianCalendar((String) null, "dd/MM/yyyy HH:mm"); // returns null
-     * Dates.parseGregorianCalendar("bad", "dd/MM/yyyy HH:mm");         // throws IllegalArgumentException
+     * Dates.parseGregorianCalendar((String) null, "dd/MM/yyyy HH:mm");   // returns null
+     * Dates.parseGregorianCalendar("bad", "dd/MM/yyyy HH:mm");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the string representation of the date/time to be parsed.
@@ -2556,8 +2574,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseGregorianCalendar("2025-01-15 10:30:45", "yyyy-MM-dd HH:mm:ss", utc).getTimeInMillis();
      *                                                          // returns 1736937045000
      *
-     * Dates.parseGregorianCalendar((String) null, "yyyy-MM-dd HH:mm:ss", utc); // returns null
-     * Dates.parseGregorianCalendar("bad", "yyyy-MM-dd HH:mm:ss", utc);         // throws IllegalArgumentException
+     * Dates.parseGregorianCalendar((String) null, "yyyy-MM-dd HH:mm:ss", utc);   // returns null
+     * Dates.parseGregorianCalendar("bad", "yyyy-MM-dd HH:mm:ss", utc);           // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Note: input carrying the ISO 8601 UTC designator {@code 'Z'} is always interpreted in UTC;
@@ -2599,9 +2617,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseXMLGregorianCalendar("1736937045000").toGregorianCalendar().getTimeInMillis();
      *                                                  // returns 1736937045000
      *
-     * Dates.parseXMLGregorianCalendar((String) null); // returns null
-     * Dates.parseXMLGregorianCalendar("");            // returns null
-     * Dates.parseXMLGregorianCalendar("null");        // returns null
+     * Dates.parseXMLGregorianCalendar((String) null);   // returns null
+     * Dates.parseXMLGregorianCalendar("");              // returns null
+     * Dates.parseXMLGregorianCalendar("null");          // returns null
      * }</pre>
      *
      * @param calendar the string representation of the date/time to be parsed.
@@ -2625,8 +2643,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.parseXMLGregorianCalendar("22/10/2025 14:30", "dd/MM/yyyy HH:mm").toGregorianCalendar(),
      *         "dd/MM/yyyy HH:mm");                     // returns "22/10/2025 14:30" (default zone round-trip)
      *
-     * Dates.parseXMLGregorianCalendar((String) null, "dd/MM/yyyy HH:mm"); // returns null
-     * Dates.parseXMLGregorianCalendar("bad", "dd/MM/yyyy HH:mm");         // throws IllegalArgumentException
+     * Dates.parseXMLGregorianCalendar((String) null, "dd/MM/yyyy HH:mm");   // returns null
+     * Dates.parseXMLGregorianCalendar("bad", "dd/MM/yyyy HH:mm");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the string representation of the date/time to be parsed.
@@ -2653,8 +2671,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.parseXMLGregorianCalendar("2025-01-15 10:30:45", "yyyy-MM-dd HH:mm:ss", utc)
      *         .toGregorianCalendar().getTimeInMillis();        // returns 1736937045000
      *
-     * Dates.parseXMLGregorianCalendar((String) null, "yyyy-MM-dd HH:mm:ss", utc); // returns null
-     * Dates.parseXMLGregorianCalendar("bad", "yyyy-MM-dd HH:mm:ss", utc);         // throws IllegalArgumentException
+     * Dates.parseXMLGregorianCalendar((String) null, "yyyy-MM-dd HH:mm:ss", utc);   // returns null
+     * Dates.parseXMLGregorianCalendar("bad", "yyyy-MM-dd HH:mm:ss", utc);           // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Note: input carrying the ISO 8601 UTC designator {@code 'Z'} is always interpreted in UTC;
@@ -2685,8 +2703,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return createXMLGregorianCalendar(parse(calendar, format, timeZone), timeZone);
     }
 
-    private static boolean isNullDateTime(final String date) {
-        return Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date));
+    private static boolean isNullDateTime(final CharSequence date) {
+        return Strings.isEmpty(date) || (date.length() == 4 && "null".equalsIgnoreCase(date.toString()));
     }
 
     private static boolean isPossibleLong(final CharSequence dateTime) {
@@ -2785,14 +2803,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
 
         if (explicitFormat != null && (ISO_8601_DATE_TIME_FORMAT.equals(formatToUse) || ISO_8601_TIMESTAMP_FORMAT.equals(formatToUse))) {
-            final DateFormat sdf = getSDF(formatToUse, UTC_TIME_ZONE);
+            final DateFormat sdf = getSDF(formatToUse, INTERNAL_UTC_TIME_ZONE);
 
             try {
                 return parseFully(sdf, dateTime);
             } catch (final ParseException e) {
                 throw new IllegalArgumentException(e);
             } finally {
-                recycleSDF(formatToUse, UTC_TIME_ZONE, sdf);
+                recycleSDF(formatToUse, INTERNAL_UTC_TIME_ZONE, sdf);
             }
         }
 
@@ -2853,7 +2871,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * (s.charAt(4) == '-');                        // returns true
      * }</pre>
      *
-     * @return a non-null string representation of the current date in {@code yyyy-MM-dd} format, rendered in the default time zone.
+     * @return a {@code non-null} string representation of the current date in {@code yyyy-MM-dd} format, rendered in the default time zone.
      * @see #formatCurrentLocalDateTime()
      * @see #formatCurrentDateTime()
      */
@@ -2867,13 +2885,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String s = Dates.formatCurrentLocalDateTime();           // returns e.g. "2025-10-22 14:30:45" (now, current zone)
-     * (s.length() == 19);                                       // returns true (yyyy-MM-dd HH:mm:ss is always 19 chars)
-     * (s.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")); // returns true (matches the pattern shape)
-     * (s.charAt(10) == ' ');                                    // returns true (space between date and time)
+     * String s = Dates.formatCurrentLocalDateTime();              // returns e.g. "2025-10-22 14:30:45" (now, current zone)
+     * (s.length() == 19);                                         // returns true (yyyy-MM-dd HH:mm:ss is always 19 chars)
+     * (s.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}"));   // returns true (matches the pattern shape)
+     * (s.charAt(10) == ' ');                                      // returns true (space between date and time)
      * }</pre>
      *
-     * @return a non-null string representation of the current date and time in {@code yyyy-MM-dd HH:mm:ss} format, rendered in the default time zone.
+     * @return a {@code non-null} string representation of the current date and time in {@code yyyy-MM-dd HH:mm:ss} format, rendered in the default time zone.
      * @see #formatCurrentLocalDate()
      * @see #formatCurrentDateTime()
      */
@@ -2887,13 +2905,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String s = Dates.formatCurrentDateTime();                  // returns e.g. "2025-10-22T14:30:45Z" (now, in UTC)
-     * (s.length() == 20);                                        // returns true
-     * (s.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z")); // returns true (ISO-8601 'Z' shape)
-     * (s.endsWith("Z"));                                         // returns true (UTC designator)
+     * String s = Dates.formatCurrentDateTime();                    // returns e.g. "2025-10-22T14:30:45Z" (now, in UTC)
+     * (s.length() == 20);                                          // returns true
+     * (s.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z"));   // returns true (ISO-8601 'Z' shape)
+     * (s.endsWith("Z"));                                           // returns true (UTC designator)
      * }</pre>
      *
-     * @return a non-null string representation of the current date and time in ISO 8601 format {@code yyyy-MM-dd'T'HH:mm:ss'Z'}, rendered in UTC.
+     * @return a {@code non-null} string representation of the current date and time in ISO 8601 format {@code yyyy-MM-dd'T'HH:mm:ss'Z'}, rendered in UTC.
      * @see #formatCurrentLocalDateTime()
      * @see #formatCurrentTimestamp()
      * @see #format(java.util.Date)
@@ -2907,13 +2925,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String s = Dates.formatCurrentTimestamp();                          // returns e.g. "2025-10-22T14:30:45.123Z" (now, in UTC, with millis)
-     * (s.length() == 24);                                                 // returns true
-     * (s.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z")); // returns true (with .SSS millis)
-     * (s.endsWith("Z"));                                                  // returns true (UTC designator)
+     * String s = Dates.formatCurrentTimestamp();                            // returns e.g. "2025-10-22T14:30:45.123Z" (now, in UTC, with millis)
+     * (s.length() == 24);                                                   // returns true
+     * (s.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"));   // returns true (with .SSS millis)
+     * (s.endsWith("Z"));                                                    // returns true (UTC designator)
      * }</pre>
      *
-     * @return a non-null string representation of the current timestamp in ISO 8601 format {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}, rendered in UTC.
+     * @return a {@code non-null} string representation of the current timestamp in ISO 8601 format {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}, rendered in UTC.
      * @see #formatCurrentDateTime()
      * @see #format(java.util.Date)
      */
@@ -2929,11 +2947,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // The default 'Z' format renders the instant in UTC, independent of the default time zone.
-     * Dates.format(new java.util.Date(1736937045000L));           // returns "2025-01-15T10:30:45Z"
-     * Dates.format(new java.sql.Timestamp(1736937045123L));       // returns "2025-01-15T10:30:45.123Z" (Timestamp adds millis)
+     * Dates.format(new java.util.Date(1736937045000L));       // returns "2025-01-15T10:30:45Z"
+     * Dates.format(new java.sql.Timestamp(1736937045123L));   // returns "2025-01-15T10:30:45.123Z" (Timestamp adds millis)
      *
-     * Dates.format(new java.util.Date(0L));                       // returns "1970-01-01T00:00:00Z"
-     * Dates.format((java.util.Date) null);                        // returns null
+     * Dates.format(new java.util.Date(0L));                   // returns "1970-01-01T00:00:00Z"
+     * Dates.format((java.util.Date) null);                    // returns null
      * }</pre>
      *
      * @param date the java.util.Date instance to be formatted; may be {@code null}.
@@ -2988,10 +3006,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * java.util.Date date = new java.util.Date(1736937045000L);   // returns 2025-01-15T10:30:45Z
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss", utc);             // returns "2025-01-15 10:30:45"
-     * Dates.format(date, "yyyy-MM-dd", utc);                      // returns "2025-01-15"
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss", utc);           // returns "2025-01-15 10:30:45"
+     * Dates.format(date, "yyyy-MM-dd", utc);                    // returns "2025-01-15"
      *
-     * Dates.format((java.util.Date) null, "yyyy-MM-dd", utc);     // returns null
+     * Dates.format((java.util.Date) null, "yyyy-MM-dd", utc);   // returns null
      * }</pre>
      *
      * <p>Note: a format pattern ending with the literal {@code 'Z'} (e.g.
@@ -3078,10 +3096,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * Calendar cal = Dates.createCalendar(1736937045000L);   // returns 2025-01-15T10:30:45Z
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);         // returns "2025-01-15 10:30:45"
-     * Dates.format(cal, "yyyy-MM-dd", utc);                  // returns "2025-01-15"
+     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);      // returns "2025-01-15 10:30:45"
+     * Dates.format(cal, "yyyy-MM-dd", utc);               // returns "2025-01-15"
      *
-     * Dates.format((Calendar) null, "yyyy-MM-dd", utc);      // returns null
+     * Dates.format((Calendar) null, "yyyy-MM-dd", utc);   // returns null
      * }</pre>
      *
      * <p>Note: a format pattern ending with the literal {@code 'Z'} (including the default format)
@@ -3130,7 +3148,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(cal);                                                             // returns "2025-01-15T10:30:45Z"
      * Dates.format(Dates.createXMLGregorianCalendar(0L));                            // returns "1970-01-01T00:00:00Z"
      *
-     * Dates.format((XMLGregorianCalendar) null);                 // returns null
+     * Dates.format((XMLGregorianCalendar) null);                                     // returns null
      * }</pre>
      *
      * @param calendar the XMLGregorianCalendar instance to be formatted; may be {@code null}.
@@ -3154,7 +3172,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(cal, Dates.ISO_8601_DATE_TIME_FORMAT);                            // returns "2025-01-15T10:30:45Z"
      * Dates.format(cal, null);                                                       // returns "2025-01-15T10:30:45Z" (null format = default)
      *
-     * Dates.format((XMLGregorianCalendar) null, "yyyy-MM-dd");   // returns null
+     * Dates.format((XMLGregorianCalendar) null, "yyyy-MM-dd");                       // returns null
      * }</pre>
      *
      * @param calendar the XMLGregorianCalendar instance to be formatted; may be {@code null}.
@@ -3178,10 +3196,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * XMLGregorianCalendar cal = Dates.createXMLGregorianCalendar(1736937045000L);   // returns 2025-01-15T10:30:45Z
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);             // returns "2025-01-15 10:30:45"
-     * Dates.format(cal, "yyyy-MM-dd", utc);                      // returns "2025-01-15"
+     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);                  // returns "2025-01-15 10:30:45"
+     * Dates.format(cal, "yyyy-MM-dd", utc);                           // returns "2025-01-15"
      *
-     * Dates.format((XMLGregorianCalendar) null, "yyyy-MM-dd", utc); // returns null
+     * Dates.format((XMLGregorianCalendar) null, "yyyy-MM-dd", utc);   // returns null
      * }</pre>
      *
      * <p>Note: a format pattern ending with the literal {@code 'Z'} (including the default format)
@@ -3321,7 +3339,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #formatTo(java.util.Date, Appendable)
      * @see #formatTo(java.util.Date, String, Appendable)
      */
-    public static void formatTo(final java.util.Date date, final String format, final TimeZone timeZone, final Appendable appendable) {
+    public static void formatTo(final java.util.Date date, final String format, final TimeZone timeZone, final Appendable appendable)
+            throws IllegalArgumentException {
         N.checkArgNotNull(appendable, cs.appendable);
 
         if (date == null) {
@@ -3424,7 +3443,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #formatTo(Calendar, Appendable)
      * @see #formatTo(Calendar, String, Appendable)
      */
-    public static void formatTo(final Calendar calendar, final String format, final TimeZone timeZone, final Appendable appendable) {
+    public static void formatTo(final Calendar calendar, final String format, final TimeZone timeZone, final Appendable appendable)
+            throws IllegalArgumentException {
         N.checkArgNotNull(appendable, cs.appendable);
 
         if (calendar == null) {
@@ -3531,7 +3551,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #formatTo(XMLGregorianCalendar, Appendable)
      * @see #formatTo(XMLGregorianCalendar, String, Appendable)
      */
-    public static void formatTo(final XMLGregorianCalendar calendar, final String format, final TimeZone timeZone, final Appendable appendable) {
+    public static void formatTo(final XMLGregorianCalendar calendar, final String format, final TimeZone timeZone, final Appendable appendable)
+            throws IllegalArgumentException {
         N.checkArgNotNull(appendable, cs.appendable);
 
         if (calendar == null) {
@@ -3604,7 +3625,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         Calendar c = utcCalendarPool.poll();
 
         if (c == null) {
-            c = Calendar.getInstance(UTC_TIME_ZONE);
+            c = Calendar.getInstance(INTERNAL_UTC_TIME_ZONE);
         }
 
         c.setTimeInMillis(timeInMillis);
@@ -3622,13 +3643,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
             utcCalendarPool.offer(c);
 
             final String formatToUse = isTimestamp ? ISO_8601_TIMESTAMP_FORMAT : ISO_8601_DATE_TIME_FORMAT;
-            final DateFormat sdf = getSDF(formatToUse, UTC_TIME_ZONE);
+            final DateFormat sdf = getSDF(formatToUse, INTERNAL_UTC_TIME_ZONE);
             final String str;
 
             try {
                 str = sdf.format(new java.util.Date(timeInMillis));
             } finally {
-                recycleSDF(formatToUse, UTC_TIME_ZONE, sdf);
+                recycleSDF(formatToUse, INTERNAL_UTC_TIME_ZONE, sdf);
             }
 
             try {
@@ -3738,10 +3759,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null, or if {@code amount} is out of range for the
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code amount} is out of range for the
      *         field (this method uses a non-lenient calendar).
      * @see Calendar#YEAR
      * @see Calendar#set(int, int)
@@ -3770,10 +3791,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null, or if {@code amount} is out of range for the
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code amount} is out of range for the
      *         field (this method uses a non-lenient calendar).
      * @see Calendar#MONTH
      * @see Calendar#set(int, int)
@@ -3802,10 +3823,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null, or if {@code amount} is out of range for the
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code amount} is out of range for the
      *         field (this method uses a non-lenient calendar).
      * @see Calendar#DAY_OF_MONTH
      * @see Calendar#set(int, int)
@@ -3830,15 +3851,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.setHours(date, 14), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-24 14:30:45"
      * Dates.format(Dates.setHours(date, 0), "yyyy-MM-dd HH:mm:ss");    // returns "2024-11-24 00:30:45" (midnight hour)
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                      // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.setHours((java.util.Date) null, 14);                      // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                       // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.setHours((java.util.Date) null, 14);                       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null, or if {@code amount} is out of range for the
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code amount} is out of range for the
      *         field (this method uses a non-lenient calendar).
      * @see Calendar#HOUR_OF_DAY
      * @see Calendar#set(int, int)
@@ -3862,15 +3883,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.setMinutes(date, 15), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-24 10:15:45"
      * Dates.format(Dates.setMinutes(date, 0), "yyyy-MM-dd HH:mm:ss");    // returns "2024-11-24 10:00:45"
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                        // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.setMinutes((java.util.Date) null, 15);                      // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                         // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.setMinutes((java.util.Date) null, 15);                       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null, or if {@code amount} is out of range for the
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code amount} is out of range for the
      *         field (this method uses a non-lenient calendar).
      * @see Calendar#MINUTE
      * @see Calendar#set(int, int)
@@ -3894,15 +3915,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.setSeconds(date, 0), "yyyy-MM-dd HH:mm:ss");    // returns "2024-11-24 10:30:00"
      * Dates.format(Dates.setSeconds(date, 59), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-24 10:30:59"
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                        // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.setSeconds((java.util.Date) null, 0);                       // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                         // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.setSeconds((java.util.Date) null, 0);                        // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null, or if {@code amount} is out of range for the
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code amount} is out of range for the
      *         field (this method uses a non-lenient calendar).
      * @see Calendar#SECOND
      * @see Calendar#set(int, int)
@@ -3926,15 +3947,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.setMilliseconds(date, 500), "yyyy-MM-dd HH:mm:ss.SSS");   // returns "2024-11-24 10:30:45.500"
      * Dates.format(Dates.setMilliseconds(date, 0), "yyyy-MM-dd HH:mm:ss.SSS");     // returns "2024-11-24 10:30:45.000"
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss.SSS");                              // returns "2024-11-24 10:30:45.123" (original unchanged)
-     * Dates.setMilliseconds((java.util.Date) null, 500);                          // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss.SSS");                               // returns "2024-11-24 10:30:45.123" (original unchanged)
+     * Dates.setMilliseconds((java.util.Date) null, 500);                           // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null, or if {@code amount} is out of range for the
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code amount} is out of range for the
      *         field (this method uses a non-lenient calendar).
      * @see Calendar#MILLISECOND
      * @see Calendar#set(int, int)
@@ -3954,11 +3975,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * The original {@code Date} is unchanged.
      *
      * @param <T> the concrete {@code java.util.Date} subtype returned by this method
-     * @param date the date, not null.
+     * @param date the date, not {@code null}.
      * @param calendarField the {@code Calendar} field to set the amount to.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
      * @see Calendar#set(int, int)
      */
     private static <T extends java.util.Date> T set(final T date, final int calendarField, final int amount) {
@@ -4081,11 +4102,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar cal = Dates.createCalendar(1736937045000L);        // returns 2025-01-15T10:30:45Z
-     * Dates.addDays(cal, 5).getTimeInMillis();                    // returns 1737369045000 (+5 days)
-     * Dates.addHours(cal, -2).getTimeInMillis();                  // returns 1736929845000 (-2 hours)
+     * Calendar cal = Dates.createCalendar(1736937045000L);   // returns 2025-01-15T10:30:45Z
+     * Dates.addDays(cal, 5).getTimeInMillis();               // returns 1737369045000 (+5 days)
+     * Dates.addHours(cal, -2).getTimeInMillis();             // returns 1736929845000 (-2 hours)
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
+     * cal.getTimeInMillis();                                 // returns 1736937045000 (original unchanged)
      * }</pre>
      *
      * @param <T> the concrete {@code Calendar} subtype of {@code calendar} which is also the return type.
@@ -4203,7 +4224,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
             return createDate(c.getTimeInMillis(), date.getClass());
         } else {
-            return createDate(date.getTime() + toMillis(unit, amount), date.getClass());
+            return createDate(Math.addExact(date.getTime(), toMillis(unit, amount)), date.getClass());
         }
     }
 
@@ -4242,10 +4263,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add years to, not null.
+     * @param date the date to add years to, not {@code null}.
      * @param amount the amount of years to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of years added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
      */
     public static <T extends java.util.Date> T addYears(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.YEAR);
@@ -4263,15 +4284,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.addMonths(date, 3), "yyyy-MM-dd HH:mm:ss");    // returns "2025-04-15 10:30:45"
      * Dates.format(Dates.addMonths(date, -2), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-15 10:30:45"
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                       // returns "2025-01-15 10:30:45" (original unchanged)
-     * Dates.addMonths((java.util.Date) null, 3);                       // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                        // returns "2025-01-15 10:30:45" (original unchanged)
+     * Dates.addMonths((java.util.Date) null, 3);                        // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add months to, not null.
+     * @param date the date to add months to, not {@code null}.
      * @param amount the amount of months to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of months added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
      */
     public static <T extends java.util.Date> T addMonths(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.MONTH);
@@ -4294,10 +4315,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add weeks to, not null.
+     * @param date the date to add weeks to, not {@code null}.
      * @param amount the amount of weeks to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of weeks added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
      */
     public static <T extends java.util.Date> T addWeeks(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.WEEK_OF_YEAR);
@@ -4312,18 +4333,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2025-01-15 10:30:45", "yyyy-MM-dd HH:mm:ss");
-     * Dates.format(Dates.addDays(date, 1), "yyyy-MM-dd HH:mm:ss");     // returns "2025-01-16 10:30:45"
-     * Dates.format(Dates.addDays(date, -5), "yyyy-MM-dd HH:mm:ss");    // returns "2025-01-10 10:30:45"
+     * Dates.format(Dates.addDays(date, 1), "yyyy-MM-dd HH:mm:ss");    // returns "2025-01-16 10:30:45"
+     * Dates.format(Dates.addDays(date, -5), "yyyy-MM-dd HH:mm:ss");   // returns "2025-01-10 10:30:45"
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                       // returns "2025-01-15 10:30:45" (original unchanged)
-     * Dates.addDays((java.util.Date) null, 1);                         // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                      // returns "2025-01-15 10:30:45" (original unchanged)
+     * Dates.addDays((java.util.Date) null, 1);                        // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add days to, not null.
+     * @param date the date to add days to, not {@code null}.
      * @param amount the amount of days to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of days added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
      */
     public static <T extends java.util.Date> T addDays(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.DAY_OF_MONTH);
@@ -4340,20 +4361,21 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      *
      * // hour/minute/second arithmetic is plain millisecond math (UTC-stable)
-     * java.util.Date date = new java.util.Date(1736937045000L);   // returns 2025-01-15T10:30:45Z
+     * java.util.Date date = new java.util.Date(1736937045000L);                       // returns 2025-01-15T10:30:45Z
      *
-     * Dates.format(Dates.addHours(date, 5), Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T15:30:45Z"
-     * Dates.format(Dates.addHours(date, -3), Dates.ISO_8601_DATE_TIME_FORMAT, utc);  // returns "2025-01-15T07:30:45Z"
+     * Dates.format(Dates.addHours(date, 5), Dates.ISO_8601_DATE_TIME_FORMAT, utc);    // returns "2025-01-15T15:30:45Z"
+     * Dates.format(Dates.addHours(date, -3), Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T07:30:45Z"
      *
-     * Dates.format(date, Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T10:30:45Z" (original unchanged)
-     * Dates.addHours((java.util.Date) null, 3);                   // throws IllegalArgumentException
+     * Dates.format(date, Dates.ISO_8601_DATE_TIME_FORMAT, utc);                       // returns "2025-01-15T10:30:45Z" (original unchanged)
+     * Dates.addHours((java.util.Date) null, 3);                                       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add hours to, not null.
+     * @param date the date to add hours to, not {@code null}.
      * @param amount the amount of hours to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of hours added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addHours(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.HOUR_OF_DAY);
@@ -4368,19 +4390,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * java.util.Date date = new java.util.Date(1736937045000L);                         // returns 2025-01-15T10:30:45Z
-     * Dates.format(Dates.addMinutes(date, 30), Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T11:00:45Z"
-     * Dates.format(Dates.addMinutes(date, -15), Dates.ISO_8601_DATE_TIME_FORMAT, utc);  // returns "2025-01-15T10:15:45Z"
+     * java.util.Date date = new java.util.Date(1736937045000L);                          // returns 2025-01-15T10:30:45Z
+     * Dates.format(Dates.addMinutes(date, 30), Dates.ISO_8601_DATE_TIME_FORMAT, utc);    // returns "2025-01-15T11:00:45Z"
+     * Dates.format(Dates.addMinutes(date, -15), Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T10:15:45Z"
      *
-     * Dates.format(date, Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T10:30:45Z" (original unchanged)
-     * Dates.addMinutes((java.util.Date) null, 30);                // throws IllegalArgumentException
+     * Dates.format(date, Dates.ISO_8601_DATE_TIME_FORMAT, utc);                          // returns "2025-01-15T10:30:45Z" (original unchanged)
+     * Dates.addMinutes((java.util.Date) null, 30);                                       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add minutes to, not null.
+     * @param date the date to add minutes to, not {@code null}.
      * @param amount the amount of minutes to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of minutes added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addMinutes(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.MINUTE);
@@ -4395,19 +4418,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * java.util.Date date = new java.util.Date(1736937045000L);                         // returns 2025-01-15T10:30:45Z
-     * Dates.format(Dates.addSeconds(date, 15), Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T10:31:00Z"
-     * Dates.format(Dates.addSeconds(date, -45), Dates.ISO_8601_DATE_TIME_FORMAT, utc);  // returns "2025-01-15T10:30:00Z"
+     * java.util.Date date = new java.util.Date(1736937045000L);                          // returns 2025-01-15T10:30:45Z
+     * Dates.format(Dates.addSeconds(date, 15), Dates.ISO_8601_DATE_TIME_FORMAT, utc);    // returns "2025-01-15T10:31:00Z"
+     * Dates.format(Dates.addSeconds(date, -45), Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T10:30:00Z"
      *
-     * Dates.format(date, Dates.ISO_8601_DATE_TIME_FORMAT, utc);   // returns "2025-01-15T10:30:45Z" (original unchanged)
-     * Dates.addSeconds((java.util.Date) null, 45);                // throws IllegalArgumentException
+     * Dates.format(date, Dates.ISO_8601_DATE_TIME_FORMAT, utc);                          // returns "2025-01-15T10:30:45Z" (original unchanged)
+     * Dates.addSeconds((java.util.Date) null, 45);                                       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add seconds to, not null.
+     * @param date the date to add seconds to, not {@code null}.
      * @param amount the amount of seconds to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of seconds added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addSeconds(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.SECOND);
@@ -4421,19 +4445,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * java.util.Date date = new java.util.Date(1736937045000L);  // returns 2025-01-15T10:30:45Z
-     * Dates.addMilliseconds(date, 500).getTime();                // returns 1736937045500
-     * Dates.addMilliseconds(date, -1000).getTime();              // returns 1736937044000
+     * java.util.Date date = new java.util.Date(1736937045000L);   // returns 2025-01-15T10:30:45Z
+     * Dates.addMilliseconds(date, 500).getTime();                 // returns 1736937045500
+     * Dates.addMilliseconds(date, -1000).getTime();               // returns 1736937044000
      *
-     * date.getTime();                                    // returns 1736937045000 (original unchanged)
-     * Dates.addMilliseconds((java.util.Date) null, 500); // throws IllegalArgumentException
+     * date.getTime();                                             // returns 1736937045000 (original unchanged)
+     * Dates.addMilliseconds((java.util.Date) null, 500);          // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add milliseconds to, not null.
+     * @param date the date to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addMilliseconds(final T date, final int amount) {
         return addToDate(date, amount, CalendarField.MILLISECOND);
@@ -4449,15 +4474,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * java.util.Date date = new java.util.Date(1736937045000L);  // 2025-01-15T10:30:45Z
-     * Dates.addMilliseconds(date, 5_000_000_000L).getTime();     // returns 1741937045000 (~57.9 days later)
+     * java.util.Date date = new java.util.Date(1736937045000L);   // 2025-01-15T10:30:45Z
+     * Dates.addMilliseconds(date, 5_000_000_000L).getTime();      // returns 1741937045000 (~57.9 days later)
      * }</pre>
      *
      * @param <T> the type of the date.
-     * @param date the date to add milliseconds to, not null.
+     * @param date the date to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the date is null.
+     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addMilliseconds(final T date, final long amount) {
         return addToDate(date, amount, TimeUnit.MILLISECONDS);
@@ -4476,15 +4502,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.addYears(cal, 1), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2026-01-15 10:30:45"
      * Dates.format(Dates.addYears(cal, -1), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2024-01-15 10:30:45"
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
-     * Dates.addYears((Calendar) null, 1);                        // throws IllegalArgumentException
+     * cal.getTimeInMillis();                                               // returns 1736937045000 (original unchanged)
+     * Dates.addYears((Calendar) null, 1);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add years to, not null.
+     * @param calendar the calendar to add years to, not {@code null}.
      * @param amount the amount of years to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of years added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addYears(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.YEAR);
@@ -4503,15 +4529,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.addMonths(cal, 6), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2025-07-15 10:30:45"
      * Dates.format(Dates.addMonths(cal, -2), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2024-11-15 10:30:45"
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
-     * Dates.addMonths((Calendar) null, 6);                       // throws IllegalArgumentException
+     * cal.getTimeInMillis();                                                // returns 1736937045000 (original unchanged)
+     * Dates.addMonths((Calendar) null, 6);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add months to, not null.
+     * @param calendar the calendar to add months to, not {@code null}.
      * @param amount the amount of months to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of months added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addMonths(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.MONTH);
@@ -4530,15 +4556,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.addWeeks(cal, 2), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2025-01-29 10:30:45"
      * Dates.format(Dates.addWeeks(cal, -1), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2025-01-08 10:30:45"
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
-     * Dates.addWeeks((Calendar) null, 2);                        // throws IllegalArgumentException
+     * cal.getTimeInMillis();                                               // returns 1736937045000 (original unchanged)
+     * Dates.addWeeks((Calendar) null, 2);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add weeks to, not null.
+     * @param calendar the calendar to add weeks to, not {@code null}.
      * @param amount the amount of weeks to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of weeks added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addWeeks(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.WEEK_OF_YEAR);
@@ -4557,15 +4583,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.addDays(cal, 1), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2025-01-16 10:30:45"
      * Dates.format(Dates.addDays(cal, -5), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2025-01-10 10:30:45"
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
-     * Dates.addDays((Calendar) null, 1);                         // throws IllegalArgumentException
+     * cal.getTimeInMillis();                                              // returns 1736937045000 (original unchanged)
+     * Dates.addDays((Calendar) null, 1);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add days to, not null.
+     * @param calendar the calendar to add days to, not {@code null}.
      * @param amount the amount of days to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of days added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addDays(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.DAY_OF_MONTH);
@@ -4584,15 +4610,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.format(Dates.addHours(cal, 5), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2025-01-15 15:30:45"
      * Dates.format(Dates.addHours(cal, -3), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2025-01-15 07:30:45"
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
-     * Dates.addHours((Calendar) null, 5);                        // throws IllegalArgumentException
+     * cal.getTimeInMillis();                                               // returns 1736937045000 (original unchanged)
+     * Dates.addHours((Calendar) null, 5);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add hours to, not null.
+     * @param calendar the calendar to add hours to, not {@code null}.
      * @param amount the amount of hours to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of hours added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addHours(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.HOUR_OF_DAY);
@@ -4607,19 +4633,19 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * Calendar cal = Dates.createCalendar(1736937045000L, utc);              // returns 2025-01-15T10:30:45Z
-     * Dates.format(Dates.addMinutes(cal, 15), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2025-01-15 10:45:45"
-     * Dates.format(Dates.addMinutes(cal, -30), "yyyy-MM-dd HH:mm:ss", utc);  // returns "2025-01-15 10:00:45"
+     * Calendar cal = Dates.createCalendar(1736937045000L, utc);               // returns 2025-01-15T10:30:45Z
+     * Dates.format(Dates.addMinutes(cal, 15), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2025-01-15 10:45:45"
+     * Dates.format(Dates.addMinutes(cal, -30), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2025-01-15 10:00:45"
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
-     * Dates.addMinutes((Calendar) null, 15);                     // throws IllegalArgumentException
+     * cal.getTimeInMillis();                                                  // returns 1736937045000 (original unchanged)
+     * Dates.addMinutes((Calendar) null, 15);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add minutes to, not null.
+     * @param calendar the calendar to add minutes to, not {@code null}.
      * @param amount the amount of minutes to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of minutes added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addMinutes(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.MINUTE);
@@ -4634,19 +4660,19 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
-     * Calendar cal = Dates.createCalendar(1736937045000L, utc);              // returns 2025-01-15T10:30:45Z
-     * Dates.format(Dates.addSeconds(cal, 15), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2025-01-15 10:31:00"
-     * Dates.format(Dates.addSeconds(cal, -45), "yyyy-MM-dd HH:mm:ss", utc);  // returns "2025-01-15 10:30:00"
+     * Calendar cal = Dates.createCalendar(1736937045000L, utc);               // returns 2025-01-15T10:30:45Z
+     * Dates.format(Dates.addSeconds(cal, 15), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2025-01-15 10:31:00"
+     * Dates.format(Dates.addSeconds(cal, -45), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2025-01-15 10:30:00"
      *
-     * cal.getTimeInMillis();                                     // returns 1736937045000 (original unchanged)
-     * Dates.addSeconds((Calendar) null, 30);                     // throws IllegalArgumentException
+     * cal.getTimeInMillis();                                                  // returns 1736937045000 (original unchanged)
+     * Dates.addSeconds((Calendar) null, 30);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add seconds to, not null.
+     * @param calendar the calendar to add seconds to, not {@code null}.
      * @param amount the amount of seconds to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of seconds added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addSeconds(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.SECOND);
@@ -4669,10 +4695,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add milliseconds to, not null.
+     * @param calendar the calendar to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addMilliseconds(final T calendar, final int amount) {
         return addToCalendar(calendar, amount, CalendarField.MILLISECOND);
@@ -4693,10 +4719,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the calendar.
-     * @param calendar the calendar to add milliseconds to, not null.
+     * @param calendar the calendar to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the calendar is null.
+     * @throws IllegalArgumentException if the calendar is {@code null}.
      */
     public static <T extends Calendar> T addMilliseconds(final T calendar, final long amount) {
         return addToCalendar(calendar, amount, TimeUnit.MILLISECONDS);
@@ -4729,18 +4755,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * // parse and format in the same (default) zone so the result is stable
      * java.util.Date date = Dates.parseJUDate("2024-11-24 10:30:45", "yyyy-MM-dd HH:mm:ss");
-     * Dates.format(Dates.round(date, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-24 11:00:00" (rounds up, 30 min)
-     * Dates.format(Dates.round(date, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss");  // returns "2024-11-24 00:00:00" (rounds down)
+     * Dates.format(Dates.round(date, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss");    // returns "2024-11-24 11:00:00" (rounds up, 30 min)
+     * Dates.format(Dates.round(date, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-24 00:00:00" (rounds down)
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                                      // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.round((java.util.Date) null, Calendar.HOUR_OF_DAY);                       // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                                       // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.round((java.util.Date) null, Calendar.HOUR_OF_DAY);                        // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date to work with, not null.
+     * @param date the date to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field.
-     * @throws IllegalArgumentException if the date is null, or if {@code field} is not a supported Calendar field.
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field.
      * @throws ArithmeticException if the year is over 280 million.
      * @see #round(java.util.Date, CalendarField)
      * @see #truncate(java.util.Date, int)
@@ -4779,11 +4805,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2024-11-24 10:30:45", "yyyy-MM-dd HH:mm:ss");
-     * Dates.format(Dates.round(date, CalendarField.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss");  // returns "2024-11-24 11:00:00"
-     * Dates.format(Dates.round(date, CalendarField.MONTH), "yyyy-MM-dd HH:mm:ss");        // returns "2024-12-01 00:00:00" (rounds up)
+     * Dates.format(Dates.round(date, CalendarField.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-24 11:00:00"
+     * Dates.format(Dates.round(date, CalendarField.MONTH), "yyyy-MM-dd HH:mm:ss");         // returns "2024-12-01 00:00:00" (rounds up)
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                                          // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.round((java.util.Date) null, CalendarField.HOUR_OF_DAY);                      // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                                           // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.round((java.util.Date) null, CalendarField.HOUR_OF_DAY);                       // throws IllegalArgumentException
      * }</pre>
      *
      * <p><b>&#9888;&#65039;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
@@ -4800,7 +4826,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #truncate(java.util.Date, CalendarField)
      * @see #ceiling(java.util.Date, CalendarField)
      */
-    public static <T extends java.util.Date> T round(final T date, final CalendarField field) {
+    public static <T extends java.util.Date> T round(final T date, final CalendarField field) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
         N.checkArgNotNull(field, cs.field);
 
@@ -4834,15 +4860,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.parseCalendar("2024-11-24 10:30:45", "yyyy-MM-dd HH:mm:ss", utc);
-     * Dates.format(Dates.round(cal, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2024-11-24 11:00:00"
-     * Dates.format(Dates.round(cal, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss", utc);  // returns "2024-11-24 00:00:00"
+     * Dates.format(Dates.round(cal, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2024-11-24 11:00:00"
+     * Dates.format(Dates.round(cal, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2024-11-24 00:00:00"
      *
-     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);                                      // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.round((Calendar) null, Calendar.HOUR_OF_DAY);                                 // throws IllegalArgumentException
+     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);                                       // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.round((Calendar) null, Calendar.HOUR_OF_DAY);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar object, which must extend java.util.Calendar.
-     * @param calendar the calendar to work with, not null.
+     * @param calendar the calendar to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the field.
      * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field.
@@ -4909,7 +4935,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #truncate(Calendar, CalendarField)
      * @see #ceiling(Calendar, CalendarField)
      */
-    public static <T extends Calendar> T round(final T calendar, final CalendarField field) {
+    public static <T extends Calendar> T round(final T calendar, final CalendarField field) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, cs.calendar);
         N.checkArgNotNull(field, cs.field);
 
@@ -4941,7 +4967,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date to work with, not null.
+     * @param date the date to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new date object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field.
@@ -4993,7 +5019,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #round(java.util.Date, CalendarField)
      * @see #ceiling(java.util.Date, CalendarField)
      */
-    public static <T extends java.util.Date> T truncate(final T date, final CalendarField field) {
+    public static <T extends java.util.Date> T truncate(final T date, final CalendarField field) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
         N.checkArgNotNull(field, cs.field);
 
@@ -5024,7 +5050,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * @param <T> the type of the calendar object, which must extend java.util.Calendar.
-     * @param calendar the calendar to work with, not null.
+     * @param calendar the calendar to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field.
@@ -5080,7 +5106,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #round(Calendar, CalendarField)
      * @see #ceiling(Calendar, CalendarField)
      */
-    public static <T extends Calendar> T truncate(final T calendar, final CalendarField field) {
+    public static <T extends Calendar> T truncate(final T calendar, final CalendarField field) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, cs.calendar);
         N.checkArgNotNull(field, cs.field);
 
@@ -5104,15 +5130,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2024-11-24 10:30:45", "yyyy-MM-dd HH:mm:ss");
-     * Dates.format(Dates.ceiling(date, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-24 11:00:00" (always rounds up)
-     * Dates.format(Dates.ceiling(date, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss");  // returns "2024-11-25 00:00:00"
+     * Dates.format(Dates.ceiling(date, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss");    // returns "2024-11-24 11:00:00" (always rounds up)
+     * Dates.format(Dates.ceiling(date, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss");   // returns "2024-11-25 00:00:00"
      *
-     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                                        // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.ceiling((java.util.Date) null, Calendar.HOUR_OF_DAY);                       // throws IllegalArgumentException
+     * Dates.format(date, "yyyy-MM-dd HH:mm:ss");                                         // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.ceiling((java.util.Date) null, Calendar.HOUR_OF_DAY);                        // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the date object, which must extend java.util.Date.
-     * @param date the date to work with, not null.
+     * @param date the date to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new date object of type T, adjusted to the ceiling of the specified field.
      * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field.
@@ -5159,7 +5185,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #round(java.util.Date, CalendarField)
      * @see #truncate(java.util.Date, CalendarField)
      */
-    public static <T extends java.util.Date> T ceiling(final T date, final CalendarField field) {
+    public static <T extends java.util.Date> T ceiling(final T date, final CalendarField field) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
         N.checkArgNotNull(field, cs.field);
 
@@ -5182,15 +5208,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.parseCalendar("2024-11-24 10:30:45", "yyyy-MM-dd HH:mm:ss", utc);
-     * Dates.format(Dates.ceiling(cal, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2024-11-24 11:00:00"
-     * Dates.format(Dates.ceiling(cal, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss", utc);  // returns "2024-11-25 00:00:00"
+     * Dates.format(Dates.ceiling(cal, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss", utc);    // returns "2024-11-24 11:00:00"
+     * Dates.format(Dates.ceiling(cal, Calendar.DAY_OF_MONTH), "yyyy-MM-dd HH:mm:ss", utc);   // returns "2024-11-25 00:00:00"
      *
-     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);                                        // returns "2024-11-24 10:30:45" (original unchanged)
-     * Dates.ceiling((Calendar) null, Calendar.HOUR_OF_DAY);                                 // throws IllegalArgumentException
+     * Dates.format(cal, "yyyy-MM-dd HH:mm:ss", utc);                                         // returns "2024-11-24 10:30:45" (original unchanged)
+     * Dates.ceiling((Calendar) null, Calendar.HOUR_OF_DAY);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the calendar object, which must extend java.util.Calendar.
-     * @param calendar the calendar to work with, not null.
+     * @param calendar the calendar to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, adjusted to the ceiling of the specified field.
      * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field.
@@ -5243,7 +5269,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #round(Calendar, CalendarField)
      * @see #truncate(Calendar, CalendarField)
      */
-    public static <T extends Calendar> T ceiling(final T calendar, final CalendarField field) {
+    public static <T extends Calendar> T ceiling(final T calendar, final CalendarField field) throws IllegalArgumentException {
         N.checkArgNotNull(calendar, cs.calendar);
         N.checkArgNotNull(field, cs.field);
 
@@ -5258,7 +5284,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p>Internal calculation method.</p>
      *
-     * @param val the calendar, not null.
+     * @param val the calendar, not {@code null}.
      * @param field the calendar field to modify.
      * @param modType type to truncate, round or ceiling.
      * @throws ArithmeticException if the year is over 280 million.
@@ -5415,15 +5441,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * Calendar cal1 = Dates.parseCalendar("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * Calendar cal2 = Dates.parseCalendar("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedEquals(cal1, cal2, CalendarField.DAY_OF_MONTH);   // returns true (same day)
-     * Dates.truncatedEquals(cal1, cal2, CalendarField.HOUR_OF_DAY);    // returns false (13:00 vs 18:00)
+     * Dates.truncatedEquals(cal1, cal2, CalendarField.DAY_OF_MONTH);              // returns true (same day)
+     * Dates.truncatedEquals(cal1, cal2, CalendarField.HOUR_OF_DAY);               // returns false (13:00 vs 18:00)
      *
-     * Dates.truncatedEquals(cal1, cal1, CalendarField.SECOND);                  // returns true (identical)
-     * Dates.truncatedEquals((Calendar) null, cal2, CalendarField.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedEquals(cal1, cal1, CalendarField.SECOND);                    // returns true (identical)
+     * Dates.truncatedEquals((Calendar) null, cal2, CalendarField.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param cal1 the first calendar, not null.
-     * @param cal2 the second calendar, not null.
+     * @param cal1 the first calendar, not {@code null}.
+     * @param cal2 the second calendar, not {@code null}.
      * @param field the field from {@code CalendarField} to be the most significant field for comparison.
      * @return {@code true} if cal1 and cal2 are equal up to the specified field; {@code false} otherwise.
      * @throws IllegalArgumentException if any argument is {@code null}.
@@ -5444,11 +5470,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * Calendar cal1 = Dates.parseCalendar("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * Calendar cal2 = Dates.parseCalendar("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedEquals(cal1, cal2, Calendar.DAY_OF_MONTH);   // returns true (same day)
-     * Dates.truncatedEquals(cal1, cal2, Calendar.HOUR_OF_DAY);    // returns false (13:00 vs 18:00)
+     * Dates.truncatedEquals(cal1, cal2, Calendar.DAY_OF_MONTH);              // returns true (same day)
+     * Dates.truncatedEquals(cal1, cal2, Calendar.HOUR_OF_DAY);               // returns false (13:00 vs 18:00)
      *
-     * Dates.truncatedEquals(cal1, cal1, Calendar.SECOND);                  // returns true (identical)
-     * Dates.truncatedEquals((Calendar) null, cal2, Calendar.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedEquals(cal1, cal1, Calendar.SECOND);                    // returns true (identical)
+     * Dates.truncatedEquals((Calendar) null, cal2, Calendar.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param cal1 the first calendar, not {@code null}.
@@ -5470,11 +5496,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * java.util.Date date1 = Dates.parseJUDate("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * java.util.Date date2 = Dates.parseJUDate("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedEquals(date1, date2, CalendarField.DAY_OF_MONTH);   // returns true (same day)
-     * Dates.truncatedEquals(date1, date2, CalendarField.HOUR_OF_DAY);    // returns false (13:00 vs 18:00)
+     * Dates.truncatedEquals(date1, date2, CalendarField.DAY_OF_MONTH);                   // returns true (same day)
+     * Dates.truncatedEquals(date1, date2, CalendarField.HOUR_OF_DAY);                    // returns false (13:00 vs 18:00)
      *
-     * Dates.truncatedEquals(date1, date1, CalendarField.SECOND);                       // returns true (identical)
-     * Dates.truncatedEquals((java.util.Date) null, date2, CalendarField.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedEquals(date1, date1, CalendarField.SECOND);                         // returns true (identical)
+     * Dates.truncatedEquals((java.util.Date) null, date2, CalendarField.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date1 the first date, not {@code null}.
@@ -5500,11 +5526,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * java.util.Date date1 = Dates.parseJUDate("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * java.util.Date date2 = Dates.parseJUDate("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedEquals(date1, date2, Calendar.DAY_OF_MONTH);   // returns true (same day)
-     * Dates.truncatedEquals(date1, date2, Calendar.HOUR_OF_DAY);    // returns false (13:00 vs 18:00)
+     * Dates.truncatedEquals(date1, date2, Calendar.DAY_OF_MONTH);                   // returns true (same day)
+     * Dates.truncatedEquals(date1, date2, Calendar.HOUR_OF_DAY);                    // returns false (13:00 vs 18:00)
      *
-     * Dates.truncatedEquals(date1, date1, Calendar.SECOND);                       // returns true (identical)
-     * Dates.truncatedEquals((java.util.Date) null, date2, Calendar.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedEquals(date1, date1, Calendar.SECOND);                         // returns true (identical)
+     * Dates.truncatedEquals((java.util.Date) null, date2, Calendar.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date1 the first date, not {@code null}.
@@ -5528,11 +5554,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * Calendar cal1 = Dates.parseCalendar("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * Calendar cal2 = Dates.parseCalendar("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedCompareTo(cal1, cal2, CalendarField.DAY_OF_MONTH);       // returns 0 (same day)
-     * (Dates.truncatedCompareTo(cal1, cal2, CalendarField.HOUR_OF_DAY) < 0);  // returns true (13:00 < 18:00)
-     * (Dates.truncatedCompareTo(cal2, cal1, CalendarField.HOUR_OF_DAY) > 0);  // returns true (18:00 > 13:00)
+     * Dates.truncatedCompareTo(cal1, cal2, CalendarField.DAY_OF_MONTH);              // returns 0 (same day)
+     * (Dates.truncatedCompareTo(cal1, cal2, CalendarField.HOUR_OF_DAY) < 0);         // returns true (13:00 < 18:00)
+     * (Dates.truncatedCompareTo(cal2, cal1, CalendarField.HOUR_OF_DAY) > 0);         // returns true (18:00 > 13:00)
      *
-     * Dates.truncatedCompareTo((Calendar) null, cal2, CalendarField.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedCompareTo((Calendar) null, cal2, CalendarField.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param cal1 the first Calendar instance to be compared, not {@code null}.
@@ -5557,11 +5583,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * Calendar cal1 = Dates.parseCalendar("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * Calendar cal2 = Dates.parseCalendar("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedCompareTo(cal1, cal2, Calendar.DAY_OF_MONTH);       // returns 0 (same day)
-     * (Dates.truncatedCompareTo(cal1, cal2, Calendar.HOUR_OF_DAY) < 0);  // returns true (13:00 < 18:00)
-     * (Dates.truncatedCompareTo(cal2, cal1, Calendar.HOUR_OF_DAY) > 0);  // returns true (18:00 > 13:00)
+     * Dates.truncatedCompareTo(cal1, cal2, Calendar.DAY_OF_MONTH);              // returns 0 (same day)
+     * (Dates.truncatedCompareTo(cal1, cal2, Calendar.HOUR_OF_DAY) < 0);         // returns true (13:00 < 18:00)
+     * (Dates.truncatedCompareTo(cal2, cal1, Calendar.HOUR_OF_DAY) > 0);         // returns true (18:00 > 13:00)
      *
-     * Dates.truncatedCompareTo((Calendar) null, cal2, Calendar.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedCompareTo((Calendar) null, cal2, Calendar.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param cal1 the first calendar, not {@code null}.
@@ -5586,11 +5612,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * java.util.Date date1 = Dates.parseJUDate("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * java.util.Date date2 = Dates.parseJUDate("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedCompareTo(date1, date2, CalendarField.DAY_OF_MONTH);       // returns 0 (same day)
-     * (Dates.truncatedCompareTo(date1, date2, CalendarField.HOUR_OF_DAY) < 0);  // returns true (13:00 < 18:00)
-     * (Dates.truncatedCompareTo(date2, date1, CalendarField.HOUR_OF_DAY) > 0);  // returns true (18:00 > 13:00)
+     * Dates.truncatedCompareTo(date1, date2, CalendarField.DAY_OF_MONTH);                   // returns 0 (same day)
+     * (Dates.truncatedCompareTo(date1, date2, CalendarField.HOUR_OF_DAY) < 0);              // returns true (13:00 < 18:00)
+     * (Dates.truncatedCompareTo(date2, date1, CalendarField.HOUR_OF_DAY) > 0);              // returns true (18:00 > 13:00)
      *
-     * Dates.truncatedCompareTo((java.util.Date) null, date2, CalendarField.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedCompareTo((java.util.Date) null, date2, CalendarField.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date1 the first Date instance to be compared, not {@code null}.
@@ -5616,11 +5642,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * java.util.Date date1 = Dates.parseJUDate("2023-03-28 13:45:30", "yyyy-MM-dd HH:mm:ss");
      * java.util.Date date2 = Dates.parseJUDate("2023-03-28 18:20:15", "yyyy-MM-dd HH:mm:ss");
-     * Dates.truncatedCompareTo(date1, date2, Calendar.DAY_OF_MONTH);       // returns 0 (same day)
-     * (Dates.truncatedCompareTo(date1, date2, Calendar.HOUR_OF_DAY) < 0);  // returns true (13:00 < 18:00)
-     * (Dates.truncatedCompareTo(date2, date1, Calendar.HOUR_OF_DAY) > 0);  // returns true (18:00 > 13:00)
+     * Dates.truncatedCompareTo(date1, date2, Calendar.DAY_OF_MONTH);                   // returns 0 (same day)
+     * (Dates.truncatedCompareTo(date1, date2, Calendar.HOUR_OF_DAY) < 0);              // returns true (13:00 < 18:00)
+     * (Dates.truncatedCompareTo(date2, date1, Calendar.HOUR_OF_DAY) > 0);              // returns true (18:00 > 13:00)
      *
-     * Dates.truncatedCompareTo((java.util.Date) null, date2, Calendar.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.truncatedCompareTo((java.util.Date) null, date2, Calendar.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date1 the first date, not {@code null}.
@@ -5666,11 +5692,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS");
-     * Dates.getFragmentInMilliseconds(date, CalendarField.SECOND);        // returns 538 (millis within the current second)
-     * Dates.getFragmentInMilliseconds(date, CalendarField.MINUTE);        // returns 10538 (10*1000 + 538)
+     * Dates.getFragmentInMilliseconds(date, CalendarField.SECOND);                    // returns 538 (millis within the current second)
+     * Dates.getFragmentInMilliseconds(date, CalendarField.MINUTE);                    // returns 10538 (10*1000 + 538)
      *
-     * Dates.getFragmentInMilliseconds(date, CalendarField.MILLISECOND);             // returns 0 (cannot split a ms into ms)
-     * Dates.getFragmentInMilliseconds((java.util.Date) null, CalendarField.SECOND); // throws IllegalArgumentException
+     * Dates.getFragmentInMilliseconds(date, CalendarField.MILLISECOND);               // returns 0 (cannot split a ms into ms)
+     * Dates.getFragmentInMilliseconds((java.util.Date) null, CalendarField.SECOND);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date to work with, not {@code null}.
@@ -5678,7 +5704,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of milliseconds within the fragment of {@code date}.
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInMilliseconds(final java.util.Date date, final CalendarField fragment) {
+    public static long getFragmentInMilliseconds(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MILLISECONDS);
     }
 
@@ -5715,11 +5741,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS");
-     * Dates.getFragmentInSeconds(date, CalendarField.MINUTE);        // returns 10 (seconds within the current minute)
-     * Dates.getFragmentInSeconds(date, CalendarField.HOUR_OF_DAY);   // returns 910 (15*60 + 10)
+     * Dates.getFragmentInSeconds(date, CalendarField.MINUTE);                    // returns 10 (seconds within the current minute)
+     * Dates.getFragmentInSeconds(date, CalendarField.HOUR_OF_DAY);               // returns 910 (15*60 + 10)
      *
-     * Dates.getFragmentInSeconds(date, CalendarField.SECOND);                  // returns 0 (fragment <= SECOND yields 0)
-     * Dates.getFragmentInSeconds((java.util.Date) null, CalendarField.MINUTE); // throws IllegalArgumentException
+     * Dates.getFragmentInSeconds(date, CalendarField.SECOND);                    // returns 0 (fragment <= SECOND yields 0)
+     * Dates.getFragmentInSeconds((java.util.Date) null, CalendarField.MINUTE);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date to work with, not {@code null}.
@@ -5727,7 +5753,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of seconds within the fragment of {@code date}.
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInSeconds(final java.util.Date date, final CalendarField fragment) {
+    public static long getFragmentInSeconds(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.SECONDS);
     }
 
@@ -5764,11 +5790,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS");
-     * Dates.getFragmentInMinutes(date, CalendarField.HOUR_OF_DAY);   // returns 15 (minutes within the current hour)
-     * Dates.getFragmentInMinutes(date, CalendarField.DAY_OF_MONTH);  // returns 435 (7*60 + 15)
+     * Dates.getFragmentInMinutes(date, CalendarField.HOUR_OF_DAY);                    // returns 15 (minutes within the current hour)
+     * Dates.getFragmentInMinutes(date, CalendarField.DAY_OF_MONTH);                   // returns 435 (7*60 + 15)
      *
-     * Dates.getFragmentInMinutes(date, CalendarField.MINUTE);                       // returns 0 (fragment <= MINUTE yields 0)
-     * Dates.getFragmentInMinutes((java.util.Date) null, CalendarField.HOUR_OF_DAY); // throws IllegalArgumentException
+     * Dates.getFragmentInMinutes(date, CalendarField.MINUTE);                         // returns 0 (fragment <= MINUTE yields 0)
+     * Dates.getFragmentInMinutes((java.util.Date) null, CalendarField.HOUR_OF_DAY);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date to work with, not {@code null}.
@@ -5776,7 +5802,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of minutes within the fragment of {@code date}.
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInMinutes(final java.util.Date date, final CalendarField fragment) {
+    public static long getFragmentInMinutes(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MINUTES);
     }
 
@@ -5813,11 +5839,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS");
-     * Dates.getFragmentInHours(date, CalendarField.DAY_OF_MONTH);    // returns 7 (hours within the current day)
-     * Dates.getFragmentInHours(date, CalendarField.MONTH);           // returns 127 (5 full days * 24 + 7)
+     * Dates.getFragmentInHours(date, CalendarField.DAY_OF_MONTH);                    // returns 7 (hours within the current day)
+     * Dates.getFragmentInHours(date, CalendarField.MONTH);                           // returns 127 (5 full days * 24 + 7)
      *
-     * Dates.getFragmentInHours(date, CalendarField.HOUR_OF_DAY);                   // returns 0 (fragment <= HOUR yields 0)
-     * Dates.getFragmentInHours((java.util.Date) null, CalendarField.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.getFragmentInHours(date, CalendarField.HOUR_OF_DAY);                     // returns 0 (fragment <= HOUR yields 0)
+     * Dates.getFragmentInHours((java.util.Date) null, CalendarField.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date to work with, not {@code null}.
@@ -5825,7 +5851,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of hours within the fragment of {@code date}.
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInHours(final java.util.Date date, final CalendarField fragment) {
+    public static long getFragmentInHours(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.HOURS);
     }
 
@@ -5862,11 +5888,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.util.Date date = Dates.parseJUDate("2023-02-28 12:00:00", "yyyy-MM-dd HH:mm:ss");
-     * Dates.getFragmentInDays(date, CalendarField.MONTH);            // returns 28 (day-of-month)
-     * Dates.getFragmentInDays(date, CalendarField.YEAR);             // returns 59 (31 in Jan + 28 = day-of-year)
+     * Dates.getFragmentInDays(date, CalendarField.MONTH);                   // returns 28 (day-of-month)
+     * Dates.getFragmentInDays(date, CalendarField.YEAR);                    // returns 59 (31 in Jan + 28 = day-of-year)
      *
-     * Dates.getFragmentInDays(date, CalendarField.DAY_OF_MONTH);          // returns 0 (fragment <= DAY yields 0)
-     * Dates.getFragmentInDays((java.util.Date) null, CalendarField.YEAR); // throws IllegalArgumentException
+     * Dates.getFragmentInDays(date, CalendarField.DAY_OF_MONTH);            // returns 0 (fragment <= DAY yields 0)
+     * Dates.getFragmentInDays((java.util.Date) null, CalendarField.YEAR);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date the date to work with, not {@code null}.
@@ -5874,7 +5900,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of days within the fragment of {@code date}.
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInDays(final java.util.Date date, final CalendarField fragment) {
+    public static long getFragmentInDays(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.DAYS);
     }
 
@@ -5932,11 +5958,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.parseCalendar("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS", utc);
-     * Dates.getFragmentInMilliseconds(cal, CalendarField.SECOND);        // returns 538 (millis within the current second)
-     * Dates.getFragmentInMilliseconds(cal, CalendarField.MINUTE);        // returns 10538 (10*1000 + 538)
+     * Dates.getFragmentInMilliseconds(cal, CalendarField.SECOND);               // returns 538 (millis within the current second)
+     * Dates.getFragmentInMilliseconds(cal, CalendarField.MINUTE);               // returns 10538 (10*1000 + 538)
      *
-     * Dates.getFragmentInMilliseconds(cal, CalendarField.MILLISECOND);        // returns 0 (cannot split a ms into ms)
-     * Dates.getFragmentInMilliseconds((Calendar) null, CalendarField.SECOND); // throws IllegalArgumentException
+     * Dates.getFragmentInMilliseconds(cal, CalendarField.MILLISECOND);          // returns 0 (cannot split a ms into ms)
+     * Dates.getFragmentInMilliseconds((Calendar) null, CalendarField.SECOND);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar to work with, not {@code null}.
@@ -5944,7 +5970,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of milliseconds within the fragment of {@code calendar}.
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInMilliseconds(final Calendar calendar, final CalendarField fragment) {
+    public static long getFragmentInMilliseconds(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MILLISECONDS);
     }
 
@@ -5982,11 +6008,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.parseCalendar("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS", utc);
-     * Dates.getFragmentInSeconds(cal, CalendarField.MINUTE);          // returns 10 (seconds within the current minute)
-     * Dates.getFragmentInSeconds(cal, CalendarField.DAY_OF_MONTH);    // returns 26110 (7*3600 + 15*60 + 10)
+     * Dates.getFragmentInSeconds(cal, CalendarField.MINUTE);               // returns 10 (seconds within the current minute)
+     * Dates.getFragmentInSeconds(cal, CalendarField.DAY_OF_MONTH);         // returns 26110 (7*3600 + 15*60 + 10)
      *
-     * Dates.getFragmentInSeconds(cal, CalendarField.SECOND);             // returns 0 (fragment <= SECOND yields 0)
-     * Dates.getFragmentInSeconds((Calendar) null, CalendarField.MINUTE); // throws IllegalArgumentException
+     * Dates.getFragmentInSeconds(cal, CalendarField.SECOND);               // returns 0 (fragment <= SECOND yields 0)
+     * Dates.getFragmentInSeconds((Calendar) null, CalendarField.MINUTE);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar to work with, not {@code null}.
@@ -5994,7 +6020,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of seconds within the fragment of {@code calendar}.
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInSeconds(final Calendar calendar, final CalendarField fragment) {
+    public static long getFragmentInSeconds(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.SECONDS);
     }
 
@@ -6032,11 +6058,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.parseCalendar("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS", utc);
-     * Dates.getFragmentInMinutes(cal, CalendarField.HOUR_OF_DAY);     // returns 15 (minutes within the current hour)
-     * Dates.getFragmentInMinutes(cal, CalendarField.MONTH);           // returns 7635 (5*1440 + 7*60 + 15)
+     * Dates.getFragmentInMinutes(cal, CalendarField.HOUR_OF_DAY);               // returns 15 (minutes within the current hour)
+     * Dates.getFragmentInMinutes(cal, CalendarField.MONTH);                     // returns 7635 (5*1440 + 7*60 + 15)
      *
-     * Dates.getFragmentInMinutes(cal, CalendarField.MINUTE);                  // returns 0 (fragment <= MINUTE yields 0)
-     * Dates.getFragmentInMinutes((Calendar) null, CalendarField.HOUR_OF_DAY); // throws IllegalArgumentException
+     * Dates.getFragmentInMinutes(cal, CalendarField.MINUTE);                    // returns 0 (fragment <= MINUTE yields 0)
+     * Dates.getFragmentInMinutes((Calendar) null, CalendarField.HOUR_OF_DAY);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar to work with, not {@code null}.
@@ -6044,7 +6070,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of minutes within the fragment of {@code calendar}.
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInMinutes(final Calendar calendar, final CalendarField fragment) {
+    public static long getFragmentInMinutes(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MINUTES);
     }
 
@@ -6082,11 +6108,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.parseCalendar("2023-01-06 07:15:10.538", "yyyy-MM-dd HH:mm:ss.SSS", utc);
-     * Dates.getFragmentInHours(cal, CalendarField.DAY_OF_MONTH);      // returns 7 (hours within the current day)
-     * Dates.getFragmentInHours(cal, CalendarField.MONTH);             // returns 127 (5 full days * 24 + 7)
+     * Dates.getFragmentInHours(cal, CalendarField.DAY_OF_MONTH);               // returns 7 (hours within the current day)
+     * Dates.getFragmentInHours(cal, CalendarField.MONTH);                      // returns 127 (5 full days * 24 + 7)
      *
-     * Dates.getFragmentInHours(cal, CalendarField.HOUR_OF_DAY);              // returns 0 (fragment <= HOUR yields 0)
-     * Dates.getFragmentInHours((Calendar) null, CalendarField.DAY_OF_MONTH); // throws IllegalArgumentException
+     * Dates.getFragmentInHours(cal, CalendarField.HOUR_OF_DAY);                // returns 0 (fragment <= HOUR yields 0)
+     * Dates.getFragmentInHours((Calendar) null, CalendarField.DAY_OF_MONTH);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar to work with, not {@code null}.
@@ -6094,7 +6120,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of hours within the fragment of {@code calendar}.
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInHours(final Calendar calendar, final CalendarField fragment) {
+    public static long getFragmentInHours(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.HOURS);
     }
 
@@ -6134,11 +6160,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.parseCalendar("2023-02-28 12:00:00", "yyyy-MM-dd HH:mm:ss", utc);
-     * Dates.getFragmentInDays(cal, CalendarField.MONTH);             // returns 28 (day-of-month)
-     * Dates.getFragmentInDays(cal, CalendarField.YEAR);              // returns 59 (31 in Jan + 28 = day-of-year)
+     * Dates.getFragmentInDays(cal, CalendarField.MONTH);              // returns 28 (day-of-month)
+     * Dates.getFragmentInDays(cal, CalendarField.YEAR);               // returns 59 (31 in Jan + 28 = day-of-year)
      *
-     * Dates.getFragmentInDays(cal, CalendarField.DAY_OF_MONTH);     // returns 0 (fragment <= DAY yields 0)
-     * Dates.getFragmentInDays((Calendar) null, CalendarField.YEAR); // throws IllegalArgumentException
+     * Dates.getFragmentInDays(cal, CalendarField.DAY_OF_MONTH);       // returns 0 (fragment <= DAY yields 0)
+     * Dates.getFragmentInDays((Calendar) null, CalendarField.YEAR);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param calendar the calendar to work with, not {@code null}.
@@ -6146,7 +6172,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return the number of days within the fragment of {@code calendar}.
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
-    public static long getFragmentInDays(final Calendar calendar, final CalendarField fragment) {
+    public static long getFragmentInDays(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
         return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.DAYS);
     }
 
@@ -6228,12 +6254,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isSameDay(d1, d2);   // returns true (same day, time ignored)
      *
      * java.util.Date d3 = Dates.parseJUDate("2023-03-12 13:45:00", "yyyy-MM-dd HH:mm:ss");
-     * Dates.isSameDay(d1, d3);                       // returns false (different day)
-     * Dates.isSameDay((java.util.Date) null, d2);    // throws IllegalArgumentException
+     * Dates.isSameDay(d1, d3);                      // returns false (different day)
+     * Dates.isSameDay((java.util.Date) null, d2);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date1 the first date, not altered, not null.
-     * @param date2 the second date, not altered, not null.
+     * @param date1 the first date, not altered, not {@code null}.
+     * @param date2 the second date, not altered, not {@code null}.
      * @return {@code true} if they represent the same day.
      * @throws IllegalArgumentException if either date is {@code null}.
      */
@@ -6267,12 +6293,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isSameDay(c1, c2);   // returns true (same day, time ignored)
      *
      * Calendar c3 = Dates.parseCalendar("2023-03-12 13:45:00", "yyyy-MM-dd HH:mm:ss");
-     * Dates.isSameDay(c1, c3);                   // returns false (different day)
-     * Dates.isSameDay((Calendar) null, c2);      // throws IllegalArgumentException
+     * Dates.isSameDay(c1, c3);                // returns false (different day)
+     * Dates.isSameDay((Calendar) null, c2);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param cal1 the first calendar, not altered, not null.
-     * @param cal2 the second calendar, not altered, not null.
+     * @param cal1 the first calendar, not altered, not {@code null}.
+     * @param cal2 the second calendar, not altered, not {@code null}.
      * @return {@code true} if they represent the same day.
      * @throws IllegalArgumentException if either calendar is {@code null}.
      * @see #isSameDay(java.util.Date, java.util.Date)
@@ -6302,12 +6328,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isSameMonth(d1, d2);   // returns true (same month and year)
      *
      * java.util.Date d3 = Dates.parseJUDate("2023-04-15 13:45:00", "yyyy-MM-dd HH:mm:ss");
-     * Dates.isSameMonth(d1, d3);                     // returns false (April vs March)
-     * Dates.isSameMonth((java.util.Date) null, d2);  // throws IllegalArgumentException
+     * Dates.isSameMonth(d1, d3);                      // returns false (April vs March)
+     * Dates.isSameMonth((java.util.Date) null, d2);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date1 the first date, not altered, not null.
-     * @param date2 the second date, not altered, not null.
+     * @param date1 the first date, not altered, not {@code null}.
+     * @param date2 the second date, not altered, not {@code null}.
      * @return {@code true} if they represent the same month of the same year.
      * @throws IllegalArgumentException if either date is {@code null}.
      */
@@ -6341,12 +6367,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isSameMonth(c1, c2);   // returns true (same month and year)
      *
      * Calendar c3 = Dates.parseCalendar("2023-04-15 13:45:00", "yyyy-MM-dd HH:mm:ss");
-     * Dates.isSameMonth(c1, c3);                 // returns false (April vs March)
-     * Dates.isSameMonth((Calendar) null, c2);    // throws IllegalArgumentException
+     * Dates.isSameMonth(c1, c3);                // returns false (April vs March)
+     * Dates.isSameMonth((Calendar) null, c2);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param cal1 the first calendar, not altered, not null.
-     * @param cal2 the second calendar, not altered, not null.
+     * @param cal1 the first calendar, not altered, not {@code null}.
+     * @param cal2 the second calendar, not altered, not {@code null}.
      * @return {@code true} if they represent the same month of the same year.
      * @throws IllegalArgumentException if either calendar is {@code null}.
      */
@@ -6379,8 +6405,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isSameYear((java.util.Date) null, d2);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date1 the first date, not altered, not null.
-     * @param date2 the second date, not altered, not null.
+     * @param date1 the first date, not altered, not {@code null}.
+     * @param date2 the second date, not altered, not {@code null}.
      * @return {@code true} if they represent the same year.
      * @throws IllegalArgumentException if either date is {@code null}.
      */
@@ -6414,12 +6440,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isSameYear(c1, c2);   // returns true (same year, month ignored)
      *
      * Calendar c3 = Dates.parseCalendar("2024-03-15 13:45:00", "yyyy-MM-dd HH:mm:ss");
-     * Dates.isSameYear(c1, c3);                  // returns false (2024 vs 2023)
-     * Dates.isSameYear((Calendar) null, c2);     // throws IllegalArgumentException
+     * Dates.isSameYear(c1, c3);                // returns false (2024 vs 2023)
+     * Dates.isSameYear((Calendar) null, c2);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param cal1 the first calendar, not altered, not null.
-     * @param cal2 the second calendar, not altered, not null.
+     * @param cal1 the first calendar, not altered, not {@code null}.
+     * @param cal2 the second calendar, not altered, not {@code null}.
      * @return {@code true} if they represent the same year.
      * @throws IllegalArgumentException if either calendar is {@code null}.
      */
@@ -6442,16 +6468,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dates.isSameInstant(new java.util.Date(1000L), new java.util.Date(1000L));   // returns true (same millis)
-     * Dates.isSameInstant(new java.util.Date(1000L), new java.util.Date(2000L));   // returns false (different millis)
+     * Dates.isSameInstant(new java.util.Date(1000L), new java.util.Date(1000L));       // returns true (same millis)
+     * Dates.isSameInstant(new java.util.Date(1000L), new java.util.Date(2000L));       // returns false (different millis)
      *
      * // a java.util.Date and a java.sql.Timestamp at the same instant are equal here
-     * Dates.isSameInstant(new java.util.Date(1000L), new java.sql.Timestamp(1000L)); // returns true
-     * Dates.isSameInstant((java.util.Date) null, new java.util.Date(1000L));         // throws IllegalArgumentException
+     * Dates.isSameInstant(new java.util.Date(1000L), new java.sql.Timestamp(1000L));   // returns true
+     * Dates.isSameInstant((java.util.Date) null, new java.util.Date(1000L));           // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date1 the first date, not altered, not null.
-     * @param date2 the second date, not altered, not null.
+     * @param date1 the first date, not altered, not {@code null}.
+     * @param date2 the second date, not altered, not {@code null}.
      * @return {@code true} if they represent the same millisecond instant.
      * @throws IllegalArgumentException if either date is {@code null}.
      * @see #isSameInstant(Calendar, Calendar)
@@ -6477,12 +6503,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isSameInstant(c1, c2);   // returns true (same millisecond instant)
      *
      * Calendar c3 = Dates.createCalendar(1672585530124L);
-     * Dates.isSameInstant(c1, c3);                 // returns false (1 ms apart)
-     * Dates.isSameInstant((Calendar) null, c2);    // throws IllegalArgumentException
+     * Dates.isSameInstant(c1, c3);                // returns false (1 ms apart)
+     * Dates.isSameInstant((Calendar) null, c2);   // throws IllegalArgumentException
      * }</pre>
      *
-     * @param cal1 the first calendar, not altered, not null.
-     * @param cal2 the second calendar, not altered, not null.
+     * @param cal1 the first calendar, not altered, not {@code null}.
+     * @param cal2 the second calendar, not altered, not {@code null}.
      * @return {@code true} if they represent the same millisecond instant.
      * @throws IllegalArgumentException if either calendar is {@code null}.
      * @see #isSameInstant(java.util.Date, java.util.Date)
@@ -6508,8 +6534,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * java.util.Date d1 = new java.util.Date(1672585530123L);
      * java.util.Date d2 = new java.util.Date(1672585530123L);
-     * Dates.isSameLocalTime(d1, d2);                     // returns true (same instant, same local fields)
-     * Dates.isSameLocalTime((java.util.Date) null, d2);  // throws IllegalArgumentException
+     * Dates.isSameLocalTime(d1, d2);                      // returns true (same instant, same local fields)
+     * Dates.isSameLocalTime((java.util.Date) null, d2);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param date1 the first date, not altered, not {@code null}.
@@ -6546,15 +6572,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <pre>{@code
      * Calendar c1 = Dates.createCalendar(1672585530123L);
      * Calendar c2 = Dates.createCalendar(1672585530123L);
-     * Dates.isSameLocalTime(c1, c2);   // returns true (identical fields and type)
+     * Dates.isSameLocalTime(c1, c2);                        // returns true (identical fields and type)
      *
      * Calendar c3 = Dates.createCalendar(1672585531123L);   // returns 1 second later
      * Dates.isSameLocalTime(c1, c3);                        // returns false (different second field)
      * Dates.isSameLocalTime((Calendar) null, c2);           // throws IllegalArgumentException
      * }</pre>
      *
-     * @param cal1 the first calendar, not altered, not null.
-     * @param cal2 the second calendar, not altered, not null.
+     * @param cal1 the first calendar, not altered, not {@code null}.
+     * @param cal2 the second calendar, not altered, not {@code null}.
      * @return {@code true} if they represent the same local time.
      * @throws IllegalArgumentException if either calendar is {@code null}.
      * @see #isSameLocalTime(java.util.Date, java.util.Date)
@@ -6572,7 +6598,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     private static DateFormat getSDF(final String format, final TimeZone timeZone) {
         DateFormat sdf = null;
 
-        if (UTC_TIME_ZONE.equals(timeZone)) {
+        if (INTERNAL_UTC_TIME_ZONE.equals(timeZone)) {
             //noinspection ConditionCoveredByFurtherCondition
             if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 sdf = utcTimestampDFPool.poll();
@@ -6618,7 +6644,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     private static void recycleSDF(final String format, final TimeZone timeZone, final DateFormat sdf) {
-        if (UTC_TIME_ZONE.equals(timeZone)) {
+        if (INTERNAL_UTC_TIME_ZONE.equals(timeZone)) {
             //noinspection ConditionCoveredByFurtherCondition
             if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 utcTimestampDFPool.offer(sdf);
@@ -6701,15 +6727,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
             // The UTC designator 'Z' fixes the zone to UTC. Reject a conflicting non-UTC zone rather than
             // silently overriding it, so the format side matches the parse side (both throw IAE on the
             // same caller mistake). A null or zero-offset (UTC-equivalent) zone is accepted and resolved to UTC.
-            if (timeZone != null && !timeZone.hasSameRules(UTC_TIME_ZONE)) {
+            if (timeZone != null && !timeZone.hasSameRules(INTERNAL_UTC_TIME_ZONE)) {
                 throw new IllegalArgumentException("A pattern or value ending with the UTC designator 'Z' requires a UTC-equivalent time zone; format: "
                         + format + ", time zone: " + timeZone);
             }
 
-            return UTC_TIME_ZONE;
+            return INTERNAL_UTC_TIME_ZONE;
         }
 
-        return timeZone == null ? DEFAULT_TIME_ZONE : timeZone;
+        // Calendar and DateFormat retain their TimeZone reference, and the fast-parse pool also uses
+        // it as a ConcurrentHashMap key. TimeZone (including ZoneInfo) is mutable and its hash code can
+        // change with the raw offset, so never retain a caller-owned instance in those internal pools.
+        return timeZone == null ? INTERNAL_DEFAULT_TIME_ZONE : (TimeZone) timeZone.clone();
     }
 
     private static long fastDateParse(final String str, final String format, final TimeZone timeZone) {
@@ -6739,7 +6768,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         Calendar c = null;
         Queue<Calendar> timeZoneCalendarQueue = null;
 
-        if (UTC_TIME_ZONE.equals(timeZone)) {
+        if (INTERNAL_UTC_TIME_ZONE.equals(timeZone)) {
             c = utcCalendarPool.poll();
         } else {
             timeZoneCalendarQueue = calendarPool.computeIfAbsent(timeZone, tz -> new ArrayBlockingQueue<>(POOL_SIZE));
@@ -6757,7 +6786,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         final long timeInMillis = c.getTimeInMillis();
 
-        if (UTC_TIME_ZONE.equals(timeZone)) {
+        if (INTERNAL_UTC_TIME_ZONE.equals(timeZone)) {
             utcCalendarPool.offer(c);
         } else {
             timeZoneCalendarQueue.offer(c);
@@ -6960,11 +6989,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * java.util.Date d10 = new java.util.Date(10000L), d15 = new java.util.Date(15000L);
      * java.util.Date d20 = new java.util.Date(20000L);
      *
-     * Dates.isOverlapping(d1, d10, d5, d15);    // returns true (overlap between 5000 and 10000)
-     * Dates.isOverlapping(d1, d10, d15, d20);   // returns false (disjoint ranges)
-     * Dates.isOverlapping(d1, d10, d10, d20);   // returns false (adjacent; endpoints are exclusive)
+     * Dates.isOverlapping(d1, d10, d5, d15);     // returns true (overlap between 5000 and 10000)
+     * Dates.isOverlapping(d1, d10, d15, d20);    // returns false (disjoint ranges)
+     * Dates.isOverlapping(d1, d10, d10, d20);    // returns false (adjacent; endpoints are exclusive)
      *
-     * Dates.isOverlapping(null, d10, d5, d15);  // throws IllegalArgumentException (null argument)
+     * Dates.isOverlapping(null, d10, d5, d15);   // throws IllegalArgumentException (null argument)
      * }</pre>
      *
      * @param startDate1 start of the first range, not {@code null}.
@@ -6976,7 +7005,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #isBetween(java.util.Date, java.util.Date, java.util.Date)
      */
     public static boolean isOverlapping(final java.util.Date startDate1, final java.util.Date endDate1, final java.util.Date startDate2,
-            final java.util.Date endDate2) {
+            final java.util.Date endDate2) throws IllegalArgumentException {
         N.checkArgNotNull(startDate1, cs.startDate1);
         N.checkArgNotNull(endDate1, cs.endDate1);
         N.checkArgNotNull(startDate2, cs.startDate2);
@@ -7009,7 +7038,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if any argument is {@code null}, or if a start is after its corresponding end.
      * @see #isOverlapping(java.util.Date, java.util.Date, java.util.Date, java.util.Date)
      */
-    public static boolean isOverlapping(final Calendar startDate1, final Calendar endDate1, final Calendar startDate2, final Calendar endDate2) {
+    public static boolean isOverlapping(final Calendar startDate1, final Calendar endDate1, final Calendar startDate2, final Calendar endDate2)
+            throws IllegalArgumentException {
         N.checkArgNotNull(startDate1, cs.startDate1);
         N.checkArgNotNull(endDate1, cs.endDate1);
         N.checkArgNotNull(startDate2, cs.startDate2);
@@ -7047,7 +7077,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see N#gtAndLt(Comparable, Comparable, Comparable)
      */
     @Beta
-    public static boolean isBetween(final java.util.Date date, final java.util.Date startDate, final java.util.Date endDate) {
+    public static boolean isBetween(final java.util.Date date, final java.util.Date startDate, final java.util.Date endDate) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
         N.checkArgNotNull(startDate, cs.startDate);
         N.checkArgNotNull(endDate, cs.endDate);
@@ -7080,7 +7110,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @see #isBetween(java.util.Date, java.util.Date, java.util.Date)
      */
     @Beta
-    public static boolean isBetween(final Calendar date, final Calendar startDate, final Calendar endDate) {
+    public static boolean isBetween(final Calendar date, final Calendar startDate, final Calendar endDate) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
         N.checkArgNotNull(startDate, cs.startDate);
         N.checkArgNotNull(endDate, cs.endDate);
@@ -7112,7 +7142,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *   <li><b>Standard Format Constants:</b> Pre-defined formatters for common date/time patterns</li>
      *   <li><b>ISO-8601 Compliance:</b> Full support for ISO standard formats</li>
      *   <li><b>Type-Safe Parsing:</b> Dedicated methods for each temporal type</li>
-     *   <li><b>Null Safety:</b> Graceful handling of null inputs with {@code @MayReturnNull} annotations</li>
+     *   <li><b>Null Safety:</b> Graceful handling of {@code null} inputs with {@code @MayReturnNull} annotations</li>
      *   <li><b>Performance Optimized:</b> Cached formatter instances for efficient reuse</li>
      *   <li><b>Time Zone Support:</b> Comprehensive handling of offsets and zone IDs</li>
      *   <li><b>Numeric Input:</b> Every {@code parseTo*} method (both the modern {@code java.time} and the
@@ -7134,7 +7164,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <ul>
      *   <li><b>Parsing:</b> {@code parseTo*} methods for converting strings to temporal objects</li>
      *   <li><b>Formatting:</b> {@code format} methods for temporal object to string conversion</li>
-     *   <li><b>Input Handling:</b> Parse methods return {@code null} for null or empty input and throw for invalid non-empty input</li>
+     *   <li><b>Input Handling:</b> Parse methods return {@code null} for {@code null}, empty, or the case-insensitive literal
+     *       {@code "null"}; other invalid input is rejected</li>
      *   <li><b>Predefined Formatters:</b> Public constants for common patterns, plus {@link DTF#of(String)}
      *       for custom patterns</li>
      * </ul>
@@ -7397,7 +7428,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             // (Zoned/Offset/Instant) must be converted to UTC when formatting, not stamped with 'Z'
             // on their local wall-clock fields. Local temporals are unaffected.
             if (utcZFormat) {
-                dtf = dtf.withZone(UTC_TIME_ZONE.toZoneId());
+                dtf = dtf.withZone(UTC_ZONE_ID);
             }
 
             dateTimeFormatter = dtf;
@@ -7458,10 +7489,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DTF.ISO_8601_DATE_TIME.format(new java.util.Date(0L));             // returns "1970-01-01T00:00:00Z" (UTC 'Z' format)
-         * DTF.ISO_8601_DATE_TIME.format(new java.util.Date(1736937045000L)); // returns "2025-01-15T10:30:45Z"
+         * DTF.ISO_8601_DATE_TIME.format(new java.util.Date(0L));               // returns "1970-01-01T00:00:00Z" (UTC 'Z' format)
+         * DTF.ISO_8601_DATE_TIME.format(new java.util.Date(1736937045000L));   // returns "2025-01-15T10:30:45Z"
          *
-         * DTF.ISO_8601_DATE_TIME.format((java.util.Date) null);    // returns null
+         * DTF.ISO_8601_DATE_TIME.format((java.util.Date) null);                // returns null
          * }</pre>
          *
          * @param date the {@code java.util.Date} instance to format; may be {@code null}.
@@ -7490,10 +7521,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Calendar cal = Dates.createCalendar(0L);
-         * DTF.ISO_8601_DATE_TIME.format(cal);                                  // returns "1970-01-01T00:00:00Z"
-         * DTF.ISO_8601_DATE_TIME.format(Dates.createCalendar(1736937045000L)); // returns "2025-01-15T10:30:45Z"
+         * DTF.ISO_8601_DATE_TIME.format(cal);                                    // returns "1970-01-01T00:00:00Z"
+         * DTF.ISO_8601_DATE_TIME.format(Dates.createCalendar(1736937045000L));   // returns "2025-01-15T10:30:45Z"
          *
-         * DTF.LOCAL_DATE_TIME.format((java.util.Calendar) null);   // returns null
+         * DTF.LOCAL_DATE_TIME.format((java.util.Calendar) null);                 // returns null
          * }</pre>
          *
          * @param calendar the {@code java.util.Calendar} instance to format; may be {@code null}.
@@ -7523,7 +7554,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * DTF.LOCAL_DATE_TIME.format(LocalDateTime.of(2023, 12, 25, 14, 30, 45));   // returns "2023-12-25 14:30:45"
          * DTF.LOCAL_DATE.format(LocalDate.of(2023, 12, 25));                        // returns "2023-12-25"
          *
-         * DTF.LOCAL_DATE_TIME.format((TemporalAccessor) null);   // returns null
+         * DTF.LOCAL_DATE_TIME.format((TemporalAccessor) null);                      // returns null
          *
          * // Note: the temporal must supply every field the pattern needs; e.g. a bare Instant cannot be
          * // formatted with a yyyy-MM-dd pattern and throws DateTimeException.
@@ -7563,7 +7594,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @throws UncheckedIOException if an I/O error occurs while appending.
          * @see Dates#formatTo(java.util.Date, String, Appendable)
          */
-        public void formatTo(final java.util.Date date, final Appendable appendable) {
+        public void formatTo(final java.util.Date date, final Appendable appendable) throws IllegalArgumentException {
             N.checkArgNotNull(appendable, cs.appendable);
 
             if (date == null) {
@@ -7599,7 +7630,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @throws UncheckedIOException if an I/O error occurs while appending.
          * @see Dates#formatTo(java.util.Calendar, String, Appendable)
          */
-        public void formatTo(final java.util.Calendar calendar, final Appendable appendable) {
+        public void formatTo(final java.util.Calendar calendar, final Appendable appendable) throws IllegalArgumentException {
             N.checkArgNotNull(appendable, cs.appendable);
 
             if (calendar == null) {
@@ -7635,7 +7666,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @throws UncheckedIOException if an I/O error occurs while appending.
          * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
          */
-        public void formatTo(final TemporalAccessor temporal, final Appendable appendable) {
+        public void formatTo(final TemporalAccessor temporal, final Appendable appendable) throws IllegalArgumentException {
             N.checkArgNotNull(appendable, cs.appendable);
 
             if (temporal == null) {
@@ -7651,11 +7682,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DTF.LOCAL_DATE.parseToLocalDate("2023-12-25");    // returns LocalDate 2023-12-25
-         * DTF.LOCAL_DATE.parseToLocalDate("1672585530123"); // returns numeric = epoch millis -> the local date at that instant
+         * DTF.LOCAL_DATE.parseToLocalDate("2023-12-25");          // returns LocalDate 2023-12-25
+         * DTF.LOCAL_DATE.parseToLocalDate("1672585530123");       // returns numeric = epoch millis -> the local date at that instant
          *
-         * DTF.LOCAL_DATE.parseToLocalDate("");                  // returns null
-         * DTF.LOCAL_DATE.parseToLocalDate((CharSequence) null); // returns null
+         * DTF.LOCAL_DATE.parseToLocalDate("");                    // returns null
+         * DTF.LOCAL_DATE.parseToLocalDate((CharSequence) null);   // returns null
          * }</pre>
          *
          * <p>Note: for the UTC {@code 'Z'} formats ({@code ISO_8601_DATE_TIME}, {@code ISO_8601_TIMESTAMP})
@@ -7673,7 +7704,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public LocalDate parseToLocalDate(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -7703,7 +7734,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                     final Calendar cal = parseToCalendar(text);
                     // For the UTC 'Z' formats, return the wall-clock value as written (UTC), matching
                     // the ZONED/OFFSET siblings, instead of shifting it into the default zone.
-                    return cal == null ? null : LocalDate.ofInstant(cal.toInstant(), utcZFormat ? UTC_TIME_ZONE.toZoneId() : cal.getTimeZone().toZoneId());
+                    return cal == null ? null : LocalDate.ofInstant(cal.toInstant(), utcZFormat ? UTC_ZONE_ID : cal.getTimeZone().toZoneId());
                 }
             }
         }
@@ -7713,11 +7744,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DTF.LOCAL_TIME.parseToLocalTime("14:30:45");      // returns LocalTime 14:30:45
-         * DTF.LOCAL_TIME.parseToLocalTime("1672585530123"); // returns numeric = epoch millis -> the local time at that instant
+         * DTF.LOCAL_TIME.parseToLocalTime("14:30:45");            // returns LocalTime 14:30:45
+         * DTF.LOCAL_TIME.parseToLocalTime("1672585530123");       // returns numeric = epoch millis -> the local time at that instant
          *
-         * DTF.LOCAL_TIME.parseToLocalTime("");                  // returns null
-         * DTF.LOCAL_TIME.parseToLocalTime((CharSequence) null); // returns null
+         * DTF.LOCAL_TIME.parseToLocalTime("");                    // returns null
+         * DTF.LOCAL_TIME.parseToLocalTime((CharSequence) null);   // returns null
          * }</pre>
          *
          * <p>Note: for the UTC {@code 'Z'} formats ({@code ISO_8601_DATE_TIME}, {@code ISO_8601_TIMESTAMP})
@@ -7735,7 +7766,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public LocalTime parseToLocalTime(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -7765,7 +7796,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                     final Calendar cal = parseToCalendar(text);
                     // For the UTC 'Z' formats, return the wall-clock value as written (UTC), matching
                     // the ZONED/OFFSET siblings, instead of shifting it into the default zone.
-                    return cal == null ? null : LocalTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_TIME_ZONE.toZoneId() : cal.getTimeZone().toZoneId());
+                    return cal == null ? null : LocalTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_ZONE_ID : cal.getTimeZone().toZoneId());
                 }
             }
         }
@@ -7778,8 +7809,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * DTF.LOCAL_DATE_TIME.parseToLocalDateTime("2023-12-25 14:30:45");   // returns LocalDateTime 2023-12-25T14:30:45
          * DTF.LOCAL_DATE_TIME.parseToLocalDateTime("1672585530123");         // returns numeric = epoch millis -> local date-time at that instant
          *
-         * DTF.LOCAL_DATE_TIME.parseToLocalDateTime("");                     // returns null
-         * DTF.LOCAL_DATE_TIME.parseToLocalDateTime((CharSequence) null);    // returns null
+         * DTF.LOCAL_DATE_TIME.parseToLocalDateTime("");                      // returns null
+         * DTF.LOCAL_DATE_TIME.parseToLocalDateTime((CharSequence) null);     // returns null
          * }</pre>
          *
          * <p>Note: for the UTC {@code 'Z'} formats ({@code ISO_8601_DATE_TIME}, {@code ISO_8601_TIMESTAMP})
@@ -7797,7 +7828,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public LocalDateTime parseToLocalDateTime(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -7827,7 +7858,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                     final Calendar cal = parseToCalendar(text);
                     // For the UTC 'Z' formats, return the wall-clock value as written (UTC), matching
                     // the ZONED/OFFSET siblings, instead of shifting it into the default zone.
-                    return cal == null ? null : LocalDateTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_TIME_ZONE.toZoneId() : cal.getTimeZone().toZoneId());
+                    return cal == null ? null : LocalDateTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_ZONE_ID : cal.getTimeZone().toZoneId());
                 }
             }
         }
@@ -7839,10 +7870,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * <pre>{@code
          * DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("2023-12-25T14:30:45+05:30");
          *                                                  // returns OffsetDateTime 2023-12-25T14:30:45+05:30
-         * DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("1672585530123"); // returns numeric = epoch millis
+         * DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("1672585530123");       // returns numeric = epoch millis
          *
-         * DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("");                  // returns null
-         * DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime((CharSequence) null); // returns null
+         * DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("");                    // returns null
+         * DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime((CharSequence) null);   // returns null
          * }</pre>
          *
          * <p>Note: for the UTC {@code 'Z'} formats ({@code ISO_8601_DATE_TIME}, {@code ISO_8601_TIMESTAMP})
@@ -7862,7 +7893,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public OffsetDateTime parseToOffsetDateTime(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -7886,7 +7917,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 final Calendar cal = parseToCalendar(text);
                 // For the UTC 'Z' formats the value is a UTC instant, so stamp +00:00 rather than the
                 // default zone's offset (mirrors parseToLocalDate/Time/DateTime).
-                return cal == null ? null : OffsetDateTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_TIME_ZONE.toZoneId() : cal.getTimeZone().toZoneId());
+                return cal == null ? null : OffsetDateTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_ZONE_ID : cal.getTimeZone().toZoneId());
             }
         }
 
@@ -7897,10 +7928,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * <pre>{@code
          * DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("2023-12-25T14:30:45+05:30[Asia/Kolkata]");
          *                                                  // returns ZonedDateTime 2023-12-25T14:30:45+05:30[Asia/Kolkata]
-         * DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("1672585530123"); // returns numeric = epoch millis
+         * DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("1672585530123");       // returns numeric = epoch millis
          *
-         * DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("");                  // returns null
-         * DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime((CharSequence) null); // returns null
+         * DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("");                    // returns null
+         * DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime((CharSequence) null);   // returns null
          * }</pre>
          *
          * <p>Note: for the UTC {@code 'Z'} formats ({@code ISO_8601_DATE_TIME}, {@code ISO_8601_TIMESTAMP})
@@ -7920,7 +7951,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public ZonedDateTime parseToZonedDateTime(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -7944,7 +7975,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 final Calendar cal = parseToCalendar(text);
                 // For the UTC 'Z' formats the value is a UTC instant, so stamp the UTC zone rather than the
                 // default zone (mirrors parseToLocalDate/Time/DateTime).
-                return cal == null ? null : ZonedDateTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_TIME_ZONE.toZoneId() : cal.getTimeZone().toZoneId());
+                return cal == null ? null : ZonedDateTime.ofInstant(cal.toInstant(), utcZFormat ? UTC_ZONE_ID : cal.getTimeZone().toZoneId());
             }
         }
 
@@ -7956,8 +7987,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * DTF.ISO_8601_DATE_TIME.parseToInstant("2023-12-25T14:30:45Z").toEpochMilli();   // returns 1703514645000
          * DTF.ISO_8601_DATE_TIME.parseToInstant("1672585530123").toEpochMilli();          // returns 1672585530123 (numeric = epoch millis)
          *
-         * DTF.ISO_8601_DATE_TIME.parseToInstant("");                  // returns null
-         * DTF.ISO_8601_DATE_TIME.parseToInstant((CharSequence) null); // returns null
+         * DTF.ISO_8601_DATE_TIME.parseToInstant("");                                      // returns null
+         * DTF.ISO_8601_DATE_TIME.parseToInstant((CharSequence) null);                     // returns null
          * }</pre>
          *
          * @param text the CharSequence to parse; may be {@code null} or empty. A purely numeric value is interpreted as epoch milliseconds.
@@ -7970,7 +8001,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public Instant parseToInstant(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8002,8 +8033,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * <pre>{@code
          * DTF.ISO_8601_DATE_TIME.parseToJUDate("2023-12-25T14:30:45Z").getTime();   // returns 1703514645000
          *
-         * DTF.ISO_8601_DATE_TIME.parseToJUDate("");                  // returns null
-         * DTF.ISO_8601_DATE_TIME.parseToJUDate((CharSequence) null); // returns null
+         * DTF.ISO_8601_DATE_TIME.parseToJUDate("");                                 // returns null
+         * DTF.ISO_8601_DATE_TIME.parseToJUDate((CharSequence) null);                // returns null
          * }</pre>
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
@@ -8014,7 +8045,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public java.util.Date parseToJUDate(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8045,8 +8076,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * TimeZone utc = TimeZone.getTimeZone("UTC");
          * DTF.LOCAL_DATE_TIME.parseToJUDate("2023-12-25 14:30:45", utc).getTime();   // returns 1703514645000
          *
-         * DTF.LOCAL_DATE_TIME.parseToJUDate("", utc);                  // returns null
-         * DTF.LOCAL_DATE_TIME.parseToJUDate((CharSequence) null, utc); // returns null
+         * DTF.LOCAL_DATE_TIME.parseToJUDate("", utc);                                // returns null
+         * DTF.LOCAL_DATE_TIME.parseToJUDate((CharSequence) null, utc);               // returns null
          * }</pre>
          *
          * <p>Note: pure numeric epoch-millisecond input preserves the raw {@code getTime()} value and ignores {@code tz}.</p>
@@ -8060,7 +8091,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public java.util.Date parseToJUDate(final CharSequence text, final TimeZone tz) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8089,8 +8120,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * <pre>{@code
          * Dates.format(DTF.LOCAL_DATE.parseToDate("2023-12-25"), "yyyy-MM-dd");   // returns "2023-12-25" (default-zone round-trip)
          *
-         * DTF.LOCAL_DATE.parseToDate("");                  // returns null
-         * DTF.LOCAL_DATE.parseToDate((CharSequence) null); // returns null
+         * DTF.LOCAL_DATE.parseToDate("");                                         // returns null
+         * DTF.LOCAL_DATE.parseToDate((CharSequence) null);                        // returns null
          * }</pre>
          *
          * <p>Note: pure numeric epoch-millisecond input preserves the raw {@code getTime()} value for serialization round-trips.</p>
@@ -8103,7 +8134,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public java.sql.Date parseToDate(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8134,8 +8165,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * TimeZone utc = TimeZone.getTimeZone("UTC");
          * DTF.LOCAL_DATE.parseToDate("2023-12-25", utc).getTime();   // returns 1703462400000 (midnight UTC)
          *
-         * DTF.LOCAL_DATE.parseToDate("", utc);                  // returns null
-         * DTF.LOCAL_DATE.parseToDate((CharSequence) null, utc); // returns null
+         * DTF.LOCAL_DATE.parseToDate("", utc);                       // returns null
+         * DTF.LOCAL_DATE.parseToDate((CharSequence) null, utc);      // returns null
          * }</pre>
          *
          * <p>Note: pure numeric epoch-millisecond input preserves the raw {@code getTime()} value and ignores {@code tz}.</p>
@@ -8149,7 +8180,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public java.sql.Date parseToDate(final CharSequence text, final TimeZone tz) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8179,8 +8210,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * <pre>{@code
          * Dates.format(DTF.LOCAL_TIME.parseToTime("14:30:45"), "HH:mm:ss");   // returns "14:30:45" (default zone round-trip)
          *
-         * DTF.LOCAL_TIME.parseToTime("");                  // returns null
-         * DTF.LOCAL_TIME.parseToTime((CharSequence) null); // returns null
+         * DTF.LOCAL_TIME.parseToTime("");                                     // returns null
+         * DTF.LOCAL_TIME.parseToTime((CharSequence) null);                    // returns null
          * }</pre>
          *
          * <p>Note: pure numeric epoch-millisecond input preserves the raw {@code getTime()} value for serialization round-trips.</p>
@@ -8193,7 +8224,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public Time parseToTime(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8224,8 +8255,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * TimeZone utc = TimeZone.getTimeZone("UTC");
          * DTF.LOCAL_TIME.parseToTime("14:30:45", utc).getTime();   // returns 52245000 (time-of-day on 1970-01-01 in UTC)
          *
-         * DTF.LOCAL_TIME.parseToTime("", utc);                  // returns null
-         * DTF.LOCAL_TIME.parseToTime((CharSequence) null, utc); // returns null
+         * DTF.LOCAL_TIME.parseToTime("", utc);                     // returns null
+         * DTF.LOCAL_TIME.parseToTime((CharSequence) null, utc);    // returns null
          * }</pre>
          *
          * <p>Note: pure numeric epoch-millisecond input preserves the raw {@code getTime()} value and ignores {@code tz}.</p>
@@ -8239,7 +8270,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public Time parseToTime(final CharSequence text, final TimeZone tz) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8269,8 +8300,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * <pre>{@code
          * DTF.ISO_8601_TIMESTAMP.parseToTimestamp("2023-12-25T14:30:45.123Z").getTime();   // returns 1703514645123
          *
-         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp("");                  // returns null
-         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp((CharSequence) null); // returns null
+         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp("");                                     // returns null
+         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp((CharSequence) null);                    // returns null
          * }</pre>
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
@@ -8281,7 +8312,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public Timestamp parseToTimestamp(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8311,8 +8342,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * TimeZone utc = TimeZone.getTimeZone("UTC");
          * DTF.ISO_8601_TIMESTAMP.parseToTimestamp("2023-12-25T14:30:45.123Z", utc).getTime();   // returns 1703514645123
          *
-         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp("", utc);                  // returns null
-         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp((CharSequence) null, utc); // returns null
+         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp("", utc);                                     // returns null
+         * DTF.ISO_8601_TIMESTAMP.parseToTimestamp((CharSequence) null, utc);                    // returns null
          * }</pre>
          *
          * <p>Note: pure numeric epoch-millisecond input preserves the raw {@code getTime()} value and ignores {@code tz}.</p>
@@ -8326,7 +8357,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public Timestamp parseToTimestamp(final CharSequence text, final TimeZone tz) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8356,8 +8387,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Dates.format(DTF.LOCAL_DATE_TIME.parseToCalendar("2023-12-25 14:30:45"), "yyyy-MM-dd HH:mm:ss");
          *                                                  // returns "2023-12-25 14:30:45" (default zone round-trip)
          *
-         * DTF.LOCAL_DATE_TIME.parseToCalendar("");                  // returns null
-         * DTF.LOCAL_DATE_TIME.parseToCalendar((CharSequence) null); // returns null
+         * DTF.LOCAL_DATE_TIME.parseToCalendar("");                    // returns null
+         * DTF.LOCAL_DATE_TIME.parseToCalendar((CharSequence) null);   // returns null
          * }</pre>
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
@@ -8368,7 +8399,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public Calendar parseToCalendar(final CharSequence text) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8398,8 +8429,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * TimeZone utc = TimeZone.getTimeZone("UTC");
          * DTF.LOCAL_DATE_TIME.parseToCalendar("2023-12-25 14:30:45", utc).getTimeInMillis();   // returns 1703514645000
          *
-         * DTF.LOCAL_DATE_TIME.parseToCalendar("", utc);                  // returns null
-         * DTF.LOCAL_DATE_TIME.parseToCalendar((CharSequence) null, utc); // returns null
+         * DTF.LOCAL_DATE_TIME.parseToCalendar("", utc);                                        // returns null
+         * DTF.LOCAL_DATE_TIME.parseToCalendar((CharSequence) null, utc);                       // returns null
          * }</pre>
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
@@ -8411,7 +8442,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          */
         @MayReturnNull
         public Calendar parseToCalendar(final CharSequence text, final TimeZone tz) {
-            if (Strings.isEmpty(text)) {
+            if (isNullDateTime(text)) {
                 return null;
             }
 
@@ -8474,10 +8505,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DTF.LOCAL_DATE_TIME.toString();    // returns "yyyy-MM-dd HH:mm:ss"
-         * DTF.LOCAL_DATE.toString();         // returns "yyyy-MM-dd"
-         * DTF.LOCAL_TIME.toString();         // returns "HH:mm:ss"
-         * DTF.ISO_8601_TIMESTAMP.toString(); // returns "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+         * DTF.LOCAL_DATE_TIME.toString();      // returns "yyyy-MM-dd HH:mm:ss"
+         * DTF.LOCAL_DATE.toString();           // returns "yyyy-MM-dd"
+         * DTF.LOCAL_TIME.toString();           // returns "HH:mm:ss"
+         * DTF.ISO_8601_TIMESTAMP.toString();   // returns "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
          * }</pre>
          *
          * @return the pattern string backing this {@code DTF}.

@@ -194,11 +194,13 @@ public class MutableLongType extends NumberType<MutableLong> {
 
     /**
      * Writes the long value of a {@link MutableLong} to a {@link CharacterWriter}.
-     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
-     * The {@code config} parameter is not used for long values.
+     * A {@code null} wrapper is written as zero when
+     * {@link JsonXmlSerConfig#isWriteNullNumberAsZero()} is enabled, and as {@code null} otherwise.
+     * A non-null value (or configured null-as-zero value) is quoted when
+     * {@link JsonXmlSerConfig#isWriteLongAsString()} is enabled with a non-zero string quotation.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
-     * {@code CharacterWriter}. String quotation/escaping config is ignored.
+     * {@code CharacterWriter}. String escaping options do not otherwise affect the numeric value.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -206,7 +208,7 @@ public class MutableLongType extends NumberType<MutableLong> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableLong} to write, may be {@code null}
-     * @param config the serialization configuration (unused for long values)
+     * @param config the serialization configuration controlling null-number and long-as-string output; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

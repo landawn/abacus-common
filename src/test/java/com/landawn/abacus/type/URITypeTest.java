@@ -61,7 +61,17 @@ public class URITypeTest extends TestBase {
     @Test
     public void testValueOfEmptyString() {
         URI result = uriType.valueOf("");
-        assertNull(result);
+
+        assertNotNull(result);
+        assertEquals(URI.create(""), result);
+        assertEquals("", result.toString());
+    }
+
+    @Test
+    public void testEmptyUriRoundTrip() {
+        URI original = URI.create("");
+
+        assertEquals(original, uriType.valueOf(uriType.stringOf(original)));
     }
 
     @Test

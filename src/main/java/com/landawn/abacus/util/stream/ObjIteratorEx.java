@@ -275,7 +275,8 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
 
     /**
      * Creates a deferred ObjIteratorEx that initializes the underlying iterator lazily.
-     * The iterator is created only when iteration begins (first call to hasNext or next).
+     * The iterator is created only when traversal is first requested by {@link #hasNext()}, {@link #next()},
+     * a positive {@link #advance(long)}, or {@link #count()}.
      * This is useful for expensive initialization operations that should only occur when actually needed.
      *
      * <p><b>Usage Examples:</b></p>
@@ -306,10 +307,17 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * {@code Files.lines(...).iterator()}) is neither; to release its resource, supply an iterator that
      * closes the stream (or close the stream yourself).</p>
      *
+     * <p>Calling {@link #closeResource()} before any traversal request is a no-op and does not invoke the supplier.</p>
+     *
      * @param <T> the type of elements
      * @param iteratorSupplier the supplier that provides the iterator
      * @return a deferred ObjIteratorEx
      * @throws IllegalArgumentException if iteratorSupplier is null
+     * @throws IllegalStateException if the supplier returns {@code null} when initialized
+     * @throws RuntimeException if the supplier throws a runtime exception when initialized;
+     *         the same failure is rethrown on subsequent access attempts
+     * @throws Error if the supplier throws an error when initialized;
+     *         the same failure is rethrown on subsequent access attempts
      */
     public static <T> ObjIteratorEx<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -317,22 +325,19 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
         return new ObjIteratorEx<>() {
             private Iterator<? extends T> iter = null;
             private IteratorEx<? extends T> iterEx = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
+            private Throwable initializationFailure = null;
 
             @Override
             public boolean hasNext() {
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 return iter.hasNext();
             }
 
             @Override
             public T next() {
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 return iter.next();
             }
@@ -343,9 +348,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                     return;
                 }
 
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 if (iterEx != null) {
                     iterEx.advance(n);
@@ -356,9 +359,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
 
             @Override
             public long count() {
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 if (iterEx != null) {
                     return iterEx.count();
@@ -383,9 +384,29 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
 
             private void init() {
                 if (!isInitialized) {
-                    isInitialized = true;
-                    iter = iteratorSupplier.get();
-                    iterEx = iter instanceof IteratorEx ? (IteratorEx<T>) iter : null;
+                    synchronized (this) {
+                        if (!isInitialized) {
+                            try {
+                                iter = iteratorSupplier.get();
+
+                                if (iter == null) {
+                                    throw new IllegalStateException("Iterator supplier returned null");
+                                }
+
+                                iterEx = iter instanceof IteratorEx ? (IteratorEx<T>) iter : null;
+                            } catch (RuntimeException | Error e) {
+                                initializationFailure = e;
+                            } finally {
+                                isInitialized = true;
+                            }
+                        }
+                    }
+                }
+
+                if (initializationFailure instanceof RuntimeException) {
+                    throw (RuntimeException) initializationFailure;
+                } else if (initializationFailure != null) {
+                    throw (Error) initializationFailure;
                 }
             }
         };
@@ -488,7 +509,8 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
          * This is the value supplied at construction time and is intended as a sizing
          * hint for downstream consumers; the iterator may actually yield fewer elements.
          *
-         * @return the expected/upper-bound number of remaining elements
+         * @return the original expected/upper-bound element count; this value is not decremented
+         *         as the iterator is consumed
          */
         public int max() {
             return bufferSize;

@@ -614,6 +614,7 @@ public class ImmutableBiMapTest extends TestBase {
         ImmutableBiMap<Integer, String> inverse1 = biMap.inverse();
         ImmutableBiMap<Integer, String> inverse2 = biMap.inverse();
         assertSame(inverse1, inverse2);
+        assertSame(biMap, inverse1.inverse());
     }
 
     @Test

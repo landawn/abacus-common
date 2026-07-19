@@ -48,6 +48,15 @@ public class FloatSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorRejectsInconsistentNaNState() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FloatSummaryStatistics(1, 1.0f, Float.NaN, 1.0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FloatSummaryStatistics(1, Float.NaN, 1.0f, 1.0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FloatSummaryStatistics(1, Float.NaN, Float.NaN, 1.0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FloatSummaryStatistics(1, 1.0f, 1.0f, Double.NaN));
+        Assertions.assertDoesNotThrow(() -> new FloatSummaryStatistics(1, Float.NaN, Float.NaN, Float.NaN));
+    }
+
+    @Test
     public void testZeroValue() {
         FloatSummaryStatistics stats = new FloatSummaryStatistics();
         stats.accept(0.0f);

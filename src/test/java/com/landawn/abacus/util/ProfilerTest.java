@@ -13,6 +13,10 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +72,50 @@ public class ProfilerTest extends AbstractTest {
         long startNano = System.nanoTime();
         Object result = failed ? new RuntimeException("failed") : null;
         return new Profiler.MethodStatistics(name, now - elapsedMs, now, startNano - elapsedMs * 1_000_000L, startNano, result);
+    }
+
+    @Test
+    public void testRunRejectsNullCommand() {
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, 1, 1, (Throwables.Runnable<Exception>) null));
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsRejectsNonPositiveThreadCount() {
+        assertThrows(IllegalArgumentException.class, () -> new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 0));
+    }
+
+    @Test
+    public void testInterruptingCallerCancelsProfilerWorker() throws InterruptedException {
+        final CountDownLatch workerStarted = new CountDownLatch(1);
+        final CountDownLatch blockWorker = new CountDownLatch(1);
+        final AtomicBoolean workerInterrupted = new AtomicBoolean();
+        final AtomicReference<Throwable> callerFailure = new AtomicReference<>();
+
+        final Thread caller = new Thread(() -> {
+            try {
+                Profiler.run(1, 1, 1, () -> {
+                    workerStarted.countDown();
+
+                    try {
+                        blockWorker.await();
+                    } catch (final InterruptedException e) {
+                        workerInterrupted.set(true);
+                        throw e;
+                    }
+                });
+            } catch (final Throwable e) {
+                callerFailure.set(e);
+            }
+        });
+
+        caller.start();
+        assertTrue(workerStarted.await(5, TimeUnit.SECONDS));
+        caller.interrupt();
+        caller.join(5_000);
+
+        assertFalse(caller.isAlive());
+        assertNotNull(callerFailure.get());
+        assertTrue(workerInterrupted.get());
     }
 
     @Test
@@ -1254,6 +1302,11 @@ public class ProfilerTest extends AbstractTest {
             assertNotNull(stats);
             // The loopStatisticsList should be minimal (1 iteration)
             assertEquals(1, stats.getLoopStatisticsList().size());
+            assertEquals(1, stats.getThreadNum());
+
+            StringWriter output = new StringWriter();
+            stats.writeXmlResult(output);
+            assertTrue(output.toString().contains("<loops>1</loops>"));
         } finally {
             setProfilerSuspended(original);
         }
@@ -1462,10 +1515,22 @@ public class ProfilerTest extends AbstractTest {
 
     @Test
     public void testMethodStatisticsIsFailed_Error() {
-        // Error is not an Exception, so isFailed should return false
         Profiler.MethodStatistics stats = new Profiler.MethodStatistics("test");
         stats.setResult(new Error("oom"));
-        assertFalse(stats.isFailed());
+        assertTrue(stats.isFailed());
+        assertTrue(stats.toString().contains("Error: oom"));
+    }
+
+    @Test
+    public void testRunRecordsErrorAsFailure() {
+        Profiler.suspend();
+
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 1, 1, "error", () -> {
+            throw new AssertionError("fatal");
+        });
+
+        assertEquals(1, stats.getAllFailedMethodStatisticsList().size());
+        assertTrue(stats.getAllFailedMethodStatisticsList().get(0).getResult() instanceof AssertionError);
     }
 
     // ============================================================
@@ -1635,6 +1700,23 @@ public class ProfilerTest extends AbstractTest {
     }
 
     @Test
+    public void testMultiLoopsStatisticsGetMethodNameListAggregatesAllLoops() {
+        Profiler.SingleLoopStatistics firstLoop = new Profiler.SingleLoopStatistics();
+        firstLoop.addMethodStatistics(makeMethodStats("first", 1, false));
+
+        Profiler.SingleLoopStatistics secondLoop = new Profiler.SingleLoopStatistics();
+        secondLoop.addMethodStatistics(makeMethodStats("second", 1, false));
+        secondLoop.addMethodStatistics(makeMethodStats("first", 1, false));
+
+        List<Profiler.LoopStatistics> loops = new ArrayList<>();
+        loops.add(firstLoop);
+        loops.add(secondLoop);
+
+        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1, loops);
+        assertEquals(java.util.Arrays.asList("first", "second"), stats.getMethodNameList());
+    }
+
+    @Test
     public void testMultiLoopsStatisticsSetLoopStatisticsList_Null() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         stats.setLoopStatisticsList(null);
@@ -1691,6 +1773,22 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetMethodMinElapsedTimeEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         assertEquals(0.0, stats.getMethodMinElapsedTimeInMillis("nonexistent"), 0.001);
+    }
+
+    @Test
+    public void testMultiLoopsStatisticsGetMethodMinElapsedTimeIncludesZero() {
+        Profiler.SingleLoopStatistics zeroLoop = new Profiler.SingleLoopStatistics();
+        zeroLoop.addMethodStatistics(new Profiler.MethodStatistics("method", 0, 0, 1, 1));
+
+        Profiler.SingleLoopStatistics nonZeroLoop = new Profiler.SingleLoopStatistics();
+        nonZeroLoop.addMethodStatistics(new Profiler.MethodStatistics("method", 0, 1, 1, 1_000_001));
+
+        List<Profiler.LoopStatistics> loops = new ArrayList<>();
+        loops.add(zeroLoop);
+        loops.add(nonZeroLoop);
+
+        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1, loops);
+        assertEquals(0.0, stats.getMethodMinElapsedTimeInMillis("method"), 0.0);
     }
 
     // ============================================================
@@ -2034,6 +2132,46 @@ public class ProfilerTest extends AbstractTest {
         final String output = sw.toString();
         assertTrue(output.contains("<table"));
         assertEquals("htmlResultTest", stats.getMethodNameList().get(0));
+    }
+
+    @Test
+    public void testErrorPercentageUsesInvocationCount() {
+        Profiler.SingleLoopStatistics loop = new Profiler.SingleLoopStatistics();
+        loop.addMethodStatistics(makeMethodStats("method", 1, false));
+        loop.addMethodStatistics(makeMethodStats("method", 1, true));
+
+        List<Profiler.LoopStatistics> loops = new ArrayList<>();
+        loops.add(loop);
+        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1, loops);
+
+        StringWriter output = new StringWriter();
+        stats.writeResult(output);
+        assertTrue(output.toString().contains("Errors:1 (50.0%)"), output.toString());
+    }
+
+    @Test
+    public void testHtmlAndXmlReportsEscapeDynamicText() {
+        final String methodName = "report<&\"'>";
+        Profiler.SingleLoopStatistics loop = new Profiler.SingleLoopStatistics();
+        loop.addMethodStatistics(new Profiler.MethodStatistics(methodName, 0, 1, 1, 1_000_001, new RuntimeException("failure <&>")));
+
+        List<Profiler.LoopStatistics> loops = new ArrayList<>();
+        loops.add(loop);
+        Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 1, 1_000_001, 1, loops);
+
+        StringWriter htmlOutput = new StringWriter();
+        stats.writeHtmlResult(htmlOutput);
+        String html = htmlOutput.toString();
+        assertTrue(html.contains("<td>report&lt;&amp;&quot;'&gt;</td>"), html);
+        assertTrue(html.contains("failure &lt;&amp;&gt;"), html);
+        assertFalse(html.contains("<td>" + methodName + "</td>"), html);
+
+        StringWriter xmlOutput = new StringWriter();
+        stats.writeXmlResult(xmlOutput);
+        String xml = xmlOutput.toString();
+        assertTrue(xml.contains("<method name=\"report&lt;&amp;&quot;&apos;&gt;\">"), xml);
+        assertTrue(xml.contains("failure &lt;&amp;&gt;"), xml);
+        assertFalse(xml.contains("<method name=\"" + methodName + "\">"), xml);
     }
 
 }

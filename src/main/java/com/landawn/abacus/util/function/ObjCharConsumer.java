@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -64,7 +64,6 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * @param t the object input argument
      * @param value the char input argument
      */
-    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjChar* has object first, char second. Do not suggest reordering.
     @Override
     void accept(T t, char value);
 

@@ -24,6 +24,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -8087,6 +8089,21 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testLazyFileLineIteratorNextAfterCloseThrowsNoSuchElementException() throws Exception {
+        final Class<?> iteratorClass = java.util.Arrays.stream(IOUtil.class.getDeclaredClasses())
+                .filter(it -> it.getSimpleName().equals("LazyFileLineIterator"))
+                .findFirst()
+                .orElseThrow();
+        final java.lang.reflect.Constructor<?> constructor = iteratorClass.getDeclaredConstructor(File.class);
+        constructor.setAccessible(true);
+        final Object iterator = constructor.newInstance(emptyFile);
+
+        ((AutoCloseable) iterator).close();
+
+        assertThrows(NoSuchElementException.class, () -> ((Iterator<?>) iterator).next());
+    }
+
+    @Test
     public void testForLines_Collection_WithCallback() throws Exception {
         File file1 = Files.createTempFile(tempFolder, "coll-cb1", ".txt").toFile();
         Files.write(file1.toPath(), "Line1\n".getBytes(UTF_8));
@@ -8542,6 +8559,35 @@ public class IOUtilTest extends TestBase {
         }
     }
 
+    @Test
+    public void testReadAllBytes_ZipSkipsLeadingDirectoryEntries() throws Exception {
+        final File zipFile = Files.createTempFile(tempFolder, "io-util-directory-first", ".zip").toFile();
+
+        try (java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(Files.newOutputStream(zipFile.toPath()))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("directory/"));
+            out.closeEntry();
+            out.putNextEntry(new java.util.zip.ZipEntry("directory/entry.txt"));
+            out.write("zip-content".getBytes(UTF_8));
+            out.closeEntry();
+        }
+
+        assertEquals("zip-content", new String(IOUtil.readAllBytes(zipFile), UTF_8));
+    }
+
+    @Test
+    public void testReadAllBytes_ZipWithOnlyDirectoriesFailsAndClosesArchive() throws Exception {
+        final File zipFile = Files.createTempFile(tempFolder, "io-util-directory-only", ".zip").toFile();
+
+        try (java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(Files.newOutputStream(zipFile.toPath()))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("directory/"));
+            out.closeEntry();
+        }
+
+        final UncheckedIOException error = assertThrows(UncheckedIOException.class, () -> IOUtil.readAllBytes(zipFile));
+        assertTrue(error.getCause().getMessage().contains("contains no file entries"));
+        assertTrue(zipFile.delete(), "the ZipFile must be closed when opening fails");
+    }
+
     // ---------------------------------------------------------------------
     //  Regression tests for symbolic-link handling in recursive operations.
     //  These guard against infinite loops on cyclic symlinks (listFiles,
@@ -8930,6 +8976,65 @@ public class IOUtilTest extends TestBase {
 
         assertTrue(path.contains("a b"));
         assertTrue(path.contains("\u20ac+%bad%zz.txt"));
+    }
+
+    @Test
+    public void testNullStreamAndReaderSourcesDoNotTouchTargets() throws Exception {
+        final File byteTarget = tempFolder.resolve("null_stream_target.txt").toFile();
+        IOUtil.write("KEEP", byteTarget);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.write((InputStream) null, byteTarget));
+        assertEquals("KEEP", IOUtil.readAllToString(byteTarget));
+
+        final File charTarget = tempFolder.resolve("null_reader_target.txt").toFile();
+        IOUtil.write("KEEP", charTarget);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.write((Reader) null, charTarget));
+        assertEquals("KEEP", IOUtil.readAllToString(charTarget));
+
+        final File appendByteTarget = tempFolder.resolve("null_stream_append.txt").toFile();
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.append((InputStream) null, appendByteTarget));
+        assertFalse(appendByteTarget.exists());
+
+        final File appendCharTarget = tempFolder.resolve("null_reader_append.txt").toFile();
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.append((Reader) null, appendCharTarget));
+        assertFalse(appendCharTarget.exists());
+    }
+
+    @Test
+    public void testFileFactoriesValidateBeforeOpeningAndUseDefaultForNullCharset() throws Exception {
+        final File output = tempFolder.resolve("buffer_size_target.txt").toFile();
+        IOUtil.write("KEEP", output);
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.newBufferedOutputStream(output, 0));
+        assertEquals("KEEP", IOUtil.readAllToString(output));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.newBufferedInputStream(output, 0));
+
+        try (FileReader reader = IOUtil.newFileReader(output, null)) {
+            assertEquals("KEEP", IOUtil.readAllToString(reader));
+        }
+
+        try (Writer writer = IOUtil.newFileWriter(output, null)) {
+            writer.write("UTF-8");
+        }
+        assertEquals("UTF-8", IOUtil.readAllToString(output));
+
+        try (java.io.BufferedReader reader = IOUtil.newBufferedReader(output.toPath(), null)) {
+            assertEquals("UTF-8", reader.readLine());
+        }
+    }
+
+    @Test
+    public void testCreateParentDirectoriesAcceptsParentlessRelativeFile() throws Exception {
+        final java.lang.reflect.Method method = IOUtil.class.getDeclaredMethod("createParentDirectories", File.class);
+        method.setAccessible(true);
+
+        assertEquals(Boolean.TRUE, method.invoke(null, new File("parentless-file.txt")));
+    }
+
+    @Test
+    public void testSizeOfDirectoryAsBigIntegerRejectsMissingDirectory() {
+        final File missing = tempFolder.resolve("missing_big_integer_directory").toFile();
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.sizeOfDirectoryAsBigInteger(missing));
     }
 
 }

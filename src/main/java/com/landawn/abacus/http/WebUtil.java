@@ -61,9 +61,9 @@ public final class WebUtil {
      *
      * <p>Supported cURL options:</p>
      * <ul>
-     *   <li>{@code -X, --request}: HTTP method (GET, POST, PUT, DELETE, etc.)</li>
-     *   <li>{@code -H, --header}: HTTP headers (can be specified multiple times)</li>
-     *   <li>{@code -d, --data, --data-raw}: Request body data (also accepts the inline {@code -d=}, {@code --data=} and {@code --data-raw=} forms)</li>
+     *   <li>{@code -X, --request}: HTTP method (including {@code -XPOST} and {@code --request=POST})</li>
+     *   <li>{@code -H, --header}: HTTP headers (including attached/equals forms; can be specified multiple times)</li>
+     *   <li>{@code -d, --data, --data-raw}: Request body data (including attached/equals forms)</li>
      *   <li>{@code -I, --head}: HEAD request (inferred method)</li>
      * </ul>
      *
@@ -96,7 +96,8 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't
      *                                  start with "curl", contains an unclosed quote, or
-     *                                  contains no URL
+     *                                  contains no URL, or if a request/data option has a missing
+     *                                  or unsupported argument
      * @see #curlToOkHttpRequestCode(String)
      */
     public static String curlToHttpRequestCode(final String curl) {
@@ -119,20 +120,36 @@ public final class WebUtil {
             }
 
             final String inlineBody = extractInlineDataValue(token);
+            final String inlineMethod = extractInlineRequestMethod(token);
 
-            if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
-                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase(Locale.ROOT))) {
-                httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase(Locale.ROOT));
+            if (inlineMethod != null || token.equals("-X") || token.equals("--request")) {
+                final String methodName;
+
+                if (inlineMethod != null) {
+                    methodName = inlineMethod;
+                } else if (i + 1 < size) {
+                    methodName = tokens.get(++i);
+                } else {
+                    throw new IllegalArgumentException("Missing HTTP method after " + token);
+                }
+
+                httpMethod = parseHttpMethod(methodName);
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
-            } else if ((Strings.equals(token, "--header") || Strings.equals(token, "-H")) && i + 1 < size) {
-                final String header = tokens.get(++i);
+            } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H") || extractInlineHeaderValue(token) != null) {
+                final String inlineHeader = extractInlineHeaderValue(token);
+
+                if (inlineHeader == null && i + 1 >= size) {
+                    throw new IllegalArgumentException("Missing header after " + token);
+                }
+
+                final String header = inlineHeader == null ? tokens.get(++i) : inlineHeader;
                 final int idx = header.indexOf(':');
                 if (idx > 0) {
                     final String headerName = header.substring(0, idx).trim();
                     final String headerValue = header.substring(idx + 1).trim();
 
-                    headers.append(indent).append(".header(\"").append(headerName).append("\", \"").append(escapeJava(headerValue)).append("\")"); //NOSONAR
+                    headers.append(indent).append(".header(\"").append(escapeJava(headerName)).append("\", \"").append(escapeJava(headerValue)).append("\")"); //NOSONAR
                 }
             } else if (isDataOptionToken(token)) {
                 hasDataOption = true;
@@ -143,10 +160,12 @@ public final class WebUtil {
                     } else {
                         bodyParts.add(inlineBody);
                     }
-                } else if (i + 1 < size) {
-                    bodyParts.add(tokens.get(++i));
                 } else {
-                    bodyParts.add(Strings.EMPTY);
+                    if (i + 1 >= size) {
+                        throw new IllegalArgumentException("Missing data after " + token);
+                    }
+
+                    bodyParts.add(tokens.get(++i));
                 }
             }
         }
@@ -160,7 +179,7 @@ public final class WebUtil {
         final boolean isRequestBodySupported = supportsHttpRequestBodyBuilder(httpMethod);
         String requestBody = null;
 
-        if (Strings.isNotEmpty(body)) {
+        if (hasDataOption) {
             requestBody = "  String requestBody = \"" + escapeJava(body) + "\";";
         }
 
@@ -174,7 +193,7 @@ public final class WebUtil {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR_UNIX).append(IOUtil.LINE_SEPARATOR_UNIX);
         }
 
-        if (Strings.isNotEmpty(body) && !isRequestBodySupported) {
+        if (hasDataOption && !isRequestBodySupported) {
             sb.append("  // HttpRequest.body(...) only supports POST, PUT, and PATCH. Request body omitted for ")
                     .append(httpMethod.name())
                     .append('.')
@@ -191,7 +210,7 @@ public final class WebUtil {
         if (httpMethod == HttpMethod.GET) {
             sb.append(indent).append(".get();");
         } else {
-            if (Strings.isNotEmpty(body) && isRequestBodySupported) {
+            if (hasDataOption && isRequestBodySupported) {
                 sb.append(indent).append(".body(requestBody)");
             }
 
@@ -256,7 +275,8 @@ public final class WebUtil {
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't
      *                                  start with "curl", contains an unclosed quote, or
-     *                                  contains no URL
+     *                                  contains no URL, or if a request/data option has a missing
+     *                                  or unsupported argument
      * @see #curlToHttpRequestCode(String)
      */
     public static String curlToOkHttpRequestCode(final String curl) {
@@ -280,20 +300,36 @@ public final class WebUtil {
             }
 
             final String inlineBody = extractInlineDataValue(token);
+            final String inlineMethod = extractInlineRequestMethod(token);
 
-            if (httpMethod == null && (token.equals("-X") || token.equals("--request")) && i + 1 < size
-                    && httpMethodMap.containsValue(tokens.get(i + 1).toUpperCase(Locale.ROOT))) {
-                httpMethod = HttpMethod.valueOf(tokens.get(++i).toUpperCase(Locale.ROOT));
+            if (inlineMethod != null || token.equals("-X") || token.equals("--request")) {
+                final String methodName;
+
+                if (inlineMethod != null) {
+                    methodName = inlineMethod;
+                } else if (i + 1 < size) {
+                    methodName = tokens.get(++i);
+                } else {
+                    throw new IllegalArgumentException("Missing HTTP method after " + token);
+                }
+
+                httpMethod = parseHttpMethod(methodName);
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
-            } else if ((Strings.equals(token, "--header") || Strings.equals(token, "-H")) && i + 1 < size) {
-                final String header = tokens.get(++i);
+            } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H") || extractInlineHeaderValue(token) != null) {
+                final String inlineHeader = extractInlineHeaderValue(token);
+
+                if (inlineHeader == null && i + 1 >= size) {
+                    throw new IllegalArgumentException("Missing header after " + token);
+                }
+
+                final String header = inlineHeader == null ? tokens.get(++i) : inlineHeader;
                 final int idx = header.indexOf(':');
                 if (idx > 0) {
                     final String headerName = header.substring(0, idx).trim();
                     final String headerValue = header.substring(idx + 1).trim();
 
-                    headers.append(indent).append(".header(\"").append(headerName).append("\", \"").append(escapeJava(headerValue)).append("\")"); //NOSONAR
+                    headers.append(indent).append(".header(\"").append(escapeJava(headerName)).append("\", \"").append(escapeJava(headerValue)).append("\")"); //NOSONAR
 
                     if ("Content-Type".equalsIgnoreCase(headerName)) {
                         mediaType = "MediaType.parse(\"" + escapeJava(headerValue) + "\")";
@@ -308,10 +344,12 @@ public final class WebUtil {
                     } else {
                         bodyParts.add(inlineBody);
                     }
-                } else if (i + 1 < size) {
-                    bodyParts.add(tokens.get(++i));
                 } else {
-                    bodyParts.add(Strings.EMPTY);
+                    if (i + 1 >= size) {
+                        throw new IllegalArgumentException("Missing data after " + token);
+                    }
+
+                    bodyParts.add(tokens.get(++i));
                 }
             }
         }
@@ -325,7 +363,7 @@ public final class WebUtil {
         final boolean isRequestBodySupported = supportsGeneratedOkHttpBody(httpMethod);
         String requestBody = null;
 
-        if (Strings.isNotEmpty(body)) {
+        if (hasDataOption) {
             requestBody = "  RequestBody requestBody = RequestBody.create(" + mediaType + ", \"" + escapeJava(body) + "\");";
         }
 
@@ -339,7 +377,7 @@ public final class WebUtil {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR_UNIX).append(IOUtil.LINE_SEPARATOR_UNIX);
         }
 
-        if (Strings.isNotEmpty(body) && !isRequestBodySupported) {
+        if (hasDataOption && !isRequestBodySupported) {
             sb.append("  // Request body omitted for ")
                     .append(httpMethod.name())
                     .append(" because this generated request does not support it.")
@@ -374,7 +412,7 @@ public final class WebUtil {
 
     private static boolean isDataOptionToken(final String token) {
         return Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d") || Strings.startsWith(token, "--data-raw=")
-                || Strings.startsWith(token, "--data=") || Strings.startsWith(token, "-d=");
+                || Strings.startsWith(token, "--data=") || Strings.startsWith(token, "-d=") || Strings.startsWith(token, "-d") && token.length() > 2;
     }
 
     private static String extractInlineDataValue(final String token) {
@@ -388,6 +426,38 @@ public final class WebUtil {
             return token.substring(dataPrefix.length());
         } else if (Strings.startsWith(token, shortDataPrefix)) {
             return token.substring(shortDataPrefix.length());
+        } else if (Strings.startsWith(token, "-d") && token.length() > 2) {
+            return token.substring(2);
+        }
+
+        return null;
+    }
+
+    private static String extractInlineRequestMethod(final String token) {
+        if (Strings.startsWith(token, "--request=")) {
+            return token.substring("--request=".length());
+        } else if (Strings.startsWith(token, "-X") && token.length() > 2) {
+            return token.substring(2);
+        }
+
+        return null;
+    }
+
+    private static HttpMethod parseHttpMethod(final String method) {
+        final String methodName = method.toUpperCase(Locale.ROOT);
+
+        if (!httpMethodMap.containsValue(methodName)) {
+            throw new IllegalArgumentException("Unsupported HTTP method: " + methodName);
+        }
+
+        return HttpMethod.valueOf(methodName);
+    }
+
+    private static String extractInlineHeaderValue(final String token) {
+        if (Strings.startsWith(token, "--header=")) {
+            return token.substring("--header=".length());
+        } else if (Strings.startsWith(token, "-H") && token.length() > 2) {
+            return token.substring(2);
         }
 
         return null;
@@ -445,70 +515,97 @@ public final class WebUtil {
     private static List<String> parseCurl(final String curl) {
         N.checkArgNotEmpty(curl, cs.curl);
         final String str = curl.trim();
-        N.checkArgument(Strings.startsWithIgnoreCase(str, "curl"), "Input curl script does not start with 'curl'");
+        N.checkArgument(str.length() >= 4 && str.regionMatches(true, 0, "curl", 0, 4) && (str.length() == 4 || Character.isWhitespace(str.charAt(4))),
+                "Input curl script does not start with the 'curl' command");
 
         final List<String> tokens = new ArrayList<>();
+        final StringBuilder token = new StringBuilder();
         final int len = str.length();
-
-        int cursor = 0;
-        char ch = 0;
+        boolean tokenStarted = false;
+        char quote = 0;
+        int quoteStart = -1;
 
         for (int i = 0; i < len; i++) {
-            ch = str.charAt(i);
+            final char ch = str.charAt(i);
 
-            if (ch == '\'' || ch == '"') {
-                final char quoteChar = ch;
-
-                if (cursor < i) {
-                    tokens.add(str.substring(cursor, i));
+            if (quote == '\'') {
+                if (ch == '\'') {
+                    quote = 0;
+                } else {
+                    token.append(ch);
                 }
 
-                cursor = ++i;
+                continue;
+            }
 
-                do {
-                    if (i >= len) {
-                        throw new IllegalArgumentException("Unclosed quote starting at position: " + (cursor - 1) + ". String ends at position: " + len);
-                    }
+            if (quote == '"') {
+                if (ch == '"') {
+                    quote = 0;
+                } else if (ch == '\\' && i + 1 < len) {
+                    final char next = str.charAt(i + 1);
 
-                    ch = str.charAt(i);
-
-                    if (ch == '\\') {
+                    if (next == '\n') {
                         i++;
-                    } else if (ch == quoteChar) {
-                        break;
+                    } else if (next == '\r') {
+                        i++;
+
+                        if (i + 1 < len && str.charAt(i + 1) == '\n') {
+                            i++;
+                        }
+                    } else if (next == '"') {
+                        token.append(ch).append(next);
+                        i++;
+                    } else if (next == '\\' || next == '$' || next == '`') {
+                        token.append(next);
+                        i++;
+                    } else {
+                        token.append(ch);
                     }
-                } while (++i < len);
-
-                if (ch != quoteChar) {
-                    throw new IllegalArgumentException("Missing closing quote " + quoteChar + " from position: " + cursor + " to position: " + i);
+                } else {
+                    token.append(ch);
                 }
 
-                tokens.add(str.substring(cursor, i));
+                continue;
+            }
 
-                cursor = i + 1;
-            } else if (Character.isWhitespace(ch) || ch == '\\') {
-                if (cursor < i) {
-                    tokens.add(str.substring(cursor, i));
+            if (Character.isWhitespace(ch)) {
+                if (tokenStarted) {
+                    tokens.add(token.toString());
+                    token.setLength(0);
+                    tokenStarted = false;
+                }
+            } else if (ch == '\'' || ch == '"') {
+                quote = ch;
+                quoteStart = i;
+                tokenStarted = true;
+            } else if (ch == '\\') {
+                tokenStarted = true;
+
+                if (i + 1 >= len) {
+                    throw new IllegalArgumentException("Trailing escape character at position: " + i);
                 }
 
-                cursor = i + 1;
-            } else if (ch == '/' && i + 1 < len && str.charAt(i + 1) == '/' && (i == 0 || Character.isWhitespace(str.charAt(i - 1)))) {
-                if (cursor < i) {
-                    tokens.add(str.substring(cursor, i));
-                }
+                final char next = str.charAt(++i);
 
-                while (++i < len) {
-                    if (str.charAt(i) == '\n' || str.charAt(i) == '\r' || str.charAt(i) == '\\') {
-                        break;
+                if (next == '\r') {
+                    if (i + 1 < len && str.charAt(i + 1) == '\n') {
+                        i++;
                     }
+                } else if (next != '\n') {
+                    token.append(next);
                 }
-
-                cursor = i + 1;
+            } else {
+                token.append(ch);
+                tokenStarted = true;
             }
         }
 
-        if (cursor < len) {
-            tokens.add(str.substring(cursor, len));
+        if (quote != 0) {
+            throw new IllegalArgumentException("Unclosed quote starting at position: " + quoteStart + ". String ends at position: " + len);
+        }
+
+        if (tokenStarted) {
+            tokens.add(token.toString());
         }
 
         return tokens;
@@ -643,7 +740,7 @@ public final class WebUtil {
      *       and {@code bodyContentType} is specified, the Content-Type header is automatically added</li>
      *   <li>Header values are read using {@link HttpUtil#readHttpHeaderValue(Object)} to handle
      *       various value types (String, List, etc.)</li>
-     *   <li>Values are escaped for the chosen {@code quoteChar} so the command is shell-safe:
+     *   <li>URLs, header names and values, and bodies are escaped for the chosen {@code quoteChar}:
      *       inside single quotes each {@code '} becomes {@code '\''}; inside double quotes
      *       {@code \ " $ `} are backslash-escaped</li>
      *   <li>The command is formatted with line separators at the beginning and end</li>
@@ -685,15 +782,26 @@ public final class WebUtil {
      * @see Strings#quoteEscaped(String, char)
      */
     public static String buildCurl(final HttpMethod httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
-            final char quoteChar) {
+            final char quoteChar) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, "httpMethod");
+
+        return buildCurlByMethodName(httpMethod.name(), url, headers, body, bodyContentType, quoteChar);
+    }
+
+    /**
+     * String-based counterpart used by the OkHttp interceptor, whose request model permits
+     * extension methods (for example, {@code PROPFIND}) that are not members of {@link HttpMethod}.
+     */
+    static String buildCurlByMethodName(final String httpMethod, final String url, final Map<String, ?> headers, final String body,
+            final String bodyContentType, final char quoteChar) {
+        N.checkArgNotEmpty(httpMethod, cs.httpMethod);
         N.checkArgNotEmpty(url, "url");
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
             sb.append(IOUtil.LINE_SEPARATOR_UNIX);
-            sb.append("curl -X ").append(httpMethod.name()).append(" ").append(quoteChar).append(escapeForShellQuote(url, quoteChar)).append(quoteChar);
+            sb.append("curl -X ").append(httpMethod).append(" ").append(quoteChar).append(escapeForShellQuote(url, quoteChar)).append(quoteChar);
 
             if (N.notEmpty(headers)) {
                 String headerValue = null;
@@ -701,7 +809,12 @@ public final class WebUtil {
                 for (final Map.Entry<String, ?> e : headers.entrySet()) {
                     headerValue = HttpUtil.readHttpHeaderValue(e.getValue());
 
-                    sb.append(" -H ").append(quoteChar).append(e.getKey()).append(": ").append(escapeForShellQuote(headerValue, quoteChar)).append(quoteChar);
+                    sb.append(" -H ")
+                            .append(quoteChar)
+                            .append(escapeForShellQuote(e.getKey(), quoteChar))
+                            .append(": ")
+                            .append(escapeForShellQuote(headerValue, quoteChar))
+                            .append(quoteChar);
                 }
             }
 

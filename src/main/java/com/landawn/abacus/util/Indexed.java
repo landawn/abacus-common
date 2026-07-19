@@ -29,7 +29,7 @@ package com.landawn.abacus.util;
  *   <li><b>Type Safety:</b> Generic type parameter {@code T} ensures compile-time type checking for values</li>
  *   <li><b>Immutable Design:</b> Both index and value are final and set only during construction</li>
  *   <li><b>Long Index Support:</b> Uses long for index to support very large collections beyond Integer.MAX_VALUE</li>
- *   <li><b>Null Value Support:</b> Values can be null, allowing representation of absent or optional data</li>
+ *   <li><b>Null Value Support:</b> Values can be {@code null}, allowing representation of absent or optional data</li>
  *   <li><b>Equality Semantics:</b> Two Indexed instances are equal if they have the same index and equal values</li>
  *   <li><b>Hash Code Contract:</b> Hash code is computed from both index and value for proper collection usage</li>
  *   <li><b>String Representation:</b> Clear format {@code [index]=value} for debugging and logging</li>
@@ -120,8 +120,8 @@ package com.landawn.abacus.util;
  * <p><b>Equality and Hash Code:</b>
  * <ul>
  *   <li>Two Indexed instances are equal if they have the same index and equal values</li>
- *   <li>Null values are supported and two null values are considered equal</li>
- *   <li>Hash code is computed as: {@code (int) (index * 31 + (value == null ? 0 : value.hashCode()))}</li>
+ *   <li>Null values are supported and two {@code null} values are considered equal</li>
+ *   <li>Hash code is computed from all bits of the index and the value's hash code</li>
  *   <li>The implementation satisfies the hash code contract for use in collections</li>
  * </ul>
  *
@@ -298,7 +298,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * Returns the value stored in this Indexed instance.
      *
      * <p>This method provides direct access to the value component of the index-value pair.
-     * The returned value may be {@code null} if the Indexed instance was created with a null value.
+     * The returned value may be {@code null} if the Indexed instance was created with a {@code null} value.
      * This is useful for extracting the actual data while the index can be accessed separately
      * through the {@link #index()} method inherited from {@link AbstractIndexed}.</p>
      *
@@ -310,8 +310,8 @@ public final class Indexed<T> extends AbstractIndexed {
      * <pre>{@code
      * // Basic value retrieval
      * Indexed<String> indexed = Indexed.of("Hello", 5);
-     * String value = indexed.value();  // returns "Hello"
-     * int index = indexed.index();     // returns 5
+     * String value = indexed.value();   // returns "Hello"
+     * int index = indexed.index();      // returns 5
      *
      * // Handling null values
      * Indexed<String> nullIndexed = Indexed.of(null, 0);
@@ -350,10 +350,9 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      * Returns the hash code of this Indexed instance.
      *
-     * <p>The hash code is computed based on both the index and the value using the formula:
-     * {@code (int) (index * 31 + (value == null ? 0 : value.hashCode()))}. This ensures
-     * that Indexed instances with the same index and value will have the same hash code,
-     * making them suitable for use in hash-based collections like HashMap and HashSet.</p>
+     * <p>The hash code is computed from all bits of both the index and the value using the formula:
+     * {@code 31 * hashLong(index) + (value == null ? 0 : value.hashCode())}. Equal instances
+     * therefore have equal hash codes and the upper half of a {@code long} index is not discarded.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -375,7 +374,7 @@ public final class Indexed<T> extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) (index * 31 + N.hashCode(value));
+        return 31 * hashLong(index) + N.hashCode(value);
     }
 
     /**

@@ -102,8 +102,8 @@ public final class EmailUtil {
      * @param from the sender's email address; must not be {@code null} or empty
      * @param subject the email subject. May be {@code null} or empty
      * @param content the plain text content of the email. May be {@code null} or empty
-     * @param userName the username for SMTP authentication; must not be {@code null}
-     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
+     * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
      * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
@@ -113,7 +113,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
+     *                                  {@code null} or empty, or {@code props} is {@code null}
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
@@ -147,8 +148,8 @@ public final class EmailUtil {
      * @param content the plain text content of the email. May be {@code null} or empty
      * @param attachedFiles array of file paths (absolute or relative) to attach, or {@code null} if no attachments.
      *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
-     * @param userName the username for SMTP authentication; must not be {@code null}
-     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
+     * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
      * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
@@ -158,7 +159,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
+     *                                  {@code null} or empty, or {@code props} is {@code null}
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
@@ -195,8 +197,8 @@ public final class EmailUtil {
      * @param from the sender's email address; must not be {@code null} or empty
      * @param subject the email subject. May be {@code null} or empty
      * @param content the HTML content of the email. May be {@code null} or empty
-     * @param userName the username for SMTP authentication; must not be {@code null}
-     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
+     * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
      * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
@@ -206,7 +208,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
+     *                                  {@code null} or empty, or {@code props} is {@code null}
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
      * @see #sendHtmlEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
@@ -249,8 +252,8 @@ public final class EmailUtil {
      * @param content the HTML content of the email. May be {@code null} or empty
      * @param attachedFiles array of file paths (absolute or relative) to attach, or {@code null} if no attachments.
      *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
-     * @param userName the username for SMTP authentication; must not be {@code null}
-     * @param password the password for SMTP authentication; must not be {@code null}
+     * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
+     * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
      * @param props mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
@@ -260,7 +263,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
+     *                                  {@code null} or empty, or {@code props} is {@code null}
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
      * @see #sendHtmlEmail(String[], String, String, String, String, String, Properties)
@@ -273,57 +277,67 @@ public final class EmailUtil {
 
     private static void send(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
             final boolean isHTML, final String userName, final String password, final Properties props) {
-        N.checkArgNotEmpty(recipients, "recipients");
-
         try {
-            final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(userName, password);
-                }
-            });
-
-            final MimeMessage mail = new MimeMessage(session);
-
-            final InternetAddress[] to = new InternetAddress[recipients.length];
-
-            for (int i = 0; i < recipients.length; i++) {
-                to[i] = new InternetAddress(recipients[i]);
-            }
-
-            mail.setRecipients(Message.RecipientType.TO, to);
-
-            mail.setFrom(new InternetAddress(from));
-
-            mail.setSubject(subject);
-
-            final Multipart multipart = new MimeMultipart();
-            BodyPart messageBodyPart = new MimeBodyPart();
-
-            if (isHTML) {
-                messageBodyPart.setContent(content, "text/html; charset=UTF-8");
-            } else {
-                messageBodyPart.setContent(content, "text/plain; charset=UTF-8");
-            }
-
-            multipart.addBodyPart(messageBodyPart);
-
-            if (!N.isEmpty(attachedFiles)) {
-                for (final String fileName : attachedFiles) {
-                    messageBodyPart = new MimeBodyPart();
-
-                    final DataSource source = new FileDataSource(fileName);
-                    messageBodyPart.setDataHandler(new DataHandler(source));
-
-                    messageBodyPart.setFileName(new File(fileName).getName());
-                    multipart.addBodyPart(messageBodyPart);
-                }
-            }
-
-            mail.setContent(multipart);
+            final MimeMessage mail = createMessage(recipients, from, subject, content, attachedFiles, isHTML, userName, password, props);
             Transport.send(mail);
         } catch (final MessagingException e) {
             throw new RuntimeException("Failed to send email to " + recipients.length + " recipient(s)", e);
         }
+    }
+
+    // Package-private so message construction can be verified without contacting an SMTP server.
+    static MimeMessage createMessage(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
+            final boolean isHTML, final String userName, final String password, final Properties props) throws MessagingException {
+        N.checkArgNotEmpty(recipients, "recipients");
+        N.checkArgNotEmpty(from, "from");
+        N.checkArgNotNull(props, "props");
+
+        final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(userName, password);
+            }
+        });
+
+        final MimeMessage mail = new MimeMessage(session);
+
+        final InternetAddress[] to = new InternetAddress[recipients.length];
+
+        for (int i = 0; i < recipients.length; i++) {
+            to[i] = new InternetAddress(recipients[i]);
+        }
+
+        mail.setRecipients(Message.RecipientType.TO, to);
+
+        mail.setFrom(new InternetAddress(from));
+
+        mail.setSubject(subject);
+
+        final Multipart multipart = new MimeMultipart();
+        BodyPart messageBodyPart = new MimeBodyPart();
+        final String body = content == null ? Strings.EMPTY : content;
+
+        if (isHTML) {
+            messageBodyPart.setContent(body, "text/html; charset=UTF-8");
+        } else {
+            messageBodyPart.setContent(body, "text/plain; charset=UTF-8");
+        }
+
+        multipart.addBodyPart(messageBodyPart);
+
+        if (!N.isEmpty(attachedFiles)) {
+            for (final String fileName : attachedFiles) {
+                messageBodyPart = new MimeBodyPart();
+
+                final DataSource source = new FileDataSource(fileName);
+                messageBodyPart.setDataHandler(new DataHandler(source));
+
+                messageBodyPart.setFileName(new File(fileName).getName());
+                multipart.addBodyPart(messageBodyPart);
+            }
+        }
+
+        mail.setContent(multipart);
+        return mail;
     }
 }

@@ -20,7 +20,9 @@
  * <h2>API naming conventions</h2>
  *
  * <p>This package (and the library as a whole) follows a small set of naming
- * conventions. They are summarized here so the public API stays predictable; the
+ * conventions for new APIs. Legacy names that predate these rules remain for source and binary
+ * compatibility, so existing methods do not always follow them. They are summarized here so new
+ * public API stays predictable; the
  * complete contributor guide lives in {@code docs/naming-conventions.md}.</p>
  *
  * <h3>Guiding principles</h3>
@@ -28,10 +30,10 @@
  *   <li><b>Family parallelism</b> &mdash; when an operation exists for a family of
  *       types or arities (e.g. the primitive list family {@code IntList} &hellip;
  *       {@code BooleanList}, or the functional-interface family), it carries the
- *       <i>same</i> name and parameter order across every sibling for which it is
+ *       <i>same</i> name and parameter order across every new sibling for which it is
  *       meaningful.</li>
- *   <li><b>One verb, one meaning</b> &mdash; each verb prefix maps to exactly one
- *       semantic everywhere it appears.</li>
+ *   <li><b>One verb, one meaning</b> &mdash; new verb prefixes should map to one
+ *       semantic. Deprecated or otherwise retained legacy names may be exceptions.</li>
  * </ul>
  *
  * <h3>Verb / prefix dictionary</h3>

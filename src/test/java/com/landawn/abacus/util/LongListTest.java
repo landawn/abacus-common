@@ -467,6 +467,20 @@ public class LongListTest extends TestBase {
     }
 
     @Test
+    public void testDeleteAllByIndicesDeduplicatesWithoutChangingCapacity() {
+        final LongList padded = new LongList(32);
+        padded.addAll(new long[] { 10L, 20L, 30L, 40L, 50L });
+        final long[] backingArray = padded.internalArray();
+
+        padded.removeAt(3, 1, 3, 1);
+
+        assertSame(backingArray, padded.internalArray());
+        assertArrayEquals(new long[] { 10L, 30L, 50L }, padded.toArray());
+        assertEquals(0L, backingArray[3]);
+        assertEquals(0L, backingArray[4]);
+    }
+
+    @Test
     public void testConcurrentModification() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
 
@@ -2149,6 +2163,17 @@ public class LongListTest extends TestBase {
     }
 
     @Test
+    public void testDescendingCopyUsesLogicalSizeRatherThanSpareCapacity() {
+        final LongList backed = new LongList(new long[] { 1L, 2L, 3L, 99L, 98L }, 3);
+        assertEquals(LongList.of(3L, 2L, 1L), backed.copy(3, -1, -1));
+        assertEquals(LongList.of(3L, 1L), backed.copy(3, -1, -2));
+
+        final LongList padded = new LongList(10);
+        padded.addAll(new long[] { 1L, 2L, 3L });
+        assertEquals(LongList.of(3L, 2L, 1L), padded.copy(3, -1, -1));
+    }
+
+    @Test
     public void testCopyRangeInvalidIndices() {
         list.addAll(new long[] { 1L, 2L, 3L });
         assertThrows(IndexOutOfBoundsException.class, () -> list.copy(2, 1));
@@ -2728,6 +2753,14 @@ public class LongListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.LongPredicate) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.LongPredicate) null, 0L));
+    }
+
+    @Test
+    public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
 }

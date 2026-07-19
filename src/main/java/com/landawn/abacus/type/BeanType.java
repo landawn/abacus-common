@@ -14,6 +14,11 @@
 
 package com.landawn.abacus.type;
 
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -35,6 +40,7 @@ public final class BeanType<T> extends AbstractType<T> {
 
     private final Class<T> typeClass;
     private final java.lang.reflect.Type javaType;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Package-private constructor for {@code BeanType}.
@@ -48,6 +54,19 @@ public final class BeanType<T> extends AbstractType<T> {
         super(javaType == null ? TypeFactory.getClassName(clazz) : TypeFactory.getJavaTypeName(javaType));
         this.typeClass = clazz;
         this.javaType = javaType == null ? clazz : javaType;
+
+        if (this.javaType instanceof ParameterizedType parameterizedType) {
+            final java.lang.reflect.Type[] arguments = parameterizedType.getActualTypeArguments();
+            final List<Type<?>> types = new ArrayList<>(arguments.length);
+
+            for (final java.lang.reflect.Type argument : arguments) {
+                types.add(TypeFactory.getType(argument));
+            }
+
+            parameterTypes = Collections.unmodifiableList(types);
+        } else {
+            parameterTypes = EMPTY_TYPE_LIST;
+        }
     }
 
     /**
@@ -70,6 +89,11 @@ public final class BeanType<T> extends AbstractType<T> {
     @Override
     public java.lang.reflect.Type reflectType() {
         return javaType;
+    }
+
+    @Override
+    public List<Type<?>> parameterTypes() {
+        return parameterTypes;
     }
 
     /**

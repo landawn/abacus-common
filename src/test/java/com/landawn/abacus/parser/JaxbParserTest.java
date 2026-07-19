@@ -12,15 +12,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
+
+import javax.xml.parsers.SAXParser;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +37,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.XmlUtil;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -205,6 +212,19 @@ public class JaxbParserTest extends TestBase {
     }
 
     @Test
+    public void testSerializeToOutputStreamUsesTheDeclaredEncoding() {
+        Person person = new Person("Zoë雪", 35);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        parser.serialize(person, null, baos);
+
+        String xml = baos.toString(StandardCharsets.UTF_8);
+        assertTrue(xml.contains("encoding=\"UTF-8\""));
+        assertTrue(xml.contains("<name>Zoë雪</name>"));
+        assertEquals(person, parser.deserialize(new ByteArrayInputStream(baos.toByteArray()), null, Person.class));
+    }
+
+    @Test
     public void testSerializeToWriter() throws IOException {
         Person person = new Person("Charlie", 40);
         StringWriter writer = new StringWriter();
@@ -225,6 +245,27 @@ public class JaxbParserTest extends TestBase {
         config.setIgnoredPropNames(ignoredProps);
 
         assertThrows(ParsingException.class, () -> parser.serialize(person, config));
+    }
+
+    @Test
+    public void testSerializeNullStillValidatesUnsupportedConfig() {
+        XmlSerConfig config = new XmlSerConfig();
+        Map<Class<?>, Set<String>> ignoredProps = new HashMap<>();
+        ignoredProps.put(Person.class, Set.of("age"));
+        config.setIgnoredPropNames(ignoredProps);
+
+        assertThrows(ParsingException.class, () -> parser.serialize(null, config));
+    }
+
+    @Test
+    public void testInvalidConfigDoesNotTruncateExistingFile() throws IOException {
+        File file = tempDir.resolve("existing.xml").toFile();
+        Files.writeString(file.toPath(), "preserve-me", StandardCharsets.UTF_8);
+        XmlSerConfig config = new XmlSerConfig();
+        config.setIgnoredPropNames(Map.of(Person.class, Set.of("age")));
+
+        assertThrows(ParsingException.class, () -> parser.serialize(new Person("Test", 1), config, file));
+        assertEquals("preserve-me", Files.readString(file.toPath(), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -311,6 +352,40 @@ public class JaxbParserTest extends TestBase {
 
         assertEquals("Grace", person.getName());
         assertEquals(28, person.getAge());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testDeserializeRecyclesHardenedSaxParser() throws Exception {
+        Field field = XmlUtil.class.getDeclaredField("saxParserPool");
+        field.setAccessible(true);
+        Queue<SAXParser> pool = (Queue<SAXParser>) field.get(null);
+        List<SAXParser> saved;
+
+        synchronized (pool) {
+            saved = new ArrayList<>(pool);
+            pool.clear();
+        }
+
+        try {
+            String xml = "<person><name>Pool</name><age>2</age></person>";
+            assertEquals("Pool", parser.deserialize(xml, null, Person.class).getName());
+
+            synchronized (pool) {
+                assertEquals(1, pool.size());
+            }
+
+            assertEquals("Pool", parser.deserialize(new StringReader(xml), null, Person.class).getName());
+
+            synchronized (pool) {
+                assertEquals(1, pool.size());
+            }
+        } finally {
+            synchronized (pool) {
+                pool.clear();
+                pool.addAll(saved);
+            }
+        }
     }
 
     @Test

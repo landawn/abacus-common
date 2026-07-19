@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -45,6 +46,8 @@ import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.cs;
 
 import okhttp3.CacheControl;
+import okhttp3.ConnectionPool;
+import okhttp3.Dispatcher;
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -319,7 +322,7 @@ public final class OkHttpRequest {
 
     private OkHttpClient.Builder clientBuilder() {
         if (httpClientBuilder == null) {
-            httpClientBuilder = httpClient.newBuilder();
+            httpClientBuilder = httpClient.newBuilder().dispatcher(new Dispatcher()).connectionPool(new ConnectionPool());
         }
 
         return httpClientBuilder;
@@ -1368,28 +1371,40 @@ public final class OkHttpRequest {
             final Request request = createRequest(httpMethod);
             // Defer per-request client shutdown when handing the Response back to the caller —
             // they need the client's dispatcher/connection-pool alive while reading the body.
-            resp = execute(request, returningResponse);
+            resp = execute(request);
 
             if (returningResponse) {
                 return (T) attachCleanup(resp);
             }
 
+            final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
+            final String contentEncoding = request.header(HttpHeaders.Names.CONTENT_ENCODING);
+            final ContentFormat requestContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
+            final Charset requestCharset = HttpUtil.getCharset(contentType);
+            final Map<String, List<String>> respHeaders = resp.headers().toMultimap();
+            final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
+            final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
+            final ResponseBody respBody = resp.body();
+
             if (!resp.isSuccessful()) {
-                throw new IOException(resp.code() + ": " + resp.message());
+                String responseBody = null;
+
+                if (respBody != null) {
+                    final InputStream errorStream = HttpUtil.wrapInputStream(respBody.byteStream(), respContentFormat);
+
+                    try {
+                        responseBody = IOUtil.readAllToString(errorStream, respCharset);
+                    } finally {
+                        IOUtil.closeQuietly(errorStream);
+                    }
+                }
+
+                throw new IOException(resp.code() + ": " + resp.message() + (Strings.isEmpty(responseBody) ? "" : ". " + responseBody));
             }
 
             if (resultClass.equals(Void.class)) {
                 return null;
             } else {
-                final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
-                final String contentEncoding = request.header(HttpHeaders.Names.CONTENT_ENCODING);
-                final ContentFormat requestContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
-                final Charset requestCharset = HttpUtil.getCharset(contentType);
-                final Map<String, List<String>> respHeaders = resp.headers().toMultimap();
-                final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
-                final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
-                final ResponseBody respBody = resp.body();
-
                 if (respBody == null) {
                     return null;
                 }
@@ -1405,7 +1420,7 @@ public final class OkHttpRequest {
                         if (respContentFormat == ContentFormat.KRYO && KRYO_PARSER != null) {
                             return KRYO_PARSER.deserialize(is, resultClass);
                         } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
-                            return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
+                            return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), respCharset, resultClass);
                         } else {
                             final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
@@ -1447,7 +1462,7 @@ public final class OkHttpRequest {
         }
 
         return response.newBuilder().body(new ResponseBody() {
-            private volatile boolean closed = false;
+            private final AtomicBoolean closed = new AtomicBoolean();
 
             @Override
             public MediaType contentType() {
@@ -1474,34 +1489,31 @@ public final class OkHttpRequest {
             }
 
             private void closeOnce() {
-                if (!closed) {
-                    closed = true;
+                // Response.close() may be reached concurrently through normal completion,
+                // cancellation, and error handling. Claim cleanup atomically so the per-request
+                // client is released exactly once.
+                if (closed.compareAndSet(false, true)) {
                     doAfterExecution();
                 }
             }
         }).build();
     }
 
-    private Response execute(final Request request, final boolean deferShutdown) throws IOException {
+    private Response execute(final Request request) throws IOException {
         if (httpClientBuilder != null) {
             final OkHttpClient builtClient = httpClientBuilder.build();
             try {
                 final Response response = builtClient.newCall(request).execute();
-                if (deferShutdown) {
-                    // Caller will own the Response (returns Response.class). We can't shut down
-                    // the per-request client now or the caller's body read will hit
-                    // RejectedExecutionException once OkHttp tries to dispatch the body callback.
-                    // Stash the client on the deferred-shutdown handle so close() releases it.
-                    pendingPerRequestClient = builtClient;
-                    return response;
-                }
-                builtClient.dispatcher().executorService().shutdown();
-                builtClient.connectionPool().evictAll();
+                // clientBuilder() installs a request-owned dispatcher and connection pool. Defer
+                // their release until a typed response is consumed or a raw response is closed.
+                pendingPerRequestClient = builtClient;
+
                 return response;
             } catch (final IOException | RuntimeException e) {
                 // Failure path: the response was never returned, so cleanup must happen here.
                 builtClient.dispatcher().executorService().shutdown();
                 builtClient.connectionPool().evictAll();
+
                 throw e;
             }
         } else {
@@ -1523,7 +1535,7 @@ public final class OkHttpRequest {
             }
         }
         if (closeHttpClientAfterExecution && httpClientBuilder == null && httpClient != DEFAULT_CLIENT) {
-            // Shut down the caller-provided client to release its thread pool and connection pool.
+            // Timeout factories create and own this client; create(..., client) leaves this flag false.
             httpClient.dispatcher().executorService().shutdown();
             httpClient.connectionPool().evictAll();
         }

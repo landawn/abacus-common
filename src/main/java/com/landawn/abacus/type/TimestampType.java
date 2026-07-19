@@ -119,9 +119,10 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * Timestamp ts3 = type.valueOf(null);         // Returns null
      * }</pre>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method parses the millisecond-precision representation produced by {@code stringOf}. Consequently,
+     * timestamps whose nanoseconds are not millisecond-aligned are truncated when converted through
+     * {@code stringOf}; a {@link Timestamp#toString()} representation with up to nine fractional digits is also
+     * accepted and preserves the supplied nanosecond precision.</p>
      *
      * @param str the string to parse
      * @return a Timestamp parsed from the string, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}

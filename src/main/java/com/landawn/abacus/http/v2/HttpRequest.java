@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.http.v2;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
@@ -25,16 +26,20 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.net.http.HttpResponse.BodySubscribers;
 import java.net.http.HttpResponse.PushPromiseHandler;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLSession;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.http.ContentFormat;
 import com.landawn.abacus.http.HttpHeaders;
 import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
@@ -209,7 +214,7 @@ public final class HttpRequest {
      *
      * @param url the URL string for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
-     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param readTimeoutInMillis the maximum duration allowed for the response, in milliseconds
      * @return a new HttpRequest instance
      */
     public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
@@ -245,13 +250,13 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URL url = new URL("http://localhost:18080/data");
-     * HttpRequest request = HttpRequest.url(url, 5000, 30000);  // 5s connect, 30s read timeout
+     * HttpRequest request = HttpRequest.url(url, 5000, 30000);  // 5s connect, 30s response timeout
      * // String body = request.get(String.class);  // network call happens here (when executed)
      * }</pre>
      *
      * @param url the URL object for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
-     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param readTimeoutInMillis the maximum duration allowed for the response, in milliseconds
      * @return a new HttpRequest instance
      */
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
@@ -287,13 +292,13 @@ public final class HttpRequest {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URI uri = URI.create("http://localhost:18080/data");
-     * HttpRequest request = HttpRequest.url(uri, 5000, 30000);  // 5s connect, 30s read timeout
+     * HttpRequest request = HttpRequest.url(uri, 5000, 30000);  // 5s connect, 30s response timeout
      * // String body = request.get(String.class);  // network call happens here (when executed)
      * }</pre>
      *
      * @param uri the URI object for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
-     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param readTimeoutInMillis the maximum duration allowed for the response, in milliseconds
      * @return a new HttpRequest instance
      */
     public static HttpRequest url(final URI uri, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
@@ -312,6 +317,7 @@ public final class HttpRequest {
      * This creates a new HttpClient builder if one doesn't exist, or copies settings from the existing client.
      * The connection timeout is the maximum time to wait when establishing a connection to the server.
      * If the connection cannot be established within this timeout, the request will fail.
+     * A {@code null} or zero duration leaves the current setting unchanged; a negative duration is rejected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -320,13 +326,13 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param connectTimeout the connection timeout duration
+     * @param connectTimeout the connection timeout; {@code null} or zero leaves the current setting unchanged
      * @return this HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative
      */
     public HttpRequest connectTimeout(final Duration connectTimeout) {
-        initClientBuilder();
-
         if (connectTimeout != null && !connectTimeout.isZero()) {
+            initClientBuilder();
             clientBuilder.connectTimeout(connectTimeout);
         }
 
@@ -382,11 +388,17 @@ public final class HttpRequest {
 
             requireNewClient = true;
         }
+
+        // Any client produced by this builder is owned by this request. In particular,
+        // fluent client-level configuration replaces even a caller-supplied client with
+        // a newly built one, so that replacement must be closed after execution.
+        closeHttpClientAfterExecution = true;
     }
 
     /**
-     * Sets the read timeout for this request.
-     * The read timeout is the maximum time to wait for data to be read from the server.
+     * Sets the timeout for the request to complete. Despite the legacy method name, this delegates to
+     * {@link java.net.http.HttpRequest.Builder#timeout(Duration)}; it is not a per-read inactivity timeout.
+     * A {@code null} or zero duration leaves the current setting unchanged; a negative duration is rejected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -395,8 +407,9 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param readTimeout the read timeout duration
+     * @param readTimeout the request timeout (maximum duration allowed for the response); {@code null} or zero leaves the current setting unchanged
      * @return this HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code readTimeout} is negative
      */
     public HttpRequest readTimeout(final Duration readTimeout) {
         if (readTimeout != null && !readTimeout.isZero()) {
@@ -407,7 +420,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets the read timeout for this request, in milliseconds.
+     * Sets the request-completion timeout, in milliseconds. Despite the legacy method name, this is not a per-read inactivity timeout.
      * This is a convenience overload of {@link #readTimeout(Duration)} that provides parity with
      * the {@code com.landawn.abacus.http.HttpRequest} and {@code OkHttpRequest} builders.
      *
@@ -418,7 +431,7 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param readTimeoutInMillis the read timeout in milliseconds (0 or negative leaves it unset)
+     * @param readTimeoutInMillis the maximum duration allowed for the response, in milliseconds (0 or negative leaves it unset)
      * @return this HttpRequest instance for method chaining
      */
     public HttpRequest readTimeout(final long readTimeoutInMillis) {
@@ -636,40 +649,6 @@ public final class HttpRequest {
 
         return this;
     }
-
-    //    /**
-    //     * Sets HTTP headers from a provided HttpHeaders object.
-    //     * If this HttpRequest already has any headers with those names, they are all replaced.
-    //     * The existing headers in this HttpRequest but not in the provided HttpHeaders remain unchanged.
-    //     * This is useful when you have a collection of headers to apply from another source.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * HttpHeaders headers = new HttpHeaders();
-    //     * headers.set("Accept", "application/json");
-    //     * headers.set("Authorization", "Bearer token123");
-    //     *
-    //     * HttpRequest.url("http://localhost:18080/data")
-    //     *     .headers(headers)
-    //     *     .get();
-    //     * }</pre>
-    //     *
-    //     * @param headers the HttpHeaders object containing all headers to set
-    //     * @return this HttpRequest instance for method chaining
-    //     * @see HttpHeaders
-    //     * @see HttpHeaders.Names
-    //     * @see HttpHeaders.Values
-    //     * @see HttpHeaders#toMap()
-    //     * @deprecated use {@link #headers(Map)} instead. Due to limitations of java.net.http.HttpRequest.Builder, the existing headers in this HttpRequest can't be removed.
-    //     *                  This is inconsistent with the similar methods {@link OkHttpRequest#headers(HttpHeaders)} and {@link com.landawn.abacus.http.HttpRequest#headers(HttpHeaders)}.
-    //     */
-    //    public HttpRequest headers(final HttpHeaders headers) {
-    //        if (headers != null && !headers.isEmpty()) {
-    //            headers.forEach(this::header);
-    //        }
-    //
-    //        return this;
-    //    }
 
     /**
      * Sets query parameters for {@code GET} or {@code DELETE} request.
@@ -907,7 +886,7 @@ public final class HttpRequest {
      * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> get() throws UncheckedIOException {
-        return get(BodyHandlers.ofString());
+        return get(createStringResponseBodyHandler());
     }
 
     /**
@@ -967,7 +946,7 @@ public final class HttpRequest {
      * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> post() throws UncheckedIOException {
-        return post(BodyHandlers.ofString());
+        return post(createStringResponseBodyHandler());
     }
 
     /**
@@ -1030,7 +1009,7 @@ public final class HttpRequest {
      * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> put() throws UncheckedIOException {
-        return put(BodyHandlers.ofString());
+        return put(createStringResponseBodyHandler());
     }
 
     /**
@@ -1098,7 +1077,7 @@ public final class HttpRequest {
      * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> patch() throws UncheckedIOException {
-        return patch(BodyHandlers.ofString());
+        return patch(createStringResponseBodyHandler());
     }
 
     /**
@@ -1165,7 +1144,7 @@ public final class HttpRequest {
      * @throws UncheckedIOException if the request could not be executed
      */
     public HttpResponse<String> delete() throws UncheckedIOException {
-        return delete(BodyHandlers.ofString());
+        return delete(createStringResponseBodyHandler());
     }
 
     /**
@@ -1261,7 +1240,7 @@ public final class HttpRequest {
      */
     @Beta
     public HttpResponse<String> execute(final HttpMethod httpMethod) throws UncheckedIOException {
-        return execute(httpMethod, BodyHandlers.ofString());
+        return execute(httpMethod, createStringResponseBodyHandler());
     }
 
     /**
@@ -1392,7 +1371,7 @@ public final class HttpRequest {
      * @return a CompletableFuture that will complete with the HTTP response
      */
     public CompletableFuture<HttpResponse<String>> asyncGet() {
-        return asyncGet(BodyHandlers.ofString());
+        return asyncGet(createStringResponseBodyHandler());
     }
 
     /**
@@ -1485,7 +1464,7 @@ public final class HttpRequest {
      * @return a CompletableFuture that will complete with the HTTP response
      */
     public CompletableFuture<HttpResponse<String>> asyncPost() {
-        return asyncPost(BodyHandlers.ofString());
+        return asyncPost(createStringResponseBodyHandler());
     }
 
     /**
@@ -1580,7 +1559,7 @@ public final class HttpRequest {
      * @return a CompletableFuture that will complete with the HTTP response
      */
     public CompletableFuture<HttpResponse<String>> asyncPut() {
-        return asyncPut(BodyHandlers.ofString());
+        return asyncPut(createStringResponseBodyHandler());
     }
 
     /**
@@ -1685,7 +1664,7 @@ public final class HttpRequest {
      * @return a CompletableFuture that will complete with the HTTP response
      */
     public CompletableFuture<HttpResponse<String>> asyncPatch() {
-        return asyncPatch(BodyHandlers.ofString());
+        return asyncPatch(createStringResponseBodyHandler());
     }
 
     /**
@@ -1791,7 +1770,7 @@ public final class HttpRequest {
      * @return a CompletableFuture that will complete with the HTTP response
      */
     public CompletableFuture<HttpResponse<String>> asyncDelete() {
-        return asyncDelete(BodyHandlers.ofString());
+        return asyncDelete(createStringResponseBodyHandler());
     }
 
     /**
@@ -1927,7 +1906,7 @@ public final class HttpRequest {
      */
     @Beta
     public CompletableFuture<HttpResponse<String>> asyncExecute(final HttpMethod httpMethod) {
-        return asyncExecute(httpMethod, BodyHandlers.ofString());
+        return asyncExecute(httpMethod, createStringResponseBodyHandler());
     }
 
     /**
@@ -2115,7 +2094,7 @@ public final class HttpRequest {
     private static final class CleanupInputStream extends InputStream {
         private final InputStream inputStream;
         private final Runnable cleanup;
-        private volatile boolean closed = false;
+        private final AtomicBoolean closed = new AtomicBoolean();
 
         private CleanupInputStream(final InputStream inputStream, final Runnable cleanup) {
             this.inputStream = inputStream;
@@ -2172,8 +2151,12 @@ public final class HttpRequest {
         }
 
         private void closeOnce() {
-            if (!closed) {
-                closed = true;
+            // InputStream.close() is allowed to be called repeatedly and real response streams are
+            // sometimes closed concurrently by cancellation/error-handling paths. A volatile
+            // check-then-set is not atomic and can consequently release the per-request client more
+            // than once. Claim cleanup before invoking caller code so even a failing cleanup is not
+            // retried by a second close.
+            if (closed.compareAndSet(false, true)) {
                 cleanup.run();
             }
         }
@@ -2186,24 +2169,44 @@ public final class HttpRequest {
     private BodyHandler<?> createResponseBodyHandler(final Class<?> resultClass) {
         if (resultClass == null || resultClass.equals(Void.class)) {
             return BodyHandlers.discarding();
-        } else if (resultClass.equals(String.class)) {
-            return BodyHandlers.ofString();
-        } else if (byte[].class.equals(resultClass)) {
-            return BodyHandlers.ofByteArray();
         } else if (resultClass.isAssignableFrom(InputStream.class)) { // Do not change this. It looks weird, but it is intentional.
             return BodyHandlers.ofInputStream();
         } else {
-            return BodyHandlers.ofString();
+            // Keep bytes until the response headers are available. BodyHandlers.ofString() always
+            // uses UTF-8 and corrupts responses that declare another charset; it also makes binary
+            // formats (Kryo) and compressed typed responses impossible to decode correctly.
+            return BodyHandlers.ofByteArray();
         }
     }
 
+    /**
+     * Creates a String handler that honors the response charset and content encoding. The JDK's
+     * no-argument {@link BodyHandlers#ofString()} handler always decodes with UTF-8.
+     */
+    private static BodyHandler<String> createStringResponseBodyHandler() {
+        return responseInfo -> {
+            final String contentType = responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_TYPE).orElse(null);
+            final String contentEncoding = responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null);
+            final Charset charset = HttpUtil.getCharset(contentType);
+            final ContentFormat contentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
+
+            return BodySubscribers.mapping(BodySubscribers.ofByteArray(), bytes -> new String(decompress(bytes, contentFormat), charset));
+        };
+    }
+
     private <T> T getBody(final HttpResponse<?> httpResponse, final Class<T> resultClass) {
+        final String contentType = httpResponse.headers().firstValue(HttpHeaders.Names.CONTENT_TYPE).orElse(null);
+        final String contentEncoding = httpResponse.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null);
+        final ContentFormat responseContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
+        final Charset responseCharset = HttpUtil.getCharset(contentType);
+
         if (!HttpUtil.isSuccessfulResponseCode(httpResponse.statusCode())) {
             final Object errorBody = httpResponse.body();
 
             if (errorBody instanceof InputStream is) {
                 try (is) {
-                    throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + IOUtil.readAllToString(is)));
+                    final InputStream decoded = HttpUtil.wrapInputStream(is, responseContentFormat);
+                    throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + IOUtil.readAllToString(decoded, responseCharset)));
                 } catch (final IOException unreachable) {
                     // never delivered here: the try body always completes abruptly with an unchecked
                     // exception, so an IOException from the implicit close() is attached to it as a
@@ -2211,6 +2214,9 @@ public final class HttpRequest {
                     // exception analysis for close().
                     throw new UncheckedIOException(unreachable);
                 }
+            } else if (errorBody instanceof byte[] bytes) {
+                final String message = new String(decompress(bytes, responseContentFormat), responseCharset);
+                throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + message));
             }
 
             throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + N.toString(errorBody)));
@@ -2222,19 +2228,42 @@ public final class HttpRequest {
 
         final Object body = httpResponse.body();
 
-        // Dispatch on the response Content-Type (the documented behavior, mirroring the
-        // HttpClient/OkHttpRequest siblings): an XML response was previously force-parsed
-        // through the JSON-shaped N.convert and threw.
-        if (body instanceof String bodyStr && !String.class.equals(resultClass)) {
-            final String contentType = httpResponse.headers().firstValue(HttpHeaders.Names.CONTENT_TYPE).orElse(null);
-            final String contentEncoding = httpResponse.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null);
-            final com.landawn.abacus.http.ContentFormat responseContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
+        if (body instanceof byte[] rawBytes) {
+            final byte[] bytes = decompress(rawBytes, responseContentFormat);
 
-            if (responseContentFormat != null && responseContentFormat != com.landawn.abacus.http.ContentFormat.NONE) {
+            if (byte[].class.equals(resultClass)) {
+                return (T) bytes;
+            }
+
+            if (String.class.equals(resultClass)) {
+                return (T) new String(bytes, responseCharset);
+            }
+
+            if (responseContentFormat == ContentFormat.KRYO) {
+                return HttpUtil.getParser(responseContentFormat).deserialize(new ByteArrayInputStream(bytes), resultClass);
+            }
+
+            final String bodyStr = new String(bytes, responseCharset);
+
+            if (responseContentFormat == ContentFormat.FORM_URL_ENCODED) {
+                return URLEncodedUtil.decode(bodyStr, responseCharset, resultClass);
+            } else if (responseContentFormat != null && responseContentFormat != ContentFormat.NONE) {
                 return HttpUtil.getParser(responseContentFormat).deserialize(bodyStr, resultClass);
             }
+
+            return N.convert(bodyStr, resultClass);
         }
 
         return N.convert(body, resultClass);
+    }
+
+    private static byte[] decompress(final byte[] body, final ContentFormat contentFormat) {
+        final InputStream input = HttpUtil.wrapInputStream(new ByteArrayInputStream(body), contentFormat);
+
+        try {
+            return IOUtil.readAllBytes(input);
+        } finally {
+            IOUtil.close(input);
+        }
     }
 }

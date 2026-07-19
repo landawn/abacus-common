@@ -24,27 +24,28 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method or type supports parallel execution within an abacus
  * pipeline. In the {@code com.landawn.abacus.util.stream} APIs, an operation
  * marked {@code @ParallelSupported} can be applied to a parallelized pipeline (e.g., one created
- * via {@code Stream.parallel()}) and will produce the correct result
- * regardless of how the runtime partitions the work.
+ * via {@code Stream.parallel()}).
  *
- * <p>For methods, this means the implementation has no shared mutable state of its own and any
- * functional argument it accepts must itself be non-interfering. For types, every public method
- * on the type carries the same guarantee. This is the converse of {@link SequentialOnly}.</p>
+ * <p>This is a pipeline-execution capability marker, not a general thread-safety annotation. It
+ * does not promise that concurrent callers may invoke the method on the same object, nor does it
+ * make user-supplied functions thread-safe. Callers must still obey each operation's requirements
+ * for non-interference, associativity, ordering, and thread safety. This is the converse of
+ * {@link SequentialOnly} in the abacus pipeline APIs.</p>
  *
  * <p>This annotation is particularly useful for:</p>
  * <ul>
  *   <li>Stream operations that can be parallelized.</li>
- *   <li>Collection operations that support concurrent access.</li>
  *   <li>Algorithms that can be executed in parallel.</li>
- *   <li>Thread-safe utility methods.</li>
+ *   <li>Types whose documented pipeline operations support parallel execution.</li>
  * </ul>
  *
  * <p><b>Requirements for parallel-supported operations:</b></p>
  * <ul>
- *   <li>No shared mutable state or proper synchronization.</li>
- *   <li>Stateless operations or thread-local state.</li>
- *   <li>Associative and non-interfering operations.</li>
- *   <li>Thread-safe access to shared resources.</li>
+ *   <li>The implementation must preserve the operation's documented result when the pipeline is
+ *       partitioned.</li>
+ *   <li>User callbacks must meet the operation's documented non-interference and concurrency
+ *       requirements.</li>
+ *   <li>Order-sensitive operations must preserve the ordering guarantees stated by their API.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -65,15 +66,6 @@ import java.lang.annotation.Target;
  *     }
  * }
  *
- * @ParallelSupported
- * public class ThreadSafeProcessor<T> {
- *     // All methods can be safely called from multiple threads
- *     private final ConcurrentMap<String, T> cache = new ConcurrentHashMap<>();
- *
- *     public T process(String key, Function<String, T> processor) {
- *         return cache.computeIfAbsent(key, processor);
- *     }
- * }
  * }</pre>
  *
  * @see SequentialOnly

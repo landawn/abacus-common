@@ -43,7 +43,9 @@ import java.util.Set;
  * }</pre>
  *
  * <p>This class is backed by a {@code volatile} map reference and the underlying
- * map is a {@link LinkedHashMap} by default, so iteration order reflects insertion order.</p>
+ * map is a {@link LinkedHashMap} by default, so iteration order reflects insertion order.
+ * The volatile reference supports atomic replacement by internal refresh code; it does not make
+ * ordinary map operations thread-safe.</p>
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
@@ -61,8 +63,8 @@ public class Properties<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
-     * props.isEmpty();             // returns true (a fresh instance is empty)
-     * props.size();                // returns 0
+     * props.isEmpty();   // returns true (a fresh instance is empty)
+     * props.size();      // returns 0
      * props.put("b", 2);
      * props.put("a", 1);
      * props.keySet();              // returns [b, a] (insertion order is preserved, not sorted)
@@ -75,7 +77,7 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     Properties(final Map<? extends K, ? extends V> valueMap) {
-        values = (Map<K, V>) valueMap;
+        values = (Map<K, V>) Objects.requireNonNull(valueMap, "valueMap");
     }
 
     /**
@@ -147,6 +149,7 @@ public class Properties<K, V> implements Map<K, V> {
      *         (e.g. {@code 0} for primitive numeric types, {@code false} for {@code boolean}, {@code null} for reference types)
      * @throws IllegalArgumentException if the stored value cannot be converted to {@code targetType}
      * @throws NumberFormatException if the stored value is a string that cannot be parsed to the target numeric type
+     * @throws NullPointerException if {@code targetType} is {@code null}
      * @see #get(Object)
      * @see #getOrDefault(Object, Object)
      * @see #getOrDefault(Object, Object, Class)
@@ -158,11 +161,8 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Retrieves the value associated with the specified property name, or returns the default value
-     * if the property is not found or its stored value is {@code null}.
-     *
-     * <p>Note: unlike {@link Map#getOrDefault(Object, Object)}, which only falls back to the
-     * default when the key is absent, this implementation also returns {@code defaultValue} when
-     * the key is present but mapped to {@code null}.</p>
+     * if the property is not found. In accordance with {@link Map#getOrDefault(Object, Object)}, a
+     * present mapping to {@code null} returns {@code null}, not the default value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -174,9 +174,9 @@ public class Properties<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param propName the name of the property whose associated value is to be returned
-     * @param defaultValue the value to be returned if the specified property is not found or its value is {@code null}
+     * @param defaultValue the value to be returned if the specified property is not found
      * @return the value associated with the specified property name, or {@code defaultValue} if the
-     *         property is not found or its value is {@code null}
+     *         property is not found
      * @see #get(Object)
      * @see #get(Object, Class)
      * @see #getOrDefault(Object, Object, Class)
@@ -186,7 +186,7 @@ public class Properties<K, V> implements Map<K, V> {
         @SuppressWarnings("SuspiciousMethodCalls")
         final V result = values.get(propName);
 
-        if (result == null) {
+        if (result == null && !values.containsKey(propName)) {
             return defaultValue;
         }
 
@@ -214,6 +214,8 @@ public class Properties<K, V> implements Map<K, V> {
      *         or {@code defaultValue} (returned as-is, without conversion) if the property is not found or its value is {@code null}
      * @throws IllegalArgumentException if a found, non-{@code null} value cannot be converted to {@code targetType}
      * @throws NumberFormatException if a found value is a string that cannot be parsed to the target numeric type
+     * @throws NullPointerException if {@code targetType} is {@code null} and a non-{@code null}
+     *         stored value must be converted
      * @see #get(Object)
      * @see #get(Object, Class)
      * @see #getOrDefault(Object, Object)
@@ -683,6 +685,6 @@ public class Properties<K, V> implements Map<K, V> {
      * @param newValues the new map to use as the internal storage
      */
     void reset(final Map<K, V> newValues) {
-        values = newValues;
+        values = Objects.requireNonNull(newValues, "newValues");
     }
 }

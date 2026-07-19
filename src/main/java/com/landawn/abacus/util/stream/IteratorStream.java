@@ -153,7 +153,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param predicate the predicate to apply to each element; must not be {@code null}
      * @return a new stream containing only the elements that match the predicate
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalStateException {
@@ -203,7 +203,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param predicate the predicate to apply to each element to decide whether to include it;
      *                  must not be {@code null}
      * @return a new stream containing the longest prefix of elements matching the predicate
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalStateException {
@@ -253,7 +253,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param predicate the predicate applied to leading elements to decide how many to skip;
      *                  must not be {@code null}
      * @return a new stream that drops the longest prefix of elements matching the predicate
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalStateException {
@@ -310,7 +310,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <R> the type of elements produced by the mapper
      * @param mapper the function to apply to each element; must not be {@code null}
      * @return a new stream consisting of mapped elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalStateException {
@@ -338,7 +338,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         final int windowSize = 2;
         checkArgPositive(increment, cs.increment); //NOSONAR
 
-        return newStream(new ObjIteratorEx<>() {
+        return newStream(new ObjIteratorEx<>() { //NOSONAR
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -397,7 +397,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         final int windowSize = 3;
         checkArgPositive(increment, cs.increment);
 
-        return newStream(new ObjIteratorEx<>() {
+        return newStream(new ObjIteratorEx<>() { //NOSONAR
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
@@ -724,27 +724,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final ObjIteratorEx<R> iter = new ObjIteratorEx<>() {
             private Iterator<? extends R> cur = null;
             private Stream<? extends R> s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -767,8 +758,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Stream<? extends R> tmp = s;
+                    s = null;
+                    cur = null;
+                    tmp.close();
                 }
             }
         };
@@ -849,27 +847,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;
             private CharStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -892,8 +881,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -948,27 +944,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private ByteIterator cur = null;
             private ByteStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -991,8 +978,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -1047,27 +1041,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final ShortIteratorEx iter = new ShortIteratorEx() {
             private ShortIterator cur = null;
             private ShortStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -1090,8 +1075,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -1146,27 +1138,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -1189,8 +1172,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -1245,27 +1235,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
             private LongStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -1288,8 +1269,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -1344,27 +1332,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
             private FloatStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -1387,8 +1366,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -1443,27 +1429,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
             private DoubleStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.next());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -1486,8 +1463,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -1573,6 +1557,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
+
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
         }, false, null);
@@ -1619,6 +1607,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
+
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
         }, false, null);
@@ -1672,7 +1664,8 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <R> Stream<R> split(final Predicate<? super T> predicate, final Collector<? super T, ?, R> collector) throws IllegalStateException {
+    public <R> Stream<R> split(final Predicate<? super T> predicate, final Collector<? super T, ?, R> collector)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNull(collector, cs.collector);
 
@@ -1730,7 +1723,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
-        return newStream(new ObjIteratorEx<>() {
+        return newStream(new ObjIteratorEx<>() { //NOSONAR
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -1746,13 +1739,6 @@ class IteratorStream<T> extends AbstractStream<T> {
                     toSkip = false;
                 }
 
-                // Stream.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
-                // But Stream.of(1).sliding(2, 1) will return [[1]], not []
-                // Why? we need to check if the queue is not empty?
-                // Not really, because elements.hasNext() is used to check if there are more elements to process.
-                // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
-                // In second case, elements.hasNext() will return true before processing the first element,
-                // so the partial window [1] is emitted.
                 return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
@@ -1802,14 +1788,24 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public long count() {
+                if (toSkip) {
+                    // next() defers the gap after a window until the following access.
+                    // Consume that gap before counting the remaining window starts.
+                    hasNext();
+                }
+
                 final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size());
-                final long len = prevSize + elements.count();
+                final long remaining = elements.count();
                 // After advance(n), the queue may hold only leftover-prefix elements from a
                 // previous window with no new source elements available; no new window can
                 // start in that case.
-                if (len == prevSize) {
+                if (remaining == 0) {
                     return 0;
                 }
+
+                // ObjIteratorEx.count() is a long-valued contract. Saturate the logical
+                // prefix-plus-source size so a valid Long.MAX_VALUE count cannot wrap negative.
+                final long len = remaining > Long.MAX_VALUE - prevSize ? Long.MAX_VALUE : prevSize + remaining;
                 return countSlidingWindows(len, windowSize, increment);
             }
 
@@ -1867,7 +1863,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
-        return newStream(new ObjIteratorEx<>() {
+        return newStream(new ObjIteratorEx<>() { //NOSONAR
             private Deque<T> queue = null;
             private boolean toSkip = false;
 
@@ -1883,13 +1879,6 @@ class IteratorStream<T> extends AbstractStream<T> {
                     toSkip = false;
                 }
 
-                // Stream.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
-                // But Stream.of(1).sliding(2, 1) will return [[1]], not []
-                // Why? we need to check if the queue is not empty?
-                // Not really, because elements.hasNext() is used to check if there are more elements to process.
-                // In first case, elements.hasNext() will return false after processing [2, 3], so hasNext will return false.
-                // In second case, elements.hasNext() will return true before processing the first element,
-                // so the partial window [1] is emitted.
                 return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
@@ -1941,14 +1930,24 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public long count() {
+                if (toSkip) {
+                    // next() defers the gap after a window until the following access.
+                    // Consume that gap before counting the remaining window starts.
+                    hasNext();
+                }
+
                 final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size());
-                final long len = prevSize + elements.count();
+                final long remaining = elements.count();
                 // After advance(n), the queue may hold only leftover-prefix elements from a
                 // previous window with no new source elements available; no new window can
                 // start in that case.
-                if (len == prevSize) {
+                if (remaining == 0) {
                     return 0;
                 }
+
+                // ObjIteratorEx.count() is a long-valued contract. Saturate the logical
+                // prefix-plus-source size so a valid Long.MAX_VALUE count cannot wrap negative.
+                final long len = remaining > Long.MAX_VALUE - prevSize ? Long.MAX_VALUE : prevSize + remaining;
                 return countSlidingWindows(len, windowSize, increment);
             }
 
@@ -1996,64 +1995,26 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     /**
-     * Returns a stream consisting of the distinct elements of this stream.
-     * If this stream is sorted by natural ordering, the deduplication is performed with an efficient
-     * adjacent-equality check; otherwise a hash set is used.
+     * Returns a stream consisting of the distinct elements of this stream, preserving encounter order.
+     * Equality and hashing, rather than ordering equivalence, determine whether elements are duplicates.
+     * This remains true for naturally sorted streams because a type's natural ordering is not required
+     * to be consistent with {@link Object#equals(Object)}.
      *
-     * <p>This is a stateful intermediate operation.
+     * <p>This is a stateful intermediate operation that maintains a set of previously seen elements.
      *
      * @return a new stream containing only the distinct elements of this stream
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> distinct() throws IllegalStateException {
         assertNotClosed();
 
-        if (isSorted() && comparator() == null) {
-            return newStream(new ObjIteratorEx<>() { //NOSONAR
-                private boolean hasNext = false;
-                private T prev = null;
-                private T next = null;
-                private boolean isFirst = true;
+        final Set<Object> set = N.newHashSet();
 
-                @Override
-                public boolean hasNext() {
-                    if (!hasNext) {
-                        while (elements.hasNext()) {
-                            next = elements.next();
-
-                            if (isFirst) {
-                                isFirst = false;
-                                hasNext = true;
-                                break;
-                            } else if (!N.equals(next, prev)) {
-                                hasNext = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    return hasNext;
-                }
-
-                @Override
-                public T next() {
-                    if (!hasNext && !hasNext()) {
-                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-                    }
-
-                    hasNext = false;
-                    prev = next;
-
-                    return next;
-                }
-            }, isSorted(), comparator());
-        } else {
-            final Set<Object> set = N.newHashSet();
-
-            // noinspection resource
-            return newStream(sequential().filter(value -> set.add(hashKey(value))).iteratorEx(), isSorted(), comparator());
-        }
+        // A sorted stream cannot safely use adjacent equality alone: Comparable explicitly permits
+        // orderings that are inconsistent with equals, so equal elements need not be adjacent.
+        // noinspection resource
+        return newStream(sequential().filter(value -> set.add(hashKey(value))).iteratorEx(), isSorted(), comparator());
     }
 
     /**
@@ -2065,7 +2026,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param maxSize the maximum number of elements the returned stream may contain; must be
      *                non-negative
      * @return a stream containing at most {@code maxSize} elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code maxSize} is negative
      */
     @Override
@@ -2112,7 +2073,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param n the number of leading elements to skip; must be non-negative
      * @return a stream consisting of the remaining elements after skipping {@code n}
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @Override
@@ -2280,7 +2241,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                         aar = queue.toArray((T[]) new Object[queue.size()]);
                     } else {
                         final Comparator<? super T> cmp = comparator == null ? NATURAL_COMPARATOR : comparator;
-                        final Queue<T> heap = new PriorityQueue<>(n, cmp);
+                        // Do not preallocate from the caller-supplied limit. The source may be tiny
+                        // even when n is very large, and PriorityQueue(int, ...) allocates eagerly.
+                        final Queue<T> heap = new PriorityQueue<>(cmp);
 
                         T next = null;
                         while (elements.hasNext()) {
@@ -2313,7 +2276,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param action the action to perform on each element; must not be {@code null}
      * @return a new stream that passes each element through {@code action} before yielding it
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> onEach(final Consumer<? super T> action) throws IllegalStateException {
@@ -2508,7 +2471,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal operation. The stream is closed after this call.
      *
      * @return a mutable {@link List} containing all stream elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public List<T> toList() throws IllegalStateException {
@@ -2535,7 +2498,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * set is unspecified.
      *
      * @return a mutable {@link Set} containing the distinct elements of this stream
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Set<T> toSet() throws IllegalStateException {
@@ -2657,7 +2620,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *                    must not be {@code null}
      * @return an Optional containing the result of folding all elements left-to-right,
      *         or an empty Optional if the stream is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalStateException {
@@ -2691,7 +2654,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param accumulator a function combining the running result with the next element;
      *                    must not be {@code null}
      * @return the result of folding all elements left-to-right, starting from {@code identity}
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <U> U foldLeft(final U identity, final BiFunction<? super U, ? super T, U> accumulator) throws IllegalStateException {
@@ -2719,10 +2682,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param accumulator the function to combine elements right-to-left; must not be {@code null}
      * @return an Optional containing the result of folding all elements right-to-left,
      *         or an empty Optional if the stream is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> foldRight(final BinaryOperator<T> accumulator) {
+        assertNotClosed();
+
         //noinspection resource
         return reversed().foldLeft(accumulator);
     }
@@ -2738,10 +2703,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param accumulator a function combining the running result with the next element right-to-left;
      *                    must not be {@code null}
      * @return the result of folding all elements right-to-left, starting from {@code identity}
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <U> U foldRight(final U identity, final BiFunction<? super U, ? super T, U> accumulator) {
+        assertNotClosed();
+
         //noinspection resource
         return reversed().foldLeft(identity, accumulator);
     }
@@ -2757,10 +2724,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      *                    elements; must not be {@code null}
      * @return an Optional describing the reduction result, or an empty Optional if the stream
      *         is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> reduce(final BinaryOperator<T> accumulator) {
+        assertNotClosed();
+
         return foldLeft(accumulator);
     }
 
@@ -2778,10 +2747,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param combiner a function to combine two partial results (unused in sequential mode);
      *                 must not be {@code null}
      * @return the result of accumulating all elements with {@code accumulator}
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <U> U reduce(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner) {
+        assertNotClosed();
+
         return foldLeft(identity, accumulator);
     }
 
@@ -2799,7 +2770,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param combiner a function that merges two result containers (unused in sequential mode);
      *                 must not be {@code null}
      * @return the populated result container
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
@@ -2827,7 +2798,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <R> the type of the result
      * @param collector the {@link Collector} describing the reduction; must not be {@code null}
      * @return the result of the collection
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> R collect(final Collector<? super T, ?, R> collector) throws IllegalStateException {
@@ -2859,7 +2830,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param n the maximum number of trailing elements to include; must be non-negative
      * @return a new stream containing at most the last {@code n} elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      * @see #skipLast(int)
      */
@@ -2920,21 +2891,23 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     /**
      * Returns a stream that excludes the last {@code n} elements of this stream.
-     * If {@code n <= 0}, all elements are included. Elements are output as
+     * If {@code n == 0}, all elements are included. Elements are output as
      * they arrive, using an internal sliding buffer of size {@code n}.
      *
      * <p>This is a stateful intermediate operation.
      *
-     * @param n the number of trailing elements to skip; non-positive values result in all elements being included
+     * @param n the number of trailing elements to skip; must be non-negative
      * @return a new stream without the last {@code n} elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code n} is negative
      * @see #takeLast(int)
      */
     @Override
-    public Stream<T> skipLast(final int n) throws IllegalStateException {
+    public Stream<T> skipLast(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNegative(n, cs.n);
 
-        if (n <= 0) {
+        if (n == 0) {
             return newStream(elements, isSorted(), comparator());
         }
 
@@ -2978,7 +2951,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param comparator the comparator used to compare elements; if {@code null}, nulls-last natural
      *                   ordering is used
      * @return an Optional containing the minimum element, or an empty Optional if the stream is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException {
@@ -3020,7 +2993,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param comparator the comparator used to compare elements; if {@code null}, nulls-first natural
      *                   ordering is used
      * @return an Optional containing the maximum element, or an empty Optional if the stream is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException {
@@ -3079,7 +3052,8 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             comparator = comparator == null ? NATURAL_COMPARATOR : comparator;
-            final Queue<T> queue = new PriorityQueue<>(k, comparator);
+            // Grow with the number of encountered elements instead of eagerly allocating k slots.
+            final Queue<T> queue = new PriorityQueue<>(comparator);
             T e = null;
 
             while (elements.hasNext()) {
@@ -3107,7 +3081,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal operation. The stream is closed after this call.
      *
      * @return the number of elements in this stream
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public long count() throws IllegalStateException, IllegalArgumentException {
@@ -3129,7 +3103,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to apply to elements; must not be {@code null}
      * @return {@code true} if at least one element matches the predicate, {@code false} otherwise
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
      */
     @Override
@@ -3159,7 +3133,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param predicate the predicate to apply to elements; must not be {@code null}
      * @return {@code true} if all elements match the predicate (or the stream is empty),
      *         {@code false} otherwise
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
      */
     @Override
@@ -3189,7 +3163,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param predicate the predicate to apply to elements; must not be {@code null}
      * @return {@code true} if no element matches the predicate (or the stream is empty),
      *         {@code false} otherwise
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
      */
     @Override
@@ -3241,7 +3215,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against; must not be {@code null}
      * @return an Optional containing the first matching element, or an empty Optional if none match
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
      */
     @Override
@@ -3275,7 +3249,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against; must not be {@code null}
      * @return an Optional containing the last matching element, or an empty Optional if none match
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
      */
     @Override
@@ -3508,7 +3482,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param asyncExecutor the executor for submitting parallel tasks
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @return a new {@link ParallelIteratorStream} wrapping the same underlying iterator
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     protected Stream<T> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
@@ -3525,7 +3499,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal operation that transfers ownership to the returned JDK stream.
      *
      * @return a JDK {@link java.util.stream.Stream} over the elements of this stream
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public java.util.stream.Stream<T> toJdkStream() throws IllegalStateException {
@@ -3537,7 +3511,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         if (isEmptyCloseHandlers(closeHandlers())) {
             return StreamSupport.stream(spliterator, isParallel());
         } else {
-            return StreamSupport.stream(spliterator, isParallel()).onClose(() -> close(closeHandlers()));
+            return StreamSupport.stream(spliterator, isParallel()).onClose(this::close);
         }
     }
 

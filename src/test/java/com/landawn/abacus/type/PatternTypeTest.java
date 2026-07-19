@@ -73,7 +73,20 @@ public class PatternTypeTest extends TestBase {
 
     @Test
     public void testValueOfWithEmptyString() {
-        assertNull(patternType.valueOf(""));
+        Pattern pattern = patternType.valueOf("");
+
+        assertNotNull(pattern);
+        assertEquals("", pattern.pattern());
+        assertTrue(pattern.matcher("").matches());
+    }
+
+    @Test
+    public void testEmptyPatternRoundTrip() {
+        Pattern original = Pattern.compile("");
+        Pattern restored = patternType.valueOf(patternType.stringOf(original));
+
+        assertNotNull(restored);
+        assertEquals(original.pattern(), restored.pattern());
     }
 
     @Test

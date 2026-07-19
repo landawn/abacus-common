@@ -1509,10 +1509,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 try {
                     xmlReader = createXMLStreamReader(source);
 
-                    //noinspection StatementWithEmptyBody
-                    for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
-                        // do nothing.
-                    }
+                    moveToRootElement(xmlReader);
 
                     if (targetType == null && N.notEmpty(nodeTypes)) {
                         String nodeName = null;
@@ -1614,10 +1611,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 try {
                     xmlReader = createXMLStreamReader(source);
 
-                    //noinspection StatementWithEmptyBody
-                    for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
-                        // do nothing.
-                    }
+                    moveToRootElement(xmlReader);
 
                     if (targetType == null && N.notEmpty(nodeTypes)) {
                         String nodeName = null;
@@ -1922,6 +1916,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                         case XMLStreamConstants.CDATA:
                         case XMLStreamConstants.CHARACTERS: {
+                            if (propName == null) {
+                                // Mixed content outside a bean property is ignored, as it is by the DOM path.
+                                // Do not call next() here: doing so would consume the following START_ELEMENT,
+                                // and the for-loop update would then skip that property entirely.
+                                break;
+                            }
+
                             text = xmlReader.getText();
 
                             if (text != null && isTextEvent(event = xmlReader.next())) {

@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Throwables;
  * @see ToCharFunction
  */
 @FunctionalInterface
-public interface ToCharBiFunction<T, U> extends Throwables.ToCharBiFunction<T, U, RuntimeException> {
+public interface ToCharBiFunction<T, U> extends Throwables.ToCharBiFunction<T, U, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

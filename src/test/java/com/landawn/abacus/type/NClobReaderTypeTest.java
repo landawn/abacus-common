@@ -1,7 +1,9 @@
 package com.landawn.abacus.type;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
@@ -33,14 +35,17 @@ public class NClobReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testGetByIndex() throws SQLException {
+    public void testGetByIndex() throws SQLException, IOException {
         Reader expectedReader = new StringReader("test content");
         Mockito.when(mockResultSet.getNClob(1)).thenReturn(mockNClob);
         Mockito.when(mockNClob.getCharacterStream()).thenReturn(expectedReader);
 
         Reader result = nClobReaderType.get(mockResultSet, 1);
-        Assertions.assertSame(expectedReader, result);
-        // Mockito.verify(mockNClob).free();
+        final StringWriter output = new StringWriter();
+        result.transferTo(output);
+        Assertions.assertEquals("test content", output.toString());
+        result.close();
+        Mockito.verify(mockNClob).free();
     }
 
     @Test
@@ -52,14 +57,17 @@ public class NClobReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testGetByLabel() throws SQLException {
+    public void testGetByLabel() throws SQLException, IOException {
         Reader expectedReader = new StringReader("test content");
         Mockito.when(mockResultSet.getNClob("nclobColumn")).thenReturn(mockNClob);
         Mockito.when(mockNClob.getCharacterStream()).thenReturn(expectedReader);
 
         Reader result = nClobReaderType.get(mockResultSet, "nclobColumn");
-        Assertions.assertSame(expectedReader, result);
-        // Mockito.verify(mockNClob).free();
+        final StringWriter output = new StringWriter();
+        result.transferTo(output);
+        Assertions.assertEquals("test content", output.toString());
+        result.close();
+        Mockito.verify(mockNClob).free();
     }
 
     @Test
@@ -133,12 +141,16 @@ public class NClobReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testClob2ReaderWithNonNull() throws SQLException {
+    public void testClob2ReaderWithNonNull() throws SQLException, IOException {
         Reader expectedReader = new StringReader("test content");
         Mockito.when(mockNClob.getCharacterStream()).thenReturn(expectedReader);
 
         Reader result = NClobReaderType.clobToReader(mockNClob);
-        Assertions.assertSame(expectedReader, result);
-        // Mockito.verify(mockNClob).free();
+        final StringWriter output = new StringWriter();
+        result.transferTo(output);
+        Assertions.assertEquals("test content", output.toString());
+        result.close();
+        result.close();
+        Mockito.verify(mockNClob, Mockito.times(1)).free();
     }
 }

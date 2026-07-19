@@ -43,9 +43,9 @@ import com.landawn.abacus.util.stream.ShortStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A comprehensive utility class providing Optional and Nullable container implementations for all primitive
+ * A comprehensive utility class providing Optional and {@code Nullable} container implementations for all primitive
  * types and objects. This utility class serves as the central hub for optional value handling in functional
- * programming contexts, offering type-safe containers that may or may not contain non-null values with
+ * programming contexts, offering type-safe containers that may or may not contain {@code non-null} values with
  * extensive functional programming operations, stream integration, and null-safe transformations.
  *
  * <p>The class name "u" follows the pattern of short, memorable utility class names (similar to Arrays, Collections)
@@ -55,23 +55,24 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Complete Primitive Coverage:</b> Optional implementations for all primitive types avoiding boxing overhead</li>
+ *   <li><b>Complete Primitive Coverage:</b> Optional implementations that store every primitive type without boxing</li>
  *   <li><b>Functional Programming Support:</b> map, flatMap, filter, and other functional operations for all types</li>
  *   <li><b>Stream Integration:</b> Seamless conversion to streams for pipeline processing</li>
  *   <li><b>Type-Safe Transformations:</b> Cross-type mapping between different primitive types and objects</li>
  *   <li><b>Exception-Safe Operations:</b> Support for exception-throwing functional interfaces</li>
- *   <li><b>Immutable Design:</b> All Optional implementations are immutable and thread-safe</li>
- *   <li><b>Null Safety:</b> Comprehensive null handling with explicit empty state representation</li>
+ *   <li><b>Structurally Immutable Design:</b> Container state cannot change after construction</li>
+ *   <li><b>Null Safety:</b> Comprehensive {@code null} handling with explicit empty state representation</li>
  *   <li><b>Collection Conversion:</b> Direct conversion to various collection types with proper handling</li>
  * </ul>
  *
  * <p><b>Core Problem Solved:</b>
- * Java's standard Optional only handles object types, requiring boxing for primitive values which:
+ * Java provides {@code OptionalInt}, {@code OptionalLong}, and {@code OptionalDouble}, but the other
+ * primitive types still require a boxed {@code Optional<Wrapper>}. Boxing primitive values:
  * <ul>
  *   <li>Creates unnecessary object allocation overhead</li>
  *   <li>Reduces performance in primitive-heavy computations</li>
  *   <li>Lacks type-specific operations for primitive types</li>
- *   <li>Forces developers to use nullable primitives or wrapper types</li>
+ *   <li>Forces developers to use {@code nullable} primitives or wrapper types</li>
  * </ul>
  * This class solves these issues by providing dedicated Optional implementations for each primitive type
  * with optimized performance and type-specific operations.
@@ -87,7 +88,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@code OptionalFloat}:</b> Container for float values with floating-point operations</li>
  *   <li><b>{@code OptionalDouble}:</b> Container for double values with enhanced floating-point operations</li>
  *   <li><b>{@code Optional<T>}:</b> Enhanced object container with additional functional operations</li>
- *   <li><b>{@code Nullable<T>}:</b> Specialized container allowing explicit null value storage</li>
+ *   <li><b>{@code Nullable<T>}:</b> Specialized container allowing explicit {@code null} value storage</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -95,8 +96,8 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Safe Primitive Operations:</b> Handling potentially absent primitive values without boxing</li>
  *   <li><b>Stream Processing:</b> Optional values in stream pipelines with type safety</li>
  *   <li><b>Configuration Values:</b> Optional configuration parameters with default fallbacks</li>
- *   <li><b>Database Operations:</b> Handling nullable database fields with type safety</li>
- *   <li><b>API Responses:</b> Optional fields in API responses with proper null handling</li>
+ *   <li><b>Database Operations:</b> Handling {@code nullable} database fields with type safety</li>
+ *   <li><b>API Responses:</b> Optional fields in API responses with proper {@code null} handling</li>
  *   <li><b>Mathematical Computations:</b> Safe division, square root, and other operations that may fail</li>
  *   <li><b>Resource Management:</b> Optional resource availability with safe access patterns</li>
  * </ul>
@@ -146,7 +147,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>Primitive optionals: No boxing/unboxing overhead compared to Optional&lt;Wrapper&gt;</li>
+ *   <li>Primitive optionals: Values are stored without boxing; operations that expose boxed collections,
+ *       object streams, or object-typed callbacks may still box</li>
  *   <li>Memory footprint: Minimal - typically one boolean flag and one primitive value</li>
  *   <li>Operation costs: O(1) for all basic operations (get, isPresent, map, filter)</li>
  *   <li>Stream conversion: O(1) for single-element or empty stream creation</li>
@@ -154,10 +156,10 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Immutable Design:</b> All Optional implementations are immutable and thread-safe</li>
- *   <li><b>No Shared State:</b> Each Optional instance contains only final fields</li>
- *   <li><b>Safe Sharing:</b> Optional instances can be safely shared between threads</li>
- *   <li><b>Concurrent Access:</b> All operations are safe for concurrent access without synchronization</li>
+ *   <li><b>Immutable Container State:</b> Each container contains only final fields</li>
+ *   <li><b>Primitive Containers:</b> Primitive optional instances are safe to share between threads</li>
+ *   <li><b>Object Containers:</b> Sharing an {@code Optional<T>} or {@code Nullable<T>} is only as safe as
+ *       sharing the contained value and the callbacks supplied to its methods</li>
  * </ul>
  *
  * <p><b>Functional Programming Support:</b>
@@ -173,10 +175,10 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Exception Handling Integration:</b>
  * <ul>
- *   <li><b>Throwables Support:</b> All functional operations accept exception-throwing interfaces</li>
+ *   <li><b>Throwables Support:</b> Mapping, filtering, and conditional methods accept exception-throwing interfaces where declared</li>
  *   <li><b>Type-Safe Exceptions:</b> Generic exception types provide compile-time safety</li>
  *   <li><b>Exception Propagation:</b> Exceptions are properly propagated through functional chains</li>
- *   <li><b>Safe Execution:</b> Exception-safe variants of common operations</li>
+ *   <li><b>Checked Exceptions:</b> Callback exception types are propagated through generic method signatures</li>
  * </ul>
  *
  * <p><b>Stream Integration:</b>
@@ -201,22 +203,23 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Numeric Conversions:</b> Between byte, short, int, long, float, double with proper casting</li>
  *   <li><b>Character Conversions:</b> Between char and numeric types for ASCII/Unicode operations</li>
  *   <li><b>Boolean Conversions:</b> To numeric types using standard boolean-to-number mappings</li>
- *   <li><b>Object Mapping:</b> From primitives to objects and vice versa with null safety</li>
+ *   <li><b>Object Mapping:</b> From primitives to objects and vice versa with {@code null} safety</li>
  * </ul>
  *
  * <p><b>Null Safety Features:</b>
  * <ul>
  *   <li><b>Explicit Empty State:</b> Clear distinction between empty and null</li>
- *   <li><b>Null-Safe Factories:</b> {@code ofNullable()} methods handle null inputs gracefully</li>
+ *   <li><b>Null-Safe Factories:</b> {@code ofNullable()} methods handle {@code null} inputs gracefully</li>
  *   <li><b>Safe Unwrapping:</b> {@code orElse()} and related methods provide safe value extraction</li>
- *   <li><b>Nullable Variant:</b> Separate Nullable type for cases where null values are meaningful</li>
+ *   <li><b>Nullable Variant:</b> Separate {@code Nullable} type for cases where {@code null} values are meaningful</li>
  * </ul>
  *
  * <p><b>Comparison and Equality:</b>
  * <ul>
  *   <li><b>Value-Based Equality:</b> Equality based on presence and value comparison</li>
  *   <li><b>Consistent Hashing:</b> Hash codes consistent with equals() implementation</li>
- *   <li><b>Natural Ordering:</b> Comparable implementation with empty-first ordering (empty optionals sort before present ones)</li>
+ *   <li><b>Natural Ordering:</b> Primitive optional implementations use empty-first ordering; object
+ *       {@code Optional} and {@code Nullable} do not implement {@link Comparable}</li>
  *   <li><b>Type Safety:</b> Comparison only between same Optional types</li>
  * </ul>
  *
@@ -226,23 +229,22 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Prefer functional operations (map, filter) over imperative isPresent() checks</li>
  *   <li>Use appropriate orElse methods to provide meaningful default values</li>
  *   <li>Chain operations functionally rather than nested isPresent() calls</li>
- *   <li>Consider using Nullable when null is a meaningful value rather than absence</li>
+ *   <li>Consider using {@code Nullable} when {@code null} is a meaningful value rather than absence</li>
  * </ul>
  *
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li>Throws {@link NoSuchElementException} when accessing absent values via {@code get()}</li>
- *   <li>Throws {@link IllegalArgumentException} for null functional interface parameters</li>
+ *   <li>Null callback handling and exception types are documented by individual methods</li>
  *   <li>Provides safe alternatives to exception-throwing operations</li>
  *   <li>Clear error messages for debugging absent value access</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
  * <ul>
- *   <li>Minimal memory footprint - typically 16-24 bytes per instance</li>
- *   <li>No memory leaks - all references are either primitive values or immutable objects</li>
- *   <li>Efficient garbage collection - small, short-lived objects</li>
- *   <li>No hidden references or caches that could cause memory issues</li>
+ *   <li>Small, fixed container state: a value plus a presence flag where required</li>
+ *   <li>Object containers retain a strong reference to their value for the lifetime of the container</li>
+ *   <li>Empty instances and selected common values use small, bounded static caches</li>
  * </ul>
  *
  * <p><b>Integration with Standard APIs:</b>
@@ -255,15 +257,15 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Specialized Features by Type:</b>
  * <ul>
- *   <li><b>Numeric Types:</b> Mathematical operations, range checks, and numeric transformations</li>
- *   <li><b>Character Type:</b> Character classification, case conversion, and Unicode operations</li>
- *   <li><b>Boolean Type:</b> Logical operations, conditional execution, and boolean algebra</li>
- *   <li><b>Object Types:</b> Reference equality, type checking, and polymorphic operations</li>
+ *   <li><b>Numeric Types:</b> Type-specific filtering, mapping, conversion, and stream access</li>
+ *   <li><b>Character Type:</b> Character filtering, mapping, conversion, and stream access</li>
+ *   <li><b>Boolean Type:</b> Boolean filtering, mapping, and conditional execution</li>
+ *   <li><b>Object Types:</b> Null-aware filtering, mapping, flat mapping, and conversions</li>
  * </ul>
  *
  * <p><b>Comparison with Standard Optional:</b>
  * <ul>
- *   <li><b>Performance:</b> No boxing overhead for primitive types</li>
+ *   <li><b>Performance:</b> Primitive values are stored without boxing</li>
  *   <li><b>Type Safety:</b> Compile-time type checking for primitive operations</li>
  *   <li><b>Functionality:</b> Enhanced operations specific to each primitive type</li>
  *   <li><b>Integration:</b> Better integration with primitive streams and collections</li>
@@ -829,7 +831,7 @@ public class u { // NOSONAR
          * Returns the contained value if present; otherwise returns the result produced
          * by the supplied {@code BooleanSupplier}.
          *
-         * <p>The supplier is checked for null before the presence check.
+         * <p>The supplier is checked for {@code null} before the presence check.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1178,10 +1180,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalBoolean.of(true).equals(OptionalBoolean.of(true));   // returns true
-         * OptionalBoolean.of(true).equals(OptionalBoolean.of(false));  // returns false
-         * OptionalBoolean.of(true).equals(OptionalBoolean.empty());    // returns false
-         * OptionalBoolean.empty().equals(OptionalBoolean.empty());     // returns true
+         * OptionalBoolean.of(true).equals(OptionalBoolean.of(true));    // returns true
+         * OptionalBoolean.of(true).equals(OptionalBoolean.of(false));   // returns false
+         * OptionalBoolean.of(true).equals(OptionalBoolean.empty());     // returns false
+         * OptionalBoolean.empty().equals(OptionalBoolean.empty());      // returns true
          * }</pre>
          *
          * @param obj the object to compare with
@@ -1254,7 +1256,7 @@ public class u { // NOSONAR
         /** The singleton empty instance. */
         private static final OptionalChar EMPTY = new OptionalChar();
 
-        /** The minimum character value that is cached (inclusive), corresponding to the null character {@code '\0'}. */
+        /** The minimum character value that is cached (inclusive), corresponding to the {@code null} character {@code '\0'}. */
         private static final char MIN_CACHED_VALUE = 0;
 
         /** The maximum character value that is cached (inclusive), corresponding to character code {@code 128}. */
@@ -1537,8 +1539,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalChar.of('A').mapToBoolean(val -> val == 'A');    // returns OptionalBoolean of true
-         * OptionalChar.empty().mapToBoolean(val -> true);          // returns empty OptionalBoolean
+         * OptionalChar.of('A').mapToBoolean(val -> val == 'A');   // returns OptionalBoolean of true
+         * OptionalChar.empty().mapToBoolean(val -> true);         // returns empty OptionalBoolean
          * }</pre>
          *
          * @param <E> the type of exception that the mapping function may throw
@@ -1684,7 +1686,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * If a value is present, returns the value, otherwise returns the null character ({@code '\u0000'}).
+         * If a value is present, returns the value, otherwise returns the {@code null} character ({@code '\u0000'}).
          *
          * <p>This is a convenience method equivalent to {@code orElse((char) 0)}.
          *
@@ -1694,7 +1696,7 @@ public class u { // NOSONAR
          * OptionalChar.empty().orElseZero();   // returns '\0'
          * }</pre>
          *
-         * @return the value if present, otherwise the null character ({@code '\u0000'})
+         * @return the value if present, otherwise the {@code null} character ({@code '\u0000'})
          */
         @Beta
         public char orElseZero() {
@@ -1769,7 +1771,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar.of('A').orElseThrow("No value present");   // returns the present value
-         * OptionalChar.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * OptionalChar.empty().orElseThrow("No value present");   // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the message to be used in the exception, if no value is present
@@ -1792,7 +1794,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar.of('A').orElseThrow("No value for key: {}", "id");   // returns the present value
-         * OptionalChar.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * OptionalChar.empty().orElseThrow("No value for key: {}", "id");   // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message template, which can contain a placeholder for the parameter
@@ -1816,7 +1818,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar.of('A').orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * OptionalChar.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * OptionalChar.empty().orElseThrow("No value at [{}, {}]", "x", "y");   // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message template, which can contain placeholders for the parameters
@@ -1841,7 +1843,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar.of('A').orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * OptionalChar.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * OptionalChar.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message template, which can contain placeholders for the parameters
@@ -1867,7 +1869,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalChar.of('A').orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * OptionalChar.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * OptionalChar.empty().orElseThrow("No value for {} of {}", "k", "set");   // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message template, which can contain placeholders for the parameters
@@ -2029,8 +2031,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalChar.of('a').boxed().get();          // returns 'a'
-         * OptionalChar.empty().boxed().isPresent();    // returns false
+         * OptionalChar.of('a').boxed().get();         // returns 'a'
+         * OptionalChar.empty().boxed().isPresent();   // returns false
          * }</pre>
          *
          * @return an {@code Optional} containing the boxed {@code Character} value if present, otherwise an empty {@code Optional}
@@ -2085,10 +2087,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalChar.of('A').equals(OptionalChar.of('A'));  // returns true
-         * OptionalChar.of('A').equals(OptionalChar.of('B'));  // returns false
-         * OptionalChar.of('A').equals(OptionalChar.empty());  // returns false
-         * OptionalChar.empty().equals(OptionalChar.empty());  // returns true
+         * OptionalChar.of('A').equals(OptionalChar.of('A'));   // returns true
+         * OptionalChar.of('A').equals(OptionalChar.of('B'));   // returns false
+         * OptionalChar.of('A').equals(OptionalChar.empty());   // returns false
+         * OptionalChar.empty().equals(OptionalChar.empty());   // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -2644,7 +2646,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalByte.of((byte) 42).orElseThrow("No value present");   // returns the present value
-         * OptionalByte.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * OptionalByte.empty().orElseThrow("No value present");         // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the error message to use if no value is present
@@ -2667,7 +2669,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalByte.of((byte) 42).orElseThrow("No value for key: {}", "id");   // returns the present value
-         * OptionalByte.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * OptionalByte.empty().orElseThrow("No value for key: {}", "id");         // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -2691,7 +2693,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalByte.of((byte) 42).orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * OptionalByte.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * OptionalByte.empty().orElseThrow("No value at [{}, {}]", "x", "y");         // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -2716,7 +2718,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalByte.of((byte) 42).orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * OptionalByte.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * OptionalByte.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");         // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -2742,7 +2744,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalByte.of((byte) 42).orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * OptionalByte.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * OptionalByte.empty().orElseThrow("No value for {} of {}", "k", "set");         // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -2914,8 +2916,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalByte.of((byte) 42).boxed().get();        // returns (byte) 42
-         * OptionalByte.empty().boxed().isPresent();        // returns false
+         * OptionalByte.of((byte) 42).boxed().get();   // returns (byte) 42
+         * OptionalByte.empty().boxed().isPresent();   // returns false
          * }</pre>
          *
          * @return an {@code Optional} containing the boxed {@code Byte} value if present, otherwise an empty {@code Optional}
@@ -2970,10 +2972,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalByte.of((byte) 42).equals(OptionalByte.of((byte) 42));  // returns true
-         * OptionalByte.of((byte) 42).equals(OptionalByte.of((byte) 10));  // returns false
-         * OptionalByte.of((byte) 42).equals(OptionalByte.empty());        // returns false
-         * OptionalByte.empty().equals(OptionalByte.empty());              // returns true
+         * OptionalByte.of((byte) 42).equals(OptionalByte.of((byte) 42));   // returns true
+         * OptionalByte.of((byte) 42).equals(OptionalByte.of((byte) 10));   // returns false
+         * OptionalByte.of((byte) 42).equals(OptionalByte.empty());         // returns false
+         * OptionalByte.empty().equals(OptionalByte.empty());               // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -3508,7 +3510,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalShort.of((short) 42).orElseThrow("No value present");   // returns the present value
-         * OptionalShort.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * OptionalShort.empty().orElseThrow("No value present");          // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the error message to use if no value is present
@@ -3531,7 +3533,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalShort.of((short) 42).orElseThrow("No value for key: {}", "id");   // returns the present value
-         * OptionalShort.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * OptionalShort.empty().orElseThrow("No value for key: {}", "id");          // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -3555,7 +3557,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalShort.of((short) 42).orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * OptionalShort.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * OptionalShort.empty().orElseThrow("No value at [{}, {}]", "x", "y");          // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -3580,7 +3582,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalShort.of((short) 42).orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * OptionalShort.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * OptionalShort.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");          // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -3606,7 +3608,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalShort.of((short) 42).orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * OptionalShort.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * OptionalShort.empty().orElseThrow("No value for {} of {}", "k", "set");          // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -3754,8 +3756,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalShort.of((short) 42).boxed().get();        // returns (short) 42
-         * OptionalShort.empty().boxed().isPresent();         // returns false
+         * OptionalShort.of((short) 42).boxed().get();   // returns (short) 42
+         * OptionalShort.empty().boxed().isPresent();    // returns false
          * }</pre>
          *
          * @return an {@code Optional} containing the boxed {@code Short} value if present, otherwise an empty {@code Optional}
@@ -3810,10 +3812,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalShort.of((short) 42).equals(OptionalShort.of((short) 42));  // returns true
-         * OptionalShort.of((short) 42).equals(OptionalShort.of((short) 10));  // returns false
-         * OptionalShort.of((short) 42).equals(OptionalShort.empty());         // returns false
-         * OptionalShort.empty().equals(OptionalShort.empty());                // returns true
+         * OptionalShort.of((short) 42).equals(OptionalShort.of((short) 42));   // returns true
+         * OptionalShort.of((short) 42).equals(OptionalShort.of((short) 10));   // returns false
+         * OptionalShort.of((short) 42).equals(OptionalShort.empty());          // returns false
+         * OptionalShort.empty().equals(OptionalShort.empty());                 // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -4242,8 +4244,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).mapToBoolean(val -> val > 0);       // returns OptionalBoolean of true
-         * OptionalInt.empty().mapToBoolean(val -> true);         // returns empty OptionalBoolean
+         * OptionalInt.of(42).mapToBoolean(val -> val > 0);   // returns OptionalBoolean of true
+         * OptionalInt.empty().mapToBoolean(val -> true);     // returns empty OptionalBoolean
          * }</pre>
          *
          * @param <E> the type of exception that the mapper may throw
@@ -4536,8 +4538,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).orElseThrow("No value present");   // returns the present value
-         * OptionalInt.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * OptionalInt.of(42).orElseThrow("No value present");    // returns the present value
+         * OptionalInt.empty().orElseThrow("No value present");   // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the error message to be used in the exception
@@ -4558,8 +4560,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).orElseThrow("No value for key: {}", "id");   // returns the present value
-         * OptionalInt.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * OptionalInt.of(42).orElseThrow("No value for key: {}", "id");    // returns the present value
+         * OptionalInt.empty().orElseThrow("No value for key: {}", "id");   // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -4581,8 +4583,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * OptionalInt.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * OptionalInt.of(42).orElseThrow("No value at [{}, {}]", "x", "y");    // returns the present value
+         * OptionalInt.empty().orElseThrow("No value at [{}, {}]", "x", "y");   // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -4605,8 +4607,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * OptionalInt.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * OptionalInt.of(42).orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // returns the present value
+         * OptionalInt.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -4630,8 +4632,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * OptionalInt.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * OptionalInt.of(42).orElseThrow("No value for {} of {}", "k", "set");    // returns the present value
+         * OptionalInt.empty().orElseThrow("No value for {} of {}", "k", "set");   // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -4792,8 +4794,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).toJdkOptional().getAsInt();      // returns 42
-         * OptionalInt.empty().toJdkOptional().isPresent();    // returns false
+         * OptionalInt.of(42).toJdkOptional().getAsInt();     // returns 42
+         * OptionalInt.empty().toJdkOptional().isPresent();   // returns false
          * }</pre>
          *
          * @return a {@code java.util.OptionalInt} containing the value if present, otherwise an empty {@code java.util.OptionalInt}
@@ -4847,10 +4849,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.of(42).equals(OptionalInt.of(42));    // returns true
-         * OptionalInt.of(42).equals(OptionalInt.of(10));    // returns false
-         * OptionalInt.of(42).equals(OptionalInt.empty());   // returns false
-         * OptionalInt.empty().equals(OptionalInt.empty());  // returns true
+         * OptionalInt.of(42).equals(OptionalInt.of(42));     // returns true
+         * OptionalInt.of(42).equals(OptionalInt.of(10));     // returns false
+         * OptionalInt.of(42).equals(OptionalInt.empty());    // returns false
+         * OptionalInt.empty().equals(OptionalInt.empty());   // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -5485,7 +5487,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalLong.of(42L).orElseThrow("No value present");   // returns the present value
-         * OptionalLong.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * OptionalLong.empty().orElseThrow("No value present");   // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the error message to be used in the exception
@@ -5507,7 +5509,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalLong.of(42L).orElseThrow("No value for key: {}", "id");   // returns the present value
-         * OptionalLong.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * OptionalLong.empty().orElseThrow("No value for key: {}", "id");   // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -5530,7 +5532,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalLong.of(42L).orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * OptionalLong.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * OptionalLong.empty().orElseThrow("No value at [{}, {}]", "x", "y");   // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -5554,7 +5556,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalLong.of(42L).orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * OptionalLong.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * OptionalLong.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -5579,7 +5581,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalLong.of(42L).orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * OptionalLong.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * OptionalLong.empty().orElseThrow("No value for {} of {}", "k", "set");   // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message format string
@@ -5645,8 +5647,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.of(42L).toList();    // returns [42]
-         * OptionalLong.empty().toList();    // returns []
+         * OptionalLong.of(42L).toList();   // returns [42]
+         * OptionalLong.empty().toList();   // returns []
          * }</pre>
          *
          * @return a List containing the value if present, otherwise an empty List
@@ -5664,8 +5666,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.of(42L).toSet();    // returns [42]
-         * OptionalLong.empty().toSet();    // returns []
+         * OptionalLong.of(42L).toSet();   // returns [42]
+         * OptionalLong.empty().toSet();   // returns []
          * }</pre>
          *
          * @return a Set containing the value if present, otherwise an empty Set
@@ -5683,8 +5685,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.of(42L).toImmutableList();    // returns [42]
-         * OptionalLong.empty().toImmutableList();    // returns []
+         * OptionalLong.of(42L).toImmutableList();   // returns [42]
+         * OptionalLong.empty().toImmutableList();   // returns []
          * }</pre>
          *
          * @return an ImmutableList containing the value if present, otherwise an empty ImmutableList
@@ -5702,8 +5704,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.of(42L).toImmutableSet();    // returns [42]
-         * OptionalLong.empty().toImmutableSet();    // returns []
+         * OptionalLong.of(42L).toImmutableSet();   // returns [42]
+         * OptionalLong.empty().toImmutableSet();   // returns []
          * }</pre>
          *
          * @return an ImmutableSet containing the value if present, otherwise an empty ImmutableSet
@@ -5721,8 +5723,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.of(42L).boxed().get();          // returns 42L
-         * OptionalLong.empty().boxed().isPresent();    // returns false
+         * OptionalLong.of(42L).boxed().get();         // returns 42L
+         * OptionalLong.empty().boxed().isPresent();   // returns false
          * }</pre>
          *
          * @return an {@code Optional} containing the boxed {@code Long} value if present, otherwise an empty {@code Optional}
@@ -5740,8 +5742,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.of(42L).toJdkOptional().getAsLong();     // returns 42L
-         * OptionalLong.empty().toJdkOptional().isPresent();     // returns false
+         * OptionalLong.of(42L).toJdkOptional().getAsLong();   // returns 42L
+         * OptionalLong.empty().toJdkOptional().isPresent();   // returns false
          * }</pre>
          *
          * @return a {@code java.util.OptionalLong} containing the value if present, otherwise an empty {@code java.util.OptionalLong}
@@ -5795,10 +5797,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.of(42L).equals(OptionalLong.of(42L));  // returns true
-         * OptionalLong.of(42L).equals(OptionalLong.of(10L));  // returns false
-         * OptionalLong.of(42L).equals(OptionalLong.empty());  // returns false
-         * OptionalLong.empty().equals(OptionalLong.empty());  // returns true
+         * OptionalLong.of(42L).equals(OptionalLong.of(42L));   // returns true
+         * OptionalLong.of(42L).equals(OptionalLong.of(10L));   // returns false
+         * OptionalLong.of(42L).equals(OptionalLong.empty());   // returns false
+         * OptionalLong.empty().equals(OptionalLong.empty());   // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -6359,7 +6361,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalFloat.of(3.14f).orElseThrow("No value present");   // returns the present value
-         * OptionalFloat.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * OptionalFloat.empty().orElseThrow("No value present");     // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the error message to use if no value is present
@@ -6381,7 +6383,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalFloat.of(3.14f).orElseThrow("No value for key: {}", "id");   // returns the present value
-         * OptionalFloat.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * OptionalFloat.empty().orElseThrow("No value for key: {}", "id");     // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -6404,7 +6406,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalFloat.of(3.14f).orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * OptionalFloat.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * OptionalFloat.empty().orElseThrow("No value at [{}, {}]", "x", "y");     // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -6428,7 +6430,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalFloat.of(3.14f).orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * OptionalFloat.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * OptionalFloat.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");     // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -6453,7 +6455,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalFloat.of(3.14f).orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * OptionalFloat.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * OptionalFloat.empty().orElseThrow("No value for {} of {}", "k", "set");     // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -6595,8 +6597,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalFloat.of(3.14f).boxed().get();          // returns 3.14f
-         * OptionalFloat.empty().boxed().isPresent();      // returns false
+         * OptionalFloat.of(3.14f).boxed().get();       // returns 3.14f
+         * OptionalFloat.empty().boxed().isPresent();   // returns false
          * }</pre>
          *
          * @return an {@code Optional} containing the boxed {@code Float} value if present, otherwise an empty {@code Optional}
@@ -6649,10 +6651,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalFloat.of(3.14f).equals(OptionalFloat.of(3.14f));  // returns true
-         * OptionalFloat.of(3.14f).equals(OptionalFloat.of(1.0f));   // returns false
-         * OptionalFloat.of(3.14f).equals(OptionalFloat.empty());    // returns false
-         * OptionalFloat.empty().equals(OptionalFloat.empty());      // returns true
+         * OptionalFloat.of(3.14f).equals(OptionalFloat.of(3.14f));   // returns true
+         * OptionalFloat.of(3.14f).equals(OptionalFloat.of(1.0f));    // returns false
+         * OptionalFloat.of(3.14f).equals(OptionalFloat.empty());     // returns false
+         * OptionalFloat.empty().equals(OptionalFloat.empty());       // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -7503,8 +7505,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalDouble.of(3.14).boxed().get();          // returns 3.14
-         * OptionalDouble.empty().boxed().isPresent();     // returns false
+         * OptionalDouble.of(3.14).boxed().get();        // returns 3.14
+         * OptionalDouble.empty().boxed().isPresent();   // returns false
          * }</pre>
          *
          * @return an {@code Optional} containing the boxed {@code Double} value if present, otherwise an empty {@code Optional}
@@ -7522,8 +7524,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalDouble.of(3.14).toJdkOptional().getAsDouble();    // returns 3.14
-         * OptionalDouble.empty().toJdkOptional().isPresent();       // returns false
+         * OptionalDouble.of(3.14).toJdkOptional().getAsDouble();   // returns 3.14
+         * OptionalDouble.empty().toJdkOptional().isPresent();      // returns false
          * }</pre>
          *
          * @return a {@code java.util.OptionalDouble} containing the value if present, otherwise an empty {@code java.util.OptionalDouble}
@@ -7576,10 +7578,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalDouble.of(3.14).equals(OptionalDouble.of(3.14));  // returns true
-         * OptionalDouble.of(3.14).equals(OptionalDouble.of(1.0));   // returns false
-         * OptionalDouble.of(3.14).equals(OptionalDouble.empty());   // returns false
-         * OptionalDouble.empty().equals(OptionalDouble.empty());    // returns true
+         * OptionalDouble.of(3.14).equals(OptionalDouble.of(3.14));   // returns true
+         * OptionalDouble.of(3.14).equals(OptionalDouble.of(1.0));    // returns false
+         * OptionalDouble.of(3.14).equals(OptionalDouble.empty());    // returns false
+         * OptionalDouble.empty().equals(OptionalDouble.empty());     // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -7648,17 +7650,21 @@ public class u { // NOSONAR
      * {@code NullPointerException}, and {@link #ofNullable(Object) ofNullable(null)} returns {@link #empty()}.
      * This mirrors the contract of {@link java.util.Optional}.
      *
+     * <p>Container immutability is shallow: the value is not defensively copied. Mutating a contained
+     * object can change what callers observe and can change this container's equality and hash code.
+     * Thread-safe sharing therefore depends on the contained value.
+     *
      * <p><b>Comparison with related containers</b></p>
      * <p>This library exposes two "may-be-missing" containers — {@code Optional} and {@link Nullable} —
      * and also interoperates with {@link java.util.Optional}. The three differ in whether {@code null}
      * is a representable <i>present</i> value:</p>
      *
      * <table border="1">
-     *   <caption>Optional vs Nullable vs java.util.Optional</caption>
+     *   <caption>Optional vs {@code Nullable} vs java.util.Optional</caption>
      *   <tr>
      *     <th>Aspect</th>
      *     <th>{@code u.Optional<T>}</th>
-     *     <th>{@link Nullable u.Nullable}</th>
+     *     <th>{@link u.Nullable}</th>
      *     <th>{@link java.util.Optional}</th>
      *   </tr>
      *   <tr>
@@ -7687,7 +7693,7 @@ public class u { // NOSONAR
      *     </tr>
      *   <tr>
      *     <td>Use when</td>
-     *     <td>Result is either absent or a meaningful non-null value (most cases)</td>
+     *     <td>Result is either absent or a meaningful {@code non-null} value (most cases)</td>
      *     <td>{@code null} itself is a meaningful value — e.g. a SQL column that exists but is NULL,
      *         a {@code Map} key that maps to {@code null}</td>
      *     <td>Interop with the JDK / external APIs</td>
@@ -7716,10 +7722,10 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class Optional<T> implements Immutable {
 
-        /** Represents {@code Boolean.TRUE}. */
+        /** Cached instance representing {@code Boolean.TRUE}. */
         public static final Optional<Boolean> TRUE = new Optional<>(Boolean.TRUE);
 
-        /** Represents {@code Boolean.FALSE}. */
+        /** Cached instance representing {@code Boolean.FALSE}. */
         public static final Optional<Boolean> FALSE = new Optional<>(Boolean.FALSE);
 
         /** Pre-allocated instance for the common value of an empty {@link String}. */
@@ -7735,7 +7741,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Constructs a new {@code Optional} with the specified non-null value.
+         * Constructs a new {@code Optional} with the specified {@code non-null} value.
          *
          * @param value the value to be present, must not be {@code null}
          */
@@ -7761,7 +7767,7 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code Optional} containing the specified {@code non-null} value.
-         * Special handling for empty strings: returns a cached instance for empty strings.
+         * Empty strings reuse a pre-allocated instance.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -7784,6 +7790,7 @@ public class u { // NOSONAR
 
         /**
          * Returns an {@code Optional} containing the specified {@code non-null} value.
+         * Canonical Boolean values and empty strings reuse pre-allocated instances.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -7796,8 +7803,19 @@ public class u { // NOSONAR
          * @return an {@code Optional} containing the specified value
          * @throws NullPointerException if {@code value} is {@code null}
          */
+        @SuppressWarnings("unchecked")
         public static <T> Optional<T> of(final T value) throws NullPointerException {
-            return new Optional<>(Objects.requireNonNull(value));
+            Objects.requireNonNull(value);
+
+            if (value == Boolean.TRUE) {
+                return (Optional<T>) TRUE;
+            } else if (value == Boolean.FALSE) {
+                return (Optional<T>) FALSE;
+            } else if (value instanceof String str && str.isEmpty()) {
+                return (Optional<T>) EMPTY_STRING;
+            }
+
+            return new Optional<>(value);
         }
 
         /**
@@ -7843,7 +7861,7 @@ public class u { // NOSONAR
                 return empty();
             }
 
-            return new Optional<>(value);
+            return of(value);
         }
 
         /**
@@ -8376,7 +8394,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional.of("test").orElseThrow("No value present");   // returns the present value
-         * Optional.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * Optional.empty().orElseThrow("No value present");      // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the message to be used in the exception, if no value is present
@@ -8399,7 +8417,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional.of("test").orElseThrow("No value for key: {}", "id");   // returns the present value
-         * Optional.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * Optional.empty().orElseThrow("No value for key: {}", "id");      // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -8423,7 +8441,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional.of("test").orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * Optional.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * Optional.empty().orElseThrow("No value at [{}, {}]", "x", "y");      // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -8448,7 +8466,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional.of("test").orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * Optional.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * Optional.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");      // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -8474,7 +8492,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional.of("test").orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * Optional.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * Optional.empty().orElseThrow("No value for {} of {}", "k", "set");      // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -8642,10 +8660,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Optional.of("test").equals(Optional.of("test"));   // returns true
-         * Optional.of("test").equals(Optional.of("hello"));  // returns false
-         * Optional.of("test").equals(Optional.empty());      // returns false
-         * Optional.empty().equals(Optional.empty());         // returns true
+         * Optional.of("test").equals(Optional.of("test"));    // returns true
+         * Optional.of("test").equals(Optional.of("hello"));   // returns false
+         * Optional.of("test").equals(Optional.empty());       // returns false
+         * Optional.empty().equals(Optional.empty());          // returns true
          * }</pre>
          *
          * @param obj an object to be tested for equality
@@ -8717,6 +8735,10 @@ public class u { // NOSONAR
      * {@link #isPresent()} to discriminate absent from present, and {@link #isNull()} /
      * {@link #isNotNull()} to discriminate {@code null} from {@code non-null} within the present case.
      *
+     * <p>Container immutability is shallow: the value is not defensively copied. Mutating a contained
+     * object can change what callers observe and can change this container's equality and hash code.
+     * Thread-safe sharing therefore depends on the contained value.
+     *
      * <p><b>Why {@code Nullable}?</b></p>
      *
      * <p><b>Logical Meaning of {@code null}</b></p>
@@ -8727,8 +8749,8 @@ public class u { // NOSONAR
      * In such cases, allowing {@code null} as a valid value is both useful and necessary.
      *
      * <p><b>Limited and Optional Usage</b></p>
-     * <p>The {@code Nullable} is used as a return type in fewer than one hundred public methods —
-     * less than 0.5% of all public methods in this library. And most of these methods also have non-null-returning alternatives.
+     * <p>{@code Nullable} is intended for APIs that must distinguish absence from a present {@code null}.
+     * For APIs where {@code null} has no distinct meaning, prefer {@link Optional} or a non-null-returning alternative.
      * <p>For example:</p>
      * <ul>
      *   <li>{@code N.findFirstNonNull/N.findLastNonNull} as alternatives to {@code N.findFirst/N.findLast}</li>
@@ -8776,7 +8798,7 @@ public class u { // NOSONAR
      *     <td>Use when</td>
      *     <td>{@code null} is a meaningful, distinct outcome — e.g. a SQL column that exists but is NULL,
      *         a {@code Map} key that is mapped to {@code null}, "found but value unknown"</td>
-     *     <td>Result is either absent or a meaningful non-null value (most cases)</td>
+     *     <td>Result is either absent or a meaningful {@code non-null} value (most cases)</td>
      *     <td>Interop with the JDK / external APIs</td>
      *   </tr>
      * </table>
@@ -8790,14 +8812,14 @@ public class u { // NOSONAR
      * Map<String, String> map = new HashMap<>();
      * map.put("key1", null);
      *
-     * Nullable<String> v1 = Nullable.of("value");         // returns present(non-null)
-     * Nullable<String> v2 = Nullable.of(map.get("key1")); // returns present(null)
-     * Nullable<String> v3 = Nullable.empty();             // returns absent
+     * Nullable<String> v1 = Nullable.of("value");           // returns present(non-null)
+     * Nullable<String> v2 = Nullable.of(map.get("key1"));   // returns present(null)
+     * Nullable<String> v3 = Nullable.empty();               // returns absent
      *
-     * v2.isPresent();  // returns true
-     * v2.isNull();     // returns true
-     * v2.orElse("x");  // returns null (NOT "x") — the null IS the value
-     * v3.orElse("x");  // returns "x"
+     * v2.isPresent();                                       // returns true
+     * v2.isNull();                                          // returns true
+     * v2.orElse("x");                                       // returns null (NOT "x") — the null IS the value
+     * v3.orElse("x");                                       // returns "x"
      * }</pre>
      *
      * @param <T> the type of value
@@ -8812,10 +8834,10 @@ public class u { // NOSONAR
     @com.landawn.abacus.annotation.Immutable
     public static final class Nullable<T> implements Immutable {
 
-        /** Represents {@code Boolean.TRUE}. */
+        /** Cached instance representing {@code Boolean.TRUE}. */
         public static final Nullable<Boolean> TRUE = new Nullable<>(Boolean.TRUE);
 
-        /** Represents {@code Boolean.FALSE}. */
+        /** Cached instance representing {@code Boolean.FALSE}. */
         public static final Nullable<Boolean> FALSE = new Nullable<>(Boolean.FALSE);
 
         /** Pre-allocated raw instance representing a present {@code null} value, shared by typed {@code null} constants. */
@@ -8890,6 +8912,7 @@ public class u { // NOSONAR
 
         /**
          * Returns a {@code Nullable} containing the specified value.
+         * Canonical Boolean values and empty strings reuse pre-allocated instances.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -8903,9 +8926,16 @@ public class u { // NOSONAR
          * @param value the value to be present, which may be {@code null}
          * @return a {@code Nullable} containing the value
          */
+        @SuppressWarnings("unchecked")
         public static <T> Nullable<T> of(final T value) {
             if (value == null) {
                 return NULL_VALUE;
+            } else if (value == Boolean.TRUE) {
+                return (Nullable<T>) TRUE;
+            } else if (value == Boolean.FALSE) {
+                return (Nullable<T>) FALSE;
+            } else if (value instanceof String str && str.isEmpty()) {
+                return (Nullable<T>) EMPTY_STRING;
             }
 
             return new Nullable<>(value);
@@ -8929,7 +8959,7 @@ public class u { // NOSONAR
             if (optional == null || !optional.isPresent()) {
                 return Nullable.empty();
             } else {
-                return new Nullable<>(optional.get());
+                return Nullable.of(optional.get());
             }
         }
 
@@ -8949,7 +8979,9 @@ public class u { // NOSONAR
          * @throws NullPointerException if {@code optional} is {@code null}
          */
         public static <T> Nullable<T> from(final java.util.Optional<T> optional) {
-            return optional.map(Nullable::new).orElseGet(Nullable::empty);
+            Objects.requireNonNull(optional);
+
+            return optional.isPresent() ? Nullable.of(optional.get()) : Nullable.empty();
         }
 
         /**
@@ -9837,9 +9869,9 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("a").or(() -> Nullable.of("b")).get();          // returns "a"
-         * Nullable.<String>of(null).or(() -> Nullable.of("b")).get(); // returns null (a present null is kept)
-         * Nullable.<String>empty().or(() -> Nullable.of("b")).get();  // returns "b"
+         * Nullable.of("a").or(() -> Nullable.of("b")).get();            // returns "a"
+         * Nullable.<String>of(null).or(() -> Nullable.of("b")).get();   // returns null (a present null is kept)
+         * Nullable.<String>empty().or(() -> Nullable.of("b")).get();    // returns "b"
          * }</pre>
          *
          * @param supplier the supplying function that produces a {@code Nullable} to be returned
@@ -9860,9 +9892,9 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("a").orIfNull(() -> Nullable.of("b")).get();          // returns "a"
-         * Nullable.<String>of(null).orIfNull(() -> Nullable.of("b")).get(); // returns "b" (a present null is replaced)
-         * Nullable.<String>empty().orIfNull(() -> Nullable.of("b")).get();  // returns "b"
+         * Nullable.of("a").orIfNull(() -> Nullable.of("b")).get();            // returns "a"
+         * Nullable.<String>of(null).orIfNull(() -> Nullable.of("b")).get();   // returns "b" (a present null is replaced)
+         * Nullable.<String>empty().orIfNull(() -> Nullable.of("b")).get();    // returns "b"
          * }</pre>
          *
          * @param supplier the supplying function that produces a {@code Nullable} to be returned
@@ -10006,7 +10038,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrow("No value present");   // returns the present value
-         * Nullable.empty().orElseThrow("No value present");    // throws NoSuchElementException("No value present")
+         * Nullable.empty().orElseThrow("No value present");      // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the error message to use if no value is present
@@ -10029,7 +10061,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrow("No value for key: {}", "id");   // returns the present value
-         * Nullable.empty().orElseThrow("No value for key: {}", "id");    // throws NoSuchElementException("No value for key: id")
+         * Nullable.empty().orElseThrow("No value for key: {}", "id");      // throws NoSuchElementException("No value for key: id")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -10053,7 +10085,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrow("No value at [{}, {}]", "x", "y");   // returns the present value
-         * Nullable.empty().orElseThrow("No value at [{}, {}]", "x", "y");    // throws NoSuchElementException("No value at [x, y]")
+         * Nullable.empty().orElseThrow("No value at [{}, {}]", "x", "y");      // throws NoSuchElementException("No value at [x, y]")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -10078,7 +10110,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrow("No value for {}/{}/{}", "a", "b", "c");   // returns the present value
-         * Nullable.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");    // throws NoSuchElementException("No value for a/b/c")
+         * Nullable.empty().orElseThrow("No value for {}/{}/{}", "a", "b", "c");      // throws NoSuchElementException("No value for a/b/c")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -10104,7 +10136,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrow("No value for {} of {}", "k", "set");   // returns the present value
-         * Nullable.empty().orElseThrow("No value for {} of {}", "k", "set");    // throws NoSuchElementException("No value for k of set")
+         * Nullable.empty().orElseThrow("No value for {} of {}", "k", "set");      // throws NoSuchElementException("No value for k of set")
          * }</pre>
          *
          * @param errorMessage the error message template to use if no value is present
@@ -10219,7 +10251,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrowIfNull("Missing %s for %s", "value", "id");          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull("Missing %s for %s", "value", "id"); // throws NoSuchElementException("Missing value for id")
+         * Nullable.of((String) null).orElseThrowIfNull("Missing %s for %s", "value", "id");   // throws NoSuchElementException("Missing value for id")
          * }</pre>
          *
          * @param errorMessage the error message template to use if the value is {@code null}
@@ -10244,7 +10276,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrowIfNull("%s/%s/%s missing", "a", "b", "c");          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull("%s/%s/%s missing", "a", "b", "c"); // throws NoSuchElementException("a/b/c missing")
+         * Nullable.of((String) null).orElseThrowIfNull("%s/%s/%s missing", "a", "b", "c");   // throws NoSuchElementException("a/b/c missing")
          * }</pre>
          *
          * @param errorMessage the error message template to use if the value is {@code null}
@@ -10270,7 +10302,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrowIfNull("Missing %s and %s", "x", "y");          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull("Missing %s and %s", "x", "y"); // throws NoSuchElementException("Missing x and y")
+         * Nullable.of((String) null).orElseThrowIfNull("Missing %s and %s", "x", "y");   // throws NoSuchElementException("Missing x and y")
          * }</pre>
          *
          * @param errorMessage the error message template to use if the value is {@code null}
@@ -10293,7 +10325,7 @@ public class u { // NOSONAR
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.of("test").orElseThrowIfNull(() -> new IllegalStateException("No value"));          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull(() -> new IllegalStateException("No value")); // throws IllegalStateException("No value")
+         * Nullable.of((String) null).orElseThrowIfNull(() -> new IllegalStateException("No value"));   // throws IllegalStateException("No value")
          * }</pre>
          *
          * @param <E> the type of exception to be thrown
@@ -10569,9 +10601,9 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").toOptional().get();              // returns "test"
-         * Nullable.of((String) null).toOptional().isPresent(); // returns false (null maps to empty)
-         * Nullable.empty().toOptional().isPresent();           // returns false
+         * Nullable.of("test").toOptional().get();                // returns "test"
+         * Nullable.of((String) null).toOptional().isPresent();   // returns false (null maps to empty)
+         * Nullable.empty().toOptional().isPresent();             // returns false
          * }</pre>
          *
          * @return an {@code Optional} containing the value if present and not {@code null}, otherwise an empty {@code Optional}
@@ -10595,9 +10627,9 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").toJdkOptional().get();              // returns "test"
-         * Nullable.of((String) null).toJdkOptional().isPresent(); // returns false (null maps to empty)
-         * Nullable.empty().toJdkOptional().isPresent();           // returns false
+         * Nullable.of("test").toJdkOptional().get();                // returns "test"
+         * Nullable.of((String) null).toJdkOptional().isPresent();   // returns false (null maps to empty)
+         * Nullable.empty().toJdkOptional().isPresent();             // returns false
          * }</pre>
          *
          * @return a {@code java.util.Optional} containing the value if present and not {@code null}, otherwise an empty {@code java.util.Optional}
@@ -10624,10 +10656,10 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").equals(Nullable.of("test"));   // returns true
-         * Nullable.of("test").equals(Nullable.of("hello"));  // returns false
-         * Nullable.of("test").equals(Nullable.empty());      // returns false
-         * Nullable.empty().equals(Nullable.empty());         // returns true
+         * Nullable.of("test").equals(Nullable.of("test"));    // returns true
+         * Nullable.of("test").equals(Nullable.of("hello"));   // returns false
+         * Nullable.of("test").equals(Nullable.empty());       // returns false
+         * Nullable.empty().equals(Nullable.empty());          // returns true
          * }</pre>
          *
          * @param obj the object to be tested for equality

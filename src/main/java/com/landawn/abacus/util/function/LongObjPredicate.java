@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -58,7 +58,6 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * @param u the object second argument of type {@code T}
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
-    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     boolean test(long t, T u);
 

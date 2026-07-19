@@ -204,7 +204,7 @@ import java.math.BigInteger;
  *   <li><b>ArithmeticException:</b> Thrown for division by zero or integer overflow</li>
  *   <li><b>NumberFormatException:</b> Thrown for invalid string formats in parsing</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid construction parameters</li>
- *   <li><b>Null Safety:</b> Appropriate null checks with {@code NullPointerException}</li>
+ *   <li><b>Null Safety:</b> Appropriate {@code null} checks with {@code NullPointerException}</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
@@ -231,7 +231,7 @@ import java.math.BigInteger;
  * <p><b>Comparison with Alternative Approaches:</b>
  * <ul>
  *   <li><b>vs. double/float:</b> Fraction provides exact precision vs. floating-point approximations</li>
- *   <li><b>vs. BigDecimal:</b> Fraction represents true fractions vs. decimal approximations</li>
+ *   <li><b>vs. BigDecimal:</b> Fraction represents {@code true} fractions vs. decimal approximations</li>
  *   <li><b>vs. BigFraction:</b> This class is faster but limited to int range vs. unlimited precision</li>
  *   <li><b>vs. Rational Libraries:</b> Optimized for common use cases vs. comprehensive mathematical features</li>
  * </ul>
@@ -387,12 +387,12 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(3, 4);              // returns 3/4
-     * Fraction f2 = Fraction.of(-5, 8);             // returns -5/8
-     * Fraction f3 = Fraction.of(2, 4);              // returns 2/4 (not reduced to 1/2)
-     * Fraction f4 = Fraction.of(0, 3);              // returns 0/3
-     * Fraction.of(1, 0);                            // throws ArithmeticException
-     * Fraction.of(1, Integer.MIN_VALUE);            // throws ArithmeticException
+     * Fraction f1 = Fraction.of(3, 4);     // returns 3/4
+     * Fraction f2 = Fraction.of(-5, 8);    // returns -5/8
+     * Fraction f3 = Fraction.of(2, 4);     // returns 2/4 (not reduced to 1/2)
+     * Fraction f4 = Fraction.of(0, 3);     // returns 0/3
+     * Fraction.of(1, 0);                   // throws ArithmeticException
+     * Fraction.of(1, Integer.MIN_VALUE);   // throws ArithmeticException
      * }</pre>
      *
      * @param numerator the numerator of the fraction
@@ -552,24 +552,34 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(0.5);                // returns 1/2
-     * Fraction f2 = Fraction.of(0.333);              // returns approximately 333/1000
-     * Fraction f3 = Fraction.of(3.14159);            // returns an approximation of pi
-     * Fraction.of(Double.NaN);                       // throws ArithmeticException
-     * Fraction.of(Double.POSITIVE_INFINITY);         // throws ArithmeticException
+     * Fraction f1 = Fraction.of(0.5);          // returns 1/2
+     * Fraction f2 = Fraction.of(0.333);        // returns approximately 333/1000
+     * Fraction f3 = Fraction.of(3.14159);      // returns an approximation of pi
+     * Fraction.of(Double.NaN);                 // throws ArithmeticException
+     * Fraction.of(Double.POSITIVE_INFINITY);   // throws ArithmeticException
      * }</pre>
      *
      * @param value the double value to convert to a fraction
      * @return a new fraction instance that approximates the given value
-     * @throws ArithmeticException if the value is greater than {@code Integer.MAX_VALUE},
-     *         is {@code NaN}, is infinite, or if the algorithm fails to converge within 25 iterations
+     * @throws ArithmeticException if the value is outside the inclusive range
+     *         [{@link Integer#MIN_VALUE}, {@link Integer#MAX_VALUE}], is {@code NaN}, is infinite,
+     *         if the approximated numerator cannot be represented as an {@code int},
+     *         or if the algorithm fails to converge within 25 iterations
      */
     public static Fraction of(double value) {
+        if (!Double.isFinite(value) || value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+            throw new ArithmeticException("The value must be finite and between Integer.MIN_VALUE and Integer.MAX_VALUE");
+        }
+
+        // Math.abs(Integer.MIN_VALUE as a double) is one greater than Integer.MAX_VALUE and the
+        // subsequent narrowing conversion would saturate to Integer.MAX_VALUE. Handle the exactly
+        // representable negative endpoint before decomposing the magnitude.
+        if (value == Integer.MIN_VALUE) {
+            return of(Integer.MIN_VALUE, 1);
+        }
+
         final int sign = value < 0 ? -1 : 1;
         value = Math.abs(value);
-        if (value > Integer.MAX_VALUE || Double.isNaN(value)) {
-            throw new ArithmeticException("The value must not be greater than Integer.MAX_VALUE or NaN");
-        }
         final int wholeNumber = (int) value;
         value -= wholeNumber;
 
@@ -947,17 +957,17 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(1, 3);   // returns 1/3
-     * float v1 = f1.floatValue();        // returns 0.33333334f
+     * Fraction f1 = Fraction.of(1, 3);    // returns 1/3
+     * float v1 = f1.floatValue();         // returns 0.33333334f
      *
-     * Fraction f2 = Fraction.of(3, 4);   // returns 3/4
-     * float v2 = f2.floatValue();        // returns 0.75f
+     * Fraction f2 = Fraction.of(3, 4);    // returns 3/4
+     * float v2 = f2.floatValue();         // returns 0.75f
      *
-     * Fraction f3 = Fraction.of(0, 1);   // returns 0/1
-     * float v3 = f3.floatValue();        // returns 0.0f
+     * Fraction f3 = Fraction.of(0, 1);    // returns 0/1
+     * float v3 = f3.floatValue();         // returns 0.0f
      *
-     * Fraction f4 = Fraction.of(-1, 2);  // returns -1/2
-     * float v4 = f4.floatValue();        // returns -0.5f
+     * Fraction f4 = Fraction.of(-1, 2);   // returns -1/2
+     * float v4 = f4.floatValue();         // returns -0.5f
      * }</pre>
      *
      * @return the fraction as a float value
@@ -1048,9 +1058,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction i2 = f2.invert();   // returns -5/2
      *
      * Fraction f3 = Fraction.of(1, 7);
-     * Fraction i3 = f3.invert();   // returns 7/1
+     * Fraction i3 = f3.invert();    // returns 7/1
      *
-     * Fraction.of(0, 1).invert();  // throws ArithmeticException
+     * Fraction.of(0, 1).invert();   // throws ArithmeticException
      * }</pre>
      *
      * @return a new fraction that is the inverse of this fraction
@@ -1084,7 +1094,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction n2 = f2.negate();   // returns 2/5
      *
      * Fraction f3 = Fraction.of(0, 1);
-     * Fraction n3 = f3.negate();   // returns 0/1
+     * Fraction n3 = f3.negate();                    // returns 0/1
      *
      * Fraction.of(Integer.MIN_VALUE, 1).negate();   // throws ArithmeticException
      * }</pre>
@@ -1116,7 +1126,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction a2 = f2.abs();   // returns 2/5 (same instance)
      *
      * Fraction f3 = Fraction.of(0, 1);
-     * Fraction a3 = f3.abs();   // returns 0/1 (same instance)
+     * Fraction a3 = f3.abs();                    // returns 0/1 (same instance)
      *
      * Fraction.of(Integer.MIN_VALUE, 1).abs();   // throws ArithmeticException
      * }</pre>
@@ -1146,11 +1156,11 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f = Fraction.of(2, 3);
-     * Fraction p1 = f.pow(2);          // returns 4/9
-     * Fraction p2 = f.pow(-1);         // returns 3/2
-     * Fraction p3 = f.pow(0);          // returns 1/1
-     * Fraction.of(0, 1).pow(5);        // returns 0/1
-     * Fraction.of(0, 1).pow(-1);       // throws ArithmeticException
+     * Fraction p1 = f.pow(2);      // returns 4/9
+     * Fraction p2 = f.pow(-1);     // returns 3/2
+     * Fraction p3 = f.pow(0);      // returns 1/1
+     * Fraction.of(0, 1).pow(5);    // returns 0/1
+     * Fraction.of(0, 1).pow(-1);   // throws ArithmeticException
      * }</pre>
      *
      * @param power the power to raise the fraction to
@@ -1332,9 +1342,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(1, 2);       // returns 1/2
-     * Fraction f2 = Fraction.of(1, 3);       // returns 1/3
-     * Fraction sum = f1.add(f2);             // returns 5/6
+     * Fraction f1 = Fraction.of(1, 2);   // returns 1/2
+     * Fraction f2 = Fraction.of(1, 3);   // returns 1/3
+     * Fraction sum = f1.add(f2);         // returns 5/6
      *
      * Fraction f3 = Fraction.of(5, 8);
      * Fraction f4 = Fraction.of(3, 8);
@@ -1343,7 +1353,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f5 = Fraction.of(0, 1);
      * Fraction sum3 = f5.add(Fraction.of(3, 4));   // returns 3/4
      *
-     * Fraction.of(1, 2).add(null);            // throws IllegalArgumentException
+     * Fraction.of(1, 2).add(null);                 // throws IllegalArgumentException
      * }</pre>
      *
      * @param fraction the fraction to add to this fraction (must not be {@code null})
@@ -1364,9 +1374,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(3, 4);       // returns 3/4
-     * Fraction f2 = Fraction.of(1, 2);       // returns 1/2
-     * Fraction diff = f1.subtract(f2);       // returns 1/4
+     * Fraction f1 = Fraction.of(3, 4);   // returns 3/4
+     * Fraction f2 = Fraction.of(1, 2);   // returns 1/2
+     * Fraction diff = f1.subtract(f2);   // returns 1/4
      *
      * Fraction f3 = Fraction.of(1, 3);
      * Fraction f4 = Fraction.of(2, 3);
@@ -1375,7 +1385,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f5 = Fraction.of(5, 8);
      * Fraction diff3 = f5.subtract(Fraction.of(0, 1));   // returns 5/8
      *
-     * Fraction.of(3, 4).subtract(null);       // throws IllegalArgumentException
+     * Fraction.of(3, 4).subtract(null);                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param fraction the fraction to subtract from this fraction (must not be {@code null})
@@ -1444,9 +1454,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(2, 3);         // returns 2/3
-     * Fraction f2 = Fraction.of(3, 4);         // returns 3/4
-     * Fraction prod = f1.multipliedBy(f2);     // returns 1/2 (reduced from 6/12)
+     * Fraction f1 = Fraction.of(2, 3);       // returns 2/3
+     * Fraction f2 = Fraction.of(3, 4);       // returns 3/4
+     * Fraction prod = f1.multipliedBy(f2);   // returns 1/2 (reduced from 6/12)
      *
      * Fraction f3 = Fraction.of(5, 6);
      * Fraction f4 = Fraction.of(7, 8);
@@ -1455,7 +1465,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f5 = Fraction.of(0, 1);
      * Fraction prod3 = f5.multipliedBy(Fraction.of(5, 3));   // returns ZERO
      *
-     * Fraction.of(2, 3).multipliedBy(null);    // throws IllegalArgumentException
+     * Fraction.of(2, 3).multipliedBy(null);                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param fraction the fraction to multiply by (must not be {@code null})
@@ -1484,13 +1494,13 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(3, 4);              // returns 3/4
-     * Fraction f2 = Fraction.of(1, 2);              // returns 1/2
-     * Fraction quot = f1.dividedBy(f2);             // returns 3/2 (3/4 ÷ 1/2 = 3/4 × 2/1)
+     * Fraction f1 = Fraction.of(3, 4);    // returns 3/4
+     * Fraction f2 = Fraction.of(1, 2);    // returns 1/2
+     * Fraction quot = f1.dividedBy(f2);   // returns 3/2 (3/4 ÷ 1/2 = 3/4 × 2/1)
      *
      * Fraction f3 = Fraction.of(5, 6);
      * Fraction f4 = Fraction.of(2, 3);
-     * Fraction quot2 = f3.dividedBy(f4);            // returns 5/4
+     * Fraction quot2 = f3.dividedBy(f4);                // returns 5/4
      *
      * Fraction.of(3, 4).dividedBy(Fraction.of(0, 1));   // throws ArithmeticException
      * Fraction.of(3, 4).dividedBy(null);                // throws IllegalArgumentException
@@ -1529,9 +1539,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f2 = Fraction.of(2, 4);
      * Fraction f3 = Fraction.of(3, 4);
      *
-     * f1.compareTo(f2);   // returns 0 (numerically equal)
-     * f1.compareTo(f3);   // returns negative (f1 < f3)
-     * f3.compareTo(f1);   // returns positive (f3 > f1)
+     * f1.compareTo(f2);                                   // returns 0 (numerically equal)
+     * f1.compareTo(f3);                                   // returns negative (f1 < f3)
+     * f3.compareTo(f1);                                   // returns positive (f3 > f1)
      *
      * Fraction.of(-1, 2).compareTo(Fraction.of(-1, 3));   // returns negative
      * f1.compareTo(null);                                 // throws NullPointerException
@@ -1657,10 +1667,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f2 = Fraction.of(1, 2);
      * Fraction f3 = Fraction.of(2, 4);
      *
-     * f1.equals(f2);    // returns true (same numerator and denominator)
-     * f1.equals(f3);    // returns false (different numerator and denominator)
-     * f1.equals(null);  // returns false
-     * f1.equals("x");   // returns false
+     * f1.equals(f2);     // returns true (same numerator and denominator)
+     * f1.equals(f3);     // returns false (different numerator and denominator)
+     * f1.equals(null);   // returns false
+     * f1.equals("x");    // returns false
      * }</pre>
      *
      * @param obj the object to compare with

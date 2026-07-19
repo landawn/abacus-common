@@ -39,6 +39,8 @@ import com.landawn.abacus.util.Objectory;
  * <p>When writing CLOB data to a {@link java.io.Writer}-based {@link Appendable}, the stream is
  * decoded as US-ASCII. For other {@link Appendable} targets, the stream is fully buffered into a
  * string first.</p>
+ * <p>Callers must close streams returned by the {@code get} methods; closing a returned stream also
+ * releases the internally acquired {@code Clob} locator.</p>
  *
  * @see InputStreamType
  * @see java.sql.Clob
@@ -64,7 +66,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param rs          the {@link java.sql.ResultSet} to read from
      * @param columnIndex the 1-based column index
-     * @return an ASCII {@link java.io.InputStream} for the CLOB value,
+     * @return an ASCII {@link java.io.InputStream} for the CLOB value; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
@@ -80,7 +82,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param rs         the {@link java.sql.ResultSet} to read from
      * @param columnName the label of the column to retrieve
-     * @return an ASCII {@link java.io.InputStream} for the CLOB value,
+     * @return an ASCII {@link java.io.InputStream} for the CLOB value; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
@@ -237,6 +239,8 @@ public class ClobAsciiStreamType extends InputStreamType {
     /**
      * Extracts an ASCII {@link java.io.InputStream} from a {@link java.sql.Clob}.
      * This is a package-private utility used by both {@code get} overloads.
+     * Closing the returned stream closes the delegate and calls {@link Clob#free()}.
+     * This method therefore assumes ownership of a non-null {@code clob}.
      *
      * @param clob the {@link java.sql.Clob} to read from; may be {@code null}
      * @return an ASCII {@link java.io.InputStream} for the CLOB's content,
@@ -244,10 +248,6 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
     static InputStream clobToAsciiStream(final Clob clob) throws SQLException {
-        if (clob != null) {
-            return clob.getAsciiStream();
-        }
-
-        return null; // NOSONAR
+        return Utils.openAsciiStream(clob);
     }
 }

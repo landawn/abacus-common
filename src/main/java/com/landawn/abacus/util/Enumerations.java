@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -428,14 +429,14 @@ public final class Enumerations {
      * @param <T> the type of elements
      * @param <C> the type of the Collection to create
      * @param e the Enumeration to convert; may be {@code null}
-     * @param supplier the supplier to create the target collection; must not be {@code null}
+     * @param supplier the supplier to create the target collection; both the supplier and the collection it supplies must not be {@code null}
      * @return the collection created by {@code supplier} containing all elements from the Enumeration; an empty collection if {@code e} is {@code null}
-     * @throws NullPointerException if {@code supplier} is {@code null}
+     * @throws NullPointerException if {@code supplier} or the collection it supplies is {@code null}
      * @see #toList(Enumeration)
      * @see #toSet(Enumeration)
      */
     public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier) {
-        final C c = supplier.get();
+        final C c = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
 
         if (e != null) {
             while (e.hasMoreElements()) {

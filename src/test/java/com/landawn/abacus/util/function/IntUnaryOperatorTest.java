@@ -155,6 +155,7 @@ public class IntUnaryOperatorTest extends TestBase {
     @Test
     public void testComposeNullThrowsImmediately() {
         IntUnaryOperator instance = a -> 0;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((java.util.function.IntUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((java.util.function.IntUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.IntUnaryOperator) null));
     }
 }

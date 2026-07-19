@@ -939,6 +939,25 @@ public class IntIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
     }
 
+    @Test
+    public void test_indexed_indexOverflowDoesNotConsumeSource() {
+        IntIterator source = IntIterator.of(1, 2);
+        ObjIterator<IndexedInt> indexed = source.indexed(Long.MAX_VALUE);
+
+        assertEquals(Long.MAX_VALUE, indexed.next().longIndex());
+        assertThrows(ArithmeticException.class, indexed::next);
+        assertEquals(2, source.nextInt());
+    }
+
+    @Test
+    public void test_indexed_maxIndexExhaustionThrowsNoSuchElementException() {
+        ObjIterator<IndexedInt> indexed = IntIterator.of(1).indexed(Long.MAX_VALUE);
+
+        assertEquals(Long.MAX_VALUE, indexed.next().longIndex());
+        assertFalse(indexed.hasNext());
+        assertThrows(NoSuchElementException.class, indexed::next);
+    }
+
     // =================================================
     // forEachRemaining() [deprecated]
     // =================================================

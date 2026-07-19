@@ -195,8 +195,8 @@ public class MutableByteType extends NumberType<MutableByte> {
 
     /**
      * Writes the byte value of a {@link MutableByte} to a {@link CharacterWriter}.
-     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
-     * The {@code config} parameter is not used for byte values.
+     * Writes {@code null} when {@code x} is {@code null}, or zero when
+     * {@link JsonXmlSerConfig#isWriteNullNumberAsZero()} is enabled.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
@@ -207,7 +207,7 @@ public class MutableByteType extends NumberType<MutableByte> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableByte} to write, may be {@code null}
-     * @param config the serialization configuration (unused for byte values)
+     * @param config the serialization configuration controlling null-number output; may be {@code null}
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

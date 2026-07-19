@@ -545,6 +545,24 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
+    @DisplayName("A null column type defaults to String without dropping or shifting the column")
+    public void testLoadCSVFromReaderWithNullTypeMapping() {
+        Map<String, Type<?>> typeMap = new HashMap<>();
+        typeMap.put("id", null);
+
+        Dataset ds = CsvUtil.load(new StringReader(testCsvContent), List.of("id", "name"), 0, Long.MAX_VALUE, typeMap);
+
+        assertEquals(2, ds.columnCount());
+        assertEquals(5, ds.size());
+        assertEquals("1", ds.get(0, 0));
+        assertEquals("John", ds.get(0, 1));
+
+        Dataset allColumns = CsvUtil.load(new StringReader(testCsvContent), typeMap);
+        assertEquals(4, allColumns.columnCount());
+        assertEquals("1", allColumns.get(0, 0));
+    }
+
+    @Test
     @DisplayName("Test load(Reader, Collection, long, long, Map<String, Type>)")
     public void testLoadCSVFromReaderWithOffsetCountAndTypeMap() {
         Reader reader = new StringReader(testCsvContent);
@@ -1272,6 +1290,19 @@ public class CsvUtilTest extends TestBase {
             List<Object[]> arrays = stream.toList();
             assertEquals(5, arrays.size());
             assertEquals(4, arrays.get(0).length);
+        }
+    }
+
+    @Test
+    @DisplayName("Reference-array streams convert fields to the component type")
+    public void testStreamWithTypedObjectArray() {
+        try (Stream<Integer[]> stream = CsvUtil.stream(new StringReader("a,b\n1,2\n3,4\n"), Integer[].class, true)) {
+            List<Integer[]> rows = stream.toList();
+
+            assertEquals(2, rows.size());
+            assertEquals(Integer.valueOf(1), rows.get(0)[0]);
+            assertEquals(Integer.valueOf(2), rows.get(0)[1]);
+            assertEquals(Integer.valueOf(4), rows.get(1)[1]);
         }
     }
 
@@ -2094,6 +2125,21 @@ public class CsvUtilTest extends TestBase {
             List<String> names = stream.toList();
             assertEquals(3, names.size());
         }
+    }
+
+    @Test
+    @DisplayName("CSV builders reject negative pagination at configuration time")
+    public void testBuildersRejectNegativePaginationImmediately() {
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().offset(-1));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().count(-1));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().offset(-1));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().count(-1));
+    }
+
+    @Test
+    public void testLoadRejectsNullRowExtractorImmediately() {
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, null,
+                (TriConsumer<List<String>, DisposableArray<String>, Object[]>) null));
     }
 
     // CSVCommon.apply() with escapeCharToBackSlashForWrite=true, previous state=false -> L3294-3295 (finally restores to non-backslash)

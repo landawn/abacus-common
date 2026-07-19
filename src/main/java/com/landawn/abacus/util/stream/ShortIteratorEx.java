@@ -372,8 +372,8 @@ public abstract class ShortIteratorEx extends ShortIterator implements IteratorE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIteratorEx iter = ShortIteratorEx.of((short) 1, (short) 2);
-     * iter.closeResource(); // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext()); // closeResource() does not consume elements
+     * iter.closeResource();         // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * ShortIteratorEx iter2 = ShortIteratorEx.of((short) 3, (short) 4);

@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Throwables;
  * @param <U> the type of the second argument to the function
  */
 @FunctionalInterface
-public interface ToFloatBiFunction<T, U> extends Throwables.ToFloatBiFunction<T, U, RuntimeException> {
+public interface ToFloatBiFunction<T, U> extends Throwables.ToFloatBiFunction<T, U, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments and returns a float result.
      *

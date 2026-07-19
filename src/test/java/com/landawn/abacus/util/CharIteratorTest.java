@@ -736,6 +736,22 @@ public class CharIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
     }
 
+    @Test
+    public void testIndexed_withStartIndex_overflow() {
+        ObjIterator<IndexedChar> indexed = CharIterator.of('a', 'b').indexed(Long.MAX_VALUE);
+
+        IndexedChar first = indexed.next();
+        assertEquals(Long.MAX_VALUE, first.longIndex());
+        assertEquals('a', first.value());
+        assertTrue(indexed.hasNext());
+        assertThrows(ArithmeticException.class, indexed::next);
+
+        ObjIterator<IndexedChar> exhausted = CharIterator.of('a').indexed(Long.MAX_VALUE);
+        exhausted.next();
+        assertFalse(exhausted.hasNext());
+        assertThrows(NoSuchElementException.class, exhausted::next);
+    }
+
     // ==================== forEachRemaining(Consumer) (deprecated) ====================
 
     @Test

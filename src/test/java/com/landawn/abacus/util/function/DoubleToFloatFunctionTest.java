@@ -58,8 +58,8 @@ public class DoubleToFloatFunctionTest extends TestBase {
     @Test
     public void testApplyAsFloat_WithZero() {
         DoubleToFloatFunction function = DoubleToFloatFunction.DEFAULT;
-        assertEquals(0.0f, function.applyAsFloat(0.0), 0.0001f);
-        assertEquals(0.0f, function.applyAsFloat(-0.0), 0.0001f);
+        assertEquals(Float.floatToRawIntBits(0.0f), Float.floatToRawIntBits(function.applyAsFloat(0.0)));
+        assertEquals(Float.floatToRawIntBits(-0.0f), Float.floatToRawIntBits(function.applyAsFloat(-0.0)));
     }
 
     @Test
@@ -73,9 +73,13 @@ public class DoubleToFloatFunctionTest extends TestBase {
     public void testApplyAsFloat_SpecialValues() {
         DoubleToFloatFunction function = DoubleToFloatFunction.DEFAULT;
 
-        assertEquals(Float.POSITIVE_INFINITY, function.applyAsFloat(Double.POSITIVE_INFINITY), 0.0001f);
-        assertEquals(Float.NEGATIVE_INFINITY, function.applyAsFloat(Double.NEGATIVE_INFINITY), 0.0001f);
+        assertEquals(Float.POSITIVE_INFINITY, function.applyAsFloat(Double.POSITIVE_INFINITY));
+        assertEquals(Float.NEGATIVE_INFINITY, function.applyAsFloat(Double.NEGATIVE_INFINITY));
         assertTrue(Float.isNaN(function.applyAsFloat(Double.NaN)));
+        assertEquals(Float.POSITIVE_INFINITY, function.applyAsFloat(Double.MAX_VALUE));
+        assertEquals(Float.NEGATIVE_INFINITY, function.applyAsFloat(-Double.MAX_VALUE));
+        assertEquals(Float.floatToRawIntBits(0.0f), Float.floatToRawIntBits(function.applyAsFloat(Double.MIN_VALUE)));
+        assertEquals(Float.floatToRawIntBits(-0.0f), Float.floatToRawIntBits(function.applyAsFloat(-Double.MIN_VALUE)));
     }
 
     @Test

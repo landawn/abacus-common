@@ -16,6 +16,8 @@ package com.landawn.abacus.util;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -26,10 +28,12 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -127,6 +131,12 @@ public final class XmlUtil {
 
     private static final int POOL_SIZE = 1000;
 
+    private static final Set<String> CRITICAL_SECURITY_NAMES = Set.of(XMLConstants.FEATURE_SECURE_PROCESSING,
+            "http://apache.org/xml/features/disallow-doctype-decl", "http://xml.org/sax/features/external-general-entities",
+            "http://xml.org/sax/features/external-parameter-entities", "http://apache.org/xml/features/nonvalidating/load-external-dtd",
+            XMLInputFactory.SUPPORT_DTD, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, XMLConstants.ACCESS_EXTERNAL_DTD, XMLConstants.ACCESS_EXTERNAL_SCHEMA,
+            XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "XIncludeAware", "expandEntityReferences", "XMLResolver");
+
     // ...
     private static final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
@@ -143,6 +153,7 @@ public final class XmlUtil {
     }
 
     private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
+    private static final WeakIdentitySet<SAXParser> ownedSaxParsers = new WeakIdentitySet<>();
 
     // ...
     private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -163,6 +174,7 @@ public final class XmlUtil {
     }
 
     private static final Queue<DocumentBuilder> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
+    private static final WeakIdentitySet<DocumentBuilder> ownedContentParsers = new WeakIdentitySet<>();
 
     // private static final int BUFFER_SIZE = 1024 * 16; // 16KB
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -207,10 +219,12 @@ public final class XmlUtil {
     static {
         try {
             transferFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+            if (!transferFactory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING)) {
+                throw new IllegalStateException("TransformerFactory ignored FEATURE_SECURE_PROCESSING");
+            }
         } catch (Exception e) { // NOSONAR
-            // FEATURE_SECURE_PROCESSING is the umbrella that defaults ACCESS_EXTERNAL_*; if it
-            // can't be set, the TransformerFactory may still permit `document(...)` etc.
-            logger.warn(e, "Failed to enable FEATURE_SECURE_PROCESSING on TransformerFactory; XSLT may permit external resource access (SSRF risk)");
+            logFactoryFailure("TransformerFactory feature", XMLConstants.FEATURE_SECURE_PROCESSING, e);
         }
 
         setTransformerFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -240,21 +254,15 @@ public final class XmlUtil {
 
     /**
      * Names of factory features/properties/attributes that are essential to XXE / billion-laughs
-     * defense. If we can't set one of these, the application is silently insecure - so escalate
-     * to WARN (instead of DEBUG) so operators see the failure in production logs.
+     * defense. Failure to apply or verify one of these settings aborts class initialization so XML
+     * processing cannot continue with a silently weakened security policy.
      */
-    private static final java.util.Set<String> CRITICAL_SECURITY_NAMES = java.util.Set.of(XMLConstants.FEATURE_SECURE_PROCESSING,
-            "http://apache.org/xml/features/disallow-doctype-decl", "http://xml.org/sax/features/external-general-entities",
-            "http://xml.org/sax/features/external-parameter-entities", "http://apache.org/xml/features/nonvalidating/load-external-dtd",
-            XMLInputFactory.SUPPORT_DTD, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, XMLConstants.ACCESS_EXTERNAL_DTD, XMLConstants.ACCESS_EXTERNAL_SCHEMA,
-            XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
-
     private static void logFactoryFailure(final String factory, final String name, final Exception e) {
-        // For critical XXE flags, fail-open is dangerous: the application keeps running with
-        // unrestricted DTD/external-entity processing. Log at WARN so operators notice.
+        // For critical XXE flags, fail-open is dangerous: abort class initialization instead of
+        // continuing with unrestricted DTD/external-entity processing.
         if (CRITICAL_SECURITY_NAMES.contains(name)) {
-            logger.warn(e, "Failed to apply critical XML security setting '{}' on {}. Application may be vulnerable to XXE/external-entity attacks", name,
-                    factory);
+            logger.warn(e, "Failed to apply required XML security setting '{}' on {}", name, factory);
+            throw new ExceptionInInitializerError(e);
         } else if (logger.isDebugEnabled()) {
             logger.debug(e, "Failed to set {} '{}'", factory, name);
         }
@@ -263,6 +271,10 @@ public final class XmlUtil {
     private static void setSaxParserFactoryFeature(final String featureName, final boolean value) {
         try {
             saxParserFactory.setFeature(featureName, value);
+
+            if (saxParserFactory.getFeature(featureName) != value) {
+                throw new IllegalStateException("SAXParserFactory ignored feature: " + featureName);
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("SAXParserFactory feature", featureName, e);
         }
@@ -271,6 +283,10 @@ public final class XmlUtil {
     private static void setSaxParserFactoryXIncludeAware(final boolean value) {
         try {
             saxParserFactory.setXIncludeAware(value);
+
+            if (saxParserFactory.isXIncludeAware() != value) {
+                throw new IllegalStateException("SAXParserFactory ignored XIncludeAware");
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("SAXParserFactory", "XIncludeAware", e);
         }
@@ -279,6 +295,10 @@ public final class XmlUtil {
     private static void setDocumentBuilderFactoryFeature(final String featureName, final boolean value) {
         try {
             docBuilderFactory.setFeature(featureName, value);
+
+            if (docBuilderFactory.getFeature(featureName) != value) {
+                throw new IllegalStateException("DocumentBuilderFactory ignored feature: " + featureName);
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("DocumentBuilderFactory feature", featureName, e);
         }
@@ -287,6 +307,10 @@ public final class XmlUtil {
     private static void setDocumentBuilderFactoryXIncludeAware(final boolean value) {
         try {
             docBuilderFactory.setXIncludeAware(value);
+
+            if (docBuilderFactory.isXIncludeAware() != value) {
+                throw new IllegalStateException("DocumentBuilderFactory ignored XIncludeAware");
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("DocumentBuilderFactory", "XIncludeAware", e);
         }
@@ -295,6 +319,10 @@ public final class XmlUtil {
     private static void setDocumentBuilderFactoryExpandEntityReferences(final boolean value) {
         try {
             docBuilderFactory.setExpandEntityReferences(value);
+
+            if (docBuilderFactory.isExpandEntityReferences() != value) {
+                throw new IllegalStateException("DocumentBuilderFactory ignored expandEntityReferences");
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("DocumentBuilderFactory", "expandEntityReferences", e);
         }
@@ -303,6 +331,10 @@ public final class XmlUtil {
     private static void setDocumentBuilderFactoryAttribute(final String attributeName, final String value) {
         try {
             docBuilderFactory.setAttribute(attributeName, value);
+
+            if (!value.equals(docBuilderFactory.getAttribute(attributeName))) {
+                throw new IllegalStateException("DocumentBuilderFactory ignored attribute: " + attributeName);
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("DocumentBuilderFactory attribute", attributeName, e);
         }
@@ -311,6 +343,10 @@ public final class XmlUtil {
     private static void setXmlInputFactoryProperty(final String propertyName, final Object value) {
         try {
             xmlInputFactory.setProperty(propertyName, value);
+
+            if (!value.equals(xmlInputFactory.getProperty(propertyName))) {
+                throw new IllegalStateException("XMLInputFactory ignored property: " + propertyName);
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("XMLInputFactory property", propertyName, e);
         }
@@ -321,6 +357,10 @@ public final class XmlUtil {
             xmlInputFactory.setXMLResolver((publicID, systemID, baseURI, namespace) -> {
                 throw new XMLStreamException("External entity resolution is disabled");
             });
+
+            if (xmlInputFactory.getXMLResolver() == null) {
+                throw new IllegalStateException("XMLInputFactory ignored XMLResolver");
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("XMLInputFactory", "XMLResolver", e);
         }
@@ -329,6 +369,10 @@ public final class XmlUtil {
     private static void setTransformerFactoryAttribute(final String attributeName, final String value) {
         try {
             transferFactory.setAttribute(attributeName, value);
+
+            if (!value.equals(transferFactory.getAttribute(attributeName))) {
+                throw new IllegalStateException("TransformerFactory ignored attribute: " + attributeName);
+            }
         } catch (Exception e) { // NOSONAR
             logFactoryFailure("TransformerFactory attribute", attributeName, e);
         }
@@ -390,6 +434,8 @@ public final class XmlUtil {
     /**
      * Unmarshals the given XML string into an object of the specified class.
      * The JAXBContext is cached for the target class to improve performance on repeated operations.
+     * Parsing uses the security-hardened StAX factory, and the internal stream reader is closed
+     * before this method returns or propagates a parsing failure.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -402,12 +448,20 @@ public final class XmlUtil {
      * @param cls The class of the object to be returned (must be JAXB-annotated)
      * @param xml The XML string to be unmarshalled (must not be {@code null})
      * @return The unmarshalled object of the specified class
-     * @throws RuntimeException if unmarshalling fails (wraps {@link JAXBException})
+     * @throws RuntimeException if secure XML parsing or JAXB unmarshalling fails
      * @see JAXBContext#newInstance(Class...)
-     * @see Unmarshaller#unmarshal(Reader)
+     * @see Unmarshaller#unmarshal(XMLStreamReader)
      */
-    @SuppressWarnings("unchecked")
     public static <T> T unmarshal(final Class<? extends T> cls, final String xml) {
+        // Parse through the hardened StAX factory (DTD and external entities disabled) instead of
+        // handing a raw Reader to JAXB, whose default unmarshaller would otherwise create its own
+        // XXE-vulnerable parser and bypass the hardening every other parse path in this class uses.
+        return unmarshalAndClose(cls, createXMLStreamReader(new StringReader(xml)));
+    }
+
+    /** Unmarshals from and always closes the supplied reader. Package-private for lifecycle testing. */
+    @SuppressWarnings("unchecked")
+    static <T> T unmarshalAndClose(final Class<? extends T> cls, final XMLStreamReader xmlStreamReader) {
         JAXBContext jc = classJaxbContextPool.get(cls);
 
         try {
@@ -417,12 +471,21 @@ public final class XmlUtil {
             }
 
             final Unmarshaller unmarshaller = jc.createUnmarshaller();
-            // Parse through the hardened StAX factory (DTD and external entities disabled) instead of
-            // handing a raw Reader to JAXB, whose default unmarshaller would otherwise create its own
-            // XXE-vulnerable parser and bypass the hardening every other parse path in this class uses.
-            return (T) unmarshaller.unmarshal(createXMLStreamReader(new StringReader(xml)));
+
+            return (T) unmarshaller.unmarshal(xmlStreamReader);
         } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
+        } finally {
+            try {
+                xmlStreamReader.close();
+            } catch (final XMLStreamException | RuntimeException e) {
+                // The public entry point uses an in-memory StringReader and unmarshalling is already complete.
+                // Do not replace a successful result (or the primary JAXB failure) with a
+                // provider-specific cleanup failure.
+                if (logger.isDebugEnabled()) {
+                    logger.debug(e, "Failed to close XMLStreamReader after JAXB unmarshalling");
+                }
+            }
         }
     }
 
@@ -494,10 +557,20 @@ public final class XmlUtil {
      * Creates a JAXB Unmarshaller for the given context path.
      * The JAXBContext is cached to improve performance on repeated operations.
      *
+     * <p><b>Security:</b> An {@code Unmarshaller} does not itself define the security policy of a
+     * parser it creates for raw {@code File}, {@code Reader}, or {@code InputStream} inputs. Do not
+     * use those overloads for untrusted XML. Supply a security-hardened {@link XMLStreamReader}, or
+     * prefer {@link #unmarshal(Class, String)} when the target class is known.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Unmarshaller unmarshaller = XmlUtil.createUnmarshaller("com.example.model");
-     * Object result = unmarshaller.unmarshal(new File("data.xml"));
+     * XMLStreamReader reader = XmlUtil.createXMLStreamReader(new StringReader(xml));
+     * try {
+     *     Object result = unmarshaller.unmarshal(reader);
+     * } finally {
+     *     reader.close();
+     * }
      * }</pre>
      *
      * @param contextPath The context path for which to create the Unmarshaller (package names separated by ':')
@@ -525,10 +598,14 @@ public final class XmlUtil {
      * Creates a JAXB Unmarshaller for the given class.
      * The JAXBContext is cached to improve performance on repeated operations.
      *
+     * <p><b>Security:</b> An {@code Unmarshaller} does not itself define the security policy of a
+     * parser it creates for raw {@code File}, {@code Reader}, or {@code InputStream} inputs. Do not
+     * use those overloads for untrusted XML. Supply a security-hardened {@link XMLStreamReader}, or
+     * prefer {@link #unmarshal(Class, String)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(Person.class);
-     * Person person = (Person) unmarshaller.unmarshal(new StringReader(xmlString));
+     * Person person = XmlUtil.unmarshal(Person.class, xmlString);
      * }</pre>
      *
      * @param cls The class for which to create the Unmarshaller (must be JAXB-annotated)
@@ -661,6 +738,7 @@ public final class XmlUtil {
                     }
 
                     documentBuilder = docBuilderFactory.newDocumentBuilder();
+                    ownedContentParsers.add(documentBuilder);
                 } catch (final ParserConfigurationException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 } finally {
@@ -675,7 +753,8 @@ public final class XmlUtil {
 
     /**
      * Recycles the given DocumentBuilder instance by resetting it and adding it back to the pool.
-     * This method should be called after using a DocumentBuilder obtained from {@link #createContentParser()}.
+     * Only instances obtained from {@link #createContentParser()} are accepted; foreign and duplicate
+     * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -695,9 +774,20 @@ public final class XmlUtil {
         }
 
         synchronized (contentDocBuilderPool) {
-            if (contentDocBuilderPool.size() < POOL_SIZE) {
+            if (!ownedContentParsers.contains(docBuilder) || containsByIdentity(contentDocBuilderPool, docBuilder)
+                    || contentDocBuilderPool.size() >= POOL_SIZE) {
+                return;
+            }
+
+            try {
                 docBuilder.reset();
                 contentDocBuilderPool.add(docBuilder);
+            } catch (final RuntimeException e) {
+                // A provider is permitted not to support reset. Discard that parser rather than
+                // masking an earlier parsing failure from a caller's finally block.
+                if (logger.isDebugEnabled()) {
+                    logger.debug(e, "Discarding DocumentBuilder that could not be reset");
+                }
             }
         }
     }
@@ -730,6 +820,7 @@ public final class XmlUtil {
             if (saxParser == null) {
                 try {
                     saxParser = saxParserFactory.newSAXParser();
+                    ownedSaxParsers.add(saxParser);
                 } catch (final ParserConfigurationException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final SAXException e) {
@@ -743,7 +834,8 @@ public final class XmlUtil {
 
     /**
      * Recycles the given SAXParser instance by resetting it and adding it back to the pool.
-     * This method should be called after using a SAXParser obtained from {@link #createSAXParser()}.
+     * Only instances obtained from {@link #createSAXParser()} are accepted; foreign and duplicate
+     * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -763,11 +855,29 @@ public final class XmlUtil {
         }
 
         synchronized (saxParserPool) {
-            if (saxParserPool.size() < POOL_SIZE) {
+            if (!ownedSaxParsers.contains(saxParser) || containsByIdentity(saxParserPool, saxParser) || saxParserPool.size() >= POOL_SIZE) {
+                return;
+            }
+
+            try {
                 saxParser.reset();
                 saxParserPool.add(saxParser);
+            } catch (final RuntimeException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(e, "Discarding SAXParser that could not be reset");
+                }
             }
         }
+    }
+
+    private static <T> boolean containsByIdentity(final Queue<T> pool, final T value) {
+        for (final T pooled : pool) {
+            if (pooled == value) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -790,10 +900,12 @@ public final class XmlUtil {
      * @see XMLInputFactory#createXMLStreamReader(Reader)
      */
     public static XMLStreamReader createXMLStreamReader(final Reader source) {
-        try {
-            return xmlInputFactory.createXMLStreamReader(source);
-        } catch (final XMLStreamException e) {
-            throw toRuntimeException(e);
+        synchronized (xmlInputFactory) {
+            try {
+                return xmlInputFactory.createXMLStreamReader(source);
+            } catch (final XMLStreamException e) {
+                throw toRuntimeException(e);
+            }
         }
     }
 
@@ -814,10 +926,12 @@ public final class XmlUtil {
      * @see XMLInputFactory#createXMLStreamReader(InputStream)
      */
     public static XMLStreamReader createXMLStreamReader(final InputStream source) {
-        try {
-            return xmlInputFactory.createXMLStreamReader(source);
-        } catch (final XMLStreamException e) {
-            throw toRuntimeException(e);
+        synchronized (xmlInputFactory) {
+            try {
+                return xmlInputFactory.createXMLStreamReader(source);
+            } catch (final XMLStreamException e) {
+                throw toRuntimeException(e);
+            }
         }
     }
 
@@ -838,10 +952,12 @@ public final class XmlUtil {
      * @see XMLInputFactory#createXMLStreamReader(InputStream, String)
      */
     public static XMLStreamReader createXMLStreamReader(final InputStream source, final String encoding) {
-        try {
-            return xmlInputFactory.createXMLStreamReader(source, encoding);
-        } catch (final XMLStreamException e) {
-            throw toRuntimeException(e);
+        synchronized (xmlInputFactory) {
+            try {
+                return xmlInputFactory.createXMLStreamReader(source, encoding);
+            } catch (final XMLStreamException e) {
+                throw toRuntimeException(e);
+            }
         }
     }
 
@@ -883,10 +999,12 @@ public final class XmlUtil {
      * @see XMLInputFactory#createFilteredReader(XMLStreamReader, StreamFilter)
      */
     public static XMLStreamReader createFilteredStreamReader(final XMLStreamReader source, final StreamFilter filter) {
-        try {
-            return xmlInputFactory.createFilteredReader(source, filter);
-        } catch (final XMLStreamException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+        synchronized (xmlInputFactory) {
+            try {
+                return xmlInputFactory.createFilteredReader(source, filter);
+            } catch (final XMLStreamException e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
         }
     }
 
@@ -911,10 +1029,12 @@ public final class XmlUtil {
      * @see XMLOutputFactory#createXMLStreamWriter(Writer)
      */
     public static XMLStreamWriter createXMLStreamWriter(final Writer output) {
-        try {
-            return xmlOutputFactory.createXMLStreamWriter(output);
-        } catch (final XMLStreamException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+        synchronized (xmlOutputFactory) {
+            try {
+                return xmlOutputFactory.createXMLStreamWriter(output);
+            } catch (final XMLStreamException e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
         }
     }
 
@@ -936,10 +1056,12 @@ public final class XmlUtil {
      * @see XMLOutputFactory#createXMLStreamWriter(OutputStream)
      */
     public static XMLStreamWriter createXMLStreamWriter(final OutputStream output) {
-        try {
-            return xmlOutputFactory.createXMLStreamWriter(output);
-        } catch (final XMLStreamException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+        synchronized (xmlOutputFactory) {
+            try {
+                return xmlOutputFactory.createXMLStreamWriter(output);
+            } catch (final XMLStreamException e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
         }
     }
 
@@ -962,10 +1084,12 @@ public final class XmlUtil {
      * @see XMLOutputFactory#createXMLStreamWriter(OutputStream, String)
      */
     public static XMLStreamWriter createXMLStreamWriter(final OutputStream output, final String encoding) {
-        try {
-            return xmlOutputFactory.createXMLStreamWriter(output, encoding);
-        } catch (final XMLStreamException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+        synchronized (xmlOutputFactory) {
+            try {
+                return xmlOutputFactory.createXMLStreamWriter(output, encoding);
+            } catch (final XMLStreamException e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
         }
     }
 
@@ -1228,11 +1352,14 @@ public final class XmlUtil {
      */
     public static List<Element> getElementsByTagName(final Element node, final String tagName) {
         final List<Element> result = new ArrayList<>();
-        final NodeList nodeList = node.getElementsByTagName(tagName);
+        final NodeList nodeList = node.getChildNodes();
+        final boolean matchAll = "*".equals(tagName);
 
         for (int i = 0; i < nodeList.getLength(); i++) {
-            if (nodeList.item(i).getParentNode().isSameNode(node)) {
-                result.add((Element) nodeList.item(i));
+            final Node child = nodeList.item(i);
+
+            if (child instanceof Element element && (matchAll || element.getTagName().equals(tagName))) {
+                result.add(element);
             }
         }
 
@@ -1411,6 +1538,12 @@ public final class XmlUtil {
      * // Result: {"age"="30", "person.name"="John"}
      * }</pre>
      *
+     * <p>The flattened representation can hold only one value per element path. If siblings use
+     * the same name, a later sibling overwrites the earlier sibling's text and attributes at that
+     * path. Traverse the DOM directly when repeated-element multiplicity must be preserved. Root
+     * attributes retain unqualified keys for compatibility; nested attributes use the complete
+     * element path.</p>
+     *
      * @param element The XML element to be read
      * @return A map containing the attributes and text content of the given element and its descendants
      */
@@ -1419,29 +1552,28 @@ public final class XmlUtil {
     }
 
     private static Map<String, String> readElement(final String parentNodeName, final Element element, final Map<String, String> output) {
-        readAttributes(parentNodeName, element, output);
-
         final boolean isEmptyParentNodeName = Strings.isEmpty(parentNodeName);
+        final String elementPath = isEmptyParentNodeName ? element.getNodeName() : parentNodeName + "." + element.getNodeName();
+
+        // Root attributes retain their historical unqualified keys. Attributes on nested
+        // elements must include the current element name; qualifying them with only the
+        // parent path makes siblings such as <home zip="..."> and <work zip="...">
+        // overwrite the same "root.zip" entry.
+        readAttributes(isEmptyParentNodeName ? Strings.EMPTY : elementPath, element, output);
 
         if (isTextElement(element)) {
-            final String nodeName = element.getNodeName();
             final String nodeText = Strings.strip(getTextContent(element));
 
-            if (isEmptyParentNodeName) {
-                output.put(nodeName, nodeText);
-            } else {
-                output.put(parentNodeName + "." + nodeName, nodeText);
-            }
+            output.put(elementPath, nodeText);
         }
 
-        final String nextParentNodeName = isEmptyParentNodeName ? element.getNodeName() : parentNodeName + "." + element.getNodeName();
         final NodeList childNodeList = element.getChildNodes();
 
         for (int childNodeIndex = 0; childNodeIndex < childNodeList.getLength(); childNodeIndex++) {
             final Node childNode = childNodeList.item(childNodeIndex);
 
             if (childNode instanceof Element childElement) {
-                readElement(nextParentNodeName, childElement, output);
+                readElement(elementPath, childElement, output);
             }
         }
 
@@ -1907,7 +2039,7 @@ public final class XmlUtil {
     private static final boolean ALLOW_TYPE_ATTR_CLASS_FORNAME = Boolean.parseBoolean(System.getProperty("abacus.xml.allowTypeAttrClassForName", "false"));
 
     /**
-     * Returns true if the typeAttr names a JDK type that is safe to resolve from attacker
+     * Returns {@code true} if the typeAttr names a JDK type that is safe to resolve from attacker
      * input (primitive name, or {@code java.*}/{@code javax.*}/{@code jakarta.*} class). Any
      * other class on the classpath is treated as a potential gadget and requires explicit
      * opt-in via {@link #ALLOW_TYPE_ATTR_CLASS_FORNAME}.
@@ -2075,6 +2207,64 @@ public final class XmlUtil {
         }
 
         return nodeType;
+    }
+
+    /** Weak, identity-based ownership registry used to keep caller-supplied parsers out of shared pools. */
+    private static final class WeakIdentitySet<T> {
+        private final ReferenceQueue<T> staleReferences = new ReferenceQueue<>();
+        private final Set<IdentityWeakReference<T>> references = new HashSet<>();
+
+        synchronized void add(final T value) {
+            removeStaleReferences();
+            references.add(new IdentityWeakReference<>(value, staleReferences));
+        }
+
+        synchronized boolean contains(final T value) {
+            removeStaleReferences();
+            return references.contains(new IdentityWeakReference<>(value));
+        }
+
+        @SuppressWarnings("unchecked")
+        private void removeStaleReferences() {
+            IdentityWeakReference<T> reference;
+
+            while ((reference = (IdentityWeakReference<T>) staleReferences.poll()) != null) {
+                references.remove(reference);
+            }
+        }
+    }
+
+    private static final class IdentityWeakReference<T> extends WeakReference<T> {
+        private final int identityHashCode;
+
+        IdentityWeakReference(final T referent) {
+            super(referent);
+            identityHashCode = System.identityHashCode(referent);
+        }
+
+        IdentityWeakReference(final T referent, final ReferenceQueue<T> referenceQueue) {
+            super(referent, referenceQueue);
+            identityHashCode = System.identityHashCode(referent);
+        }
+
+        @Override
+        public int hashCode() {
+            return identityHashCode;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (!(obj instanceof IdentityWeakReference<?>)) {
+                return false;
+            }
+
+            final Object referent = get();
+            return referent != null && referent == ((IdentityWeakReference<?>) obj).get();
+        }
     }
 
     /**

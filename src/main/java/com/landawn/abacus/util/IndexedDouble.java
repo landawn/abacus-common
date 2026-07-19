@@ -117,15 +117,13 @@ public final class IndexedDouble extends AbstractIndexed {
     /**
      * Returns the hash code of this {@code IndexedDouble} instance.
      *
-     * <p>The hash code is computed from both the index and the value.
-     * Note: The double value is multiplied by 31 and then truncated to {@code int},
-     * so values that differ only in their fractional parts may produce the same hash code.</p>
+     * <p>The hash code is computed from all bits of both the index and the value.</p>
      *
      * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
-        return (int) index + (int) (value * 31);
+        return 31 * Double.hashCode(value) + hashLong(index);
     }
 
     /**

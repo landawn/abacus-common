@@ -3,9 +3,12 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,7 +44,7 @@ public class ClobAsciiStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testGet_ResultSet_Int() throws SQLException {
+    public void testGet_ResultSet_Int() throws SQLException, IOException {
         ResultSet rs = mock(ResultSet.class);
         Clob clob = mock(Clob.class);
         InputStream expectedStream = new ByteArrayInputStream("test".getBytes());
@@ -51,9 +54,11 @@ public class ClobAsciiStreamTypeTest extends TestBase {
 
         InputStream result = type.get(rs, 1);
 
-        assertEquals(expectedStream, result);
+        assertEquals("test", new String(result.readAllBytes()));
+        result.close();
         verify(rs).getClob(1);
         verify(clob).getAsciiStream();
+        verify(clob).free();
     }
 
     @Test
@@ -68,7 +73,7 @@ public class ClobAsciiStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testGet_ResultSet_String() throws SQLException {
+    public void testGet_ResultSet_String() throws SQLException, IOException {
         ResultSet rs = mock(ResultSet.class);
         Clob clob = mock(Clob.class);
         InputStream expectedStream = new ByteArrayInputStream("data".getBytes());
@@ -78,9 +83,11 @@ public class ClobAsciiStreamTypeTest extends TestBase {
 
         InputStream result = type.get(rs, "columnName");
 
-        assertEquals(expectedStream, result);
+        assertEquals("data", new String(result.readAllBytes()));
+        result.close();
         verify(rs).getClob("columnName");
         verify(clob).getAsciiStream();
+        verify(clob).free();
     }
 
     @Test
@@ -184,21 +191,47 @@ public class ClobAsciiStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testClob2AsciiStream() throws SQLException {
+    public void testClob2AsciiStream() throws SQLException, IOException {
         Clob clob = mock(Clob.class);
         InputStream expectedStream = new ByteArrayInputStream("clob data".getBytes());
         when(clob.getAsciiStream()).thenReturn(expectedStream);
 
         InputStream result = ClobAsciiStreamType.clobToAsciiStream(clob);
 
-        assertEquals(expectedStream, result);
+        assertEquals("clob data", new String(result.readAllBytes()));
+        result.close();
+        result.close();
         verify(clob).getAsciiStream();
+        verify(clob, times(1)).free();
     }
 
     @Test
     public void testClob2AsciiStream_Null() throws SQLException {
         InputStream result = ClobAsciiStreamType.clobToAsciiStream(null);
         Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testClob2AsciiStream_FreesClobWhenOpeningFails() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        final SQLException openFailure = new SQLException("open");
+        when(clob.getAsciiStream()).thenThrow(openFailure);
+
+        assertSame(openFailure, assertThrows(SQLException.class, () -> ClobAsciiStreamType.clobToAsciiStream(clob)));
+        verify(clob).free();
+    }
+
+    @Test
+    public void testClob2AsciiStream_ReportsFreeFailureAsIOException() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        final SQLException freeFailure = new SQLException("free");
+        when(clob.getAsciiStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        doThrow(freeFailure).when(clob).free();
+
+        final InputStream result = ClobAsciiStreamType.clobToAsciiStream(clob);
+        final IOException thrown = assertThrows(IOException.class, result::close);
+
+        assertSame(freeFailure, thrown.getCause());
     }
 
     /**

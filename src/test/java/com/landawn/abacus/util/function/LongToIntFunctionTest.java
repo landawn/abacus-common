@@ -92,9 +92,10 @@ public class LongToIntFunctionTest extends TestBase {
 
     @Test
     public void testApplyAsInt_truncation() {
-        final LongToIntFunction function = value -> (int) value;
-        final int result = function.applyAsInt(5000000000L); // Larger than Integer.MAX_VALUE
-        assertNotNull(result); // Will be truncated
+        assertEquals(705032704, LongToIntFunction.DEFAULT.applyAsInt(5000000000L));
+        assertEquals(Integer.MIN_VALUE, LongToIntFunction.DEFAULT.applyAsInt(2147483648L));
+        assertEquals(-1, LongToIntFunction.DEFAULT.applyAsInt(Long.MAX_VALUE));
+        assertEquals(0, LongToIntFunction.DEFAULT.applyAsInt(Long.MIN_VALUE));
     }
 
     @Test

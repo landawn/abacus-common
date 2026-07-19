@@ -3,6 +3,7 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,6 +174,6 @@ public class DoubleConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         DoubleConsumer instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.DoubleConsumer) null));
+        assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.DoubleConsumer) null));
     }
 }

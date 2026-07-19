@@ -24,7 +24,7 @@ class InvocationHandlerTest extends TestBase {
         assertNotNull(original);
     }
 
-    class LoggingInvocationHandler implements InvocationHandler {
+    public static class LoggingInvocationHandler implements InvocationHandler {
         private final Object target;
 
         public LoggingInvocationHandler(final Object target) {

@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -209,8 +208,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
-                IOException ioException = null;
-                RuntimeException recycleException = null;
+                Throwable failure = null;
 
                 try {
                     bw.write(SK._BRACKET_L);
@@ -224,32 +222,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (final IOException e) {
-                    ioException = e;
+                } catch (final IOException | RuntimeException | Error e) {
+                    failure = e;
+                    throw e;
                 } finally {
                     if (!isBufferedWriter) {
-                        try {
-                            Objectory.recycle((BufferedWriter) bw);
-                        } catch (final UncheckedIOException e) {
-                            if (ioException == null) {
-                                ioException = e.getCause();
-                            } else if (ioException != e.getCause()) {
-                                ioException.addSuppressed(e.getCause());
-                            }
-                        } catch (final RuntimeException e) {
-                            if (ioException == null) {
-                                recycleException = e;
-                            } else {
-                                ioException.addSuppressed(e);
-                            }
-                        }
+                        Utils.recycle((BufferedWriter) bw, failure);
                     }
-                }
-
-                if (ioException != null) {
-                    throw ioException;
-                } else if (recycleException != null) {
-                    throw recycleException;
                 }
             } else {
                 appendable.append(SK._BRACKET_L);

@@ -14,15 +14,17 @@
 
 package com.landawn.abacus.util;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * An immutable wrapper around an array that provides read-only access to its elements.
- * Once created, the contents of an ImmutableArray cannot be modified, making it thread-safe
- * and suitable for use as a defensive copy of array data.
+ * A read-only wrapper around an array. Instances created by {@link #copyOf(Object[])} or the
+ * {@code of} factories own their storage and are suitable as defensive copies. The deprecated
+ * {@link #wrap(Object[])} factory instead retains the caller's array; subsequent changes to that
+ * array are visible through the wrapper and invalidate the usual immutability and thread-safety guarantees.
  *
  * <p>This class implements {@link Iterable} to allow for enhanced for-loop iteration and
  * provides various utility methods for accessing and searching array elements. It also
@@ -295,7 +297,9 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *         or an empty {@code ImmutableArray} if the input is {@code null}
      */
     public static <T> ImmutableArray<T> copyOf(final T[] elements) {
-        return N.isEmpty(elements) ? empty() : new ImmutableArray<>(elements.clone());
+        // Keep the runtime component type even for an empty input. Collapsing String[0], for
+        // example, into the shared Object[]-backed singleton makes copy(0, 0) fail its T[] contract.
+        return elements == null ? empty() : new ImmutableArray<>(elements.clone());
     }
 
     /**
@@ -527,11 +531,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * }</pre>
      *
      * @param consumer the action to be performed for each element
-     * @throws IllegalArgumentException if the specified consumer is null
+     * @throws NullPointerException if the specified consumer is null
      */
     @Override
-    public void forEach(final Consumer<? super T> consumer) throws IllegalArgumentException {
-        N.checkArgNotNull(consumer, "consumer"); // NOSONAR
+    public void forEach(final Consumer<? super T> consumer) {
+        Objects.requireNonNull(consumer, "consumer");
 
         for (int i = 0; i < length; i++) {
             consumer.accept(elements[i]);

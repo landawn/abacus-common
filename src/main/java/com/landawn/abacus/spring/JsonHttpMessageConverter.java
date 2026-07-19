@@ -31,7 +31,8 @@ import com.landawn.abacus.util.N;
 /**
  * Spring HTTP message converter for JSON serialization and deserialization using abacus-common JSON utilities.
  * This converter integrates Abacus's JSON processing capabilities with Spring's HTTP message conversion framework,
- * allowing seamless conversion between Java objects and JSON in Spring MVC/WebFlux applications.
+ * allowing seamless conversion between Java objects and JSON in Spring MVC and other
+ * {@code HttpMessageConverter}-based clients such as {@code RestTemplate}.
  *
  * <p>This converter extends Spring's {@link AbstractJsonHttpMessageConverter} and delegates the actual
  * JSON processing to Abacus's {@link N} utility class.</p>
@@ -66,10 +67,16 @@ import com.landawn.abacus.util.N;
  * <ul>
  *   <li>High-performance JSON processing using abacus-common utilities</li>
  *   <li>Support for complex generic types through TypeFactory</li>
- *   <li>Seamless integration with Spring MVC and WebFlux</li>
+ *   <li>Seamless integration with Spring MVC and {@code HttpMessageConverter}-based clients</li>
  *   <li>Automatic content type handling for JSON media types</li>
- *   <li>Thread-safe implementation suitable for singleton usage</li>
+ *   <li>Suitable for singleton usage once its mutable parser configurations and inherited
+ *       supported-media-type list have been fully configured</li>
  * </ul>
+ *
+ * <p><b>Thread safety:</b> the supplied {@link JsonSerConfig} and {@link JsonDeserConfig} instances
+ * are retained by reference. A converter may be shared safely after construction provided those
+ * configurations, and inherited converter settings such as supported media types, are not mutated
+ * concurrently with request processing.</p>
  *
  * <p><b>Supported media types:</b> by default the converter handles the media types inherited from
  * {@link AbstractJsonHttpMessageConverter} (typically {@code application/json} and
@@ -104,8 +111,9 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *   <li>application/*+json</li>
      * </ul>
      *
-     * <p>The converter is thread-safe and can be safely used as a singleton in Spring applications.
-     * It automatically integrates with Spring's content negotiation mechanism to handle JSON
+     * <p>The converter can be used as a singleton after configuration is complete. Its parser
+     * configurations and inherited converter settings must not be mutated concurrently with request
+     * processing. It integrates with Spring's content negotiation mechanism to handle JSON
      * serialization and deserialization for REST endpoints.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -122,12 +130,12 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
     /**
      * Constructs a new JsonHttpMessageConverter with custom serialization and deserialization configurations.
      * This constructor allows fine-grained control over JSON processing behavior, including field exclusion,
-     * date formatting, null handling, and other serialization/deserialization options.
+     * date formatting, {@code null} handling, and other serialization/deserialization options.
      *
      * <p>Use this constructor when you need to customize the JSON processing behavior beyond the defaults.
      * Common customizations include:</p>
      * <ul>
-     *   <li>Excluding null or default values from serialization output</li>
+     *   <li>Excluding {@code null} or default values from serialization output</li>
      *   <li>Customizing date/time formatting patterns</li>
      *   <li>Ignoring unknown properties during deserialization</li>
      *   <li>Specifying property inclusion/exclusion rules</li>
@@ -154,11 +162,13 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *            Must not be {@code null}. Use {@link JsonSerConfig} to customize serialization behavior.
      * @param jdc the deserialization configuration controlling how JSON is converted to Java objects.
      *            Must not be {@code null}. Use {@link JsonDeserConfig} to customize deserialization behavior.
+     *            Both configuration objects are retained by reference and should not be mutated while
+     *            the converter is serving concurrent requests.
      * @see JsonSerConfig
      * @see JsonDeserConfig
      * @see com.landawn.abacus.parser.Exclusion
      */
-    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
+    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc) throws IllegalArgumentException {
         N.checkArgNotNull(jsc, "jsc");
         N.checkArgNotNull(jdc, "jdc");
 
@@ -219,7 +229,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
-    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final MediaType... supportedMediaTypes) {
+    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final MediaType... supportedMediaTypes)
+            throws IllegalArgumentException {
         N.checkArgNotNull(jsc, "jsc");
         N.checkArgNotNull(jdc, "jdc");
 
@@ -247,7 +258,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
-    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final List<MediaType> supportedMediaTypes) {
+    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final List<MediaType> supportedMediaTypes)
+            throws IllegalArgumentException {
         N.checkArgNotNull(jsc, "jsc");
         N.checkArgNotNull(jdc, "jdc");
 
@@ -318,7 +330,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * <p>The method uses Abacus's JSON serialization capabilities through {@link N#toJson(Object, JsonSerConfig, Writer)}
      * to convert Java objects into JSON format.</p>
      *
-     * <p><b>About the 'type' Parameter:</b><br>
+     * <p><b>About the <i>type</i> Parameter:</b><br>
      * The {@code type} parameter is provided by Spring's framework and represents the declared return type
      * from the controller method. However, this implementation <b>does not use</b> the type parameter because
      * Abacus's JSON serialization can infer all necessary type information from the object itself at runtime.

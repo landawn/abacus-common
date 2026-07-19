@@ -371,8 +371,8 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIteratorEx iter = ByteIteratorEx.of((byte) 1, (byte) 2);
-     * iter.closeResource(); // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext()); // closeResource() does not consume elements
+     * iter.closeResource();         // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * ByteIteratorEx iter2 = ByteIteratorEx.of((byte) 3, (byte) 4);

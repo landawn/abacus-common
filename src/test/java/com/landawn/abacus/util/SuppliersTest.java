@@ -1,5 +1,8 @@
 package com.landawn.abacus.util;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +30,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -1134,6 +1143,12 @@ public class SuppliersTest extends TestBase {
         });
     }
 
+    @Test
+    public void testDynamicSupplierFactoriesRejectNullTypeConsistently() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap(null));
+    }
+
     // --- registerForCollection ---
 
     @Test
@@ -1312,6 +1327,14 @@ public class SuppliersTest extends TestBase {
         private static final long serialVersionUID = 1L;
     }
 
+    public static class CustomIdentityHashMap<K, V> extends IdentityHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class CustomConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
     @Test
     public void testCustomConcurrentSortedTypesPreserveRequestedRuntimeType() {
         // regression: a concrete sorted subclass was caught by the greedy SortedSet/SortedMap branch and
@@ -1322,5 +1345,330 @@ public class SuppliersTest extends TestBase {
 
         final Map<String, Integer> map = Suppliers.<String, Integer> ofMap(CustomConcurrentSkipListMap.class).get();
         Assertions.assertTrue(map instanceof CustomConcurrentSkipListMap, map.getClass().getName());
+    }
+
+    @Test
+    public void testCustomIdentityAndConcurrentMapTypesPreserveRequestedRuntimeType() {
+        final Map<String, Integer> identityMap = Suppliers.<String, Integer> ofMap(CustomIdentityHashMap.class).get();
+        final Map<String, Integer> concurrentMap = Suppliers.<String, Integer> ofMap(CustomConcurrentHashMap.class).get();
+
+        Assertions.assertTrue(identityMap instanceof CustomIdentityHashMap, identityMap.getClass().getName());
+        Assertions.assertTrue(concurrentMap instanceof CustomConcurrentHashMap, concurrentMap.getClass().getName());
+
+        identityMap.put("one", 1);
+        concurrentMap.put("two", 2);
+        Assertions.assertEquals(1, identityMap.get("one"));
+        Assertions.assertEquals(2, concurrentMap.get("two"));
+    }
+
+    public static class ConstructorCountingList<E> extends ArrayList<E> {
+        private static final long serialVersionUID = 1L;
+        static final AtomicInteger constructorCalls = new AtomicInteger();
+
+        public ConstructorCountingList() {
+            constructorCalls.incrementAndGet();
+        }
+    }
+
+    public static class ConstructorCountingMap<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+        static final AtomicInteger constructorCalls = new AtomicInteger();
+
+        public ConstructorCountingMap() {
+            constructorCalls.incrementAndGet();
+        }
+    }
+
+    public static class ThrowingList<E> extends ArrayList<E> {
+        private static final long serialVersionUID = 1L;
+        static final AtomicInteger constructorCalls = new AtomicInteger();
+
+        public ThrowingList() {
+            constructorCalls.incrementAndGet();
+            throw new IllegalStateException("list constructor failure");
+        }
+    }
+
+    public static class ThrowingMap<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+        static final AtomicInteger constructorCalls = new AtomicInteger();
+
+        public ThrowingMap() {
+            constructorCalls.incrementAndGet();
+            throw new IllegalStateException("map constructor failure");
+        }
+    }
+
+    public static class NoDefaultConstructorList<E> extends ArrayList<E> {
+        private static final long serialVersionUID = 1L;
+
+        public NoDefaultConstructorList(final int ignored) {
+            // no no-argument constructor
+        }
+    }
+
+    public static class NoDefaultConstructorMap<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        public NoDefaultConstructorMap(final int ignored) {
+            // no no-argument constructor
+        }
+    }
+
+    private static final class MarkerInvocationHandler implements InvocationHandler {
+        final int source;
+
+        MarkerInvocationHandler(final int source) {
+            this.source = source;
+        }
+
+        @Override
+        public Object invoke(final Object proxy, final Method method, final Object[] args) {
+            throw new UnsupportedOperationException(method.getName());
+        }
+    }
+
+    public static class NotACollection {
+        // used to exercise raw-call validation
+    }
+
+    public static class NotAMap {
+        // used to exercise raw-call validation
+    }
+
+    @Test
+    public void testFactoryArgumentsAreValidatedEagerly() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.of((Supplier<Object>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.of("value", null));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMultiset((Class<? extends Map>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMultiset((java.util.function.Supplier<? extends Map<Object, ?>>) null));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((Class<? extends Map>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap.class, (Class<? extends List>) null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofListMultimap((java.util.function.Supplier<Map<Object, List<Object>>>) null, ArrayList::new));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap::new, (java.util.function.Supplier<List<Object>>) null));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap((Class<? extends Map>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap(HashMap.class, (Class<? extends Set>) null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofSetMultimap((java.util.function.Supplier<Map<Object, Set<Object>>>) null, HashSet::new));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap(HashMap::new, (java.util.function.Supplier<Set<Object>>) null));
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofMultimap((java.util.function.Supplier<Map<Object, Collection<Object>>>) null, ArrayList::new));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofMultimap(HashMap::new, (java.util.function.Supplier<Collection<Object>>) null));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap.class, (Class) HashSet.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap(HashMap.class, (Class) ArrayList.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMultiset((Class) String.class));
+    }
+
+    @Test
+    public void testCustomBackingSuppliersRejectNullResults() {
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<Object> ofMultiset(() -> null).get());
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofListMultimap(() -> null, ArrayList::new).get());
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(() -> null, HashSet::new).get());
+        Assertions.assertThrows(NullPointerException.class,
+                () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(() -> null, ArrayList::new).get());
+
+        final ListMultimap<String, Integer> listMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap::new, () -> null).get();
+        final SetMultimap<String, Integer> setMultimap = Suppliers.<String, Integer> ofSetMultimap(HashMap::new, () -> null).get();
+        final Multimap<String, Integer, Collection<Integer>> multimap = Suppliers.<String, Integer, Collection<Integer>> ofMultimap(HashMap::new, () -> null)
+                .get();
+
+        Assertions.assertThrows(NullPointerException.class, () -> listMultimap.put("key", 1));
+        Assertions.assertThrows(NullPointerException.class, () -> setMultimap.put("key", 1));
+        Assertions.assertThrows(NullPointerException.class, () -> multimap.put("key", 1));
+    }
+
+    @Test
+    public void testCustomBackingSuppliersAreInvokedExactlyOnceAndProduceIndependentResults() {
+        final AtomicInteger mapCalls = new AtomicInteger();
+        final AtomicInteger valueCalls = new AtomicInteger();
+        final Supplier<ListMultimap<String, Integer>> supplier = Suppliers.ofListMultimap(() -> {
+            mapCalls.incrementAndGet();
+            return new HashMap<>();
+        }, () -> {
+            valueCalls.incrementAndGet();
+            return new ArrayList<>();
+        });
+
+        final ListMultimap<String, Integer> first = supplier.get();
+        final ListMultimap<String, Integer> second = supplier.get();
+        Assertions.assertNotSame(first, second);
+        Assertions.assertEquals(2, mapCalls.get());
+        Assertions.assertEquals(0, valueCalls.get());
+
+        first.put("first", 1);
+        second.put("second", 2);
+        Assertions.assertEquals(2, valueCalls.get());
+        Assertions.assertNull(first.get("second"));
+        Assertions.assertNull(second.get("first"));
+    }
+
+    @Test
+    public void testDynamicFactoriesDoNotProbeConstructorsAndCreateExactlyOneFreshInstancePerGet() {
+        ConstructorCountingList.constructorCalls.set(0);
+        ConstructorCountingMap.constructorCalls.set(0);
+
+        final Supplier<? extends Collection<String>> collectionSupplier = Suppliers.ofCollection(ConstructorCountingList.class);
+        final Supplier<? extends Map<String, Integer>> mapSupplier = Suppliers.ofMap(ConstructorCountingMap.class);
+        Assertions.assertEquals(0, ConstructorCountingList.constructorCalls.get());
+        Assertions.assertEquals(0, ConstructorCountingMap.constructorCalls.get());
+
+        final Collection<String> firstCollection = collectionSupplier.get();
+        final Collection<String> secondCollection = collectionSupplier.get();
+        final Map<String, Integer> firstMap = mapSupplier.get();
+        final Map<String, Integer> secondMap = mapSupplier.get();
+        Assertions.assertNotSame(firstCollection, secondCollection);
+        Assertions.assertNotSame(firstMap, secondMap);
+        Assertions.assertEquals(ConstructorCountingList.class, firstCollection.getClass());
+        Assertions.assertEquals(ConstructorCountingMap.class, firstMap.getClass());
+        Assertions.assertEquals(2, ConstructorCountingList.constructorCalls.get());
+        Assertions.assertEquals(2, ConstructorCountingMap.constructorCalls.get());
+    }
+
+    @Test
+    public void testConstructorFailuresAreDeferredWithoutDiscardedProbeInstances() {
+        ThrowingList.constructorCalls.set(0);
+        ThrowingMap.constructorCalls.set(0);
+
+        final Supplier<? extends Collection<String>> collectionSupplier = Suppliers.ofCollection(ThrowingList.class);
+        final Supplier<? extends Map<String, Integer>> mapSupplier = Suppliers.ofMap(ThrowingMap.class);
+        Assertions.assertEquals(0, ThrowingList.constructorCalls.get());
+        Assertions.assertEquals(0, ThrowingMap.constructorCalls.get());
+
+        Assertions.assertThrows(RuntimeException.class, collectionSupplier::get);
+        Assertions.assertThrows(RuntimeException.class, mapSupplier::get);
+        Assertions.assertEquals(1, ThrowingList.constructorCalls.get());
+        Assertions.assertEquals(1, ThrowingMap.constructorCalls.get());
+    }
+
+    @Test
+    public void testInvalidDynamicAndRegistrationClassesAreRejectedWithoutPoolPoisoning() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(NoDefaultConstructorList.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap(NoDefaultConstructorMap.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap.class, NoDefaultConstructorList.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMultiset(NoDefaultConstructorMap.class));
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.registerForCollection((Class) NotACollection.class, (java.util.function.Supplier) NotACollection::new));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.registerForMap((Class) NotAMap.class, (java.util.function.Supplier) NotAMap::new));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection((Class) NotACollection.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap((Class) NotAMap.class));
+    }
+
+    @Test
+    @SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
+    public void testRegisteredSuppliersRejectNullResults() {
+        final Class<? extends Collection> collectionType = (Class) Proxy.getProxyClass(getClass().getClassLoader(), Collection.class, Cloneable.class);
+        final Class<? extends Map> mapType = (Class) Proxy.getProxyClass(getClass().getClassLoader(), Map.class, Cloneable.class);
+
+        Assertions.assertTrue(Suppliers.registerForCollection((Class) collectionType, () -> null));
+        Assertions.assertTrue(Suppliers.registerForMap((Class) mapType, () -> null));
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.ofCollection(collectionType).get());
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.ofMap(mapType).get());
+    }
+
+    @Test
+    @SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
+    public void testConcurrentRegistrationHasOneVisibleWinner() throws Exception {
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final Class<? extends Collection> targetType = (Class) Proxy.getProxyClass(classLoader, List.class, Cloneable.class);
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        final CountDownLatch ready = new CountDownLatch(2);
+        final CountDownLatch start = new CountDownLatch(1);
+
+        try {
+            final Future<Boolean> first = executor.submit(() -> {
+                ready.countDown();
+                start.await();
+                return Suppliers.registerForCollection((Class) targetType,
+                        () -> (Collection) Proxy.newProxyInstance(classLoader, new Class<?>[] { List.class, Cloneable.class }, new MarkerInvocationHandler(1)));
+            });
+            final Future<Boolean> second = executor.submit(() -> {
+                ready.countDown();
+                start.await();
+                return Suppliers.registerForCollection((Class) targetType,
+                        () -> (Collection) Proxy.newProxyInstance(classLoader, new Class<?>[] { List.class, Cloneable.class }, new MarkerInvocationHandler(2)));
+            });
+
+            Assertions.assertTrue(ready.await(5, TimeUnit.SECONDS));
+            start.countDown();
+            final boolean firstWon = first.get(5, TimeUnit.SECONDS);
+            final boolean secondWon = second.get(5, TimeUnit.SECONDS);
+            Assertions.assertNotEquals(firstWon, secondWon);
+
+            final Object result = Suppliers.ofCollection(targetType).get();
+            final MarkerInvocationHandler handler = (MarkerInvocationHandler) Proxy.getInvocationHandler(result);
+            Assertions.assertEquals(firstWon ? 1 : 2, handler.source);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    @SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
+    public void testConcurrentMapRegistrationHasOneVisibleWinner() throws Exception {
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final Class<? extends Map> targetType = (Class) Proxy.getProxyClass(classLoader, Map.class, java.io.Serializable.class);
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        final CountDownLatch ready = new CountDownLatch(2);
+        final CountDownLatch start = new CountDownLatch(1);
+
+        try {
+            final Future<Boolean> first = executor.submit(() -> {
+                ready.countDown();
+                start.await();
+                return Suppliers.registerForMap((Class) targetType, () -> (Map) Proxy.newProxyInstance(classLoader,
+                        new Class<?>[] { Map.class, java.io.Serializable.class }, new MarkerInvocationHandler(1)));
+            });
+            final Future<Boolean> second = executor.submit(() -> {
+                ready.countDown();
+                start.await();
+                return Suppliers.registerForMap((Class) targetType, () -> (Map) Proxy.newProxyInstance(classLoader,
+                        new Class<?>[] { Map.class, java.io.Serializable.class }, new MarkerInvocationHandler(2)));
+            });
+
+            Assertions.assertTrue(ready.await(5, TimeUnit.SECONDS));
+            start.countDown();
+            final boolean firstWon = first.get(5, TimeUnit.SECONDS);
+            final boolean secondWon = second.get(5, TimeUnit.SECONDS);
+            Assertions.assertNotEquals(firstWon, secondWon);
+
+            final Object result = Suppliers.ofMap(targetType).get();
+            final MarkerInvocationHandler handler = (MarkerInvocationHandler) Proxy.getInvocationHandler(result);
+            Assertions.assertEquals(firstWon ? 1 : 2, handler.source);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testImmutableTypeFallbacksAreMutableFreshContainers() {
+        final Collection<String> firstList = Suppliers.<String> ofCollection(ImmutableList.class).get();
+        final Collection<String> secondList = Suppliers.<String> ofCollection(ImmutableList.class).get();
+        final Collection<String> firstSet = Suppliers.<String> ofCollection(ImmutableSet.class).get();
+        final Map<String, Integer> firstMap = Suppliers.<String, Integer> ofMap(ImmutableMap.class).get();
+
+        firstList.add("value");
+        firstSet.add("value");
+        firstMap.put("key", 1);
+        Assertions.assertEquals(List.of("value"), firstList);
+        Assertions.assertEquals(Set.of("value"), firstSet);
+        Assertions.assertEquals(Map.of("key", 1), firstMap);
+        Assertions.assertTrue(secondList.isEmpty());
+        Assertions.assertNotSame(firstList, secondList);
+    }
+
+    @Test
+    public void testUnsupportedImmutableFactoriesHaveActionableMessages() {
+        Assertions.assertTrue(Assertions.assertThrows(UnsupportedOperationException.class, Suppliers::ofImmutableList).getMessage().contains("ImmutableList"));
+        Assertions.assertTrue(Assertions.assertThrows(UnsupportedOperationException.class, Suppliers::ofImmutableSet).getMessage().contains("ImmutableSet"));
+        Assertions.assertTrue(Assertions.assertThrows(UnsupportedOperationException.class, Suppliers::ofImmutableMap).getMessage().contains("ImmutableMap"));
     }
 }

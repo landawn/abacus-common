@@ -29,11 +29,11 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.Supplier;
 
@@ -61,9 +61,10 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>Flexible Parsing:</b> Support for both Map-based and object-based parameter decoding</li>
  *   <li><b>Charset Support:</b> Full Unicode support with configurable character encoding</li>
  *   <li><b>Naming Policies:</b> Customizable field naming strategies for object serialization</li>
+ *
  *   <li><b>Thread Safety:</b> All methods are thread-safe and suitable for concurrent usage</li>
  *   <li><b>Performance Optimized:</b> BitSet-based encoding tables and efficient string processing</li>
- *   <li><b>Null Safety:</b> Comprehensive null handling with predictable behavior</li>
+ *   <li><b>Null Safety:</b> Comprehensive {@code null} handling with predictable behavior</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -155,7 +156,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>Bean Properties:</b> Automatic discovery and encoding of JavaBean properties</li>
  *   <li><b>Field Access:</b> Direct field access for objects without getters/setters</li>
  *   <li><b>Collection Handling:</b> Special processing for arrays, Lists, and Sets</li>
- *   <li><b>Null Values:</b> Configurable behavior for null property values</li>
+ *   <li><b>Null Values:</b> Configurable behavior for {@code null} property values</li>
  *   <li><b>Type Conversion:</b> Automatic conversion of primitive and wrapper types</li>
  * </ul>
  *
@@ -199,7 +200,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * <ul>
  *   <li><b>UncheckedIOException:</b> Wraps IOException from Appendable operations</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid parameters or malformed input</li>
- *   <li><b>NullPointerException:</b> Appropriate null checks with descriptive messages</li>
+ *   <li><b>NullPointerException:</b> Appropriate {@code null} checks with descriptive messages</li>
  *   <li><b>Charset Fallback:</b> A {@code null} charset is handled gracefully with a fallback to UTF-8</li>
  * </ul>
  *
@@ -566,7 +567,7 @@ public final class URLEncodedUtil {
      * <p>
      * This method takes a base URL and parameters, encodes the parameters according to
      * application/x-www-form-urlencoded rules, and appends them to the URL with a '?' separator.
-     * If the URL already contains a '?' the encoded parameters are joined with '&amp;'. Any fragment
+     * If the URL already contains a '?' the encoded parameters are joined with <i>&amp;</i>. Any fragment
      * identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
@@ -587,6 +588,7 @@ public final class URLEncodedUtil {
      * @return the URL with the encoded query string appended (e.g., "http://example.com/path?name=value");
      *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws NullPointerException if {@code url} is {@code null}
      * @see #encode(String, Object, Charset)
      * @see #encode(Object)
      */
@@ -599,7 +601,7 @@ public final class URLEncodedUtil {
      * <p>
      * This method takes a base URL and parameters, encodes the parameters using the specified charset
      * according to application/x-www-form-urlencoded rules, and appends them to the URL with a '?'
-     * separator. If the URL already contains a '?' the encoded parameters are joined with '&amp;'. Any
+     * separator. If the URL already contains a '?' the encoded parameters are joined with <i>&amp;</i>. Any
      * fragment identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
@@ -619,6 +621,7 @@ public final class URLEncodedUtil {
      * @return the URL with the encoded query string appended;
      *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws NullPointerException if {@code url} is {@code null}
      * @see #encode(String, Object)
      * @see #encode(String, Object, Charset, NamingPolicy)
      */
@@ -631,7 +634,7 @@ public final class URLEncodedUtil {
      * <p>
      * This method takes a base URL and parameters, encodes the parameters using the specified charset and
      * naming policy according to application/x-www-form-urlencoded rules, and appends them to the URL with
-     * a '?' separator. If the URL already contains a '?' the encoded parameters are joined with '&amp;'.
+     * a '?' separator. If the URL already contains a '?' the encoded parameters are joined with <i>&amp;</i>.
      * Any fragment identifier ({@code #...}) present in the URL is preserved and appended after the parameters.
      * Property/key names are transformed according to the naming policy before encoding.
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
@@ -656,10 +659,13 @@ public final class URLEncodedUtil {
      * @return the URL with the encoded query string appended;
      *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws NullPointerException if {@code url} is {@code null}
      * @see #encode(String, Object, Charset)
      */
     @SuppressWarnings("rawtypes")
     public static String encode(final String url, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
+        Objects.requireNonNull(url, "url");
+
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
             return url;
         }
@@ -716,6 +722,7 @@ public final class URLEncodedUtil {
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param output the {@code Appendable} (e.g., {@code StringBuilder}, {@code Writer}) to which the encoded query string will be appended.
+     * @throws NullPointerException if {@code output} is {@code null}
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, Appendable)
@@ -747,6 +754,7 @@ public final class URLEncodedUtil {
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
+     * @throws NullPointerException if {@code output} is {@code null}
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, NamingPolicy, Appendable)
@@ -785,6 +793,7 @@ public final class URLEncodedUtil {
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
+     * @throws NullPointerException if {@code output} is {@code null}
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, Appendable)
@@ -792,6 +801,8 @@ public final class URLEncodedUtil {
     @SuppressWarnings("rawtypes")
     public static void encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy, final Appendable output)
             throws UncheckedIOException {
+        Objects.requireNonNull(output, "output");
+
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
             return;
         }
@@ -1038,11 +1049,11 @@ public final class URLEncodedUtil {
      * @param mapSupplier a supplier that provides an instance of the desired Map implementation; must not be {@code null}.
      * @return a Map of type M containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null}.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
      * @see #decode(String, Charset)
      */
     public static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier) {
-        final M result = mapSupplier.get();
+        final M result = Objects.requireNonNull(Objects.requireNonNull(mapSupplier, "mapSupplier").get(), "mapSupplier returned null");
 
         if (Strings.isEmpty(urlQuery)) {
             return result;
@@ -1242,7 +1253,7 @@ public final class URLEncodedUtil {
      * @see #decode(String, Class)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
+    public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
 
         if (Map.class.isAssignableFrom(targetType)) {
@@ -1332,7 +1343,7 @@ public final class URLEncodedUtil {
      *         returns an empty instance if {@code parameters} is {@code null} or empty.
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean type.
      */
-    public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
+    public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, "targetType");
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
@@ -1378,8 +1389,7 @@ public final class URLEncodedUtil {
     /**
      * Decodes a percent-encoded URL string back to its original text representation.
      * {@code %XX} sequences are interpreted as byte values and decoded using the given charset.
-     * Non-ASCII characters that appear literally in the string (i.e., not encoded) are also
-     * converted using the given charset.
+     * Characters that appear literally in the string (i.e., not encoded) are retained unchanged.
      *
      * @param content the string to decode; {@code null} returns {@code null}.
      * @param charset the charset used to decode percent-encoded byte sequences;
@@ -1394,49 +1404,42 @@ public final class URLEncodedUtil {
             return null;
         }
 
-        final ByteBuffer bb = ByteBuffer.allocate(content.length() * 4);
-        final CharBuffer cb = CharBuffer.wrap(content);
+        // Decode each contiguous escape run as bytes. Literal characters must not be round-tripped
+        // through the selected charset: URLDecoder semantics retain them as-is, and doing otherwise
+        // both corrupts unrepresentable Unicode and requires unsafe fixed-size byte estimates for
+        // stateful encoders such as ISO-2022-JP.
+        final StringBuilder result = new StringBuilder(content.length());
 
-        while (cb.hasRemaining()) {
-            final char c = cb.get();
+        for (int i = 0, len = content.length(); i < len;) {
+            final char c = content.charAt(i);
 
-            if ((c == '%') && (cb.remaining() >= 2)) {
-                final char uc = cb.get();
-                final char lc = cb.get();
-                final int upperDigit = Character.digit(uc, 16);
-                final int lowerDigit = Character.digit(lc, 16);
+            if (c == '%' && i + 2 < len && Character.digit(content.charAt(i + 1), 16) >= 0 && Character.digit(content.charAt(i + 2), 16) >= 0) {
+                final java.io.ByteArrayOutputStream escapedBytes = new java.io.ByteArrayOutputStream();
 
-                if ((upperDigit != -1) && (lowerDigit != -1)) {
-                    bb.put((byte) ((upperDigit << 4) + lowerDigit));
-                } else {
-                    bb.put((byte) '%');
-                    bb.put((byte) uc);
-                    bb.put((byte) lc);
+                while (i + 2 < len && content.charAt(i) == '%') {
+                    final int upperDigit = Character.digit(content.charAt(i + 1), 16);
+                    final int lowerDigit = Character.digit(content.charAt(i + 2), 16);
+
+                    if (upperDigit < 0 || lowerDigit < 0) {
+                        break;
+                    }
+
+                    escapedBytes.write((upperDigit << 4) + lowerDigit);
+                    i += 3;
                 }
-            } else if (plusAsBlank && (c == '+')) {
-                bb.put((byte) ' ');
+
+                result.append(new String(escapedBytes.toByteArray(), charset));
+            } else if (plusAsBlank && c == '+') {
+                result.append(' ');
+                i++;
             } else {
-                if (c > 0x7F) {
-                    // Keep surrogate pairs intact when encoding non-ASCII characters.
-                    final byte[] bytes;
-
-                    if (Character.isHighSurrogate(c) && cb.hasRemaining() && Character.isLowSurrogate(cb.charAt(0))) {
-                        bytes = new String(new char[] { c, cb.get() }).getBytes(charset);
-                    } else {
-                        bytes = String.valueOf(c).getBytes(charset);
-                    }
-
-                    for (final byte b : bytes) {
-                        bb.put(b);
-                    }
-                } else {
-                    bb.put((byte) c);
-                }
+                // Invalid/incomplete percent escapes are retained verbatim, one character at a
+                // time, so Unicode following an invalid '%' is never narrowed to a byte.
+                result.append(c);
+                i++;
             }
         }
 
-        bb.flip();
-
-        return charset.decode(bb).toString();
+        return result.toString();
     }
 }

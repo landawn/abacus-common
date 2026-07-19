@@ -133,20 +133,18 @@ public class LongSupplierTest extends TestBase {
 
     @Test
     public void testConstant_RANDOM() {
-        final long value1 = LongSupplier.RANDOM.getAsLong();
-        final long value2 = LongSupplier.RANDOM.getAsLong();
-
-        assertNotNull(value1);
-        assertNotNull(value2);
-        // Note: There's a very small chance they could be equal, but that's acceptable
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            LongSupplier.RANDOM.getAsLong();
+            LongSupplier.RANDOM.getAsLong();
+        });
     }
 
     @Test
     public void testConstant_RANDOM_range() {
-        // Just verify it returns valid long values
-        for (int i = 0; i < 100; i++) {
-            final long value = LongSupplier.RANDOM.getAsLong();
-            assertTrue(value >= Long.MIN_VALUE && value <= Long.MAX_VALUE);
-        }
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            for (int i = 0; i < 100; i++) {
+                LongSupplier.RANDOM.getAsLong();
+            }
+        });
     }
 }

@@ -16,6 +16,9 @@ import com.landawn.abacus.TestBase;
 
 public class ParserFactoryTest extends TestBase {
 
+    private static final class ReplacementRegistrationTarget {
+    }
+
     // Simple Kryo Serializer for testing
     private static class TestStringSerializer extends Serializer<String> {
         TestStringSerializer() {
@@ -367,6 +370,12 @@ public class ParserFactoryTest extends TestBase {
     }
 
     @Test
+    public void test_registerKryo_rejectsNegativeIdsImmediately() {
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(Integer.class, -1));
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(Integer.class, new TestStringSerializer(), -1));
+    }
+
+    @Test
     public void testRegisterKryoWithIdAndNullClass() {
         assertThrows(IllegalArgumentException.class, () -> {
             ParserFactory.registerKryo(null, 100);
@@ -407,6 +416,26 @@ public class ParserFactoryTest extends TestBase {
         assertDoesNotThrow(() -> {
             ParserFactory.registerKryo(String.class, new TestStringSerializer(), 300);
         });
+    }
+
+    @Test
+    public void testLatestGlobalRegistrationOverloadReplacesEarlierVariant() {
+        final Serializer<ReplacementRegistrationTarget> serializer = new Serializer<>() {
+            @Override
+            public void write(final Kryo kryo, final Output output, final ReplacementRegistrationTarget object) {
+            }
+
+            @Override
+            public ReplacementRegistrationTarget read(final Kryo kryo, final Input input, final Class<? extends ReplacementRegistrationTarget> type) {
+                return new ReplacementRegistrationTarget();
+            }
+        };
+
+        ParserFactory.registerKryo(ReplacementRegistrationTarget.class, serializer, 990);
+        ParserFactory.registerKryo(ReplacementRegistrationTarget.class, 991);
+
+        assertEquals(991, ParserFactory._kryoClassIdMap.get(ReplacementRegistrationTarget.class).intValue());
+        assertTrue(!ParserFactory._kryoClassSerializerIdMap.containsKey(ReplacementRegistrationTarget.class));
     }
 
     @Test

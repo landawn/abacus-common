@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.util.List;
-import java.util.Map;
 
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
@@ -40,9 +39,9 @@ public class JSONType<T> extends AbstractType<T> {
 
     private final String declaringName;
 
+    private final Type<T> targetType;
     private final Class<T> typeClass;
-    //    private final Type<T>[] parameterTypes;
-    //    private final Type<T> elementType;
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Package-private constructor for JSONType.
@@ -55,17 +54,16 @@ public class JSONType<T> extends AbstractType<T> {
      * @param clsName the class name or short alias ({@code "Map"}, {@code "List"}) for which
      *                to create the JSON type handler
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "cast" })
     JSONType(final String clsName) {
         super(JSON + SK.LESS_THAN + TypeFactory.getType(clsName).name() + SK.GREATER_THAN);
 
-        declaringName = JSON + SK.LESS_THAN + TypeFactory.getType(clsName).declaringName() + SK.GREATER_THAN;
+        targetType = (Type<T>) TypeFactory.getType(clsName);
+        declaringName = JSON + SK.LESS_THAN + targetType.declaringName() + SK.GREATER_THAN;
         // Resolve through TypeFactory (like the name built above): pool-registered simple names
         // such as "UUID" are valid type names that ClassUtil.forName cannot resolve.
-        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class
-                : ("List".equalsIgnoreCase(clsName) ? List.class : TypeFactory.getType(clsName).javaType()));
-        //        this.parameterTypes = new Type[] { TypeFactory.getType(clsName) };
-        //        this.elementType = parameterTypes[0];
+        typeClass = (Class<T>) targetType.javaType();
+        parameterTypes = List.of(targetType);
     }
 
     /**
@@ -88,6 +86,16 @@ public class JSONType<T> extends AbstractType<T> {
     @Override
     public Class<T> javaType() {
         return typeClass;
+    }
+
+    /**
+     * Returns the single target type wrapped by this {@code JSON<...>} type.
+     *
+     * @return an immutable one-element list containing the target type
+     */
+    @Override
+    public List<Type<?>> parameterTypes() {
+        return parameterTypes;
     }
 
     /**
@@ -123,6 +131,6 @@ public class JSONType<T> extends AbstractType<T> {
      */
     @Override
     public T valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : Utils.jsonParser.deserialize(str, typeClass);
+        return Strings.isEmpty(str) ? null : Utils.jsonParser.deserialize(str, targetType);
     }
 }

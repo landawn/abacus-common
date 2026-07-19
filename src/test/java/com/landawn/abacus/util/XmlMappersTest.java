@@ -16,11 +16,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,6 +35,7 @@ import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.landawn.abacus.TestBase;
 
@@ -1638,6 +1643,68 @@ public class XmlMappersTest extends TestBase {
                 Assertions.assertNotSame(sharedDefault, m, "The shared defaultXmlMapper must never be placed into the mapper pool");
             }
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testLibraryOwnedXmlMappersUseHardenedInputFactories() throws Exception {
+        java.lang.reflect.Field defaultField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
+        java.lang.reflect.Field prettyField = XmlMappers.class.getDeclaredField("defaultXmlMapperForPretty");
+        java.lang.reflect.Field poolField = XmlMappers.class.getDeclaredField("mapperPool");
+        defaultField.setAccessible(true);
+        prettyField.setAccessible(true);
+        poolField.setAccessible(true);
+
+        assertSecureXmlInputFactory((XmlMapper) defaultField.get(null));
+        assertSecureXmlInputFactory((XmlMapper) prettyField.get(null));
+
+        List<XmlMapper> pool = (List<XmlMapper>) poolField.get(null);
+        synchronized (pool) {
+            pool.clear();
+        }
+
+        DeserializationConfig config = XmlMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        XmlMappers.fromXml("<Person><name>safe</name><age>1</age></Person>", Person.class, config);
+
+        synchronized (pool) {
+            Assertions.assertEquals(1, pool.size());
+            assertSecureXmlInputFactory(pool.get(0));
+        }
+    }
+
+    @Test
+    public void testLibraryOwnedXmlMappersRejectExternalEntityPayloads() {
+        String hostileXml = "<!DOCTYPE Person [<!ENTITY xxe SYSTEM \"file:///definitely-not-readable-abacus-xxe\">]>"
+                + "<Person><name>&xxe;</name><age>1</age></Person>";
+
+        assertThrows(RuntimeException.class, () -> XmlMappers.fromXml(hostileXml, Person.class));
+
+        DeserializationConfig config = XmlMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        assertThrows(RuntimeException.class, () -> XmlMappers.fromXml(hostileXml, Person.class, config));
+    }
+
+    @Test
+    public void testWrapDoesNotMutateCallerOwnedXmlInputFactory() {
+        XMLInputFactory callerFactory = XMLInputFactory.newFactory();
+        callerFactory.setProperty(XMLInputFactory.SUPPORT_DTD, true);
+        XmlMapper callerMapper = new XmlMapper(callerFactory);
+
+        XmlMappers.wrap(callerMapper);
+
+        Assertions.assertSame(callerFactory, ((XmlFactory) callerMapper.getFactory()).getXMLInputFactory());
+        Assertions.assertEquals(Boolean.TRUE, callerFactory.getProperty(XMLInputFactory.SUPPORT_DTD));
+    }
+
+    @Test
+    public void testRecycleIsPrivateSoCallerOwnedMappersCannotPoisonPool() throws Exception {
+        Assertions.assertTrue(Modifier.isPrivate(XmlMappers.class.getDeclaredMethod("recycle", XmlMapper.class).getModifiers()));
+    }
+
+    private static void assertSecureXmlInputFactory(final XmlMapper mapper) throws XMLStreamException {
+        XMLInputFactory factory = ((XmlFactory) mapper.getFactory()).getXMLInputFactory();
+        Assertions.assertEquals(Boolean.FALSE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+        Assertions.assertEquals(Boolean.FALSE, factory.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES));
+        assertThrows(XMLStreamException.class, () -> factory.getXMLResolver().resolveEntity("public", "system", "base", "namespace"));
     }
 
 }

@@ -15,9 +15,13 @@
 package com.landawn.abacus.util;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +36,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * library to your build path. When available, this class will automatically use ReflectASM for improved
  * reflection performance.</p>
  *
- * <p>All reflection metadata (fields, constructors, methods) is cached for performance optimization.</p>
+ * <p>Reflection metadata (fields, constructors, methods) is cached per class with {@link ClassValue},
+ * so the cache does not prevent classes and their defining classloaders from being reclaimed.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -72,11 +77,26 @@ public final class Reflection<T> {
         isReflectASMAvailable = tmp;
     }
 
-    static final Map<Class<?>, Map<String, Field>> clsFieldPool = new ConcurrentHashMap<>();
+    static final ClassValue<Map<String, Field>> clsFieldPool = new ClassValue<>() {
+        @Override
+        protected Map<String, Field> computeValue(final Class<?> type) {
+            return new ConcurrentHashMap<>();
+        }
+    };
 
-    static final Map<Class<?>, Map<Wrapper<Class<?>[]>, Constructor<?>>> clsConstructorPool = new ConcurrentHashMap<>();
+    static final ClassValue<Map<Wrapper<Class<?>[]>, Constructor<?>>> clsConstructorPool = new ClassValue<>() {
+        @Override
+        protected Map<Wrapper<Class<?>[]>, Constructor<?>> computeValue(final Class<?> type) {
+            return new ConcurrentHashMap<>();
+        }
+    };
 
-    static final Map<Class<?>, Map<String, Map<Wrapper<Class<?>[]>, Method>>> clsMethodPool = new ConcurrentHashMap<>();
+    static final ClassValue<Map<String, Map<Wrapper<Class<?>[]>, Method>>> clsMethodPool = new ClassValue<>() {
+        @Override
+        protected Map<String, Map<Wrapper<Class<?>[]>, Method>> computeValue(final Class<?> type) {
+            return new ConcurrentHashMap<>();
+        }
+    };
 
     private final Class<T> cls;
 
@@ -354,7 +374,7 @@ public final class Reflection<T> {
      * @throws NoSuchFieldException if no field with the specified name is found
      */
     private Field getField(final String fieldName) throws NoSuchFieldException {
-        Map<String, Field> fieldPool = clsFieldPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
+        final Map<String, Field> fieldPool = clsFieldPool.get(cls);
 
         Field field = fieldPool.get(fieldName);
 
@@ -383,18 +403,20 @@ public final class Reflection<T> {
     /**
      * Returns the declared constructor matching the specified parameter types.
      * Results are cached per class for performance. If no exact match is found,
-     * assignability (including primitive/wrapper equivalence) is used to locate
-     * a compatible constructor.
+     * invocation compatibility (including unboxing and primitive widening) is used to locate
+     * the most-specific compatible constructor. If multiple unrelated overloads are
+     * equally applicable, the invocation is rejected instead of depending on reflection
+     * enumeration order.
      *
      * @param cls the class to search for the constructor
      * @param argTypes the array of parameter types for the constructor; individual
-     *        elements may be {@code null} to match any type at that position
+     *        elements may be {@code null} to match any reference type at that position
      * @return the Constructor object matching the parameter types
      * @throws SecurityException if a security manager denies access to the constructor
      * @throws RuntimeException if no compatible constructor is found
      */
     private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException {
-        Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
+        final Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.get(cls);
 
         final Wrapper<Class<?>[]> key = Wrapper.of(argTypes);
         Constructor<?> result = constructorPool.get(key);
@@ -409,6 +431,8 @@ public final class Reflection<T> {
             }
 
             if (result == null) {
+                final List<Constructor<?>> compatibleConstructors = new ArrayList<>();
+
                 for (final Constructor<?> constructor : cls.getDeclaredConstructors()) {
                     final Class<?>[] paramTypes = constructor.getParameterTypes();
 
@@ -424,14 +448,13 @@ public final class Reflection<T> {
                         }
 
                         if (allMatch) {
-                            result = constructor;
+                            compatibleConstructors.add(constructor);
                         }
                     }
-
-                    if (result != null) {
-                        break;
-                    }
                 }
+
+                result = selectMostSpecific(compatibleConstructors, argTypes,
+                        "constructor for " + cls.getName() + " with parameter types: " + N.toString(argTypes));
             }
 
             if (result == null) {
@@ -449,21 +472,23 @@ public final class Reflection<T> {
      * itself first and then its superclasses (mirroring {@link #getField(String)}), so inherited
      * and private methods are found even when ReflectASM is unavailable or cannot resolve them.
      * Results are cached per class for performance. At each level of the hierarchy an exact match
-     * is tried first; failing that, assignability (including primitive/wrapper equivalence) is
+     * is tried first; failing that, invocation compatibility (including unboxing and primitive widening) is
      * used to locate a compatible method. As a last resort, {@link Class#getMethod(String, Class...)}
      * is consulted to resolve public methods that are not declared anywhere in the superclass
-     * chain (e.g., interface default methods).
+     * chain (e.g., interface default methods). Compatible overloads are compared across
+     * the complete hierarchy and the most-specific one is selected; unrelated equally
+     * applicable overloads are reported as ambiguous.
      *
      * @param cls the class to search for the method
      * @param methodName the name of the method to retrieve
      * @param argTypes the array of parameter types for the method; individual
-     *        elements may be {@code null} to match any type at that position
+     *        elements may be {@code null} to match any reference type at that position
      * @return the Method object matching the name and parameter types
      * @throws SecurityException if a security manager denies access to the method
      * @throws RuntimeException if no compatible method is found
      */
     private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException {
-        Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
+        final Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.get(cls);
 
         Map<Wrapper<Class<?>[]>, Method> argsMethodPool = methodPool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
 
@@ -472,6 +497,7 @@ public final class Reflection<T> {
 
         if (result == null) {
             Class<?> current = cls;
+            final List<Method> compatibleMethods = new ArrayList<>();
 
             while (result == null && current != null) {
                 if (!hasNullArgType(argTypes)) {
@@ -497,8 +523,7 @@ public final class Reflection<T> {
                             }
 
                             if (allMatch) {
-                                result = method;
-                                break;
+                                compatibleMethods.add(method);
                             }
                         }
                     }
@@ -520,6 +545,33 @@ public final class Reflection<T> {
             }
 
             if (result == null) {
+                // Class#getMethods also contributes public interface/default methods, which are
+                // absent from the declared-method walk above. Duplicate overridden signatures are
+                // removed by selectMostSpecific while preserving the subclass declaration.
+                for (final Method method : cls.getMethods()) {
+                    final Class<?>[] paramTypes = method.getParameterTypes();
+
+                    if (method.getName().equals(methodName) && paramTypes.length == argTypes.length) {
+                        boolean allMatch = true;
+
+                        for (int i = 0, len = paramTypes.length; i < len; i++) {
+                            if (!isParameterCompatible(paramTypes[i], argTypes[i])) {
+                                allMatch = false;
+                                break;
+                            }
+                        }
+
+                        if (allMatch) {
+                            compatibleMethods.add(method);
+                        }
+                    }
+                }
+
+                result = selectMostSpecific(compatibleMethods, argTypes,
+                        "method " + cls.getName() + "." + methodName + " with parameter types: " + N.toString(argTypes));
+            }
+
+            if (result == null) {
                 throw new RuntimeException("No method found by name: " + methodName + " with parameter types: " + N.toString(argTypes));
             }
 
@@ -527,6 +579,124 @@ public final class Reflection<T> {
         }
 
         return result;
+    }
+
+    /**
+     * Selects the unique most-specific executable from a set of compatible overloads.
+     * Resolution follows the fixed-arity invocation phases relevant to runtime argument types:
+     * reference widening is considered before unboxing and primitive widening. Within the selected
+     * phase, parameter types are compared for specificity, including the primitive widening order.
+     * Duplicate signatures (typically an override visible through both hierarchy searches)
+     * retain the first executable supplied by the caller.
+     */
+    private <E extends Executable> E selectMostSpecific(final List<E> compatibleExecutables, final Class<?>[] argTypes, final String description) {
+        if (compatibleExecutables.isEmpty()) {
+            return null;
+        }
+
+        final List<E> uniqueExecutables = new ArrayList<>(compatibleExecutables.size());
+        int bestPhase = Integer.MAX_VALUE;
+
+        outer: for (final E executable : compatibleExecutables) {
+            final int phase = conversionPhase(executable.getParameterTypes(), argTypes);
+
+            if (phase > bestPhase) {
+                continue;
+            } else if (phase < bestPhase) {
+                uniqueExecutables.clear();
+                bestPhase = phase;
+            }
+
+            for (final E added : uniqueExecutables) {
+                if (Arrays.equals(executable.getParameterTypes(), added.getParameterTypes())) {
+                    continue outer;
+                }
+            }
+
+            uniqueExecutables.add(executable);
+        }
+
+        E result = null;
+
+        for (final E candidate : uniqueExecutables) {
+            boolean dominated = false;
+
+            for (final E other : uniqueExecutables) {
+                if (candidate != other && isStrictlyMoreSpecific(other.getParameterTypes(), candidate.getParameterTypes())) {
+                    dominated = true;
+                    break;
+                }
+            }
+
+            if (!dominated) {
+                if (result != null) {
+                    throw new RuntimeException("Ambiguous " + description);
+                }
+
+                result = candidate;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns {@code 0} for strict (reference-widening) invocation and {@code 1} when
+     * unboxing and/or primitive widening is required. The supplied types have already
+     * been checked for compatibility.
+     */
+    private int conversionPhase(final Class<?>[] paramTypes, final Class<?>[] argTypes) {
+        for (int i = 0; i < paramTypes.length; i++) {
+            final Class<?> argType = argTypes[i];
+
+            if (argType != null && !isStrictInvocationCompatible(paramTypes[i], argType)) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    private boolean isStrictInvocationCompatible(final Class<?> paramType, final Class<?> argType) {
+        if (paramType.isPrimitive()) {
+            return argType.isPrimitive() && isWideningPrimitiveConversion(argType, paramType);
+        }
+
+        return !argType.isPrimitive() && paramType.isAssignableFrom(argType);
+    }
+
+    private boolean isStrictlyMoreSpecific(final Class<?>[] candidateTypes, final Class<?>[] otherTypes) {
+        boolean strictlyMoreSpecific = false;
+
+        for (int i = 0; i < candidateTypes.length; i++) {
+            if (candidateTypes[i].isPrimitive() && otherTypes[i].isPrimitive()) {
+                if (candidateTypes[i] == otherTypes[i]) {
+                    continue;
+                }
+
+                if (!isWideningPrimitiveConversion(candidateTypes[i], otherTypes[i])) {
+                    return false;
+                }
+
+                strictlyMoreSpecific = true;
+                continue;
+            }
+
+            final Class<?> candidateType = wrap(candidateTypes[i]);
+            final Class<?> otherType = wrap(otherTypes[i]);
+
+            if (candidateType.equals(otherType)) {
+                continue;
+            }
+
+            if (!otherType.isAssignableFrom(candidateType)) {
+                return false;
+            }
+
+            strictlyMoreSpecific = true;
+        }
+
+        return strictlyMoreSpecific;
     }
 
     private boolean hasNullArgType(final Class<?>[] argTypes) {
@@ -544,17 +714,49 @@ public final class Reflection<T> {
             return !paramType.isPrimitive();
         }
 
-        return paramType.isAssignableFrom(argType) || wrap(paramType).isAssignableFrom(wrap(argType));
+        if (paramType.isPrimitive()) {
+            final Class<?> primitiveArgType = ClassUtil.unwrap(argType);
+
+            return primitiveArgType.isPrimitive() && isWideningPrimitiveConversion(primitiveArgType, paramType);
+        }
+
+        return paramType.isAssignableFrom(argType) || (argType.isPrimitive() && paramType.isAssignableFrom(wrap(argType)));
+    }
+
+    /**
+     * Tests the identity and widening primitive conversions accepted by reflective invocation.
+     */
+    private boolean isWideningPrimitiveConversion(final Class<?> sourceType, final Class<?> targetType) {
+        if (sourceType == targetType) {
+            return true;
+        }
+
+        if (sourceType == byte.class) {
+            return targetType == short.class || targetType == int.class || targetType == long.class || targetType == float.class || targetType == double.class;
+        } else if (sourceType == short.class) {
+            return targetType == int.class || targetType == long.class || targetType == float.class || targetType == double.class;
+        } else if (sourceType == char.class) {
+            return targetType == int.class || targetType == long.class || targetType == float.class || targetType == double.class;
+        } else if (sourceType == int.class) {
+            return targetType == long.class || targetType == float.class || targetType == double.class;
+        } else if (sourceType == long.class) {
+            return targetType == float.class || targetType == double.class;
+        } else if (sourceType == float.class) {
+            return targetType == double.class;
+        }
+
+        return false;
     }
 
     /**
      * Returns an array of runtime classes corresponding to the supplied argument values.
      * A {@code null} value in {@code values} produces a {@code null} entry in the returned
-     * array, which is then treated as a wildcard when matching constructors or methods.
+     * array, which is then treated as a wildcard for non-primitive parameters when matching
+     * constructors or methods.
      *
      * @param values the argument values whose types are to be extracted
      * @return an array of {@code Class} objects (may contain {@code null} entries),
-     *         or {@link #EMPTY_CLASSES} if {@code values} is null or empty
+     *         or {@link #EMPTY_CLASSES} if {@code values} is {@code null} or empty
      */
     private Class<?>[] getTypes(final Object... values) {
         if (N.isEmpty(values)) {

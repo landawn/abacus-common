@@ -63,17 +63,16 @@ public abstract class Ticker {
      * relative to another timestamp returned by this same ticker. The difference between
      * two readings from the same ticker instance represents elapsed time in nanoseconds.</p>
      *
-     * <p><b>Implementation note:</b> Subclasses must ensure that the values returned are
-     * monotonically non-decreasing (i.e., later calls never return a smaller value than
-     * earlier calls).</p>
+     * <p><b>Implementation note:</b> Readings are intended for subtraction, not direct ordering.
+     * Like {@link System#nanoTime()}, an implementation may wrap after a sufficiently long interval;
+     * elapsed-time calculations remain valid when the interval is shorter than half the numeric range.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Ticker ticker = Ticker.systemTicker();
      * long start = ticker.read();
      * long end = ticker.read();
-     * end >= start;                    // true (readings are monotonically non-decreasing)
-     * long elapsedNanos = end - start; // the elapsed time between the two readings, in nanoseconds
+     * long elapsedNanos = end - start; // compare the difference, not the absolute readings
      * }</pre>
      *
      * @return the current reading of the ticker, in nanoseconds

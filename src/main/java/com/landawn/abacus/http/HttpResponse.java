@@ -91,7 +91,7 @@ public class HttpResponse {
         this.headers = copyHeaders(headers);
         this.body = copyBody(body);
         this.bodyFormat = bodyFormat == null ? ContentFormat.NONE : bodyFormat;
-        this.respCharset = respCharset;
+        this.respCharset = respCharset == null ? HttpUtil.DEFAULT_CHARSET : respCharset;
     }
 
     /**
@@ -282,7 +282,7 @@ public class HttpResponse {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), resultClass);
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
-                return URLEncodedUtil.decode(new String(body, respCharset), resultClass);
+                return URLEncodedUtil.decode(new String(body, respCharset), respCharset, resultClass);
             } else {
                 // For NONE / unrecognized content formats, the configured parser falls back to
                 // JSON. That works for JSON-shaped bodies but produces confusing parse errors
@@ -342,7 +342,7 @@ public class HttpResponse {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), null, resultType);
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
-                return N.convert(URLEncodedUtil.decode(new String(body, respCharset), resultType.javaType()), resultType);
+                return N.convert(URLEncodedUtil.decode(new String(body, respCharset), respCharset, resultType.javaType()), resultType);
             } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
                 return N.fromJson(new String(body, respCharset), resultType);
             } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
@@ -384,7 +384,8 @@ public class HttpResponse {
 
     /**
      * Computes the hash code for this HttpResponse.
-     * The hash code is based on the request URL, status code, message, headers, body format, and body content.
+     * The hash code is based on the request URL, status code, message, headers, body format,
+     * response charset, and body content.
      * Headers and body are taken from the normalized public accessors ({@link #headers()} and {@link #body()}),
      * so a response with {@code null} headers (or body) hashes the same as one with an empty headers map
      * (or empty body), consistent with {@link #equals(Object)}.
@@ -400,13 +401,14 @@ public class HttpResponse {
         result = prime * result + ((message == null) ? 0 : message.hashCode());
         result = prime * result + headers().hashCode();
         result = prime * result + bodyFormat.hashCode();
-        return prime * result + Arrays.hashCode(body());
+        result = prime * result + respCharset.hashCode();
+        return prime * result + Arrays.hashCode(body == null ? N.EMPTY_BYTE_ARRAY : body);
     }
 
     /**
      * Determines whether this HttpResponse is equal to another object.
      * Two HttpResponse objects are considered equal if they have the same request URL,
-     * status code, message, headers, body format, and body content.
+     * status code, message, headers, body format, response charset, and body content.
      * Headers and body are compared using the normalized public accessors ({@link #headers()} and
      * {@link #body()}), so {@code null} and empty are treated as equivalent (e.g. a response with
      * {@code null} headers equals one with an empty headers map, and likewise for the body).
@@ -423,7 +425,8 @@ public class HttpResponse {
 
         if (obj instanceof HttpResponse other) {
             return N.equals(requestUrl, other.requestUrl) && statusCode == other.statusCode && N.equals(message, other.message)
-                    && N.equals(headers(), other.headers()) && N.equals(bodyFormat, other.bodyFormat) && Arrays.equals(body(), other.body());
+                    && N.equals(headers(), other.headers()) && N.equals(bodyFormat, other.bodyFormat) && N.equals(respCharset, other.respCharset)
+                    && Arrays.equals(body == null ? N.EMPTY_BYTE_ARRAY : body, other.body == null ? N.EMPTY_BYTE_ARRAY : other.body);
         }
 
         return false;

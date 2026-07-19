@@ -19,8 +19,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
@@ -82,6 +84,82 @@ public class ParallelArrayStreamTest extends TestBase {
         stream = Stream.of(TEST_INTEGER_ARRAY).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
         stringStream = Stream.of(TEST_STRING_ARRAY).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
         executor = Executors.newFixedThreadPool(256);
+    }
+
+    @Test
+    public void testReduceWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch slowWorkerStarted = new CountDownLatch(1);
+        final AtomicBoolean slowWorkerFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedWorker = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(1, 2)
+                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(2))
+                .onClose(() -> closeObservedFinishedWorker.set(slowWorkerFinished.get()));
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> testStream.reduce(0, (left, right) -> {
+            if (right == 2) {
+                slowWorkerStarted.countDown();
+                sleepForWorkerOverlap();
+                slowWorkerFinished.set(true);
+                return left + right;
+            }
+
+            awaitWorkerStart(slowWorkerStarted);
+            throw new IllegalStateException("worker failure");
+        }, Integer::sum));
+
+        assertEquals("worker failure", thrown.getMessage());
+        assertTrue(slowWorkerFinished.get());
+        assertTrue(closeObservedFinishedWorker.get());
+    }
+
+    @Test
+    public void testReduceClosesAfterCombiningPartialResults() {
+        final AtomicBoolean combinerFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedCombiner = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(1, 2)
+                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(2))
+                .onClose(() -> closeObservedFinishedCombiner.set(combinerFinished.get()));
+
+        final int result = testStream.reduce(0, Integer::sum, (left, right) -> {
+            combinerFinished.set(true);
+            return left + right;
+        });
+
+        assertEquals(3, result);
+        assertTrue(combinerFinished.get());
+        assertTrue(closeObservedFinishedCombiner.get());
+    }
+
+    @Test
+    public void testParallelToJdkStreamCloseHandlerRunsOnce() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(1, 2, 3, 4).parallel(PS.create(Splitor.ARRAY).maxThreadNum(2)).onClose(closeCount::incrementAndGet);
+        final java.util.stream.Stream<Integer> jdkStream = source.toJdkStream();
+
+        jdkStream.close();
+        source.close();
+
+        assertEquals(1, closeCount.get());
+    }
+
+    private static void awaitWorkerStart(final CountDownLatch latch) {
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void sleepForWorkerOverlap() {
+        try {
+            Thread.sleep(200);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
 
     @AfterEach
@@ -680,6 +758,13 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatmapCollection_IteratorSplitor() {
+        List<Integer> result = Stream.of(1, 2, 3, 4).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(2)).flatmap(x -> Arrays.asList(x, -x)).sorted().toList();
+
+        assertEquals(Arrays.asList(-4, -3, -2, -1, 1, 2, 3, 4), result);
+    }
+
+    @Test
     @DisplayName("flattmap() should flatten arrays")
     public void testFlattMapArray() {
         Function<Integer, Integer[]> duplicate = x -> new Integer[] { x, x };
@@ -909,6 +994,32 @@ public class ParallelArrayStreamTest extends TestBase {
                 .sorted()
                 .toList();
         assertEquals(10, result.size());
+    }
+
+    @Test
+    public void testFlatMapToDouble_IteratorSplitorClosesEveryMappedStream() {
+        AtomicInteger closeCount = new AtomicInteger();
+
+        double[] result = Stream.of(1, 2, 3, 4)
+                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(2))
+                .flatMapToDouble(n -> DoubleStream.of(n.doubleValue()).onClose(closeCount::incrementAndGet))
+                .toArray();
+
+        assertEquals(4, result.length);
+        assertEquals(4, closeCount.get());
+    }
+
+    @Test
+    public void testFlatMap_IteratorSplitorClosesEveryMappedStream() {
+        final AtomicInteger closeCount = new AtomicInteger();
+
+        final Object[] result = Stream.of(1, 2, 3, 4)
+                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(2))
+                .flatMap(value -> Stream.of(value).onClose(closeCount::incrementAndGet))
+                .toArray();
+
+        assertEquals(4, result.length);
+        assertEquals(4, closeCount.get());
     }
 
     @Test
@@ -2621,6 +2732,18 @@ public class ParallelArrayStreamTest extends TestBase {
                 .toList();
 
         assertEquals(Arrays.asList("first:1", "other:2", "other:3"), result);
+    }
+
+    @Test
+    public void testCancelUncompletedThreadsIsPreserved() {
+        try (ParallelArrayStream<Integer> source = new ParallelArrayStream<>(new Integer[] { 1, 2, 3 }, 0, 3, false, null, testMaxThreadNum, Splitor.ARRAY,
+                null, true, new ArrayList<>())) {
+            assertTrue(source.cancelUncompletedThreads());
+
+            try (Stream<Integer> mapped = source.map(Fn.identity())) {
+                assertTrue(mapped.cancelUncompletedThreads());
+            }
+        }
     }
 
 }

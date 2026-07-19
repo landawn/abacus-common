@@ -79,7 +79,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null}, empty, or blank
-     * @return the parsed {@code Boolean[]} array, an empty array for {@code "[]"},
+     * @return the parsed {@code Boolean[]} array
      *         or {@code null} if {@code str} is {@code null}, empty, or blank
      * @see #valueOf(Object)
      * @see #stringOf(Boolean[])
@@ -113,7 +113,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * Appends a {@code Boolean[]} array to an {@link Appendable} in bracket-enclosed format.
      * Appends the literal {@code "null"} string if {@code x} is {@code null}.
      * Each {@code null} element is written as {@code "null"};
-     * non-null elements are written as {@code "true"} or {@code "false"}.
+     * {@code non-null} elements are written as {@code "true"} or {@code "false"}.
      * <p>
      * <b>appendTo vs. serializeTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
      * {@code Boolean[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.
@@ -157,19 +157,20 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
     /**
      * Writes a {@code Boolean[]} array to a {@link CharacterWriter} in bracket-enclosed format.
      * Uses pre-allocated character arrays for {@code true}/{@code false}/{@code null} literals
-     * for efficient output. The format is identical to {@link #appendTo(Appendable, Boolean[])}.
-     * {@code config} is not used.
+     * for efficient output. The format is identical to {@link #appendTo(Appendable, Boolean[])}
+     * except that {@code config} is forwarded to the element type.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes boolean literals ({@code true}/
      * {@code false}) and {@code null} elements directly to the {@code CharacterWriter}. The supplied serialization
-     * config is not used by this implementation.
+     * config is forwarded to each element, so a {@code null} element is written as {@code false} when
+     * {@code config.isWriteNullBooleanAsFalse()} is set.
      * <p>
      * <b>serializeTo vs. appendTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
      * {@code Boolean[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Boolean[]} array to write; may be {@code null}
-     * @param config the serialization configuration (unused for boolean arrays); may be {@code null}
+     * @param config the serialization configuration forwarded to each element; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -184,11 +185,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                     writer.write(ELEMENT_SEPARATOR);
                 }
 
-                if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY); //NOSONAR
-                }
+                elementType.serializeTo(writer, x[i], config);
             }
 
             writer.write(SK._BRACKET_R);

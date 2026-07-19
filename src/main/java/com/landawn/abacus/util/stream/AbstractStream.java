@@ -162,6 +162,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<U> select(final Class<? extends U> targetType) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return (Stream<U>) sequential().filter(Fn.instanceOf(targetType)).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
@@ -172,11 +174,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> pairWith(final Function<? super T, ? extends U> extractor) {
+        assertNotClosed();
+
         return map(t -> Pair.of(t, extractor.apply(t)));
     }
 
     @Override
     public Stream<T> skipUntil(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return dropWhile(Fn.not(predicate));
     }
 
@@ -267,6 +273,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> mapIfNotNull(final Function<? super T, ? extends R> mapper) {
+        assertNotClosed();
+
         //noinspection resource
         return skipNulls().map(mapper);
     }
@@ -401,6 +409,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> flatmapIfNotNull(final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        assertNotClosed();
+
         //noinspection resource
         return skipNulls().flatmap(mapper);
     }
@@ -408,6 +418,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, R> Stream<R> flatmapIfNotNull(final Function<? super T, ? extends Collection<? extends U>> mapper,
             final Function<? super U, ? extends Collection<? extends R>> secondMapper) {
+        assertNotClosed();
+
         //noinspection resource
         return skipNulls().flatmap(mapper).skipNulls().flatmap(secondMapper);
     }
@@ -446,6 +458,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> mapMulti(final BiConsumer<? super T, ? super Consumer<R>> mapper) {
+        assertNotClosed();
+
         final boolean isParallel = isParallel();
 
         if (isParallel) {
@@ -498,6 +512,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public IntStream mapMultiToInt(final BiConsumer<? super T, ? super IntConsumer> mapper) {
+        assertNotClosed();
+
         final Function<T, IntStream> secondMapper = t -> {
             final SpinedBuffer.OfInt buffer = new SpinedBuffer.OfInt();
 
@@ -511,6 +527,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public LongStream mapMultiToLong(final BiConsumer<? super T, ? super LongConsumer> mapper) {
+        assertNotClosed();
+
         final Function<T, LongStream> secondMapper = t -> {
             final SpinedBuffer.OfLong buffer = new SpinedBuffer.OfLong();
 
@@ -524,6 +542,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public DoubleStream mapMultiToDouble(final BiConsumer<? super T, ? super DoubleConsumer> mapper) {
+        assertNotClosed();
+
         final Function<T, DoubleStream> secondMapper = t -> {
             final SpinedBuffer.OfDouble buffer = new SpinedBuffer.OfDouble();
 
@@ -537,6 +557,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> mapPartial(final Function<? super T, Optional<R>> mapper) {
+        assertNotClosed();
+
         final Predicate<Optional<R>> predicate = Fn.isPresent();
         final Function<Optional<R>, R> func = Fn.getIfPresentOrElseNull();
         if (isParallel()) {
@@ -551,6 +573,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public IntStream mapPartialToInt(final Function<? super T, OptionalInt> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT).mapToInt(Fn.GET_AS_INT));
@@ -562,6 +586,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public LongStream mapPartialToLong(final Function<? super T, OptionalLong> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_LONG).mapToLong(Fn.GET_AS_LONG));
@@ -573,6 +599,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public DoubleStream mapPartialToDouble(final Function<? super T, OptionalDouble> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_DOUBLE).mapToDouble(Fn.GET_AS_DOUBLE));
@@ -584,6 +612,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> mapPartialJdk(final Function<? super T, java.util.Optional<R>> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return map(mapper).psp(s -> s.filter(Fn.isPresentJdk()).map(Fn.getIfPresentOrElseNullJdk()));
@@ -595,6 +625,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public IntStream mapPartialToIntJdk(final Function<? super T, java.util.OptionalInt> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT_JDK).mapToInt(Fn.GET_AS_INT_JDK));
@@ -606,6 +638,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public LongStream mapPartialToLongJdk(final Function<? super T, java.util.OptionalLong> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_LONG_JDK).mapToLong(Fn.GET_AS_LONG_JDK));
@@ -617,6 +651,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public DoubleStream mapPartialToDoubleJdk(final Function<? super T, java.util.OptionalDouble> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_DOUBLE_JDK).mapToDouble(Fn.GET_AS_DOUBLE_JDK));
@@ -1027,7 +1063,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             @Override
-            public U next() {
+            public U next() throws IllegalStateException {
                 if (isFirst) {
                     isFirst = false;
                     return init;
@@ -1147,6 +1183,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> splitAt(final int position, final Collector<? super T, ?, R> collector) throws IllegalStateException {
+        assertNotClosed();
+
         return splitAt(position).map(s -> s.collect(collector));
     }
 
@@ -1259,6 +1297,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> splitAt(final Predicate<? super T> where, final Collector<? super T, ?, R> collector) throws IllegalStateException {
+        assertNotClosed();
+
         return splitAt(where).map(s -> s.collect(collector));
     }
 
@@ -1271,6 +1311,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<List<T>> sliding(final int windowSize) {
+        assertNotClosed();
+
         return sliding(windowSize, IntFunctions.ofList());
     }
 
@@ -1421,108 +1463,6 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         forEachTriple(1, action);
     }
-
-    //    @Override
-    //    public Optional<T> reduceUntil(final BinaryOperator<T> accumulator, final Predicate<? super T> conditionToBreak) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final MutableBoolean flagToBreak = MutableBoolean.of(false);
-    //
-    //        final BinaryOperator<T> newAccumulator = (t, u) -> {
-    //            final T ret = accumulator.apply(t, u);
-    //
-    //            if (flagToBreak.isFalse() && conditionToBreak.test(ret)) {
-    //                flagToBreak.setValue(true);
-    //            }
-    //
-    //            return ret;
-    //        };
-    //
-    //        if (isParallel()) {
-    //            //noinspection resource
-    //            return psp(s -> s.takeWhile(value -> flagToBreak.isFalse())).reduce(newAccumulator);
-    //        } else {
-    //            //noinspection resource
-    //            return takeWhile(value -> flagToBreak.isFalse()).reduce(newAccumulator);
-    //        }
-    //    }
-    //
-    //    @Override
-    //    public Optional<T> reduceUntil(final BinaryOperator<T> accumulator, final BiPredicate<? super T, ? super T> conditionToBreak) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final MutableBoolean flagToBreak = MutableBoolean.of(false);
-    //
-    //        final BinaryOperator<T> newAccumulator = (t, u) -> {
-    //            final T ret = accumulator.apply(t, u);
-    //
-    //            if (flagToBreak.isFalse() && conditionToBreak.test(ret, t)) {
-    //                flagToBreak.setValue(true);
-    //            }
-    //
-    //            return ret;
-    //        };
-    //
-    //        if (isParallel()) {
-    //            //noinspection resource
-    //            return psp(s -> s.takeWhile(value -> flagToBreak.isFalse())).reduce(newAccumulator);
-    //        } else {
-    //            //noinspection resource
-    //            return takeWhile(value -> flagToBreak.isFalse()).reduce(newAccumulator);
-    //        }
-    //    }
-    //
-    //    @Override
-    //    public <U> U reduceUntil(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner,
-    //            final Predicate<? super U> conditionToBreak) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final MutableBoolean flagToBreak = MutableBoolean.of(false);
-    //
-    //        final BiFunction<U, T, U> newAccumulator = (u, t) -> {
-    //            final U ret = accumulator.apply(u, t);
-    //
-    //            if (flagToBreak.isFalse() && conditionToBreak.test(ret)) {
-    //                flagToBreak.setValue(true);
-    //            }
-    //
-    //            return ret;
-    //        };
-    //
-    //        if (isParallel()) {
-    //            //noinspection resource
-    //            return psp(s -> s.takeWhile(value -> flagToBreak.isFalse())).reduce(identity, newAccumulator, combiner);
-    //        } else {
-    //            //noinspection resource
-    //            return takeWhile(value -> flagToBreak.isFalse()).reduce(identity, newAccumulator, combiner);
-    //        }
-    //    }
-    //
-    //    @Override
-    //    public <U> U reduceUntil(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner,
-    //            final BiPredicate<? super U, ? super T> conditionToBreak) throws IllegalStateException {
-    //        assertNotClosed();
-    //
-    //        final MutableBoolean flagToBreak = MutableBoolean.of(false);
-    //
-    //        final BiFunction<U, T, U> newAccumulator = (u, t) -> {
-    //            final U ret = accumulator.apply(u, t);
-    //
-    //            if (flagToBreak.isFalse() && conditionToBreak.test(ret, t)) {
-    //                flagToBreak.setValue(true);
-    //            }
-    //
-    //            return ret;
-    //        };
-    //
-    //        if (isParallel()) {
-    //            //noinspection resource
-    //            return psp(s -> s.takeWhile(value -> flagToBreak.isFalse())).reduce(identity, newAccumulator, combiner);
-    //        } else {
-    //            //noinspection resource
-    //            return takeWhile(value -> flagToBreak.isFalse()).reduce(identity, newAccumulator, combiner);
-    //        }
-    //    }
 
     @Override
     public <K> Stream<Entry<K, List<T>>> groupBy(final Function<? super T, ? extends K> keyMapper) throws IllegalStateException {
@@ -1844,7 +1784,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E> keyMapper,
-            final Collector<? super T, ?, D> downstream) throws E {
+            final Collector<? super T, ?, D> downstream) throws IllegalStateException, E {
         assertNotClosed();
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
@@ -1870,7 +1810,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -1912,12 +1852,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, E extends Exception> Map<K, List<T>> flatGroupTo(final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor)
             throws E {
+        assertNotClosed();
+
         return flatGroupTo(flatKeyExtractor, Suppliers.ofMap());
     }
 
     @Override
     public <K, M extends Map<K, List<T>>, E extends Exception> M flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor, final Supplier<? extends M> mapFactory) throws E {
+        assertNotClosed();
+
         return flatGroupTo(flatKeyExtractor, BiFunctions.selectSecond(), mapFactory);
     }
 
@@ -1925,6 +1869,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     public <K, V, E extends Exception, E2 extends Exception> Map<K, List<V>> flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Throwables.BiFunction<? super K, ? super T, ? extends V, E2> valueMapper) throws E, E2 {
+        assertNotClosed();
+
         return flatGroupTo(flatKeyExtractor, valueMapper, Suppliers.ofMap());
     }
 
@@ -1933,12 +1879,16 @@ abstract class AbstractStream<T> extends Stream<T> {
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Throwables.BiFunction<? super K, ? super T, ? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
+        assertNotClosed();
+
         return flatGroupTo(flatKeyExtractor, valueMapper, Collectors.toList(), mapFactory);
     }
 
     @Override
     public <K, D, E extends Exception> Map<K, D> flatGroupTo(final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Collector<? super T, ?, D> downstream) throws E {
+        assertNotClosed();
+
         return flatGroupTo(flatKeyExtractor, downstream, Suppliers.ofMap());
     }
 
@@ -1946,6 +1896,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     public <K, D, M extends Map<K, D>, E extends Exception> M flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor, final Collector<? super T, ?, D> downstream,
             final Supplier<? extends M> mapFactory) throws E {
+        assertNotClosed();
+
         return flatGroupTo(flatKeyExtractor, BiFunctions.selectSecond(), downstream, mapFactory);
     }
 
@@ -1953,6 +1905,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     public <K, V, D, E extends Exception, E2 extends Exception> Map<K, D> flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Throwables.BiFunction<? super K, ? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream) throws E, E2 {
+        assertNotClosed();
+
         return flatGroupTo(flatKeyExtractor, valueMapper, downstream, Suppliers.ofMap());
     }
 
@@ -2209,6 +2163,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -2426,6 +2382,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         final Consumer<T> action = it -> rateLimiter.acquire();
@@ -2440,6 +2398,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> delay(final Duration delay) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(delay, cs.delay);
 
         final long millis = delay.toMillis();
@@ -2466,7 +2426,9 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> debounce(Duration duration) {
+    public Stream<T> debounce(Duration duration) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
@@ -2474,7 +2436,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             // Debounce is inherently sequential and time-ordered; run it on the sequential view.
             return psp(s -> s.debounce(duration));
         } else {
-            return newStream(new ObjIteratorEx<>() {
+            return newStream(new ObjIteratorEx<>() { //NOSONAR
                 private final ObjIteratorEx<T> iter = iteratorEx();
                 private final long durationMillis = duration.toMillis();
                 private T prev; // the most recent element of the current burst, awaiting a quiet gap
@@ -2540,6 +2502,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> skipNulls() {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return sequential().filter(Fn.notNull()).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
@@ -2887,6 +2851,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sorted() {
+        assertNotClosed();
+
         return sorted(NATURAL_COMPARATOR);
     }
 
@@ -2914,6 +2880,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @SuppressWarnings("rawtypes")
     @Override
     public Stream<T> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.comparingBy(keyMapper);
 
         return sorted(comparator);
@@ -2921,6 +2889,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sortedByInt(final ToIntFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.comparingInt(keyMapper);
 
         return sorted(comparator);
@@ -2928,6 +2898,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sortedByLong(final ToLongFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.comparingLong(keyMapper);
 
         return sorted(comparator);
@@ -2935,6 +2907,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sortedByDouble(final ToDoubleFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.comparingDouble(keyMapper);
 
         return sorted(comparator);
@@ -2942,11 +2916,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> reverseSorted() {
+        assertNotClosed();
+
         return sorted(REVERSED_COMPARATOR);
     }
 
     @Override
     public Stream<T> reverseSorted(final Comparator<? super T> comparator) {
+        assertNotClosed();
+
         final Comparator<? super T> cmpToUse = Comparators.reverseOrder(comparator);
 
         return sorted(cmpToUse);
@@ -2954,6 +2932,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> reverseSortedByInt(final ToIntFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingInt(keyMapper);
 
         return sorted(cmpToUse);
@@ -2961,6 +2941,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> reverseSortedByLong(final ToLongFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingLong(keyMapper);
 
         return sorted(cmpToUse);
@@ -2968,6 +2950,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> reverseSortedByDouble(final ToDoubleFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingDouble(keyMapper);
 
         return sorted(cmpToUse);
@@ -2975,6 +2959,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingBy(keyMapper);
 
         return sorted(cmpToUse);
@@ -3001,7 +2987,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> top(final int n) throws IllegalStateException {
+    public Stream<T> top(final int n) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 
@@ -3133,6 +3119,8 @@ abstract class AbstractStream<T> extends Stream<T> {
         if (!repeat) {
             return combinations(len);
         } else {
+            checkArgNotNegative(len, cs.len);
+
             return newStream(new ObjIteratorEx<>() { //NOSONAR
                 private boolean initialized = false;
                 private List<List<T>> list = null;
@@ -3383,7 +3371,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R, RR, E extends Exception> RR collectThenApply(final Collector<? super T, ?, R> downstream,
-            final Throwables.Function<? super R, ? extends RR, E> func) throws E {
+            final Throwables.Function<? super R, ? extends RR, E> func) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
         checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(func, cs.func);
@@ -3822,6 +3810,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> saveEach(final File output) {
+        assertNotClosed();
+
         return saveEach(TO_LINE_OF_STRING, output);
     }
 
@@ -4127,6 +4117,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public Stream<T> saveEach(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
             throws IllegalStateException {
+        assertNotClosed();
+
         return saveEach(stmt, 1, 0, stmtSetter);
     }
 
@@ -4206,6 +4198,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public Stream<T> saveEach(final Connection conn, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException {
+        assertNotClosed();
+
         return saveEach(conn, insertSQL, 1, 0, stmtSetter);
     }
 
@@ -4306,6 +4300,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public Stream<T> saveEach(final javax.sql.DataSource ds, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException {
+        assertNotClosed();
+
         return saveEach(ds, insertSQL, 1, 0, stmtSetter);
     }
 
@@ -4419,16 +4415,22 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(final File output) throws IOException {
+        assertNotClosed();
+
         return persist(TO_LINE_OF_STRING, output);
     }
 
     @Override
     public long persist(final String header, final String tail, final File output) throws IOException {
+        assertNotClosed();
+
         return persist(header, tail, TO_LINE_OF_STRING, output);
     }
 
     @Override
     public long persist(final Function<? super T, String> toLine, final File output) throws IOException {
+        assertNotClosed();
+
         return persist(null, null, toLine, output);
     }
 
@@ -4531,6 +4533,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output) throws IOException {
+        assertNotClosed();
+
         return persist(null, null, write, output);
     }
 
@@ -4652,6 +4656,10 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, SQLException {
         assertNotClosed();
+        checkArgNotNull(conn, cs.Connection);
+        checkArgNotNull(insertSQL, cs.insertSQL);
+        checkArgNotNegative(batchSize, cs.batchSize);
+        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
 
         PreparedStatement stmt = null;
 
@@ -4668,6 +4676,10 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persist(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, SQLException {
         assertNotClosed();
+        checkArgNotNull(ds, cs.DataSource);
+        checkArgNotNull(insertSQL, cs.insertSQL);
+        checkArgNotNegative(batchSize, cs.batchSize);
+        checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -4688,6 +4700,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persistToCsv(final File output) throws IOException {
+        assertNotClosed();
+
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
@@ -4699,6 +4713,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persistToCsv(final Collection<String> headers, final File output) throws IOException {
+        assertNotClosed();
+
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
@@ -4710,6 +4726,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persistToCsv(final OutputStream output) throws IOException {
+        assertNotClosed();
+
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
@@ -4721,6 +4739,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persistToCsv(final Collection<String> headers, final OutputStream output) throws IOException {
+        assertNotClosed();
+
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
@@ -4732,12 +4752,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persistToCsv(final Writer output) throws IllegalStateException, IOException {
+        assertNotClosed();
+
         return persistToCsv(null, output, true);
     }
 
     @TerminalOp
     @Override
     public long persistToCsv(final Collection<String> csvHeaders, final Writer output) throws IllegalStateException, IllegalArgumentException, IOException {
+        assertNotClosed();
+
         return persistToCsv(csvHeaders, output, false);
     }
 
@@ -4766,6 +4790,12 @@ abstract class AbstractStream<T> extends Stream<T> {
                 if (iter.hasNext()) {
                     cnt++;
                     next = iter.next();
+
+                    if (next == null) {
+                        throw new IllegalArgumentException(
+                                "null is not supported for CSV format. Use bean/Map rows, or Collection/Object[] rows with explicit headers");
+                    }
+
                     cls = next.getClass();
 
                     if (Beans.isBeanClass(cls)) {
@@ -4950,7 +4980,8 @@ abstract class AbstractStream<T> extends Stream<T> {
                             }
                         }
                     } else {
-                        throw new IllegalArgumentException(cls + " is not supported for CSV format. Only bean/Map types are supported");
+                        throw new IllegalArgumentException(
+                                cls + " is not supported for CSV format. Use bean/Map rows, or Collection/Object[] rows with explicit headers");
                     }
                 } else if (N.notEmpty(headers)) {
                     final int headSize = headers.size();
@@ -4981,6 +5012,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persistToJson(final File output) throws IOException {
+        assertNotClosed();
+
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
@@ -4992,6 +5025,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persistToJson(final OutputStream output) throws IOException {
+        assertNotClosed();
+
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
@@ -5054,11 +5089,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> crossJoin(final Collection<? extends U> b) {
+        assertNotClosed();
+
         return crossJoin(b, Fn.pair());
     }
 
     @Override
     public <U, R> Stream<R> crossJoin(final Collection<? extends U> b, final BiFunction<? super T, ? super U, ? extends R> func) {
+        assertNotClosed();
+
         return flatMap(t -> Stream.of(b).map(u -> func.apply(t, u)));
     }
 
@@ -5091,11 +5130,15 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> innerJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor) {
+        assertNotClosed();
+
         return innerJoin(b, leftKeyExtractor, rightKeyExtractor, Fn.pair());
     }
 
     @Override
     public <K> Stream<Pair<T, T>> innerJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return innerJoin(b, keyMapper, Fn.pair());
     }
 
@@ -5130,6 +5173,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, R> Stream<R> innerJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
             final BiFunction<? super T, ? super T, ? extends R> func) {
+        assertNotClosed();
+
         return innerJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -5164,6 +5209,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> innerJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         return innerJoin(b, predicate, Fn.pair());
     }
 
@@ -5181,11 +5228,15 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> fullJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor) {
+        assertNotClosed();
+
         return fullJoin(b, leftKeyExtractor, rightKeyExtractor, Fn.pair());
     }
 
     @Override
     public <K> Stream<Pair<T, T>> fullJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return fullJoin(b, keyMapper, Fn.pair());
     }
 
@@ -5236,6 +5287,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, R> Stream<R> fullJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
             final BiFunction<? super T, ? super T, ? extends R> func) {
+        assertNotClosed();
+
         return fullJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -5294,6 +5347,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> fullJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         return fullJoin(b, predicate, Fn.pair());
     }
 
@@ -5326,11 +5381,15 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> leftJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor) {
+        assertNotClosed();
+
         return leftJoin(b, leftKeyExtractor, rightKeyExtractor, Fn.pair());
     }
 
     @Override
     public <K> Stream<Pair<T, T>> leftJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return leftJoin(b, keyMapper, Fn.pair());
     }
 
@@ -5367,6 +5426,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, R> Stream<R> leftJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
             final BiFunction<? super T, ? super T, ? extends R> func) {
+        assertNotClosed();
+
         return leftJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -5403,6 +5464,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> leftJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         return leftJoin(b, predicate, Fn.pair());
     }
 
@@ -5423,11 +5486,15 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> rightJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor) {
+        assertNotClosed();
+
         return rightJoin(b, leftKeyExtractor, rightKeyExtractor, Fn.pair());
     }
 
     @Override
     public <K> Stream<Pair<T, T>> rightJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return rightJoin(b, keyMapper, Fn.pair());
     }
 
@@ -5476,6 +5543,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, R> Stream<R> rightJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
             final BiFunction<? super T, ? super T, ? extends R> func) {
+        assertNotClosed();
+
         return rightJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -5532,6 +5601,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> rightJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         return rightJoin(b, predicate, Fn.pair());
     }
 
@@ -5563,11 +5634,15 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, List<U>>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor) {
+        assertNotClosed();
+
         return groupJoin(b, leftKeyExtractor, rightKeyExtractor, Fn.pair());
     }
 
     @Override
     public <K> Stream<Pair<T, List<T>>> groupJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return groupJoin(b, keyMapper, Fn.pair());
     }
 
@@ -5616,6 +5691,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, R> Stream<R> groupJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
             final BiFunction<? super T, ? super List<T>, ? extends R> func) {
+        assertNotClosed();
+
         return groupJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -5672,6 +5749,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor, final BinaryOperator<U> mergeFunction) {
+        assertNotClosed();
+
         return groupJoin(b, leftKeyExtractor, rightKeyExtractor, mergeFunction, Fn.pair());
     }
 
@@ -5797,6 +5876,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K, D> Stream<Pair<T, D>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor, final Collector<? super U, ?, D> downstream) {
+        assertNotClosed();
+
         return groupJoin(b, leftKeyExtractor, rightKeyExtractor, downstream, Fn.pair());
     }
 
@@ -5863,12 +5944,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, D> Stream<Pair<T, D>> groupJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, ?, D> downstream) {
+        assertNotClosed();
+
         return groupJoin(b, keyMapper, keyMapper, downstream);
     }
 
     @Override
     public <K, D, R> Stream<R> groupJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, ?, D> downstream, final BiFunction<? super T, ? super D, ? extends R> func) {
+        assertNotClosed();
+
         return groupJoin(b, keyMapper, keyMapper, downstream, func);
     }
 
@@ -5983,6 +6068,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, R> Stream<Pair<T, R>> joinByRange(final Iterator<U> b, final BiPredicate<? super T, ? super U> predicate,
             final Collector<? super U, ?, R> collector) {
+        assertNotClosed();
+
         return joinByRange(b, predicate, collector, Fn.pair());
     }
 
@@ -6114,16 +6201,14 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(b, "Stream 'b' cannot be null");
         checkArgNotNull(predicate, "'predicate' cannot be null");
 
-        if (N.isEmpty(b.closeHandlers())) {
-            return joinByRange(b.iteratorEx(), predicate);
-        } else {
-            return joinByRange(b.iteratorEx(), predicate).onClose(newCloseHandler(b));
-        }
+        return joinByRange(b.iteratorEx(), predicate).onClose(newCloseHandler(b));
     }
 
     @Override
     public <U, R> Stream<Pair<T, R>> joinByRange(final Stream<U> b, final BiPredicate<? super T, ? super U> predicate,
             final Collector<? super U, ?, R> collector) {
+        assertNotClosed();
+
         return joinByRange(b, predicate, collector, Fn.pair());
     }
 
@@ -6136,11 +6221,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(collector, "'collector' cannot be null");
         checkArgNotNull(func, "'func' cannot be null");
 
-        if (N.isEmpty(b.closeHandlers())) {
-            return joinByRange(b.iteratorEx(), predicate, collector, func);
-        } else {
-            return ((Stream<R>) joinByRange(b.iteratorEx(), predicate, collector, func)).onClose(newCloseHandler(b));
-        }
+        return ((Stream<R>) joinByRange(b.iteratorEx(), predicate, collector, func)).onClose(newCloseHandler(b));
     }
 
     @Override
@@ -6154,11 +6235,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(func, "'func' cannot be null");
         checkArgNotNull(mapperForUnJoinedElements, "'mapperForUnJoinedElements' cannot be null");
 
-        if (N.isEmpty(b.closeHandlers())) {
-            return joinByRange(b.iteratorEx(), predicate, collector, func, mapperForUnJoinedElements);
-        } else {
-            return joinByRange(b.iteratorEx(), predicate, collector, func, mapperForUnJoinedElements).onClose(newCloseHandler(b));
-        }
+        return joinByRange(b.iteratorEx(), predicate, collector, func, mapperForUnJoinedElements).onClose(newCloseHandler(b));
     }
 
     @Override

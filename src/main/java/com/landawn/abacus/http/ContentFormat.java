@@ -24,8 +24,10 @@ package com.landawn.abacus.http;
  * <p><b>Matrix coverage (intentional limitations):</b> Compression variants
  * ({@code _LZ4}/{@code _SNAPPY}/{@code _GZIP}/{@code _BR}) are provided only for the
  * {@code JSON} and {@code XML} serialization formats. {@link #FORM_URL_ENCODED} and
- * {@link #KRYO} intentionally expose only their base (uncompressed) members; combine them
- * with the compression-only members if needed. Brotli ({@code _BR}/{@link #BR}) is supported
+ * {@link #KRYO} intentionally expose only their base (uncompressed) members; the enum cannot
+ * represent a combined form/Kryo-plus-compression format. The compression-only members describe
+ * compressed raw content, not a second format that can be combined with another enum value.
+ * Brotli ({@code _BR}/{@link #BR}) is supported
  * on the <i>decode</i> (response) path only — see {@link HttpUtil#wrapOutputStream}, which
  * rejects Brotli on the encode (request) path because there is no bundled Brotli encoder.</p>
  *

@@ -219,6 +219,15 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      */
     @Override
     public boolean removeAll(final Collection<?> c) {
+        if (c == this) {
+            if (isEmpty()) {
+                return false;
+            }
+
+            clear();
+            return true;
+        }
+
         boolean modified = false;
 
         if (N.notEmpty(c)) {
@@ -301,8 +310,9 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
 
     /**
      * Returns an iterator over the elements in this set. The elements are returned in no
-     * particular order. The iterator is fail-fast: if the set is modified after the iterator
-     * is created, the iterator will throw a {@link java.util.ConcurrentModificationException}.
+     * particular order. The iterator is fail-fast on a best-effort basis: structural modification
+     * outside the iterator after its creation will generally cause a
+     * {@link java.util.ConcurrentModificationException}, but this must not be relied on for correctness.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

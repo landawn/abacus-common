@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,8 +28,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -40,8 +43,9 @@ import java.util.function.Predicate;
  * filtering, mapping, throttling, and time-based operations.
  *
  * <p>The Observer pattern implementation allows for asynchronous data streams with cooperative
- * cancellation (via {@link #limit(long)}) and thread-safe operations. It provides a fluent API
- * for composing complex data processing pipelines.</p>
+ * cancellation (via {@link #limit(long)}). Event delivery by the built-in timed operators is
+ * serialized where required, but pipeline construction is not thread-safe. An instance is a
+ * single-use pipeline and accepts exactly one subscription.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -51,25 +55,23 @@ import java.util.function.Predicate;
  *     .observe(System.out::println);
  * }</pre>
  *
- * <p>This class implements the {@link Immutable} marker interface. Note that the intermediate
- * operator methods append to an internal dispatcher chain and return {@code this} for fluent
- * chaining rather than producing new instances.</p>
+ * <p>Intermediate operator methods append to this instance's internal dispatcher chain and return
+ * {@code this} for fluent chaining. The pipeline is therefore mutable while it is being built.</p>
  *
  * @param <T> the type of elements emitted by this Observer
  * @see Timed
  */
-@com.landawn.abacus.annotation.Immutable
-public abstract class Observer<T> implements Immutable {
+public abstract class Observer<T> {
+
+    private static final AtomicInteger WORKER_ID = new AtomicInteger();
 
     private static final Object NONE = ClassUtil.newNullSentinel();
 
     private static final Object COMPLETE_FLAG = ClassUtil.newNullSentinel();
 
     /**
-     * Multiplier applied to the configured interval duration when deciding whether to schedule
-     * a new debounce/throttle task. A new task is scheduled only if no task has been scheduled
-     * within the last {@code interval * INTERVAL_FACTOR}, preventing runaway
-     * task accumulation under high event rates.
+     * Legacy interval multiplier retained for source and binary compatibility. Current timed
+     * operators schedule against their exact configured interval and do not use this value.
      */
     protected static final double INTERVAL_FACTOR = 3;
 
@@ -100,7 +102,7 @@ public abstract class Observer<T> implements Immutable {
             final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(//
                     N.max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
                     N.max(128, IOUtil.CPU_CORES * 16), // // maxThreadPoolSize
-                    180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+                    180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), daemonThreadFactory("abacus-observer-async-"));
 
             asyncExecutor = threadPoolExecutor;
 
@@ -113,27 +115,36 @@ public abstract class Observer<T> implements Immutable {
      * to schedule deferred or periodic tasks within the processing pipeline.
      */
     protected static final ScheduledThreadPoolExecutor schedulerForIntermediateOp = new ScheduledThreadPoolExecutor(
-            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8));
+            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8), daemonThreadFactory("abacus-observer-intermediate-"));
 
     /**
      * Scheduled executor used by terminal observe operations ({@link TimerObserver},
      * {@link IntervalObserver}) to emit items on a scheduled basis.
      */
     protected static final ScheduledThreadPoolExecutor schedulerForObserveOp = new ScheduledThreadPoolExecutor(
-            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8));
+            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8), daemonThreadFactory("abacus-observer-terminal-"));
 
     static {
-        //    schedulerForIntermediateOp.setRemoveOnCancelPolicy(true);
-        //    schedulerForObserveOp.setRemoveOnCancelPolicy(true);
+        // Timed pipelines frequently cancel tasks with long delays. Remove them immediately so
+        // cancelled futures do not retain their observer/dispatcher graphs until the delay expires.
+        schedulerForIntermediateOp.setRemoveOnCancelPolicy(true);
+        schedulerForObserveOp.setRemoveOnCancelPolicy(true);
 
         MoreExecutors.addDelayedShutdownHook(schedulerForIntermediateOp, 120, TimeUnit.SECONDS);
         MoreExecutors.addDelayedShutdownHook(schedulerForObserveOp, 120, TimeUnit.SECONDS);
     }
 
+    private static ThreadFactory daemonThreadFactory(final String namePrefix) {
+        return task -> {
+            final Thread thread = MoreExecutors.newThread(namePrefix + WORKER_ID.incrementAndGet(), task);
+            thread.setDaemon(true);
+            return thread;
+        };
+    }
+
     /**
-     * Map of scheduled futures to their associated delay (in milliseconds), maintained so that
-     * {@link #cancelScheduledFutures()} can wait for each scheduled task to complete before
-     * cancelling it, ensuring clean shutdown of buffer and sliding-window operators.
+     * Periodic buffer tasks tracked for cancellation when a subscription terminates. The mapped
+     * delay is retained for binary/source compatibility with the existing internal representation.
      */
     protected final Map<ScheduledFuture<?>, Long> scheduledFutures = new LinkedHashMap<>();
 
@@ -147,6 +158,9 @@ public abstract class Observer<T> implements Immutable {
      */
     protected volatile boolean hasMore = true;
 
+    /** Guards the single-use subscription contract. Access is synchronized by {@link #beginSubscription}. */
+    private boolean subscribed;
+
     /** Creates a new Observer with a fresh, empty {@link Dispatcher} chain. */
     protected Observer() {
         this(new Dispatcher<>());
@@ -159,6 +173,15 @@ public abstract class Observer<T> implements Immutable {
      */
     protected Observer(final Dispatcher<Object> dispatcher) {
         this.dispatcher = dispatcher;
+    }
+
+    protected final synchronized void beginSubscription(final Consumer<? super T> action, final Consumer<? super Exception> onError,
+            final Runnable onComplete) {
+        N.checkArgNotNull(action, cs.action);
+        N.checkArgNotNull(onError, cs.onError);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+        N.checkState(!subscribed, "This Observer has already been subscribed");
+        subscribed = true;
     }
 
     /**
@@ -176,11 +199,16 @@ public abstract class Observer<T> implements Immutable {
      * }</pre>
      *
      * @param queue the {@code BlockingQueue} to complete
+     * @throws IllegalArgumentException if {@code queue} is {@code null}
+     * @throws ClassCastException if the queue orders or otherwise restricts its elements and
+     *         cannot accept the private completion marker
      * @throws RuntimeException if the current thread is interrupted while waiting to insert
      *         the completion flag into a full queue
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void complete(final BlockingQueue<?> queue) {
+        N.checkArgNotNull(queue, cs.queue);
+
         if (!((Queue) queue).offer(COMPLETE_FLAG)) {
             try {
                 ((BlockingQueue) queue).put(COMPLETE_FLAG);
@@ -399,7 +427,9 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Applies debounce operator that only emits an item if a particular timespan has passed
-     * without emitting another item. This is useful for handling rapid events like user input.
+     * without emitting another item. On normal completion, the most recent pending item is
+     * emitted immediately; an error discards any pending item. This is useful for handling
+     * rapid events like user input.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -421,7 +451,9 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Applies debounce operator that only emits an item if a particular timespan has passed
-     * without emitting another item. The time interval can be specified with custom units.
+     * without emitting another item. On normal completion, the most recent pending item is
+     * emitted immediately; an error discards any pending item. The time interval can be
+     * specified with custom units.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -449,57 +481,132 @@ public abstract class Observer<T> implements Immutable {
         final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
-            // volatile: written under synchronized(holder) in onNext but read off-lock in the scheduler
-            // thread (and lastScheduledTime is written off-lock via the reschedule path), so these need a
-            // happens-before edge to avoid stale reads.
-            private volatile long prevTimestamp = 0;
-            private volatile long lastScheduledTime = 0;
+            private final Object terminalSignal = new Object();
+            private ScheduledFuture<?> future;
+            private long generation = 0;
+            private boolean terminated = false;
 
             @Override
             public void onNext(final Object param) {
+                Exception schedulingFailure = null;
+
                 synchronized (holder) {
-                    final long now = System.nanoTime();
-
-                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInNanos * INTERVAL_FACTOR) {
-                        holder.setValue(param);
-                        prevTimestamp = now;
-
-                        schedule(intervalDuration, unit);
-                    } else {
-                        holder.setValue(param);
-                        prevTimestamp = now;
+                    if (terminated) {
+                        return;
                     }
+
+                    holder.setValue(param);
+
+                    if (future != null) {
+                        future.cancel(false);
+                    }
+
+                    final long scheduledGeneration = ++generation;
+
+                    try {
+                        future = schedulerForIntermediateOp.schedule(() -> emitPending(scheduledGeneration), intervalDurationInNanos, TimeUnit.NANOSECONDS);
+                    } catch (final Exception e) {
+                        terminated = true;
+                        holder.setValue(NONE);
+                        hasMore = false;
+                        schedulingFailure = e;
+                    }
+                }
+
+                if (schedulingFailure != null) {
+                    super.onError(schedulingFailure);
                 }
             }
 
-            private void schedule(final long delay, final TimeUnit unit) {
-                try {
-                    schedulerForIntermediateOp.schedule(() -> {
-                        final long pastIntervalInNanos = System.nanoTime() - prevTimestamp;
+            @Override
+            public void onError(final Exception error) {
+                if (terminate(false)) {
+                    super.onError(error);
+                }
+            }
 
-                        if (pastIntervalInNanos >= intervalDurationInNanos) {
-                            Object lastParam = null;
+            @Override
+            public void onComplete() {
+                final Object pending = takePendingOnTermination(true);
 
-                            synchronized (holder) {
-                                lastParam = holder.value();
-                                holder.setValue(NONE);
-                            }
+                if (pending == terminalSignal) {
+                    return;
+                }
 
-                            if (lastParam != NONE && downDispatcher != null) {
-                                downDispatcher.onNext(lastParam);
-                            }
-                        } else {
-                            schedule(intervalDurationInNanos - pastIntervalInNanos, TimeUnit.NANOSECONDS);
-                        }
-                    }, delay, unit);
-
-                    lastScheduledTime = System.nanoTime();
-                } catch (final Exception e) {
-                    holder.setValue(NONE);
-
-                    if (downDispatcher != null) {
-                        downDispatcher.onError(e);
+                if (pending != NONE && downDispatcher != null) {
+                    try {
+                        downDispatcher.onNext(pending);
+                    } catch (final Exception e) {
+                        super.onError(e);
+                        return;
                     }
+                }
+
+                super.onComplete();
+            }
+
+            private void emitPending(final long scheduledGeneration) {
+                Exception failure = null;
+
+                synchronized (holder) {
+                    if (terminated || scheduledGeneration != generation) {
+                        return;
+                    }
+
+                    final Object pending = holder.value();
+                    holder.setValue(NONE);
+                    future = null;
+
+                    if (pending != NONE && downDispatcher != null) {
+                        try {
+                            // Keep the state lock while delivering so a terminal signal cannot
+                            // overtake this scheduled onNext.
+                            downDispatcher.onNext(pending);
+                        } catch (final Exception e) {
+                            terminated = true;
+                            generation++;
+                            hasMore = false;
+                            failure = e;
+                        }
+                    }
+                }
+
+                if (failure != null) {
+                    super.onError(failure);
+                }
+            }
+
+            private boolean terminate(final boolean keepPending) {
+                synchronized (holder) {
+                    if (terminated) {
+                        return false;
+                    }
+
+                    terminated = true;
+                    generation++;
+
+                    if (future != null) {
+                        future.cancel(false);
+                        future = null;
+                    }
+
+                    if (!keepPending) {
+                        holder.setValue(NONE);
+                    }
+
+                    return true;
+                }
+            }
+
+            private Object takePendingOnTermination(final boolean keepPending) {
+                synchronized (holder) {
+                    if (!terminate(keepPending)) {
+                        return terminalSignal;
+                    }
+
+                    final Object pending = holder.value();
+                    holder.setValue(NONE);
+                    return pending;
                 }
             }
         });
@@ -508,8 +615,9 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Applies throttleFirst operator that only emits the first item emitted during sequential
-     * time windows of a specified duration. Subsequent items are ignored until the window expires.
+     * Applies throttleFirst operator that immediately emits the first item received, then ignores
+     * subsequent items until the specified duration has elapsed. Each accepted item starts the
+     * next suppression window.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -530,8 +638,9 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Applies throttleFirst operator that only emits the first item emitted during sequential
-     * time windows of a specified duration with custom time units.
+     * Applies throttleFirst operator that immediately emits the first item received, then ignores
+     * subsequent items until the specified duration has elapsed. Each accepted item starts the
+     * next suppression window. The duration can be specified with custom time units.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -559,39 +668,54 @@ public abstract class Observer<T> implements Immutable {
         final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
-            private long lastScheduledTime = 0;
+            private long lastEmissionTime = 0;
+            private boolean hasEmitted = false;
+            private boolean terminated = false;
 
             @Override
             public void onNext(final Object param) {
                 synchronized (holder) {
+                    if (terminated) {
+                        return;
+                    }
+
                     final long now = System.nanoTime();
 
-                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInNanos * INTERVAL_FACTOR) {
-                        holder.setValue(param);
+                    if (!hasEmitted || now - lastEmissionTime >= intervalDurationInNanos) {
+                        hasEmitted = true;
+                        lastEmissionTime = now;
 
-                        try {
-                            schedulerForIntermediateOp.schedule(() -> {
-                                Object firstParam = null;
-
-                                synchronized (holder) {
-                                    firstParam = holder.value();
-                                    holder.setValue(NONE);
-                                }
-
-                                if (firstParam != NONE && downDispatcher != null) {
-                                    downDispatcher.onNext(firstParam);
-                                }
-                            }, intervalDuration, unit);
-
-                            lastScheduledTime = now;
-                        } catch (final Exception e) {
-                            holder.setValue(NONE);
-
-                            if (downDispatcher != null) {
-                                downDispatcher.onError(e);
-                            }
+                        if (downDispatcher != null) {
+                            // Delivery stays inside the state lock so a concurrent terminal signal
+                            // cannot overtake the accepted first item.
+                            downDispatcher.onNext(param);
                         }
                     }
+                }
+            }
+
+            @Override
+            public void onError(final Exception error) {
+                if (terminate()) {
+                    super.onError(error);
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                if (terminate()) {
+                    super.onComplete();
+                }
+            }
+
+            private boolean terminate() {
+                synchronized (holder) {
+                    if (terminated) {
+                        return false;
+                    }
+
+                    terminated = true;
+                    return true;
                 }
             }
         });
@@ -600,8 +724,9 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Applies throttleLast operator that only emits the last item emitted during sequential
-     * time windows of a specified duration. Also known as "sample" in some reactive libraries.
+     * Applies throttleLast operator that emits the most recent item after each full sampling
+     * window. A pending item from an incomplete window is discarded on completion or error.
+     * Also known as "sample" in some reactive libraries.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -622,8 +747,9 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Applies throttleLast operator that only emits the last item emitted during sequential
-     * time windows of a specified duration with custom time units.
+     * Applies throttleLast operator that emits the most recent item after each full sampling
+     * window. A pending item from an incomplete window is discarded on completion or error.
+     * The duration can be specified with custom time units.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -651,41 +777,96 @@ public abstract class Observer<T> implements Immutable {
         final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
-            private long lastScheduledTime = 0;
+            private ScheduledFuture<?> future;
+            private boolean terminated = false;
 
             @Override
             public void onNext(final Object param) {
+                Exception schedulingFailure = null;
+
                 synchronized (holder) {
-                    final long now = System.nanoTime();
+                    if (terminated) {
+                        return;
+                    }
 
-                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInNanos * INTERVAL_FACTOR) {
-                        holder.setValue(param);
-
+                    if (holder.value() == NONE) {
                         try {
-                            schedulerForIntermediateOp.schedule(() -> {
-                                Object lastParam = null;
-
-                                synchronized (holder) {
-                                    lastParam = holder.value();
-                                    holder.setValue(NONE);
-                                }
-
-                                if (lastParam != NONE && downDispatcher != null) {
-                                    downDispatcher.onNext(lastParam);
-                                }
-                            }, intervalDuration, unit);
-
-                            lastScheduledTime = now;
+                            future = schedulerForIntermediateOp.schedule(this::emitPending, intervalDurationInNanos, TimeUnit.NANOSECONDS);
                         } catch (final Exception e) {
-                            holder.setValue(NONE);
-
-                            if (downDispatcher != null) {
-                                downDispatcher.onError(e);
-                            }
+                            terminated = true;
+                            hasMore = false;
+                            schedulingFailure = e;
                         }
-                    } else {
+                    }
+
+                    if (!terminated) {
                         holder.setValue(param);
                     }
+                }
+
+                if (schedulingFailure != null) {
+                    super.onError(schedulingFailure);
+                }
+            }
+
+            @Override
+            public void onError(final Exception error) {
+                if (terminate()) {
+                    super.onError(error);
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                if (terminate()) {
+                    super.onComplete();
+                }
+            }
+
+            private void emitPending() {
+                Exception failure = null;
+
+                synchronized (holder) {
+                    if (terminated) {
+                        return;
+                    }
+
+                    final Object pending = holder.value();
+                    holder.setValue(NONE);
+                    future = null;
+
+                    if (pending != NONE && downDispatcher != null) {
+                        try {
+                            // Serialize delivery with terminal signals.
+                            downDispatcher.onNext(pending);
+                        } catch (final Exception e) {
+                            terminated = true;
+                            hasMore = false;
+                            failure = e;
+                        }
+                    }
+                }
+
+                if (failure != null) {
+                    super.onError(failure);
+                }
+            }
+
+            private boolean terminate() {
+                synchronized (holder) {
+                    if (terminated) {
+                        return false;
+                    }
+
+                    terminated = true;
+                    holder.setValue(NONE);
+
+                    if (future != null) {
+                        future.cancel(false);
+                        future = null;
+                    }
+
+                    return true;
                 }
             }
         });
@@ -743,6 +924,8 @@ public abstract class Observer<T> implements Immutable {
             return this;
         }
 
+        final long delayInNanos = unit.toNanos(delay);
+
         dispatcher.append(new Dispatcher<>() {
             private final long startTimeInNanos = System.nanoTime();
             private volatile boolean isDelayed = false;
@@ -750,8 +933,13 @@ public abstract class Observer<T> implements Immutable {
             @Override
             public void onNext(final Object param) {
                 if (!isDelayed) {
-                    final long elapsedTimeInMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTimeInNanos);
-                    N.sleepUninterruptibly(Math.max(0, unit.toMillis(delay) - elapsedTimeInMillis));
+                    final long elapsedTimeInNanos = System.nanoTime() - startTimeInNanos;
+                    final long remainingDelayInNanos = delayInNanos - elapsedTimeInNanos;
+
+                    if (remainingDelayInNanos > 0) {
+                        N.sleepUninterruptibly(remainingDelayInNanos, TimeUnit.NANOSECONDS);
+                    }
+
                     isDelayed = true;
                 }
 
@@ -961,9 +1149,12 @@ public abstract class Observer<T> implements Immutable {
      * @param keyExtractor function to extract the key used to determine uniqueness; key
      *        equality is based on {@code hashCode()} and {@code equals()}; must not be {@code null}
      * @return this Observer instance for method chaining
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #distinct()
      */
-    public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) {
+    public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         dispatcher.append(new Dispatcher<>() {
             private final Set<Object> set = N.newHashSet();
 
@@ -991,8 +1182,11 @@ public abstract class Observer<T> implements Immutable {
      * @param filter the predicate used to test each item; items for which the predicate returns
      *               {@code true} are forwarded downstream; must not be {@code null}
      * @return this Observer instance for method chaining
+     * @throws IllegalArgumentException if {@code filter} is {@code null}
      */
-    public Observer<T> filter(final Predicate<? super T> filter) {
+    public Observer<T> filter(final Predicate<? super T> filter) throws IllegalArgumentException {
+        N.checkArgNotNull(filter, cs.filter);
+
         dispatcher.append(new Dispatcher<>() {
             @Override
             public void onNext(final Object param) {
@@ -1019,9 +1213,12 @@ public abstract class Observer<T> implements Immutable {
      * @param mapper the function to transform each item; must not be {@code null}
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         transformed items
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(Function)
      */
-    public <R> Observer<R> map(final Function<? super T, R> mapper) {
+    public <R> Observer<R> map(final Function<? super T, R> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         dispatcher.append(new Dispatcher<>() {
             @Override
             public void onNext(final Object param) {
@@ -1051,9 +1248,12 @@ public abstract class Observer<T> implements Immutable {
      *        must not be {@code null}
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         flattened items
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(Function)
      */
-    public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
+    public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         dispatcher.append(new Dispatcher<>() {
             @Override
             public void onNext(final Object param) {
@@ -1074,7 +1274,8 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Buffers items into lists based on a time window. Emits a list of items
-     * every timespan period.
+     * every timespan period. Normal completion emits a final non-empty partial
+     * buffer; an error discards it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1098,6 +1299,7 @@ public abstract class Observer<T> implements Immutable {
     /**
      * Buffers items into lists based on time windows or item count, whichever occurs first.
      * Emits when either the time window expires or the buffer reaches the specified count.
+     * Normal completion emits a final non-empty partial buffer; an error discards it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1121,36 +1323,115 @@ public abstract class Observer<T> implements Immutable {
 
         dispatcher.append(new Dispatcher<>() {
             private final List<T> queue = new ArrayList<>();
+            private volatile ScheduledFuture<?> scheduledFuture;
+            private boolean terminated = false;
 
             { //NOSONAR
-                scheduledFutures.put(schedulerForIntermediateOp.scheduleAtFixedRate(() -> {
-                    List<T> list = null;
-                    synchronized (queue) {
-                        list = new ArrayList<>(queue);
-                        queue.clear();
-                    }
-
-                    if (downDispatcher != null) {
-                        downDispatcher.onNext(list);
-                    }
-                }, timespan, timespan, unit), Math.max(1L, unit.toMillis(timespan)));
+                final ScheduledFuture<?> future = schedulerForIntermediateOp.scheduleAtFixedRate(this::emitPeriodically, timespan, timespan, unit);
+                scheduledFuture = future;
+                scheduledFutures.put(future, Math.max(1L, unit.toMillis(timespan)));
             }
 
             @Override
             public void onNext(final Object param) {
-                List<T> list = null;
-
                 synchronized (queue) {
+                    if (terminated) {
+                        return;
+                    }
+
                     queue.add((T) param);
 
                     if (queue.size() == count) {
-                        list = new ArrayList<>(queue);
+                        final List<T> list = new ArrayList<>(queue);
                         queue.clear();
+
+                        if (downDispatcher != null) {
+                            // Serialize count-triggered delivery with terminal signals.
+                            downDispatcher.onNext(list);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onError(final Exception error) {
+                if (terminate(false) != TERMINATED_BUFFER) {
+                    super.onError(error);
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                final List<T> pending = terminate(true);
+
+                if (pending == TERMINATED_BUFFER) {
+                    return;
+                }
+
+                if (N.notEmpty(pending) && downDispatcher != null) {
+                    try {
+                        downDispatcher.onNext(pending);
+                    } catch (final Exception e) {
+                        super.onError(e);
+                        return;
                     }
                 }
 
-                if (list != null && downDispatcher != null) {
-                    downDispatcher.onNext(list);
+                super.onComplete();
+            }
+
+            private final List<T> TERMINATED_BUFFER = new ArrayList<>(0);
+
+            private void emitPeriodically() {
+                Exception failure = null;
+
+                synchronized (queue) {
+                    if (terminated) {
+                        return;
+                    }
+
+                    final List<T> list = new ArrayList<>(queue);
+                    queue.clear();
+
+                    if (downDispatcher != null) {
+                        try {
+                            // Serialize scheduled delivery with terminal signals.
+                            downDispatcher.onNext(list);
+                        } catch (final Exception e) {
+                            terminated = true;
+                            hasMore = false;
+                            queue.clear();
+                            failure = e;
+                        }
+                    }
+                }
+
+                if (failure != null) {
+                    cancelScheduledFuture();
+                    super.onError(failure);
+                }
+            }
+
+            private List<T> terminate(final boolean takePending) {
+                cancelScheduledFuture();
+
+                synchronized (queue) {
+                    if (terminated) {
+                        return TERMINATED_BUFFER;
+                    }
+
+                    terminated = true;
+                    final List<T> pending = takePending && N.notEmpty(queue) ? new ArrayList<>(queue) : null;
+                    queue.clear();
+                    return pending;
+                }
+            }
+
+            private void cancelScheduledFuture() {
+                final ScheduledFuture<?> future = scheduledFuture;
+
+                if (future != null) {
+                    future.cancel(false);
                 }
             }
         });
@@ -1160,7 +1441,8 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      * Buffers items into lists based on sliding time windows. Creates overlapping or
-     * gapped windows based on the timespan and timeskip parameters.
+     * gapped windows based on the timespan and timeskip parameters. Normal completion
+     * emits each active non-empty partial window; an error discards active windows.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1185,7 +1467,8 @@ public abstract class Observer<T> implements Immutable {
     /**
      * Buffers items into lists based on sliding time windows with a maximum count per buffer.
      * Creates overlapping or gapped windows that emit when either the window duration
-     * expires or the count is reached.
+     * expires or the count is reached. Normal completion emits each active non-empty partial
+     * window; an error discards active windows.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1210,43 +1493,179 @@ public abstract class Observer<T> implements Immutable {
         N.checkArgument(count > 0, "count cannot be 0 or negative");
 
         dispatcher.append(new Dispatcher<>() {
-            private final long startNanos = System.nanoTime();
-            private final long intervalNanos = unit.toNanos(timeskip);
-            private final long timespanNanos = unit.toNanos(timespan);
-            private final List<T> queue = new ArrayList<>();
+            private final List<List<T>> TERMINATED_WINDOWS = new ArrayList<>(0);
+            private final List<List<T>> windows = new ArrayList<>();
+            private final Map<List<T>, ScheduledFuture<?>> windowFutures = new IdentityHashMap<>();
+            private volatile ScheduledFuture<?> windowStarter;
+            private boolean terminated = false;
 
             { //NOSONAR
-                scheduledFutures.put(schedulerForIntermediateOp.scheduleAtFixedRate(() -> {
-                    List<T> list = null;
-                    synchronized (queue) {
-                        list = new ArrayList<>(queue);
-                        queue.clear();
-                    }
+                final List<T> initialWindow = new ArrayList<>();
+                windows.add(initialWindow);
+                windowFutures.put(initialWindow, schedulerForIntermediateOp.schedule(() -> emitWindow(initialWindow), timespan, unit));
 
-                    if (downDispatcher != null) {
-                        downDispatcher.onNext(list);
-                    }
-                }, timespan, timeskip, unit), Math.max(1L, unit.toMillis(timeskip)));
+                final ScheduledFuture<?> future = schedulerForIntermediateOp.scheduleAtFixedRate(this::startWindow, timeskip, timeskip, unit);
+                windowStarter = future;
+                scheduledFutures.put(future, Math.max(1L, unit.toMillis(timeskip)));
             }
 
             @Override
             public void onNext(final Object param) {
-                if ((System.nanoTime() - startNanos) % intervalNanos <= timespanNanos) {
-                    List<T> list = null;
+                synchronized (windows) {
+                    if (terminated) {
+                        return;
+                    }
 
-                    synchronized (queue) {
-                        queue.add((T) param);
+                    List<List<T>> fullWindows = null;
 
-                        if (queue.size() == count) {
-                            list = new ArrayList<>(queue);
-                            queue.clear();
+                    for (final Iterator<List<T>> iter = windows.iterator(); iter.hasNext();) {
+                        final List<T> window = iter.next();
+                        window.add((T) param);
+
+                        if (window.size() == count) {
+                            iter.remove();
+
+                            final ScheduledFuture<?> future = windowFutures.remove(window);
+
+                            if (future != null) {
+                                future.cancel(false);
+                            }
+
+                            if (fullWindows == null) {
+                                fullWindows = new ArrayList<>();
+                            }
+
+                            fullWindows.add(new ArrayList<>(window));
                         }
                     }
 
-                    if (list != null && downDispatcher != null) {
-                        downDispatcher.onNext(list);
+                    if (fullWindows != null && downDispatcher != null) {
+                        // Serialize count-triggered delivery with scheduled and terminal signals.
+                        for (final List<T> window : fullWindows) {
+                            downDispatcher.onNext(window);
+                        }
                     }
                 }
+            }
+
+            @Override
+            public void onError(final Exception error) {
+                if (terminate(false) != TERMINATED_WINDOWS) {
+                    super.onError(error);
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                final List<List<T>> pending = terminate(true);
+
+                if (pending == TERMINATED_WINDOWS) {
+                    return;
+                }
+
+                if (downDispatcher != null) {
+                    try {
+                        for (final List<T> window : pending) {
+                            downDispatcher.onNext(window);
+                        }
+                    } catch (final Exception e) {
+                        super.onError(e);
+                        return;
+                    }
+                }
+
+                super.onComplete();
+            }
+
+            private void startWindow() {
+                Exception failure = null;
+
+                synchronized (windows) {
+                    if (terminated) {
+                        return;
+                    }
+
+                    final List<T> window = new ArrayList<>();
+                    windows.add(window);
+
+                    try {
+                        windowFutures.put(window, schedulerForIntermediateOp.schedule(() -> emitWindow(window), timespan, unit));
+                    } catch (final Exception e) {
+                        windows.remove(window);
+                        hasMore = false;
+                        terminateLocked();
+                        failure = e;
+                    }
+                }
+
+                if (failure != null) {
+                    super.onError(failure);
+                }
+            }
+
+            private void emitWindow(final List<T> window) {
+                Exception failure = null;
+
+                synchronized (windows) {
+                    if (terminated || !windows.remove(window)) {
+                        return;
+                    }
+
+                    windowFutures.remove(window);
+
+                    if (downDispatcher != null) {
+                        try {
+                            // Serialize scheduled delivery with source and terminal signals.
+                            downDispatcher.onNext(new ArrayList<>(window));
+                        } catch (final Exception e) {
+                            hasMore = false;
+                            terminateLocked();
+                            failure = e;
+                        }
+                    }
+                }
+
+                if (failure != null) {
+                    super.onError(failure);
+                }
+            }
+
+            private List<List<T>> terminate(final boolean takePending) {
+                synchronized (windows) {
+                    if (terminated) {
+                        return TERMINATED_WINDOWS;
+                    }
+
+                    final List<List<T>> pending = new ArrayList<>();
+
+                    if (takePending) {
+                        for (final List<T> window : windows) {
+                            if (N.notEmpty(window)) {
+                                pending.add(new ArrayList<>(window));
+                            }
+                        }
+                    }
+
+                    terminateLocked();
+                    return pending;
+                }
+            }
+
+            private void terminateLocked() {
+                terminated = true;
+
+                final ScheduledFuture<?> starter = windowStarter;
+
+                if (starter != null) {
+                    starter.cancel(false);
+                }
+
+                for (final ScheduledFuture<?> future : windowFutures.values()) {
+                    future.cancel(false);
+                }
+
+                windows.clear();
+                windowFutures.clear();
             }
         });
 
@@ -1267,6 +1686,7 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param action the action to perform on each item
      * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalStateException if this Observer has already been subscribed
      * @see #observe(Consumer, Consumer)
      * @see #observe(Consumer, Consumer, Runnable)
      */
@@ -1289,7 +1709,8 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param action the action to perform on each item
      * @param onError the action to perform on error
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} or {@code onError} is {@code null}
+     * @throws IllegalStateException if this Observer has already been subscribed
      * @see #observe(Consumer, Consumer, Runnable)
      */
     public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) {
@@ -1314,26 +1735,19 @@ public abstract class Observer<T> implements Immutable {
      * @param action the action to perform on each item
      * @param onError the action to perform on error
      * @param onComplete the action to perform on completion
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if any callback is {@code null}
+     * @throws IllegalStateException if this Observer has already been subscribed
      */
     public abstract void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete);
 
-    /**
-     * Cancels all scheduled futures associated with this Observer.
-     * This method is called internally during cleanup to ensure proper resource management.
-     */
+    /** Cancels and forgets all periodic intermediate-operation tasks associated with this Observer. */
     void cancelScheduledFutures() {
-        final long startTime = System.currentTimeMillis();
-
         if (N.notEmpty(scheduledFutures)) {
-            for (final Map.Entry<ScheduledFuture<?>, Long> entry : scheduledFutures.entrySet()) {
-                final long delay = entry.getValue();
-
-                N.sleepUninterruptibly(Math.max(0, delay - (System.currentTimeMillis() - startTime)
-                        + delay /* Extending another delay just wants to make sure the last schedule can be completed before the schedule task is canceled*/));
-
-                entry.getKey().cancel(false);
+            for (final ScheduledFuture<?> future : scheduledFutures.keySet()) {
+                future.cancel(false);
             }
+
+            scheduledFutures.clear();
         }
     }
 
@@ -1420,6 +1834,9 @@ public abstract class Observer<T> implements Immutable {
          * @param onComplete the runnable to invoke when the stream completes; must not be {@code null}
          */
         protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) {
+            N.checkArgNotNull(onError, cs.onError);
+            N.checkArgNotNull(onComplete, cs.onComplete);
+
             this.onError = onError;
             this.onComplete = onComplete;
         }
@@ -1474,12 +1891,12 @@ public abstract class Observer<T> implements Immutable {
          * @param action the action to perform on each item; must not be {@code null}
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the queue signals completion
-         * @throws IllegalArgumentException if {@code action} is {@code null}
+         * @throws IllegalArgumentException if any callback is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(action, "action"); //NOSONAR
+            beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
@@ -1503,10 +1920,10 @@ public abstract class Observer<T> implements Immutable {
 
                     isOnError = false;
 
-                    onComplete.run();
+                    dispatcher.onComplete();
                 } catch (final Exception e) {
                     if (isOnError) {
-                        onError.accept(e);
+                        dispatcher.onError(e);
                     } else {
                         throw ExceptionUtil.toRuntimeException(e, true);
                     }
@@ -1540,12 +1957,12 @@ public abstract class Observer<T> implements Immutable {
          * @param action the action to perform on each item; must not be {@code null}
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the iterator is exhausted
-         * @throws IllegalArgumentException if {@code action} is {@code null}
+         * @throws IllegalArgumentException if any callback is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
+            beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
@@ -1568,10 +1985,10 @@ public abstract class Observer<T> implements Immutable {
 
                     isOnError = false;
 
-                    onComplete.run();
+                    dispatcher.onComplete();
                 } catch (final Exception e) {
                     if (isOnError) {
-                        onError.accept(e);
+                        dispatcher.onError(e);
                     } else {
                         throw ExceptionUtil.toRuntimeException(e, true);
                     }
@@ -1605,17 +2022,19 @@ public abstract class Observer<T> implements Immutable {
         /**
          * Subscribes to the timer with the specified handlers.
          * Schedules a single emission of {@code 0L} after the configured delay on
-         * {@link Observer#schedulerForObserveOp}, then signals completion.
+         * {@link Observer#schedulerForObserveOp}, then signals completion. If an upstream
+         * stop condition (for example {@code limit(0)}) is already in effect, no value is
+         * emitted and completion is signalled asynchronously without waiting for the timer.
          *
          * @param action the action to perform when the timer fires; must not be {@code null}
          * @param onError the consumer invoked if an exception occurs during the scheduled emission
          * @param onComplete the runnable invoked immediately after the single emission
-         * @throws IllegalArgumentException if {@code action} is {@code null}
+         * @throws IllegalArgumentException if any callback is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
+            beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
@@ -1624,16 +2043,26 @@ public abstract class Observer<T> implements Immutable {
                 }
             });
 
-            schedulerForObserveOp.schedule(() -> {
+            final Runnable task = () -> {
                 try {
-                    dispatcher.onNext(0L);
+                    if (hasMore) {
+                        dispatcher.onNext(0L);
+                    }
+
                     dispatcher.onComplete();
                 } catch (final Exception e) {
                     dispatcher.onError(e);
                 } finally {
                     cancelScheduledFutures();
                 }
-            }, delay, unit);
+            };
+
+            if (hasMore) {
+                schedulerForObserveOp.schedule(task, delay, unit);
+            } else {
+                // observe(...) is documented as asynchronous even when no values can be emitted.
+                asyncExecutor.execute(task);
+            }
         }
     }
 
@@ -1657,6 +2086,9 @@ public abstract class Observer<T> implements Immutable {
         /** The scheduled future for the fixed-rate task; cancelled when {@link #hasMore} becomes {@code false}. */
         private volatile ScheduledFuture<?> future = null;
 
+        /** Ensures that exactly one terminal signal is delivered. */
+        private volatile boolean terminated = false;
+
         IntervalObserver(final long initialDelay, final long period, final TimeUnit unit) {
             this.initialDelay = initialDelay;
             this.period = period;
@@ -1668,16 +2100,18 @@ public abstract class Observer<T> implements Immutable {
          * Schedules a fixed-rate task on {@link Observer#schedulerForObserveOp} that emits
          * sequential {@code Long} values starting from {@code 0} after {@code initialDelay},
          * then every {@code period}. Cancels the task when {@link #hasMore} becomes {@code false}.
+         * If production was stopped before subscription (for example by {@code limit(0)}),
+         * completion is signalled asynchronously without waiting for {@code initialDelay}.
          *
          * @param action the action to perform on each emission; must not be {@code null}
          * @param onError the consumer invoked if an exception occurs during an emission
          * @param onComplete the runnable invoked when the interval is cancelled
-         * @throws IllegalArgumentException if {@code action} is {@code null}
+         * @throws IllegalArgumentException if any callback is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
+            beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
@@ -1686,43 +2120,82 @@ public abstract class Observer<T> implements Immutable {
                 }
             });
 
-            future = schedulerForObserveOp.scheduleAtFixedRate(new Runnable() {
+            if (!hasMore) {
+                asyncExecutor.execute(this::terminateNormally);
+                return;
+            }
+
+            final ScheduledFuture<?> scheduledFuture = schedulerForObserveOp.scheduleAtFixedRate(new Runnable() {
                 private long val = 0;
 
                 @Override
                 public void run() {
                     if (!hasMore) {
-                        try {
-                            dispatcher.onComplete();
-                        } catch (final Exception e) {
-                            dispatcher.onError(e);
-                        } finally {
-                            try {
-                                // future may not be assigned yet if the first tick (initialDelay 0) runs
-                                // before scheduleAtFixedRate() returns; guard against the NPE.
-                                if (future != null) {
-                                    future.cancel(true);
-                                }
-                            } finally {
-                                cancelScheduledFutures();
-                            }
-                        }
+                        terminateNormally();
                     } else {
                         try {
                             dispatcher.onNext(val++);
                         } catch (final Exception e) {
-                            try {
-                                dispatcher.onError(e);
-                            } finally {
-                                if (future != null) {
-                                    future.cancel(true);
-                                }
-                                cancelScheduledFutures();
-                            }
+                            terminateWithError(e);
+                            return;
+                        }
+
+                        // A downstream limit may stop the source while processing this item. Complete now
+                        // instead of waiting for the next period, which may be arbitrarily far in the future.
+                        if (!hasMore) {
+                            terminateNormally();
                         }
                     }
                 }
             }, initialDelay, period, unit);
+
+            future = scheduledFuture;
+
+            // With a zero initial delay, the first invocation can terminate before scheduleAtFixedRate
+            // returns and before the field assignment above. Cancel the now-published future in that case.
+            if (terminated) {
+                scheduledFuture.cancel(true);
+            }
+        }
+
+        private void terminateNormally() {
+            if (terminated) {
+                return;
+            }
+
+            terminated = true;
+
+            try {
+                dispatcher.onComplete();
+            } catch (final Exception e) {
+                dispatcher.onError(e);
+            } finally {
+                cancelFutureAndIntermediateTasks();
+            }
+        }
+
+        private void terminateWithError(final Exception error) {
+            if (terminated) {
+                return;
+            }
+
+            terminated = true;
+
+            try {
+                dispatcher.onError(error);
+            } finally {
+                cancelFutureAndIntermediateTasks();
+            }
+        }
+
+        private void cancelFutureAndIntermediateTasks() {
+            final ScheduledFuture<?> scheduledFuture = future;
+
+            if (scheduledFuture != null) {
+                scheduledFuture.cancel(true);
+            }
+
+            cancelScheduledFutures();
         }
     }
 }

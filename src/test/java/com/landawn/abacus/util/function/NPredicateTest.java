@@ -2,6 +2,7 @@ package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -209,6 +210,24 @@ public class NPredicateTest extends TestBase {
         assertTrue(combined.test("hello", "", "world"));
         assertTrue(combined.test("a", "b", "c", "d", "e", "f"));
         assertFalse(combined.test("hello", "world"));
+    }
+
+    @Test
+    public void testCompositionForwardsSameArray() {
+        String[][] seen = new String[2][];
+        NPredicate<String> first = args -> {
+            seen[0] = args;
+            return true;
+        };
+        NPredicate<String> second = args -> {
+            seen[1] = args;
+            return true;
+        };
+        String[] values = { "a", "b" };
+
+        assertTrue(first.and(second).test(values));
+        assertSame(values, seen[0]);
+        assertSame(values, seen[1]);
     }
 
     @Test

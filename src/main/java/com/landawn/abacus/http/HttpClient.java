@@ -47,7 +47,6 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
@@ -1607,7 +1606,7 @@ public final class HttpClient implements AutoCloseable {
      */
     private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass,
             final OutputStream outputStream, final Writer outputWriter) throws UncheckedIOException {
-        final Charset requestCharset = HttpUtil.getRequestCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
+        final Charset requestCharset = getRequestCharset(settings);
         final ContentFormat requestContentFormat = getContentFormat(settings);
         final boolean doOutput = request != null && !(httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE);
 
@@ -1706,7 +1705,7 @@ public final class HttpClient implements AutoCloseable {
                         if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                             return HttpUtil.kryoParser.deserialize(is, resultClass);
                         } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
-                            return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
+                            return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), respCharset, resultClass);
                         } else {
                             final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
@@ -1778,6 +1777,19 @@ public final class HttpClient implements AutoCloseable {
         }
 
         return contentType;
+    }
+
+    /**
+     * Resolves the charset from the effective content type. An unrelated per-request header must not
+     * hide a charset configured on the client defaults; {@link #setHttpProperties(HttpURLConnection,
+     * HttpSettings)} applies both sets of headers, with the per-request content type overriding only
+     * when it is actually present.
+     *
+     * @param settings the per-request settings, or {@code null} to use client defaults
+     * @return the charset declared by the effective content type, or UTF-8 when none is declared
+     */
+    Charset getRequestCharset(final HttpSettings settings) {
+        return HttpUtil.getCharset(getContentType(settings));
     }
 
     /**
@@ -1894,7 +1906,15 @@ public final class HttpClient implements AutoCloseable {
                     netURL = URI.create(URLEncodedUtil.encode(_url, queryParameters, HttpUtil.DEFAULT_CHARSET)).toURL();
                 }
 
-                final Proxy proxy = (settings == null ? _settings : settings).getProxy();
+                // Per-request settings are layered on top of the client's defaults (the same
+                // rule used for headers, timeouts and content metadata). A request settings
+                // object created only to add a header therefore must not silently disable the
+                // client-level proxy. Proxy.NO_PROXY remains available for an explicit bypass.
+                Proxy proxy = settings == null ? null : settings.getProxy();
+
+                if (proxy == null) {
+                    proxy = _settings.getProxy();
+                }
 
                 if (proxy == null) {
                     connection = (HttpURLConnection) netURL.openConnection();
@@ -1904,7 +1924,14 @@ public final class HttpClient implements AutoCloseable {
             }
 
             if (connection instanceof HttpsURLConnection) {
-                final SSLSocketFactory ssf = (settings == null ? _settings : settings).getSSLSocketFactory();
+                // A null request-level factory means "not specified", not "discard the client
+                // default". This is particularly important for callers that pass an otherwise
+                // unrelated per-request setting such as a tracing header.
+                SSLSocketFactory ssf = settings == null ? null : settings.getSSLSocketFactory();
+
+                if (ssf == null) {
+                    ssf = _settings.getSSLSocketFactory();
+                }
 
                 if (ssf != null) {
                     ((HttpsURLConnection) connection).setSSLSocketFactory(ssf);
@@ -1914,7 +1941,10 @@ public final class HttpClient implements AutoCloseable {
             int connectTimeoutInMillis = _connectTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectTimeoutInMillis;
 
             if (settings != null && settings.getConnectTimeout() > 0) {
-                connectTimeoutInMillis = Numbers.toIntExact(settings.getConnectTimeout());
+                // HttpURLConnection stores timeouts as ints. Client-level long values are
+                // already saturated above; apply the same rule to request-level values instead
+                // of unexpectedly throwing ArithmeticException for an otherwise valid long.
+                connectTimeoutInMillis = settings.getConnectTimeout() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) settings.getConnectTimeout();
             }
 
             if (connectTimeoutInMillis > 0) {
@@ -1924,7 +1954,7 @@ public final class HttpClient implements AutoCloseable {
             int readTimeoutInMillis = _readTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeoutInMillis;
 
             if (settings != null && settings.getReadTimeout() > 0) {
-                readTimeoutInMillis = Numbers.toIntExact(settings.getReadTimeout());
+                readTimeoutInMillis = settings.getReadTimeout() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) settings.getReadTimeout();
             }
 
             if (readTimeoutInMillis > 0) {
@@ -2695,13 +2725,9 @@ public final class HttpClient implements AutoCloseable {
     /**
      * Closes this HTTP client and releases any resources it owns.
      *
-     * <p>Connections are managed per-request, so there are no pooled connections to drain here.
-     * However, if a custom {@link Executor} was passed to the factory and it is itself a
-     * {@link java.util.concurrent.ExecutorService ExecutorService}, this client wrapped it in
-     * its own {@link AsyncExecutor} — those wrapped services are shut down here so callers do
-     * not leak threads when they close the client. The shared default executor
-     * ({@code HttpUtil.DEFAULT_ASYNC_EXECUTOR}) is intentionally left alone since it is reused
-     * across clients.</p>
+     * <p>Connections are managed per request, so there are no pooled connections to drain here.
+     * A custom {@link Executor} supplied to a factory remains owned by the caller and is not shut
+     * down by this method; it may be shared with other components or clients.</p>
      *
      * <p>This method is idempotent and never throws. {@code HttpClient} implements
      * {@link AutoCloseable}, so it can be used in a try-with-resources statement.</p>
@@ -2720,16 +2746,7 @@ public final class HttpClient implements AutoCloseable {
      */
     @Override
     public synchronized void close() {
-        if (_asyncExecutor != HttpUtil.DEFAULT_ASYNC_EXECUTOR) {
-            try {
-                final java.util.concurrent.Executor underlying = _asyncExecutor.getExecutor();
-                if (underlying instanceof java.util.concurrent.ExecutorService es) {
-                    es.shutdown();
-                }
-            } catch (final RuntimeException ignored) {
-                // Best-effort cleanup. Continue even if the executor refuses shutdown
-                // (e.g. SecurityManager) so close() remains idempotent and non-throwing.
-            }
-        }
+        // No owned resources. HttpURLConnection instances are closed per request and injected
+        // executors remain caller-owned.
     }
 }

@@ -971,7 +971,7 @@ public final class Futures {
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 containing:
      *                              (_1: futures collection, _2: timeout value, _3: TimeUnit). Must not be {@code null}.
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
-     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if either function is null.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if either function is {@code null}.
      * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
      *                         ExecutionException, or TimeoutException.
      * @see #compose(Collection, Throwables.Function)
@@ -1002,7 +1002,7 @@ public final class Futures {
                         if (exception == null) {
                             exception = e;
                         } else {
-                            exception.addSuppressed(e);
+                            addSuppressedIfDistinct(exception, e);
                         }
                     }
                 }
@@ -1505,6 +1505,8 @@ public final class Futures {
      * <p>The returned future's list will have the same size as the input collection, with
      * results in corresponding positions. If any future fails, the returned future fails
      * with the first exception encountered.
+     * The collection's membership and iteration order are captured when this method is called;
+     * later structural changes to {@code cfs} do not affect the returned future.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1540,6 +1542,7 @@ public final class Futures {
 
     private static <T> ContinuableFuture<List<T>> allOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
+        final List<Future<? extends T>> futures = new ArrayList<>(cfs);
 
         return ContinuableFuture.wrap(new Future<>() {
             @Override
@@ -1547,14 +1550,14 @@ public final class Futures {
                 boolean res = true;
                 RuntimeException exception = null;
 
-                for (final Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : futures) {
                     try {
                         res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
                         } else {
-                            exception.addSuppressed(e);
+                            addSuppressedIfDistinct(exception, e);
                         }
                     }
                 }
@@ -1568,7 +1571,7 @@ public final class Futures {
 
             @Override
             public boolean isCancelled() {
-                for (final Future<?> future : cfs) {
+                for (final Future<?> future : futures) {
                     if (future.isCancelled()) {
                         return true;
                     }
@@ -1579,7 +1582,7 @@ public final class Futures {
 
             @Override
             public boolean isDone() {
-                for (final Future<?> future : cfs) {
+                for (final Future<?> future : futures) {
                     if (!future.isDone()) {
                         return false;
                     }
@@ -1590,9 +1593,9 @@ public final class Futures {
 
             @Override
             public List<T> get() throws InterruptedException, ExecutionException {
-                final List<T> result = new ArrayList<>(cfs.size());
+                final List<T> result = new ArrayList<>(futures.size());
 
-                for (final Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : futures) {
                     result.add(future.get());
                 }
 
@@ -1604,9 +1607,9 @@ public final class Futures {
                 final long timeoutInNanos = unit.toNanos(timeout);
                 final long startTimeInNanos = System.nanoTime();
 
-                final List<T> result = new ArrayList<>(cfs.size());
+                final List<T> result = new ArrayList<>(futures.size());
 
-                for (final Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : futures) {
                     final long elapsedTimeInNanos = System.nanoTime() - startTimeInNanos;
                     final long remainingTimeInNanos = timeoutInNanos <= 0 ? 0 : N.max(0L, timeoutInNanos - elapsedTimeInNanos);
                     result.add(future.get(remainingTimeInNanos, TimeUnit.NANOSECONDS));
@@ -1663,6 +1666,8 @@ public final class Futures {
      *
      * <p>This is particularly useful for implementing timeout patterns, redundancy, or
      * getting the fastest response from multiple sources.
+     * The input collection's membership is captured when this method is called; later structural
+     * changes to {@code cfs} do not affect the returned future.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1693,6 +1698,7 @@ public final class Futures {
 
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
+        final List<Future<? extends T>> futures = new ArrayList<>(cfs);
 
         return ContinuableFuture.wrap(new Future<>() {
             @Override
@@ -1700,14 +1706,14 @@ public final class Futures {
                 boolean res = true;
                 RuntimeException exception = null;
 
-                for (final Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : futures) {
                     try {
                         res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
                         } else {
-                            exception.addSuppressed(e);
+                            addSuppressedIfDistinct(exception, e);
                         }
                     }
                 }
@@ -1721,7 +1727,7 @@ public final class Futures {
 
             @Override
             public boolean isCancelled() {
-                for (final Future<?> future : cfs) {
+                for (final Future<?> future : futures) {
                     if (!future.isCancelled()) {
                         return false;
                     }
@@ -1734,7 +1740,7 @@ public final class Futures {
             public boolean isDone() {
                 boolean allDone = true;
 
-                for (final Future<?> future : cfs) {
+                for (final Future<?> future : futures) {
                     if (future.isDone()) {
                         try {
                             future.get();
@@ -1756,7 +1762,7 @@ public final class Futures {
 
             @Override
             public T get() throws InterruptedException {
-                final Iterator<Result<T, Exception>> iter = iterate(cfs, Fn.identity());
+                final Iterator<Result<T, Exception>> iter = iterate(futures, Fn.identity());
                 Result<T, Exception> result = null;
                 RuntimeException exception = null;
 
@@ -1775,7 +1781,7 @@ public final class Futures {
                         final InterruptedException cause = (InterruptedException) result.getException();
 
                         if (exception != null) {
-                            cause.addSuppressed(exception);
+                            addSuppressedIfDistinct(cause, exception);
                         }
 
                         throw cause;
@@ -1783,7 +1789,7 @@ public final class Futures {
                         if (exception == null) {
                             exception = ExceptionUtil.toRuntimeException(result.getException(), false);
                         } else {
-                            exception.addSuppressed(ExceptionUtil.toRuntimeException(result.getException(), false));
+                            addSuppressedIfDistinct(exception, ExceptionUtil.toRuntimeException(result.getException(), false));
                         }
                     }
                 }
@@ -1793,6 +1799,8 @@ public final class Futures {
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException {
+                java.util.Objects.requireNonNull(unit, "unit");
+
                 if (timeout <= 0) {
                     // Per the Future.get(timeout, unit) contract, a non-positive timeout means "poll without
                     // blocking". Consult the input futures directly rather than going through iterate(...), whose
@@ -1803,7 +1811,7 @@ public final class Futures {
                     RuntimeException exception = null;
                     boolean anyIncomplete = false;
 
-                    for (final Future<? extends T> future : cfs) {
+                    for (final Future<? extends T> future : futures) {
                         if (future.isDone()) {
                             try {
                                 return future.get();
@@ -1813,7 +1821,7 @@ public final class Futures {
                                 if (exception == null) {
                                     exception = re;
                                 } else {
-                                    exception.addSuppressed(re);
+                                    addSuppressedIfDistinct(exception, re);
                                 }
                             }
                         } else {
@@ -1828,7 +1836,7 @@ public final class Futures {
                     throw exception;
                 }
 
-                final Iterator<Result<T, Exception>> iter = iterate(cfs, timeout, unit, Fn.identity());
+                final Iterator<Result<T, Exception>> iter = iterate(futures, timeout, unit, Fn.identity());
                 Result<T, Exception> result = null;
                 RuntimeException exception = null;
 
@@ -1847,7 +1855,7 @@ public final class Futures {
                         final Exception cause = result.getException();
 
                         if (exception != null) {
-                            cause.addSuppressed(exception);
+                            addSuppressedIfDistinct(cause, exception);
                         }
 
                         if (cause instanceof TimeoutException) {
@@ -1859,7 +1867,7 @@ public final class Futures {
                         if (exception == null) {
                             exception = ExceptionUtil.toRuntimeException(result.getException(), false);
                         } else {
-                            exception.addSuppressed(ExceptionUtil.toRuntimeException(result.getException(), false));
+                            addSuppressedIfDistinct(exception, ExceptionUtil.toRuntimeException(result.getException(), false));
                         }
                     }
                 }
@@ -2128,9 +2136,9 @@ public final class Futures {
         final int futureCount = cfs.size();
 
         // Track every submitted wrapper task so we can cancel still-running ones when
-        // the iterator is abandoned, the global timeout fires, or the consumer is
-        // interrupted. Without this, blocked future.get() calls keep occupying threads in
-        // the shared async executor long after the caller has stopped consuming results.
+        // the global timeout fires or the consumer is interrupted. Without this, blocked
+        // future.get() calls keep occupying threads in the shared async executor long after
+        // the caller has stopped consuming results.
         final List<Future<?>> submitted = new ArrayList<>(futureCount);
 
         for (final Future<? extends T> future : cfs) {
@@ -2142,7 +2150,7 @@ public final class Futures {
                 final FutureTask<Void> submittedTask = new FutureTask<>(() -> {
                     try {
                         completedResults.offer(Result.of(future.get(), null));
-                    } catch (final Exception e) {
+                    } catch (final Exception | Error e) { // A broken/custom Future may throw an Error directly; never leave the consumer waiting forever.
                         completedResults.offer(Result.of(null, convertException(e)));
                     }
                 }, null);
@@ -2255,5 +2263,13 @@ public final class Futures {
         }
 
         return e instanceof Exception ex ? ex : new ExecutionException(e);
+    }
+
+    /** Adds a secondary failure without allowing {@link Throwable#addSuppressed(Throwable)}
+     * to mask the primary failure when an input Future reuses the same exception instance. */
+    private static void addSuppressedIfDistinct(final Throwable primary, final Throwable secondary) {
+        if (primary != secondary) {
+            primary.addSuppressed(secondary);
+        }
     }
 }

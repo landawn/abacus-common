@@ -15,7 +15,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -73,13 +72,13 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @param before the function to apply before this function is applied
      * @return a composed {@code Function} that first applies the {@code before}
      *         function and then applies this function
-     * @throws IllegalArgumentException if {@code before} is null
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.Function)
      */
     @Override
     default <V> Function<V, R> compose(final java.util.function.Function<? super V, ? extends T> before) {
-        N.checkArgNotNull(before, cs.before);
+        java.util.Objects.requireNonNull(before, cs.before);
         return (final V v) -> apply(before.apply(v));
     }
 
@@ -102,13 +101,13 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @param after the function to apply after this function is applied
      * @return a composed {@code Function} that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws NullPointerException if {@code after} is null
      *
      * @see #compose(java.util.function.Function)
      */
     @Override
     default <V> Function<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after, cs.after);
+        java.util.Objects.requireNonNull(after, cs.after);
         return (final T t) -> after.apply(apply(t));
     }
 
@@ -127,7 +126,7 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * Integer value = throwableParser.apply("123");
      * }</pre>
      *
-     * @param <E> the type of exception that the returned function may throw
+     * @param <E> the target exception type for compatibility with {@code Throwables.Function}
      * @return a {@code Throwables.Function} view of this function
      */
     default <E extends Throwable> Throwables.Function<T, R, E> toThrowable() {

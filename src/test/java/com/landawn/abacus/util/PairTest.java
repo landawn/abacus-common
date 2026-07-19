@@ -866,6 +866,22 @@ public class PairTest extends TestBase {
     }
 
     @Test
+    public void testMapEntryContractUsesOrdinaryArrayEqualityAndHashing() {
+        int[] key = { 1, 2 };
+        int[] equalContentKey = { 1, 2 };
+        Pair<int[], String> pair = Pair.of(key, "value");
+        Map.Entry<int[], String> sameReferenceEntry = new AbstractMap.SimpleEntry<>(key, "value");
+        Map.Entry<int[], String> equalContentEntry = new AbstractMap.SimpleEntry<>(equalContentKey, "value");
+
+        assertEquals(sameReferenceEntry, pair);
+        assertEquals(pair, sameReferenceEntry);
+        assertEquals(sameReferenceEntry.hashCode(), pair.hashCode());
+        assertNotEquals(equalContentEntry, pair);
+        assertNotEquals(pair, equalContentEntry);
+        assertNotEquals(pair, Pair.of(equalContentKey, "value"));
+    }
+
+    @Test
     public void testMap_function_nullCheck() {
         Pair<String, Integer> entry = Pair.of("Temperature", 25);
         Boolean isValid = entry.map(p -> p.left() != null && p.right() != null);

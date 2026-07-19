@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -47,7 +47,6 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * @param t the first input argument of type T
      * @param value the second input argument, a primitive double value
      */
-    // @ai-ignore DoubleObj*/ObjDouble* argument order convention - intentional: class name prefix determines parameter order. DoubleObj* has double first; ObjDouble* has object first. Do not suggest reordering.
     @Override
     void accept(T t, double value);
 

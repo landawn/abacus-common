@@ -25,7 +25,8 @@ import java.util.Map;
  * <p>This class extends {@link AbstractMap.SimpleImmutableEntry} and provides additional
  * factory methods for creating immutable entries. Once created, neither the key nor the
  * value can be changed. Attempts to call {@link #setValue(Object)} will throw
- * {@link UnsupportedOperationException}.
+ * {@link UnsupportedOperationException}. The key and value references may themselves refer to
+ * mutable objects; this class does not make defensive copies of them.
  *
  * <p>ImmutableEntry is useful when you need to:
  * <ul>

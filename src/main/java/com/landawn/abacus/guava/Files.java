@@ -51,7 +51,7 @@ import com.landawn.abacus.util.ImmutableList;
  * A comprehensive file manipulation utility class that provides unified file operations by wrapping and extending
  * Google Guava's file utilities. This class serves as a facade combining functionality from both
  * {@code com.google.common.io.Files} and {@code com.google.common.io.MoreFiles}, offering a consistent and
- * enhanced API for file manipulation, I/O operations, and path management with improved null safety and
+ * enhanced API for file manipulation, I/O operations, and path management with improved {@code null} safety and
  * performance optimizations.
  *
  * <p>Note: This class is copied from Google Guava under Apache License 2.0 and may be modified for enhanced

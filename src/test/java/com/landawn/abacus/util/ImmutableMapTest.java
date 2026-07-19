@@ -15,6 +15,10 @@ import com.landawn.abacus.TestBase;
 
 public class ImmutableMapTest extends TestBase {
 
+    private static final class MutableImmutableNamedMap<K, V> extends HashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
     @Test
     public void testEmpty() {
         ImmutableMap<String, Integer> emptyMap = ImmutableMap.empty();
@@ -533,5 +537,19 @@ public class ImmutableMapTest extends TestBase {
         // Values are still readable through the views.
         Assertions.assertTrue(ofMap.keySet().contains("a"));
         Assertions.assertTrue(wrappedMap.values().contains(2));
+    }
+
+    @Test
+    public void testWrapDoesNotTrustBackingMapClassNameForImmutability() {
+        MutableImmutableNamedMap<String, Integer> backing = new MutableImmutableNamedMap<>();
+        backing.put("a", 1);
+
+        ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(backing);
+        Map.Entry<String, Integer> entry = wrapped.entrySet().iterator().next();
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> entry.setValue(2));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.keySet().remove("a"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.values().remove(1));
+        Assertions.assertEquals(1, backing.get("a"));
     }
 }

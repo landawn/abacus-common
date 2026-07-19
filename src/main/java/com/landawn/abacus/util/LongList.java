@@ -38,7 +38,7 @@ import com.landawn.abacus.util.stream.LongStream;
 /**
  * A high-performance, resizable array implementation for primitive long values that provides
  * specialized operations optimized for 64-bit integer data types. This class extends {@link PrimitiveList}
- * to offer memory-efficient storage and operations that avoid the boxing overhead associated with
+ * to offer memory-efficient storage and core operations that avoid the boxing overhead associated with
  * {@code List<Long>}, making it ideal for applications requiring intensive long integer array
  * manipulation with optimal performance characteristics.
  *
@@ -50,12 +50,12 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Zero-Boxing Overhead:</b> Direct long primitive storage without Long wrapper allocation</li>
+ *   <li><b>Primitive Storage:</b> Direct long storage; operations using {@link Set} or {@link Multiset} may still box values</li>
  *   <li><b>Memory Efficiency:</b> Compact long array storage with minimal memory overhead</li>
  *   <li><b>64-bit Precision:</b> Full support for long integer range (-2^63 to 2^63-1)</li>
  *   <li><b>High Performance:</b> Optimized algorithms for long-specific operations</li>
  *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Multiset Operations:</b> Intersection, difference, and symmetric-difference operations that account for duplicate counts</li>
  *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
@@ -69,7 +69,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li><b>High-Precision Computing:</b> Mathematical calculations requiring 64-bit integer precision</li>
  *   <li><b>Financial Systems:</b> Currency amounts in smallest units (e.g., cents, satoshis)</li>
  *   <li><b>Big Data Processing:</b> Large-scale data analysis with 64-bit counters and measurements</li>
- *   <li><b>Cryptography:</b> Large integer operations, hash values, and cryptographic keys</li>
+ *   <li><b>Counters and Hash Values:</b> Primitive storage for 64-bit counters and non-secret hash values</li>
  *   <li><b>Scientific Computing:</b> Large numerical datasets, simulation data, measurement values</li>
  *   <li><b>Performance Monitoring:</b> Nanosecond timestamps, memory usage, performance counters</li>
  * </ul>
@@ -117,15 +117,15 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
  *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
- *   <li><b>Parallel Sorting:</b> O(n log n) with improved constants on multi-core systems</li>
- *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
- *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
+ *   <li><b>Parallel Sorting:</b> O(n log n); whether it is faster depends on input size and runtime environment</li>
+ *   <li><b>Multiset Operations:</b> Typically O(n) expected time with additional boxed storage</li>
+ *   <li><b>Statistical Operations:</b> O(n) for min/max and O(n log n) for the current median implementation</li>
  * </ul>
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
  *   <li><b>Storage:</b> 8 bytes per element (64 bits) with no object overhead</li>
- *   <li><b>vs List&lt;Long&gt;:</b> ~3x less memory usage (no Long wrapper objects)</li>
+ *   <li><b>vs List&lt;Long&gt;:</b> Avoids per-element {@code Long} references and wrapper allocation; actual memory savings are JVM-dependent</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
  * </ul>
@@ -173,7 +173,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
@@ -195,8 +195,8 @@ import com.landawn.abacus.util.stream.LongStream;
  * <p><b>Serialization Support:</b>
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
- *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of long arrays</li>
+ *   <li><b>Version Identifier:</b> Declares a {@code serialVersionUID}; this does not by itself guarantee compatibility with future field changes</li>
+ *   <li><b>Default Format:</b> Uses Java's default serialization, including the current backing-array capacity</li>
  *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
  * </ul>
  *
@@ -211,16 +211,16 @@ import com.landawn.abacus.util.stream.LongStream;
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
- *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Central Tendency:</b> Lower-median calculation through selection</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Long&gt;:</b> 3x less memory, significantly faster operations</li>
+ *   <li><b>vs List&lt;Long&gt;:</b> Avoids boxing in primitive operations; measure end-to-end performance for the intended workload</li>
  *   <li><b>vs long[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
- *   <li><b>vs ArrayList&lt;Long&gt;:</b> No boxing overhead, primitive-specific methods</li>
+ *   <li><b>vs ArrayList&lt;Long&gt;:</b> Primitive storage and primitive-specific core methods</li>
  *   <li><b>vs IntList:</b> Double the range, suitable for large identifiers and timestamps</li>
  * </ul>
  *
@@ -230,7 +230,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
  *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
  *   <li>Convert to boxed collections only when required for API compatibility</li>
- *   <li>Leverage parallel sorting for large datasets (>10,000 elements)</li>
+ *   <li>Benchmark parallel sorting for the target data size and runtime before preferring it</li>
  *   <li>Use set operations instead of manual intersection/difference calculations</li>
  * </ul>
  *
@@ -239,7 +239,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li>Pre-size lists with known capacity using the {@code LongList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
- *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
+ *   <li>Use {@code parallelSort()} only where measurement shows a benefit</li>
  *   <li>Consider {@code stream()} API for complex transformations and filtering</li>
  * </ul>
  *
@@ -353,7 +353,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public LongList(final int initialCapacity) {
+    public LongList(final int initialCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_LONG_ARRAY : new long[initialCapacity];
@@ -370,11 +370,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * long[] a = {1L, 2L, 3L};
      * LongList list = new LongList(a);
-     * list.size();         // returns 3
-     * list.get(0);         // returns 1
+     * list.size();   // returns 3
+     * list.get(0);   // returns 1
      * a[0] = 99L;          // backing array is shared
-     * list.get(0);         // returns 99
-     * new LongList(null);  // throws NullPointerException
+     * list.get(0);          // returns 99
+     * new LongList(null);   // throws NullPointerException
      * }</pre>
      *
      * @param a the array whose elements are to be placed into this list. Must not be {@code null}.
@@ -505,6 +505,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new LongList containing a copy of the elements in the specified range
+     * @throws NullPointerException if {@code a} is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      *                                   or {@code fromIndex > toIndex}
      */
@@ -636,9 +637,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.random(5);
-     * list.size();             // returns 5 (values are unpredictable longs)
-     * LongList.random(0);      // returns []
-     * LongList.random(-1);     // throws NegativeArraySizeException
+     * list.size();           // returns 5 (values are unpredictable longs)
+     * LongList.random(0);    // returns []
+     * LongList.random(-1);   // throws NegativeArraySizeException
      * }</pre>
      *
      * @param len the number of random elements to generate. Must be non-negative.
@@ -958,8 +959,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList numbers = LongList.of(1L, 2L, 3L, 2L, 4L, 2L, 5L);
-     * boolean removed = numbers.removeAllOccurrences(2L);   // returns true; list is now [1, 3, 4, 5]
-     * boolean notFound = numbers.removeAllOccurrences(9L);  // returns false; list unchanged
+     * boolean removed = numbers.removeAllOccurrences(2L);    // returns true; list is now [1, 3, 4, 5]
+     * boolean notFound = numbers.removeAllOccurrences(9L);   // returns false; list unchanged
      * }</pre>
      *
      * @param e the element to be removed from this list
@@ -1044,8 +1045,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(1L, -2L, 3L, -4L, 5L);
-     * boolean changed = list.removeIf(i -> i < 0);    // returns true; list is now [1, 3, 5]
-     * boolean noChange = list.removeIf(i -> i > 99);  // returns false; list unchanged
+     * boolean changed = list.removeIf(i -> i < 0);     // returns true; list is now [1, 3, 5]
+     * boolean noChange = list.removeIf(i -> i > 99);   // returns false; list unchanged
      * }</pre>
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
@@ -1203,22 +1204,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return numRemoved;
     }
 
-    //    /**
-    //     * Removes the element at the specified position in this list and returns it.
-    //     *
-    //     * <p>Shifts any subsequent elements to the left (subtracts one from their indices).
-    //     *
-    //     * @param index the index of the element to be removed
-    //     * @return the element that was removed from the list
-    //     * @throws IndexOutOfBoundsException if the index is out of range
-    //     *         ({@code index < 0 || index >= size()})
-    //     * @deprecated replaced by {@link #removeAt(int)}.
-    //     */
-    //    @Deprecated
-    //    public long delete(final int index) {
-    //        return removeAt(index);
-    //    }
-
     /**
      * Removes and returns the element at the specified index.
      *
@@ -1271,20 +1256,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             return;
         }
 
-        for (final int index : indices) {
-            N.checkElementIndex(index, size);
-        }
-
-        final long[] tmp = N.removeAt(elementData, indices);
-
-        N.copy(tmp, 0, elementData, 0, tmp.length);
-
-        if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, 0L);
-        }
-
-        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
-        size = size - (elementData.length - tmp.length);
+        final int newSize = compactAfterRemovingIndices(elementData, size, indices);
+        N.fill(elementData, newSize, size, 0L);
+        size = newSize;
     }
 
     /**
@@ -1512,8 +1486,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(1L, -2L, 3L, -4L);
-     * boolean changed = list.replaceIf(x -> x < 0, 0L);   // returns true; list is now [1, 0, 3, 0]
-     * boolean noChange = list.replaceIf(x -> x > 99, 1L); // returns false; list unchanged
+     * boolean changed = list.replaceIf(x -> x < 0, 0L);     // returns true; list is now [1, 0, 3, 0]
+     * boolean noChange = list.replaceIf(x -> x > 99, 1L);   // returns false; list unchanged
      * }</pre>
      *
      * @param predicate the predicate to test each element. Must not be {@code null}.
@@ -1546,8 +1520,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(1L, 2L, 3L);
-     * list.fill(0L);    // list is now [0, 0, 0]
-     * list.size();      // returns 3 (size unchanged)
+     * list.fill(0L);   // list is now [0, 0, 0]
+     * list.size();     // returns 3 (size unchanged)
      * }</pre>
      *
      * @param val the value to fill the list with
@@ -1565,8 +1539,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);
-     * list.fill(1, 4, 0L);     // list is now [1, 0, 0, 0, 5]
-     * list.fill(0, 6, 9L);     // throws IndexOutOfBoundsException (toIndex > size)
+     * list.fill(1, 4, 0L);   // list is now [1, 0, 0, 0, 5]
+     * list.fill(0, 6, 9L);   // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
      * @param fromIndex the index of the first element to fill (inclusive)
@@ -2319,7 +2293,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final LongConsumer action) {
+    public void forEach(final LongConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
@@ -2358,7 +2332,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final int fromIndex, final int toIndex, final LongConsumer action) throws IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final LongConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2382,8 +2356,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(10L, 20L, 30L);
-     * list.first().getAsLong();      // returns 10
-     * new LongList().first();        // returns OptionalLong.empty
+     * list.first().getAsLong();   // returns 10
+     * new LongList().first();     // returns OptionalLong.empty
      * }</pre>
      *
      * @return an {@code OptionalLong} containing the first element of this list,
@@ -2400,8 +2374,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(10L, 20L, 30L);
-     * list.last().getAsLong();       // returns 30
-     * new LongList().last();         // returns OptionalLong.empty
+     * list.last().getAsLong();   // returns 30
+     * new LongList().last();     // returns OptionalLong.empty
      * }</pre>
      *
      * @return an {@code OptionalLong} containing the last element of this list,
@@ -2658,7 +2632,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
-    public void shuffle(final Random rnd) {
+    public void shuffle(final Random rnd) throws IllegalArgumentException {
         N.checkArgNotNull(rnd, cs.rnd);
 
         if (size() > 1) {
@@ -2733,7 +2707,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * A positive {@code step} selects elements forward from {@code fromIndex} (inclusive)
      * up to {@code toIndex} (exclusive). A negative {@code step} (with {@code fromIndex}
      * greater than {@code toIndex}) selects elements in reverse order; when {@code toIndex}
-     * is {@code -1} it is treated as {@code 0} for bounds validation. The step value must not be zero.
+     * is {@code -1} it is treated as {@code 0} for bounds validation. For a descending copy,
+     * {@code fromIndex == size()} starts at the last logical element. The step value must not be zero.
      * </p>
      *
      * @param fromIndex the starting index of the range to copy (inclusive)
@@ -2779,12 +2754,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public List<LongList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final List<long[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
-        @SuppressWarnings("rawtypes")
-        final List<LongList> result = (List) list;
+        final List<long[]> arrays = N.split(elementData, fromIndex, toIndex, chunkSize);
+        final List<LongList> result = new ArrayList<>(arrays.size());
 
-        for (int i = 0, len = list.size(); i < len; i++) {
-            result.set(i, of(list.get(i)));
+        for (final long[] array : arrays) {
+            result.add(of(array));
         }
 
         return result;
@@ -2956,6 +2930,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new collection of the desired type,
      *                given the size of the range
      * @return a collection containing the elements in the specified range
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
@@ -2964,7 +2939,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final C c = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2983,6 +2959,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new {@code Multiset} instance,
      *                given the size of the range
      * @return a {@code Multiset} containing the elements in the specified range with their counts
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
@@ -2990,7 +2967,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public Multiset<Long> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Long>> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final Multiset<Long> multiset = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final Multiset<Long> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);
@@ -3020,7 +2998,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Returns a {@code LongStream} with this list as its source.
      * <p>
-     * The stream processes all elements of this list in order.
+     * The stream processes all elements of this list in order. It is backed by the current
+     * internal array rather than a snapshot; modifying this list while the stream is in use
+     * produces unspecified results.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3040,7 +3020,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Returns a {@code LongStream} with the specified range of this list as its source.
      * <p>
      * The range is defined by {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
-     * The stream processes elements in the specified range in order.
+     * The stream processes elements in the specified range in order. It is backed by the current
+     * internal array rather than a snapshot; modifying this list while the stream is in use
+     * produces unspecified results.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3093,8 +3075,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(10L, 20L, 30L);
-     * list.getLast();              // returns 30
-     * new LongList().getLast();    // throws NoSuchElementException
+     * list.getLast();             // returns 30
+     * new LongList().getLast();   // throws NoSuchElementException
      * }</pre>
      *
      * @return the last long value in this list

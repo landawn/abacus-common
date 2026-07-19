@@ -56,7 +56,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
  * </table>
  *
- * <p>Note: {@code poll()} <em>removes</em> the object from the pool, so its true keyed mirror is
+ * <p>Note: {@code poll()} <em>removes</em> the object from the pool, so its {@code true} keyed mirror is
  * {@link KeyedObjectPool#remove(Object)} (which also removes). {@link KeyedObjectPool#get(Object)}
  * returns the value <em>without</em> removing it and therefore has no unkeyed analog (a
  * non-removing {@code peek()} on an unkeyed pool would be ambiguous over interchangeable objects).</p>
@@ -152,10 +152,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *
      * @param element the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return {@code true} if successful, {@code false} if timeout elapsed before space was available
      * @throws InterruptedException if interrupted while waiting
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the element or unit is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element, long timeout, TimeUnit unit) throws InterruptedException;
@@ -176,11 +176,11 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *
      * @param element the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if timeout elapsed or add failed
      * @throws InterruptedException if interrupted while waiting
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the element or unit is null
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
@@ -239,9 +239,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * }</pre>
      *
      * @param timeout the maximum time to wait for an object to become available
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return an object from the pool, or {@code null} if the timeout elapsed before an object was available
      * @throws InterruptedException if interrupted while waiting
+     * @throws IllegalArgumentException if the unit is null
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull

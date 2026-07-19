@@ -80,16 +80,14 @@ public class ZonedDateTimeTypeTest extends TestBase {
     }
 
     @Test
-    public void testStringOfUsesOffsetFormatForRoundTrip() {
+    public void testStringOfPreservesRegionZoneForRoundTrip() {
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("America/Los_Angeles"));
         String text = zonedDateTimeType.stringOf(zonedDateTime);
         ZonedDateTime result = zonedDateTimeType.valueOf(text);
 
-        // stringOf serializes with the ISO_OFFSET_DATE_TIME representation: offset only, no region-zone suffix.
-        assertFalse(text.contains("["));
+        assertTrue(text.contains("[America/Los_Angeles]"));
         assertTrue(text.contains("-08:00"));
-        // The round-trip preserves the instant; the region zone collapses to its offset.
-        assertEquals(zonedDateTime.toInstant(), result.toInstant());
+        assertEquals(zonedDateTime, result);
     }
 
     @Test
@@ -381,14 +379,14 @@ public class ZonedDateTimeTypeTest extends TestBase {
     @Test
     public void testSerializeToWithISO8601DateTime() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("UTC"));
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 123456789, ZoneId.of("UTC"));
 
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         zonedDateTimeType.serializeTo(writer, zonedDateTime, config);
 
-        verify(writer).write(anyString());
+        verify(writer).write("2023-12-25T10:30:45Z");
     }
 
     @Test
@@ -401,7 +399,7 @@ public class ZonedDateTimeTypeTest extends TestBase {
 
         zonedDateTimeType.serializeTo(writer, zonedDateTime, config);
 
-        verify(writer).write(anyString());
+        verify(writer).write("2023-12-25T10:30:45.000Z");
     }
 
     @Test

@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.type;
 
+import java.util.List;
+
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
 
@@ -42,6 +44,7 @@ public class ClazzType extends AbstractType<Class> {
 
     /** The parameter class wrapped by this {@code Clazz<T>} type (the resolved type argument). */
     private final Class clazz; //NOSONAR
+    private final List<Type<?>> parameterTypes;
 
     /**
      * Constructs a {@code ClazzType} for the class identified by {@code typeName}.
@@ -53,7 +56,9 @@ public class ClazzType extends AbstractType<Class> {
     protected ClazzType(final String typeName) {
         super("Clazz<" + typeName + ">");
 
-        clazz = ClassUtil.forName(typeName);
+        final Type<?> parameterType = TypeFactory.getType(typeName);
+        clazz = parameterType.javaType();
+        parameterTypes = List.of(parameterType);
     }
 
     /**
@@ -82,6 +87,16 @@ public class ClazzType extends AbstractType<Class> {
      */
     public Class parameterClass() {
         return clazz;
+    }
+
+    /**
+     * Returns the type argument represented by this {@code Clazz<T>} handler.
+     *
+     * @return an immutable one-element list containing the class's declared type argument
+     */
+    @Override
+    public List<Type<?>> parameterTypes() {
+        return parameterTypes;
     }
 
     /**

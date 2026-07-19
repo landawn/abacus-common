@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -47,7 +47,6 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
      * @param u the object input argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
-    // @ai-ignore DoubleObj*/ObjDouble* argument order convention - intentional: class name prefix determines parameter order. DoubleObj* has double first; ObjDouble* has object first. Do not suggest reordering.
     @Override
     boolean test(double t, T u);
 

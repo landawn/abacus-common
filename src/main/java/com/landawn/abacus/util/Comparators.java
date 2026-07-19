@@ -36,15 +36,15 @@ import com.landawn.abacus.util.function.ToShortFunction;
 
 /**
  * A comprehensive factory utility class providing static methods for creating and combining
- * {@link Comparator} instances with sophisticated null handling, type-specific optimizations,
+ * {@link Comparator} instances with sophisticated {@code null} handling, type-specific optimizations,
  * and complex comparison scenarios. This final class serves as a central hub for all comparison
  * operations, offering pre-built comparators for common data types and flexible builder patterns
  * for custom comparison logic.
  *
  * <p>Comparators addresses the limitations of the standard Java {@link Comparator} interface by
- * providing consistent null handling semantics, specialized comparators for primitive arrays and
+ * providing consistent {@code null} handling semantics, specialized comparators for primitive arrays and
  * collections, and advanced features like case-insensitive string comparison, length-based
- * comparisons, and bean property comparisons. All comparators follow predictable null handling
+ * comparisons, and bean property comparisons. All comparators follow predictable {@code null} handling
  * rules and provide both natural and reversed ordering variants.</p>
  *
  * <p><b>Key Features:</b>
@@ -63,16 +63,17 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * <ul>
  *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
  *   <li>All methods are static - no instance creation needed or allowed</li>
- *   <li>All comparators are thread-safe and can be safely shared between threads</li>
+ *   <li>The predefined comparator constants are stateless and thread-safe. A comparator returned
+ *       by a factory is thread-safe only when every supplied extractor/comparator is thread-safe</li>
  *   <li>Null handling behavior is consistent and well-defined across all methods</li>
  * </ul>
  *
  * <p><b>Null Handling Semantics:</b>
  * <ul>
- *   <li><b>nullsFirst():</b> Treats null as the minimum value (null &lt; any non-null value)</li>
- *   <li><b>nullsLast():</b> Treats null as the maximum value (null &gt; any non-null value)</li>
+ *   <li><b>nullsFirst():</b> Treats {@code null} as the minimum value (null &lt; any {@code non-null} value)</li>
+ *   <li><b>nullsLast():</b> Treats {@code null} as the maximum value (null &gt; any {@code non-null} value)</li>
  *   <li><b>Default Behavior:</b> Most comparators use nullsFirst semantics by default</li>
- *   <li><b>Consistency:</b> Both nulls compare as equal (null == null returns 0)</li>
+ *   <li><b>Consistency:</b> Both nulls compare as equal (null == {@code null} returns 0)</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -153,7 +154,7 @@ import com.landawn.abacus.util.function.ToShortFunction;
  *   <li><b>Collection Comparators:</b> Size-based and element-wise comparison for collections</li>
  *   <li><b>String Comparators:</b> Case-insensitive and length-based string comparison</li>
  *   <li><b>Natural Order:</b> Null-safe natural ordering for Comparable types</li>
- *   <li><b>Reversed Order:</b> Inverted natural ordering with consistent null handling</li>
+ *   <li><b>Reversed Order:</b> Inverted natural ordering with consistent {@code null} handling</li>
  * </ul>
  *
  * <p><b>Factory Method Categories:</b>
@@ -186,19 +187,19 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * </ul>
  *
  * <p><b>Thread Safety:</b>
- * All comparators created by this class are <b>thread-safe</b>:
+ * The predefined comparator constants are <b>thread-safe</b>. Comparators created by factory
+ * methods may capture caller-supplied functions or comparators and inherit their thread-safety:
  * <ul>
- *   <li>Comparator instances are stateless and immutable</li>
- *   <li>Can be safely shared between multiple threads</li>
- *   <li>No synchronization required for concurrent use</li>
- *   <li>Ideal for static final fields and shared constants</li>
+ *   <li>Predefined constants are stateless and can be safely shared between threads</li>
+ *   <li>Factory results with stateless/thread-safe collaborators can likewise be shared safely</li>
+ *   <li>A stateful extractor or delegate comparator may require external synchronization</li>
  * </ul>
  *
  * <p><b>Array Comparison Details:</b>
  * <ul>
  *   <li><b>Element-wise:</b> Compares arrays lexicographically element by element</li>
  *   <li><b>Length Handling:</b> Shorter arrays are considered "less than" longer arrays when all compared elements are equal</li>
- *   <li><b>Null Arrays:</b> Handled according to the chosen null semantics</li>
+ *   <li><b>Null Arrays:</b> Handled according to the chosen {@code null} semantics</li>
  *   <li><b>Type Safety:</b> Separate comparators for each primitive array type</li>
  * </ul>
  *
@@ -220,7 +221,7 @@ import com.landawn.abacus.util.function.ToShortFunction;
  *
  * <p><b>Advanced Features:</b>
  * <ul>
- *   <li><b>Conditional Null Handling:</b> Different null strategies based on context</li>
+ *   <li><b>Conditional Null Handling:</b> Different {@code null} strategies based on context</li>
  *   <li><b>Multi-level Sorting:</b> Chain comparators for complex sort orders</li>
  *   <li><b>Type-specific Optimization:</b> Avoid boxing for primitive comparisons</li>
  *   <li><b>Functional Composition:</b> Combine with method references and lambdas</li>
@@ -230,22 +231,22 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * <ul>
  *   <li>Use primitive-specific methods (comparingInt vs comparingBy) for better performance</li>
  *   <li>Cache frequently used comparators in static final fields</li>
- *   <li>Choose appropriate null handling strategy based on domain requirements</li>
+ *   <li>Choose appropriate {@code null} handling strategy based on domain requirements</li>
  *   <li>Use method references with key extractors for readable and efficient code</li>
  *   <li>Combine comparators with thenComparing() for multi-level sorting</li>
  * </ul>
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li>Throws {@link IllegalArgumentException} for null key extractors</li>
- *   <li>Handles null inputs gracefully according to configured null semantics</li>
+ *   <li>Throws {@link IllegalArgumentException} for {@code null} key extractors</li>
+ *   <li>Handles {@code null} inputs gracefully according to configured {@code null} semantics</li>
  *   <li>Preserves natural ordering contracts for Comparable types</li>
  *   <li>Provides consistent behavior across all comparison operations</li>
  * </ul>
  *
  * <p><b>Comparison with JDK Comparator:</b>
  * <ul>
- *   <li><b>Enhanced Null Handling:</b> More sophisticated and consistent null strategies</li>
+ *   <li><b>Enhanced Null Handling:</b> More sophisticated and consistent {@code null} strategies</li>
  *   <li><b>Additional Types:</b> Built-in support for arrays, collections, and complex types</li>
  *   <li><b>Performance Optimizations:</b> Primitive-specific comparators avoid boxing</li>
  *   <li><b>Convenience Methods:</b> More factory methods for common comparison scenarios</li>
@@ -655,7 +656,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared.
-     * @param cmp the comparator to use for {@code non-null} values, may be null.
+     * @param cmp the comparator to use for {@code non-null} values, may be {@code null}.
      * @return a comparator that considers {@code null} less than {@code non-null} values, comparing {@code non-null} values using the specified comparator.
      */
     public static <T> Comparator<T> nullsFirst(final Comparator<T> cmp) {
@@ -761,7 +762,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared.
-     * @param cmp the comparator to use for {@code non-null} values, may be null.
+     * @param cmp the comparator to use for {@code non-null} values, may be {@code null}.
      * @return a comparator that considers {@code null} greater than {@code non-null} values, comparing {@code non-null} values using the specified comparator.
      */
     public static <T> Comparator<T> nullsLast(final Comparator<T> cmp) {
@@ -1865,6 +1866,10 @@ public final class Comparators {
      *   <li>If both are exhausted simultaneously with all elements equal, they are equal</li>
      * </ol>
      *
+     * <p>If both arguments are the same object, the comparator returns {@code 0} without
+     * requesting an iterator. This preserves reflexivity for one-shot {@code Iterable}
+     * implementations whose {@link Iterable#iterator()} method returns the same iterator.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Iterable<Person>> cmp = Comparators.comparingIterable(
@@ -1885,6 +1890,10 @@ public final class Comparators {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
+            if (a == b) {
+                return 0;
+            }
+
             final Iterator<T> iterA = N.iterate(a);
             final Iterator<T> iterB = N.iterate(b);
 
@@ -1939,8 +1948,10 @@ public final class Comparators {
      * by consuming elements from both iterators.
      *
      * <p><strong>Warning:</strong> This comparator consumes elements from the iterators during
-     * comparison. The iterators cannot be reused after comparison. Consider using
-     * {@link #comparingIterable(Comparator)} if you need to preserve the original data.</p>
+     * comparison. The iterators cannot be reused after comparison. The sole exception is when
+     * both arguments are the same iterator object: the comparator returns {@code 0} without
+     * consuming it. Consider using {@link #comparingIterable(Comparator)} if you need to preserve
+     * the original data.</p>
      *
      * <p>The comparison algorithm:</p>
      * <ol>
@@ -1968,6 +1979,10 @@ public final class Comparators {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
+            if (a == b) {
+                return 0;
+            }
+
             if (N.isEmpty(a)) {
                 return N.isEmpty(b) ? 0 : -1;
             } else if (N.isEmpty(b)) {

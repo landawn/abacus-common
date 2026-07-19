@@ -145,6 +145,14 @@ public class ImmutableNavigableSetTest extends TestBase {
     }
 
     @Test
+    public void testCopyOf_EmptySortedSetRetainsComparator() {
+        Comparator<String> comparator = Comparator.reverseOrder();
+        SortedSet<String> source = new TreeSet<>(comparator);
+
+        Assertions.assertSame(comparator, ImmutableNavigableSet.copyOf(source).comparator());
+    }
+
+    @Test
     public void testCopyOf_Array() {
         String[] values = { "c", "a", "b", "a" };
         ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf(values);
@@ -309,6 +317,38 @@ public class ImmutableNavigableSetTest extends TestBase {
         Assertions.assertEquals("b", iter.next());
         Assertions.assertEquals("a", iter.next());
         Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testDescendingIteratorDoesNotExposeMutableObjIterator() {
+        TreeSet<String> backing = new TreeSet<>(Arrays.asList("a", "b", "c")) {
+            @Override
+            public ObjIterator<String> descendingIterator() {
+                Iterator<String> delegate = super.descendingIterator();
+
+                return new ObjIterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        return delegate.hasNext();
+                    }
+
+                    @Override
+                    public String next() {
+                        return delegate.next();
+                    }
+
+                    @Override
+                    public void remove() {
+                        delegate.remove();
+                    }
+                };
+            }
+        };
+
+        ObjIterator<String> iter = ImmutableNavigableSet.wrap(backing).descendingIterator();
+        Assertions.assertEquals("c", iter.next());
+        Assertions.assertThrows(UnsupportedOperationException.class, iter::remove);
+        Assertions.assertEquals(new TreeSet<>(Arrays.asList("a", "b", "c")), backing);
     }
 
     @Test

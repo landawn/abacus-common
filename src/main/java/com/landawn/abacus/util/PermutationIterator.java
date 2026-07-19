@@ -82,7 +82,7 @@ public final class PermutationIterator {
      * @throws IllegalArgumentException if {@code elements} is {@code null}
      * @see #ordered(Collection)
      */
-    public static <T> ObjIterator<List<T>> of(final Collection<T> elements) {
+    public static <T> ObjIterator<List<T>> of(final Collection<T> elements) throws IllegalArgumentException {
         N.checkArgNotNull(elements, cs.elements);
 
         if (elements.isEmpty()) {
@@ -243,7 +243,7 @@ public final class PermutationIterator {
      * @see #ordered(Collection)
      * @see #of(Collection)
      */
-    public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) {
+    public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(elements, cs.elements);
         N.checkArgNotNull(comparator, cs.comparator);
 

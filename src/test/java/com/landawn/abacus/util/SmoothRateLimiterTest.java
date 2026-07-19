@@ -80,4 +80,13 @@ public class SmoothRateLimiterTest extends TestBase {
 
         Assertions.assertTrue(limiter.storedPermits > 0);
     }
+
+    @Test
+    public void testHugeReservationSaturatesInsteadOfWrappingSchedule() {
+        SmoothRateLimiter limiter = (SmoothRateLimiter) RateLimiter.create(0.000001, Long.MAX_VALUE, TimeUnit.MICROSECONDS);
+
+        limiter.reserve(Integer.MAX_VALUE);
+
+        Assertions.assertEquals(Long.MAX_VALUE, limiter.queryEarliestAvailable(0));
+    }
 }

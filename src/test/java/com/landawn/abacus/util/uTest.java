@@ -3534,7 +3534,7 @@ public class uTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Optional.of(null) throws IllegalArgumentException; Nullable.of(null) is present and null-valued")
+    @DisplayName("Optional.of(null) throws NullPointerException; Nullable.of(null) is present and null-valued")
     public void testNullSemantics_OfFactories() {
         assertThrows(NullPointerException.class, () -> Optional.of((Object) null));
         Nullable<String> n = Nullable.of((String) null);
@@ -3869,5 +3869,23 @@ public class uTest extends TestBase {
         // Outside cache: new instance each call (still equal)
         assertNotSame(OptionalInt.of(99999), OptionalInt.of(99999));
         assertEquals(OptionalInt.of(99999), OptionalInt.of(99999));
+    }
+
+    @Test
+    @DisplayName("Generic object factories reuse canonical Boolean and empty-string containers")
+    public void testGenericFactoriesReuseCommonValueInstances() {
+        assertSame(Optional.TRUE, Optional.<Boolean> of(Boolean.TRUE));
+        assertSame(Optional.FALSE, Optional.<Boolean> of(Boolean.FALSE));
+        assertSame(Optional.TRUE, Optional.<Boolean> ofNullable(Boolean.TRUE));
+        assertSame(Optional.of(""), Optional.<String> of(""));
+        assertSame(Optional.of(""), Optional.<String> ofNullable(""));
+        assertSame(Optional.TRUE, Optional.from(java.util.Optional.of(Boolean.TRUE)));
+
+        assertSame(Nullable.TRUE, Nullable.<Boolean> of(Boolean.TRUE));
+        assertSame(Nullable.FALSE, Nullable.<Boolean> of(Boolean.FALSE));
+        assertSame(Nullable.of(""), Nullable.<String> of(""));
+        assertSame(Nullable.TRUE, Nullable.from(Optional.of(Boolean.TRUE)));
+        assertSame(Nullable.FALSE, Nullable.from(java.util.Optional.of(Boolean.FALSE)));
+        assertSame(Nullable.of(""), Nullable.from(java.util.Optional.of("")));
     }
 }

@@ -99,6 +99,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         final IntConsumer action = it -> rateLimiter.acquire();
@@ -113,6 +115,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream delay(final Duration delay) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(delay, cs.delay);
 
         final long millis = delay.toMillis();
@@ -139,7 +143,9 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream debounce(Duration duration) {
+    public IntStream debounce(Duration duration) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
@@ -149,7 +155,7 @@ abstract class AbstractIntStream extends IntStream {
 
         final IntIteratorEx iter = iteratorEx();
 
-        return newStream(new IntIteratorEx() {
+        return newStream(new IntIteratorEx() { //NOSONAR
             private final long durationMillis = duration.toMillis();
             private int prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
@@ -255,6 +261,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream mapMulti(final IntMapMultiConsumer mapper) {
+        assertNotClosed();
+
         final IntFunction<IntStream> secondMapper = t -> {
             final SpinedBuffer.OfInt buffer = new SpinedBuffer.OfInt();
 
@@ -268,6 +276,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream mapPartial(final IntFunction<OptionalInt> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT).mapToInt(Fn.GET_AS_INT));
@@ -279,6 +289,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream mapPartialJdk(final IntFunction<java.util.OptionalInt> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT_JDK).mapToInt(Fn.GET_AS_INT_JDK));
@@ -622,7 +634,7 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream top(final int n) throws IllegalStateException {
+    public IntStream top(final int n) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 
@@ -735,6 +747,8 @@ abstract class AbstractIntStream extends IntStream {
                     a[i] = elements[cursor - i - 1];
                 }
 
+                cursor = fromIndex;
+
                 return a;
             }
 
@@ -822,6 +836,8 @@ abstract class AbstractIntStream extends IntStream {
                 for (int i = cnt; i < len; i++) {
                     a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
+
+                cnt = len;
 
                 return a;
             }
@@ -949,6 +965,8 @@ abstract class AbstractIntStream extends IntStream {
                 for (int i = 0; i < cursor; i++) {
                     a[i] = sortedArray[cursor - i - 1];
                 }
+
+                cursor = 0;
 
                 return a;
             }
@@ -1270,7 +1288,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.IntFunction<? extends K, E> keyMapper,
-            final Collector<? super Integer, ?, D> downstream) throws E {
+            final Collector<? super Integer, ?, D> downstream) throws IllegalStateException, E {
         assertNotClosed();
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
@@ -1422,9 +1440,15 @@ abstract class AbstractIntStream extends IntStream {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}
+     */
     @Override
-    public Joiner joinTo(final Joiner joiner) throws IllegalStateException {
+    public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(joiner, cs.joiner);
 
         try {
             @SuppressWarnings("resource")

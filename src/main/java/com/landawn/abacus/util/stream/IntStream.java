@@ -16,6 +16,7 @@ package com.landawn.abacus.util.stream;
 
 import java.nio.IntBuffer;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -256,7 +257,6 @@ import com.landawn.abacus.util.function.ToIntFunction;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
-@com.landawn.abacus.annotation.Immutable
 @LazyEvaluation
 public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate, IntConsumer, OptionalInt, IndexedInt, IntIterator, IntStream> {
 
@@ -283,17 +283,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
@@ -346,17 +347,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
@@ -412,18 +414,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
@@ -450,17 +453,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#map(Function)
      */
     @ParallelSupported
@@ -493,17 +497,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to char
      * @return a new CharStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
@@ -537,17 +542,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to byte
      * @return a new ByteStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
@@ -581,17 +587,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to short
      * @return a new ShortStream consisting of the results of applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
@@ -625,17 +632,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to long
      * @return a new LongStream consisting of the results of applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
@@ -669,17 +677,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to float
      * @return a new FloatStream consisting of the results of applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(IntUnaryOperator)
      * @see #mapToDouble(IntToDoubleFunction)
      */
@@ -713,17 +722,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(IntUnaryOperator)
      * @see #mapToFloat(IntToFloatFunction)
      * @see java.util.stream.IntStream#mapToDouble(IntToDoubleFunction)
@@ -758,18 +768,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from int to T
      * @return a new Stream of objects resulting from applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(IntUnaryOperator)
      * @see java.util.stream.IntStream#mapToObj(IntFunction)
      */
@@ -780,10 +791,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     /**
      * Returns a stream consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying
-     * the provided mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * the provided mapping function to each element. Each non-null mapped stream is
+     * closed after its contents are consumed or when the resulting stream is closed.
+     * A null mapped stream is treated as empty.
      *
      * <p><b>Naming Convention:</b></p>
      * <p>This library uses specific naming for different {@code flatMap} variants:</p>
@@ -811,17 +821,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to IntStream
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      */
     @ParallelSupported
@@ -868,17 +879,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to {@code Collection<Integer>}
      * @return a new {@code IntStream} consisting of the flattened contents of the collections produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(IntFunction)
      * @see #flatMapArray(IntFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -921,17 +933,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from int to int[]
      * @return a new {@code IntStream} consisting of the flattened contents of the arrays produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(IntFunction)
      * @see #flattMap(IntFunction)
      * @see #flatMapToLong(IntFunction)
@@ -953,18 +966,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a Collection
      *               (parameter is not used as this method always throws)
      * @return the new stream (this method never returns as it always throws)
+     * @throws IllegalStateException if the stream is already closed
      * @throws UnsupportedOperationException always thrown as this method is not supported
      * @deprecated This method is not supported. Use {@link #flatmapToObj(IntFunction)} instead
      * @see #flatmapToObj(IntFunction)
@@ -973,6 +987,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @IntermediateOp
     IntStream flattmap(@SuppressWarnings("unused") final IntFunction<? extends Collection<Integer>> mapper) throws UnsupportedOperationException { // NOSONAR
+        assertNotClosed();
+
         throw new UnsupportedOperationException("Method 'flattmap' is deprecated and unsupported; use 'flatmapToObj' or 'flatMap' instead");
     }
 
@@ -1008,17 +1024,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped JDK stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK IntStream
      * @return a new {@code IntStream} consisting of the flattened contents of the mapped JDK {@code IntStream} instances
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(IntFunction)
      * @see #flatMapArray(IntFunction)
      */
@@ -1049,22 +1069,25 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped JDK streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
     public IntStream flatMapJdkStream(IntFunction<? extends java.util.stream.IntStream> mapper) {
+        assertNotClosed();
+
         return flattMap(mapper);
     }
 
@@ -1091,17 +1114,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a CharStream
      * @return a new {@link CharStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1125,17 +1152,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a ByteStream
      * @return a new {@link ByteStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1159,17 +1190,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a ShortStream
      * @return a new {@link ShortStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1193,17 +1228,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a LongStream
      * @return a new {@link LongStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1227,17 +1266,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a FloatStream
      * @return a new {@link FloatStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1261,17 +1304,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a DoubleStream
      * @return a new {@link DoubleStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1280,8 +1327,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
      * with the contents of a mapped stream produced by applying the provided mapping function to each element.
-     * Each mapped stream is closed after its contents have been placed into this stream.
-     * (If a mapped stream is {@code null} an empty stream is used, instead.)
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * <p>This operation is stateless and can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -1299,18 +1346,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to a Stream
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(IntFunction)
      * @see #flatmapToObj(IntFunction)
      */
@@ -1338,18 +1386,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to a Collection
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToObj(IntFunction)
      * @see #flatMapArrayToObj(IntFunction)
      */
@@ -1377,18 +1426,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to an array
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the arrays produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToObj(IntFunction)
      * @see #flatmapToObj(IntFunction)
      */
@@ -1418,18 +1468,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that generates zero or more
      *               output values for each input value
      * @return a new {@link IntStream} consisting of the elements generated by the mapper
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1455,17 +1506,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to an OptionalInt
      * @return a new {@link IntStream} consisting of the present values from the non-empty {@code OptionalInt} results produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1492,17 +1544,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK OptionalInt
      * @return a new {@link IntStream} consisting of the present values from the non-empty {@code java.util.OptionalInt} results produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1530,13 +1583,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -1573,13 +1626,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
@@ -1616,13 +1669,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1670,13 +1723,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1721,13 +1774,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
@@ -1768,17 +1821,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator an {@code IntBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code IntStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
@@ -1812,19 +1866,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      *        It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * @param accumulator an {@code IntBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code IntStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
@@ -1855,19 +1910,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator an {@code IntBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code IntStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
@@ -1890,17 +1946,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to prepend to this stream
      * @return a new stream with the specified elements prepended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1922,17 +1979,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append to this stream
      * @return a new stream with the specified elements appended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1959,17 +2017,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append if this stream is empty
      * @return this stream if not empty, otherwise a new stream containing the specified elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1996,17 +2055,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to return
      * @return a new {@link IntStream} consisting of the top {@code n} elements; the order of the returned elements is not guaranteed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -2034,18 +2094,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to return
      * @param comparator a non-interfering, stateless Comparator to be used to compare stream elements
      * @return a new {@link IntStream} consisting of the top {@code n} elements as determined by the comparator; the order of the returned elements is not guaranteed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -2067,7 +2128,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2077,6 +2138,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * </table>
      *
      * @return an IntList containing all stream elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2099,7 +2161,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2115,6 +2177,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param keyMapper a non-interfering, stateless function to apply to each element to produce keys
      * @param valueMapper a non-interfering, stateless function to apply to each element to produce values
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @throws IllegalStateException if duplicate keys are encountered
@@ -2150,7 +2213,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2168,6 +2231,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueMapper a non-interfering, stateless function to apply to each element to produce values
      * @param mapFactory a supplier which returns a new, empty Map into which the results will be inserted
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @throws IllegalStateException if duplicate keys are encountered
@@ -2209,7 +2273,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2226,6 +2290,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueMapper a non-interfering, stateless function to apply to each element to produce values
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -2263,7 +2328,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2282,6 +2347,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @param mapFactory a supplier which returns a new, empty Map into which the results will be inserted
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -2310,7 +2376,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2325,6 +2391,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param keyMapper a classifier function mapping input elements to keys
      * @param downstream a Collector implementing the downstream reduction
      * @return a Map containing the results of the group-by operation
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the classifier throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -2363,7 +2430,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2380,6 +2447,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param downstream a Collector implementing the downstream reduction
      * @param mapFactory a supplier which returns a new, empty Map into which the results will be inserted
      * @return a Map containing the results of the group-by operation
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the classifier throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -2416,18 +2484,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param identity the identity value for the accumulating function
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
@@ -2463,17 +2532,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an OptionalInt describing the result of the reduction, or an empty OptionalInt if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
@@ -2507,13 +2577,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> the type of the result
@@ -2525,6 +2595,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *                 which must be compatible with the accumulator function. It's unnecessary to specify
      *                 {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -2559,13 +2630,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> the type of the result. It must be {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
@@ -2574,6 +2645,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param accumulator an associative, non-interfering, stateless function for incorporating an
      *                    additional element into a result
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of:
      *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
@@ -2605,21 +2677,24 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #forEach(Throwables.IntConsumer)
      */
     @ParallelSupported
     @TerminalOp
     public void foreach(final IntConsumer action) { // NOSONAR
+        assertNotClosed();
+
         forEach(action::accept);
     }
 
@@ -2642,17 +2717,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2682,18 +2758,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements. The first parameter is the
      *               element index and the second parameter is the element value.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2725,19 +2802,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if any elements of the stream match the provided predicate,
      *         otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2769,19 +2847,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if either all elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2813,19 +2892,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if either no elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2850,16 +2930,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalInt containing the first element of the stream, or an empty OptionalInt if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.IntPredicate)
@@ -2868,6 +2949,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public OptionalInt findFirst() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2889,16 +2972,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalInt containing the first element of the stream, or an empty OptionalInt if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.IntPredicate)
@@ -2907,6 +2991,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public OptionalInt findAny() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2935,18 +3021,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return an {@code OptionalInt} describing the first element that matches the predicate, or an empty {@code OptionalInt} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2982,18 +3069,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return an {@code OptionalInt} describing any element that matches the predicate, or an empty {@code OptionalInt} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -3027,18 +3115,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return an {@code OptionalInt} describing the last element that matches the predicate, or an empty {@code OptionalInt} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Beta
@@ -3054,9 +3143,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntStream.of(5, 2, 8, 1, 9).min();   // returns OptionalInt[1]
+     * IntStream.of(5, 2, 8, 1, 9).min();                         // returns OptionalInt[1]
      *
-     * IntStream.empty().min();   // returns OptionalInt.empty()
+     * IntStream.empty().min();                                   // returns OptionalInt.empty()
      *
      * // Safe retrieval with default value
      * int minValue = IntStream.of(10, 20, 30).min().orElse(0);   // returns 10
@@ -3065,17 +3154,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalInt containing the minimum element of this stream,
      *         or an empty OptionalInt if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3089,9 +3179,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntStream.of(5, 2, 8, 1, 9).max();   // returns OptionalInt[9]
+     * IntStream.of(5, 2, 8, 1, 9).max();                         // returns OptionalInt[9]
      *
-     * IntStream.empty().max();   // returns OptionalInt.empty()
+     * IntStream.empty().max();                                   // returns OptionalInt.empty()
      *
      * // Safe retrieval with default value
      * int maxValue = IntStream.of(10, 20, 30).max().orElse(0);   // returns 30
@@ -3100,17 +3190,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalInt containing the maximum element of this stream,
      *         or an empty OptionalInt if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3137,17 +3228,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an OptionalInt containing the k-th largest element, or an empty OptionalInt if the stream is empty or the count of elements is less than k
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code k} is not positive
      */
     @SequentialOnly
@@ -3176,16 +3268,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return the sum of elements in this stream. Returns 0 if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      * @throws ArithmeticException if the sum overflows the {@code int} range
      * @see #average()
      * @see #reduce(int, IntBinaryOperator)
@@ -3202,11 +3295,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntStream.of(1, 2, 3, 4, 5).average();   // returns OptionalDouble[3.0]
+     * IntStream.of(1, 2, 3, 4, 5).average();                       // returns OptionalDouble[3.0]
      *
-     * IntStream.of(10, 20, 30).average();   // returns OptionalDouble[20.0]
+     * IntStream.of(10, 20, 30).average();                          // returns OptionalDouble[20.0]
      *
-     * IntStream.empty().average();   // returns OptionalDouble.empty()
+     * IntStream.empty().average();                                 // returns OptionalDouble.empty()
      *
      * // Safe retrieval with default value
      * double avg = IntStream.of(100, 200).average().orElse(0.0);   // returns 150.0
@@ -3215,17 +3308,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalDouble containing the arithmetic mean of elements of this stream,
      *         or an empty optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3250,16 +3344,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an IntSummaryStatistics describing various summary data about the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3301,7 +3396,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3313,6 +3408,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return a Pair where the first element is IntSummaryStatistics and the second element is
      *         an Optional containing a map from each {@link Percentage} to its corresponding value,
      *         or an empty Optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3345,20 +3441,22 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the stream to merge with this stream
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned,
      *                     otherwise the second parameter is selected.
      * @return the merged stream
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3383,18 +3481,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the IntStream to be combined with the current IntStream. Must be {@code non-null}.
      * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(IntStream, int, int, IntBinaryOperator)
      */
     @ParallelSupported
@@ -3419,19 +3518,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
      * @param c the third IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
      * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(IntStream, IntStream, int, int, int, IntTernaryOperator)
      */
     @ParallelSupported
@@ -3455,13 +3555,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
@@ -3469,6 +3569,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneB the default value to use for the given IntStream when it runs out of elements
      * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -3493,13 +3594,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
@@ -3509,6 +3610,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneC the default value to use for the third IntStream when it runs out of elements
      * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -3546,16 +3648,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a LongStream containing the elements of this stream widened to long
+     * @throws IllegalStateException if the stream is already closed
      * @see #asFloatStream()
      * @see #asDoubleStream()
      * @see #mapToLong(IntToLongFunction)
@@ -3597,16 +3700,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a FloatStream containing the elements of this stream converted to float
+     * @throws IllegalStateException if the stream is already closed
      * @see #asLongStream()
      * @see #asDoubleStream()
      * @see #mapToFloat(IntToFloatFunction)
@@ -3656,16 +3760,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a DoubleStream containing the elements of this stream converted to double
+     * @throws IllegalStateException if the stream is already closed
      * @see #asLongStream()
      * @see #asFloatStream()
      * @see #mapToDouble(IntToDoubleFunction)
@@ -3701,16 +3806,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a Stream consisting of the elements of this stream, each boxed to an Integer
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3734,16 +3840,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
+     * <p>If this stream has close handlers, closing the returned JDK stream closes this stream and
+     * invokes those handlers exactly once.</p>
+     *
      * @return a java.util.stream.IntStream containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3770,23 +3880,26 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param transfer the function to transform the java.util.stream.IntStream
      * @return a new IntStream resulting from the transformation
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if transfer is null
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
     public IntStream transformB(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer) {
+        assertNotClosed();
+
         return transformB(transfer, false);
     }
 
@@ -3811,19 +3924,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param transfer the function to transform the java.util.stream.IntStream
      * @param deferred if {@code true}, the transformation is deferred until the stream is consumed;
      *                 if {@code false}, the transformation is applied immediately
      * @return a new IntStream resulting from the transformation
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if transfer is null
      */
     @Beta
@@ -3847,6 +3961,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * This is an internal method used by the stream framework to provide extended iteration capabilities.
      *
      * @return an IntIteratorEx providing extended iteration capabilities including advance() and count()
+     * @throws IllegalStateException if the stream is already closed
      */
     abstract IntIteratorEx iteratorEx();
 
@@ -4173,19 +4288,6 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         return iterator == null ? empty() : new IteratorIntStream(iterator);
     }
 
-    //    /**
-    //     * Creates an IntStream from a java.util.stream.IntStream.
-    //     * This method is deprecated, use {@link #from(java.util.stream.IntStream)} instead.
-    //     *
-    //     * @param stream the java.util.stream.IntStream to convert
-    //     * @return an IntStream containing the elements from the input stream
-    //     * @deprecated Use {@link #from(java.util.stream.IntStream)} instead
-    //     */
-    //    @Deprecated
-    //    public static IntStream of(final java.util.stream.IntStream stream) { // Should the name be from?
-    //        return from(stream);
-    //    }
-
     /**
      * Creates an IntStream from an OptionalInt.
      * If the OptionalInt is empty or {@code null}, returns an empty stream.
@@ -4275,6 +4377,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     /**
      * Creates an IntStream of Unicode code points from a CharSequence.
      * Surrogate pairs are properly handled and converted to their code point values.
+     * A {@code null} or empty input produces an empty stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4291,8 +4394,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *     .count();   // returns 8
      * }</pre>
      *
-     * @param str the CharSequence to convert to code points
-     * @return an IntStream containing the Unicode code points from the CharSequence
+     * @param str the CharSequence to convert to code points; may be {@code null}
+     * @return an IntStream containing the Unicode code points from the CharSequence,
+     *         or an empty stream if {@code str} is {@code null} or empty
      */
     public static IntStream ofCodePoints(final CharSequence str) {
         if (Strings.isEmpty(str)) {
@@ -4362,7 +4466,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
      * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
      */
-    public static IntStream splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst, final IntBinaryOperator mapper) {
+    public static IntStream splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst, final IntBinaryOperator mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNegative(totalSize, cs.totalSize);
         N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
 
@@ -4736,10 +4841,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
             @Override
             public int nextInt() {
-                if (cnt-- <= 0) {
+                if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                cnt--;
                 return next++;
             }
 
@@ -4830,10 +4936,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
             @Override
             public int nextInt() {
-                if (cnt-- <= 0) {
+                if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                cnt--;
                 final int result = next;
                 next += by;
                 return result;
@@ -4918,10 +5025,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
             @Override
             public int nextInt() {
-                if (cnt-- <= 0) {
+                if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                cnt--;
                 return next++;
             }
 
@@ -5012,10 +5120,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
             @Override
             public int nextInt() {
-                if (cnt-- <= 0) {
+                if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                cnt--;
                 final int result = next;
                 next += by;
                 return result;
@@ -5101,10 +5210,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
             @Override
             public int nextInt() {
-                if (cnt-- <= 0) {
+                if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                cnt--;
                 return element;
             }
 
@@ -5218,7 +5328,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @see N#forEach(int, int, Throwables.IntConsumer)
      */
     @Beta
-    public static IntStream ofIndices(final int lenOrSize) {
+    public static IntStream ofIndices(final int lenOrSize) throws IllegalArgumentException {
         N.checkArgNotNegative(lenOrSize, cs.lenOrSize);
 
         return range(0, lenOrSize);
@@ -5255,7 +5365,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @see N#forEach(int, int, int, Throwables.IntConsumer)
      */
     @Beta
-    public static IntStream ofIndices(final int lenOrSize, final int step) {
+    public static IntStream ofIndices(final int lenOrSize, final int step) throws IllegalArgumentException {
         N.checkArgNotNegative(lenOrSize, cs.lenOrSize);
         N.checkArgument(step != 0, "The input parameter 'step' cannot be zero");
 
@@ -5354,7 +5464,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @throws IllegalArgumentException if fromIndex is negative, if increment is zero, or if indexFunc is null
      */
     @Beta
-    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final ObjIntFunction<? super AC, Integer> indexFunc) {
+    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final ObjIntFunction<? super AC, Integer> indexFunc)
+            throws IllegalArgumentException {
         N.checkArgNotNegative(fromIndex, cs.fromIndex);
         N.checkArgument(increment != 0, "'increment' cannot be zero");
         N.checkArgNotNull(indexFunc, cs.indexFunc);
@@ -5402,6 +5513,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     /**
      * Creates a stream that iterates using the given <i>hasNext</i> and <i>next</i> suppliers.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5427,12 +5540,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         N.checkArgNotNull(next);
 
         return new IteratorIntStream(new IntIteratorEx() {
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -5453,6 +5571,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     /**
      * Creates a stream that iterates from an initial value, applying a function to generate subsequent values,
      * and continues as long as the hasNext supplier returns {@code true}.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5482,12 +5602,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         return new IteratorIntStream(new IntIteratorEx() {
             private int cur = 0;
             private boolean isFirst = true;
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -5817,6 +5942,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     /**
      * Concatenates a collection of IntStreams into a single IntStream.
+     * The collection's membership and encounter order are snapshotted when this method is called.
+     * Closing the returned stream closes every snapshotted input stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5835,13 +5962,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * IntStream.concat(rangeStreams).toArray();   // returns [0, 1, 2, 10, 11, 12]
      * }</pre>
      *
-     * @param streams the collection of IntStreams to concatenate
+     * @param streams the collection of IntStreams to concatenate; {@code null} elements are treated as empty streams
      * @return an IntStream containing all the ints from the input collection of IntStreams
      * @see Stream#concat(Collection)
      */
     public static IntStream concat(final Collection<? extends IntStream> streams) {
-        return N.isEmpty(streams) ? empty() : new IteratorIntStream(new IntIteratorEx() { //NOSONAR
-            private final Iterator<? extends IntStream> iterators = streams.iterator();
+        if (N.isEmpty(streams)) {
+            return empty();
+        }
+
+        final List<? extends IntStream> sources = new ArrayList<>(streams);
+
+        return new IteratorIntStream(new IntIteratorEx() { //NOSONAR
+            private final Iterator<? extends IntStream> iterators = sources.iterator();
             private IntStream cur;
             private IntIterator iter;
 
@@ -5867,7 +6000,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return iter.nextInt();
             }
-        }).onClose(newCloseHandler(streams));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -6173,7 +6306,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * the typed two-stream / three-stream overloads (which use {@link IntBinaryOperator} /
      * {@link IntTernaryOperator} and avoid boxing).
      *
-     * @param streams the collection of int streams to zip
+     * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine arrays of values from the streams. Must be {@code non-null}.
      * @return a stream of combined values. Empty if the collection is empty
      * @see #zip(Collection, int[], IntNFunction)
@@ -6476,7 +6609,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * the typed two-stream / three-stream overloads (which use {@link IntBinaryOperator} /
      * {@link IntTernaryOperator} and avoid boxing).
      *
-     * @param streams the collection of int streams to zip
+     * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
      * @param zipFunction the function to combine arrays of values from the streams. Must be {@code non-null}.
      * @return a stream of combined values that will close all input streams when closed
@@ -6512,14 +6645,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param a the first int array
      * @param b the second int array
-     * @param nextSelector a function that determines which element to select next. It receives the next elements
+     * @param nextSelector a function that determines which element to select next. It receives the next elements; must not be {@code null}
      *                     from both arrays and returns {@link MergeResult#TAKE_FIRST} to select from the first array
      *                     or {@link MergeResult#TAKE_SECOND} to select from the second array
      * @return a new IntStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(int[], int[], int[], IntBiFunction)
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
     public static IntStream merge(final int[] a, final int[] b, final IntBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(a)) {
             return of(b);
         } else if (N.isEmpty(b)) {
@@ -6580,8 +6716,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first int array
      * @param b the second int array
      * @param c the third int array
-     * @param nextSelector a function that determines which element to select next from pairs of elements
+     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
      * @return a new IntStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(int[], int[], IntBiFunction)
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
@@ -6614,14 +6751,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param a the first IntIterator (null is treated as an empty iterator)
      * @param b the second IntIterator (null is treated as an empty iterator)
-     * @param nextSelector a function that determines which element to select next. It receives the next elements
+     * @param nextSelector a function that determines which element to select next. It receives the next elements; must not be {@code null}
      *                     from both iterators and returns {@link MergeResult#TAKE_FIRST} to select from the first iterator
      *                     or {@link MergeResult#TAKE_SECOND} to select from the second iterator
      * @return a new IntStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntIterator, IntIterator, IntIterator, IntBiFunction)
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
     public static IntStream merge(final IntIterator a, final IntIterator b, final IntBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return new IteratorIntStream(new IntIteratorEx() {
             private final IntIterator iterA = a == null ? IntIterator.empty() : a;
             private final IntIterator iterB = b == null ? IntIterator.empty() : b;
@@ -6710,8 +6850,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first IntIterator (null is treated as an empty iterator)
      * @param b the second IntIterator (null is treated as an empty iterator)
      * @param c the third IntIterator (null is treated as an empty iterator)
-     * @param nextSelector a function that determines which element to select next from pairs of elements
+     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
      * @return a new IntStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntIterator, IntIterator, IntBiFunction)
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
@@ -6744,14 +6885,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param a the first IntStream
      * @param b the second IntStream
-     * @param nextSelector a function that determines which element to select next. It receives the next elements
+     * @param nextSelector a function that determines which element to select next. It receives the next elements; must not be {@code null}
      *                     from both streams and returns {@link MergeResult#TAKE_FIRST} to select from the first stream
      *                     or {@link MergeResult#TAKE_SECOND} to select from the second stream
      * @return a new IntStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntStream, IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
     public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
     }
 
@@ -6784,8 +6928,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first IntStream
      * @param b the second IntStream
      * @param c the third IntStream
-     * @param nextSelector a function that determines which element to select next from pairs of elements
+     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
      * @return a new IntStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
@@ -6822,17 +6967,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *     .toIntList();   // returns []
      * }</pre>
      *
-     * @param streams the collection of IntStreams to merge
-     * @param nextSelector a function that determines which element to select next from pairs of elements
+     * @param streams the collection of IntStreams to merge; a {@code null} collection and {@code null} elements are treated as empty
+     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
      * @return a new IntStream containing the merged elements, or an empty stream if the collection is empty
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Collection, BiFunction)
      */
     public static IntStream merge(final Collection<? extends IntStream> streams, final IntBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(streams)) {
             return empty();
         } else if (streams.size() == 1) {
-            return streams.iterator().next();
+            final IntStream stream = streams.iterator().next();
+            return stream == null ? empty() : stream;
         } else if (streams.size() == 2) {
             final Iterator<? extends IntStream> iter = streams.iterator();
             return merge(iter.next(), iter.next(), nextSelector);

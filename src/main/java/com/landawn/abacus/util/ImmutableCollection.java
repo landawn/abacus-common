@@ -16,19 +16,25 @@ package com.landawn.abacus.util;
 
 import java.util.AbstractCollection;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * {@code ImmutableCollection} is a base class for immutable collection implementations.
+ * {@code ImmutableCollection} is a base class for read-only collection implementations.
  * This class extends {@link AbstractCollection} and implements the {@link Immutable} interface,
- * representing a collection that cannot be modified once created.
+ * representing a collection that cannot be modified through its own API.
  *
  * <p>All mutating operations ({@code add}, {@code remove}, {@code clear}, etc.) throw
  * {@link UnsupportedOperationException}. The collection provides read-only access to its
  * elements through standard collection methods like {@link #contains(Object)}, {@link #size()},
  * and {@link #iterator()}.</p>
+ *
+ * <p>{@link #wrap(Collection)} retains the supplied collection as its backing storage. Changes made
+ * directly to that collection are therefore visible through the returned view; its thread-safety is
+ * the thread-safety of the backing collection.</p>
  *
  * <p>This class serves as the base for other immutable collection types in the framework,
  * such as {@link ImmutableList} and {@link ImmutableSet}. It should generally not be
@@ -248,7 +254,20 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Override
     public ObjIterator<E> iterator() {
-        return ObjIterator.of(coll.iterator());
+        final java.util.Iterator<E> iter = coll.iterator();
+
+        // ObjIterator.of may return a mutable ObjIterator subclass unchanged.
+        return new ObjIterator<>() {
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public E next() {
+                return iter.next();
+            }
+        };
     }
 
     /**
@@ -323,10 +342,10 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Compares the specified object with this collection for equality.
-     * The exact equality semantics depend on the concrete type of the underlying collection:
-     * for list-backed collections, order matters; for set-backed collections, only membership
-     * matters. This method delegates to the underlying collection's {@code equals} implementation.
+     * Compares the specified object with this collection for equality. The base
+     * {@code ImmutableCollection} uses identity equality, matching the convention of
+     * {@link AbstractCollection}. Concrete {@link List} and {@link Set} implementations use
+     * their interface-defined value equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -344,6 +363,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
+        }
+
+        // Collection itself has no value-equality contract. Delegating a list-backed base
+        // wrapper to List.equals would make wrapper.equals(list) true while
+        // list.equals(wrapper) is false because the wrapper is not a List.
+        if (!(this instanceof List<?>) && !(this instanceof Set<?>)) {
+            return false;
         }
 
         // The backing-collection shortcut is only valid when the other side presents its backing
@@ -368,19 +394,15 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     * Returns the hash code value for this collection. The hash code of a
-     * collection is defined to be the hash code of the underlying collection.
-     *
-     * <p>This ensures that {@code c1.equals(c2)} implies that
-     * {@code c1.hashCode()==c2.hashCode()} for any two collections
-     * {@code c1} and {@code c2}, as required by the general contract
-     * of {@link Object#hashCode}.</p>
+     * Returns the hash code value for this collection. The base
+     * {@code ImmutableCollection} uses an identity hash code; concrete {@link List} and
+     * {@link Set} implementations use their interface-defined value hash code.
      *
      * @return the hash code value for this collection
      */
     @Override
     public int hashCode() {
-        return coll.hashCode();
+        return this instanceof List<?> || this instanceof Set<?> ? coll.hashCode() : System.identityHashCode(this);
     }
 
     /**

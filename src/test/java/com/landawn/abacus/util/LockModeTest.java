@@ -89,7 +89,9 @@ public class LockModeTest extends AbstractTest {
 
     @Test
     public void testOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> LockMode.of(0));
+        IllegalArgumentException failure = assertThrows(IllegalArgumentException.class, () -> LockMode.of(0));
+        assertTrue(failure.getMessage().contains("LockMode"));
+        assertTrue(failure.getMessage().contains("0"));
         assertThrows(IllegalArgumentException.class, () -> LockMode.of(16));
         assertThrows(IllegalArgumentException.class, () -> LockMode.of(-1));
         assertThrows(IllegalArgumentException.class, () -> LockMode.of(100));

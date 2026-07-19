@@ -65,7 +65,9 @@ final class ISO8601Util {
      * The timezone used for 'Z' suffix in ISO8601 date/time values (UTC timezone).
      * Since version 2.7, this is {@link Dates#UTC_TIME_ZONE}.
      */
-    static final TimeZone TIMEZONE_Z = Dates.UTC_TIME_ZONE;
+    // Do not alias Dates.UTC_TIME_ZONE: it is a mutable public compatibility constant and callers
+    // can change its raw offset. ISO parsing and formatting must retain an independent UTC zone.
+    static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
 
     private ISO8601Util() {
         // Utility class - prevent instantiation
@@ -222,13 +224,14 @@ final class ISO8601Util {
      * Parses a date from an ISO8601 formatted string with parse position tracking.
      *
      * <p>This method allows partial parsing of a string by tracking the parse position.
-     * The position will be updated to indicate where parsing stopped.</p>
+     * On success, the position is updated to indicate where parsing stopped; on failure, it is
+     * left unchanged.</p>
      *
      * <p>Supported formats include (24-hour clock):</p>
      * <ul>
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]}</li>
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]]}</li>
-     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]][Z|[+-]HH:mm]}</li>
+     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]][Z|[+-]HH:mm|[+-]HHmm]}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -240,7 +243,8 @@ final class ISO8601Util {
      *
      * @param date the ISO8601 string to parse
      * @param pos the parse position indicating the offset at which to begin; on success it is
-     *            updated to the index immediately after the last consumed character
+     *            updated to the index immediately after the last consumed character, and on
+     *            failure it is left unchanged
      * @return the parsed {@link Date} object
      * @throws IllegalArgumentException if the date string cannot be parsed or is malformed
      */
@@ -252,13 +256,18 @@ final class ISO8601Util {
 
             // extract year
             final int year = parseInt(date, offset, offset += 4);
-            if (checkOffset(date, offset, '-')) {
+            final boolean hasDateSeparators = checkOffset(date, offset, '-');
+            if (hasDateSeparators) {
                 offset += 1;
             }
 
             // extract month
             final int month = parseInt(date, offset, offset += 2);
-            if (checkOffset(date, offset, '-')) {
+            if (checkOffset(date, offset, '-') != hasDateSeparators) {
+                throw new IllegalArgumentException("Inconsistent date separators in date \"" + date + "\"");
+            }
+
+            if (hasDateSeparators) {
                 offset += 1;
             }
 
@@ -270,10 +279,12 @@ final class ISO8601Util {
             int seconds = 0;
             int milliseconds = 0; // always use 0 otherwise returned date will include millis of current time
 
-            // if the value has no time component (and no time zone), we are done
+            // If the value has no time component or immediately-adjacent timezone, the date
+            // prefix is complete. A ParsePosition caller may leave trailing text unconsumed.
             final boolean hasT = checkOffset(date, offset, 'T');
+            final boolean hasTimezone = checkOffset(date, offset, 'Z') || checkOffset(date, offset, '+') || checkOffset(date, offset, '-');
 
-            if (!hasT && (date.length() <= offset)) {
+            if (!hasT && !hasTimezone) {
                 //noinspection MagicConstant
                 final Calendar calendar = new GregorianCalendar(TIMEZONE_Z);
 
@@ -281,26 +292,33 @@ final class ISO8601Util {
                 calendar.setLenient(false);
                 calendar.set(year, month - 1, day);
 
+                final Date result = calendar.getTime();
                 pos.setIndex(offset);
-                return calendar.getTime();
+                return result;
             }
 
             if (hasT) {
 
                 // extract hours, minutes, seconds and milliseconds
                 hour = parseInt(date, offset += 1, offset += 2);
-                if (checkOffset(date, offset, ':')) {
+                final boolean hasTimeSeparators = checkOffset(date, offset, ':');
+                if (hasTimeSeparators) {
                     offset += 1;
                 }
 
                 minutes = parseInt(date, offset, offset += 2);
-                if (checkOffset(date, offset, ':')) {
+                final boolean hasSecondsSeparator = checkOffset(date, offset, ':');
+                if (hasSecondsSeparator) {
                     offset += 1;
                 }
                 // second and milliseconds can be optional
                 if (date.length() > offset) {
                     final char c = date.charAt(offset);
                     if (c != 'Z' && c != '+' && c != '-') {
+                        if (hasSecondsSeparator != hasTimeSeparators) {
+                            throw new IllegalArgumentException("Inconsistent time separators in date \"" + date + "\"");
+                        }
+
                         seconds = parseInt(date, offset, offset += 2);
                         if (seconds > 59 && seconds < 63) {
                             seconds = 59; // truncate up to 3 leap seconds
@@ -330,7 +348,11 @@ final class ISO8601Util {
                             }
                             offset = endOffset;
                         }
+                    } else if (hasSecondsSeparator) {
+                        throw new IllegalArgumentException("Missing seconds after ':' in date \"" + date + "\"");
                     }
+                } else if (hasSecondsSeparator) {
+                    throw new IllegalArgumentException("Missing seconds after ':' in date \"" + date + "\"");
                 }
             }
 
@@ -349,8 +371,9 @@ final class ISO8601Util {
                     timezone = TIMEZONE_Z;
                     offset += 1;
                 } else if (timezoneIndicator == '+' || timezoneIndicator == '-') {
-                    final String timezoneOffset = date.substring(offset);
-                    offset += timezoneOffset.length();
+                    final int timezoneEnd = offset + (checkOffset(date, offset + 3, ':') ? 6 : 5);
+                    final String timezoneOffset = date.substring(offset, timezoneEnd);
+                    offset = timezoneEnd;
                     // 18-Jun-2015, tatu: Minor simplification, skip offset of "+0000"/"+00:00"
                     if ("+0000".equals(timezoneOffset) || "+00:00".equals(timezoneOffset)) {
                         timezone = TIMEZONE_Z;
@@ -401,8 +424,9 @@ final class ISO8601Util {
             calendar.set(Calendar.SECOND, seconds);
             calendar.set(Calendar.MILLISECOND, milliseconds);
 
+            final Date result = calendar.getTime();
             pos.setIndex(offset);
-            return calendar.getTime();
+            return result;
             // If we get a ParseException it'll already have the right message/offset.
             // Other exception types can convert here.
         } catch (final Exception e) {

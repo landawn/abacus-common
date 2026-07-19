@@ -132,7 +132,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code LongIterator} over the specified range, or an empty iterator if the validated range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -332,8 +332,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L);
-     * Long boxed = iter.next();         // returns 1L (boxed) — avoid this
-     * long primitive = iter.nextLong(); // returns 2L — prefer this
+     * Long boxed = iter.next();           // returns 1L (boxed) — avoid this
+     * long primitive = iter.nextLong();   // returns 2L — prefer this
      * }</pre>
      *
      * @return the next long value as a boxed {@link Long}
@@ -612,15 +612,17 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedLong} objects with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
-    public ObjIterator<IndexedLong> indexed(final long startIndex) {
+    public ObjIterator<IndexedLong> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final LongIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -629,7 +631,24 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
             @Override
             public IndexedLong next() {
-                return IndexedLong.of(iter.nextLong(), idx++);
+                if (indexOverflow) {
+                    if (!iter.hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    throw new ArithmeticException("long overflow");
+                }
+
+                final long value = iter.nextLong();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedLong.of(value, currentIndex);
             }
         };
     }
@@ -646,6 +665,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param action the action to be performed for each element
+     * @throws NullPointerException if {@code action} is {@code null}
      * @deprecated use {@link #foreachRemaining(Throwables.LongConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
@@ -698,8 +718,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element, accepting index and value; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
-     *         causing the index to overflow
+     * @throws IllegalStateException if another element would require an index greater than
+     *         {@link Integer#MAX_VALUE}
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntLongConsumer<E> action) throws IllegalArgumentException, E {

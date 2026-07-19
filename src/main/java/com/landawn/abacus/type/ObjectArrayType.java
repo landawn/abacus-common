@@ -184,6 +184,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
         if (this.isSerializable()) {
             final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
+            Throwable failure = null;
 
             try {
                 bw.write(SK._BRACKET_L);
@@ -204,9 +205,14 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
                 return bw.toString();
             } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+                final UncheckedIOException uncheckedException = new UncheckedIOException(e);
+                failure = uncheckedException;
+                throw uncheckedException;
+            } catch (final RuntimeException | Error e) {
+                failure = e;
+                throw e;
             } finally {
-                Objectory.recycle(bw);
+                Utils.recycle(bw, failure);
             }
         } else {
             return Utils.jsonParser.serialize(x, Utils.jsc);
@@ -269,6 +275,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                Throwable failure = null;
 
                 try {
                     bw.write(SK._BRACKET_L);
@@ -290,9 +297,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
+                } catch (final IOException | RuntimeException | Error e) {
+                    failure = e;
+                    throw e;
                 } finally {
                     if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
+                        Utils.recycle((BufferedWriter) bw, failure);
                     }
                 }
             } else {
@@ -346,11 +356,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 }
 
-                if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    elementType.serializeTo(writer, x[i], config);
-                }
+                elementType.serializeTo(writer, x[i], config);
             }
 
             writer.write(SK._BRACKET_R);

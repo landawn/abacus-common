@@ -241,7 +241,7 @@ public enum LockMode {
                 return RAUD;
 
             default:
-                throw new IllegalArgumentException("Invalid lock mode value[" + intValue + "]. ");
+                throw new IllegalArgumentException("No LockMode for int value: " + intValue + ". Expected a bitmask value in range 1-15");
         }
     }
 
@@ -264,6 +264,7 @@ public enum LockMode {
      * @param lockMode the LockMode to check against
      * @return {@code true} if this mode and {@code lockMode} have at least one lock flag in common,
      *         {@code false} otherwise
+     * @throws NullPointerException if {@code lockMode} is {@code null}
      */
     public boolean isXLockOf(final LockMode lockMode) {
         return (intValue & lockMode.intValue) > 0;

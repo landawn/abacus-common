@@ -35,7 +35,7 @@ public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeExcepti
     DoubleSupplier ZERO = () -> 0;
     /**
      * A {@code DoubleSupplier} which returns a random double value between {@code 0.0d} (inclusive) and {@code 1.0d} (exclusive).
-     * Each invocation returns a new pseudorandom value.
+     * Each invocation draws another value, but successive values are not guaranteed to be distinct.
      */
     DoubleSupplier RANDOM = Util.RAND_DOUBLE::nextDouble;
 

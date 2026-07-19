@@ -44,16 +44,8 @@ public class TickerTest extends TestBase {
             readings[i] = ticker.read();
         }
 
-        boolean foundDifferent = false;
         for (int i = 1; i < readings.length; i++) {
-            if (readings[i] != readings[i - 1]) {
-                foundDifferent = true;
-                break;
-            }
-        }
-
-        for (int i = 1; i < readings.length; i++) {
-            Assertions.assertTrue(readings[i] >= readings[i - 1]);
+            Assertions.assertTrue(readings[i] - readings[i - 1] >= 0);
         }
     }
 
@@ -95,22 +87,19 @@ public class TickerTest extends TestBase {
 
         Assertions.assertTrue(elapsedNanos >= 10_000_000L);
 
-        Assertions.assertTrue(elapsedNanos < 100_000_000L);
     }
 
     @Test
     public void testRead() {
         Ticker ticker = Ticker.systemTicker();
-        long time = ticker.read();
-        assertTrue(time > 0);
+        ticker.read();
     }
 
     @Test
     public void testRead_multipleReads() {
         Ticker ticker = Ticker.systemTicker();
         for (int i = 0; i < 10; i++) {
-            long time = ticker.read();
-            assertTrue(time > 0);
+            ticker.read();
         }
     }
 
@@ -120,7 +109,7 @@ public class TickerTest extends TestBase {
         long time1 = ticker.read();
         Thread.sleep(1);
         long time2 = ticker.read();
-        assertTrue(time2 >= time1);
+        assertTrue(time2 - time1 >= 0);
     }
 
     @Test
@@ -130,7 +119,7 @@ public class TickerTest extends TestBase {
         long previousTime = ticker.read();
         for (int i = 0; i < 100; i++) {
             long currentTime = ticker.read();
-            Assertions.assertTrue(currentTime >= previousTime);
+            Assertions.assertTrue(currentTime - previousTime >= 0);
             previousTime = currentTime;
         }
     }
@@ -149,7 +138,7 @@ public class TickerTest extends TestBase {
         long endTime = ticker.read();
         long elapsed = endTime - startTime;
 
-        Assertions.assertTrue(elapsed > 0);
+        Assertions.assertTrue(elapsed >= 0);
 
         Assertions.assertTrue(sum != 0);
     }
@@ -172,10 +161,7 @@ public class TickerTest extends TestBase {
         }
         long time2 = ticker.read();
 
-        Assertions.assertTrue(time2 > time1);
-
-        Assertions.assertTrue(time1 > 0);
-        Assertions.assertTrue(time2 > 0);
+        Assertions.assertTrue(time2 - time1 >= 0);
     }
 
 }

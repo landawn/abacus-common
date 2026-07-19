@@ -79,13 +79,13 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
     /** Whether to write long values as strings. */
     boolean writeLongAsString = false;
 
-    /** Whether to write null string values as empty strings. */
+    /** Whether to write {@code null} string values as empty strings. */
     boolean writeNullStringAsEmpty = false;
 
-    /** Whether to write null numeric values as zero. */
+    /** Whether to write {@code null} numeric values as zero. */
     boolean writeNullNumberAsZero = false;
 
-    /** Whether to write null boolean values as false. */
+    /** Whether to write {@code null} boolean values as {@code false}. */
     boolean writeNullBooleanAsFalse = false;
 
     /** Whether to write {@code BigDecimal} values in plain format. */
@@ -616,7 +616,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isCircularReferenceSupported();                                     // returns false (default)
+     * config.isCircularReferenceSupported();                                       // returns false (default)
      * config.setCircularReferenceSupported(true).isCircularReferenceSupported();   // returns true
      * }</pre>
      *

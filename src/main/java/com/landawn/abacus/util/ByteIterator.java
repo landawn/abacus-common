@@ -653,15 +653,17 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param startIndex the starting index value (must be non-negative)
      * @return an ObjIterator of IndexedByte elements with custom starting index
      * @throws IllegalArgumentException if startIndex is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
-    public ObjIterator<IndexedByte> indexed(final long startIndex) {
+    public ObjIterator<IndexedByte> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final ByteIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -670,7 +672,24 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
             @Override
             public IndexedByte next() {
-                return IndexedByte.of(iter.nextByte(), idx++);
+                if (indexOverflow) {
+                    if (iter.hasNext()) {
+                        throw new ArithmeticException("long overflow");
+                    }
+
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final byte value = iter.nextByte();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedByte.of(value, currentIndex);
             }
         };
     }
@@ -694,7 +713,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 

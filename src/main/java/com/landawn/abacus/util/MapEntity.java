@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -275,12 +276,15 @@ public final class MapEntity implements Serializable {
      * user.removeAll(Arrays.asList("temp1", "temp2"));
      * }</pre>
      *
+     * <p>The collection may be a live view of this entity, such as {@link #keySet()}.</p>
+     *
      * @param propNames a collection of property names to remove
      * @throws NullPointerException if {@code propNames} is {@code null}
      * @see #remove(String)
      */
     public void removeAll(final Collection<String> propNames) { // NOSONAR
-        for (final String propName : propNames) {
+        // Snapshot first because removing from values invalidates a backed view such as values.keySet().
+        for (final String propName : new ArrayList<>(propNames)) {
             remove(propName);
         }
     }

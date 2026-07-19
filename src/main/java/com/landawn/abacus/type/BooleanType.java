@@ -29,7 +29,7 @@ import com.landawn.abacus.util.N;
  * using {@link com.landawn.abacus.util.N#convert(Object, Class)}.</p>
  *
  * <p>String serialization and JDBC write operations are inherited from
- * {@link AbstractBooleanType}. The SQL type used for null writes is
+ * {@link AbstractBooleanType}. The SQL type used for {@code null} writes is
  * {@link java.sql.Types#BOOLEAN}.</p>
  *
  * @see AbstractBooleanType

@@ -64,7 +64,7 @@ import lombok.experimental.Accessors;
  *   <li><b>Iterator-Centric Design:</b> Optimized specifically for Iterator patterns and lazy evaluation</li>
  *   <li><b>Memory Efficient:</b> Minimal memory footprint with streaming operations</li>
  *   <li><b>Parallel Processing:</b> Support for concurrent iterator operations with ExecutorService</li>
- *   <li><b>Null-Safe Operations:</b> Graceful handling of null inputs and empty iterators</li>
+ *   <li><b>Null-Safe Operations:</b> Graceful handling of {@code null} inputs and empty iterators</li>
  *   <li><b>Functional Programming:</b> Comprehensive support for map, filter, reduce, and functional patterns</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
@@ -176,9 +176,9 @@ import lombok.experimental.Accessors;
  * <p><b>Error Handling Strategy:</b>
  * <ul>
  *   <li><b>Graceful Degradation:</b> Methods handle edge cases without throwing exceptions</li>
- *   <li><b>Null Safety:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Null Safety:</b> Comprehensive {@code null} input handling throughout the API</li>
  *   <li><b>Boundary Checking:</b> Safe index access with bounds validation</li>
- *   <li><b>Nullable Returns:</b> Use of Nullable types to avoid null return values</li>
+ *   <li><b>Nullable Returns:</b> Use of {@code Nullable} types to avoid {@code null} return values</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
@@ -194,7 +194,7 @@ import lombok.experimental.Accessors;
  *   <li>Use iterator-based operations for memory-efficient processing of large datasets</li>
  *   <li>Leverage parallel processing for CPU-intensive transformations</li>
  *   <li>Prefer lazy evaluation patterns for improved performance</li>
- *   <li>Use Nullable return types to avoid null pointer exceptions</li>
+ *   <li>Use {@code Nullable} return types to avoid {@code null} pointer exceptions</li>
  *   <li>Chain operations efficiently to minimize intermediate collection creation</li>
  *   <li>Consider iterator consumption patterns (single-use vs. reusable)</li>
  * </ul>
@@ -1927,7 +1927,7 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the Iterable objects.
      * @param a the Iterable objects to be concatenated. {@code null} Iterable elements within {@code a} are treated as empty.
-     * @return an ObjIterator that will iterate over the elements of each provided Iterable in order, or an empty iterator if {@code a} is {@code null} or empty.
+     * @return an ObjIterator that will lazily obtain and iterate over each provided Iterable in order, or an empty iterator if {@code a} is {@code null} or empty.
      * @see N#concat(Iterable...)
      */
     @SafeVarargs
@@ -1936,13 +1936,7 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        final List<Iterator<? extends T>> list = new ArrayList<>(a.length);
-
-        for (final Iterable<? extends T> e : a) {
-            list.add(N.iterate(e));
-        }
-
-        return concat(list);
+        return concatIterables(Arrays.asList(a));
     }
 
     /**
@@ -2134,6 +2128,8 @@ public final class Iterators {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 final Throwables.BiConsumer<? super A, ? super B, RuntimeException> actionE = Fnn.from(action);
 
                 while (hasNext()) {
@@ -2143,6 +2139,8 @@ public final class Iterators {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNext()) {
                     cur.foreachRemaining(action);
                 }
@@ -2150,6 +2148,7 @@ public final class Iterators {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
 
                 return new ObjIterator<>() {
                     private ObjIterator<R> mappedIter = null;
@@ -2240,6 +2239,8 @@ public final class Iterators {
 
             @Override
             public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNext()) {
                     cur.foreachRemaining(action);
                 }
@@ -2247,6 +2248,8 @@ public final class Iterators {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNext()) {
                     cur.foreachRemaining(action);
                 }
@@ -2254,6 +2257,7 @@ public final class Iterators {
 
             @Override
             public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
 
                 return new ObjIterator<>() {
                     private ObjIterator<R> mappedIter = null;
@@ -2604,15 +2608,14 @@ public final class Iterators {
      * @param b the second iterator to be zipped, or {@code null} which is treated as an empty iterator.
      * @param zipFunction a {@code BiFunction} that takes an element from each iterator and returns a new element for the resulting {@code ObjIterator}.
      * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}. The resulting iterator stops as soon as either input iterator is exhausted.
-     * Note that calling {@code next()} on the returned iterator when {@code hasNext()} is {@code false} still pulls from {@code a} first: if only {@code b} is exhausted,
-     * one element is irreversibly consumed from {@code a} before {@code NoSuchElementException} is thrown. Always check {@code hasNext()} before calling {@code next()}.
+     * Calling {@code next()} after exhaustion throws {@link NoSuchElementException} without advancing either input iterator.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterator, Iterator, Object, Object, BiFunction)
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Maps#zip(Iterable, Iterable)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.function);
 
         return new ObjIterator<>() {
@@ -2626,6 +2629,10 @@ public final class Iterators {
 
             @Override
             public R next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return zipFunction.apply(iterA.next(), iterB.next());
             }
         };
@@ -2683,14 +2690,13 @@ public final class Iterators {
      * @param c the third iterator to be zipped, or {@code null} which is treated as an empty iterator.
      * @param zipFunction a {@code TriFunction} that takes an element from each iterator and returns a new element for the resulting {@code ObjIterator}.
      * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}. The resulting iterator stops as soon as any input iterator is exhausted.
-     * Note that calling {@code next()} on the returned iterator when {@code hasNext()} is {@code false} still pulls from {@code a} (then {@code b}) first: elements may be
-     * irreversibly consumed from the non-exhausted iterators before {@code NoSuchElementException} is thrown. Always check {@code hasNext()} before calling {@code next()}.
+     * Calling {@code next()} after exhaustion throws {@link NoSuchElementException} without advancing any input iterator.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
-            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.function);
 
         return new ObjIterator<>() {
@@ -2705,6 +2711,10 @@ public final class Iterators {
 
             @Override
             public R next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return zipFunction.apply(iterA.next(), iterB.next(), iterC.next());
             }
         };
@@ -2772,7 +2782,7 @@ public final class Iterators {
      * @see #zip(Iterator, Iterator, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA, final B valueForNoneB,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.function);
 
         return new ObjIterator<>() {
@@ -2862,7 +2872,8 @@ public final class Iterators {
      * @see #zip(Iterator, Iterator, Iterator, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
-            final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+            final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.function);
 
         return new ObjIterator<>() {
@@ -3021,7 +3032,8 @@ public final class Iterators {
      */
     @Deprecated
     @Beta
-    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip)
+            throws IllegalArgumentException {
         N.checkArgNotNull(unzip, "unzip");
 
         return TriIterator.unzip(iter, unzip);
@@ -3057,7 +3069,8 @@ public final class Iterators {
      */
     @Deprecated
     @Beta
-    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip)
+            throws IllegalArgumentException {
         N.checkArgNotNull(unzip, "unzip");
 
         return TriIterator.unzip(N.iterate(c), unzip);
@@ -3240,7 +3253,7 @@ public final class Iterators {
      * @param offset the number of elements to skip from the beginning. Must be non-negative.
      * @param count the maximum number of elements to return after skipping. Must be non-negative.
      * @return an {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element, or an empty iterator if {@code iter} is {@code null}.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative
      * @see N#slice(Iterator, int, int)
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
@@ -3576,7 +3589,7 @@ public final class Iterators {
      * @see Maps#filter(Map, BiPredicate)
      */
     @Beta
-    public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
@@ -3608,7 +3621,7 @@ public final class Iterators {
      * @see N#filter(Iterator, Predicate)
      * @see Maps#filter(Map, BiPredicate)
      */
-    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
@@ -3671,7 +3684,7 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Beta
-    public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
@@ -3702,7 +3715,7 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator as long as they satisfy the provided {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
@@ -3765,7 +3778,7 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Beta
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
@@ -3796,7 +3809,8 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator as long as they satisfy the provided {@code Predicate}, including the first element that does not satisfy the {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
@@ -3863,7 +3877,7 @@ public final class Iterators {
      * @see #skipUntil(Iterable, Predicate)
      */
     @Beta
-    public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
@@ -3897,7 +3911,7 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #skipUntil(Iterator, Predicate)
      */
-    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
@@ -3969,7 +3983,7 @@ public final class Iterators {
      * @see #dropWhile(Iterable, Predicate)
      */
     @Beta
-    public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
@@ -4004,7 +4018,7 @@ public final class Iterators {
      * @see #dropWhile(Iterator, Predicate)
      */
     @Beta
-    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
@@ -4073,7 +4087,7 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Beta
-    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) {
+    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (c == null) {
@@ -4101,7 +4115,7 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) {
+    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (iter == null) {
@@ -4150,7 +4164,8 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Beta
-    public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
+    public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (c == null) {
@@ -4179,7 +4194,8 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
+    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (iter == null) {
@@ -4207,7 +4223,7 @@ public final class Iterators {
             }
 
             @Override
-            public U next() {
+            public U next() throws IllegalArgumentException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4744,6 +4760,7 @@ public final class Iterators {
      * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
+     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
@@ -4792,6 +4809,7 @@ public final class Iterators {
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
+     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
@@ -4832,7 +4850,7 @@ public final class Iterators {
      * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
@@ -4876,9 +4894,10 @@ public final class Iterators {
      * @param queueSize the size of the queue to hold elements between reading and processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws Error if the {@code elementConsumer} throws an error.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
      */
@@ -4887,6 +4906,8 @@ public final class Iterators {
             final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
             final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
+        N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
+                "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
 
         if (N.isEmpty(iterators)) {
             // onComplete is documented to run after all elements have been processed - vacuously
@@ -4923,7 +4944,7 @@ public final class Iterators {
             } else {
                 final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
                 final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
-                final Holder<Exception> errorHolder = new Holder<>();
+                final Holder<Throwable> errorHolder = new Holder<>();
 
                 try {
                     for (int i = 0; i < processThreadNum; i++) {
@@ -4941,7 +4962,7 @@ public final class Iterators {
 
                                     elementConsumer.accept(element);
                                 }
-                            } catch (final Exception e) {
+                            } catch (final Throwable e) {
                                 synchronized (errorHolder) {
                                     if (errorHolder.value() == null) {
                                         errorHolder.setValue(e);
@@ -4971,7 +4992,7 @@ public final class Iterators {
                     }
 
                     if (errorHolder.value() != null) {
-                        throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
+                        throw ExceptionUtil.toRuntimeException(errorHolder.value(), true, true);
                     }
                 } finally {
                     executorService.shutdown();
@@ -5111,7 +5132,7 @@ public final class Iterators {
      * @return the calculated buffer size, capped at 1024.
      */
     static int calculateBufferedSize(final int readThreadNum) {
-        return N.min(1024, readThreadNum * 64);
+        return (int) N.min(1024L, (long) readThreadNum * 64);
     }
 
     /**

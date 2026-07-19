@@ -26,6 +26,9 @@ public class IntToCharFunctionTest extends TestBase {
     public void test_DEFAULT() {
         assertEquals((char) 65, IntToCharFunction.DEFAULT.applyAsChar(65));
         assertEquals((char) 0, IntToCharFunction.DEFAULT.applyAsChar(0));
+        assertEquals((char) 0xFFFF, IntToCharFunction.DEFAULT.applyAsChar(-1));
+        assertEquals((char) 0, IntToCharFunction.DEFAULT.applyAsChar(0x10000));
+        assertEquals((char) 0xD800, IntToCharFunction.DEFAULT.applyAsChar(0xD800));
     }
 
     @Test

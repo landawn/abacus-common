@@ -673,6 +673,11 @@ public class AbstractIntStreamTest extends TestBase {
     }
 
     @Test
+    public void testJoinToRejectsNullForEmptyStream() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createIntStream().joinTo(null));
+    }
+
+    @Test
     public void testCollectWithSupplierAndAccumulator() {
         List<Integer> result = stream.collect(ArrayList::new, (list, value) -> list.add(value));
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
@@ -711,6 +716,27 @@ public class AbstractIntStreamTest extends TestBase {
         revIter2.nextInt();
         assertEquals(3L, revIter2.count());
         Assertions.assertFalse(revIter2.hasNext());
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
+        IntIteratorEx reversed = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        assertEquals(5, reversed.toArray().length);
+        Assertions.assertFalse(reversed.hasNext());
+        assertEquals(0, reversed.toArray().length);
+
+        IntIteratorEx rotated = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        rotated.nextInt();
+        assertEquals(4, rotated.toArray().length);
+        Assertions.assertFalse(rotated.hasNext());
+        assertEquals(0, rotated.toArray().length);
+
+        IntIteratorEx reverseSorted = (IntIteratorEx) createIntStream(new int[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        reverseSorted.nextInt();
+        reverseSorted.nextInt();
+        assertEquals(3, reverseSorted.toArray().length);
+        Assertions.assertFalse(reverseSorted.hasNext());
+        assertEquals(0, reverseSorted.toArray().length);
     }
 
     @Test

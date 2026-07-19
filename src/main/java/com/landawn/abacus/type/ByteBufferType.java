@@ -26,8 +26,8 @@ import com.landawn.abacus.util.Strings;
  * enabling storage and transmission of binary buffer data in text-based formats.
  *
  * <p>The buffer's content is defined as the bytes from index {@code 0} up to (but not including)
- * the current {@link java.nio.ByteBuffer#position() position}. The position is preserved across
- * calls to {@link #stringOf(ByteBuffer)} and {@link #byteArrayOf(ByteBuffer)}.</p>
+ * the current {@link java.nio.ByteBuffer#position() position}. The position, limit, and mark are
+ * preserved across calls to {@link #stringOf(ByteBuffer)} and {@link #byteArrayOf(ByteBuffer)}.</p>
  *
  * <p>There is no direct JDBC mapping; this type is intended for JSON/XML serialization contexts.
  * For database binary data, prefer {@link BytesType} or {@link BlobType}.</p>
@@ -90,7 +90,8 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     /**
      * Converts a {@link java.nio.ByteBuffer} to its Base64-encoded string representation.
      * The encoded bytes are taken from position {@code 0} to the buffer's current
-     * {@link java.nio.ByteBuffer#position() position}; the position is restored after reading.
+     * {@link java.nio.ByteBuffer#position() position}; the buffer's position, limit, and mark are
+     * not modified.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
@@ -119,7 +120,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the Base64-encoded string to decode; may be {@code null} or empty
-     * @return a {@code ByteBuffer} wrapping the decoded bytes with position at {@code bytes.length},
+     * @return a buffer containing the decoded bytes
      *         or {@code null} if {@code str} is {@code null},
      *         or an empty buffer if {@code str} is empty
      * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet
@@ -140,25 +141,25 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     /**
      * Extracts the written content of a {@link java.nio.ByteBuffer} as a byte array.
      * Copies bytes from index {@code 0} up to (but not including) the buffer's current
-     * {@link java.nio.ByteBuffer#position() position}, then restores the position to its
-     * original value before returning.
+     * {@link java.nio.ByteBuffer#position() position}. The copy is read through a duplicate, so
+     * the original buffer's position, limit, and mark are not modified.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBuffer buf = ByteBuffer.allocate(10);
-     * buf.put((byte) 10).put((byte) 20);              // position is now 2
-     * byte[] bytes = ByteBufferType.byteArrayOf(buf); // returns [10, 20]; buf.position() still 2
+     * buf.put((byte) 10).put((byte) 20);                // position is now 2
+     * byte[] bytes = ByteBufferType.byteArrayOf(buf);   // returns [10, 20]; buf.position() still 2
      * }</pre>
      *
      * @param x the {@code ByteBuffer} to extract bytes from; must not be {@code null}
      * @return a new byte array containing the buffer's written bytes (indices {@code 0..position-1})
      */
     public static byte[] byteArrayOf(final ByteBuffer x) {
-        final byte[] bytes = new byte[x.position()];
+        final ByteBuffer duplicate = x.duplicate();
+        final byte[] bytes = new byte[duplicate.position()];
 
-        x.position(0);
-        x.get(bytes);
-        x.position(bytes.length);
+        duplicate.position(0);
+        duplicate.get(bytes);
 
         return bytes;
     }

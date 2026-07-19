@@ -478,7 +478,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @throws IllegalArgumentException if {@code source} is {@code null}
      */
     @Override
-    public <T> T deserialize(final String source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final KryoDeserConfig config, final Class<? extends T> targetClass) throws IllegalArgumentException {
         N.checkArgNotNull(source, cs.source);
 
         final Input input = createInput();
@@ -730,7 +730,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                 try {
                     return kryo.readObject(source, targetClass);
                 } catch (final RuntimeException e2) {
-                    if (classAndObjectException != null) {
+                    // A custom Serializer is allowed to reuse and throw the same RuntimeException
+                    // instance on both attempts. Throwable rejects self-suppression, so preserve
+                    // that original failure instead of masking it with IllegalArgumentException.
+                    if (classAndObjectException != null && classAndObjectException != e2) {
                         e2.addSuppressed(classAndObjectException);
                     }
 
@@ -922,6 +925,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Registers a class with this parser instance for improved performance.
      * Registration allows Kryo to serialize the class more efficiently.
+     * If the class was registered previously through another overload, this call replaces that
+     * registration; the most recent call is authoritative.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -937,6 +942,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         N.checkArgNotNull(type, cs.type);
 
         synchronized (kryoPool) {
+            clearKryoRegistration(type);
             kryoClassSet.add(type);
 
             xPool.clear();
@@ -947,6 +953,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Registers a class with a specific ID for this parser instance.
      * Using fixed IDs ensures compatibility across different JVM instances.
+     * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -956,13 +963,15 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @param type the class to register
-     * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type is {@code null}
+     * @param id the non-negative unique ID for this class
+     * @throws IllegalArgumentException if type is {@code null} or {@code id} is negative
      */
     public void register(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
+        N.checkArgNotNegative(id, "id");
 
         synchronized (kryoPool) {
+            clearKryoRegistration(type);
             kryoClassIdMap.put(type, id);
 
             xPool.clear();
@@ -973,6 +982,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Registers a class with a custom serializer for this parser instance.
      * Custom serializers can handle special serialization requirements.
+     * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -989,6 +999,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         N.checkArgNotNull(serializer, cs.serializer);
 
         synchronized (kryoPool) {
+            clearKryoRegistration(type);
             kryoClassSerializerMap.put(type, serializer);
 
             xPool.clear();
@@ -999,6 +1010,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Registers a class with a custom serializer and specific ID for this parser instance.
      * Combines the benefits of custom serialization and fixed IDs.
+     * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1008,19 +1020,33 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @param type the class to register
      * @param serializer the custom serializer for this class
-     * @param id the unique ID for this class
-     * @throws IllegalArgumentException if type or serializer is {@code null}
+     * @param id the non-negative unique ID for this class
+     * @throws IllegalArgumentException if type or serializer is {@code null}, or {@code id} is negative
      */
     public void register(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
         N.checkArgNotNull(serializer, cs.serializer);
+        N.checkArgNotNegative(id, "id");
 
         synchronized (kryoPool) {
+            clearKryoRegistration(type);
             kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
 
             xPool.clear();
             kryoPool.clear();
         }
+    }
+
+    /**
+     * Clears all earlier registration variants for {@code type}, making the most recent
+     * {@code register(...)} call authoritative. Without this, stale entries in the maps below
+     * were all replayed and the hard-coded replay order, rather than call order, chose the winner.
+     */
+    private void clearKryoRegistration(final Class<?> type) {
+        kryoClassSet.remove(type);
+        kryoClassIdMap.remove(type);
+        kryoClassSerializerMap.remove(type);
+        kryoClassSerializerIdMap.remove(type);
     }
 
     private static final Set<Class<?>> builtInClassesToRegister = new LinkedHashSet<>();
@@ -1231,76 +1257,86 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      */
     protected Kryo createKryo() {
         synchronized (kryoPool) {
-            final long currentGlobalRegistrationVersion = ParserFactory._kryoRegistrationVersion.get();
+            synchronized (ParserFactory._kryoRegistrationLock) {
+                final long currentGlobalRegistrationVersion = ParserFactory._kryoRegistrationVersion.get();
 
-            if (globalKryoRegistrationVersion != currentGlobalRegistrationVersion) {
-                xPool.clear();
-                kryoPool.clear();
-                globalKryoRegistrationVersion = currentGlobalRegistrationVersion;
-            }
+                if (globalKryoRegistrationVersion != currentGlobalRegistrationVersion) {
+                    xPool.clear();
+                    kryoPool.clear();
+                    globalKryoRegistrationVersion = currentGlobalRegistrationVersion;
+                }
 
-            if (kryoPool.size() > 0) {
-                return kryoPool.remove(kryoPool.size() - 1);
-            }
-            final Kryo kryo = new Kryo();
+                // Keep the global lock through the pooled-instance decision. Otherwise a global
+                // registration could complete after the version check but before this removal,
+                // allowing one stale pooled Kryo to escape after the new registration is visible.
+                if (kryoPool.size() > 0) {
+                    return kryoPool.remove(kryoPool.size() - 1);
+                }
 
-            kryo.setRegistrationRequired(false);
+                final Kryo kryo = new Kryo();
 
-            for (final Class<?> cls : builtInClassesToRegister) {
-                kryo.register(cls);
-            }
+                kryo.setRegistrationRequired(false);
 
-            if (N.notEmpty(ParserFactory._kryoClassSet)) {
-                for (final Class<?> cls : ParserFactory._kryoClassSet) {
+                for (final Class<?> cls : builtInClassesToRegister) {
                     kryo.register(cls);
                 }
-            }
 
-            if (N.notEmpty(ParserFactory._kryoClassIdMap)) {
-                for (final Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
-                    kryo.register(entry.getKey(), entry.getValue());
+                // Keep the registry lock until the fully configured instance is published/returned.
+                // This makes creation linearizable with global register calls: a registration either
+                // precedes this instance and is replayed here, or follows this return and invalidates it
+                // before it can subsequently be obtained from the pool.
+                if (N.notEmpty(ParserFactory._kryoClassSet)) {
+                    for (final Class<?> cls : ParserFactory._kryoClassSet) {
+                        kryo.register(cls);
+                    }
                 }
-            }
 
-            if (N.notEmpty(ParserFactory._kryoClassSerializerMap)) {
-                for (final Map.Entry<Class<?>, Serializer<?>> entry : ParserFactory._kryoClassSerializerMap.entrySet()) {
-                    kryo.register(entry.getKey(), entry.getValue());
+                if (N.notEmpty(ParserFactory._kryoClassIdMap)) {
+                    for (final Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
+                        kryo.register(entry.getKey(), entry.getValue());
+                    }
                 }
-            }
 
-            if (N.notEmpty(ParserFactory._kryoClassSerializerIdMap)) {
-                for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : ParserFactory._kryoClassSerializerIdMap.entrySet()) {
-                    kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                if (N.notEmpty(ParserFactory._kryoClassSerializerMap)) {
+                    for (final Map.Entry<Class<?>, Serializer<?>> entry : ParserFactory._kryoClassSerializerMap.entrySet()) {
+                        kryo.register(entry.getKey(), entry.getValue());
+                    }
                 }
-            }
 
-            if (N.notEmpty(kryoClassSet)) {
-                for (final Class<?> cls : kryoClassSet) {
-                    kryo.register(cls);
+                if (N.notEmpty(ParserFactory._kryoClassSerializerIdMap)) {
+                    for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : ParserFactory._kryoClassSerializerIdMap.entrySet()) {
+                        kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                    }
                 }
-            }
 
-            if (N.notEmpty(kryoClassIdMap)) {
-                for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
-                    kryo.register(entry.getKey(), entry.getValue());
+                if (N.notEmpty(kryoClassSet)) {
+                    for (final Class<?> cls : kryoClassSet) {
+                        kryo.register(cls);
+                    }
                 }
-            }
 
-            if (N.notEmpty(kryoClassSerializerMap)) {
-                for (final Map.Entry<Class<?>, Serializer<?>> entry : kryoClassSerializerMap.entrySet()) { //NOSONAR
-                    kryo.register(entry.getKey(), entry.getValue());
+                if (N.notEmpty(kryoClassIdMap)) {
+                    for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
+                        kryo.register(entry.getKey(), entry.getValue());
+                    }
                 }
-            }
 
-            if (N.notEmpty(kryoClassSerializerIdMap)) {
-                for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
-                    kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                if (N.notEmpty(kryoClassSerializerMap)) {
+                    for (final Map.Entry<Class<?>, Serializer<?>> entry : kryoClassSerializerMap.entrySet()) { //NOSONAR
+                        kryo.register(entry.getKey(), entry.getValue());
+                    }
                 }
+
+                if (N.notEmpty(kryoClassSerializerIdMap)) {
+                    for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
+                        kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                    }
+                }
+
+                xPool.put(kryo, kryo);
+
+                return kryo;
             }
-
-            xPool.put(kryo, kryo);
-
-            return kryo;
         }
     }
 

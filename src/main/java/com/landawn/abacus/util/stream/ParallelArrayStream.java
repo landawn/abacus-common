@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -85,8 +84,12 @@ import com.landawn.abacus.util.function.TriFunction;
  * long count = stream.filter(s -> s.length() > 5).count();
  * }</pre>
  *
- * <p><b>Thread Safety:</b> Operations on this stream are thread-safe and properly synchronized
- * when accessing shared state during parallel execution.
+ * <p><b>Thread Safety:</b> A parallel operation coordinates its own worker threads when they
+ * access shared state. The stream instance itself is not intended to be driven concurrently by
+ * multiple callers or reused for independent operations.
+ *
+ * <p><b>Failure handling:</b> Terminal operations wait for every submitted worker before closing
+ * the stream or a temporary executor. The primary failure is rethrown and additional failures are suppressed.
  *
  * @param <T> the type of elements in the stream
  * @see ArrayStream
@@ -109,7 +112,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param fromIndex the start index (inclusive) of the range to process
      * @param toIndex the end index (exclusive) of the range to process
      * @param sorted whether the array elements in the range are in sorted order
-     * @param comparator the comparator used to order elements, or null if using natural ordering
+     * @param comparator the comparator used to order elements, or {@code null} if using natural ordering
      * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
      * @param splitor the strategy for dividing work among threads (null uses default)
      * @param asyncExecutor the executor for running parallel tasks (null uses default)
@@ -134,7 +137,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element to determine inclusion
      * @return a new parallel stream of matching elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalStateException {
@@ -244,7 +247,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to apply to elements; once it returns
      *        {@code false} for any element, the stream terminates
      * @return a new parallel stream of matching elements selected by the parallel operation
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalStateException {
@@ -313,7 +316,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return a new parallel stream of elements selected by the parallel drop operation
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalStateException {
@@ -399,7 +402,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param <R> the element type of the new stream
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel stream of mapped values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalStateException {
@@ -486,7 +489,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        missing second elements are passed as {@code null}
      * @param mapper a non-interfering, stateless function applied to each pair of adjacent elements
      * @return a new parallel stream of results from the sliding pair mapping
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
      */
     @Override
@@ -552,7 +555,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        missing elements in the window are passed as {@code null}
      * @param mapper a non-interfering, stateless function applied to each triple of elements
      * @return a new parallel stream of results from the sliding triple mapping
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
      */
     @Override
@@ -617,7 +620,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapperForFirst a non-interfering, stateless function to apply to the first element
      * @param mapperForElse a non-interfering, stateless function to apply to all other elements
      * @return a new parallel stream with differentiated first-element mapping
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse)
@@ -650,7 +653,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapperForLast a non-interfering, stateless function to apply to the last element
      * @param mapperForElse a non-interfering, stateless function to apply to all preceding elements
      * @return a new parallel stream with differentiated last-element mapping
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse)
@@ -683,7 +686,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code char}
      * @return a new parallel {@code CharStream} of mapped char values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public CharStream mapToChar(final ToCharFunction<? super T> mapper) throws IllegalStateException {
@@ -767,7 +770,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code byte}
      * @return a new parallel {@code ByteStream} of mapped byte values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public ByteStream mapToByte(final ToByteFunction<? super T> mapper) throws IllegalStateException {
@@ -851,7 +854,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code short}
      * @return a new parallel {@code ShortStream} of mapped short values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public ShortStream mapToShort(final ToShortFunction<? super T> mapper) throws IllegalStateException {
@@ -935,7 +938,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param mapper a non-interfering, stateless function to apply to each element to produce an {@code int}
      * @return a new parallel {@code IntStream} of mapped int values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public IntStream mapToInt(final ToIntFunction<? super T> mapper) throws IllegalStateException {
@@ -1019,7 +1022,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code long}
      * @return a new parallel {@code LongStream} of mapped long values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public LongStream mapToLong(final ToLongFunction<? super T> mapper) throws IllegalStateException {
@@ -1103,7 +1106,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code float}
      * @return a new parallel {@code FloatStream} of mapped float values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) throws IllegalStateException {
@@ -1187,7 +1190,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code double}
      * @return a new parallel {@code DoubleStream} of mapped double values
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) throws IllegalStateException {
@@ -1267,15 +1270,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel stream consisting of the results of replacing each element of this stream with
      * the contents of the stream produced by applying the given mapping function. Each sub-stream is
-     * opened and consumed by the thread that obtained the corresponding source element. Close handlers
-     * on sub-streams are called when each sub-stream is exhausted. The output order is not guaranteed
-     * to match the input order.
+     * opened and consumed by the thread that obtained the corresponding source element. Each mapped
+     * sub-stream is closed when it is exhausted or when the returned stream is closed. The output order
+     * is not guaranteed to match the input order.
      *
      * @param <R> the element type of the new stream
      * @param mapper a non-interfering, stateless function that maps each element to a stream of results;
      *        the returned sub-stream may be {@code null}, in which case it is treated as empty
      * @return a new parallel stream formed by concatenating all mapped sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) throws IllegalStateException {
@@ -1300,27 +1303,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private Iterator<? extends R> cur = null;
                     private Stream<? extends R> s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -1343,8 +1337,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Stream<? extends R> tmp = s;
+                            s = null;
+                            cur = null;
+                            tmp.close();
                         }
                     }
                 });
@@ -1357,11 +1358,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private Iterator<? extends R> cur = null;
                     private Stream<? extends R> s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -1372,21 +1374,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -1405,8 +1397,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Stream<? extends R> tmp = s;
+                            s = null;
+                            cur = null;
+                            tmp.close();
                         }
                     }
                 });
@@ -1428,7 +1427,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function that maps each element to a collection of results;
      *        {@code null} or empty collections are treated as empty
      * @return a new parallel stream formed by concatenating all mapped collections
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> Stream<R> flatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalStateException {
@@ -1527,7 +1526,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function that maps each element to an array of results;
      *        {@code null} arrays are treated as empty
      * @return a new parallel stream formed by concatenating all mapped arrays
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -1540,13 +1539,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel {@link CharStream} consisting of the results of replacing each element of this
      * stream with the contents of the {@code CharStream} produced by the mapping function. Sub-streams
-     * are opened and consumed by the thread that obtained the corresponding source element; close handlers
-     * on sub-streams are invoked when each sub-stream is exhausted. Output order is not guaranteed.
+     * are opened and consumed by the thread that obtained the corresponding source element. Each non-null
+     * sub-stream is closed after its contents are consumed or when the resulting stream is closed.
+     * Output order is not guaranteed.
      *
      * @param mapper a non-interfering, stateless function that maps each element to a {@code CharStream};
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code CharStream} formed by concatenating all mapped char sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -1572,27 +1572,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private CharIterator cur = null;
                     private CharStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -1615,8 +1606,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -1630,11 +1628,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private CharIterator cur = null;
                     private CharStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -1645,21 +1644,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -1678,8 +1667,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -1695,13 +1691,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel {@link ByteStream} consisting of the results of replacing each element of this
      * stream with the contents of the {@code ByteStream} produced by the mapping function. Sub-streams
-     * are opened and consumed by the thread that obtained the corresponding source element; close handlers
-     * on sub-streams are invoked when each sub-stream is exhausted. Output order is not guaranteed.
+     * are opened and consumed by the thread that obtained the corresponding source element. Each non-null
+     * sub-stream is closed after its contents are consumed or when the resulting stream is closed.
+     * Output order is not guaranteed.
      *
      * @param mapper a non-interfering, stateless function that maps each element to a {@code ByteStream};
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code ByteStream} formed by concatenating all mapped byte sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -1727,27 +1724,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private ByteIterator cur = null;
                     private ByteStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -1770,8 +1758,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -1785,11 +1780,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private ByteIterator cur = null;
                     private ByteStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -1800,21 +1796,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -1833,8 +1819,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -1850,13 +1843,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel {@link ShortStream} consisting of the results of replacing each element of this
      * stream with the contents of the {@code ShortStream} produced by the mapping function. Sub-streams
-     * are opened and consumed by the thread that obtained the corresponding source element; close handlers
-     * on sub-streams are invoked when each sub-stream is exhausted. Output order is not guaranteed.
+     * are opened and consumed by the thread that obtained the corresponding source element. Each non-null
+     * sub-stream is closed after its contents are consumed or when the resulting stream is closed.
+     * Output order is not guaranteed.
      *
      * @param mapper a non-interfering, stateless function that maps each element to a {@code ShortStream};
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code ShortStream} formed by concatenating all mapped short sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -1882,27 +1876,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private ShortIterator cur = null;
                     private ShortStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -1925,8 +1910,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -1940,11 +1932,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private ShortIterator cur = null;
                     private ShortStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -1955,21 +1948,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -1988,8 +1971,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2005,13 +1995,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel {@link IntStream} consisting of the results of replacing each element of this
      * stream with the contents of the {@code IntStream} produced by the mapping function. Sub-streams
-     * are opened and consumed by the thread that obtained the corresponding source element; close handlers
-     * on sub-streams are invoked when each sub-stream is exhausted. Output order is not guaranteed.
+     * are opened and consumed by the thread that obtained the corresponding source element. Each non-null
+     * sub-stream is closed after its contents are consumed or when the resulting stream is closed.
+     * Output order is not guaranteed.
      *
      * @param mapper a non-interfering, stateless function that maps each element to an {@code IntStream};
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code IntStream} formed by concatenating all mapped int sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -2037,27 +2028,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private IntIterator cur = null;
                     private IntStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -2080,8 +2062,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2095,11 +2084,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private IntIterator cur = null;
                     private IntStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -2110,21 +2100,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -2143,8 +2123,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2160,13 +2147,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel {@link LongStream} consisting of the results of replacing each element of this
      * stream with the contents of the {@code LongStream} produced by the mapping function. Sub-streams
-     * are opened and consumed by the thread that obtained the corresponding source element; close handlers
-     * on sub-streams are invoked when each sub-stream is exhausted. Output order is not guaranteed.
+     * are opened and consumed by the thread that obtained the corresponding source element. Each non-null
+     * sub-stream is closed after its contents are consumed or when the resulting stream is closed.
+     * Output order is not guaranteed.
      *
      * @param mapper a non-interfering, stateless function that maps each element to a {@code LongStream};
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code LongStream} formed by concatenating all mapped long sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -2192,27 +2180,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private LongIterator cur = null;
                     private LongStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -2235,8 +2214,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2250,11 +2236,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private LongIterator cur = null;
                     private LongStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -2265,21 +2252,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -2298,8 +2275,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2315,13 +2299,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel {@link FloatStream} consisting of the results of replacing each element of this
      * stream with the contents of the {@code FloatStream} produced by the mapping function. Sub-streams
-     * are opened and consumed by the thread that obtained the corresponding source element; close handlers
-     * on sub-streams are invoked when each sub-stream is exhausted. Output order is not guaranteed.
+     * are opened and consumed by the thread that obtained the corresponding source element. Each non-null
+     * sub-stream is closed after its contents are consumed or when the resulting stream is closed.
+     * Output order is not guaranteed.
      *
      * @param mapper a non-interfering, stateless function that maps each element to a {@code FloatStream};
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code FloatStream} formed by concatenating all mapped float sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -2347,27 +2332,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private FloatIterator cur = null;
                     private FloatStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -2390,8 +2366,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2405,11 +2388,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private FloatIterator cur = null;
                     private FloatStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -2420,21 +2404,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -2453,8 +2427,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2470,13 +2451,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns a parallel {@link DoubleStream} consisting of the results of replacing each element of this
      * stream with the contents of the {@code DoubleStream} produced by the mapping function. Sub-streams
-     * are opened and consumed by the thread that obtained the corresponding source element; close handlers
-     * on sub-streams are invoked when each sub-stream is exhausted. Output order is not guaranteed.
+     * are opened and consumed by the thread that obtained the corresponding source element. Each non-null
+     * sub-stream is closed after its contents are consumed or when the resulting stream is closed.
+     * Output order is not guaranteed.
      *
      * @param mapper a non-interfering, stateless function that maps each element to a {@code DoubleStream};
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code DoubleStream} formed by concatenating all mapped double sub-streams
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SuppressFBWarnings
     @Override
@@ -2502,27 +2484,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private DoubleIterator cur = null;
                     private DoubleStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while (cur == null || !cur.hasNext()) {
-                            if (cursor < to) {
-                                if (closeHandle != null) {
-                                    final Deque<LocalRunnable> tmp = closeHandle;
-                                    closeHandle = null;
-                                    StreamBase.close(tmp);
-                                }
+                            closeMappedStream();
 
+                            if (cursor < to) {
                                 s = mapper.apply(elements[cursor++]);
 
                                 if (s == null) {
                                     cur = null;
                                 } else {
-                                    if (N.notEmpty(s.closeHandlers())) {
-                                        closeHandle = s.closeHandlers();
-                                    }
-
                                     cur = s.iteratorEx();
                                 }
                             } else {
@@ -2545,8 +2518,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2560,11 +2540,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     private T next = null;
                     private DoubleIterator cur = null;
                     private DoubleStream s = null;
-                    private Deque<LocalRunnable> closeHandle = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            closeMappedStream();
+
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -2575,21 +2556,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            if (closeHandle != null) {
-                                final Deque<LocalRunnable> tmp = closeHandle;
-                                closeHandle = null;
-                                StreamBase.close(tmp);
-                            }
-
                             s = mapper.apply(next);
 
                             if (s == null) {
                                 cur = null;
                             } else {
-                                if (N.notEmpty(s.closeHandlers())) {
-                                    closeHandle = s.closeHandlers();
-                                }
-
                                 cur = s.iteratorEx();
                             }
                         }
@@ -2608,8 +2579,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                     @Override
                     public void closeResource() {
-                        if (closeHandle != null) {
-                            StreamBase.close(closeHandle);
+                        closeMappedStream();
+                    }
+
+                    private void closeMappedStream() {
+                        if (s != null) {
+                            final Runnable closeAction = s::close;
+                            s = null;
+                            cur = null;
+                            closeAction.run();
                         }
                     }
                 });
@@ -2629,7 +2607,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param action a non-interfering action to perform on each element as it is consumed
      * @return a new parallel stream that invokes the action on each element
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> onEach(final Consumer<? super T> action) throws IllegalStateException {
@@ -2718,7 +2696,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param <E2> the type of exception that the completion callback may throw
      * @param action a non-interfering action to perform on each element
      * @param onComplete a callback to run after all elements have been processed
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @throws E2 if the completion callback throws an exception
      */
@@ -2807,7 +2785,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param flatMapper a non-interfering function that maps each element to an iterable of values;
      *        {@code null} iterables are skipped
      * @param action a non-interfering bi-consumer accepting each element and the corresponding flat value
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if {@code flatMapper} throws an exception
      * @throws E2 if {@code action} throws an exception
      */
@@ -2909,7 +2887,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param flatMapper2 a function mapping each {@code T2} value to an iterable of {@code T3}
      *        values; may return {@code null}
      * @param action a tri-consumer invoked for each {@code (t, t2, t3)} triple
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if {@code flatMapper} throws an exception
      * @throws E2 if {@code flatMapper2} throws an exception
      * @throws E3 if {@code action} throws an exception
@@ -3020,7 +2998,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param increment the number of positions to advance the window between consecutive pairs; must
      *        be positive
      * @param action a non-interfering bi-consumer invoked for each pair
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
      * @throws E if the action throws an exception
      */
@@ -3083,7 +3061,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param increment the number of positions to advance the window between consecutive triples;
      *        must be positive
      * @param action a non-interfering tri-consumer invoked for each triple
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
      * @throws E if the action throws an exception
      */
@@ -3152,7 +3130,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mergeFunction a function to resolve collisions between values with the same key
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map containing the accumulated key/value pairs
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -3230,45 +3208,21 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        // checkException(eHolder, (E) null, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialMaps -> {
+            M res = null;
 
-        M res = null;
-
-        try {
-            for (final ContinuableFuture<M> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
+            for (final M partialMap : partialMaps) {
                 if (res == null) {
-                    res = future.get();
+                    res = partialMap;
                 } else {
-                    final M m = future.get();
-
-                    for (final Map.Entry<K, V> entry : m.entrySet()) {
+                    for (final Map.Entry<K, V> entry : partialMap.entrySet()) {
                         Collectors.merge(res, entry.getKey(), entry.getValue(), mergeFunction);
                     }
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwException(eHolder, (E) null);
-            }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
-
-        if (eHolder.value() != null) {
-            throwException(eHolder, (E) null);
-        }
-
-        return res;
+            return res;
+        }, this, asyncExecutor, asyncExecutorToUse, (E) null);
     }
 
     /**
@@ -3291,14 +3245,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param downstream a collector describing how per-key values are accumulated and finished
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -3398,57 +3352,34 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        // checkException(eHolder, (E) null, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialMaps -> {
+            Map<K, Object> intermediate = null;
 
-        Map<K, Object> intermediate = null;
-
-        try {
-            for (final ContinuableFuture<Map<K, Object>> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
+            for (final Map<K, Object> partialMap : partialMaps) {
                 if (intermediate == null) {
-                    intermediate = future.get();
+                    intermediate = partialMap;
                 } else {
-                    final Map<K, Object> m = future.get();
                     K key = null;
 
-                    for (final Map.Entry<K, Object> entry : m.entrySet()) {
+                    for (final Map.Entry<K, Object> entry : partialMap.entrySet()) {
                         key = entry.getKey();
 
                         if (intermediate.containsKey(key)) {
-                            intermediate.put(key, downstreamCombiner.apply(intermediate.get(key), m.get(key)));
+                            intermediate.put(key, downstreamCombiner.apply(intermediate.get(key), entry.getValue()));
                         } else {
-                            intermediate.put(key, m.get(key));
+                            intermediate.put(key, entry.getValue());
                         }
                     }
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwException(eHolder, (E) null);
-            }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
+            final BiFunction<? super K, Object, Object> function = (k, v1) -> downstreamFinisher.apply(v1);
 
-        if (eHolder.value() != null) {
-            throwException(eHolder, (E) null);
-        }
+            //noinspection DataFlowIssue
+            Collectors.replaceAll(intermediate, function);
 
-        final BiFunction<? super K, Object, Object> function = (k, v1) -> downstreamFinisher.apply(v1);
-
-        //noinspection DataFlowIssue
-        Collectors.replaceAll(intermediate, function);
-
-        return (M) intermediate;
+            return (M) intermediate;
+        }, this, asyncExecutor, asyncExecutorToUse, (E) null);
     }
 
     /**
@@ -3471,7 +3402,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param downstream a collector describing how per-key values are accumulated and finished
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the flat key extractor throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -3592,57 +3523,34 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        // checkException(eHolder, (E) null, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialMaps -> {
+            Map<K, Object> intermediate = null;
 
-        Map<K, Object> intermediate = null;
-
-        try {
-            for (final ContinuableFuture<Map<K, Object>> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
+            for (final Map<K, Object> partialMap : partialMaps) {
                 if (intermediate == null) {
-                    intermediate = future.get();
+                    intermediate = partialMap;
                 } else {
-                    final Map<K, Object> m = future.get();
                     K key = null;
 
-                    for (final Map.Entry<K, Object> entry : m.entrySet()) {
+                    for (final Map.Entry<K, Object> entry : partialMap.entrySet()) {
                         key = entry.getKey();
 
                         if (intermediate.containsKey(key)) {
-                            intermediate.put(key, downstreamCombiner.apply(intermediate.get(key), m.get(key)));
+                            intermediate.put(key, downstreamCombiner.apply(intermediate.get(key), entry.getValue()));
                         } else {
-                            intermediate.put(key, m.get(key));
+                            intermediate.put(key, entry.getValue());
                         }
                     }
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwException(eHolder, (E) null);
-            }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
+            final BiFunction<? super K, Object, Object> function = (k, v1) -> downstreamFinisher.apply(v1);
 
-        if (eHolder.value() != null) {
-            throwException(eHolder, (E) null);
-        }
+            //noinspection DataFlowIssue
+            Collectors.replaceAll(intermediate, function);
 
-        final BiFunction<? super K, Object, Object> function = (k, v1) -> downstreamFinisher.apply(v1);
-
-        //noinspection DataFlowIssue
-        Collectors.replaceAll(intermediate, function);
-
-        return (M) intermediate;
+            return (M) intermediate;
+        }, this, asyncExecutor, asyncExecutorToUse, (E) null);
     }
 
     /**
@@ -3662,7 +3570,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param valueMapper a function to produce multimap values from elements
      * @param mapFactory a supplier providing a new empty multimap into which results are inserted
      * @return a multimap containing all accumulated key/value pairs
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -3736,41 +3644,19 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        // checkException(eHolder, (E) null, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialMaps -> {
+            M res = null;
 
-        M res = null;
-
-        try {
-            for (final ContinuableFuture<M> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
+            for (final M partialMap : partialMaps) {
                 if (res == null) {
-                    res = future.get();
+                    res = partialMap;
                 } else {
-                    res.putValues(future.get());
+                    res.putValues(partialMap);
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwException(eHolder, (E) null);
-            }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
-
-        if (eHolder.value() != null) {
-            throwException(eHolder, (E) null);
-        }
-
-        return res;
+            return res;
+        }, this, asyncExecutor, asyncExecutorToUse, (E) null);
     }
 
     /**
@@ -3783,7 +3669,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@link Optional} describing the result of the reduction, or an empty Optional if the
      *         stream is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException {
@@ -3863,45 +3749,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        // checkRuntimeException(eHolder, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialResults -> {
+            T result = (T) NONE;
 
-        T result = (T) NONE;
-
-        try {
-            for (final ContinuableFuture<T> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
-                final T tmp = future.get();
-
-                if (tmp == NONE) {
-                    // continue;
-                } else if (result == NONE) {
-                    result = tmp;
-                } else {
-                    result = accumulator.apply(result, tmp);
+            for (final T partialResult : partialResults) {
+                if (partialResult != NONE) {
+                    result = result == NONE ? partialResult : accumulator.apply(result, partialResult);
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwRuntimeException(eHolder);
-            }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
-
-        if (eHolder.value() != null) {
-            throwRuntimeException(eHolder);
-        }
-
-        return result == NONE ? Optional.empty() : Optional.of(result);
+            return result == NONE ? Optional.empty() : Optional.of(result);
+        }, this, asyncExecutor, asyncExecutorToUse);
     }
 
     /**
@@ -3918,7 +3776,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param combiner an associative, non-interfering, stateless function for combining two partial
      *        reduction results
      * @return the result of the reduction
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <U> U reduce(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner)
@@ -3986,41 +3844,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        // checkRuntimeException(eHolder, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialResults -> {
+            U result = (U) NONE;
 
-        U result = (U) NONE;
-
-        try {
-            for (final ContinuableFuture<U> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
-                if (result == NONE) {
-                    result = future.get();
-                } else {
-                    result = combiner.apply(result, future.get());
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwRuntimeException(eHolder);
+            for (final U partialResult : partialResults) {
+                result = result == NONE ? partialResult : combiner.apply(result, partialResult);
             }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
-
-        if (eHolder.value() != null) {
-            throwRuntimeException(eHolder);
-        }
-
-        return result == NONE ? identity : result;
+            return result == NONE ? identity : result;
+        }, this, asyncExecutor, asyncExecutorToUse);
     }
 
     /**
@@ -4035,7 +3867,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param combiner a non-interfering, stateless function that merges two result containers; the second
      *        container's contents are merged into the first
      * @return the result of the mutable reduction
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
@@ -4117,7 +3949,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param <R> the type of the result
      * @param collector the {@code Collector} describing the reduction
      * @return the result of the reduction
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @see java.util.stream.Collectors
      */
     @Override
@@ -4201,45 +4033,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        // checkRuntimeException(eHolder, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialResults -> {
+            Object container = isConcurrentCollector ? singleContainer : NONE;
 
-        Object container = isConcurrentCollector ? singleContainer : NONE;
-
-        try {
-            for (final ContinuableFuture<Object> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
-                if (isConcurrentCollector) {
-                    future.get();
-                } else {
-                    if (container == NONE) {
-                        container = future.get();
-                    } else {
-                        container = combiner.apply(container, future.get());
-                    }
+            if (!isConcurrentCollector) {
+                for (final Object partialResult : partialResults) {
+                    container = container == NONE ? partialResult : combiner.apply(container, partialResult);
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwRuntimeException(eHolder);
-            }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
-
-        if (eHolder.value() != null) {
-            throwRuntimeException(eHolder);
-        }
-
-        return finisher.apply(container == NONE ? supplier.get() : container);
+            return finisher.apply(container == NONE ? supplier.get() : container);
+        }, this, asyncExecutor, asyncExecutorToUse);
     }
 
     /**
@@ -4251,7 +4055,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        a natural-ordering comparator treating {@code null} values as larger is used
      * @return an {@link Optional} describing the minimum element, or an empty Optional if the stream
      *         is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException {
@@ -4287,7 +4091,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        a natural-ordering comparator treating {@code null} values as smaller is used
      * @return an {@link Optional} describing the maximum element, or an empty Optional if the stream
      *         is empty
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException {
@@ -4322,7 +4126,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if any element matches the predicate, {@code false} otherwise
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Override
@@ -4404,7 +4208,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if all elements match the predicate (or the stream is empty),
      *         {@code false} otherwise
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Override
@@ -4486,7 +4290,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if no elements match the predicate (or the stream is empty),
      *         {@code false} otherwise
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Override
@@ -4570,7 +4374,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        must be &gt;= {@code atLeast})
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return {@code true} if the match count is in {@code [atLeast, atMost]}, {@code false} otherwise
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if
      *         {@code atLeast > atMost}
      * @throws E if the predicate throws an exception
@@ -4657,7 +4461,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the first (lowest-index) matching element, or an empty
      *         Optional if no element matches
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Override
@@ -4756,7 +4560,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing any matching element, or an empty Optional if no element
      *         matches
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Override
@@ -4852,7 +4656,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the last (highest-index) matching element, or an empty
      *         Optional if no element matches
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Override
@@ -4951,7 +4755,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a function to extract the key from each element
      * @param c the collection of keys; duplicates are treated as separate candidates
      * @return a new parallel stream of elements whose keys are in {@code c}
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <U> Stream<T> intersection(final Function<? super T, ? extends U> mapper, final Collection<U> c) throws IllegalStateException {
@@ -5002,7 +4806,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a function to extract the key from each element
      * @param c the collection of keys to exclude; duplicates are treated as separate exclusions
      * @return a new parallel stream of elements whose keys are not in {@code c}
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <U> Stream<T> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) throws IllegalStateException {
@@ -5049,7 +4853,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param stream the stream to append; its elements follow the elements of this stream
      * @return a new parallel stream that concatenates this stream with the provided stream
-     * @throws IllegalStateException if this stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> append(final Stream<T> stream) throws IllegalStateException {
@@ -5065,7 +4869,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *
      * @param stream the stream to prepend; its elements precede the elements of this stream
      * @return a new parallel stream that concatenates the provided stream with this stream
-     * @throws IllegalStateException if this stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> prepend(final Stream<T> stream) throws IllegalStateException {
@@ -5085,7 +4889,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        returns {@link MergeResult#TAKE_FIRST} to take from this stream, or
      *        {@link MergeResult#TAKE_SECOND} to take from {@code b}
      * @return a new parallel stream of merged elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> mergeWith(final Collection<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalStateException {
@@ -5106,7 +4910,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        returns {@link MergeResult#TAKE_FIRST} to take from this stream, or
      *        {@link MergeResult#TAKE_SECOND} to take from {@code b}
      * @return a new parallel stream of merged elements
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> mergeWith(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalStateException {
@@ -5126,7 +4930,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param b the collection to zip with this stream
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Collection<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
@@ -5149,7 +4953,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param valueForNoneB the padding value used when {@code b} is exhausted
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
@@ -5172,7 +4976,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param c the third collection to zip with this stream
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Collection<T2> b, final Collection<T3> c,
@@ -5199,7 +5003,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param valueForNoneC the padding value used when {@code c} is exhausted
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Collection<T2> b, final Collection<T3> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
@@ -5221,7 +5025,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param b the stream to zip with this stream
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Stream<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
@@ -5244,7 +5048,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param valueForNoneB the padding value used when {@code b} is exhausted
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Stream<T2> b, final T valueForNoneA, final T2 valueForNoneB,
@@ -5267,7 +5071,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param c the third stream to zip with this stream
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction)
@@ -5294,7 +5098,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param valueForNoneC the padding value used when {@code c} is exhausted
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any required argument is invalid
      */
     @Override
@@ -5322,7 +5126,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * subsequent calls return the same instance.
      *
      * @return a sequential stream backed by the same array range as this parallel stream
-     * @throws IllegalStateException if this stream has already been closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> sequential() throws IllegalStateException {
@@ -5362,5 +5166,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         // assertNotClosed();
 
         return asyncExecutor;
+    }
+
+    /**
+     * Returns whether unfinished parallel tasks should be cancelled when the stream is closed.
+     *
+     * @return {@code true} if unfinished tasks should be cancelled
+     */
+    @Override
+    protected boolean cancelUncompletedThreads() {
+        return cancelUncompletedThreads;
     }
 }

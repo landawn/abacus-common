@@ -167,10 +167,13 @@ public final class Retry<R> {
      * }</pre>
      *
      * @param cmd the runnable operation to execute; must not be {@code null}.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
+     * @throws RuntimeException if a configured retry predicate throws a runtime exception; predicate
+     *         failures are propagated immediately
      * @throws Exception the exception thrown by {@code cmd} if the retry condition is not satisfied,
      *                   or the last exception thrown if all retry attempts are exhausted.
      */
-    public void run(final Throwables.Runnable<? extends Exception> cmd) throws Exception {
+    public void run(final Throwables.Runnable<? extends Exception> cmd) throws IllegalArgumentException, Exception {
         N.checkArgNotNull(cmd, "cmd");
 
         if (retryTimes > 0) {
@@ -210,7 +213,7 @@ public final class Retry<R> {
      * Executes the specified callable operation and retries it if it fails or returns an
      * unsatisfactory result according to the configured retry conditions.
      *
-     * <p>The operation is retried when any of the following is true after an invocation:</p>
+     * <p>The operation is retried when any of the following is {@code true} after an invocation:</p>
      * <ul>
      *   <li>An exception is thrown and {@code retryCondition} (a {@link Predicate}) is present
      *       and returns {@code true} for that exception.</li>
@@ -219,6 +222,7 @@ public final class Retry<R> {
      *   <li>A result is returned and {@code retryCondition2} is present and returns {@code true}
      *       for {@code (result, null)}.</li>
      * </ul>
+     * <p>Each invocation outcome is passed to its retry predicate exactly once.</p>
      * <p>If the condition is not satisfied the exception is rethrown (or the result returned)
      * immediately. Otherwise the thread sleeps for {@code retryIntervalInMillis} milliseconds
      * (if positive) and the operation is attempted again, up to {@code retryTimes} additional
@@ -227,9 +231,9 @@ public final class Retry<R> {
      * <p>After all retries are exhausted:</p>
      * <ul>
      *   <li>If the last attempt threw an exception, that exception is rethrown.</li>
-     *   <li>If no attempt threw and the last attempt returned a result that still satisfies
-     *       {@code retryCondition2}, a {@link RuntimeException} is thrown describing the persistent
-     *       failure. If any attempt threw, the most recently caught exception is rethrown instead.</li>
+     *   <li>If the last attempt returned a result that still satisfies {@code retryCondition2}, a
+     *       {@link RuntimeException} is thrown describing that rejected final result. The most recent
+     *       operation exception, if any, is attached as its cause for diagnostic context.</li>
      * </ul>
      *
      * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries.</p>
@@ -244,82 +248,58 @@ public final class Retry<R> {
      *
      * @param callable the callable operation to execute; must not be {@code null}.
      * @return the result of the first invocation whose outcome does not satisfy the retry condition.
-     * @throws RuntimeException if all retry attempts are exhausted, no attempt threw an exception,
-     *                          and the final invocation returned a result that still satisfies {@code retryCondition2}.
+     * @throws RuntimeException if all retry attempts are exhausted and the final invocation returned
+     *                          a result that still satisfies {@code retryCondition2},
+     *                          or if a configured retry predicate itself throws a runtime exception. Predicate failures
+     *                          are propagated immediately and do not trigger another operation attempt.
      * @throws Exception the exception thrown by {@code callable} if the retry condition is not
      *                   satisfied, or the last exception thrown if all retry attempts are exhausted.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    public R call(final java.util.concurrent.Callable<? extends R> callable) throws Exception {
+    public R call(final java.util.concurrent.Callable<? extends R> callable) throws IllegalArgumentException, Exception {
         N.checkArgNotNull(callable, "callable");
 
         if (retryTimes > 0) {
             R result = null;
-            int retriedTimes = 0;
+            Exception lastException = null;
 
-            try {
-                result = callable.call();
-
-                if (retryCondition2 == null || !retryCondition2.test(result, null)) {
-                    return result;
-                }
-
-                while (retriedTimes < retryTimes) {
-                    retriedTimes++;
-
+            for (int retriedTimes = 0; retriedTimes <= retryTimes; retriedTimes++) {
+                if (retriedTimes > 0) {
                     if (retryIntervalInMillis > 0) {
                         N.sleepUninterruptibly(retryIntervalInMillis);
                     }
 
                     logger.debug("Starting retry attempt {} of {}", retriedTimes, retryTimes);
+                }
 
+                try {
                     result = callable.call();
+                } catch (final Exception e) {
+                    lastException = e;
 
-                    //noinspection ConstantValue
-                    if (retryCondition2 == null || !retryCondition2.test(result, null)) {
-                        return result;
+                    if (!((retryCondition != null && retryCondition.test(e)) || (retryCondition2 != null && retryCondition2.test(null, e)))) {
+                        throw e;
                     }
-                }
-            } catch (final Exception e) {
-                Exception ex = e;
 
-                if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-                    throw ex;
-                }
-
-                while (retriedTimes < retryTimes) {
-                    retriedTimes++;
-
-                    try {
-                        if (retryIntervalInMillis > 0) {
-                            N.sleepUninterruptibly(retryIntervalInMillis);
-                        }
-
-                        logger.debug("Starting retry attempt {} of {}", retriedTimes, retryTimes);
-
-                        result = callable.call();
-
-                        if (retryCondition2 == null || !retryCondition2.test(result, null)) {
-                            return result;
-                        }
-                    } catch (final Exception e2) {
-                        ex = e2;
-
-                        if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
-                            throw ex;
-                        }
+                    if (retriedTimes == retryTimes) {
+                        throw e;
                     }
+
+                    continue;
                 }
 
-                throw ex;
+                // Evaluate outside the callable's catch block. A predicate failure is a configuration
+                // failure, not an operation failure, and must not trigger another callable invocation.
+                if (retryCondition2 == null || !retryCondition2.test(result, null)) {
+                    return result;
+                }
+
+                if (retriedTimes == retryTimes) {
+                    throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result), lastException);
+                }
             }
 
-            //noinspection ConstantValue
-            if (retryTimes > 0 && (retryCondition2 != null && retryCondition2.test(result, null))) {
-                throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result));
-            }
-
-            return result;
+            throw new AssertionError("Unreachable retry state");
         } else {
             return callable.call();
         }

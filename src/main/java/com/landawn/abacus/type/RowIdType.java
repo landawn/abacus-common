@@ -254,6 +254,7 @@ public class RowIdType extends AbstractType<RowId> {
      * BufferedJsonWriter writer = new BufferedJsonWriter();
      * type.serializeTo(writer, rowId, null);   // Writes RowId to character stream
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}. The value is written unquoted and unescaped; the supplied serialization config is

@@ -705,6 +705,22 @@ public class BooleanIteratorTest extends TestBase {
     }
 
     @Test
+    public void testIndexedWithStartIndexOverflow() {
+        ObjIterator<IndexedBoolean> indexed = BooleanIterator.of(true, false).indexed(Long.MAX_VALUE);
+
+        IndexedBoolean first = indexed.next();
+        Assertions.assertEquals(Long.MAX_VALUE, first.longIndex());
+        Assertions.assertTrue(first.value());
+        Assertions.assertTrue(indexed.hasNext());
+        Assertions.assertThrows(ArithmeticException.class, indexed::next);
+
+        ObjIterator<IndexedBoolean> exhausted = BooleanIterator.of(true).indexed(Long.MAX_VALUE);
+        exhausted.next();
+        Assertions.assertFalse(exhausted.hasNext());
+        Assertions.assertThrows(NoSuchElementException.class, exhausted::next);
+    }
+
+    @Test
     public void testForEachRemainingDeprecated() {
         BooleanIterator iter = BooleanIterator.of(true, false, true);
         java.util.List<Boolean> result = new java.util.ArrayList<>();

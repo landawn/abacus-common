@@ -61,8 +61,6 @@ public final class NameUtil {
 
     private static final Map<String, String> parentNamePool = new ObjectPool<>(POOL_SIZE);
 
-    // private static final Map<String, Map<String, String>> parentCanonicalNamePool = new ConcurrentHashMap<>();
-
     /**
      * Private constructor to prevent instantiation of this utility class.
      */
@@ -122,9 +120,12 @@ public final class NameUtil {
      *
      * <p>When there is available space in the pool (and, depending on {@code force},
      * the name is not already present), the string is interned via
-     * {@link String#intern()} and added to the cache pool. If the pool is already full,
-     * the name is returned unchanged without being interned or cached. The {@code force}
-     * parameter determines whether to bypass the duplicate check.</p>
+     * {@link String#intern()} and added to the cache pool. If an equal name is already
+     * cached and {@code force} is {@code false}, the existing canonical instance is
+     * returned. If the pool is already full, an existing canonical instance is still
+     * returned when present; otherwise the name is returned unchanged. The {@code force}
+     * parameter requests replacement of an existing entry with the interned instance when
+     * the pool has capacity.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -133,9 +134,10 @@ public final class NameUtil {
      * }</pre>
      *
      * @param name the name string to cache; may be {@code null}
-     * @param force if {@code true}, the entry is added even if the name is already present in the cache;
-     *              if {@code false}, caching is skipped when the name is already present
-     * @return the (possibly interned) name string, or {@code null} if {@code name} is {@code null}
+     * @param force if {@code true}, an existing entry is replaced with the interned instance when
+     *              the pool has capacity; if {@code false}, the existing canonical entry is returned
+     * @return the cached canonical instance when present, otherwise the (possibly interned)
+     *         name string; {@code null} if {@code name} is {@code null}
      */
     public static String cacheName(String name, final boolean force) {
         if (name == null) {
@@ -143,13 +145,24 @@ public final class NameUtil {
         }
 
         synchronized (cachedNamePool) {
-            if (cachedNamePool.size() < POOL_SIZE && (force || !cachedNamePool.containsKey(name))) {
+            final String cachedName = cachedNamePool.get(name);
+
+            // Always return the canonical cached instance when one already exists. Besides making
+            // cacheName itself consistent, this closes the race in getCachedName where another
+            // thread can populate the pool between its initial get and this synchronized block.
+            if (cachedName != null && !force) {
+                return cachedName;
+            }
+
+            if (cachedNamePool.size() < POOL_SIZE) {
                 name = name.intern();
 
                 cachedNamePool.put(name, name);
+
+                return name;
             }
 
-            return name;
+            return cachedName == null ? name : cachedName;
         }
     }
 
@@ -181,6 +194,7 @@ public final class NameUtil {
      * @return {@code true} if {@code parentName} is the immediate parent of {@code name}
      *         (i.e. {@code name} starts with {@code parentName + "."} and the remainder
      *         contains no further dots); {@code false} otherwise
+     * @throws NullPointerException if {@code parentName} or {@code name} is {@code null}
      */
     public static boolean isCanonicalName(final String parentName, final String name) {
         return name.length() > parentName.length() && name.charAt(parentName.length()) == '.' && parentName.equals(getParentName(name));
@@ -206,6 +220,7 @@ public final class NameUtil {
      *
      * @param name the canonical name from which to extract the simple name
      * @return the simple name (last component after the final dot)
+     * @throws NullPointerException if {@code name} is {@code null}
      */
     public static String getSimpleName(final String name) {
         String simplePropName = simpleNamePool.get(name);
@@ -252,6 +267,7 @@ public final class NameUtil {
      * @param name the canonical name from which to extract the parent name
      * @return the parent name (everything before the last dot), or an empty string
      *         if the name is not a canonical property name
+     * @throws NullPointerException if {@code name} is {@code null}
      */
     public static String getParentName(final String name) {
         String parentName = parentNamePool.get(name);

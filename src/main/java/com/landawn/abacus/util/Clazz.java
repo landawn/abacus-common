@@ -52,7 +52,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <ul>
  *   <li>The Class objects returned by all methods do NOT contain actual runtime type parameter information</li>
  *   <li>These are primarily useful for providing type hints to APIs that accept Class parameters</li>
- *   <li>For true runtime type parameter information, use {@code Type.of()} or {@code TypeReference}</li>
+ *   <li>For {@code true} runtime type parameter information, use {@code Type.of()} or {@code TypeReference}</li>
  *   <li>The generic type parameters exist only for compile-time type safety and documentation</li>
  * </ul>
  *
@@ -1088,8 +1088,8 @@ public final class Clazz {
      *
      * // Producer-consumer pattern
      * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100);
-     * queue.put(new Task());                                        // waits if the queue is full
-     * Task task = queue.take();                                     // waits if the queue is empty
+     * queue.put(new Task());      // waits if the queue is full
+     * Task task = queue.take();   // waits if the queue is empty
      * }</pre>
      *
      * @param <T> the element type of the blocking queue.

@@ -116,7 +116,7 @@ public class BiFunctionTest extends TestBase {
     @Test
     public void testAndThenRejectsNullFunctionImmediately() {
         BiFunction<String, Integer, String> biFunction = (s, i) -> s + ":" + i;
-        assertThrows(IllegalArgumentException.class, () -> biFunction.andThen(null));
+        assertThrows(NullPointerException.class, () -> biFunction.andThen(null));
     }
 
     @Test
@@ -151,6 +151,6 @@ public class BiFunctionTest extends TestBase {
     @Test
     public void testAndThenNullThrowsImmediately() {
         BiFunction<String, String, String> instance = (a, b) -> null;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Function) null));
+        assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
     }
 }

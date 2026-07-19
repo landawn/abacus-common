@@ -746,6 +746,11 @@ public class AbstractLongStreamTest extends TestBase {
     }
 
     @Test
+    public void testJoinToRejectsNullForEmptyStream() {
+        assertThrows(IllegalArgumentException.class, () -> createLongStream().joinTo(null));
+    }
+
+    @Test
     public void testCollectWithSupplierAccumulator() {
         stream = createLongStream(new long[] { 1, 2, 3, 4, 5 });
         LongList result = stream.collect(LongList::new, LongList::add);
@@ -827,6 +832,27 @@ public class AbstractLongStreamTest extends TestBase {
         revIter2.nextLong();
         assertEquals(3L, revIter2.count());
         assertFalse(revIter2.hasNext());
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
+        LongIteratorEx reversed = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
+        assertEquals(5, reversed.toArray().length);
+        assertFalse(reversed.hasNext());
+        assertEquals(0, reversed.toArray().length);
+
+        LongIteratorEx rotated = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).rotated(2).iteratorEx();
+        rotated.nextLong();
+        assertEquals(4, rotated.toArray().length);
+        assertFalse(rotated.hasNext());
+        assertEquals(0, rotated.toArray().length);
+
+        LongIteratorEx reverseSorted = (LongIteratorEx) createLongStream(3L, 1L, 4L, 1L, 5L).reverseSorted().iteratorEx();
+        reverseSorted.nextLong();
+        reverseSorted.nextLong();
+        assertEquals(3, reverseSorted.toArray().length);
+        assertFalse(reverseSorted.hasNext());
+        assertEquals(0, reverseSorted.toArray().length);
     }
 
     @Test

@@ -24,9 +24,11 @@ public class IntToDoubleFunctionTest extends TestBase {
 
     @Test
     public void test_DEFAULT() {
-        assertEquals(100.0, IntToDoubleFunction.DEFAULT.applyAsDouble(100), 0.001);
-        assertEquals(0.0, IntToDoubleFunction.DEFAULT.applyAsDouble(0), 0.001);
-        assertEquals(-50.0, IntToDoubleFunction.DEFAULT.applyAsDouble(-50), 0.001);
+        assertEquals(100.0, IntToDoubleFunction.DEFAULT.applyAsDouble(100));
+        assertEquals(0.0, IntToDoubleFunction.DEFAULT.applyAsDouble(0));
+        assertEquals(-50.0, IntToDoubleFunction.DEFAULT.applyAsDouble(-50));
+        assertEquals((double) Integer.MAX_VALUE, IntToDoubleFunction.DEFAULT.applyAsDouble(Integer.MAX_VALUE));
+        assertEquals((double) Integer.MIN_VALUE, IntToDoubleFunction.DEFAULT.applyAsDouble(Integer.MIN_VALUE));
     }
 
     @Test

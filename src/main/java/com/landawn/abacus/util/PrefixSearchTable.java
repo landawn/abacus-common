@@ -11,10 +11,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
  * See the License for the specific language governing permissions and       *
  * limitations under the License.                                            *
- *****************************************************************************/
+ *  *****************************************************************************/
 package com.landawn.abacus.util;
 
-import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
 import java.util.AbstractMap;
@@ -82,8 +81,8 @@ public final class PrefixSearchTable<K, V> {
      * @return an {@code Optional} holding the value mapped to the longest (non-empty) prefix of
      *         {@code compoundKey}; an empty {@code Optional} if no non-empty prefix is present
      * @throws IllegalArgumentException if {@code compoundKey} is empty
-     * @throws NullPointerException if {@code compoundKey} is {@code null} or any traversed key
-     *         element is {@code null}
+     * @throws NullPointerException if {@code compoundKey} is {@code null} or any key element is
+     *         {@code null}
      * @see #getAll(List)
      */
     public Optional<V> get(List<? extends K> compoundKey) {
@@ -112,16 +111,16 @@ public final class PrefixSearchTable<K, V> {
      *
      * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
      * @return a lazy {@code EntryStream} pairing each matched prefix of {@code compoundKey}
-     *         (as an unmodifiable {@code List}) with its mapped value, in ascending order of
+     *         (as an immutable snapshot) with its mapped value, in ascending order of
      *         prefix length; empty if no non-empty prefix is present
      * @throws IllegalArgumentException if {@code compoundKey} is empty (thrown eagerly by this method)
-     * @throws NullPointerException if {@code compoundKey} is {@code null} (thrown eagerly by this
-     *         method); or, while the returned stream is being consumed, if any traversed key element
-     *         is {@code null}
+     * @throws NullPointerException if {@code compoundKey} is {@code null} or any key element is
+     *         {@code null} (thrown eagerly by this method)
      * @see #get(List)
      */
-    public EntryStream<List<K>, V> getAll(List<? extends K> compoundKey) {
+    public EntryStream<List<K>, V> getAll(List<? extends K> compoundKey) throws IllegalArgumentException {
         N.checkArgument(compoundKey.size() > 0, "cannot search by empty key");
+        final List<K> keySnapshot = List.copyOf(compoundKey);
 
         return EntryStream.of(new Iterator<Map.Entry<List<K>, V>>() {
             private Map<K, Node<K, V>> remaining = nodes;
@@ -130,9 +129,9 @@ public final class PrefixSearchTable<K, V> {
 
             @Override
             public boolean hasNext() {
-                if (next == null && remaining != null && cursor < compoundKey.size()) {
-                    while (remaining != null && cursor < compoundKey.size()) {
-                        Node<K, V> node = remaining.get(requireNonNull(compoundKey.get(cursor)));
+                if (next == null && remaining != null && cursor < keySnapshot.size()) {
+                    while (remaining != null && cursor < keySnapshot.size()) {
+                        Node<K, V> node = remaining.get(keySnapshot.get(cursor));
 
                         if (node == null) {
                             remaining = null;
@@ -143,7 +142,7 @@ public final class PrefixSearchTable<K, V> {
                         remaining = node.children;
 
                         if (node.value != null) {
-                            next = new AbstractMap.SimpleImmutableEntry<>(unmodifiableList(compoundKey.subList(0, cursor)), node.value);
+                            next = new AbstractMap.SimpleImmutableEntry<>(List.copyOf(keySnapshot.subList(0, cursor)), node.value);
                             break;
                         }
                     }
@@ -255,7 +254,7 @@ public final class PrefixSearchTable<K, V> {
          * @throws NullPointerException if {@code compoundKey} is {@code null}, any key element is {@code null},
          *     or {@code value} is {@code null}
          */
-        public Builder<K, V> add(List<? extends K> compoundKey, V value) {
+        public Builder<K, V> add(List<? extends K> compoundKey, V value) throws IllegalArgumentException {
             int size = compoundKey.size();
             N.checkArgument(size > 0, "empty key not allowed");
             N.requireNonNull(value);

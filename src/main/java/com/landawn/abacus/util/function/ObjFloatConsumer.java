@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -53,7 +53,6 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * @param t the first input argument of type T
      * @param value the second input argument, a primitive float value
      */
-    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjFloat* has object first, float second. Do not suggest reordering.
     @Override
     void accept(T t, float value);
 
@@ -67,7 +66,7 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjFloatConsumer<Statistics> sample = (s, v) -> s.addSample(v);
-     * ObjFloatConsumer<Statistics> log    = (s, v) -> System.out.println("sample=" + v);
+     * ObjFloatConsumer<Statistics> log = (s, v) -> System.out.println("sample=" + v);
      * ObjFloatConsumer<Statistics> both   = sample.andThen(log);
      * both.accept(stats, 1.5f);
      * }</pre>

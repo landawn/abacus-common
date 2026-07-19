@@ -112,6 +112,21 @@ public class WebUtilTest extends TestBase {
     }
 
     @Test
+    public void testCurlConvertersSupportAttachedShortAndEqualsLongOptions() {
+        String curl = "curl -XPOST --header=Content-Type:application/json -HX-Trace:abc -dtest https://api.example.com/users";
+
+        String httpCode = WebUtil.curlToHttpRequestCode(curl);
+        assertTrue(httpCode.contains(".header(\"Content-Type\", \"application/json\")"));
+        assertTrue(httpCode.contains(".header(\"X-Trace\", \"abc\")"));
+        assertTrue(httpCode.contains("String requestBody = \"test\";"));
+        assertTrue(httpCode.contains(".post();"));
+
+        String okHttpCode = WebUtil.curlToOkHttpRequestCode(curl.replace("-XPOST", "--request=POST"));
+        assertTrue(okHttpCode.contains(".header(\"X-Trace\", \"abc\")"));
+        assertTrue(okHttpCode.contains(".post();"));
+    }
+
+    @Test
     public void testCurl2HttpRequestWithLongForm() {
         String curl = "curl --request POST --header \"Content-Type: application/json\" https://api.example.com/users";
         String result = WebUtil.curlToHttpRequestCode(curl);
@@ -266,6 +281,12 @@ public class WebUtilTest extends TestBase {
     @Test
     public void testCurl2HttpRequestWithInvalidStartThrows() {
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("wget https://example.com"));
+    }
+
+    @Test
+    public void testCurlCommandNameRequiresTokenBoundary() {
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curly https://example.com"));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("curling https://example.com"));
     }
 
     @Test
@@ -474,6 +495,41 @@ public class WebUtilTest extends TestBase {
     }
 
     @Test
+    public void testParseCurlPreservesEscapedWhitespace() {
+        String result = WebUtil.curlToHttpRequestCode("curl https://api.example.com/data -d foo\\ bar");
+
+        assertTrue(result.contains("String requestBody = \"foo bar\";"));
+    }
+
+    @Test
+    public void testParseCurlCombinesAdjacentQuotedFragments() {
+        String curl = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com/data", null, "O'Brien", "text/plain", '\'');
+        String result = WebUtil.curlToHttpRequestCode(curl);
+
+        assertTrue(result.contains("String requestBody = \"O'Brien\";"));
+    }
+
+    @Test
+    public void testCurlConvertersPreserveExplicitEmptyData() {
+        String curl = "curl https://api.example.com/data -d ''";
+
+        String httpCode = WebUtil.curlToHttpRequestCode(curl);
+        assertTrue(httpCode.contains("String requestBody = \"\";"));
+        assertTrue(httpCode.contains(".body(requestBody)"));
+
+        String okHttpCode = WebUtil.curlToOkHttpRequestCode(curl);
+        assertTrue(okHttpCode.contains("RequestBody requestBody = RequestBody.create(null, \"\");"));
+        assertTrue(okHttpCode.contains(".body(requestBody)"));
+    }
+
+    @Test
+    public void testCurlConvertersRejectInvalidOptionArguments() {
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl https://api.example.com -X"));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("curl https://api.example.com -X UNKNOWN"));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl https://api.example.com -d"));
+    }
+
+    @Test
     public void testParseCurlWithUnmatchedQuote() {
         String curl = "curl -X POST https://api.example.com/users -d '{\"name\":\"John";
         assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(curl));
@@ -615,6 +671,16 @@ public class WebUtilTest extends TestBase {
 
         assertNotNull(result);
         assertTrue(result.contains("Custom-Header"));
+    }
+
+    @Test
+    public void testBuildCurlEscapesHeaderName() {
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("X-Owner's-Token", "value");
+
+        final String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com/test", headers, null, null, '\'');
+
+        assertTrue(result.contains("-H 'X-Owner'\\''s-Token: value'"), result);
     }
 
     @Test

@@ -210,7 +210,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     /**
      * Writes an {@link java.util.concurrent.atomic.AtomicInteger} value to a {@link CharacterWriter}.
      * If the configuration specifies {@code writeNullNumberAsZero} and {@code x} is {@code null},
-     * writes {@code 0}; otherwise writes {@code null} for a null value or uses the writer's optimized
+     * writes {@code 0}; otherwise writes {@code null} for a {@code null} value or uses the writer's optimized
      * {@code writeInt} method with the contained integer value.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the

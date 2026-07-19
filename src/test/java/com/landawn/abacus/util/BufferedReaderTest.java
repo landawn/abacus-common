@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -21,6 +22,39 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.AbstractTest;
 
 public class BufferedReaderTest extends AbstractTest {
+
+    private static final class FailOnSecondReadReader extends Reader {
+        private int readCount;
+
+        @Override
+        public int read(final char[] cbuf, final int off, final int len) throws IOException {
+            if (readCount++ > 0) {
+                throw new IOException("unexpected second underlying read");
+            }
+
+            cbuf[off] = 'x';
+            return 1;
+        }
+
+        @Override
+        public void close() {
+            // no resources
+        }
+    }
+
+    private static final class CloseTrackingReader extends StringReader {
+        private boolean closed;
+
+        CloseTrackingReader(final String source) {
+            super(source);
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+            super.close();
+        }
+    }
 
     @Test
     public void testConstructorWithString() throws IOException {
@@ -151,6 +185,22 @@ public class BufferedReaderTest extends AbstractTest {
         assertEquals(buffer.length, count);
         assertEquals('x', buffer[0]);
         assertEquals('x', buffer[buffer.length - 1]);
+    }
+
+    @Test
+    public void testReadDoesNotFillUnderlyingReaderToCapacity() throws IOException {
+        BufferedReader reader = new BufferedReader(new FailOnSecondReadReader());
+
+        assertEquals('x', reader.read());
+    }
+
+    @Test
+    public void testLargeReadUsesOneUnderlyingReadOperation() throws IOException {
+        BufferedReader reader = new BufferedReader(new FailOnSecondReadReader());
+        char[] buffer = new char[Objectory.BUFFER_SIZE];
+
+        assertEquals(1, reader.read(buffer, 0, buffer.length));
+        assertEquals('x', buffer[0]);
     }
 
     @Test
@@ -340,6 +390,19 @@ public class BufferedReaderTest extends AbstractTest {
         reader.reinit("Second");
         assertEquals("Second", reader.readLine());
         assertNull(reader.readLine());
+    }
+
+    @Test
+    public void testReinitWithStringDetachesPreviousReader() throws IOException {
+        CloseTrackingReader previousSource = new CloseTrackingReader("First");
+        BufferedReader reader = new BufferedReader(previousSource);
+
+        reader.reinit("Second");
+        assertEquals("Second", reader.readLine());
+        reader.close();
+
+        assertFalse(previousSource.closed);
+        previousSource.close();
     }
 
     @Test

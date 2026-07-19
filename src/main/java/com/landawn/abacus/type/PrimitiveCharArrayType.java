@@ -25,6 +25,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -35,8 +36,9 @@ import com.landawn.abacus.util.Strings;
  * Type handler for primitive {@code char[]} arrays.
  * Provides functionality for serialization, deserialization, database operations,
  * and conversion between char arrays and their various representations including {@link Clob} objects.
- * The {@link #stringOf(char[])} representation single-quotes each element (for example {@code ['a', 'b', 'c']}),
- * while {@link #appendTo(Appendable, char[])} and {@link #toString(char[])} emit the elements unquoted.
+ * The {@link #stringOf(char[])} representation single-quotes each element (for example {@code ['a', 'b', 'c']})
+ * and backslash-escapes quotes, backslashes, and control characters so every {@code char} can round-trip.
+ * {@link #appendTo(Appendable, char[])} and {@link #toString(char[])} emit the elements unquoted.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
@@ -92,6 +94,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Converts a char array to its string representation.
      * The format is: ['a', 'b', 'c'] with each character quoted and separated by commas.
+     * Characters that would make the representation ambiguous are escaped with JavaScript-style
+     * backslash escapes; for example, a single quote is written as {@code '\\''} and a newline as
+     * {@code '\\n'}.
      * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -122,7 +127,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
             }
 
             sb.append(SK.SINGLE_QUOTE);
-            sb.append(x[i]);
+            sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
             sb.append(SK.SINGLE_QUOTE);
         }
 
@@ -138,7 +143,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Parses a string representation and creates a char array.
      * Expected format: ['a', 'b', 'c'] with quoted characters or [a, b, c] without quotes.
-     * Automatically detects whether characters are quoted and handles both formats.
+     * Automatically detects whether characters are quoted and handles both formats. Backslash
+     * escape sequences inside quoted elements are decoded.
      * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
@@ -171,7 +177,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 final char quoteChar = element.charAt(0);
 
                 if ((quoteChar == SK._SINGLE_QUOTE || quoteChar == SK._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
-                    a[i] = elementType.valueOf(element.substring(1, element.length() - 1));
+                    a[i] = elementType.valueOf(EscapeUtil.unescapeEcmaScript(element.substring(1, element.length() - 1)));
                     continue;
                 }
             }

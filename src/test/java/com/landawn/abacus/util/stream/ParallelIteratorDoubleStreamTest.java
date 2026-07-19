@@ -11,6 +11,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,50 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
 
     protected DoubleStream createDoubleStream(double... elements) {
         return DoubleStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
+    }
+
+    @Test
+    public void testReduceWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch slowWorkerStarted = new CountDownLatch(1);
+        final AtomicBoolean slowWorkerFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedWorker = new AtomicBoolean();
+        final DoubleStream testStream = createDoubleStream(1, 2).onClose(() -> closeObservedFinishedWorker.set(slowWorkerFinished.get()));
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> testStream.reduce(0, (left, right) -> {
+            if (right == 2) {
+                slowWorkerStarted.countDown();
+                sleepForWorkerOverlap();
+                slowWorkerFinished.set(true);
+                return left + right;
+            }
+
+            awaitWorkerStart(slowWorkerStarted);
+            throw new IllegalStateException("worker failure");
+        }));
+
+        assertEquals("worker failure", thrown.getMessage());
+        assertTrue(slowWorkerFinished.get());
+        assertTrue(closeObservedFinishedWorker.get());
+    }
+
+    private static void awaitWorkerStart(final CountDownLatch latch) {
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void sleepForWorkerOverlap() {
+        try {
+            Thread.sleep(200);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
 
     @BeforeEach
@@ -324,9 +371,7 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
 
         // null elements -> 0d
         double[] withNulls = createDoubleStream(new double[] { 1.0 }).flatmap(d -> Arrays.asList((Double) null, 7.5)).toArray();
-        assertEquals(2, withNulls.length);
-        assertEquals(0.0, withNulls[0], 0.0001);
-        assertEquals(7.5, withNulls[1], 0.0001);
+        assertHaveSameElements(new double[] { 0.0, 7.5 }, withNulls);
     }
 
     @Test

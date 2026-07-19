@@ -134,7 +134,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code CharIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > (a == null ? 0 : a.length)} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)},
+     *         or {@code fromIndex > toIndex}
      */
     public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -352,8 +353,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b');
-     * Character boxed = iter.next();    // returns 'a' (boxed) — avoid this
-     * char primitive = iter.nextChar(); // returns 'b' — prefer this
+     * Character boxed = iter.next();      // returns 'a' (boxed) — avoid this
+     * char primitive = iter.nextChar();   // returns 'b' — prefer this
      * }</pre>
      *
      * @return the next char value as a {@code Character} object
@@ -664,15 +665,17 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param startIndex the starting index value, must not be negative
      * @return an {@code ObjIterator} of {@code IndexedChar} elements with indices starting from {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
-    public ObjIterator<IndexedChar> indexed(final long startIndex) {
+    public ObjIterator<IndexedChar> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final CharIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -681,7 +684,24 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
             @Override
             public IndexedChar next() {
-                return IndexedChar.of(iter.nextChar(), idx++);
+                if (indexOverflow) {
+                    if (iter.hasNext()) {
+                        throw new ArithmeticException("long overflow");
+                    }
+
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final char value = iter.nextChar();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedChar.of(value, currentIndex);
             }
         };
     }
@@ -705,7 +725,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Character> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Character> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 

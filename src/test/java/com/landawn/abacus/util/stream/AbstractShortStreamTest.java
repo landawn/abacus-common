@@ -831,6 +831,11 @@ public class AbstractShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testJoinToRejectsNullForEmptyStream() {
+        assertThrows(IllegalArgumentException.class, () -> createShortStream(new short[0]).joinTo(null));
+    }
+
+    @Test
     public void testCollectWithSupplierAndAccumulator() {
         List<Short> list = createShortStream(new short[] { 1, 2, 3 }).collect(ArrayList::new, (l, v) -> l.add(v));
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), list);
@@ -881,6 +886,27 @@ public class AbstractShortStreamTest extends TestBase {
         revIter2.nextShort();
         assertEquals(3L, revIter2.count());
         assertFalse(revIter2.hasNext());
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
+        ShortIteratorEx reversed = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        assertEquals(5, reversed.toArray().length);
+        assertFalse(reversed.hasNext());
+        assertEquals(0, reversed.toArray().length);
+
+        ShortIteratorEx rotated = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        rotated.nextShort();
+        assertEquals(4, rotated.toArray().length);
+        assertFalse(rotated.hasNext());
+        assertEquals(0, rotated.toArray().length);
+
+        ShortIteratorEx reverseSorted = (ShortIteratorEx) createShortStream(new short[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        reverseSorted.nextShort();
+        reverseSorted.nextShort();
+        assertEquals(3, reverseSorted.toArray().length);
+        assertFalse(reverseSorted.hasNext());
+        assertEquals(0, reverseSorted.toArray().length);
     }
 
     @Test

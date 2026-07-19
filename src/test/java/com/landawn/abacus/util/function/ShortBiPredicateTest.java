@@ -30,6 +30,8 @@ public class ShortBiPredicateTest extends TestBase {
         assertTrue(ShortBiPredicate.EQUAL.test((short) -5, (short) -5));
         assertFalse(ShortBiPredicate.EQUAL.test((short) 10, (short) 20));
         assertFalse(ShortBiPredicate.EQUAL.test((short) -5, (short) 5));
+        assertTrue(ShortBiPredicate.EQUAL.test(Short.MIN_VALUE, Short.MIN_VALUE));
+        assertTrue(ShortBiPredicate.EQUAL.test(Short.MAX_VALUE, Short.MAX_VALUE));
     }
 
     @Test
@@ -46,6 +48,8 @@ public class ShortBiPredicateTest extends TestBase {
         assertTrue(ShortBiPredicate.GREATER_THAN.test((short) 5, (short) -5));
         assertFalse(ShortBiPredicate.GREATER_THAN.test((short) 10, (short) 10));
         assertFalse(ShortBiPredicate.GREATER_THAN.test((short) 10, (short) 20));
+        assertTrue(ShortBiPredicate.GREATER_THAN.test(Short.MAX_VALUE, Short.MIN_VALUE));
+        assertFalse(ShortBiPredicate.GREATER_THAN.test(Short.MIN_VALUE, Short.MAX_VALUE));
     }
 
     @Test
@@ -62,6 +66,8 @@ public class ShortBiPredicateTest extends TestBase {
         assertTrue(ShortBiPredicate.LESS_THAN.test((short) -5, (short) 5));
         assertFalse(ShortBiPredicate.LESS_THAN.test((short) 10, (short) 10));
         assertFalse(ShortBiPredicate.LESS_THAN.test((short) 20, (short) 10));
+        assertTrue(ShortBiPredicate.LESS_THAN.test(Short.MIN_VALUE, Short.MAX_VALUE));
+        assertFalse(ShortBiPredicate.LESS_THAN.test(Short.MAX_VALUE, Short.MIN_VALUE));
     }
 
     @Test
@@ -192,5 +198,6 @@ public class ShortBiPredicateTest extends TestBase {
     public void testAndNullThrowsImmediately() {
         ShortBiPredicate instance = (a, b) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((ShortBiPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.or((ShortBiPredicate) null));
     }
 }

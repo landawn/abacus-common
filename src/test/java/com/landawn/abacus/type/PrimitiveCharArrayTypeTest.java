@@ -75,6 +75,16 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void testCanonicalStringRoundTripsSpecialCharacters() {
+        char[] array = { '\'', '"', '\\', '\n', '\t', '\r', '\b', '\f', ',', '[', ']', '\u0000', '\u2028' };
+
+        String str = type.stringOf(array);
+
+        assertEquals("['\\\'', '\\\"', '\\\\', '\\n', '\\t', '\\r', '\\b', '\\f', ',', '[', ']', '\\u0000', '\\u2028']", str);
+        assertArrayEquals(array, type.valueOf(str));
+    }
+
+    @Test
     public void testValueOfObjectOther() {
         String input = "['a', 'b', 'c']";
         char[] result = type.valueOf((Object) input);

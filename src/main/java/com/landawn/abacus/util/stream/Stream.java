@@ -154,14 +154,14 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  * with additional functionalities, optimizations, and more intuitive operations for functional-style data processing.
  *
  * <p>The Stream class represents a sequence of elements supporting sequential and parallel aggregate operations,
- * with significant enhancements over the standard Java Stream API including better null handling, extended
+ * with significant enhancements over the standard Java Stream API including better {@code null} handling, extended
  * mapping functions, improved parallel processing support, and integration with various data sources.
  *
  * <p><b>Key Enhancements over Java Stream API:</b>
  * <ul>
  *   <li><b>Enhanced Filtering:</b> {@code filter} with action on dropped items, {@code takeWhile}, {@code dropWhile}</li>
  *   <li><b>Advanced Mapping:</b> {@code mapIfNotNull}, {@code slidingMap}, type-safe {@code select} operations</li>
- *   <li><b>Null Safety:</b> Improved handling of null values throughout the pipeline</li>
+ *   <li><b>Null Safety:</b> Improved handling of {@code null} values throughout the pipeline</li>
  *   <li><b>Element Pairing:</b> {@code pairWith} operations for combining elements</li>
  *   <li><b>Collection Integration:</b> Better integration with collections, arrays, and primitive streams</li>
  *   <li><b>Parallel Processing:</b> Extended support for parallel operations with fine-grained control</li>
@@ -230,7 +230,8 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *
  * <p><b>Performance Considerations:</b>
  * <ul>
- *   <li>Sequential processing is often more efficient for small datasets (&lt; 10,000 elements)</li>
+ *   <li>Sequential processing is often more efficient for small datasets; the crossover point depends on
+ *       the source, per-element work, executor, and hardware</li>
  *   <li>Parallel processing benefits CPU-intensive operations on large datasets</li>
  *   <li>Lazy evaluation means intermediate operations are not executed until a terminal operation</li>
  *   <li>Primitive specialized streams (IntStream, LongStream, DoubleStream) avoid boxing overhead</li>
@@ -275,8 +276,10 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *   </tr>
  *   <tr>
  *     <td>Checked exceptions</td>
- *     <td>Not on {@code Stream} itself; use the sibling {@link com.landawn.abacus.util.Seq} when pipeline
- *         lambdas must throw checked exceptions.</td>
+ *     <td>Most intermediate operations use {@code java.util.function} interfaces. The {@code *E}
+ *         convenience methods wrap checked exceptions as runtime exceptions, while selected terminal
+ *         operations accept {@code Throwables}-style callbacks and propagate their declared checked
+ *         exception type. Use {@link com.landawn.abacus.util.Seq} for checked exceptions throughout a pipeline.</td>
  *     <td>Lambdas cannot throw checked exceptions.</td>
  *   </tr>
  * </table>
@@ -340,8 +343,10 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *   <tr><th>Aspect</th><th>{@code Stream<T>}</th><th>{@code Seq<T, E>}</th></tr>
  *   <tr>
  *     <td>Checked exceptions</td>
- *     <td>Not supported: operations use {@code java.util.function} interfaces, so a checked exception must be
- *         caught inside the lambda or wrapped in an unchecked exception.</td>
+ *     <td>Most intermediate operations use {@code java.util.function} interfaces. The {@code *E}
+ *         convenience methods wrap checked exceptions as runtime exceptions, while selected terminal
+ *         operations such as {@code forEach} accept {@code Throwables}-style callbacks and propagate
+ *         their declared checked exception type.</td>
  *     <td>First-class: operation lambdas are {@code Throwables}-style and may throw the declared checked
  *         exception type {@code E} (e.g. {@code IOException}, {@code SQLException}); terminal operations
  *         declare {@code throws E}, so it propagates to the caller unwrapped.</td>
@@ -418,7 +423,6 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
-@com.landawn.abacus.annotation.Immutable
 @LazyEvaluation
 @SuppressWarnings({ "java:S1192", "java:S1845" })
 public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? super T>, Consumer<? super T>, Optional<T>, Indexed<T>, ObjIterator<T>, Stream<T>> {
@@ -451,7 +455,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -462,6 +466,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new Stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #filter(Predicate, Consumer)
      * @see #takeWhile(Predicate)
      * @see #dropWhile(Predicate)
@@ -492,7 +497,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -506,6 +511,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *        This action is only applied to the elements that do not match the predicate and pulled by downstream/terminal operation.
      *        Must be {@code non-null}.
      * @return a new Stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #filter(Predicate)
      * @see #onEach(Consumer)
      */
@@ -559,7 +565,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -570,6 +576,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new Stream consisting of elements taken while the predicate returns true
+     * @throws IllegalStateException if the stream is already closed
      * @see #dropWhile(Predicate)
      * @see #filter(Predicate)
      * @see #limit(long)
@@ -626,7 +633,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -638,6 +645,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
+     * @throws IllegalStateException if the stream is already closed
      * @see #takeWhile(Predicate)
      * @see #filter(Predicate)
      * @see #skip(long)
@@ -695,7 +703,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -709,6 +717,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *        This action is only applied to the elements that match the predicate and pulled by downstream/terminal operation.
      *        Must be {@code non-null}.
      * @return a new Stream consisting of the remaining elements after the elements that match the predicate have been removed
+     * @throws IllegalStateException if the stream is already closed
      * @see #dropWhile(Predicate)
      * @see #filter(Predicate, Consumer)
      * @see #skipUntil(Predicate)
@@ -763,7 +772,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -774,6 +783,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to start including elements
      * @return a new Stream consisting of the remaining elements starting from the first element that matches the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #dropWhile(Predicate)
      * @see #takeWhile(Predicate)
      * @see #skip(long)
@@ -806,7 +816,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -818,6 +828,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> the type of the elements to be selected
      * @param targetType the class of the type to be selected.
      * @return a new Stream containing elements of the specified type
+     * @throws IllegalStateException if the stream is already closed
      * @see #filter(Predicate)
      * @see #map(Function)
      */
@@ -846,7 +857,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -858,6 +869,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> The type of the paired value.
      * @param extractor the function to be applied to each element in the stream.
      * @return a new Stream of Pairs, where each Pair consists of an element from the original stream and its corresponding value obtained by applying the extractor function.
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(Function)
      * @see #zipWith(Collection, BiFunction)
      */
@@ -889,7 +901,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -901,6 +913,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the result elements.
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(Function)
      * @see #mapToInt(ToIntFunction)
      * @see #mapToLong(ToLongFunction)
@@ -934,7 +947,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -946,6 +959,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> the type of the result elements
      * @param mapper a non-interfering, stateless function that transforms each {@code non-null} element
      * @return a new Stream consisting of the results of applying the given function to the {@code non-null} elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(Function)
      * @see #skipNulls()
      * @see #filter(Predicate)
@@ -980,7 +994,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1025,7 +1039,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1085,7 +1099,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1137,7 +1151,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1177,7 +1191,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1242,7 +1256,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1291,7 +1305,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1337,7 +1351,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1384,7 +1398,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1428,7 +1442,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1475,7 +1489,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1513,7 +1527,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1524,6 +1538,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new CharStream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(ToIntFunction)
      * @see #mapToLong(ToLongFunction)
      * @see #mapToDouble(ToDoubleFunction)
@@ -1549,7 +1564,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1560,6 +1575,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ByteStream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(ToIntFunction)
      * @see #mapToLong(ToLongFunction)
      * @see #mapToDouble(ToDoubleFunction)
@@ -1585,7 +1601,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1596,6 +1612,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ShortStream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(ToIntFunction)
      * @see #mapToLong(ToLongFunction)
      * @see #mapToDouble(ToDoubleFunction)
@@ -1625,7 +1642,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1636,6 +1653,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new IntStream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToLong(ToLongFunction)
      * @see #mapToDouble(ToDoubleFunction)
      * @see #map(Function)
@@ -1665,7 +1683,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1676,6 +1694,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new LongStream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(ToIntFunction)
      * @see #mapToDouble(ToDoubleFunction)
      * @see #map(Function)
@@ -1701,7 +1720,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1712,6 +1731,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new FloatStream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(ToIntFunction)
      * @see #mapToLong(ToLongFunction)
      * @see #mapToDouble(ToDoubleFunction)
@@ -1741,7 +1761,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1752,6 +1772,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new DoubleStream consisting of the results of applying the given function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(ToIntFunction)
      * @see #mapToLong(ToLongFunction)
      * @see #map(Function)
@@ -1777,7 +1798,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1790,6 +1811,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <V> The type of the value in the Map.Entry.
      * @param mapper the function to be applied to each element in the stream, which should return a Map.Entry instance.
      * @return a new EntryStream consisting of Map.Entry instances obtained by applying the mapper function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToEntry(Function, Function)
      * @see #flatMapToEntry(Function)
      */
@@ -1818,7 +1840,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1832,6 +1854,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to be applied to each element in the stream to generate the key.
      * @param valueMapper the function to be applied to each element in the stream to generate the value.
      * @return a new EntryStream consisting of Map.Entry instances obtained by applying the key and value mapping functions to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToEntry(Function)
      * @see #groupBy(Function, Function)
      */
@@ -1855,6 +1878,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is the flatMap operation that flattens nested streams into a single stream.
      * Each element is transformed into a stream, and all resulting streams are concatenated.
+     * Each non-{@code null} mapped stream is closed after its contents are consumed. Closing the
+     * returned stream also closes the mapped stream currently being consumed. A {@code null}
+     * mapped stream is treated as empty.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -1873,7 +1899,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1886,6 +1912,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new Stream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped stream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatmap(Function)
      * @see #map(Function)
      * @see #flatten(Collection)
@@ -1928,7 +1955,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1941,6 +1968,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new Stream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(Function)
      * @see #flatMapArray(Function)
      * @see #map(Function)
@@ -1971,7 +1999,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1984,6 +2012,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new Stream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(Function)
      * @see #flatmap(Function)
      * @see #flattMap(Function)
@@ -2000,6 +2029,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is similar to flatMap but works specifically with JDK streams.
      * Each element is transformed into a JDK stream, and all resulting streams are flattened into a single stream.
+     * Each non-{@code null} mapped JDK stream is closed after its contents are consumed. Closing
+     * the returned stream also closes the mapped JDK stream currently being consumed.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -2014,7 +2045,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2027,6 +2058,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new Stream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped stream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(Function)
      * @see #flatmap(Function)
      * @see #flatMapArray(Function)
@@ -2061,7 +2093,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2073,11 +2105,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the returned Stream.
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new {@link Stream} consisting of the flattened contents of the mapped JDK streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
     public <R> Stream<R> flatMapJdkStream(Function<? super T, ? extends java.util.stream.Stream<? extends R>> mapper) {
+        assertNotClosed();
+
         return flattMap(mapper);
     }
 
@@ -2099,7 +2134,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2111,6 +2146,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new CharStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped CharStream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(Function)
      * @see #flatMapToLong(Function)
      * @see #flatMapToDouble(Function)
@@ -2137,7 +2173,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2149,6 +2185,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new CharStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped Character collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToChar(Function)
      * @see #flatMapArrayToChar(Function)
      * @see #flatmap(Function)
@@ -2176,7 +2213,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2188,6 +2225,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new CharStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped char array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToChar(Function)
      * @see #flatmapToChar(Function)
      */
@@ -2213,7 +2251,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2225,6 +2263,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ByteStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped ByteStream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(Function)
      * @see #flatMapToLong(Function)
      * @see #flatMapToDouble(Function)
@@ -2251,7 +2290,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2263,6 +2302,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ByteStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped Byte collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToByte(Function)
      * @see #flatMapArrayToByte(Function)
      * @see #flatmap(Function)
@@ -2290,7 +2330,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2302,6 +2342,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ByteStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped byte array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToByte(Function)
      * @see #flatmapToByte(Function)
      */
@@ -2327,7 +2368,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2339,6 +2380,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ShortStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped ShortStream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(Function)
      * @see #flatMapToLong(Function)
      * @see #flatMapToDouble(Function)
@@ -2365,7 +2407,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2377,6 +2419,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ShortStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped Short collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToShort(Function)
      * @see #flatMapArrayToShort(Function)
      * @see #flatmap(Function)
@@ -2404,7 +2447,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2416,6 +2459,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new ShortStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped short array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToShort(Function)
      * @see #flatmapToShort(Function)
      */
@@ -2441,7 +2485,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2453,6 +2497,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new IntStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped IntStream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToLong(Function)
      * @see #flatMapToDouble(Function)
      * @see #mapToInt(ToIntFunction)
@@ -2479,7 +2524,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2491,6 +2536,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new IntStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped Integer collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(Function)
      * @see #flatMapArrayToInt(Function)
      * @see #flatmap(Function)
@@ -2518,7 +2564,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2530,6 +2576,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new IntStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped int array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(Function)
      * @see #flatmapToInt(Function)
      */
@@ -2555,7 +2602,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2567,6 +2614,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new LongStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped LongStream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(Function)
      * @see #flatMapToDouble(Function)
      * @see #mapToLong(ToLongFunction)
@@ -2593,7 +2641,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2605,6 +2653,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new LongStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped Long collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToLong(Function)
      * @see #flatMapArrayToLong(Function)
      * @see #flatmap(Function)
@@ -2632,7 +2681,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2644,6 +2693,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new LongStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped long array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToLong(Function)
      * @see #flatmapToLong(Function)
      */
@@ -2669,7 +2719,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2681,6 +2731,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new FloatStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped FloatStream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToDouble(Function)
      * @see #mapToFloat(ToFloatFunction)
      */
@@ -2706,7 +2757,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2718,6 +2769,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new FloatStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped Float collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToFloat(Function)
      * @see #flatMapArrayToFloat(Function)
      * @see #flatmap(Function)
@@ -2745,7 +2797,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2757,6 +2809,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new FloatStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped float array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToFloat(Function)
      * @see #flatmapToFloat(Function)
      */
@@ -2782,7 +2835,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2794,6 +2847,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new DoubleStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped DoubleStream produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(Function)
      * @see #flatMapToLong(Function)
      * @see #mapToDouble(ToDoubleFunction)
@@ -2820,7 +2874,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2832,6 +2886,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new DoubleStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped Double collection produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToDouble(Function)
      * @see #flatMapArrayToDouble(Function)
      * @see #flatmap(Function)
@@ -2859,7 +2914,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2871,6 +2926,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new DoubleStream consisting of the elements obtained by replacing each element of this stream
      *         with the contents of a mapped double array produced by applying the provided mapping function to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToDouble(Function)
      * @see #flatmapToDouble(Function)
      */
@@ -2885,6 +2941,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
+     * Each non-{@code null} stream returned by the mapper is closed after its entries are consumed,
+     * or when the returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2900,7 +2958,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2913,6 +2971,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <V> The type of the value in the Map.Entry.
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new EntryStream consisting of Map.Entry instances obtained by applying the mapper function to the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatmapToEntry(Function)
      * @see #mapToEntry(Function, Function)
      */
@@ -2943,7 +3002,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2957,6 +3016,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new EntryStream consisting of Map.Entry instances obtained by transforming each element of this stream
      *         into a Map and then flattening these Maps into a stream of their entries.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToEntry(Function)
      * @see #mapToEntry(Function, Function)
      */
@@ -2971,6 +3031,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
+     * Each non-{@code null} EntryStream returned by the mapper is closed after its entries are
+     * consumed, or when the returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2982,7 +3044,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2996,6 +3058,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new EntryStream consisting of key-value pairs obtained by transforming each element of this stream
      *         into an EntryStream and then flattening these EntryStreams into a single EntryStream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToEntry(Function)
      * @see #flatmapToEntry(Function)
      */
@@ -3024,7 +3087,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3036,6 +3099,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> the type of elements in the resulting stream
      * @param mapper a Function that takes an element and produces a Collection of new elements.
      * @return a new Stream consisting of the results of applying the Function to each {@code non-null} element
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatmap(Function)
      * @see #skipNulls()
      * @see #mapIfNotNull(Function)
@@ -3070,7 +3134,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3084,6 +3148,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a Function that takes an element and produces a Collection of intermediate elements.
      * @param secondMapper a Function that takes an intermediate element and produces a Collection of new elements.
      * @return a new Stream consisting of the results of applying the Functions to each {@code non-null} element
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatmapIfNotNull(Function)
      * @see #flatmap(Function)
      * @see #skipNulls()
@@ -3119,7 +3184,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3131,6 +3196,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> the type of the output stream
      * @param mapper a BiConsumer that takes an input element and a Consumer for output elements, and produces multiple output elements for each input element.
      * @return a new Stream consisting of all output elements produced by the BiConsumer for each input element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(Function)
      * @see #mapMultiToInt(BiConsumer)
      * @see #mapMultiToLong(BiConsumer)
@@ -3165,7 +3231,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3176,6 +3242,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a BiConsumer that takes an input element and an IntConsumer for output integers, and produces multiple output integers for each input element.
      * @return a new IntStream consisting of all output integers produced by the BiConsumer for each input element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapMulti(BiConsumer)
      * @see #mapMultiToLong(BiConsumer)
      * @see #mapMultiToDouble(BiConsumer)
@@ -3212,7 +3279,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3223,6 +3290,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a BiConsumer that takes an input element and a LongConsumer for output longs, and produces multiple output longs for each input element.
      * @return a new LongStream consisting of all output longs produced by the BiConsumer for each input element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapMulti(BiConsumer)
      * @see #mapMultiToInt(BiConsumer)
      * @see #mapMultiToDouble(BiConsumer)
@@ -3256,7 +3324,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3267,6 +3335,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a BiConsumer that takes an input element and a DoubleConsumer for output doubles, and produces multiple output doubles for each input element.
      * @return a new DoubleStream consisting of all output doubles produced by the BiConsumer for each input element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapMulti(BiConsumer)
      * @see #mapMultiToInt(BiConsumer)
      * @see #mapMultiToLong(BiConsumer)
@@ -3303,7 +3372,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3315,6 +3384,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> the type of the output stream
      * @param mapper a Function that takes an element and produces an Optional of a new element of type R.
      * @return a new Stream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartialJdk(Function)
      * @see #filter(Predicate)
      * @see #map(Function)
@@ -3351,7 +3421,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3362,6 +3432,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a Function that takes an element and produces an OptionalInt of a new element.
      * @return a new IntStream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartial(Function)
      * @see #mapPartialToLong(Function)
      * @see #mapPartialToDouble(Function)
@@ -3398,7 +3469,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3409,6 +3480,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a Function that takes an element and produces an OptionalLong of a new element.
      * @return a new LongStream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartial(Function)
      * @see #mapPartialToInt(Function)
      * @see #mapPartialToDouble(Function)
@@ -3445,7 +3517,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3456,6 +3528,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a Function that takes an element and produces an OptionalDouble of a new element.
      * @return a new DoubleStream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartial(Function)
      * @see #mapPartialToInt(Function)
      * @see #mapPartialToLong(Function)
@@ -3492,7 +3565,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3504,6 +3577,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> the type of the output stream
      * @param mapper a Function that takes an element and produces a java.util.Optional of a new element of type R.
      * @return a new Stream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartial(Function)
      * @see #mapPartialToIntJdk(Function)
      * @see #mapPartialToLongJdk(Function)
@@ -3541,7 +3615,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3552,6 +3626,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a Function that takes an element and produces a java.util.OptionalInt of a new element.
      * @return a new IntStream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartialJdk(Function)
      * @see #mapPartialToInt(Function)
      */
@@ -3587,7 +3662,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3598,6 +3673,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a Function that takes an element and produces a java.util.OptionalLong of a new element.
      * @return a new LongStream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartialJdk(Function)
      * @see #mapPartialToLong(Function)
      */
@@ -3633,7 +3709,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3644,6 +3720,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper a Function that takes an element and produces a java.util.OptionalDouble of a new element.
      * @return a new DoubleStream consisting of the results of applying the Function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartialJdk(Function)
      * @see #mapPartialToDouble(Function)
      */
@@ -3672,7 +3749,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3684,6 +3761,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is a list of elements belonging to that group.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Supplier)
      * @see #groupBy(Function, Function)
      * @see #groupBy(Function, Collector)
@@ -3714,7 +3792,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3727,6 +3805,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @param mapFactory a supplier to create the resulting map.
      * @return a new Stream consisting of entries where the key is the group identifier and the value is a list of elements belonging to that group.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function)
      * @see #groupBy(Function, Function, Supplier)
      */
@@ -3755,7 +3834,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3769,6 +3848,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group.
      * @return a new Stream consisting of entries where the key is the group identifier and the value is a list of elements that mapped to the corresponding key.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Function, Supplier)
      * @see Collectors#toMultimap(Function, Function)
      */
@@ -3798,7 +3878,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3813,6 +3893,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new Stream consisting of entries where the key is the group identifier and the value is a list of elements that mapped to the corresponding key.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Function)
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
@@ -3839,7 +3920,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3853,6 +3934,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @param downstream the Collector to be applied to the elements of each group.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the Collector to the elements of the group.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Collector, Supplier)
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -3880,7 +3962,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3895,6 +3977,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the elements of each group.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the Collector to the elements of the group.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Collector)
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -3922,7 +4005,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3938,6 +4021,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group.
      * @param downstream the Collector to be applied to the values of each group.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the Collector to the values of the group.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Function, Collector, Supplier)
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -3968,7 +4052,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3985,6 +4069,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the values of each group.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the Collector to the values of the group.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Function, Collector)
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -4012,7 +4097,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4027,6 +4112,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group.
      * @param mergeFunction the function to be applied for merging the values of each group.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of merging the values of the group using the merge function.
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupBy(Function, Function, Collector)
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -4058,7 +4144,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4074,6 +4160,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction the function to be used for merging values in case of key collision.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the value mapping function to the elements of the group and merging them using the merge function
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Function, BinaryOperator, Supplier)
      * @see #groupTo(Throwables.Function, Throwables.Function, Collector, Supplier)
      */
@@ -4103,7 +4190,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4115,6 +4202,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <K> The type of the key in the resulting EntryStream
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is a list of elements belonging to that group
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Supplier)
      * @see #groupTo(Throwables.Function)
      */
@@ -4143,7 +4231,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4156,6 +4244,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is a list of elements belonging to that group
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function)
      * @see #groupTo(Throwables.Function, Supplier)
      */
@@ -4184,7 +4273,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4198,6 +4287,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is a list of elements that were mapped to that key
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Function, Supplier)
      * @see #groupTo(Throwables.Function, Throwables.Function)
      */
@@ -4228,7 +4318,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4243,6 +4333,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is a list of elements that were mapped to that key
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Function)
      * @see #groupTo(Throwables.Function, Throwables.Function, Supplier)
      */
@@ -4272,7 +4363,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4286,6 +4377,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
      * @param downstream the Collector to be applied to the elements of each group.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the elements of the group
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Collector, Supplier)
      * @see #groupTo(Throwables.Function, Collector)
      */
@@ -4316,7 +4408,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4331,6 +4423,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the elements of each group.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the elements of the group
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Collector)
      * @see #groupTo(Throwables.Function, Collector, Supplier)
      */
@@ -4362,7 +4455,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4378,6 +4471,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper the function to be applied to each element in the stream to determine its value for the Collector.
      * @param downstream the Collector to be applied to the values of each group.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the values of the group
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Function, Collector, Supplier)
      * @see #groupTo(Throwables.Function, Throwables.Function, Collector)
      */
@@ -4410,7 +4504,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4427,6 +4521,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the values of each group.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the values of the group
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Function, Collector)
      * @see #groupTo(Throwables.Function, Throwables.Function, Collector, Supplier)
      */
@@ -4458,7 +4553,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4473,6 +4568,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper the function to be applied to each element in the stream to determine its value for the BinaryOperator.
      * @param mergeFunction the BinaryOperator to be applied to the values of each group.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the BinaryOperator to the values of the group
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Function, BinaryOperator, Supplier)
      * @see #groupBy(Function, Function, BinaryOperator, Supplier)
      */
@@ -4504,7 +4600,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4520,6 +4616,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction the function to be used for merging values in case of key collision.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the value mapping function to the elements of the group and merging them using the merge function
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupByToEntry(Function, Function, BinaryOperator)
      * @see #groupBy(Function, Function, BinaryOperator, Supplier)
      */
@@ -4550,7 +4647,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4561,6 +4658,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate a non-interfering, stateless predicate to be used for partitioning the stream elements
      * @return a new Stream consisting of Map.Entry where the key is a Boolean and the value is a List of elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #partitionByToEntry(Predicate)
      * @see #partitionTo(Throwables.Predicate)
      * @see Collectors#partitioningBy(Predicate)
@@ -4592,7 +4690,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4605,6 +4703,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering, stateless predicate to be used for partitioning the stream elements
      * @param downstream the Collector to be applied to the elements of each group.
      * @return a new Stream consisting of Map.Entry where the key is a Boolean and the value is the result of applying the Collector to the elements of the group
+     * @throws IllegalStateException if the stream is already closed
      * @see #partitionByToEntry(Predicate, Collector)
      * @see #partitionTo(Throwables.Predicate, Collector)
      * @see Collectors#partitioningBy(Predicate, Collector)
@@ -4635,7 +4734,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4646,6 +4745,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate a non-interfering, stateless predicate to be used for partitioning the stream elements
      * @return a new EntryStream consisting of entries where the key is a Boolean and the value is a List of elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #partitionBy(Predicate)
      * @see #partitionTo(Throwables.Predicate)
      * @see Collectors#partitioningBy(Predicate)
@@ -4677,7 +4777,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4690,6 +4790,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering, stateless predicate to be used for partitioning the stream elements
      * @param downstream the Collector to be applied to the elements of each group.
      * @return a new EntryStream consisting of entries where the key is a Boolean and the value is the result of applying the Collector to the elements of the group
+     * @throws IllegalStateException if the stream is already closed
      * @see #partitionBy(Predicate, Collector)
      * @see #partitionTo(Throwables.Predicate, Collector)
      * @see Collectors#partitioningBy(Predicate, Collector)
@@ -4718,7 +4819,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4730,6 +4831,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <K> The type of the key in the resulting Stream. The type is determined by the result type of the Function.
      * @param keyMapper the Function to be used for mapping stream elements to keys.
      * @return a new Stream consisting of Map.Entry where the key is the mapped key and the value is the count of elements that were mapped to this key
+     * @throws IllegalStateException if the stream is already closed
      * @see #countByToEntry(Function)
      * @see #groupBy(Function, Collector)
      */
@@ -4737,6 +4839,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @TerminalOpTriggered
     public <K> Stream<Map.Entry<K, Integer>> countBy(final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return groupBy(keyMapper, Collectors.countingToInt());
     }
 
@@ -4759,7 +4863,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4772,6 +4876,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the Function to be used for mapping stream elements to keys.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new Stream consisting of Map.Entry where the key is the mapped key and the value is the count of elements that were mapped to this key
+     * @throws IllegalStateException if the stream is already closed
      * @see #countByToEntry(Function, Supplier)
      * @see #groupBy(Function, Collector, Supplier)
      */
@@ -4779,6 +4884,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @TerminalOpTriggered
     public <K> Stream<Map.Entry<K, Integer>> countBy(final Function<? super T, ? extends K> keyMapper, final Supplier<? extends Map<K, Integer>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, Collectors.countingToInt(), mapFactory);
     }
 
@@ -4801,7 +4908,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4813,6 +4920,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <K> The type of the key in the resulting EntryStream. The type is determined by the result type of the Function.
      * @param keyMapper the Function to be used for mapping stream elements to keys.
      * @return a new EntryStream consisting of entries where the key is the mapped key and the value is the count of elements that were mapped to this key
+     * @throws IllegalStateException if the stream is already closed
      * @see #countBy(Function)
      * @see #groupByToEntry(Function, Collector)
      */
@@ -4820,6 +4928,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @TerminalOpTriggered
     public <K> EntryStream<K, Integer> countByToEntry(final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, Collectors.countingToInt());
     }
 
@@ -4842,7 +4952,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4855,6 +4965,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the Function to be used for mapping stream elements to keys.
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the mapped key and the value is the count of elements that were mapped to this key
+     * @throws IllegalStateException if the stream is already closed
      * @see #countBy(Function, Supplier)
      * @see #groupByToEntry(Function, Collector, Supplier)
      */
@@ -4862,6 +4973,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @TerminalOpTriggered
     public <K> EntryStream<K, Integer> countByToEntry(final Function<? super T, ? extends K> keyMapper, final Supplier<? extends Map<K, Integer>> mapFactory) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, Collectors.countingToInt(), mapFactory);
     }
 
@@ -4884,7 +4997,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4924,7 +5037,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4965,7 +5078,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5008,7 +5121,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5052,7 +5165,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5094,7 +5207,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5137,7 +5250,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5182,7 +5295,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5226,7 +5339,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5272,7 +5385,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5315,7 +5428,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5326,6 +5439,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param accumulator a BiFunction that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new Stream consisting of the results of the scan operation on the elements of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #scan(Object, BiFunction)
      * @see #reduce(BinaryOperator)
      */
@@ -5353,7 +5467,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5367,6 +5481,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *             It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * @param accumulator a BiFunction that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new Stream consisting of the results of the scan operation on the elements of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #scan(Object, boolean, BiFunction)
      * @see #scan(BinaryOperator)
      */
@@ -5399,7 +5514,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5413,6 +5528,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator a BiFunction that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new Stream consisting of the results of the scan operation on the elements of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #scan(Object, BiFunction)
      * @see #scan(BinaryOperator)
      */
@@ -5438,7 +5554,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5449,6 +5565,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param chunkSize the desired size of each chunk (the last chunk may be smaller). Must be positive.
      * @return a Stream of Lists, each containing a chunk of elements from the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if chunkSize is not positive
      * @see #split(int, IntFunction)
      * @see #sliding(int)
@@ -5475,7 +5592,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5488,6 +5605,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the desired size of each chunk (the last chunk may be smaller). Must be positive.
      * @param collectionSupplier a function that provides a new collection of type C for each chunk
      * @return a Stream of Collections, each containing a chunk of elements from the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if chunkSize is not positive or collectionSupplier is null
      * @see #split(int)
      * @see #split(int, Collector)
@@ -5513,7 +5631,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5526,6 +5644,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the desired size of each sub stream (the last may be smaller). Must be positive.
      * @param collector the collector to be used for collecting elements of each sub stream
      * @return a new Stream consisting of results produced by the collector for each sub stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if chunkSize is not positive or collector is null
      * @see #split(int)
      * @see #split(int, IntFunction)
@@ -5551,7 +5670,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5562,6 +5681,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate the condition to be used for splitting the stream into sub-streams
      * @return a new Stream consisting of Lists of elements from the original Stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #split(Predicate, Supplier)
      * @see #split(Predicate, Collector)
      */
@@ -5587,7 +5707,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5600,6 +5720,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to be used for splitting the stream into collections
      * @param collectionSupplier the supplier function to provide a new collection for each sub stream
      * @return a new Stream consisting of collections of elements from the original Stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #split(Predicate)
      * @see #split(Predicate, Collector)
      */
@@ -5625,7 +5746,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5638,6 +5759,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to be used for splitting the stream
      * @param collector the collector to be used for collecting elements of each chunk
      * @return a new Stream consisting of elements from the original Stream collected by the provided collector
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if collector is null
      * @see #split(Predicate)
      * @see #split(Predicate, Supplier)
@@ -5663,7 +5785,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5674,6 +5796,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param position the index at which to split the stream. Must be non-negative.
      * @return a new Stream consisting of two sub-streams split at the given index
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code position} is negative
      * @see #splitAt(int, Collector)
      * @see #splitAt(Predicate)
@@ -5702,7 +5825,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5715,6 +5838,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param position the index at which to split the stream. The element at this index will be the first element of the second part
      * @param collector the collector to be used for collecting elements of each part of the stream
      * @return a new Stream consisting of two elements: the collected first part followed by the collected second part
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code position} is negative
      * @see #splitAt(int)
      * @see #splitAt(Predicate, Collector)
@@ -5741,7 +5865,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5752,6 +5876,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param where the predicate to determine where to split the stream
      * @return a new Stream consisting of two sub-streams split at the point where the predicate is satisfied
+     * @throws IllegalStateException if the stream is already closed
      * @see #splitAt(int)
      * @see #splitAt(Predicate, Collector)
      */
@@ -5780,7 +5905,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5793,6 +5918,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param where the condition at which to split the stream
      * @param collector the collector to be used for collecting elements of each part of the stream
      * @return a new Stream consisting of two elements: the collected first part followed by the collected second part
+     * @throws IllegalStateException if the stream is already closed
      * @see #splitAt(Predicate)
      * @see #splitAt(int, Collector)
      */
@@ -5818,7 +5944,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5829,6 +5955,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param windowSize the size of the window to be used for sliding over the Stream elements. Must be positive.
      * @return a new Stream where each element is a List of elements from the original Stream, representing a window
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if windowSize is not positive
      * @see #sliding(int, int)
      * @see #sliding(int, IntFunction)
@@ -5856,7 +5983,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5869,6 +5996,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param windowSize the size of the window to be used for sliding over the Stream elements. Must be positive.
      * @param collectionSupplier the function to create a new collection for each window
      * @return a new Stream where each element is a collection of elements from the original Stream, representing a window
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if windowSize is not positive or collectionSupplier is null
      * @see #sliding(int)
      * @see #sliding(int, int, IntFunction)
@@ -5896,7 +6024,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5909,6 +6037,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param windowSize the size of the window to be used for sliding over the Stream elements. Must be positive.
      * @param collector the collector to be used for reduction of the elements in each window
      * @return a new Stream where each element is a result container of the collected elements from the original Stream, representing a window
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if windowSize is not positive or collector is null
      * @see #sliding(int)
      * @see #sliding(int, int, Collector)
@@ -5936,7 +6065,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5948,6 +6077,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param windowSize the size of the window to be used for sliding over the Stream elements. Must be positive.
      * @param increment the number of elements to move the window by each time. Must be positive.
      * @return a new Stream where each element is a List of elements from the original Stream, representing a window
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if windowSize or increment is not positive
      * @see #sliding(int)
      * @see #sliding(int, int, IntFunction)
@@ -5975,7 +6105,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5989,6 +6119,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param increment the number of elements to move the window by each time. Must be positive.
      * @param collectionSupplier the function to create a new collection for each window
      * @return a new Stream where each element is a collection of elements from the original Stream, representing a window
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if windowSize or increment is not positive, or collectionSupplier is null
      * @see #sliding(int, int)
      * @see #sliding(int, int, Collector)
@@ -6016,7 +6147,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6030,6 +6161,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param increment the number of elements to move the window by each time. Must be positive.
      * @param collector the collector to be used for reduction of the elements in each window
      * @return a new Stream where each element is a result container of the collected elements from the original Stream, representing a window
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if windowSize or increment is not positive, or collector is null
      * @see #sliding(int, Collector)
      * @see #sliding(int, int)
@@ -6055,7 +6187,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6066,6 +6198,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param delimiter the element to be inserted between each element of the stream
      * @return a new Stream with the delimiter interspersed between each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #prepend(Object[])
      * @see #append(Object[])
      */
@@ -6092,7 +6225,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6103,6 +6236,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mergeFunction a binary operator used to merge duplicate elements.
      * @return a new Stream consisting of the distinct elements of this stream with duplicates merged
+     * @throws IllegalStateException if the stream is already closed
      * @see #distinct()
      * @see #distinctBy(Function)
      */
@@ -6110,6 +6244,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @TerminalOpTriggered
     public Stream<T> distinct(final BinaryOperator<T> mergeFunction) {
+        assertNotClosed();
+
         // ConcurrentHashMap is not required for parallel stream and it doesn't support null key.
         // final Supplier<? extends Map<T, T>> supplier = isParallel() ? Suppliers.<T, T> ofConcurrentHashMap() : Suppliers.<T, T> ofLinkedHashMap();
 
@@ -6148,7 +6284,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6159,6 +6295,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to extract the key for comparison.
      * @return a new Stream consisting of the distinct elements of this stream based on the extracted keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #distinct()
      * @see #distinctBy(Function, BinaryOperator)
      */
@@ -6186,7 +6323,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6198,6 +6335,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to extract the key for comparison.
      * @param mergeFunction a binary operator used to merge duplicate elements.
      * @return a new Stream consisting of the distinct elements of this stream with duplicates merged
+     * @throws IllegalStateException if the stream is already closed
      * @see #distinct(BinaryOperator)
      * @see #distinctBy(Function)
      */
@@ -6205,6 +6343,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @TerminalOpTriggered
     public Stream<T> distinctBy(final Function<? super T, ?> keyMapper, final BinaryOperator<T> mergeFunction) {
+        assertNotClosed();
+
         // ConcurrentHashMap is not required for parallel stream and it doesn't support null key.
         // final Supplier<? extends Map<K, T>> supplier = isParallel() ? Suppliers.<K, T> ofConcurrentHashMap() : Suppliers.<K, T> ofLinkedHashMap();
 
@@ -6242,7 +6382,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6253,6 +6393,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator a {@code non-null} Comparator to be used to compare stream elements
      * @return a new stream that contains the elements of the original stream, sorted according to the provided Comparator
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedBy(Function)
      * @see #reverseSorted(Comparator)
      */
@@ -6279,7 +6420,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6290,6 +6431,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a non-interfering, stateless function to apply to each element to determine its key for sorting
      * @return a new stream that contains the elements of the original stream, sorted according to the natural order of the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sorted(Comparator)
      * @see #sortedByInt(ToIntFunction)
      * @see Comparators#comparingBy(Function)
@@ -6319,7 +6461,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6330,6 +6472,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to extract the int key for sorting
      * @return a new Stream consisting of the elements of this stream, sorted by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedBy(Function)
      * @see #sortedByLong(ToLongFunction)
      * @see Comparators#comparingInt(ToIntFunction)
@@ -6358,7 +6501,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6369,6 +6512,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to extract the long key for sorting
      * @return a new Stream consisting of the elements of this stream, sorted by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedBy(Function)
      * @see #sortedByDouble(ToDoubleFunction)
      * @see Comparators#comparingLong(ToLongFunction)
@@ -6397,7 +6541,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6408,6 +6552,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to extract the double key for sorting
      * @return a new Stream consisting of the elements of this stream, sorted by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedBy(Function)
      * @see #sortedByInt(ToIntFunction)
      * @see Comparators#comparingDouble(ToDoubleFunction)
@@ -6435,7 +6580,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6446,6 +6591,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator a {@code non-null} Comparator to be used to compare stream elements in reverse order
      * @return a new stream that contains the elements of the original stream, sorted in reverse order according to the provided Comparator
+     * @throws IllegalStateException if the stream is already closed
      * @see #sorted(Comparator)
      * @see #reverseSortedBy(Function)
      * @see Comparators#reverseOrder(Comparator)
@@ -6473,7 +6619,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6484,6 +6630,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to extract the int key for sorting
      * @return a new stream that contains the elements of the original stream, sorted in reverse order according to the natural order of the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedByInt(ToIntFunction)
      * @see #reverseSortedBy(Function)
      * @see Comparators#reversedComparingInt(ToIntFunction)
@@ -6511,7 +6658,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6522,6 +6669,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to extract the long key for sorting
      * @return a new stream that contains the elements of the original stream, sorted in reverse order according to the natural order of the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedByLong(ToLongFunction)
      * @see #reverseSortedBy(Function)
      * @see Comparators#reversedComparingLong(ToLongFunction)
@@ -6549,7 +6697,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6560,6 +6708,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to extract the double key for sorting
      * @return a new stream that contains the elements of the original stream, sorted in reverse order according to the natural order of the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedByDouble(ToDoubleFunction)
      * @see #reverseSortedBy(Function)
      * @see Comparators#reversedComparingDouble(ToDoubleFunction)
@@ -6588,7 +6737,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6599,6 +6748,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to apply to each element to determine its key for sorting
      * @return a new stream that contains the elements of the original stream, sorted in reverse order according to the natural order of the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedBy(Function)
      * @see #reverseSorted(Comparator)
      * @see Comparators#reversedComparingBy(Function)
@@ -6628,7 +6778,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6640,6 +6790,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param n the number of top elements to select from the stream. Must be non-negative.
      * @return a new stream that contains the top (largest) n elements of the original stream, according to the natural order of the elements.
      *            There is no guarantee on the order of the returned elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if n is less than zero
      * @see #top(int, Comparator)
      * @see #kthLargest(int, Comparator)
@@ -6667,7 +6818,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6680,6 +6831,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator a {@code non-null} Comparator to be used to compare stream elements; the {@code n} elements considered "greatest" by this comparator are returned
      * @return a new Stream consisting of the top n elements of this stream compared by the provided Comparator.
      *              There is no guarantee on the order of the returned elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if n is less than zero
      * @see #top(int)
      * @see #kthLargest(int, Comparator)
@@ -6706,7 +6858,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6718,6 +6870,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param startInclusive the first position in the range to skip, inclusive. Must be non-negative.
      * @param endExclusive the last position in the range to skip, exclusive. Must be &gt;= startInclusive.
      * @return a new stream that skips the specified range of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if startInclusive is negative or endExclusive &lt; startInclusive
      * @see #skip(long)
      * @see #limit(long)
@@ -6743,7 +6896,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6753,6 +6906,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a new stream that excludes {@code null} elements of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #filter(Predicate)
      */
     @SequentialOnly
@@ -6777,7 +6931,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6788,6 +6942,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param n the number of elements from the end of the stream to skip. Must be non-negative.
      * @return a new stream that excludes the last n elements of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if n is negative
      * @see #takeLast(int)
      * @see #skip(long)
@@ -6803,7 +6958,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
      * A queue with size up to n will be maintained to retain the last n elements.
      * It may cause OutOfMemoryError if n is too large.
-     * All the elements will be loaded to get the last n elements and the Stream will be closed after that, if a terminal operation is triggered.
+     * All elements are traversed, but at most {@code n} elements are retained. The stream is closed after
+     * a terminal operation completes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6815,7 +6971,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6826,6 +6982,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param n the number of elements from the end of the stream to include. Must be non-negative.
      * @return a new stream that includes the last n elements of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if n is negative
      * @deprecated Use {@link #takeLast(int)} instead
      * @see #takeLast(int)
@@ -6835,6 +6992,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @SequentialOnly
     @IntermediateOp
     public final Stream<T> last(final int n) {
+        assertNotClosed();
+
         return takeLast(n);
     }
 
@@ -6845,7 +7004,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
      * A queue with size up to n will be maintained to retain the last n elements.
      * It may cause OutOfMemoryError if n is too large.
-     * All the elements will be loaded to get the last n elements and the Stream will be closed after that, if a terminal operation is triggered.
+     * All elements are traversed, but at most {@code n} elements are retained. The stream is closed after
+     * a terminal operation completes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6857,7 +7017,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6868,6 +7028,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param n the number of elements from the end of the stream to include. Must be non-negative.
      * @return a new stream that includes the last n elements of the original stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if n is negative
      * @see #skipLast(int)
      * @see #limit(long)
@@ -6894,7 +7055,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6905,6 +7066,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation.
      * @return a new Stream consisting of the elements of this stream with the provided action applied to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #peek(Consumer)
      */
     @Beta
@@ -6931,7 +7093,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6942,6 +7104,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param action a non-interfering action to perform on the first element of the stream
      * @return a new stream that includes the action on the first element
+     * @throws IllegalStateException if the stream is already closed
      * @see #onLast(Consumer)
      * @see #peekFirst(Consumer)
      */
@@ -6968,7 +7131,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6979,6 +7142,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param action a non-interfering action to perform on the last element of the stream
      * @return a new stream that includes the action on the last element
+     * @throws IllegalStateException if the stream is already closed
      * @see #onFirst(Consumer)
      * @see #peekLast(Consumer)
      */
@@ -7008,7 +7172,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7019,6 +7183,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation.
      * @return a new Stream consisting of the elements of this stream with the provided action applied to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #onEach(Consumer)
      */
     @Beta
@@ -7026,6 +7191,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @Override
     public Stream<T> peek(Consumer<? super T> action) {
+        assertNotClosed();
+
         return onEach(action);
     }
 
@@ -7048,7 +7215,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7059,12 +7226,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param action a non-interfering action to perform on the first element of the stream
      * @return a new stream that includes the action on the first element
+     * @throws IllegalStateException if the stream is already closed
      * @see #onFirst(Consumer)
      * @see #onEach(Consumer)
      */
     @SequentialOnly
     @IntermediateOp
     public Stream<T> peekFirst(final Consumer<? super T> action) {
+        assertNotClosed();
+
         return onFirst(action);
     }
 
@@ -7087,7 +7257,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7098,12 +7268,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param action a non-interfering action to perform on the last element of the stream
      * @return a new stream that includes the action on the last element
+     * @throws IllegalStateException if the stream is already closed
      * @see #onLast(Consumer)
      * @see #onEach(Consumer)
      */
     @SequentialOnly
     @IntermediateOp
     public Stream<T> peekLast(final Consumer<? super T> action) {
+        assertNotClosed();
+
         return onLast(action);
     }
 
@@ -7124,7 +7297,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7136,6 +7309,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering predicate to test on the elements of the stream
      * @param action a non-interfering action to perform on the elements that satisfy the predicate
      * @return a new stream that includes the action on the elements that satisfy the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if predicate or action is null
      * @see #onEach(Consumer)
      * @see #peekIf(BiPredicate, Consumer)
@@ -7143,7 +7317,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public Stream<T> peekIf(final Predicate<? super T> predicate, final Consumer<? super T> action) {
+    public Stream<T> peekIf(final Predicate<? super T> predicate, final Consumer<? super T> action) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(action, cs.action);
 
@@ -7169,7 +7345,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7181,6 +7357,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering predicate to test on the elements of the stream and their iteration count
      * @param action a non-interfering action to perform on the elements that satisfy the predicate
      * @return a new stream that includes the action on the elements that satisfy the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the predicate or action is null
      * @see #onEach(Consumer)
      * @see #peekIf(Predicate, Consumer)
@@ -7189,6 +7366,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @ParallelSupported
     @IntermediateOp
     public Stream<T> peekIf(final BiPredicate<? super T, ? super Long> predicate, final Consumer<? super T> action) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(action, cs.action);
 
@@ -7228,7 +7407,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7238,12 +7417,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #forEach(Throwables.Consumer)
      */
     @Beta
     @ParallelSupported
     @TerminalOp
     public void foreach(final Consumer<? super T> action) {
+        assertNotClosed();
+
         forEach(Fn.from(action));
     }
 
@@ -7269,7 +7451,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7280,6 +7462,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the Consumer
      * @see java.util.function.Consumer
      * @see com.landawn.abacus.util.Throwables.Consumer
@@ -7313,7 +7496,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7326,6 +7509,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E2> the type of exception that the onComplete may throw
      * @param action the action to be performed for each element
      * @param onComplete the Runnable to be executed after all elements have been processed
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the Consumer
      * @throws E2 Exception thrown by the Runnable
      * @see N#forEach(Iterable, Throwables.Consumer)
@@ -7356,7 +7540,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7370,6 +7554,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E2> The type of exception that can be thrown by the BiConsumer action
      * @param flatMapper the function to transform elements of the Stream into Iterables
      * @param action the action to be performed for each element of the Stream and each element of the Iterable produced by the flatMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the flatMapper function
      * @throws E2 Exception thrown by the BiConsumer action
      * @see N#forEach(Iterable, Throwables.Function, Throwables.BiConsumer)
@@ -7401,7 +7586,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7418,6 +7603,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param flatMapper the first function to transform elements of the Stream into Iterables
      * @param flatMapper2 the second function to transform elements of the first Iterable into further Iterables
      * @param action the action to be performed for each element of the Stream and each element of the Iterables produced by the flatMapper functions
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the first flatMapper function
      * @throws E2 Exception thrown by the second flatMapper function
      * @throws E3 Exception thrown by the TriConsumer action
@@ -7454,7 +7640,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7465,6 +7651,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the Consumer
      * @see com.landawn.abacus.util.Throwables.IntObjConsumer
      */
@@ -7497,7 +7684,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7508,6 +7695,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element, which accepts an element and a MutableBoolean
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @see #forEachUntil(MutableBoolean, Throwables.Consumer)
      */
@@ -7542,7 +7730,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7555,6 +7743,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param flagToBreak a flag to break the for-each loop. Set it to {@code true} to break the loop if you don't want to continue the action.
      *                    Iteration on this stream will also be stopped when this flag is set to {@code true}.
      * @param action the action to be performed for each element
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @see #forEachUntil(Throwables.BiConsumer)
      */
@@ -7580,7 +7769,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7591,6 +7780,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <E> type of exception that might be thrown from the action
      * @param action a non-interfering action to perform on each adjacent pair of elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @see #forEachPair(int, Throwables.BiConsumer)
      */
@@ -7620,7 +7810,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7632,6 +7822,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> type of exception that might be thrown from the action
      * @param increment the distance between the first elements of each pair. Must be positive.
      * @param action a non-interfering action to perform on each pair of elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @throws IllegalArgumentException if increment is not positive
      * @see #forEachPair(Throwables.BiConsumer)
@@ -7658,7 +7849,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7669,6 +7860,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <E> type of exception that might be thrown from the action
      * @param action a non-interfering action to perform on each adjacent triple of elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @see #forEachTriple(int, Throwables.TriConsumer)
      */
@@ -7698,7 +7890,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7710,6 +7902,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> type of exception that might be thrown from the action
      * @param increment the distance between the first elements of each triple. Must be positive.
      * @param action a non-interfering action to perform on each triple of elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @throws IllegalArgumentException if increment is not positive
      * @see #forEachTriple(Throwables.TriConsumer)
@@ -7736,7 +7929,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7748,6 +7941,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate the predicate to apply to elements of this stream
      * @return {@code true} if any elements match the predicate, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #allMatch(Throwables.Predicate)
      * @see #noneMatch(Throwables.Predicate)
@@ -7773,7 +7967,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7785,6 +7979,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate the predicate to apply to elements of this stream
      * @return {@code true} if all elements match the predicate or this Stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #anyMatch(Throwables.Predicate)
      * @see #noneMatch(Throwables.Predicate)
@@ -7810,7 +8005,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7822,6 +8017,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate the predicate to apply to elements of this stream
      * @return {@code true} if no elements match the predicate or this Stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #anyMatch(Throwables.Predicate)
      * @see #allMatch(Throwables.Predicate)
@@ -7847,7 +8043,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7861,6 +8057,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param atMost the maximum number of elements that need to match the predicate
      * @param predicate the predicate to apply to elements in the stream
      * @return {@code true} if the number of elements matching the predicate is within the range [atLeast, atMost], {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atLeast} is greater than {@code atMost}
      * @throws E Exception thrown by the predicate
      * @see #anyMatch(Throwables.Predicate)
@@ -7888,7 +8085,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7898,6 +8095,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return an {@code Optional} containing the first element of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.Predicate)
@@ -7906,6 +8104,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @ParallelSupported
     @TerminalOp
     public Optional<T> findFirst() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -7927,7 +8127,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7937,6 +8137,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return an {@code Optional} containing the first element of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.Predicate)
@@ -7945,6 +8146,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @ParallelSupported
     @TerminalOp
     public Optional<T> findAny() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -7965,7 +8168,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7977,6 +8180,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to apply to elements in the stream
      * @return an {@code Optional} containing the first matching element, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.Predicate)
      * @see #findLast(Throwables.Predicate)
@@ -8002,7 +8206,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8014,6 +8218,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to apply to elements in the stream
      * @return an {@code Optional} containing any matching element, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.Predicate)
      */
@@ -8038,7 +8243,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8050,6 +8255,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to apply to elements in the stream
      * @return an {@code Optional} containing the last matching element, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #reversed()
      * @see #findFirst(Throwables.Predicate)
@@ -8075,7 +8281,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8086,6 +8292,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param a the elements to check for presence in the stream
      * @return {@code true} if the stream contains all the specified elements or the specified array is {@code null} or empty, {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
      * @see #containsAny(Object[])
      * @see #containsNone(Object[])
      */
@@ -8110,7 +8317,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8121,6 +8328,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param c the elements to check for presence in the stream
      * @return {@code true} if the stream contains all the specified elements or the specified collection is {@code null} or empty, {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
      * @see #containsAny(Collection)
      * @see #containsNone(Collection)
      */
@@ -8144,7 +8352,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8155,6 +8363,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param a the elements to check for presence in the stream
      * @return {@code true} if the stream contains any of the specified elements, {@code false} if it does not, or if the array is {@code null} or empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #containsNone(Object[])
      * @see #containsAll(Object[])
      */
@@ -8179,7 +8388,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8190,6 +8399,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param c the elements to check for presence in the stream
      * @return {@code true} if the stream contains any of the specified elements, {@code false} if it does not, or if the collection is {@code null} or empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #containsNone(Collection)
      * @see #containsAll(Collection)
      */
@@ -8213,7 +8423,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8224,6 +8434,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param a the elements to check for presence in the stream
      * @return {@code true} if the stream doesn't contain any of the specified elements, or if this stream is empty, or if the array is {@code null} or empty, {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
      * @see #containsAny(Object[])
      * @see #containsAll(Object[])
      */
@@ -8248,7 +8459,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8259,6 +8470,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param c the elements to check for presence in the stream
      * @return {@code true} if the stream doesn't contain any of the specified elements, or if this stream is empty, or if the collection is {@code null} or empty. {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
      * @see #containsAny(Collection)
      * @see #containsAll(Collection)
      */
@@ -8283,7 +8495,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8295,6 +8507,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <A> the component type of the array
      * @param generator a function which produces a new array of the desired type and the provided length
      * @return an array containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #toArray()
      * @see #toList()
      */
@@ -8320,7 +8533,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8336,6 +8549,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to produce the keys for the map
      * @param valueMapper a function to produce the values for the map
      * @return an immutable map containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if there are duplicated keys
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
@@ -8350,6 +8564,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @TerminalOp
     public <K, V, E extends Exception, E2 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper) throws IllegalStateException, E, E2 {
+        assertNotClosed();
+
         return ImmutableMap.wrap(toMap(keyMapper, valueMapper));
     }
 
@@ -8376,7 +8592,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8393,6 +8609,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper a function to produce the values for the map
      * @param mergeFunction the function to merge values associated with the same key
      * @return an immutable map containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
      * @see #toImmutableMap(Throwables.Function, Throwables.Function)
@@ -8405,6 +8622,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @TerminalOp
     public <K, V, E extends Exception, E2 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction) throws E, E2 {
+        assertNotClosed();
+
         return ImmutableMap.wrap(toMap(keyMapper, valueMapper, mergeFunction));
     }
 
@@ -8426,7 +8645,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8442,6 +8661,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to produce the keys for the map
      * @param valueMapper a function to produce the values for the map
      * @return a map containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if there are duplicated keys
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
@@ -8478,7 +8698,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8495,6 +8715,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper a function to produce the values for the map
      * @param mergeFunction the function to merge values associated with the same key
      * @return a map containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
      * @see #toMap(Throwables.Function, Throwables.Function, BinaryOperator, Supplier)
@@ -8530,7 +8751,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8548,6 +8769,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper a function to produce the values for the map
      * @param mapFactory a supplier to create the resulting map
      * @return a map containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if there are duplicated keys
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
@@ -8586,7 +8808,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8605,6 +8827,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction the function to merge values associated with the same key
      * @param mapFactory a supplier to create the resulting map
      * @return a map containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
      * @see Fn#throwingMerger()
@@ -8634,7 +8857,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8647,6 +8870,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that the keyMapper function may throw
      * @param keyMapper a function to produce the keys for the map
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @see #toMultimap(Throwables.Function)
      * @see #groupTo(Throwables.Function, Supplier)
@@ -8674,7 +8898,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8689,6 +8913,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to produce the keys for the map
      * @param mapFactory a supplier to create the resulting map
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @see #toMultimap(Throwables.Function, Supplier)
      * @see #groupTo(Throwables.Function)
@@ -8720,7 +8945,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8736,6 +8961,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to produce the keys for the map
      * @param valueMapper a function to produce the values for the map
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
      * @see #toMultimap(Throwables.Function, Throwables.Function)
@@ -8770,7 +8996,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8788,6 +9014,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper a function to produce the values for the map
      * @param mapFactory a supplier to create the resulting map
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
      * @see #toMultimap(Throwables.Function, Throwables.Function, Supplier)
@@ -8821,7 +9048,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8836,6 +9063,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to produce the keys for the map
      * @param downstream a collector to reduce the values associated with a key
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      * @see #groupTo(Throwables.Function, Collector, Supplier)
@@ -8865,7 +9093,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8882,6 +9110,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream a collector to reduce the values associated with a key.
      * @param mapFactory a supplier to create the resulting map.
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -8912,7 +9141,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8930,6 +9159,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper a function to produce the values for the map.
      * @param downstream a collector to reduce the values associated with a key.
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
@@ -8963,7 +9193,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8983,6 +9213,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream a collector to reduce the values associated with a key.
      * @param mapFactory a supplier to create the resulting map.
      * @return a map containing the elements of this stream grouped by the keys produced by the keyMapper function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
@@ -9016,7 +9247,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9029,6 +9260,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of the exception that can be thrown by the key mapping function
      * @param flatKeyExtractor a function that maps an input element to a collection of keys.
      * @return a Map where each key is associated with a List of elements that were mapped to it
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      */
     @ParallelSupported
@@ -9058,7 +9290,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9073,6 +9305,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param flatKeyExtractor a function that maps an input element to a collection of keys.
      * @param mapFactory a supplier to create the resulting map.
      * @return a Map where each key is associated with a List of elements that were mapped to it
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      */
     @ParallelSupported
@@ -9105,7 +9338,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9121,6 +9354,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param flatKeyExtractor a function that maps an input element to a collection of keys.
      * @param valueMapper a function that maps an input element and its corresponding key to a value.
      * @return a Map where each key is associated with a List of values that were mapped to it
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      * @throws E2 Exception thrown by the value mapping function
      */
@@ -9157,7 +9391,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9175,6 +9409,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper a function that maps an input element and its corresponding key to a value.
      * @param mapFactory a supplier to create the resulting map.
      * @return a Map where each key is associated with a List of values that were mapped to it
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      * @throws E2 Exception thrown by the value mapping function
      */
@@ -9205,7 +9440,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9220,6 +9455,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param flatKeyExtractor a function that maps an input element to a collection of keys.
      * @param downstream a Collector that accumulates input elements into a mutable result container.
      * @return a Map where each key is associated with the result of the downstream collector
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      */
     @ParallelSupported
@@ -9251,7 +9487,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9268,6 +9504,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream a Collector that accumulates input elements into a mutable result container.
      * @param mapFactory a function that creates a new Map.
      * @return a Map where each key is associated with the result of the downstream collector
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      */
     @ParallelSupported
@@ -9302,7 +9539,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9320,6 +9557,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper a function that maps an input element and a key to an intermediate value.
      * @param downstream a Collector that accumulates intermediate values into a final result.
      * @return a Map where each key is associated with the result of applying the downstream collector to the values mapped to it
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      * @throws E2 Exception thrown by the value mapping function
      */
@@ -9353,7 +9591,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9373,6 +9611,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream a Collector that accumulates intermediate values into a final result.
      * @param mapFactory a Supplier that generates the resulting Map.
      * @return a Map where each key is associated with the result of applying the downstream collector to the values mapped to it
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the key mapping function
      * @throws E2 Exception thrown by the value mapping function
      */
@@ -9402,7 +9641,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9414,6 +9653,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of the exception that can be thrown by the predicate
      * @param predicate a function that tests whether an element should be included in the <i>true</i> or <i>false</i> list.
      * @return a Map where the Boolean key is associated with a list of elements that satisfy or do not satisfy the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the predicate
      * @see #groupTo(Throwables.Function)
      * @see Collectors#partitioningBy(Predicate)
@@ -9442,7 +9682,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9456,6 +9696,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a function that tests whether an element should be included in the <i>true</i> or <i>false</i> group.
      * @param downstream a Collector that accumulates elements into a final result.
      * @return a Map where the Boolean key is associated with a value that is the result of applying a downstream collector to the elements that satisfy or do not satisfy the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @throws E Exception thrown by the predicate
      * @see #groupTo(Throwables.Function, Collector)
      * @see Collectors#partitioningBy(Predicate, Collector)
@@ -9482,7 +9723,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9495,6 +9736,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that may be thrown by the key extractor function
      * @param keyMapper the function to extract keys from the elements.
      * @return a ListMultimap where the keys are generated by the key extractor function and the values are the elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if an exception occurs during key extraction
      * @see #groupTo(Throwables.Function)
      */
@@ -9520,7 +9762,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9536,6 +9778,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to extract keys from the elements.
      * @param mapFactory the supplier to create a new multimap instance.
      * @return a Multimap where the keys are generated by the key extractor function and the values are the elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if an exception occurs during key extraction
      * @see #groupTo(Throwables.Function, Supplier)
      */
@@ -9562,7 +9805,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9578,6 +9821,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the function to extract keys from the elements.
      * @param valueMapper the function to extract values from the elements.
      * @return a ListMultimap where the keys are generated by the key extractor function and the values are generated by the value extractor function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if an exception occurs during key extraction
      * @throws E2 if an exception occurs during value extraction
      * @see #groupTo(Throwables.Function, Throwables.Function)
@@ -9608,7 +9852,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9627,6 +9871,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueMapper the function to extract values from the elements.
      * @param mapFactory the supplier to create the Multimap instance.
      * @return a Multimap where the keys are generated by the key extractor function and the values are generated by the value extractor function
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if an exception occurs during key extraction
      * @throws E2 if an exception occurs during value extraction
      * @see #groupTo(Throwables.Function, Throwables.Function, Supplier)
@@ -9654,7 +9899,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9664,6 +9909,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a Dataset representation of the Stream elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if element type {@code T} is not Map or Bean.
      * @see N#newDataset(Collection)
      */
@@ -9692,7 +9938,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9703,6 +9949,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param columnNames the list of column names to be used in the Dataset. Must not be {@code null} or empty.
      * @return a Dataset representation of the Stream elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the specified {@code columnNames} is {@code null} or empty.
      * @see N#newDataset(Collection, Collection)
      * @see #toDataset()
@@ -9729,7 +9976,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9740,6 +9987,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param accumulator the function for combining two values.
      * @return an Optional describing the result of the fold, or an empty Optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #reduce(BinaryOperator)
      */
     @SequentialOnly
@@ -9761,7 +10009,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9774,6 +10022,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param identity the initial value.
      * @param accumulator the function for combining the current reduced value and the current stream element.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see #reduce(Object, BiFunction, BinaryOperator)
      */
     @SequentialOnly
@@ -9798,7 +10047,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9809,6 +10058,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param accumulator the function for combining two values.
      * @return an Optional describing the result of the fold, or an empty Optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #reduce(BinaryOperator)
      */
     @SequentialOnly
@@ -9832,7 +10082,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9845,6 +10095,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param identity the initial value.
      * @param accumulator the function for combining the current reduced value and the current stream element.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see #reduce(Object, BiFunction, BinaryOperator)
      */
     @SequentialOnly
@@ -9872,7 +10123,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9883,6 +10134,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param accumulator the function for combining the current reduced value and the current stream element. Must be {@code non-null} and associative.
      * @return an Optional describing the result of the reduction. If the stream is empty, an empty {@code Optional} is returned.
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
@@ -9905,7 +10157,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9917,10 +10169,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param identity the initial value of the reduction operation.
      * @param accumulator the function for combining the current reduced value and the current stream element. Must be {@code non-null} and associative.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
     public T reduce(final T identity, final BinaryOperator<T> accumulator) {
+        assertNotClosed();
+
         return reduce(identity, accumulator, accumulator);
     }
 
@@ -9943,7 +10198,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -9957,188 +10212,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param accumulator the function for combining the current reduced value and the current stream element.
      * @param combiner the function for combining the results of the accumulator function. Must be {@code non-null} and associative.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
     public abstract <U> U reduce(U identity, BiFunction<? super U, ? super T, U> accumulator, BinaryOperator<U> combiner);
-
-    //    /**
-    //     * Performs a reduction on the elements of this stream, using the provided accumulator function, until the specified condition is met.
-    //     * This is a terminal operation.
-    //     *
-    //     * <p>This operation can be parallelized if the stream supports parallel processing.
-    //     * The accumulator should be associative for correct behavior in parallel streams.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Stream.of(1, 2, 3, 4, 5)
-    //     *       .reduceUntil((a, b) -> a + b, sum -> sum > 6)
-    //     *       .get();   // Returns 10 (stops when sum > 6)
-    //     * }</pre>
-    //     *
-    //     * @param accumulator the function for combining the current reduced value and the current stream element. Must be {@code non-null} and associative.
-    //     * @param conditionToBreak the input parameter is the current reduced value returned by {@code accumulator}, not the current element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when {@code true} is returned by {@code conditionToBreak}.
-    //     * @return an {@code Optional} containing the result of the reduction if the stream is non-empty, otherwise an empty {@code Optional}
-    //     * @deprecated it's going to be very confusing in parallel stream. Too much complexity for little benefit.
-    //     */
-    //    @Deprecated
-    //    @ParallelSupported
-    //    @TerminalOp
-    //    public abstract Optional<T> reduceUntil(BinaryOperator<T> accumulator, Predicate<? super T> conditionToBreak);
-    //
-    //    /**
-    //     * Performs a reduction on the elements of this stream, using the provided accumulator function, until the specified condition is met.
-    //     * This is a terminal operation.
-    //     *
-    //     * <p>This operation can be parallelized if the stream supports parallel processing.
-    //     * The accumulator should be associative for correct behavior in parallel streams.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Stream.of(1, 2, 3, 4, 5)
-    //     *       .reduceUntil((a, b) -> a + b,
-    //     *                    (sum, next) -> sum > 6)
-    //     *       .get();   // Returns 6 (stops when sum would exceed 6)
-    //     * }</pre>
-    //     *
-    //     * @param accumulator the function for combining the current reduced value and the current stream element. Must be {@code non-null} and associative.
-    //     * @param conditionToBreak the first input parameter is the current reduced result returned by {@code accumulator}, the second input parameter is the current element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when {@code true} is returned by {@code conditionToBreak}.
-    //     * @return an {@code Optional} containing the result of the reduction if the stream is non-empty, otherwise an empty {@code Optional}
-    //     * @deprecated it's going to be very confusing in parallel stream. Too much complexity for little benefit.
-    //     */
-    //    @Deprecated
-    //    @ParallelSupported
-    //    @TerminalOp
-    //    public abstract Optional<T> reduceUntil(BinaryOperator<T> accumulator, BiPredicate<? super T, ? super T> conditionToBreak);
-    //
-    //    /**
-    //     * Performs a reduction on the elements of this stream, using the provided accumulator function, until the specified condition is met.
-    //     * This is a terminal operation.
-    //     *
-    //     * <p>This operation can be parallelized if the stream supports parallel processing.
-    //     * The accumulator should be associative for correct behavior in parallel streams.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Stream.of(1, 2, 3, 4, 5)
-    //     *       .reduceUntil(0, (a, b) -> a + b, sum -> sum > 6);
-    //     * // Returns 10 (stops when sum > 6)
-    //     * }</pre>
-    //     *
-    //     * @param identity the initial value.
-    //     * @param accumulator the function for combining the current reduced value and the current stream element. Must be {@code non-null} and associative.
-    //     * @param conditionToBreak the input parameter is the current reduced value returned by {@code accumulator}, not the current element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when {@code true} is returned by {@code conditionToBreak}.
-    //     * @return the result of the reduction
-    //     * @deprecated it's going to be very confusing in parallel stream. Too much complexity for little benefit.
-    //     */
-    //    @Deprecated
-    //    @ParallelSupported
-    //    @TerminalOp
-    //    public T reduceUntil(final T identity, final BinaryOperator<T> accumulator, final Predicate<? super T> conditionToBreak) {
-    //        return reduceUntil(identity, accumulator, accumulator, conditionToBreak);
-    //    }
-    //
-    //    /**
-    //     * Performs a reduction on the elements of this stream, using the provided accumulator function, until the specified condition is met.
-    //     * This is a terminal operation.
-    //     *
-    //     * <p>This operation can be parallelized if the stream supports parallel processing.
-    //     * The accumulator should be associative for correct behavior in parallel streams.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Stream.of(1, 2, 3, 4, 5)
-    //     *       .reduceUntil(0, (a, b) -> a + b,
-    //     *                    (sum, next) -> sum + next > 10);
-    //     * // Returns 10 (stops before sum would exceed 10)
-    //     * }</pre>
-    //     *
-    //     * @param identity the initial value.
-    //     * @param accumulator the function for combining the current reduced value and the current stream element. Must be {@code non-null} and associative.
-    //     * @param conditionToBreak the first input parameter is the current reduced value returned by {@code accumulator}, the second input parameter is the current element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when {@code true} is returned by {@code conditionToBreak}.
-    //     * @return the result of the reduction
-    //     * @deprecated it's going to be very confusing in parallel stream. Too much complexity for little benefit.
-    //     */
-    //    @Deprecated
-    //    @ParallelSupported
-    //    @TerminalOp
-    //    public T reduceUntil(final T identity, final BinaryOperator<T> accumulator, final BiPredicate<? super T, ? super T> conditionToBreak) {
-    //        return reduceUntil(identity, accumulator, accumulator, conditionToBreak);
-    //    }
-    //
-    //    /**
-    //     * Performs a reduction on the elements of this stream, using the provided accumulator function and combiner, until the specified condition is met.
-    //     * This is a terminal operation.
-    //     *
-    //     * <p>This operation can be parallelized if the stream supports parallel processing.
-    //     * The accumulator and combiner should be associative for correct behavior in parallel streams.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Stream.of("a", "b", "c", "d")
-    //     *       .reduceUntil(new StringBuilder(),
-    //     *                    (sb, s) -> sb.append(s),
-    //     *                    (sb1, sb2) -> sb1.append(sb2),
-    //     *                    sb -> sb.length() >= 3)
-    //     *       .toString();   // Returns "abc" or "abd" depending on order
-    //     * }</pre>
-    //     *
-    //     * @param <U> the type of the identity and the return value
-    //     * @param identity the initial value.
-    //     * @param accumulator the function for combining the current reduced value and the current stream element.
-    //     * @param combiner the function for combining two values, which is used in a parallel context. Must be {@code non-null} and associative.
-    //     * @param conditionToBreak the input parameter is the current reduced value returned by {@code accumulator}, not the current element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when {@code true} is returned by {@code conditionToBreak}.
-    //     * @return the result of the reduction
-    //     * @deprecated it's going to be very confusing in parallel stream. Too much complexity for little benefit.
-    //     */
-    //    @Deprecated
-    //    @ParallelSupported
-    //    @TerminalOp
-    //    public abstract <U> U reduceUntil(U identity, BiFunction<? super U, ? super T, U> accumulator, BinaryOperator<U> combiner,
-    //            Predicate<? super U> conditionToBreak);
-    //
-    //    /**
-    //     * Performs a reduction on the elements of this stream, using the provided accumulator function and combiner, until the specified condition is met.
-    //     * This is a terminal operation.
-    //     *
-    //     * <p>This operation can be parallelized if the stream supports parallel processing.
-    //     * The accumulator and combiner should be associative for correct behavior in parallel streams.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Stream.of(1, 2, 3, 4, 5)
-    //     *       .reduceUntil(0,
-    //     *                    (sum, x) -> sum + x,
-    //     *                    (a, b) -> a + b,
-    //     *                    (sum, next) -> sum + next > 10);
-    //     * // Returns 10 (stops before sum would exceed 10)
-    //     * }</pre>
-    //     *
-    //     * @param <U> the type of the identity and the return value
-    //     * @param identity the initial value.
-    //     * @param accumulator the function for combining the current reduced value and the current stream element.
-    //     * @param combiner the function for combining two values, which is used in a parallel context. Must be {@code non-null} and associative.
-    //     * @param conditionToBreak the first input parameter is the current reduced value returned by {@code accumulator}, the second input parameter is the current element from this Stream.
-    //     *        Returns {@code true} to break the loop if you don't want to continue the {@code action}.
-    //     *        Iteration on this stream will also be stopped when {@code true} is returned by {@code conditionToBreak}.
-    //     * @return the result of the reduction
-    //     * @deprecated it's going to be very confusing in parallel stream. Too much complexity for little benefit.
-    //     */
-    //    @Deprecated
-    //    @ParallelSupported
-    //    @TerminalOp
-    //    public abstract <U> U reduceUntil(U identity, BiFunction<? super U, ? super T, U> accumulator, BinaryOperator<U> combiner,
-    //            BiPredicate<? super U, ? super T> conditionToBreak);
 
     /**
      * Performs a mutable reduction operation on the elements of this stream.
@@ -10164,7 +10242,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10179,6 +10257,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param combiner an associative, non-interfering, stateless function for combining two values, which must be compatible with the accumulator function.
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see #collect(Supplier, BiConsumer)
      * @see #collect(Collector)
      * @see BiConsumers#ofAddAll()
@@ -10208,7 +10287,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10221,6 +10300,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of:
      *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
@@ -10248,7 +10328,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10260,6 +10340,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the result. The result can be any type that can be produced by the Collector.
      * @param collector the Collector encapsulating the reduction operation. It provides functions for creating a new result container, incorporating an element into a result, and combining two result containers.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
@@ -10283,7 +10364,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10298,6 +10379,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to perform the reduction operation on the elements of this stream.
      * @param func the function to apply to the result of the collection.
      * @return the final result after applying the function to the collected elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during function application.
      */
     @ParallelSupported
@@ -10323,7 +10405,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10336,6 +10418,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of exception that may be thrown during the collection or consumer application.
      * @param downstream the Collector to perform the reduction operation on the elements of this stream.
      * @param consumer the consumer to apply to the result of the collection.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during the consumer application.
      */
     @ParallelSupported
@@ -10358,7 +10441,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10371,6 +10454,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of exception that may be thrown during the function application.
      * @param func the function to apply to the list of elements.
      * @return the result produced by applying the function to the list of elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during the function application.
      */
     @SequentialOnly
@@ -10394,7 +10478,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10405,6 +10489,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <E> The type of exception that may be thrown during the consumer application.
      * @param consumer the consumer to apply to the list of elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during the consumer application.
      */
     @SequentialOnly
@@ -10425,7 +10510,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10438,6 +10523,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of exception that may be thrown during the function application.
      * @param func the function to apply to the set of elements.
      * @return the result produced by applying the function to the set of elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during the function application.
      */
     @SequentialOnly
@@ -10460,7 +10546,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10471,6 +10557,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <E> The type of exception that may be thrown during the consumer application.
      * @param consumer the consumer to apply to the set of elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during the consumer application.
      */
     @SequentialOnly
@@ -10492,7 +10579,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10507,6 +10594,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param supplier the supplier to create the Collection instance.
      * @param func the function to apply to the collection of elements.
      * @return the result produced by applying the function to the collection of elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during the function application.
      */
     @SequentialOnly
@@ -10529,7 +10617,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10542,6 +10630,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of exception that may be thrown during the consumer application.
      * @param supplier the supplier to create the collection instance.
      * @param consumer the consumer to apply to the collection of elements.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E If an exception occurs during the consumer application.
      */
     @SequentialOnly
@@ -10568,7 +10657,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10579,6 +10668,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator the comparator to compare elements of this stream.
      * @return an <i>Optional</i> describing the minimum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
@@ -10586,7 +10676,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Returns an <i>Optional</i> describing the minimum element of this stream according to the natural order of the keys produced by the provided keyMapper function.
-     * Elements with {@code null} keys are considered larger than elements with non-null keys and will never be selected as the minimum element.
+     * Elements with {@code null} keys are considered larger than elements with {@code non-null} keys and will never be selected as the minimum element.
      * This is a terminal operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -10601,7 +10691,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10612,11 +10702,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to apply to each element to determine its key for comparison.
      * @return an <i>Optional</i> describing the minimum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
     @SuppressWarnings("rawtypes")
     public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.nullsLastBy(keyMapper);
 
         return min(comparator);
@@ -10638,7 +10731,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10649,6 +10742,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator the comparator to compare elements of this stream.
      * @return a <i>List</i> containing all the minimum elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
@@ -10673,7 +10767,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10684,6 +10778,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator the comparator to compare elements of this stream.
      * @return an <i>Optional</i> describing the maximum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
@@ -10691,7 +10786,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Returns an <i>Optional</i> describing the maximum element of this stream according to the natural order of the keys produced by the provided keyMapper function.
-     * Elements with {@code null} keys are considered smaller than elements with non-null keys and will never be selected as the maximum element.
+     * Elements with {@code null} keys are considered smaller than elements with {@code non-null} keys and will never be selected as the maximum element.
      * This is a terminal operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -10706,7 +10801,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10717,11 +10812,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param keyMapper a function to apply to each element to determine its key for comparison.
      * @return an <i>Optional</i> describing the maximum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
     @SuppressWarnings("rawtypes")
     public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyMapper);
 
         return max(comparator);
@@ -10743,7 +10841,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10754,6 +10852,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator the comparator to compare elements of this stream.
      * @return a <i>List</i> containing all the maximum elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @TerminalOp
@@ -10777,7 +10876,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10788,6 +10887,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper the function to extract integer values from the elements.
      * @return the sum of the integer values. Returns 0 if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      * @see N#sumInt(Iterable, ToIntFunction)
      */
     @ParallelSupported
@@ -10809,7 +10909,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10820,6 +10920,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper the function to extract long values from the elements.
      * @return the sum of the long values
+     * @throws IllegalStateException if the stream is already closed
      * @see N#sumLong(Iterable, ToLongFunction)
      */
     @ParallelSupported
@@ -10844,7 +10945,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10855,6 +10956,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper the function to extract double values from the elements.
      * @return the sum of the double values. Returns 0.0 if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      * @see N#sumDouble(Iterable, ToDoubleFunction)
      */
     @ParallelSupported
@@ -10880,7 +10982,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10891,6 +10993,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper the function to extract integer values from the elements.
      * @return the average of the integer values, or empty if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see N#averageInt(Iterable, ToIntFunction)
      */
     @ParallelSupported
@@ -10913,7 +11016,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10924,6 +11027,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper the function to extract long values from the elements.
      * @return the average of the long values, or empty if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see N#averageLong(Iterable, ToLongFunction)
      */
     @ParallelSupported
@@ -10949,7 +11053,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10960,6 +11064,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param mapper the function to extract double values from the elements.
      * @return the average of the double values, or empty if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see N#averageDouble(Iterable, ToDoubleFunction)
      */
     @ParallelSupported
@@ -10985,7 +11090,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -10997,6 +11102,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param k the rank of the element to find. k=1 would mean the largest element, k=2 the second largest, and so on. Must be positive.
      * @param comparator a comparator to determine the order of the elements.
      * @return an {@code Optional} containing the <i>k-th</i> largest element if it exists, otherwise an empty {@code Optional}.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -11019,7 +11125,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11031,6 +11137,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator a comparator to determine the order of the elements.
      * @return an {@code Optional} containing a Map where the keys are the percentiles and the values are the corresponding elements.
      *         If the stream is empty, an empty {@code Optional} is returned.
+     * @throws IllegalStateException if the stream is already closed
      * @see N#percentilesOfSorted(int[])
      */
     @SequentialOnly
@@ -11053,7 +11160,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11063,6 +11170,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return <i>true</i> if the stream contains duplicate elements, otherwise <i>false</i>.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -11090,7 +11198,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11100,6 +11208,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a new stream where each element is a list representing a combination of elements from the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #combinations(int)
      * @see #combinations(int, boolean)
      */
@@ -11124,7 +11233,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11135,6 +11244,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param len the length of each combination. Must be non-negative and not bigger than the number of elements in this stream.
      * @return a new stream where each element is a list representing a combination of elements from the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IndexOutOfBoundsException if {@code len} is negative or bigger than the number of elements in this stream
      * @see #combinations(int, boolean)
      * @see #permutations()
@@ -11172,7 +11282,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11184,6 +11294,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param len the length of each combination. Must be non-negative, and must not be bigger than the number of elements in this stream if {@code repeat} is {@code false}.
      * @param repeat if {@code true}, elements can be repeated in the combinations; otherwise, elements are not repeated.
      * @return a new stream where each element is a list representing a combination of elements from the original stream.
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code repeat} is {@code true} and {@code len} is negative
+     * @throws IndexOutOfBoundsException if {@code repeat} is {@code false} and {@code len} is negative or greater than the number of stream elements
      */
     @SequentialOnly
     @IntermediateOp
@@ -11210,7 +11323,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11220,6 +11333,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a new Stream consisting of all the permutations of the elements in the original Stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Iterables#permutations(Collection)
      */
     @SequentialOnly
@@ -11248,7 +11362,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11258,6 +11372,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a new Stream consisting of all the ordered permutations of the elements in the original Stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Iterables#orderedPermutations(Collection)
      */
     @SequentialOnly
@@ -11289,7 +11404,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11300,6 +11415,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator the comparator that should be used to determine the order of the elements in the permutations.
      * @return a new Stream consisting of all the ordered permutations of the elements in the original Stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Iterables#orderedPermutations(Collection, Comparator)
      */
     @SequentialOnly
@@ -11336,7 +11452,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11347,6 +11463,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param cs the collections to generate the Cartesian product from.
      * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in the original collections.
+     * @throws IllegalStateException if the stream is already closed
      * @see #cartesianProduct(Collection)
      * @see Iterables#cartesianProduct(Collection...)
      */
@@ -11354,6 +11471,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     @SafeVarargs
     public final Stream<List<T>> cartesianProduct(final Collection<? extends T>... cs) {
+        assertNotClosed();
+
         return cartesianProduct(Arrays.asList(cs));
     }
 
@@ -11387,7 +11506,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11398,6 +11517,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param cs the collections to generate the Cartesian product from.
      * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in the original collections.
+     * @throws IllegalStateException if the stream is already closed
      * @see Iterables#cartesianProduct(Collection)
      */
     @SequentialOnly
@@ -11426,7 +11546,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11436,6 +11556,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a new Stream consisting of Lists that represent the rollup of the elements in the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Iterables#rollup(Collection)
      */
     @SequentialOnly
@@ -11467,7 +11588,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11480,6 +11601,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a function that transforms stream elements into a form that can be compared with collection elements.
      * @param c the collection to find common elements with.
      * @return a new Stream containing elements whose mapped values are present in the collection
+     * @throws IllegalStateException if the stream is already closed
      * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
@@ -11512,7 +11634,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11525,6 +11647,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a function that transforms stream elements into values for comparison.
      * @param c the collection of values to exclude from the stream.
      * @return a new stream containing elements whose mapped values have more occurrences in this stream than in the collection
+     * @throws IllegalStateException if the stream is already closed
      * @see #intersection(Function, Collection)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -11549,7 +11672,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11560,11 +11683,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param a the elements to prepend to the stream
      * @return a new stream with the specified elements prepended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
     @SafeVarargs
     public final Stream<T> prepend(final T... a) {
+        assertNotClosed();
+
         return prepend(Array.asList(a));
     }
 
@@ -11582,7 +11708,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11593,6 +11719,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param c the collection of elements to prepend to the stream.
      * @return a new stream with the specified collection of elements prepended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -11612,7 +11739,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11623,11 +11750,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param a the elements to append to the stream
      * @return a new stream with the specified elements appended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
     @SafeVarargs
     public final Stream<T> append(final T... a) {
+        assertNotClosed();
+
         return append(Array.asList(a));
     }
 
@@ -11645,7 +11775,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11656,6 +11786,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param c the collection of elements to append to the stream.
      * @return a new stream with the specified collection of elements appended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -11679,7 +11810,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11690,11 +11821,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param a the elements to append to the stream
      * @return a new stream with the specified elements appended if the stream is empty, otherwise the original stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
     @SafeVarargs
     public final Stream<T> appendIfEmpty(final T... a) {
+        assertNotClosed();
+
         return appendIfEmpty(Array.asList(a));
     }
 
@@ -11716,7 +11850,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11727,6 +11861,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param c the collection of elements to append to the stream.
      * @return a new stream with the specified collection of elements appended if the stream is empty, otherwise the original stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -11750,7 +11885,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11761,11 +11896,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param defaultValue the default value to be used if the stream is empty
      * @return a new stream that contains the default value if the original stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #appendIfEmpty(Object...)
      */
     @SequentialOnly
     @IntermediateOp
     public final Stream<T> defaultIfEmpty(final T defaultValue) {
+        assertNotClosed();
+
         return appendIfEmpty(defaultValue);
     }
 
@@ -11787,7 +11925,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11797,6 +11935,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a new Stream&lt;T&gt; that is buffered
+     * @throws IllegalStateException if the stream is already closed
      * @see #buffered(int)
      */
     @SequentialOnly
@@ -11819,7 +11958,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11830,7 +11969,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param bufferSize the size of the buffer to be used for the Stream. Must be positive.
      * @return a new Stream&lt;T&gt; that is buffered
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if bufferSize is non-positive
      */
     @SequentialOnly
@@ -11854,7 +11993,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11865,6 +12004,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param queueToBuffer the queue to be used for buffering the Stream.
      * @return a new Stream&lt;T&gt; that is buffered
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if queueToBuffer is null
      */
     @SequentialOnly
@@ -11889,7 +12029,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11901,6 +12041,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the Collection to be merged. It should be ordered with the current Stream.
      * @param nextSelector a BiFunction that determines the order of elements in the merged Stream.
      * @return a new Stream that is the result of merging the current Stream with the given Collection
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -11924,7 +12065,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11936,6 +12077,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the Stream to be merged. It should be ordered with the current Stream.
      * @param nextSelector a BiFunction that determines the order of elements in the merged Stream.
      * @return a new Stream that is the result of merging the current Stream with the given Stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -11960,7 +12102,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -11974,6 +12116,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the Collection to be combined with the current Stream.
      * @param zipFunction a BiFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Collection
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(Collection, Object, Object, BiFunction)
      * @see N#zip(Iterable, Iterable, BiFunction)
      */
@@ -12002,7 +12145,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12018,6 +12161,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use for the Collection when it runs out of elements
      * @param zipFunction a BiFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Collection
+     * @throws IllegalStateException if the stream is already closed
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      */
     @ParallelSupported
@@ -12045,7 +12189,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12061,6 +12205,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the second Collection to be combined with the current Stream.
      * @param zipFunction a TriFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Collections
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(Collection, Collection, Object, Object, Object, TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
@@ -12091,7 +12236,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12110,6 +12255,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use for the second Collection when it runs out of elements
      * @param zipFunction a TriFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Collections
+     * @throws IllegalStateException if the stream is already closed
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     @ParallelSupported
@@ -12136,7 +12282,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12150,6 +12296,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the Stream to be combined with the current Stream.
      * @param zipFunction a BiFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(Stream, Object, Object, BiFunction)
      * @see N#zip(Iterable, Iterable, BiFunction)
      */
@@ -12174,7 +12321,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12190,6 +12337,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use for the given Stream when it runs out of elements
      * @param zipFunction a BiFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Stream
+     * @throws IllegalStateException if the stream is already closed
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      */
     @ParallelSupported
@@ -12215,7 +12363,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12231,6 +12379,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third Stream to be combined with the current Stream. Will be closed along with this Stream.
      * @param zipFunction a TriFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(Stream, Stream, Object, Object, Object, TriFunction)
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      */
@@ -12258,7 +12407,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12277,6 +12426,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use for the third Stream when it runs out of elements
      * @param zipFunction a TriFunction that determines the combination of elements in the combined Stream.
      * @return a new Stream that is the result of combining the current Stream with the given Streams
+     * @throws IllegalStateException if the stream is already closed
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     @ParallelSupported
@@ -12304,7 +12454,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12344,7 +12494,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12389,7 +12539,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12434,7 +12584,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12475,7 +12625,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12521,7 +12671,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12564,7 +12714,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12610,7 +12760,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12655,7 +12805,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12704,7 +12854,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12751,7 +12901,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12798,7 +12948,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12842,7 +12992,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12879,7 +13029,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12917,7 +13067,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12956,7 +13106,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -12999,7 +13149,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13041,7 +13191,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13084,7 +13234,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13125,7 +13275,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13164,7 +13314,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13201,7 +13351,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13244,7 +13394,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13285,7 +13435,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13329,7 +13479,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13373,7 +13523,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13423,7 +13573,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13466,7 +13616,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13508,7 +13658,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13554,7 +13704,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13599,7 +13749,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13644,7 +13794,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13695,7 +13845,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13737,7 +13887,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13777,7 +13927,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13807,16 +13957,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringWriter writer = new StringWriter();
-     * Stream.of(Map.of("name", "John", "age", 25))
+     * Stream.of("A", "B", "C")
      *       .persistToJson(writer);
-     * // writer contains a JSON array with one element, e.g. [{"name": "John", "age": 25}],
+     * // writer contains the JSON array ["A", "B", "C"],
      * // formatted with each element on a separate line
      * }</pre>
      *
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13841,6 +13991,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation is useful when you need to integrate with APIs that expect JDK streams
      * or when you want to use JDK stream operations not available in this Stream implementation.
      * The returned stream is parallel if this stream is parallel; encounter order is preserved.
+     * If this stream has close handlers, closing the returned JDK stream closes this stream and
+     * invokes those handlers exactly once, even if this stream is subsequently closed again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13853,7 +14005,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13863,6 +14015,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * </table>
      *
      * @return a java.util.stream.Stream containing the elements of this Stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #transformB(Function)
      * @see #transformB(Function, boolean)
      */
@@ -13891,7 +14044,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13903,7 +14056,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> The type of elements in the returned stream
      * @param transfer the function to be applied on the current stream to produce a new stream.
      * @return a new Stream transformed by the provided function
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the provided function is {@code null}
      * @see #toJdkStream()
      */
@@ -13912,6 +14065,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     public <U> Stream<U> transformB(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends U>> transfer)
             throws IllegalArgumentException {
+        assertNotClosed();
 
         return transformB(transfer, false);
     }
@@ -13940,7 +14094,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -13953,7 +14107,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param transfer the function to be applied on the current stream to produce a new stream.
      * @param deferred if {@code true}, the transformation is deferred until the stream is consumed
      * @return a new Stream transformed by the provided function
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the provided function is {@code null}
      * @see #toJdkStream()
      */
@@ -13997,7 +14151,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14011,6 +14165,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the chunk size this stream will be split into for the parallel operation. Must be positive.
      * @param op the operation applied to each chunk of elements, producing a new Stream; applied repeatedly by multiple threads in parallel.
      * @return a new Stream transformed by the provided function
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the specified maxThreadNum or chunkSize is equal to or less than 0
      */
     @Beta
@@ -14052,7 +14207,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14063,11 +14218,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public Stream<T> spsFilter(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return sps(s -> s.filter(predicate));
     }
 
@@ -14090,7 +14248,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14102,11 +14260,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the returned stream
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsMap(final Function<? super T, ? extends R> mapper) {
+        assertNotClosed();
+
         return sps(s -> s.map(mapper));
     }
 
@@ -14129,7 +14290,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14141,11 +14302,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the returned stream
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) {
+        assertNotClosed();
+
         return sps(s -> s.flatMap(mapper));
     }
 
@@ -14168,7 +14332,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14180,11 +14344,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the returned stream
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        assertNotClosed();
+
         return sps(s -> s.flatmap(mapper));
     }
 
@@ -14207,7 +14374,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14219,11 +14386,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param predicate the predicate to apply to each element to determine if it should be included.
      * @return a new Stream with the specified filter applied in parallel
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public Stream<T> spsFilter(final int maxThreadNum, final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.filter(predicate));
     }
 
@@ -14246,7 +14416,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14259,11 +14429,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsMap(final int maxThreadNum, final Function<? super T, ? extends R> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.map(mapper));
     }
 
@@ -14286,7 +14459,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14299,11 +14472,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatMap(final int maxThreadNum, final Function<? super T, ? extends Stream<? extends R>> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.flatMap(mapper));
     }
 
@@ -14326,7 +14502,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14339,11 +14515,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatmap(final int maxThreadNum, final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.flatmap(mapper));
     }
 
@@ -14366,7 +14545,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14379,11 +14558,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the size of chunks to split the stream into for parallel processing. Must be positive.
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, int, Function)
      */
     @Beta
     @IntermediateOp
     public Stream<T> spsFilter(final int maxThreadNum, final int chunkSize, final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).filter(predicate));
     }
 
@@ -14407,7 +14589,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14421,11 +14603,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the size of chunks to split the stream into for parallel processing. Must be positive.
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been mapped in parallel using the provided mapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsMap(final int maxThreadNum, final int chunkSize, final Function<? super T, ? extends R> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).map(mapper));
     }
 
@@ -14449,7 +14634,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14463,11 +14648,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the size of chunks to split the stream into for parallel processing. Must be positive.
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been flat-mapped in parallel using the provided mapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatMap(final int maxThreadNum, final int chunkSize, final Function<? super T, ? extends Stream<? extends R>> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).flatMap(mapper));
     }
 
@@ -14491,7 +14679,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14505,11 +14693,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the size of chunks to split the stream into for parallel processing. Must be positive.
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been flat-mapped in parallel using the provided mapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatmap(final int maxThreadNum, final int chunkSize, final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).flatmap(mapper));
     }
 
@@ -14534,7 +14725,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14545,11 +14736,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public Stream<T> spsFilterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+        assertNotClosed();
+
         return sps(s -> s.filterE(predicate));
     }
 
@@ -14574,7 +14768,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14586,11 +14780,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the returned stream
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsMapE(final Throwables.Function<? super T, ? extends R, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return sps(s -> s.mapE(mapper));
     }
 
@@ -14615,7 +14812,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14627,11 +14824,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the returned stream
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return sps(s -> s.flatMapE(mapper));
     }
 
@@ -14656,7 +14856,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14668,11 +14868,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the returned stream
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return sps(s -> s.flatmapE(mapper));
     }
 
@@ -14697,7 +14900,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14709,11 +14912,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public Stream<T> spsFilterE(final int maxThreadNum, final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.filterE(predicate));
     }
 
@@ -14738,7 +14944,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14751,11 +14957,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends R, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.mapE(mapper));
     }
 
@@ -14780,7 +14989,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14793,11 +15002,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.flatMapE(mapper));
     }
 
@@ -14822,7 +15034,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14835,12 +15047,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> spsFlatmapE(final int maxThreadNum,
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return sps(maxThreadNum, s -> s.flatmapE(mapper));
     }
 
@@ -14867,7 +15082,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14879,10 +15094,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the elements in the resulting stream
      * @param op the function to be applied to the JDK parallel stream.
      * @return a new Stream with the specified operation applied in parallel
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @IntermediateOp
     public <R> Stream<R> sjps(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends R>> op) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return newStream(Stream.from(((java.util.stream.Stream<R>) op.apply(this.toJdkStream()))), false, null).sequential(); //NOSONAR
@@ -14910,7 +15128,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14921,6 +15139,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate the predicate to apply to each element to determine if it should be included.
      * @return a new stream that contains only the elements that match the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the predicate throws an exception (wrapped)
      * @see Fn#pp(Throwables.Predicate)
      */
@@ -14928,6 +15147,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @ParallelSupported
     @IntermediateOp
     public Stream<T> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+        assertNotClosed();
+
         return filter(Fn.pp(predicate));
     }
 
@@ -14949,7 +15170,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -14961,6 +15182,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> The type of the result elements
      * @param mapper a non-interfering, stateless function that transforms each element
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the mapper function throws an exception (wrapped)
      * @see Fn#ff(Throwables.Function)
      */
@@ -14968,6 +15190,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @ParallelSupported
     @IntermediateOp
     public <R> Stream<R> mapE(final Throwables.Function<? super T, ? extends R, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return map(Fn.ff(mapper));
     }
 
@@ -14989,7 +15213,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15002,6 +15226,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element in the stream, which returns a stream. Can throw checked exceptions.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream,
      *         and then flattening the resulting streams
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the mapper function throws an exception
      * @see #flatMap(Function)
      * @see Fn#ff(Throwables.Function)
@@ -15010,6 +15235,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @ParallelSupported
     @IntermediateOp
     public <R> Stream<R> flatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return flatMap(Fn.ff(mapper));
     }
 
@@ -15031,7 +15258,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15044,6 +15271,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element in the stream, which returns a collection. Can throw checked exceptions.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream,
      *         and then flattening the resulting collections
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the mapper function throws an exception
      * @see #flatmap(Function)
      * @see Fn#ff(Throwables.Function)
@@ -15052,6 +15280,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @ParallelSupported
     @IntermediateOp
     public <R> Stream<R> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
+        assertNotClosed();
+
         return flatmap(Fn.ff(mapper));
     }
 
@@ -15083,7 +15313,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15095,6 +15325,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> the type of elements in the collection to cross join with
      * @param b the collection to cross join with; must not be null
      * @return a new Stream of Pairs containing all combinations of elements from this stream and the collection
+     * @throws IllegalStateException if the stream is already closed
      * @see #crossJoin(Collection, BiFunction)
      * @see #innerJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -15132,7 +15363,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15146,6 +15377,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to cross join with; must not be null
      * @param func the function to apply to each pair of elements; must not be null
      * @return a new Stream containing the results of applying the function to all combinations
+     * @throws IllegalStateException if the stream is already closed
      * @see #crossJoin(Collection)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -15183,7 +15415,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15197,6 +15429,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the stream to cross join with; will be loaded into memory and closed automatically; must not be null
      * @param func the function to apply to each pair of elements; must not be null
      * @return a new Stream containing the results of applying the function to all combinations
+     * @throws IllegalStateException if the stream is already closed
      * @throws OutOfMemoryError if the second stream is too large to fit in memory
      * @see #crossJoin(Collection, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -15235,7 +15468,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15250,6 +15483,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream; must not be null
      * @param rightKeyExtractor function to extract keys from elements of the collection; must not be null
      * @return a new Stream of Pair objects containing matched elements from both sources
+     * @throws IllegalStateException if the stream is already closed
      * @see #innerJoin(Collection, Function, Function, BiFunction)
      * @see #leftJoin(Collection, Function, Function)
      * @see #fullJoin(Collection, Function, Function)
@@ -15291,7 +15525,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15308,6 +15542,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection; must not be null
      * @param func the function to apply to matched pairs to produce result elements; must not be null
      * @return a new Stream consisting of the results of applying the function to matched pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #innerJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -15345,7 +15580,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15358,6 +15593,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with; must not be null
      * @param keyMapper function to extract keys from elements; applied to both sources; must not be null
      * @return a new Stream of Pair objects containing matched elements from both sources
+     * @throws IllegalStateException if the stream is already closed
      * @see #innerJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -15394,7 +15630,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15409,6 +15645,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements; applied to both sources; must not be null
      * @param func the function to apply to matched pairs to produce result elements; must not be null
      * @return a new Stream consisting of the results of applying the function to matched pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #innerJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -15448,7 +15685,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15465,6 +15702,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the second stream; must not be null
      * @param func the function to apply to matched pairs to produce result elements; must not be null
      * @return a new Stream consisting of the results of applying the function to matched pairs
+     * @throws IllegalStateException if the stream is already closed
      * @throws OutOfMemoryError if the second stream is too large to fit in memory
      * @see #innerJoin(Collection, Function, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -15511,7 +15749,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15524,6 +15762,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with; must not be null
      * @param predicate the condition to test pairs of elements; must not be null
      * @return a new Stream of Pair objects containing matched elements from both sources
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code innerJoin(Collection, Function, Function)} first
      *             for better performance with key-based joins
      * @see #innerJoin(Collection, Function, Function)
@@ -15574,7 +15813,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15589,6 +15828,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs of elements; must not be null
      * @param func the function to apply to matched pairs to produce result elements; must not be null
      * @return a new Stream consisting of the results of applying the function to matched pairs
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code innerJoin(Collection, Function, Function, BiFunction)}
      *             first for better performance with key-based joins
      * @see #innerJoin(Collection, Function, Function, BiFunction)
@@ -15634,7 +15874,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15649,6 +15889,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream; must not be null
      * @param rightKeyExtractor function to extract keys from elements of the collection; must not be null
      * @return a new Stream of Pair objects containing all elements from both sources, with {@code null} for unmatched elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #fullJoin(Collection, Function, Function, BiFunction)
      * @see #innerJoin(Collection, Function, Function)
      * @see #leftJoin(Collection, Function, Function)
@@ -15698,7 +15939,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15715,6 +15956,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection; must not be null
      * @param func the function to apply to pairs; must handle {@code null} values; must not be null
      * @return a new Stream consisting of the results of applying the function to all pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #fullJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -15756,7 +15998,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15769,6 +16011,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with; must not be null
      * @param keyMapper function to extract keys from elements; applied to both sources; must not be null
      * @return a new Stream of Pair objects containing all elements from both sources, with {@code null} for unmatched elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #fullJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -15812,7 +16055,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15827,6 +16070,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements; applied to both sources; must not be null
      * @param func the function to apply to pairs; must handle {@code null} values; must not be null
      * @return a new Stream consisting of the results of applying the function to all pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #fullJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -15866,7 +16110,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15883,6 +16127,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the second stream; must not be null
      * @param func the function to apply to pairs; must handle {@code null} values; must not be null
      * @return a new Stream consisting of the results of applying the function to all pairs
+     * @throws IllegalStateException if the stream is already closed
      * @throws OutOfMemoryError if the second stream is too large to fit in memory
      * @see #fullJoin(Collection, Function, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -15930,7 +16175,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -15943,6 +16188,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with; must not be null
      * @param predicate the condition to test pairs; must handle {@code null} values; must not be null
      * @return a new Stream of Pair objects containing all elements from both sources, with {@code null} for unmatched elements
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code fullJoin(Collection, Function, Function)}
      *             first for better performance with key-based joins
      * @see #fullJoin(Collection, Function, Function)
@@ -15993,7 +16239,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16008,6 +16254,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs; must handle {@code null} values; must not be null
      * @param func the function to apply to pairs; must handle {@code null} values; must not be null
      * @return a new Stream consisting of the results of applying the function to all pairs
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code fullJoin(Collection, Function, Function, BiFunction)}
      *             first for better performance with key-based joins
      * @see #fullJoin(Collection, Function, Function, BiFunction)
@@ -16053,7 +16300,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16068,6 +16315,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream; must not be null
      * @param rightKeyExtractor function to extract keys from elements of the collection; must not be null
      * @return a new Stream of Pair objects containing all elements from this stream, with {@code null} for unmatched right elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #leftJoin(Collection, Function, Function, BiFunction)
      * @see #innerJoin(Collection, Function, Function)
      * @see #fullJoin(Collection, Function, Function)
@@ -16114,7 +16362,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16131,6 +16379,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection; must not be null
      * @param func the function to apply to pairs; must handle {@code null} right values; must not be null
      * @return a new Stream consisting of the results of applying the function to all left elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @see #leftJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -16173,7 +16422,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16186,6 +16435,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with; must not be null
      * @param keyMapper function to extract keys from elements; applied to both sources; must not be null
      * @return a new Stream of Pair objects containing all elements from this stream, with {@code null} for unmatched right elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #leftJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -16226,7 +16476,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16241,6 +16491,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements; applied to both sources; must not be null
      * @param func the function to apply to pairs; must handle {@code null} right values; must not be null
      * @return a new Stream consisting of the results of applying the function to all left elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @see #leftJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -16282,7 +16533,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16299,6 +16550,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the second stream; must not be null
      * @param func the function to apply to pairs; must handle {@code null} right values; must not be null
      * @return a new Stream consisting of the results of applying the function to all left elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @throws OutOfMemoryError if the second stream is too large to fit in memory
      * @see #leftJoin(Collection, Function, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -16331,7 +16583,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16344,6 +16596,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with.
      * @param predicate the condition to test pairs of elements. Must handle {@code null} right values.
      * @return a new Stream of Pair objects containing all elements from this stream, with {@code null} for unmatched right elements
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code leftJoin(Collection, Function, Function)} first.
      * @see #leftJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -16378,7 +16631,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16393,6 +16646,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs of elements. Must handle {@code null} right values.
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} right values.
      * @return a new Stream consisting of the results of applying the function to all left elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code leftJoin(Collection, Function, Function, BiFunction)} first.
      * @see #leftJoin(Collection, Function, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -16426,7 +16680,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16441,6 +16695,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream.
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @return a new Stream of Pair objects containing all elements from the collection, with {@code null} for unmatched left elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #rightJoin(Collection, Function, Function, BiFunction)
      * @see #leftJoin(Collection, Function, Function)
      * @see #fullJoin(Collection, Function, Function)
@@ -16476,7 +16731,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16493,6 +16748,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} left values.
      * @return a new Stream consisting of the results of applying the function to all right elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @see #rightJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -16524,7 +16780,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16537,6 +16793,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with.
      * @param keyMapper function to extract keys from elements.
      * @return a new Stream of Pair objects containing all elements from the collection, with {@code null} for unmatched left elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #rightJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -16568,7 +16825,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16583,6 +16840,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements.
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} left values.
      * @return a new Stream consisting of the results of applying the function to all right elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @see #rightJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -16615,7 +16873,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16632,6 +16890,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the second stream.
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} left values.
      * @return a new Stream consisting of the results of applying the function to all right elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @see #rightJoin(Collection, Function, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -16663,7 +16922,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16676,6 +16935,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with.
      * @param predicate the condition to test pairs of elements. Must handle {@code null} left values.
      * @return a new Stream of Pair objects containing all elements from the collection, with {@code null} for unmatched left elements
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code rightJoin(Collection, Function, Function)} first.
      * @see #rightJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -16710,7 +16970,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16725,6 +16985,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs of elements. Must handle {@code null} left values.
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} left values.
      * @return a new Stream consisting of the results of applying the function to all right elements with their matches
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code rightJoin(Collection, Function, Function, BiFunction)} first.
      * @see #rightJoin(Collection, Function, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -16759,7 +17020,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16774,6 +17035,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream.
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @return a new Stream of Pair objects containing elements from this stream paired with lists of matching elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BiFunction)
      */
     @ParallelSupported
@@ -16806,7 +17068,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16823,6 +17085,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @param func the function to apply to element-list pairs to produce result elements.
      * @return a new Stream consisting of the results of applying the function to grouped pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function)
      */
     @ParallelSupported
@@ -16855,7 +17118,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16868,6 +17131,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the collection to join with.
      * @param keyMapper function to extract keys from elements.
      * @return a new Stream of Pair objects containing elements from this stream paired with lists of matching elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, BiFunction)
      */
     @ParallelSupported
@@ -16900,7 +17164,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16915,6 +17179,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements.
      * @param func the function to apply to element-list pairs to produce result elements.
      * @return a new Stream consisting of the results of applying the function to grouped pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function)
      */
     @ParallelSupported
@@ -16944,7 +17209,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -16961,6 +17226,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the second stream.
      * @param func the function to apply to element-list pairs to produce result elements.
      * @return a new Stream consisting of the results of applying the function to grouped pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BiFunction)
      */
     @ParallelSupported
@@ -16993,7 +17259,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17009,6 +17275,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @param mergeFunction binary operator to merge multiple matching elements into one.
      * @return a new Stream of Pair objects containing elements paired with merged matching elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BinaryOperator, BiFunction)
      */
     @ParallelSupported
@@ -17041,7 +17308,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17059,6 +17326,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction binary operator to merge multiple matching elements into one.
      * @param func the function to apply to paired elements to produce result elements.
      * @return a new Stream consisting of the results of applying the function to merged pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BinaryOperator)
      */
     @ParallelSupported
@@ -17089,7 +17357,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17107,6 +17375,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction binary operator to merge multiple matching elements into one.
      * @param func the function to apply to paired elements to produce result elements.
      * @return a new Stream consisting of the results of applying the function to merged pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BinaryOperator, BiFunction)
      */
     @ParallelSupported
@@ -17138,7 +17407,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17155,6 +17424,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @param downstream collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing elements paired with collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, Collector, BiFunction)
      */
     @ParallelSupported
@@ -17187,7 +17457,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17206,6 +17476,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream collector to aggregate matching elements.
      * @param func the function to apply to paired results to produce final elements.
      * @return a new Stream consisting of the results of applying the function to collected pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, Collector)
      */
     @ParallelSupported
@@ -17240,7 +17511,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17255,6 +17526,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements.
      * @param downstream collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing elements paired with collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Collector, BiFunction)
      */
     @ParallelSupported
@@ -17288,7 +17560,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17305,6 +17577,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream collector to aggregate matching elements.
      * @param func the function to apply to paired results to produce final elements.
      * @return a new Stream consisting of the results of applying the function to collected pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Collector)
      */
     @ParallelSupported
@@ -17335,7 +17608,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17354,6 +17627,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream collector to aggregate matching elements.
      * @param func the function to apply to paired results to produce final elements.
      * @return a new Stream consisting of the results of applying the function to collected pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, Collector, BiFunction)
      */
     @ParallelSupported
@@ -17386,7 +17660,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17399,6 +17673,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the ordered iterator to join with.
      * @param predicate the condition to test if elements can be joined.
      * @return a new Stream of Pair objects containing stream elements paired with lists of matching iterator elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Iterator, BiPredicate, Collector)
      */
     @Beta
@@ -17431,7 +17706,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17446,6 +17721,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test if elements can be joined.
      * @param collector the collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing stream elements paired with collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Iterator, BiPredicate)
      */
     @Beta
@@ -17480,7 +17756,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17497,6 +17773,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to aggregate matching elements.
      * @param func the function to apply to paired results to produce final elements.
      * @return a new Stream consisting of the results of applying the function to collected pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Iterator, BiPredicate, Collector)
      */
     @Beta
@@ -17533,7 +17810,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17551,6 +17828,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to paired results to produce final elements.
      * @param mapperForUnJoinedElements function to process remaining iterator elements.
      * @return a new Stream consisting of joined results followed by mapped unjoined elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Iterator, BiPredicate, Collector, BiFunction)
      */
     @Beta
@@ -17586,7 +17864,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17599,6 +17877,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the ordered stream to join with. Will be closed along with this stream.
      * @param predicate the condition to test if elements can be joined.
      * @return a new Stream of Pair objects containing stream elements paired with lists of matching elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Stream, BiPredicate, Collector)
      */
     @Beta
@@ -17632,7 +17911,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17647,6 +17926,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test if elements can be joined.
      * @param collector the collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing stream elements paired with collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Stream, BiPredicate)
      */
     @Beta
@@ -17683,7 +17963,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17700,6 +17980,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to aggregate matching elements.
      * @param func the function to apply to paired results to produce final elements.
      * @return a new Stream consisting of the results of applying the function to collected pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Stream, BiPredicate, Collector)
      */
     @Beta
@@ -17737,7 +18018,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17755,6 +18036,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to paired results to produce final elements.
      * @param mapperForUnJoinedElements function to process remaining stream elements.
      * @return a new Stream consisting of joined results followed by mapped unjoined elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #joinByRange(Stream, BiPredicate, Collector, BiFunction)
      */
     @Beta
@@ -17773,6 +18055,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The terminal operation is a function that consumes this Stream and may throw an exception.
      * The result of the operation is wrapped in a ContinuableFuture which allows for further chaining of operations.
+     * This stream is closed when the action finishes, whether it completes normally or exceptionally.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17784,7 +18067,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17795,14 +18078,23 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param terminalAction the terminal operation to be executed on this Stream.
      * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if terminalAction is null
      */
     @Beta
     @TerminalOp
     public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Stream<T>, ? extends Exception> terminalAction) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
 
-        return ContinuableFuture.run(() -> terminalAction.accept(Stream.this));
+        return ContinuableFuture.run(() -> {
+            try {
+                terminalAction.accept(Stream.this);
+            } finally {
+                Stream.this.close();
+            }
+        });
     }
 
     /**
@@ -17811,6 +18103,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The terminal operation is a function that consumes this Stream and may throw an exception.
      * The result of the operation is wrapped in a ContinuableFuture which allows for further chaining of operations.
+     * This stream is closed when the action finishes, whether it completes normally or exceptionally.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17823,7 +18116,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17835,16 +18128,25 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param terminalAction the terminal operation to be executed on this Stream.
      * @param executor the Executor to use for asynchronous execution.
      * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if terminalAction or executor is null
      */
     @Beta
     @TerminalOp
     public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Stream<T>, ? extends Exception> terminalAction, final Executor executor)
             throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.run(() -> terminalAction.accept(Stream.this), executor);
+        return ContinuableFuture.run(() -> {
+            try {
+                terminalAction.accept(Stream.this);
+            } finally {
+                Stream.this.close();
+            }
+        }, executor);
     }
 
     /**
@@ -17853,6 +18155,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The terminal operation is a function that consumes this Stream, produces a result, and may throw an exception.
      * The result of the operation is wrapped in a ContinuableFuture which allows for further chaining of operations.
+     * This stream is closed when the action finishes, whether it completes normally or exceptionally.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17864,7 +18167,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17876,15 +18179,24 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <R> the type of the result of the terminal operation
      * @param terminalAction the terminal operation to be executed on this Stream.
      * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if terminalAction is null
      */
     @Beta
     @TerminalOp
     public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Stream<T>, R, ? extends Exception> terminalAction)
             throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
 
-        return ContinuableFuture.call(() -> terminalAction.apply(Stream.this));
+        return ContinuableFuture.call(() -> {
+            try {
+                return terminalAction.apply(Stream.this);
+            } finally {
+                Stream.this.close();
+            }
+        });
     }
 
     /**
@@ -17893,6 +18205,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The terminal operation is a function that consumes this Stream, produces a result, and may throw an exception.
      * The result of the operation is wrapped in a ContinuableFuture which allows for further chaining of operations.
+     * This stream is closed when the action finishes, whether it completes normally or exceptionally.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17905,7 +18218,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -17918,16 +18231,25 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param terminalAction the terminal operation to be executed on this Stream.
      * @param executor the Executor to use for asynchronous execution.
      * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if terminalAction or executor is null
      */
     @Beta
     @TerminalOp
     public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Stream<T>, R, ? extends Exception> terminalAction, final Executor executor)
             throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> terminalAction.apply(Stream.this), executor);
+        return ContinuableFuture.call(() -> {
+            try {
+                return terminalAction.apply(Stream.this);
+            } finally {
+                Stream.this.close();
+            }
+        }, executor);
     }
 
     //    @SuppressWarnings("rawtypes")
@@ -18391,30 +18713,6 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         return Stream.<T> of(iterator).skip(fromIndex).limit(toIndex - fromIndex); //NOSONAR
     }
-
-    //    /**
-    //     * Returns a stream containing the elements of the specified JDK stream.
-    //     * This is a static factory method that creates a stream from a java.util.stream.Stream.
-    //     *
-    //     * <p>This method is deprecated. Use {@link #from(java.util.stream.Stream)} instead.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * java.util.stream.Stream<String> javaStream = Arrays.stream(new String[] {"a", "b", "c"});
-    //     * Stream<String> stream = Stream.of(javaStream);   // Deprecated - use Stream.from(javaStream) instead
-    //     * stream.forEach(System.out::println);             // Prints: a, b, c
-    //     * }</pre>
-    //     *
-    //     * @param <T> the type of the elements
-    //     * @param stream the JDK stream whose elements are to be included in the stream
-    //     * @return a stream containing the elements of the specified JDK stream
-    //     * @deprecated Use {@link #from(java.util.stream.Stream)} instead
-    //     * @see #from(java.util.stream.Stream)
-    //     */
-    //    @Deprecated
-    //    public static <T> Stream<T> of(final java.util.stream.Stream<? extends T> stream) { // Should the name be from?
-    //        return from(stream);
-    //    }
 
     /**
      * Returns a stream containing the elements of the specified enumeration.
@@ -19869,7 +20167,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see IntStream#splitByChunkCount(int, int, boolean, IntBinaryOperator)
      */
     public static <T> Stream<T> splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst,
-            final IntBiFunction<? extends T> mapper) {
+            final IntBiFunction<? extends T> mapper) throws IllegalArgumentException {
         N.checkArgNotNegative(totalSize, cs.totalSize);
         N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
 
@@ -20315,6 +20613,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream continues as long as hasNext returns {@code true}. Each element is provided by the next supplier.
      * This is useful for converting imperative iteration patterns into streams.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20337,12 +20637,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         N.checkArgNotNull(next);
 
         return of(new ObjIteratorEx<>() {
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -20367,6 +20672,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The first element (position 0) in the Stream will be the provided init value.
      * For n &gt; 0, the element at position n will be the result of applying the function f to the
      * element at position n - 1. The stream continues as long as hasNext returns {@code true}.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20388,12 +20695,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         return of(new ObjIteratorEx<>() {
             private T cur = (T) NONE;
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -20580,7 +20892,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a stream of lines from the file
      * @throws IllegalArgumentException if the file is {@code null}
      */
-    public static Stream<String> ofLines(final File file, final Charset charset) {
+    public static Stream<String> ofLines(final File file, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
 
         final ObjIteratorEx<String> iter = createLazyLineIterator(file, null, charset, null, true);
@@ -20632,7 +20944,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a stream of lines from the path
      * @throws IllegalArgumentException if the path is {@code null}
      */
-    public static Stream<String> ofLines(final Path path, final Charset charset) {
+    public static Stream<String> ofLines(final Path path, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(path, cs.path);
 
         final ObjIteratorEx<String> iter = createLazyLineIterator(null, path, charset, null, true);
@@ -20760,7 +21072,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a stream of files in the parent directory
      * @throws IllegalArgumentException if parentPath is {@code null}
      */
-    public static Stream<File> listFiles(final File parentPath) {
+    public static Stream<File> listFiles(final File parentPath) throws IllegalArgumentException {
         N.checkArgNotNull(parentPath, cs.parentPath);
 
         if (!parentPath.exists()) {
@@ -20790,7 +21102,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a stream of files in the parent directory
      * @throws IllegalArgumentException if parentPath is {@code null}
      */
-    public static Stream<File> listFiles(final File parentPath, final boolean recursively) {
+    public static Stream<File> listFiles(final File parentPath, final boolean recursively) throws IllegalArgumentException {
         N.checkArgNotNull(parentPath, cs.parentPath);
 
         if (!parentPath.exists()) {
@@ -21292,7 +21604,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The streams are processed sequentially, maintaining the order of elements within each stream
      * and the order of streams as provided in the collection. If the collection is empty, an empty stream is returned.
-     * The resulting stream will automatically close all input streams when it is closed.
+     * The resulting stream will automatically close all input streams when it is closed. The collection's
+     * membership and encounter order are snapshotted when this method is called, so later structural
+     * changes to the caller's collection do not change traversal or resource closing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21317,8 +21631,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return empty();
         }
 
+        final List<? extends Stream<? extends T>> sources = new ArrayList<>(streams);
+
         return of(new ObjIteratorEx<T>() {
-            private final Iterator<? extends Stream<? extends T>> iterators = streams.iterator();
+            private final Iterator<? extends Stream<? extends T>> iterators = sources.iterator();
             private Stream<? extends T> cur;
             private Iterator<? extends T> iter;
 
@@ -21345,7 +21661,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return iter.next();
             }
-        }).onClose(newCloseHandler(streams));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -21354,6 +21670,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The iterables are processed sequentially, maintaining the order of elements within each iterable
      * and the order of iterables as provided in the collection. If the collection is empty, an empty stream is returned.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      * This method is marked as @Beta, indicating it may be subject to changes in future versions.
      *
      * <p><b>Usage Examples:</b></p>
@@ -21378,8 +21695,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return empty();
         }
 
+        final List<? extends Iterable<? extends T>> sources = new ArrayList<>(iterables);
+
         return of(new ObjIteratorEx<>() {
-            private final Iterator<? extends Iterable<? extends T>> iterators = iterables.iterator();
+            private final Iterator<? extends Iterable<? extends T>> iterators = sources.iterator();
             private Iterable<? extends T> coll;
             private Iterator<? extends T> cur;
 
@@ -21409,6 +21728,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The iterators are processed sequentially, maintaining the order of elements within each iterator
      * and the order of iterators as provided in the collection. If the collection is empty, an empty stream is returned.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      * This method is marked as @Beta, indicating it may be subject to changes in future versions.
      *
      * <p><b>Usage Examples:</b></p>
@@ -21433,8 +21753,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return empty();
         }
 
+        final List<? extends Iterator<? extends T>> sources = new ArrayList<>(c);
+
         return of(new ObjIteratorEx<>() {
-            private final Iterator<? extends Iterator<? extends T>> iterators = c.iterator();
+            private final Iterator<? extends Iterator<? extends T>> iterators = sources.iterator();
             private Iterator<? extends T> cur;
 
             @Override
@@ -21475,13 +21797,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <T> the type of elements in the iterators
-     * @param a the iterators to be concatenated in parallel
+     * @param a the iterators to be concatenated in parallel; a {@code null} or empty array produces an empty stream
      * @return a stream containing all elements from the provided iterators
      * @see #concat(Iterator...)
      * @see #parallelConcatIterators(Collection, int, int)
      */
     @SafeVarargs
     public static <T> Stream<T> parallelConcat(final Iterator<? extends T>... a) {
+        if (N.isEmpty(a)) {
+            return empty();
+        }
+
         final int readThreadNum = DEFAULT_READING_THREAD_NUM;
         return parallelConcatIterators(Array.asList(a), readThreadNum, calculateBufferedSize(a.length, readThreadNum));
     }
@@ -21505,13 +21831,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <T> the type of elements in the streams
-     * @param a the streams to be concatenated in parallel
+     * @param a the streams to be concatenated in parallel; a {@code null} or empty array produces an empty stream
      * @return a stream containing all elements from the provided streams
      * @see #concat(Stream...)
      * @see #parallelConcat(Collection, int, int)
      */
     @SafeVarargs
     public static <T> Stream<T> parallelConcat(final Stream<? extends T>... a) {
+        if (N.isEmpty(a)) {
+            return empty();
+        }
+
         final int readThreadNum = DEFAULT_READING_THREAD_NUM;
         return parallelConcat(Array.asList(a), readThreadNum, calculateBufferedSize(a.length, readThreadNum));
     }
@@ -21567,7 +21897,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #parallelConcat(Collection)
      * @see #parallelConcat(Collection, int, int)
      */
-    public static <T> Stream<T> parallelConcat(final Collection<? extends Stream<? extends T>> streams, final int readThreadNum) {
+    public static <T> Stream<T> parallelConcat(final Collection<? extends Stream<? extends T>> streams, final int readThreadNum)
+            throws IllegalArgumentException {
         N.checkArgPositive(readThreadNum, cs.readThreadNum);
 
         if (N.isEmpty(streams)) {
@@ -21603,17 +21934,22 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param readThreadNum the number of threads used to read elements from streams. Default is min(64, CPU cores)
      * @param bufferSize the size of the buffer used to store elements from the streams read by the reading threads
      * @return a stream containing all elements from the provided streams
+     * @throws IllegalArgumentException if {@code readThreadNum} or {@code bufferSize} is not positive
      * @see #parallelConcat(Collection, int)
      */
-    public static <T> Stream<T> parallelConcat(final Collection<? extends Stream<? extends T>> streams, final int readThreadNum, final int bufferSize) {
+    public static <T> Stream<T> parallelConcat(final Collection<? extends Stream<? extends T>> streams, final int readThreadNum, final int bufferSize)
+            throws IllegalArgumentException {
         N.checkArgPositive(readThreadNum, cs.readThreadNum);
 
         if (N.isEmpty(streams)) {
             return Stream.empty();
         }
 
+        N.checkArgPositive(bufferSize, cs.bufferSize);
+
+        final List<? extends Stream<? extends T>> sources = new ArrayList<>(streams);
         final MutableBoolean onGoing = MutableBoolean.of(true);
-        final int threadNum = Math.min(streams.size(), readThreadNum);
+        final int threadNum = Math.min(sources.size(), readThreadNum);
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
         final Holder<AsyncExecutor> holderForAsyncExecutorUsed = new Holder<>();
 
@@ -21622,7 +21958,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final Holder<Throwable> eHolder = new Holder<>();
             final MutableBoolean disposableChecked = MutableBoolean.of(false);
 
-            final Iterator<? extends Stream<? extends T>> iterators = streams.iterator();
+            final Iterator<? extends Stream<? extends T>> iterators = sources.iterator();
             final AtomicInteger threadCounter = new AtomicInteger(threadNum);
             boolean noException = false;
 
@@ -21747,7 +22083,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         };
 
         //noinspection resource
-        return just(supplier).flatMap(it -> Stream.of(it.get())).onClose(newCloseHandler(streams)).onClose(() -> {
+        return just(supplier).flatMap(it -> Stream.of(it.get())).onClose(newCloseHandler(sources)).onClose(() -> {
             onGoing.setFalse();
 
             if (holderForAsyncExecutorUsed.isNotNull()) {
@@ -21815,7 +22151,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #parallelConcatIterators(Collection)
      * @see #parallelConcatIterators(Collection, int, int)
      */
-    public static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum) {
+    public static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum)
+            throws IllegalArgumentException {
         N.checkArgPositive(readThreadNum, cs.readThreadNum);
 
         if (N.isEmpty(iterators)) {
@@ -21857,7 +22194,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #parallelConcatIterators(Collection, int)
      */
     public static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final int bufferSize) {
+            final int bufferSize) throws IllegalArgumentException {
         N.checkArgPositive(readThreadNum, cs.readThreadNum);
 
         if (N.isEmpty(iterators)) {
@@ -21901,7 +22238,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final Supplier<BufferedIterator<T>> supplier = () -> buffered(iterators, readThreadNum, queue, cancelUncompletedThreads, asyncExecutor, null);
+        final List<? extends Iterator<? extends T>> sources = new ArrayList<>(iterators);
+        final Supplier<BufferedIterator<T>> supplier = () -> buffered(sources, readThreadNum, queue, cancelUncompletedThreads, asyncExecutor, null);
 
         //noinspection resource
         return just(supplier).map(Supplier::get).flatMap(it -> Stream.of(it).onClose(it::closeResource));
@@ -22307,7 +22645,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result elements
-     * @param c the collection of CharStreams
+     * @param c the collection of character streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine elements from all streams
      * @return a stream of combined values. Empty if the collection is empty
      */
@@ -22316,11 +22654,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<CharStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
         final CharIterator[] iters = new CharIterator[len];
         int i = 0;
 
-        for (final CharStream s : c) {
+        for (final CharStream s : sources) {
             iters[i++] = iterate(s);
         }
 
@@ -22346,7 +22685,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -22593,7 +22932,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result elements
-     * @param c the collection of character streams to zip
+     * @param c the collection of character streams to zip; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
@@ -22604,13 +22943,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<CharStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
 
         if (len != valuesForNone.length) {
             throw new IllegalArgumentException("The size of 'valuesForNone' must match the size of the input collection");
         }
 
-        final CharStream[] ss = c.toArray(new CharStream[len]);
+        final CharStream[] ss = sources.toArray(new CharStream[len]);
         final CharIterator[] iters = new CharIterator[len];
 
         for (int i = 0; i < len; i++) {
@@ -22626,7 +22966,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                             return true;
                         } else {
                             iters[i] = null;
-                            ss[i].close();
+                            if (ss[i] != null) {
+                                ss[i].close();
+                            }
                         }
                     }
                 }
@@ -22654,7 +22996,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -22860,7 +23202,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result elements
-     * @param c the collection of byte streams to zip
+     * @param c the collection of byte streams to zip; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
      */
@@ -22869,11 +23211,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<ByteStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
         final ByteIterator[] iters = new ByteIterator[len];
         int i = 0;
 
-        for (final ByteStream s : c) {
+        for (final ByteStream s : sources) {
             iters[i++] = iterate(s);
         }
 
@@ -22899,7 +23242,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -23145,7 +23488,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result elements
-     * @param c the collection of byte streams to zip
+     * @param c the collection of byte streams to zip; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
@@ -23156,13 +23499,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<ByteStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
 
         if (len != valuesForNone.length) {
             throw new IllegalArgumentException("The size of 'valuesForNone' must match the size of the input collection");
         }
 
-        final ByteStream[] ss = c.toArray(new ByteStream[len]);
+        final ByteStream[] ss = sources.toArray(new ByteStream[len]);
         final ByteIterator[] iters = new ByteIterator[len];
 
         for (int i = 0; i < len; i++) {
@@ -23178,7 +23522,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                             return true;
                         } else {
                             iters[i] = null;
-                            ss[i].close();
+                            if (ss[i] != null) {
+                                ss[i].close();
+                            }
                         }
                     }
                 }
@@ -23206,7 +23552,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -23412,7 +23758,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result elements
-     * @param c the collection of short streams to zip
+     * @param c the collection of short streams to zip; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
      */
@@ -23421,11 +23767,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<ShortStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
         final ShortIterator[] iters = new ShortIterator[len];
         int i = 0;
 
-        for (final ShortStream s : c) {
+        for (final ShortStream s : sources) {
             iters[i++] = iterate(s);
         }
 
@@ -23451,7 +23798,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -23703,7 +24050,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of short streams. If empty, returns an empty stream.
+     * @param c the collection of short streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param valuesForNone the array of default values to use when streams run out of values. Must have the same length as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
@@ -23714,13 +24061,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<ShortStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
 
         if (len != valuesForNone.length) {
             throw new IllegalArgumentException("The size of 'valuesForNone' must match the size of the input collection");
         }
 
-        final ShortStream[] ss = c.toArray(new ShortStream[len]);
+        final ShortStream[] ss = sources.toArray(new ShortStream[len]);
         final ShortIterator[] iters = new ShortIterator[len];
 
         for (int i = 0; i < len; i++) {
@@ -23736,7 +24084,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                             return true;
                         } else {
                             iters[i] = null;
-                            ss[i].close();
+                            if (ss[i] != null) {
+                                ss[i].close();
+                            }
                         }
                     }
                 }
@@ -23764,7 +24114,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -23982,7 +24332,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of int streams. If empty, returns an empty stream.
+     * @param c the collection of int streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
      */
@@ -23991,11 +24341,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<IntStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
         final IntIterator[] iters = new IntIterator[len];
         int i = 0;
 
-        for (final IntStream s : c) {
+        for (final IntStream s : sources) {
             iters[i++] = iterate(s);
         }
 
@@ -24021,7 +24372,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -24274,7 +24625,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of int streams. If empty, returns an empty stream.
+     * @param c the collection of int streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param valuesForNone the array of default values to use when streams run out of values. Must have the same length as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
@@ -24285,13 +24636,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<IntStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
 
         if (len != valuesForNone.length) {
             throw new IllegalArgumentException("The size of 'valuesForNone' must match the size of the input collection");
         }
 
-        final IntStream[] ss = c.toArray(new IntStream[len]);
+        final IntStream[] ss = sources.toArray(new IntStream[len]);
         final IntIterator[] iters = new IntIterator[len];
 
         for (int i = 0; i < len; i++) {
@@ -24307,7 +24659,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                             return true;
                         } else {
                             iters[i] = null;
-                            ss[i].close();
+                            if (ss[i] != null) {
+                                ss[i].close();
+                            }
                         }
                     }
                 }
@@ -24335,7 +24689,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -24553,7 +24907,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of long streams. If empty, returns an empty stream.
+     * @param c the collection of long streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
      */
@@ -24562,11 +24916,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<LongStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
         final LongIterator[] iters = new LongIterator[len];
         int i = 0;
 
-        for (final LongStream s : c) {
+        for (final LongStream s : sources) {
             iters[i++] = iterate(s);
         }
 
@@ -24592,7 +24947,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -24841,7 +25196,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of long streams
+     * @param c the collection of long streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param valuesForNone the values to use if the streams run out of values. Must have the same size as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
@@ -24852,13 +25207,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<LongStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
 
         if (len != valuesForNone.length) {
             throw new IllegalArgumentException("The size of 'valuesForNone' must match the size of the input collection");
         }
 
-        final LongStream[] ss = c.toArray(new LongStream[len]);
+        final LongStream[] ss = sources.toArray(new LongStream[len]);
         final LongIterator[] iters = new LongIterator[len];
 
         for (int i = 0; i < len; i++) {
@@ -24874,7 +25230,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                             return true;
                         } else {
                             iters[i] = null;
-                            ss[i].close();
+                            if (ss[i] != null) {
+                                ss[i].close();
+                            }
                         }
                     }
                 }
@@ -24902,7 +25260,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -25103,7 +25461,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of float streams
+     * @param c the collection of float streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
      */
@@ -25112,11 +25470,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<FloatStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
         final FloatIterator[] iters = new FloatIterator[len];
         int i = 0;
 
-        for (final FloatStream s : c) {
+        for (final FloatStream s : sources) {
             iters[i++] = iterate(s);
         }
 
@@ -25142,7 +25501,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -25391,7 +25750,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of float streams
+     * @param c the collection of float streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param valuesForNone the values to use if the streams run out of values. Must have the same size as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
@@ -25402,13 +25761,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<FloatStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
 
         if (len != valuesForNone.length) {
             throw new IllegalArgumentException("The size of 'valuesForNone' must match the size of the input collection");
         }
 
-        final FloatStream[] ss = c.toArray(new FloatStream[len]);
+        final FloatStream[] ss = sources.toArray(new FloatStream[len]);
         final FloatIterator[] iters = new FloatIterator[len];
 
         for (int i = 0; i < len; i++) {
@@ -25424,7 +25784,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                             return true;
                         } else {
                             iters[i] = null;
-                            ss[i].close();
+                            if (ss[i] != null) {
+                                ss[i].close();
+                            }
                         }
                     }
                 }
@@ -25452,7 +25814,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -25653,7 +26015,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of double streams
+     * @param c the collection of double streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
      */
@@ -25662,11 +26024,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<DoubleStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
         final DoubleIterator[] iters = new DoubleIterator[len];
         int i = 0;
 
-        for (final DoubleStream s : c) {
+        for (final DoubleStream s : sources) {
             iters[i++] = iterate(s);
         }
 
@@ -25692,7 +26055,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -25958,7 +26321,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <R> the type of the result
-     * @param c the collection of double streams
+     * @param c the collection of double streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param valuesForNone the values to use if the streams run out of values. Size must match the collection size.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
@@ -25970,13 +26333,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return Stream.empty();
         }
 
-        final int len = c.size();
+        final List<DoubleStream> sources = new ArrayList<>(c);
+        final int len = sources.size();
 
         if (len != valuesForNone.length) {
             throw new IllegalArgumentException("The size of 'valuesForNone' must match the size of the input collection");
         }
 
-        final DoubleStream[] ss = c.toArray(new DoubleStream[len]);
+        final DoubleStream[] ss = sources.toArray(new DoubleStream[len]);
         final DoubleIterator[] iters = new DoubleIterator[len];
 
         for (int i = 0; i < len; i++) {
@@ -25992,7 +26356,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                             return true;
                         } else {
                             iters[i] = null;
-                            ss[i].close();
+                            if (ss[i] != null) {
+                                ss[i].close();
+                            }
                         }
                     }
                 }
@@ -26020,7 +26386,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 return zipFunction.apply(args);
             }
-        }).onClose(newCloseHandler(c));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -26341,6 +26707,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The operation stops when the shortest stream is exhausted. Each invocation of the zipFunction
      * receives a list containing one element from each stream, in the order of the collection.
      * The returned stream will automatically close all input streams when it is closed.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -26356,15 +26723,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <T> the type of the elements in the streams
      * @param <R> the type of the result
-     * @param streams the collection of streams to be zipped
+     * @param streams the collection of streams to be zipped. Can be {@code null} or empty (returns an empty stream).
      * @param zipFunction the function to combine lists of values from the streams.
      * @return a stream of combined values
      * @see #zip(Collection, List, Function)
      * @see #zipIterables(Collection, Function)
      */
     public static <T, R> Stream<R> zip(final Collection<? extends Stream<? extends T>> streams, final Function<? super List<T>, ? extends R> zipFunction) {
+        final List<? extends Stream<? extends T>> sources = N.isEmpty(streams) ? new ArrayList<>(0) : new ArrayList<>(streams);
+
         //noinspection resource
-        return ((Stream<R>) zipIterators(iterateAll(streams), zipFunction)).onClose(newCloseHandler(streams));
+        return ((Stream<R>) zipIterators(iterateAll(sources), zipFunction)).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -26798,6 +27167,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation processes elements from all streams in lockstep.
      * The resulting stream will have a length equal to the longest of the input streams.
      * The size of valuesForNone must match the size of the streams collection.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -26821,8 +27191,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     public static <T, R> Stream<R> zip(final Collection<? extends Stream<? extends T>> streams, final List<? extends T> valuesForNone,
             final Function<? super List<T>, ? extends R> zipFunction) {
+        final List<? extends Stream<? extends T>> sources = N.isEmpty(streams) ? new ArrayList<>(0) : new ArrayList<>(streams);
+
         //noinspection resource
-        return (Stream<R>) zipIterators(iterateAll(streams), valuesForNone, zipFunction).onClose(newCloseHandler(streams));
+        return (Stream<R>) zipIterators(iterateAll(sources), valuesForNone, zipFunction).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -26984,6 +27356,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * If maxThreadNumForZipFunction is 1, this method behaves the same as the sequential zip operation.
+     * When either iterator is exhausted, the other iterator is not advanced for an incomplete pair.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27004,7 +27377,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) {
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         if (maxThreadNumForZipFunction == 1) {
@@ -27028,14 +27401,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     public boolean hasNext() {
                         if (!hasNext && onGoing.isTrue()) {
                             synchronized (iters) {
-                                if (iterA.hasNext()) {
+                                // Check every source before advancing any of them. Otherwise, when a later
+                                // source is exhausted, elements already pulled from earlier sources are lost.
+                                if (iterA.hasNext() && iterB.hasNext()) {
                                     nextA = iterA.next();
-                                } else {
-                                    onGoing.setFalse();
-                                    return false;
-                                }
-
-                                if (iterB.hasNext()) {
                                     nextB = iterB.next();
                                 } else {
                                     onGoing.setFalse();
@@ -27152,6 +27521,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * If maxThreadNumForZipFunction is 1, this method behaves the same as the sequential zip operation.
+     * When any iterator is exhausted, the other iterators are not advanced for an incomplete triplet.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27175,7 +27545,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
-            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final int maxThreadNumForZipFunction) {
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         if (maxThreadNumForZipFunction == 1) {
@@ -27201,21 +27571,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     public boolean hasNext() {
                         if (!hasNext && onGoing.isTrue()) {
                             synchronized (iters) {
-                                if (iterA.hasNext()) {
+                                // Check every source before advancing any of them. Otherwise, when a later
+                                // source is exhausted, elements already pulled from earlier sources are lost.
+                                if (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
                                     nextA = iterA.next();
-                                } else {
-                                    onGoing.setFalse();
-                                    return false;
-                                }
-
-                                if (iterB.hasNext()) {
                                     nextB = iterB.next();
-                                } else {
-                                    onGoing.setFalse();
-                                    return false;
-                                }
-
-                                if (iterC.hasNext()) {
                                     nextC = iterC.next();
                                 } else {
                                     onGoing.setFalse();
@@ -27359,7 +27719,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA, final B valueForNoneB,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) {
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         if (maxThreadNumForZipFunction == 1) {
@@ -27548,7 +27908,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction,
-            final int maxThreadNumForZipFunction) {
+            final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         if (maxThreadNumForZipFunction == 1) {
@@ -27680,6 +28040,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * For better performance with large streams, consider using buffered() on the input streams.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27704,8 +28065,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     public static <T, R> Stream<R> parallelZip(final Collection<? extends Stream<? extends T>> streams,
             final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) {
+        final List<? extends Stream<? extends T>> sources = N.isEmpty(streams) ? new ArrayList<>(0) : new ArrayList<>(streams);
+
         //noinspection resource
-        return ((Stream<R>) parallelZipIterators(iterateAll(streams), zipFunction, maxThreadNumForZipFunction)).onClose(newCloseHandler(streams));
+        return ((Stream<R>) parallelZipIterators(iterateAll(sources), zipFunction, maxThreadNumForZipFunction)).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -27720,6 +28083,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The resulting stream will have a length equal to the longest of the input streams.
      * The size of valuesForNone must match the size of the streams collection.
      * For better performance with large streams, consider using buffered() on the input streams.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27736,7 +28100,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <T> the type of the elements in the streams
      * @param <R> the type of the result
-     * @param streams the collection of streams. Must not be {@code null}.
+     * @param streams the collection of streams. Can be {@code null} or empty (returns an empty stream).
      * @param valuesForNone the values to use if any stream runs out of values. Size must match streams size.
      * @param zipFunction the function to combine lists of values from the streams.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
@@ -27747,9 +28111,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     public static <T, R> Stream<R> parallelZip(final Collection<? extends Stream<? extends T>> streams, final List<? extends T> valuesForNone,
             final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) {
+        final List<? extends Stream<? extends T>> sources = N.isEmpty(streams) ? new ArrayList<>(0) : new ArrayList<>(streams);
+
         //noinspection resource
-        return ((Stream<R>) parallelZipIterators(iterateAll(streams), valuesForNone, zipFunction, maxThreadNumForZipFunction))
-                .onClose(newCloseHandler(streams));
+        return ((Stream<R>) parallelZipIterators(iterateAll(sources), valuesForNone, zipFunction, maxThreadNumForZipFunction))
+                .onClose(newCloseHandler(sources));
     }
 
     /**
@@ -27814,7 +28180,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <T> the type of the elements in the iterables
      * @param <R> the type of the result
-     * @param iterables the collection of iterables. Must not be {@code null}.
+     * @param iterables the collection of iterables; {@code null} is treated as empty, in which case {@code valuesForNone} must also be empty
      * @param valuesForNone the values to use if any iterable runs out of values. Size must match iterables size.
      * @param zipFunction the function to combine lists of values from the iterables.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
@@ -27834,7 +28200,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation processes elements from all iterators in parallel, taking one element
      * from each iterator and combining them using the zip function. The stream terminates when
-     * any iterator is exhausted.
+     * any iterator is exhausted. No iterator is advanced for a tuple unless every iterator has
+     * another element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27856,7 +28223,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #zipIterators(Collection, Function)
      */
     public static <T, R> Stream<R> parallelZipIterators(final Collection<? extends Iterator<? extends T>> iterators,
-            final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) {
+            final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         if (N.isEmpty(iterators)) {
@@ -27889,15 +28256,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     public boolean hasNext() {
                         if (!hasNext && onGoing.isTrue()) {
                             synchronized (iters) {
-                                next = new Object[len];
-
+                                // Check every source before advancing any of them. Otherwise, when a later
+                                // source is exhausted, elements already pulled from earlier sources are lost.
                                 for (int i = 0; i < len; i++) {
-                                    if (iterArray[i].hasNext()) {
-                                        next[i] = iterArray[i].next();
-                                    } else {
+                                    if (!iterArray[i].hasNext()) {
                                         onGoing.setFalse();
                                         return false;
                                     }
+                                }
+
+                                next = new Object[len];
+
+                                for (int i = 0; i < len; i++) {
+                                    next[i] = iterArray[i].next();
                                 }
 
                                 hasNext = true;
@@ -27959,7 +28330,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #zipIterators(Collection, List, Function)
      */
     public static <T, R> Stream<R> parallelZipIterators(final Collection<? extends Iterator<? extends T>> iterators, final List<? extends T> valuesForNone,
-            final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) {
+            final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         if (N.size(iterators) != N.size(valuesForNone)) {
@@ -28057,9 +28428,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param nextSelector a function that determines which element to select next.
      *                     Returns TAKE_FIRST to select from the first array, TAKE_SECOND for the second.
      * @return a stream containing the merged elements from the two arrays
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see N#merge(Object[], Object[], BiFunction)
      */
     public static <T> Stream<T> merge(final T[] a, final T[] b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(a)) {
             return of(b);
         } else if (N.isEmpty(b)) {
@@ -28116,6 +28490,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third array to be merged. It should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the three arrays
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see N#merge(Object[], Object[], BiFunction)
      */
     public static <T> Stream<T> merge(final T[] a, final T[] b, final T[] c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
@@ -28199,10 +28574,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second iterator to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the two iterators
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see N#merge(Iterable, Iterable, BiFunction)
      */
     public static <T> Stream<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return new IteratorStream<>(new ObjIteratorEx<>() {
             private final Iterator<T> iterA = a == null ? ObjIterator.<T> empty() : (Iterator<T>) a;
             private final Iterator<T> iterB = b == null ? ObjIterator.<T> empty() : (Iterator<T>) b;
@@ -28288,6 +28666,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third iterator to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the three iterators
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see N#merge(Iterable, Iterable, BiFunction)
      */
     public static <T> Stream<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b, final Iterator<? extends T> c,
@@ -28317,9 +28696,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second stream to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the two streams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
     }
 
@@ -28346,6 +28728,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third stream to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the three streams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b, final Stream<? extends T> c,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
@@ -28373,7 +28756,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <T> the type of the elements in the streams
-     * @param streams the collection of streams to be merged. Each stream should be ordered. Can be {@code null} or empty.
+     * @param streams the collection of streams to be merged. Each stream should be ordered. The collection can be {@code null} or empty,
+     *            and {@code null} elements are treated as empty streams.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all streams in the collection
      * @throws IllegalArgumentException if nextSelector is null
@@ -28385,7 +28769,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         if (N.isEmpty(streams)) {
             return empty();
         } else if (streams.size() == 1) {
-            return (Stream<T>) streams.iterator().next();
+            final Stream<? extends T> source = streams.iterator().next();
+            return source == null ? empty() : (Stream<T>) source;
         } else if (streams.size() == 2) {
             final Iterator<? extends Stream<? extends T>> iter = streams.iterator();
             return merge(iter.next(), iter.next(), nextSelector);
@@ -28423,10 +28808,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterables the collection of iterables to be merged. Each iterable should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterables in the collection
-     * @throws IllegalArgumentException if nextSelector is null
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     public static <T> Stream<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return mergeIterators(N.iterateEach(iterables), nextSelector);
     }
 
@@ -28452,7 +28839,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterators the collection of iterators to be merged. Each iterator should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterators in the collection
-     * @throws IllegalArgumentException if nextSelector is null
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     public static <T> Stream<T> mergeIterators(final Collection<? extends Iterator<? extends T>> iterators,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -28486,6 +28873,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
      * elements merged into the intermediate queues. Consider using {@link #merge(Collection, BiFunction)}
      * for totally lazy evaluation.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -28499,9 +28887,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <T> the type of the elements in the streams
-     * @param streams the collection of streams to be merged. Each stream should be ordered. Can be {@code null} or empty.
+     * @param streams the collection of streams to be merged. Each stream should be ordered. The collection can be {@code null} or empty,
+     *            and {@code null} elements are treated as empty streams.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all streams in the collection
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(Collection, BiFunction)
      * @see #parallelMerge(Collection, BiFunction, int)
      */
@@ -28519,6 +28909,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
      * elements merged into the intermediate queues. Consider using {@link #merge(Collection, BiFunction)}
      * for totally lazy evaluation.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -28532,28 +28923,33 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <T> the type of the elements in the streams
-     * @param streams the collection of streams to be merged. Each stream should be ordered. Can be {@code null} or empty.
+     * @param streams the collection of streams to be merged. Each stream should be ordered. The collection can be {@code null} or empty,
+     *            and {@code null} elements are treated as empty streams.
      * @param nextSelector a function that determines which element to select next.
      * @param maxThreadNum the maximum number of threads for the parallel merge. Must be positive.
      * @return a stream containing the merged elements from all streams in the collection
-     * @throws IllegalArgumentException if maxThreadNum is not positive
+     * @throws IllegalArgumentException if maxThreadNum is not positive or nextSelector is null
      * @see #merge(Collection, BiFunction)
      */
     public static <T> Stream<T> parallelMerge(final Collection<? extends Stream<? extends T>> streams,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector, final int maxThreadNum) throws IllegalArgumentException {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not be less than 1");
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
+        final List<? extends Stream<? extends T>> sources = N.isEmpty(streams) ? new ArrayList<>(0) : new ArrayList<>(streams);
 
         if (maxThreadNum == 1) {
-            return merge(streams, nextSelector);
-        } else if (N.isEmpty(streams)) {
+            return merge(sources, nextSelector);
+        } else if (sources.isEmpty()) {
             return empty();
-        } else if (streams.size() == 1) {
-            return (Stream<T>) streams.iterator().next();
-        } else if (streams.size() == 2) {
-            final Iterator<? extends Stream<? extends T>> iter = streams.iterator();
+        } else if (sources.size() == 1) {
+            final Stream<? extends T> source = sources.iterator().next();
+            return source == null ? empty() : (Stream<T>) source;
+        } else if (sources.size() == 2) {
+            final Iterator<? extends Stream<? extends T>> iter = sources.iterator();
             return merge(iter.next(), iter.next(), nextSelector);
-        } else if (streams.size() == 3) {
-            final Iterator<? extends Stream<? extends T>> iter2 = streams.iterator();
+        } else if (sources.size() == 3) {
+            final Iterator<? extends Stream<? extends T>> iter2 = sources.iterator();
             //noinspection resource
             return merge(merge(iter2.next(), iter2.next(), nextSelector).buffered(), iter2.next(), nextSelector);
         }
@@ -28561,15 +28957,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final Supplier<Stream<T>> supplier = () -> {
             final Queue<Stream<T>> queue = N.newLinkedList();
 
-            for (final Stream<? extends T> e : streams) {
+            for (final Stream<? extends T> e : sources) {
                 queue.add((Stream<T>) e);
             }
 
             final Holder<Throwable> eHolder = new Holder<>();
-            final MutableInt cnt = MutableInt.of(streams.size());
-            final List<ContinuableFuture<Void>> futureList = new ArrayList<>(streams.size() - 1);
+            final MutableInt cnt = MutableInt.of(sources.size());
+            final List<ContinuableFuture<Void>> futureList = new ArrayList<>(sources.size() - 1);
 
-            final int threadNum = N.min(maxThreadNum, streams.size() / 2);
+            final int threadNum = N.min(maxThreadNum, sources.size() / 2);
 
             AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(DEFAULT_ASYNC_EXECUTOR, threadNum);
 
@@ -28609,7 +29005,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 });
             }
 
-            completeAndShutdownTempExecutor(futureList, eHolder, streams, asyncExecutorToUse);
+            completeAndShutdownTempExecutor(futureList, eHolder, sources, asyncExecutorToUse);
 
             synchronized (queue) {
                 final int queueSize = queue.size();
@@ -28624,7 +29020,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         };
 
         //noinspection resource
-        return Stream.just(supplier).flatMap(Supplier::get).onClose(newCloseHandler(streams));
+        return Stream.just(supplier).flatMap(Supplier::get).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -28652,6 +29048,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterables the collection of iterables to be merged. Each iterable should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterables in the collection
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #mergeIterables(Collection, BiFunction)
      * @see #parallelMergeIterables(Collection, BiFunction, int)
      */
@@ -28686,11 +29083,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param nextSelector a function that determines which element to select next.
      * @param maxThreadNum the maximum number of threads for the parallel merge. Must be positive.
      * @return a stream containing the merged elements from all iterables in the collection
-     * @throws IllegalArgumentException if maxThreadNum is not positive
+     * @throws IllegalArgumentException if maxThreadNum is not positive or nextSelector is {@code null}
      * @see #mergeIterables(Collection, BiFunction)
      */
     public static <T> Stream<T> parallelMergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector, final int maxThreadNum) throws IllegalArgumentException {
+        N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not be less than 1");
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return parallelMergeIterators(N.iterateEach(iterables), nextSelector, maxThreadNum);
     }
 
@@ -28703,6 +29103,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
      * elements merged into the intermediate queues. Consider using {@link #mergeIterators(Collection, BiFunction)}
      * for totally lazy evaluation.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -28719,6 +29120,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterators the collection of iterators to be merged. Each iterator should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterators in the collection
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #mergeIterators(Collection, BiFunction)
      * @see #parallelMergeIterators(Collection, BiFunction, int)
      */
@@ -28736,6 +29138,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
      * elements merged into the intermediate queues. Consider using {@link #mergeIterators(Collection, BiFunction)}
      * for totally lazy evaluation.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -28753,24 +29156,27 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param nextSelector a function that determines which element to select next.
      * @param maxThreadNum the maximum number of threads for the parallel merge. Must be positive.
      * @return a stream containing the merged elements from all iterators in the collection
-     * @throws IllegalArgumentException if maxThreadNum is not positive
+     * @throws IllegalArgumentException if maxThreadNum is not positive or nextSelector is {@code null}
      * @see #mergeIterators(Collection, BiFunction)
      */
     public static <T> Stream<T> parallelMergeIterators(final Collection<? extends Iterator<? extends T>> iterators,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector, final int maxThreadNum) throws IllegalArgumentException {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not be less than 1");
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
+        final List<? extends Iterator<? extends T>> sources = N.isEmpty(iterators) ? new ArrayList<>(0) : new ArrayList<>(iterators);
 
         if (maxThreadNum == 1) {
-            return mergeIterators(iterators, nextSelector);
-        } else if (N.isEmpty(iterators)) {
+            return mergeIterators(sources, nextSelector);
+        } else if (sources.isEmpty()) {
             return empty();
-        } else if (iterators.size() == 1) {
-            return of(iterators.iterator().next());
-        } else if (iterators.size() == 2) {
-            final Iterator<? extends Iterator<? extends T>> iter = iterators.iterator();
+        } else if (sources.size() == 1) {
+            return of(sources.iterator().next());
+        } else if (sources.size() == 2) {
+            final Iterator<? extends Iterator<? extends T>> iter = sources.iterator();
             return merge(iter.next(), iter.next(), nextSelector);
-        } else if (iterators.size() == 3) {
-            final Iterator<? extends Iterator<? extends T>> iter2 = iterators.iterator();
+        } else if (sources.size() == 3) {
+            final Iterator<? extends Iterator<? extends T>> iter2 = sources.iterator();
             //noinspection resource
             final Stream<T> buffered = merge(iter2.next(), iter2.next(), nextSelector).buffered();
 
@@ -28780,12 +29186,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         }
 
         final Supplier<Stream<T>> supplier = () -> {
-            final Queue<Iterator<? extends T>> queue = N.newLinkedList(iterators);
+            final Queue<Iterator<? extends T>> queue = N.newLinkedList(sources);
             final Holder<Throwable> eHolder = new Holder<>();
-            final MutableInt cnt = MutableInt.of(iterators.size());
-            final List<ContinuableFuture<Void>> futureList = new ArrayList<>(iterators.size() - 1);
+            final MutableInt cnt = MutableInt.of(sources.size());
+            final List<ContinuableFuture<Void>> futureList = new ArrayList<>(sources.size() - 1);
 
-            final int threadNum = N.min(maxThreadNum, iterators.size() / 2);
+            final int threadNum = N.min(maxThreadNum, sources.size() / 2);
 
             AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(DEFAULT_ASYNC_EXECUTOR, threadNum);
 

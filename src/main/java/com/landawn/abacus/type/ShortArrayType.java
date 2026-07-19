@@ -129,6 +129,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, new Short[] {1, 2, 3});   // Appends "[1, 2, 3]"
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -183,6 +184,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * BufferedJsonWriter writer = new BufferedJsonWriter();
      * type.serializeTo(writer, new Short[] {1, 2, 3}, null);   // Writes "[1, 2, 3]"
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -195,7 +197,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the Short array to write
-     * @param config the serialization configuration (currently unused for Short arrays)
+     * @param config the serialization configuration forwarded to each element; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
@@ -210,11 +212,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
                     writer.write(ELEMENT_SEPARATOR);
                 }
 
-                if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    writer.write(x[i]);
-                }
+                elementType.serializeTo(writer, x[i], config);
             }
 
             writer.write(SK._BRACKET_R);

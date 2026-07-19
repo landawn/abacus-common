@@ -66,61 +66,6 @@ public enum NamingPolicy {
      */
     CAMEL_CASE(Strings::toCamelCase),
 
-    //    In Java, UpperCamelCase is the better choice — both technically and culturally.
-    //
-    //    Short answer
-    //
-    //    Prefer UpperCamelCase in Java documentation, APIs, and naming utilities.
-    //
-    //    UpperCamelCase is understood, but it is non-idiomatic in Java.
-    //
-    //    Why UpperCamelCase is better in Java
-    //    1️⃣ It matches Java’s official terminology
-    //
-    //    The Java Language Specification, JDK docs, and common Java libraries consistently use:
-    //
-    //    camel case
-    //
-    //    lower camel case
-    //
-    //    upper camel case
-    //
-    //    Examples:
-    //
-    //    JLS: “class names are written in UpperCamelCase”
-    //
-    //    Guava, Apache Commons, Spring → all use UpperCamelCase terminology
-    //
-    //    You’ll rarely see UpperCamelCase in authoritative Java docs.
-    //
-    //    2️⃣ UpperCamelCase is language-agnostic, not Java-centric
-    //
-    //    UpperCamelCase originated in:
-    //
-    //    Pascal
-    //
-    //    C#
-    //
-    //    .NET ecosystem
-    //
-    //    In C# docs:
-    //
-    //    UpperCamelCase → types, methods
-    //
-    //    camelCase → locals, parameters
-    //
-    //    Java never adopted this terminology.
-    //
-    //    3️⃣ Java naming rules map cleanly
-    //    Java element    Case
-    //    Class / Interface / Enum    UpperCamelCase
-    //    Method  camelCase
-    //    Field (non-constant)    camelCase
-    //    Constant    SCREAMING_SNAKE_CASE
-    //    Package lowercase
-    //
-    //    This symmetry (UpperCamelCase ↔ camelCase) is conceptually clean.
-
     /**
      * Upper camel case naming policy (e.g., "MyVariableName").
      *
@@ -253,15 +198,15 @@ public enum NamingPolicy {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert to lower camel case
-     * String result1 = NamingPolicy.CAMEL_CASE.convert("user-name");            // "userName"
-     * String result2 = NamingPolicy.CAMEL_CASE.convert("USER_NAME");            // "userName"
+     * String result1 = NamingPolicy.CAMEL_CASE.convert("user-name");   // "userName"
+     * String result2 = NamingPolicy.CAMEL_CASE.convert("USER_NAME");   // "userName"
      *
      * // Convert to snake case
-     * String result3 = NamingPolicy.SNAKE_CASE.convert("userName");   // "user_name"
+     * String result3 = NamingPolicy.SNAKE_CASE.convert("userName");    // "user_name"
      *
      * // Null and empty string handling
-     * String result4 = NamingPolicy.CAMEL_CASE.convert(null);                   // null
-     * String result5 = NamingPolicy.CAMEL_CASE.convert("");                     // ""
+     * String result4 = NamingPolicy.CAMEL_CASE.convert(null);          // null
+     * String result5 = NamingPolicy.CAMEL_CASE.convert("");            // ""
      * }</pre>
      *
      * @param str the string to convert; may be {@code null}, empty, or contain various separators

@@ -11,7 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +24,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -46,9 +50,17 @@ import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
+import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 public class RowDatasetTest extends TestBase {
+
+    @SuppressWarnings("unchecked")
+    private static <T> ObjIteratorEx<T> iteratorEx(final Stream<T> stream) throws ReflectiveOperationException {
+        final Method method = Stream.class.getDeclaredMethod("iteratorEx");
+        method.setAccessible(true);
+        return (ObjIteratorEx<T>) method.invoke(stream);
+    }
 
     private RowDataset dataset;
     private RowDataset emptyDataset;
@@ -838,6 +850,15 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testRenameColumnRejectsNullOrEmptyNewName() {
+        final RowDataset dataset = createThreeRowScoreDataset();
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.renameColumn("id", null));
+        assertThrows(IllegalArgumentException.class, () -> dataset.renameColumn("id", ""));
+        assertEquals(Arrays.asList("id", "name", "age", "score"), dataset.columnNames());
+    }
+
+    @Test
     public void testRenameColumnsWithMap() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
         Map<String, String> renameMap = new LinkedHashMap<>();
@@ -896,6 +917,17 @@ public class RowDatasetTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             ds.renameColumns(renameMap);
         });
+    }
+
+    @Test
+    public void testRenameColumnsValidatesAllNewNamesBeforeMutation() {
+        final RowDataset dataset = createThreeRowScoreDataset();
+        final Map<String, String> renameMap = new LinkedHashMap<>();
+        renameMap.put("id", "identifier");
+        renameMap.put("name", "");
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.renameColumns(renameMap));
+        assertEquals(Arrays.asList("id", "name", "age", "score"), dataset.columnNames());
     }
 
     // ========== renameColumns - empty early return ==========
@@ -2171,6 +2203,56 @@ public class RowDatasetTest extends TestBase {
 
         // The failed calls must not have partially added any rows.
         assertEquals(sizeBefore, ds.size());
+    }
+
+    @Test
+    public void testAddRows_MixedSupportedRepresentations() {
+        final RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name", "age", "city")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(0)), new ArrayList<>(Arrays.asList("Initial")), new ArrayList<>(Arrays.asList(20)),
+                        new ArrayList<>(Arrays.asList("Seattle")))));
+
+        final Map<String, Object> mapRow = new LinkedHashMap<>();
+        mapRow.put("id", 3);
+        mapRow.put("name", "Map");
+        mapRow.put("age", 32);
+        mapRow.put("city", "Chicago");
+
+        final List<Object> rows = Arrays.asList(new Object[] { 1, "Array", 30, "New York" }, Arrays.asList(2, "List", 31, "Boston"), mapRow,
+                new Person(4, "Bean", 33, "Austin"));
+
+        ds.addRows(1, rows);
+
+        assertEquals(5, ds.size());
+        assertEquals(Arrays.asList(0, 1, 2, 3, 4), ds.getColumn("id"));
+        assertEquals(Arrays.asList("Initial", "Array", "List", "Map", "Bean"), ds.getColumn("name"));
+        assertEquals(Arrays.asList("Seattle", "New York", "Boston", "Chicago", "Austin"), ds.getColumn("city"));
+    }
+
+    @Test
+    public void testAddRows_ExtractionFailureDoesNotPartiallyMutateColumns() {
+        final RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2)), new ArrayList<>(Arrays.asList("A", "B")))));
+        final List<Object> throwingRow = new AbstractList<>() {
+            @Override
+            public Object get(final int index) {
+                if (index == 1) {
+                    throw new IllegalStateException("name extraction failed");
+                }
+
+                return 20;
+            }
+
+            @Override
+            public int size() {
+                return 2;
+            }
+        };
+
+        assertThrows(IllegalStateException.class, () -> ds.addRows(Arrays.asList(Arrays.asList(10, "X"), throwingRow)));
+
+        assertEquals(2, ds.size());
+        assertEquals(Arrays.asList(1, 2), ds.getColumn("id"));
+        assertEquals(Arrays.asList("A", "B"), ds.getColumn("name"));
     }
 
     @Test
@@ -3528,6 +3610,24 @@ public class RowDatasetTest extends TestBase {
         Assertions.assertTrue(firstValue.contains("NYC"));
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testToMapHonorsAbstractCollectionAndMapRowTypes() {
+        final Map<Object, Object> queueRows = dataset.<Object, Object> toMap("id", Arrays.asList("name", "age"), (Class<Object>) (Class<?>) Queue.class);
+        final Object queueRow = queueRows.get(1);
+
+        assertTrue(queueRow instanceof Queue);
+        assertEquals(Arrays.asList("Alice", 25), new ArrayList<>((Queue<?>) queueRow));
+
+        final Map<Object, Object> sortedMapRows = dataset.<Object, Object> toMap("id", Arrays.asList("name", "age"),
+                (Class<Object>) (Class<?>) SortedMap.class);
+        final Object sortedMapRow = sortedMapRows.get(1);
+
+        assertTrue(sortedMapRow instanceof SortedMap);
+        assertEquals(25, ((SortedMap<?, ?>) sortedMapRow).get("age"));
+        assertEquals("Alice", ((SortedMap<?, ?>) sortedMapRow).get("name"));
+    }
+
     @Test
     public void testToMapWithMapRowType() {
         final RowDataset dataset = createFourRowCityDataset();
@@ -3751,6 +3851,25 @@ public class RowDatasetTest extends TestBase {
         Assertions.assertEquals(2, result.keySet().size());
         Assertions.assertEquals(2, result.get("A").size());
         Assertions.assertEquals(2, result.get("B").size());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testToMultimapHonorsAbstractCollectionAndMapRowTypes() {
+        final ListMultimap<Object, Object> queueRows = dataset.<Object, Object> toMultimap("id", Arrays.asList("name", "age"),
+                (Class<Object>) (Class<?>) Queue.class);
+        final Object queueRow = queueRows.get(1).get(0);
+
+        assertTrue(queueRow instanceof Queue);
+        assertEquals(Arrays.asList("Alice", 25), new ArrayList<>((Queue<?>) queueRow));
+
+        final ListMultimap<Object, Object> sortedMapRows = dataset.<Object, Object> toMultimap("id", Arrays.asList("name", "age"),
+                (Class<Object>) (Class<?>) SortedMap.class);
+        final Object sortedMapRow = sortedMapRows.get(1).get(0);
+
+        assertTrue(sortedMapRow instanceof SortedMap);
+        assertEquals(25, ((SortedMap<?, ?>) sortedMapRow).get("age"));
+        assertEquals("Alice", ((SortedMap<?, ?>) sortedMapRow).get("name"));
     }
 
     @Test
@@ -6033,6 +6152,32 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testInnerJoinGeneratesUniqueNamesForChainedColumnCollisions() {
+        final RowDataset left = new RowDataset(new ArrayList<>(Arrays.asList("id", "id_2")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)), new ArrayList<>(Arrays.asList("left")))));
+        final RowDataset right = new RowDataset(new ArrayList<>(Arrays.asList("id", "id_2")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)), new ArrayList<>(Arrays.asList("right")))));
+
+        final Dataset joined = left.innerJoin(right, "id", "id");
+
+        assertEquals(Arrays.asList("id", "id_2", "id_3", "id_2_2"), joined.columnNames());
+        assertEquals(1, joined.size());
+        assertEquals((Object) 1, joined.get(0, joined.getColumnIndex("id_3")));
+        assertEquals("right", joined.get(0, joined.getColumnIndex("id_2_2")));
+    }
+
+    @Test
+    public void testJoinValidatesNewColumnArgumentsBeforeLookingForMatches() {
+        final RowDataset rightWithoutMatches = new RowDataset(new ArrayList<>(Arrays.asList("id")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(100)))));
+        final Map<String, String> onColumns = N.asMap("id", "id");
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.innerJoin(rightWithoutMatches, onColumns, "joined", String.class));
+        assertThrows(IllegalArgumentException.class, () -> dataset.innerJoin(rightWithoutMatches, onColumns, "", Object[].class));
+        assertThrows(IllegalArgumentException.class, () -> dataset.innerJoin(rightWithoutMatches, onColumns, "joined", null));
+    }
+
+    @Test
     public void testInnerJoinMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
         List<String> rightColumns = N.toList("city", "age", "salary");
@@ -7112,6 +7257,34 @@ public class RowDatasetTest extends TestBase {
                 .skip(2)
                 .toList();
         assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testRowStreamOptimizedCountAndToArrayExhaustIterators() throws ReflectiveOperationException {
+        final RowDataset ds = createThreeRowScoreDataset();
+
+        final ObjIteratorEx<TestBean> beanRows = iteratorEx(ds.stream(Arrays.asList("name", "age"), TestBean.class));
+        assertNotNull(beanRows.next());
+        assertEquals(2, beanRows.count());
+        assertFalse(beanRows.hasNext());
+
+        final ObjIteratorEx<String> mappedRows = iteratorEx(
+                ds.stream(Arrays.asList("name"), (int rowIndex, DisposableObjArray row) -> rowIndex + ":" + row.get(0)));
+        assertEquals(3, mappedRows.count());
+        assertFalse(mappedRows.hasNext());
+
+        final ObjIteratorEx<String> pairRows = iteratorEx(ds.stream(Tuple.of("name", "age"), (BiFunction<String, Integer, String>) (name, age) -> name + age));
+        assertEquals(3, pairRows.count());
+        assertFalse(pairRows.hasNext());
+
+        final ObjIteratorEx<String> tripleRows = iteratorEx(
+                ds.stream(Tuple.of("id", "name", "age"), (TriFunction<Integer, String, Integer, String>) (id, name, age) -> id + name + age));
+        assertEquals(3, tripleRows.count());
+        assertFalse(tripleRows.hasNext());
+
+        final ObjIteratorEx<TestBean> arrayRows = iteratorEx(ds.stream(Arrays.asList("name", "age"), TestBean.class));
+        assertEquals(3, arrayRows.toArray(new TestBean[0]).length);
+        assertFalse(arrayRows.hasNext());
     }
 
     @Test

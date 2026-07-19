@@ -1,5 +1,7 @@
 package com.landawn.abacus.pool;
 
+import java.lang.reflect.Field;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -229,6 +231,20 @@ public class ActivityPrintTest extends TestBase {
     }
 
     @Test
+    public void testUpdateAccessCountSaturatesInsteadOfOverflowing() throws Exception {
+        final ActivityPrint print = new ActivityPrint(10000, 5000);
+        final Field accessCount = ActivityPrint.class.getDeclaredField("accessCount");
+        accessCount.setAccessible(true);
+        accessCount.setInt(print, Integer.MAX_VALUE - 1);
+
+        print.updateAccessCount();
+        assertEquals(Integer.MAX_VALUE, print.getAccessCount());
+
+        print.updateAccessCount();
+        assertEquals(Integer.MAX_VALUE, print.getAccessCount());
+    }
+
+    @Test
     public void testGetExpirationTime() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
@@ -258,6 +274,14 @@ public class ActivityPrintTest extends TestBase {
     }
 
     @Test
+    public void testGetExpirationTimeBeforeEpochDoesNotFalseSaturate() {
+        ActivityPrint print = new ActivityPrint(10, 5000);
+        print.setCreatedTime(-1);
+
+        assertEquals(9, print.getExpirationTime());
+    }
+
+    @Test
     public void testIsExpiredInitially() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
@@ -268,6 +292,14 @@ public class ActivityPrintTest extends TestBase {
     public void testIsExpiredWithOldCreatedTime() {
         ActivityPrint print = new ActivityPrint(1000, 5000);
         print.setCreatedTime(System.currentTimeMillis() - 2000);
+
+        assertTrue(print.isExpired());
+    }
+
+    @Test
+    public void testIsExpiredHandlesElapsedTimeOverflow() {
+        ActivityPrint print = new ActivityPrint(1, Long.MAX_VALUE);
+        print.setCreatedTime(Long.MIN_VALUE);
 
         assertTrue(print.isExpired());
     }

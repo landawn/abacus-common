@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 
 /**
  * General File System utilities for checking disk space.
@@ -287,7 +288,7 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free disk space in bytes
-     * @throws IOException if an error occurs
+     * @throws IOException if an error occurs or the command exceeds a positive {@code timeout}
      */
     long freeSpaceWindows(String path, final long timeout) throws IOException {
         path = FilenameUtil.normalize(path, false);
@@ -469,7 +470,7 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return a list of output lines from the executed command
-     * @throws IOException if an error occurs
+     * @throws IOException if an error occurs or the command exceeds a positive {@code timeout}
      */
     List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout) throws IOException {
 
@@ -478,20 +479,36 @@ final class FileSystemUtil {
         InputStream in = null;
         OutputStream out = null;
         InputStream err = null;
-        BufferedReader inr = null;
-        Thread monitor = null;
+        Thread outputGobbler = null;
+        Thread errorGobbler = null;
         try { //NOSONAR
-
-            monitor = ThreadMonitor.start(timeout);
-
             proc = openProcess(cmdAttrs);
             in = proc.getInputStream();
             out = proc.getOutputStream();
             err = proc.getErrorStream();
 
-            // Consume stderr in a separate thread to prevent deadlock when the error stream buffer fills up
+            // Both pipes must be drained while the process runs; otherwise a full native pipe can
+            // block the process before waitFor observes its completion.
+            final InputStream outputStream = in;
+            final IOException[] outputFailure = new IOException[1];
+            outputGobbler = new Thread(() -> {
+                try (BufferedReader reader = new BufferedReader(IOUtil.newInputStreamReader(outputStream, Charset.defaultCharset()))) {
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        if (lines.size() < max) {
+                            lines.add(line.toLowerCase(Locale.ENGLISH).trim());
+                        }
+                    }
+                } catch (final IOException e) {
+                    outputFailure[0] = e;
+                }
+            }, FileSystemUtil.class.getSimpleName() + "-stdout");
+            outputGobbler.setDaemon(true);
+            outputGobbler.start();
+
             final InputStream errStream = err;
-            final Thread errGobbler = new Thread(() -> {
+            errorGobbler = new Thread(() -> {
                 try {
                     final byte[] buf = new byte[1024];
                     while (errStream.read(buf) != -1) { //NOSONAR
@@ -500,20 +517,28 @@ final class FileSystemUtil {
                 } catch (final IOException ignored) {
                     // ignore
                 }
-            });
-            errGobbler.setDaemon(true);
-            errGobbler.start();
+            }, FileSystemUtil.class.getSimpleName() + "-stderr");
+            errorGobbler.setDaemon(true);
+            errorGobbler.start();
 
-            // default charset is most likely appropriate here
-            inr = new BufferedReader(IOUtil.newInputStreamReader(in, Charset.defaultCharset()));
-            String line = inr.readLine();
-            while (line != null && lines.size() < max) {
-                line = line.toLowerCase(Locale.ENGLISH).trim();
-                lines.add(line);
-                line = inr.readLine();
+            final boolean finished;
+            if (timeout > 0) {
+                finished = proc.waitFor(timeout, TimeUnit.MILLISECONDS);
+            } else {
+                proc.waitFor();
+                finished = true;
             }
 
-            proc.waitFor();
+            if (!finished) {
+                throw new IOException("Command line timed out after " + timeout + " ms for command " + Arrays.asList(cmdAttrs));
+            }
+
+            outputGobbler.join();
+            errorGobbler.join();
+
+            if (outputFailure[0] != null) {
+                throw outputFailure[0];
+            }
 
             if (proc.exitValue() != 0) {
                 // os command problem, throw exception
@@ -529,13 +554,23 @@ final class FileSystemUtil {
             Thread.currentThread().interrupt();
             throw new IOException("Command line threw an InterruptedException " + "for command " + Arrays.asList(cmdAttrs) + " timeout=" + timeout, ex);
         } finally {
-            ThreadMonitor.stop(monitor);
+            if (proc != null) {
+                if (proc.isAlive()) {
+                    proc.destroyForcibly();
+                } else {
+                    proc.destroy();
+                }
+            }
+            // On Windows, closing a process pipe while another thread is blocked in a read can
+            // itself block. Terminate the process first so its native pipe endpoints are closed.
             IOUtil.closeQuietly(in);
             IOUtil.closeQuietly(out);
             IOUtil.closeQuietly(err);
-            IOUtil.closeQuietly(inr);
-            if (proc != null) {
-                proc.destroy();
+            if (outputGobbler != null && outputGobbler.isAlive()) {
+                outputGobbler.interrupt();
+            }
+            if (errorGobbler != null && errorGobbler.isAlive()) {
+                errorGobbler.interrupt();
             }
         }
     }

@@ -42,6 +42,7 @@ import java.io.OutputStream;
 public final class SnappyOutputStream extends OutputStream {
 
     private final org.xerial.snappy.SnappyOutputStream out;
+    private final OutputStream underlying;
 
     /**
      * Creates a new SnappyOutputStream that compresses data written to the specified output stream.
@@ -52,9 +53,12 @@ public final class SnappyOutputStream extends OutputStream {
      * OutputStream compressed = new SnappyOutputStream(new FileOutputStream("data.snappy"));
      * }</pre>
      *
-     * @param os the underlying output stream to write compressed data to
+     * @param os the underlying output stream to write compressed data to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
     public SnappyOutputStream(final OutputStream os) {
+        N.checkArgNotNull(os, "os");
+        underlying = os;
         out = new org.xerial.snappy.SnappyOutputStream(os);
     }
 
@@ -69,10 +73,20 @@ public final class SnappyOutputStream extends OutputStream {
      * OutputStream compressed = new SnappyOutputStream(new FileOutputStream("large.snappy"), 65536);
      * }</pre>
      *
-     * @param os the underlying output stream to write compressed data to
-     * @param bufferSize the size of the compression buffer in bytes
+     * @param os the underlying output stream to write compressed data to; must not be {@code null}
+     * @param bufferSize the size of the compression buffer in bytes, from 1 KiB through 512 MiB inclusive
+     * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code bufferSize} is outside
+     *         the supported range
      */
     public SnappyOutputStream(final OutputStream os, final int bufferSize) {
+        N.checkArgNotNull(os, "os");
+
+        if (bufferSize < org.xerial.snappy.SnappyOutputStream.MIN_BLOCK_SIZE || bufferSize > org.xerial.snappy.SnappyOutputStream.MAX_BLOCK_SIZE) {
+            throw new IllegalArgumentException("bufferSize must be between " + org.xerial.snappy.SnappyOutputStream.MIN_BLOCK_SIZE + " and "
+                    + org.xerial.snappy.SnappyOutputStream.MAX_BLOCK_SIZE + " bytes: " + bufferSize);
+        }
+
+        underlying = os;
         out = new org.xerial.snappy.SnappyOutputStream(os, bufferSize);
     }
 
@@ -187,10 +201,32 @@ public final class SnappyOutputStream extends OutputStream {
      * }
      * }</pre>
      *
+     * <p>If writing the final compressed block fails, this method still attempts to close the
+     * underlying stream. A cleanup failure is attached to the primary failure as a suppressed
+     * exception.</p>
+     *
      * @throws IOException if an I/O error occurs during closing
      */
     @Override
     public void close() throws IOException {
-        out.close();
+        try {
+            out.close();
+        } catch (final IOException e) {
+            closeUnderlyingAfterFailure(e);
+            throw e;
+        } catch (final RuntimeException | Error e) {
+            closeUnderlyingAfterFailure(e);
+            throw e;
+        }
+    }
+
+    private void closeUnderlyingAfterFailure(final Throwable primary) {
+        try {
+            underlying.close();
+        } catch (final IOException | RuntimeException | Error cleanupFailure) {
+            if (cleanupFailure != primary) {
+                primary.addSuppressed(cleanupFailure);
+            }
+        }
     }
 }

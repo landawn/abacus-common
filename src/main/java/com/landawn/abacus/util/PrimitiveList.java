@@ -17,6 +17,7 @@
 package com.landawn.abacus.util;
 
 import java.io.Serial;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -1590,6 +1591,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance of the desired type with the given initial capacity
      * @return a Collection containing elements from the specified range in the same order
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      * @throws RuntimeException if the supplier throws an exception during Collection creation
      */
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
@@ -1656,6 +1658,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing all elements from this primitive list with their occurrence counts
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
     public Multiset<B> toMultiset(final IntFunction<Multiset<B>> supplier) {
@@ -1731,6 +1734,60 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
         if (index < 0 || index >= size()) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size());
         }
+    }
+
+    /**
+     * Compacts a primitive backing array in place by removing the specified logical indices.
+     * Duplicate and unsorted indices are supported. All indices are validated before the array
+     * is modified, so an invalid request leaves the list unchanged.
+     *
+     * @param elementData a primitive backing array
+     * @param size the logical number of elements in the array
+     * @param indices the logical indices to remove
+     * @return the new logical size
+     * @throws NullPointerException if {@code elementData} or {@code indices} is {@code null}
+     * @throws IndexOutOfBoundsException if any index is outside {@code [0, size)}
+     */
+    protected static int compactAfterRemovingIndices(final Object elementData, final int size, final int[] indices) {
+        N.requireNonNull(elementData, "elementData");
+        N.requireNonNull(indices, "indices");
+
+        if (indices.length == 0) {
+            return size;
+        }
+
+        final int[] sortedIndices = indices.clone();
+        Arrays.sort(sortedIndices);
+        N.checkElementIndex(sortedIndices[0], size);
+        N.checkElementIndex(sortedIndices[sortedIndices.length - 1], size);
+
+        int sourceStart = 0;
+        int destinationStart = 0;
+        int previousIndex = -1;
+
+        for (final int index : sortedIndices) {
+            if (index == previousIndex) {
+                continue;
+            }
+
+            final int length = index - sourceStart;
+
+            if (length > 0) {
+                System.arraycopy(elementData, sourceStart, elementData, destinationStart, length);
+                destinationStart += length;
+            }
+
+            sourceStart = index + 1;
+            previousIndex = index;
+        }
+
+        if (sourceStart < size) {
+            final int length = size - sourceStart;
+            System.arraycopy(elementData, sourceStart, elementData, destinationStart, length);
+            destinationStart += length;
+        }
+
+        return destinationStart;
     }
 
     /**

@@ -61,7 +61,7 @@ import com.landawn.abacus.util.u.Optional;
  *   </tr>
  *   <tr>
  *     <td>State model</td>
- *     <td>Single slot: always "present" (it may contain {@code null} or a non-null value, but
+ *     <td>Single slot: always "present" (it may contain {@code null} or a {@code non-null} value, but
  *         the holder itself always exists). No notion of "absent."</td>
  *     <td>Tri-state: {@code absent} | {@code present(null)} | {@code present(non-null)} —
  *         use {@link Nullable#isPresent()} together with {@link Nullable#isNull()} /
@@ -71,13 +71,14 @@ import com.landawn.abacus.util.u.Optional;
  *     <td>Thread visibility</td>
  *     <td>{@code volatile} field — single reads/writes are visible across threads, but
  *         compound operations are <em>not</em> atomic. Use {@link java.util.concurrent.atomic.AtomicReference}
- *         for true CAS semantics.</td>
+ *         for {@code true} CAS semantics.</td>
  *     <td>Not applicable — instances are immutable and freely shareable.</td>
  *   </tr>
  *   <tr>
  *     <td>Hash/equals stability</td>
  *     <td>Hash code changes when the value is mutated — unsafe as a hash-table key while mutating</td>
- *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
+ *     <td>The wrapper state is fixed, but hash stability still requires the contained value's
+ *         {@code equals}/{@code hashCode} behavior to remain stable</td>
  *   </tr>
  *   <tr>
  *     <td>API style</td>
@@ -283,6 +284,7 @@ public final class Holder<T> implements Mutable {
      * @param updateFunction the function that takes the current value and returns a new value;
      *                       must not be {@code null}.
      * @return the previous value held by this Holder before the update, may be {@code null}.
+     * @throws NullPointerException if {@code updateFunction} is {@code null}.
      * @throws E if the update function throws an exception.
      */
     public <E extends Exception> T getAndUpdate(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
@@ -311,6 +313,7 @@ public final class Holder<T> implements Mutable {
      * @param updateFunction the function that takes the current value and returns a new value;
      *                       must not be {@code null}.
      * @return the new value held by this Holder after the update, may be {@code null}.
+     * @throws NullPointerException if {@code updateFunction} is {@code null}.
      * @throws E if the update function throws an exception.
      */
     public <E extends Exception> T updateAndGet(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
@@ -342,6 +345,7 @@ public final class Holder<T> implements Mutable {
      * @param predicate the predicate that tests the current value, must not be {@code null}.
      * @param newValue the new value to set if the predicate returns {@code true}, may be {@code null}.
      * @return {@code true} if the value was updated, {@code false} otherwise.
+     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> boolean setIf(final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
@@ -352,35 +356,6 @@ public final class Holder<T> implements Mutable {
 
         return false;
     }
-
-    //    /**
-    //     * Sets the value to the specified new value if the given predicate returns {@code true}
-    //     * when tested with both the current value and the new value. If the predicate returns
-    //     * {@code false}, the value remains unchanged.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * Holder<Integer> holder = Holder.of(5);
-    //     * boolean updated = holder.setIf((current, newVal) -> current != null && newVal > current, 10);
-    //     * // returns true, holder now contains 10
-    //     * }</pre>
-    //     *
-    //     * @param <E> the type of exception that the predicate may throw.
-    //     * @param newValue the new value to set if the predicate returns {@code true}, may be {@code null}.
-    //     * @param predicate the predicate that tests both the current value (first parameter) and the new value (second parameter), must not be {@code null}.
-    //     * @return {@code true} if the value was updated, {@code false} otherwise.
-    //     * @throws E if the predicate throws an exception.
-    //     * @deprecated use {@link #setIf(Throwables.Predicate, Object)} instead.
-    //     */
-    //    @Deprecated
-    //    public <E extends Exception> boolean setIf(final Throwables.BiPredicate<? super T, ? super T, E> predicate, final T newValue) throws E {
-    //        if (predicate.test(value, newValue)) {
-    //            value = newValue;
-    //            return true;
-    //        }
-    //
-    //        return false;
-    //    }
 
     /**
      * Checks whether the value held by this Holder is {@code null}.
@@ -497,6 +472,7 @@ public final class Holder<T> implements Mutable {
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed with the value; must not be {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}.
      * @throws E if the action throws an exception.
      * @deprecated Use {@link #ifNotNull(Throwables.Consumer)} for null-conditional execution,
      *             or access the value directly via {@link #value()} for unconditional use.
@@ -548,6 +524,7 @@ public final class Holder<T> implements Mutable {
      * @param <E> the type of exception that the mapping function may throw.
      * @param mapper the mapping function to apply to the value; must not be {@code null}.
      * @return the result of applying the mapping function to the value, may be {@code null}.
+     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapping function throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
@@ -649,6 +626,7 @@ public final class Holder<T> implements Mutable {
      * @param predicate the predicate to test the value; must not be {@code null}.
      * @return a {@code Nullable} containing the value if the predicate returns {@code true},
      *         otherwise an empty {@code Nullable}.
+     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E {
@@ -924,6 +902,7 @@ public final class Holder<T> implements Mutable {
      *                          {@code null}; must not be {@code null}.
      * @return the non-{@code null} value held by this Holder.
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
+     * @throws NullPointerException if the supplier returns {@code null} while the held value is {@code null}.
      * @throws E if the value is {@code null}.
      */
     public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {

@@ -138,7 +138,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * @throws IllegalArgumentException if {@code value} is {@code null}
      */
     @Override
-    public void accept(final BigDecimal value) {
+    public void accept(final BigDecimal value) throws IllegalArgumentException {
         N.checkArgNotNull(value, cs.value);
 
         ++count;

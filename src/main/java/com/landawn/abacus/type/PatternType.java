@@ -16,8 +16,6 @@ package com.landawn.abacus.type;
 
 import java.util.regex.Pattern;
 
-import com.landawn.abacus.util.Strings;
-
 /**
  * Type handler for java.util.regex.Pattern objects, providing conversion between Pattern instances
  * and their string representations. This type allows for seamless serialization and deserialization
@@ -83,19 +81,22 @@ public class PatternType extends AbstractType<Pattern> {
     /**
      * Parses a string representation to create a Pattern instance.
      * Compiles the string into a Pattern using Pattern.compile().
-     * Returns {@code null} if the input string is {@code null} or empty.
+     * Returns {@code null} only if the input string is {@code null}. An empty string is a
+     * valid regular expression and is therefore compiled to a pattern that matches the empty
+     * string. Preserving that distinction also makes an empty {@link Pattern} round-trip through
+     * {@link #stringOf(Pattern)}.
      *
      * <p>This method parses the pattern text produced by {@code stringOf}. Flags are only preserved when represented
      * in the pattern text itself, such as inline flags.</p>
      *
      * @param str the regular expression string to compile
-     * @return a compiled Pattern object, or {@code null} if the input is {@code null} or empty
+     * @return a compiled Pattern object, or {@code null} if the input is {@code null}
      * @throws java.util.regex.PatternSyntaxException if {@code str} is not a valid regular expression
      * @see #valueOf(Object)
      * @see #stringOf(Pattern)
      */
     @Override
     public Pattern valueOf(final String str) {
-        return (Strings.isEmpty(str)) ? null : Pattern.compile(str);
+        return str == null ? null : Pattern.compile(str);
     }
 }

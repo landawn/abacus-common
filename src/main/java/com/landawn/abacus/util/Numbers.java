@@ -1309,7 +1309,7 @@ public final class Numbers {
      *
      * @param x the Integer value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
-     * @return a string representation of the Integer value formatted according to the provided decimal format,
+     * @return
      *         or {@code null} if {@code x} is {@code null}
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(int, String)
@@ -1380,7 +1380,7 @@ public final class Numbers {
      *
      * @param x the Long value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
-     * @return a string representation of the Long value formatted according to the provided decimal format,
+     * @return
      *         or {@code null} if {@code x} is {@code null}
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(long, String)
@@ -1440,11 +1440,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105f, "0.00");      // returns "12.10"
-     * Numbers.format(12.105f, "#.##");      // returns "12.1"
-     * Numbers.format((Float) null, "0.00"); // returns null
-     * Numbers.format(0.121f, "#.##%");      // returns "12.1%"
-     * Numbers.format(0.12156f, "#.##%");    // returns "12.16%"
+     * Numbers.format(12.105f, "0.00");        // returns "12.10"
+     * Numbers.format(12.105f, "#.##");        // returns "12.1"
+     * Numbers.format((Float) null, "0.00");   // returns null
+     * Numbers.format(0.121f, "#.##%");        // returns "12.1%"
+     * Numbers.format(0.12156f, "#.##%");      // returns "12.16%"
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
@@ -1453,7 +1453,7 @@ public final class Numbers {
      *
      * @param x the Float value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
-     * @return a string representation of the Float value formatted according to the provided decimal format,
+     * @return
      *         or {@code null} if {@code x} is {@code null}.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(float, String)
@@ -1516,11 +1516,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105, "0.00");        // returns "12.11"
-     * Numbers.format(12.105, "#.##");        // returns "12.11"
-     * Numbers.format((Double) null, "0.00"); // returns null
-     * Numbers.format(0.121, "#.##%");        // returns "12.1%"
-     * Numbers.format(0.12156, "#.##%");      // returns "12.16%"
+     * Numbers.format(12.105, "0.00");          // returns "12.11"
+     * Numbers.format(12.105, "#.##");          // returns "12.11"
+     * Numbers.format((Double) null, "0.00");   // returns null
+     * Numbers.format(0.121, "#.##%");          // returns "12.1%"
+     * Numbers.format(0.12156, "#.##%");        // returns "12.16%"
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
@@ -1529,7 +1529,7 @@ public final class Numbers {
      *
      * @param x the Double value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
-     * @return a string representation of the Double value formatted according to the provided decimal format,
+     * @return
      *         or {@code null} if {@code x} is {@code null}.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(double, String)
@@ -2279,11 +2279,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toInt("12345");        // returns 12345
-     * Numbers.toInt("-98765");       // returns -98765
-     * Numbers.toInt("2147483647");   // returns 2147483647
-     * Numbers.toInt((String) null);  // returns 0
-     * Numbers.toInt("");             // returns 0
+     * Numbers.toInt("12345");         // returns 12345
+     * Numbers.toInt("-98765");        // returns -98765
+     * Numbers.toInt("2147483647");    // returns 2147483647
+     * Numbers.toInt((String) null);   // returns 0
+     * Numbers.toInt("");              // returns 0
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2345,13 +2345,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toInt("12345", 0);        // returns 12345
-     * Numbers.toInt("-98765", 0);       // returns -98765
-     * Numbers.toInt("2147483647", 0);   // returns 2147483647
-     * Numbers.toInt((String) null, 1);  // returns 1
-     * Numbers.toInt("", 1);             // returns 1
-     * Numbers.toInt("abc", 0);          // throws NumberFormatException
-     * Numbers.toInt("2147483648", 0);   // throws ArithmeticException (out of range)
+     * Numbers.toInt("12345", 0);         // returns 12345
+     * Numbers.toInt("-98765", 0);        // returns -98765
+     * Numbers.toInt("2147483647", 0);    // returns 2147483647
+     * Numbers.toInt((String) null, 1);   // returns 1
+     * Numbers.toInt("", 1);              // returns 1
+     * Numbers.toInt("abc", 0);           // throws NumberFormatException
+     * Numbers.toInt("2147483648", 0);    // throws ArithmeticException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2849,8 +2849,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toFloat((BigDecimal) null);          // returns 0.0f
-     * Numbers.toFloat(BigDecimal.valueOf(8.5));    // returns 8.5f
+     * Numbers.toFloat((BigDecimal) null);         // returns 0.0f
+     * Numbers.toFloat(BigDecimal.valueOf(8.5));   // returns 8.5f
      * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
@@ -2871,8 +2871,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toFloat((BigDecimal) null, 1.1f);          // returns 1.1f
-     * Numbers.toFloat(BigDecimal.valueOf(8.5), 1.1f);    // returns 8.5f
+     * Numbers.toFloat((BigDecimal) null, 1.1f);         // returns 1.1f
+     * Numbers.toFloat(BigDecimal.valueOf(8.5), 1.1f);   // returns 8.5f
      * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
@@ -3092,7 +3092,7 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"));   // returns 123.46
      * Numbers.toScaledBigDecimal(new BigDecimal("123.454"));   // returns 123.45
      * Numbers.toScaledBigDecimal(new BigDecimal("123.455"));   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal((BigDecimal) null);                        // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((BigDecimal) null);           // returns BigDecimal.ZERO
      * }</pre>
      *
      * <p><b>Note:</b> This overload defaults to {@link java.math.RoundingMode#HALF_EVEN}. To choose a
@@ -3117,7 +3117,7 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"), 2, RoundingMode.HALF_UP);   // returns 123.46
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"), 1, RoundingMode.DOWN);      // returns 123.4
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"), 3, RoundingMode.UP);        // returns 123.456
-     * Numbers.toScaledBigDecimal((BigDecimal) null, 2, RoundingMode.HALF_EVEN);                      // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((BigDecimal) null, 2, RoundingMode.HALF_EVEN);         // returns BigDecimal.ZERO
      * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
@@ -3126,7 +3126,7 @@ public final class Numbers {
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      */
-    public static BigDecimal toScaledBigDecimal(final BigDecimal value, final int scale, final RoundingMode roundingMode) {
+    public static BigDecimal toScaledBigDecimal(final BigDecimal value, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
 
         if (value == null) {
@@ -3144,10 +3144,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toScaledBigDecimal(123.456f);   // returns 123.46
-     * Numbers.toScaledBigDecimal(123.454f);   // returns 123.45
-     * Numbers.toScaledBigDecimal(123.455f);   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal((Float) null);       // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal(123.456f);       // returns 123.46
+     * Numbers.toScaledBigDecimal(123.454f);       // returns 123.45
+     * Numbers.toScaledBigDecimal(123.455f);       // returns 123.46 (HALF_EVEN)
+     * Numbers.toScaledBigDecimal((Float) null);   // returns BigDecimal.ZERO
      * }</pre>
      *
      * <p>The {@code Float} is converted via {@link Float#toString(float)}, preserving the float's
@@ -3172,10 +3172,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toScaledBigDecimal(123.456f, 2, RoundingMode.HALF_UP);   // returns 123.46
-     * Numbers.toScaledBigDecimal(123.456f, 1, RoundingMode.DOWN);      // returns 123.4
-     * Numbers.toScaledBigDecimal(123.456f, 3, RoundingMode.UP);        // returns 123.456
-     * Numbers.toScaledBigDecimal((Float) null, 2, RoundingMode.HALF_EVEN);     // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal(123.456f, 2, RoundingMode.HALF_UP);         // returns 123.46
+     * Numbers.toScaledBigDecimal(123.456f, 1, RoundingMode.DOWN);            // returns 123.4
+     * Numbers.toScaledBigDecimal(123.456f, 3, RoundingMode.UP);              // returns 123.456
+     * Numbers.toScaledBigDecimal((Float) null, 2, RoundingMode.HALF_EVEN);   // returns BigDecimal.ZERO
      * }</pre>
      *
      * <p>The {@code Float} is converted via {@link Float#toString(float)}, preserving the float's decimal
@@ -3189,7 +3189,7 @@ public final class Numbers {
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      */
-    public static BigDecimal toScaledBigDecimal(final Float value, final int scale, final RoundingMode roundingMode) {
+    public static BigDecimal toScaledBigDecimal(final Float value, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
 
         if (value == null) {
@@ -3209,10 +3209,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toScaledBigDecimal(123.456);   // returns 123.46
-     * Numbers.toScaledBigDecimal(123.454);   // returns 123.45
-     * Numbers.toScaledBigDecimal(123.455);   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal((Double) null);      // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal(123.456);         // returns 123.46
+     * Numbers.toScaledBigDecimal(123.454);         // returns 123.45
+     * Numbers.toScaledBigDecimal(123.455);         // returns 123.46 (HALF_EVEN)
+     * Numbers.toScaledBigDecimal((Double) null);   // returns BigDecimal.ZERO
      * }</pre>
      *
      * <p><b>Note:</b> This overload defaults to {@link java.math.RoundingMode#HALF_EVEN}. To choose a
@@ -3237,10 +3237,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toScaledBigDecimal(123.456, 2, RoundingMode.HALF_UP);   // returns 123.46
-     * Numbers.toScaledBigDecimal(123.456, 1, RoundingMode.DOWN);      // returns 123.4
-     * Numbers.toScaledBigDecimal(123.456, 3, RoundingMode.UP);        // returns 123.456
-     * Numbers.toScaledBigDecimal((Double) null, 2, RoundingMode.HALF_EVEN);    // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal(123.456, 2, RoundingMode.HALF_UP);           // returns 123.46
+     * Numbers.toScaledBigDecimal(123.456, 1, RoundingMode.DOWN);              // returns 123.4
+     * Numbers.toScaledBigDecimal(123.456, 3, RoundingMode.UP);                // returns 123.456
+     * Numbers.toScaledBigDecimal((Double) null, 2, RoundingMode.HALF_EVEN);   // returns BigDecimal.ZERO
      * }</pre>
      *
      * <p>The {@code Double} is converted via {@link java.math.BigDecimal#valueOf(double)}, i.e. the double's
@@ -3252,7 +3252,7 @@ public final class Numbers {
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      */
-    public static BigDecimal toScaledBigDecimal(final Double value, final int scale, final RoundingMode roundingMode) {
+    public static BigDecimal toScaledBigDecimal(final Double value, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
 
         if (value == null) {
@@ -3270,10 +3270,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toScaledBigDecimal("123.456");   // returns 123.46
-     * Numbers.toScaledBigDecimal("123.454");   // returns 123.45
-     * Numbers.toScaledBigDecimal("123.455");   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal((String) null);        // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal("123.456");       // returns 123.46
+     * Numbers.toScaledBigDecimal("123.454");       // returns 123.45
+     * Numbers.toScaledBigDecimal("123.455");       // returns 123.46 (HALF_EVEN)
+     * Numbers.toScaledBigDecimal((String) null);   // returns BigDecimal.ZERO
      * }</pre>
      *
      * <p><b>Note:</b> This overload defaults to {@link java.math.RoundingMode#HALF_EVEN}. To choose a
@@ -3296,10 +3296,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toScaledBigDecimal("123.456", 2, RoundingMode.HALF_UP);   // returns 123.46
-     * Numbers.toScaledBigDecimal("123.456", 1, RoundingMode.DOWN);      // returns 123.4
-     * Numbers.toScaledBigDecimal("123.456", 3, RoundingMode.UP);        // returns 123.456
-     * Numbers.toScaledBigDecimal((String) null, 2, RoundingMode.HALF_EVEN);      // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal("123.456", 2, RoundingMode.HALF_UP);         // returns 123.46
+     * Numbers.toScaledBigDecimal("123.456", 1, RoundingMode.DOWN);            // returns 123.4
+     * Numbers.toScaledBigDecimal("123.456", 3, RoundingMode.UP);              // returns 123.456
+     * Numbers.toScaledBigDecimal((String) null, 2, RoundingMode.HALF_EVEN);   // returns BigDecimal.ZERO
      * }</pre>
      *
      * @param value the {@code String} to convert, may be {@code null}.
@@ -3309,7 +3309,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      * @throws NumberFormatException if {@code value} is empty/blank or not a valid number
      */
-    public static BigDecimal toScaledBigDecimal(final String value, final int scale, final RoundingMode roundingMode) {
+    public static BigDecimal toScaledBigDecimal(final String value, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
 
         if (value == null) {
@@ -4337,13 +4337,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isCreatable("123");       // returns true
-     * Numbers.isCreatable("123.45");    // returns true
-     * Numbers.isCreatable("0xFF");      // returns true   (hexadecimal)
-     * Numbers.isCreatable("09");        // returns false  (invalid octal)
-     * Numbers.isCreatable("abc");       // returns false
-     * Numbers.isCreatable(null);        // returns false
-     * Numbers.isCreatable("");          // returns false
+     * Numbers.isCreatable("123");      // returns true
+     * Numbers.isCreatable("123.45");   // returns true
+     * Numbers.isCreatable("0xFF");     // returns true   (hexadecimal)
+     * Numbers.isCreatable("09");       // returns false  (invalid octal)
+     * Numbers.isCreatable("abc");      // returns false
+     * Numbers.isCreatable(null);       // returns false
+     * Numbers.isCreatable("");         // returns false
      * }</pre>
      *
      * <p><b>Comparison of {@code isCreatable}, {@code isParsable} and {@code isDigits}:</b> the three predicates accept
@@ -4962,14 +4962,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log2(8, RoundingMode.DOWN);          // returns 3    (2^3 = 8)
-     * Numbers.log2(16, RoundingMode.DOWN);         // returns 4    (2^4 = 16)
-     * Numbers.log2(10, RoundingMode.DOWN);         // returns 3    (floor(log2(10)))
-     * Numbers.log2(10, RoundingMode.UP);           // returns 4    (ceiling(log2(10)))
-     * Numbers.log2(10, RoundingMode.CEILING);      // returns 4
-     * Numbers.log2(10, RoundingMode.FLOOR);        // returns 3
-     * Numbers.log2(10, RoundingMode.HALF_UP);      // returns 3    (10 < 2^3.5 (~11.3), so rounds down)
-     * Numbers.log2(16, RoundingMode.UNNECESSARY);  // returns 4    (exact power of 2)
+     * Numbers.log2(8, RoundingMode.DOWN);           // returns 3    (2^3 = 8)
+     * Numbers.log2(16, RoundingMode.DOWN);          // returns 4    (2^4 = 16)
+     * Numbers.log2(10, RoundingMode.DOWN);          // returns 3    (floor(log2(10)))
+     * Numbers.log2(10, RoundingMode.UP);            // returns 4    (ceiling(log2(10)))
+     * Numbers.log2(10, RoundingMode.CEILING);       // returns 4
+     * Numbers.log2(10, RoundingMode.FLOOR);         // returns 3
+     * Numbers.log2(10, RoundingMode.HALF_UP);       // returns 3    (10 < 2^3.5 (~11.3), so rounds down)
+     * Numbers.log2(16, RoundingMode.UNNECESSARY);   // returns 4    (exact power of 2)
      * }</pre>
      *
      * @param x the integer value to compute the logarithm of, must be positive
@@ -4985,7 +4985,7 @@ public final class Numbers {
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
-    public static int log2(final int x, final RoundingMode mode) {
+    public static int log2(final int x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         checkPositive("x", x);
 
@@ -5021,12 +5021,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log2(8L, RoundingMode.DOWN);              // returns 3    (2^3 = 8)
-     * Numbers.log2(1024L, RoundingMode.DOWN);           // returns 10   (2^10 = 1024)
-     * Numbers.log2(1000L, RoundingMode.DOWN);           // returns 9    (floor(log2(1000)))
-     * Numbers.log2(1000L, RoundingMode.UP);             // returns 10   (ceiling(log2(1000)))
-     * Numbers.log2(1000L, RoundingMode.HALF_UP);        // returns 10   (1000 > 2^9.5 (~724), so rounds up)
-     * Numbers.log2(1048576L, RoundingMode.UNNECESSARY); // returns 20   (exact power of 2 (2^20))
+     * Numbers.log2(8L, RoundingMode.DOWN);                // returns 3    (2^3 = 8)
+     * Numbers.log2(1024L, RoundingMode.DOWN);             // returns 10   (2^10 = 1024)
+     * Numbers.log2(1000L, RoundingMode.DOWN);             // returns 9    (floor(log2(1000)))
+     * Numbers.log2(1000L, RoundingMode.UP);               // returns 10   (ceiling(log2(1000)))
+     * Numbers.log2(1000L, RoundingMode.HALF_UP);          // returns 10   (1000 > 2^9.5 (~724), so rounds up)
+     * Numbers.log2(1048576L, RoundingMode.UNNECESSARY);   // returns 20   (exact power of 2 (2^20))
      * }</pre>
      *
      * @param x the value to compute the logarithm of, must be positive
@@ -5042,7 +5042,7 @@ public final class Numbers {
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
-    public static int log2(final long x, final RoundingMode mode) {
+    public static int log2(final long x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
@@ -5118,13 +5118,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log2(8.0, RoundingMode.DOWN);          // returns 3    (2^3 = 8)
-     * Numbers.log2(10.0, RoundingMode.DOWN);         // returns 3    (floor(log2(10)))
-     * Numbers.log2(10.0, RoundingMode.UP);           // returns 4    (ceiling(log2(10)))
-     * Numbers.log2(10.0, RoundingMode.FLOOR);        // returns 3
-     * Numbers.log2(10.0, RoundingMode.CEILING);      // returns 4
-     * Numbers.log2(10.0, RoundingMode.HALF_UP);      // returns 3
-     * Numbers.log2(16.0, RoundingMode.UNNECESSARY);  // returns 4    (exact power of 2)
+     * Numbers.log2(8.0, RoundingMode.DOWN);           // returns 3    (2^3 = 8)
+     * Numbers.log2(10.0, RoundingMode.DOWN);          // returns 3    (floor(log2(10)))
+     * Numbers.log2(10.0, RoundingMode.UP);            // returns 4    (ceiling(log2(10)))
+     * Numbers.log2(10.0, RoundingMode.FLOOR);         // returns 3
+     * Numbers.log2(10.0, RoundingMode.CEILING);       // returns 4
+     * Numbers.log2(10.0, RoundingMode.HALF_UP);       // returns 3
+     * Numbers.log2(16.0, RoundingMode.UNNECESSARY);   // returns 4    (exact power of 2)
      * }</pre>
      *
      * @param x the value to compute the logarithm of, must be positive and finite
@@ -5193,8 +5193,8 @@ public final class Numbers {
      * Numbers.log2(bi2, RoundingMode.DOWN);        // returns 10   (2^10 = 1024)
      *
      * BigInteger bi3 = BigInteger.valueOf(1000);
-     * Numbers.log2(bi3, RoundingMode.DOWN);        // returns 9    (floor(log2(1000)))
-     * Numbers.log2(bi3, RoundingMode.UP);          // returns 10   (ceiling(log2(1000)))
+     * Numbers.log2(bi3, RoundingMode.DOWN);   // returns 9    (floor(log2(1000)))
+     * Numbers.log2(bi3, RoundingMode.UP);     // returns 10   (ceiling(log2(1000)))
      *
      * BigInteger large = new BigInteger("2").pow(100);
      * Numbers.log2(large, RoundingMode.DOWN);      // returns 100  (exact power of 2)
@@ -5276,7 +5276,7 @@ public final class Numbers {
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
-    public static int log10(final int x, final RoundingMode mode) {
+    public static int log10(final int x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         checkPositive("x", x);
 
@@ -5323,11 +5323,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log10(100L, RoundingMode.DOWN);               // returns 2    (10^2 = 100)
-     * Numbers.log10(1000000L, RoundingMode.DOWN);           // returns 6    (10^6 = 1000000)
-     * Numbers.log10(999999L, RoundingMode.DOWN);            // returns 5    (floor(log10(999999)))
-     * Numbers.log10(999999L, RoundingMode.UP);              // returns 6    (ceiling(log10(999999)))
-     * Numbers.log10(1000000000L, RoundingMode.UNNECESSARY); // returns 9    (exact power of 10 (10^9))
+     * Numbers.log10(100L, RoundingMode.DOWN);                 // returns 2    (10^2 = 100)
+     * Numbers.log10(1000000L, RoundingMode.DOWN);             // returns 6    (10^6 = 1000000)
+     * Numbers.log10(999999L, RoundingMode.DOWN);              // returns 5    (floor(log10(999999)))
+     * Numbers.log10(999999L, RoundingMode.UP);                // returns 6    (ceiling(log10(999999)))
+     * Numbers.log10(1000000000L, RoundingMode.UNNECESSARY);   // returns 9    (exact power of 10 (10^9))
      * }</pre>
      *
      * @param x the value to compute the logarithm of, must be positive
@@ -5342,7 +5342,7 @@ public final class Numbers {
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
-    public static int log10(final long x, final RoundingMode mode) {
+    public static int log10(final long x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
@@ -5443,7 +5443,7 @@ public final class Numbers {
      * @see RoundingMode
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
-    public static int log10(final BigInteger x, final RoundingMode mode) {
+    public static int log10(final BigInteger x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         checkPositive("x", N.checkArgNotNull(x));
         if (fitsInLong(x)) {
@@ -5529,15 +5529,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.pow(2, 3);    // returns 8
-     * Numbers.pow(3, 4);    // returns 81
-     * Numbers.pow(5, 0);    // returns 1          (any number to power 0 is 1)
-     * Numbers.pow(0, 5);    // returns 0          (0 to any positive power is 0)
-     * Numbers.pow(0, 0);    // returns 1          (by convention)
-     * Numbers.pow(-2, 3);   // returns -8
-     * Numbers.pow(-2, 4);   // returns 16
-     * Numbers.pow(10, 9);   // returns 1000000000
-     * Numbers.pow(10, 10);  // returns 1410065408 (overflows, returns low-order bits)
+     * Numbers.pow(2, 3);     // returns 8
+     * Numbers.pow(3, 4);     // returns 81
+     * Numbers.pow(5, 0);     // returns 1          (any number to power 0 is 1)
+     * Numbers.pow(0, 5);     // returns 0          (0 to any positive power is 0)
+     * Numbers.pow(0, 0);     // returns 1          (by convention)
+     * Numbers.pow(-2, 3);    // returns -8
+     * Numbers.pow(-2, 4);    // returns 16
+     * Numbers.pow(10, 9);    // returns 1000000000
+     * Numbers.pow(10, 10);   // returns 1410065408 (overflows, returns low-order bits)
      * }</pre>
      *
      * @param b the base integer
@@ -5594,15 +5594,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.pow(2L, 3);    // returns 8L
-     * Numbers.pow(3L, 4);    // returns 81L
-     * Numbers.pow(5L, 0);    // returns 1L        (any number to power 0 is 1)
-     * Numbers.pow(0L, 5);    // returns 0L        (0 to any positive power is 0)
-     * Numbers.pow(0L, 0);    // returns 1L        (by convention)
-     * Numbers.pow(-2L, 3);   // returns -8L
-     * Numbers.pow(-2L, 4);   // returns 16L
-     * Numbers.pow(10L, 18);  // returns 1000000000000000000L
-     * Numbers.pow(10L, 19);  // returns -8446744073709551616L (overflows, returns low-order bits)
+     * Numbers.pow(2L, 3);     // returns 8L
+     * Numbers.pow(3L, 4);     // returns 81L
+     * Numbers.pow(5L, 0);     // returns 1L        (any number to power 0 is 1)
+     * Numbers.pow(0L, 5);     // returns 0L        (0 to any positive power is 0)
+     * Numbers.pow(0L, 0);     // returns 1L        (by convention)
+     * Numbers.pow(-2L, 3);    // returns -8L
+     * Numbers.pow(-2L, 4);    // returns 16L
+     * Numbers.pow(10L, 18);   // returns 1000000000000000000L
+     * Numbers.pow(10L, 19);   // returns -8446744073709551616L (overflows, returns low-order bits)
      * }</pre>
      *
      * @param b the base long integer
@@ -5818,14 +5818,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.sqrt(9, RoundingMode.DOWN);          // returns 3    (perfect square)
-     * Numbers.sqrt(10, RoundingMode.DOWN);         // returns 3    (rounds toward zero)
-     * Numbers.sqrt(10, RoundingMode.UP);           // returns 4    (rounds away from zero)
-     * Numbers.sqrt(10, RoundingMode.FLOOR);        // returns 3    (rounds toward negative infinity)
-     * Numbers.sqrt(10, RoundingMode.CEILING);      // returns 4    (rounds toward positive infinity)
-     * Numbers.sqrt(10, RoundingMode.HALF_UP);      // returns 3    (rounds to nearest, ties away from zero)
-     * Numbers.sqrt(11, RoundingMode.HALF_UP);      // returns 3    (11 is closer to 9 than 16)
-     * Numbers.sqrt(16, RoundingMode.UNNECESSARY);  // returns 4    (exact square root required)
+     * Numbers.sqrt(9, RoundingMode.DOWN);           // returns 3    (perfect square)
+     * Numbers.sqrt(10, RoundingMode.DOWN);          // returns 3    (rounds toward zero)
+     * Numbers.sqrt(10, RoundingMode.UP);            // returns 4    (rounds away from zero)
+     * Numbers.sqrt(10, RoundingMode.FLOOR);         // returns 3    (rounds toward negative infinity)
+     * Numbers.sqrt(10, RoundingMode.CEILING);       // returns 4    (rounds toward positive infinity)
+     * Numbers.sqrt(10, RoundingMode.HALF_UP);       // returns 3    (rounds to nearest, ties away from zero)
+     * Numbers.sqrt(11, RoundingMode.HALF_UP);       // returns 3    (11 is closer to 9 than 16)
+     * Numbers.sqrt(16, RoundingMode.UNNECESSARY);   // returns 4    (exact square root required)
      * }</pre>
      *
      * @param x the value to compute the square root of; must be non-negative
@@ -5840,7 +5840,7 @@ public final class Numbers {
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
-    public static int sqrt(final int x, final RoundingMode mode) {
+    public static int sqrt(final int x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         checkNonNegative("x", x);
         final int sqrtFloor = sqrtFloor(x);
@@ -5888,15 +5888,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.sqrt(9L, RoundingMode.DOWN);                   // returns 3L    (perfect square)
-     * Numbers.sqrt(10L, RoundingMode.DOWN);                  // returns 3L    (rounds toward zero)
-     * Numbers.sqrt(10L, RoundingMode.UP);                    // returns 4L    (rounds away from zero)
-     * Numbers.sqrt(10L, RoundingMode.FLOOR);                 // returns 3L    (rounds toward negative infinity)
-     * Numbers.sqrt(10L, RoundingMode.CEILING);               // returns 4L    (rounds toward positive infinity)
-     * Numbers.sqrt(10L, RoundingMode.HALF_UP);               // returns 3L    (rounds to nearest, ties away from zero)
-     * Numbers.sqrt(100000000000L, RoundingMode.DOWN);        // returns 316227L
-     * Numbers.sqrt(100000000000L, RoundingMode.UP);          // returns 316228L
-     * Numbers.sqrt(10000000000L, RoundingMode.UNNECESSARY);  // returns 100000L  (exact square root)
+     * Numbers.sqrt(9L, RoundingMode.DOWN);                    // returns 3L    (perfect square)
+     * Numbers.sqrt(10L, RoundingMode.DOWN);                   // returns 3L    (rounds toward zero)
+     * Numbers.sqrt(10L, RoundingMode.UP);                     // returns 4L    (rounds away from zero)
+     * Numbers.sqrt(10L, RoundingMode.FLOOR);                  // returns 3L    (rounds toward negative infinity)
+     * Numbers.sqrt(10L, RoundingMode.CEILING);                // returns 4L    (rounds toward positive infinity)
+     * Numbers.sqrt(10L, RoundingMode.HALF_UP);                // returns 3L    (rounds to nearest, ties away from zero)
+     * Numbers.sqrt(100000000000L, RoundingMode.DOWN);         // returns 316227L
+     * Numbers.sqrt(100000000000L, RoundingMode.UP);           // returns 316228L
+     * Numbers.sqrt(10000000000L, RoundingMode.UNNECESSARY);   // returns 100000L  (exact square root)
      * }</pre>
      *
      * @param x the value to compute the square root of; must be non-negative
@@ -5909,7 +5909,7 @@ public final class Numbers {
      * @see #sqrt(BigInteger, RoundingMode)
      * @see RoundingMode
      */
-    public static long sqrt(final long x, final RoundingMode mode) {
+    public static long sqrt(final long x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         checkNonNegative("x", x);
 
@@ -5996,7 +5996,7 @@ public final class Numbers {
      * Numbers.sqrt(large, RoundingMode.DOWN);   // returns the rounded-down square root
      * }</pre>
      *
-     * @param x the value to compute the square root of; must be non-null and non-negative
+     * @param x the value to compute the square root of; must be {@code non-null} and non-negative
      * @param mode the rounding mode to apply
      * @return the integer square root of {@code x}, rounded according to the specified mode
      * @throws IllegalArgumentException if {@code x} is {@code null} or negative, or if {@code mode} is {@code null}
@@ -6008,7 +6008,7 @@ public final class Numbers {
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
-    public static BigInteger sqrt(final BigInteger x, final RoundingMode mode) {
+    public static BigInteger sqrt(final BigInteger x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         checkNonNegative("x", N.checkArgNotNull(x));
         if (fitsInLong(x)) {
@@ -6097,14 +6097,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.divide(7, 3, RoundingMode.DOWN);         // returns 2   (rounds toward zero)
-     * Numbers.divide(7, 3, RoundingMode.UP);           // returns 3   (rounds away from zero)
-     * Numbers.divide(7, 3, RoundingMode.FLOOR);        // returns 2   (rounds toward negative infinity)
-     * Numbers.divide(-7, 3, RoundingMode.FLOOR);       // returns -3  (rounds toward negative infinity)
-     * Numbers.divide(7, 3, RoundingMode.CEILING);      // returns 3   (rounds toward positive infinity)
-     * Numbers.divide(7, 2, RoundingMode.HALF_UP);      // returns 4   (rounds to nearest, ties away from zero)
-     * Numbers.divide(8, 3, RoundingMode.HALF_EVEN);    // returns 3   (rounds to nearest, ties to even)
-     * Numbers.divide(9, 3, RoundingMode.UNNECESSARY);  // returns 3   (exact division required)
+     * Numbers.divide(7, 3, RoundingMode.DOWN);          // returns 2   (rounds toward zero)
+     * Numbers.divide(7, 3, RoundingMode.UP);            // returns 3   (rounds away from zero)
+     * Numbers.divide(7, 3, RoundingMode.FLOOR);         // returns 2   (rounds toward negative infinity)
+     * Numbers.divide(-7, 3, RoundingMode.FLOOR);        // returns -3  (rounds toward negative infinity)
+     * Numbers.divide(7, 3, RoundingMode.CEILING);       // returns 3   (rounds toward positive infinity)
+     * Numbers.divide(7, 2, RoundingMode.HALF_UP);       // returns 4   (rounds to nearest, ties away from zero)
+     * Numbers.divide(8, 3, RoundingMode.HALF_EVEN);     // returns 3   (rounds to nearest, ties to even)
+     * Numbers.divide(9, 3, RoundingMode.UNNECESSARY);   // returns 3   (exact division required)
      * }</pre>
      *
      * @param p the dividend
@@ -6188,14 +6188,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.divide(7L, 3L, RoundingMode.DOWN);         // returns 2L   (rounds toward zero)
-     * Numbers.divide(7L, 3L, RoundingMode.UP);           // returns 3L   (rounds away from zero)
-     * Numbers.divide(7L, 3L, RoundingMode.FLOOR);        // returns 2L   (rounds toward negative infinity)
-     * Numbers.divide(-7L, 3L, RoundingMode.FLOOR);       // returns -3L  (rounds toward negative infinity)
-     * Numbers.divide(7L, 3L, RoundingMode.CEILING);      // returns 3L   (rounds toward positive infinity)
-     * Numbers.divide(7L, 2L, RoundingMode.HALF_UP);      // returns 4L   (rounds to nearest, ties away from zero)
-     * Numbers.divide(8L, 3L, RoundingMode.HALF_EVEN);    // returns 3L   (rounds to nearest, ties to even)
-     * Numbers.divide(9L, 3L, RoundingMode.UNNECESSARY);  // returns 3L   (exact division required)
+     * Numbers.divide(7L, 3L, RoundingMode.DOWN);          // returns 2L   (rounds toward zero)
+     * Numbers.divide(7L, 3L, RoundingMode.UP);            // returns 3L   (rounds away from zero)
+     * Numbers.divide(7L, 3L, RoundingMode.FLOOR);         // returns 2L   (rounds toward negative infinity)
+     * Numbers.divide(-7L, 3L, RoundingMode.FLOOR);        // returns -3L  (rounds toward negative infinity)
+     * Numbers.divide(7L, 3L, RoundingMode.CEILING);       // returns 3L   (rounds toward positive infinity)
+     * Numbers.divide(7L, 2L, RoundingMode.HALF_UP);       // returns 4L   (rounds to nearest, ties away from zero)
+     * Numbers.divide(8L, 3L, RoundingMode.HALF_EVEN);     // returns 3L   (rounds to nearest, ties to even)
+     * Numbers.divide(9L, 3L, RoundingMode.UNNECESSARY);   // returns 3L   (exact division required)
      * }</pre>
      *
      * @param p the dividend
@@ -6278,12 +6278,12 @@ public final class Numbers {
      * <pre>{@code
      * BigInteger seven = BigInteger.valueOf(7);
      * BigInteger three = BigInteger.valueOf(3);
-     * Numbers.divide(seven, three, RoundingMode.DOWN);                         // returns 2   (rounds toward zero)
-     * Numbers.divide(seven, three, RoundingMode.UP);                           // returns 3   (rounds away from zero)
-     * Numbers.divide(seven, three, RoundingMode.FLOOR);                        // returns 2   (rounds toward negative infinity)
-     * Numbers.divide(seven, three, RoundingMode.CEILING);                      // returns 3   (rounds toward positive infinity)
-     * Numbers.divide(seven, BigInteger.valueOf(2), RoundingMode.HALF_UP);      // returns 4   (rounds to nearest)
-     * Numbers.divide(BigInteger.valueOf(9), three, RoundingMode.UNNECESSARY);  // returns 3   (exact division)
+     * Numbers.divide(seven, three, RoundingMode.DOWN);                          // returns 2   (rounds toward zero)
+     * Numbers.divide(seven, three, RoundingMode.UP);                            // returns 3   (rounds away from zero)
+     * Numbers.divide(seven, three, RoundingMode.FLOOR);                         // returns 2   (rounds toward negative infinity)
+     * Numbers.divide(seven, three, RoundingMode.CEILING);                       // returns 3   (rounds toward positive infinity)
+     * Numbers.divide(seven, BigInteger.valueOf(2), RoundingMode.HALF_UP);       // returns 4   (rounds to nearest)
+     * Numbers.divide(BigInteger.valueOf(9), three, RoundingMode.UNNECESSARY);   // returns 3   (exact division)
      * }</pre>
      *
      * @param p the dividend
@@ -6565,7 +6565,7 @@ public final class Numbers {
      * <p>Special cases:
      * <ul>
      * <li>The invocations {@code Numbers.lcm(Integer.MIN_VALUE, n)} and {@code Numbers.lcm(n, Integer.MIN_VALUE)} throw
-     * an {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^31} the true LCM
+     * an {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^31} the {@code true} LCM
      * is at least 2^31, which is too large for an int value (the smallest such case is when {@code Math.abs(n)} is a
      * power of 2, where the result would be exactly 2^31).</li>
      * <li>The result of {@code Numbers.lcm(0, x)} and {@code Numbers.lcm(x, 0)} is {@code 0} for any {@code x}.</li>
@@ -6616,7 +6616,7 @@ public final class Numbers {
      * <p>Special cases:
      * <ul>
      * <li>The invocations {@code Numbers.lcm(Long.MIN_VALUE, n)} and {@code Numbers.lcm(n, Long.MIN_VALUE)} throw an
-     * {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^63} the true LCM is
+     * {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^63} the {@code true} LCM is
      * at least 2^63, which is too large for a long value (the smallest such case is when {@code Math.abs(n)} is a power
      * of 2, where the result would be exactly 2^63).</li>
      * <li>The result of {@code Numbers.lcm(0L, x)} and {@code Numbers.lcm(x, 0L)} is {@code 0L} for any {@code x}.</li>
@@ -6675,7 +6675,7 @@ public final class Numbers {
      * @see #lcm(BigInteger, BigInteger)
      * @see BigInteger#gcd(BigInteger)
      */
-    public static BigInteger gcd(final BigInteger a, final BigInteger b) {
+    public static BigInteger gcd(final BigInteger a, final BigInteger b) throws IllegalArgumentException {
         N.checkArgNotNull(a, "a");
         N.checkArgNotNull(b, "b");
 
@@ -6707,7 +6707,7 @@ public final class Numbers {
      * @see #lcm(long, long)
      * @see #gcd(BigInteger, BigInteger)
      */
-    public static BigInteger lcm(final BigInteger a, final BigInteger b) {
+    public static BigInteger lcm(final BigInteger a, final BigInteger b) throws IllegalArgumentException {
         N.checkArgNotNull(a, "a");
         N.checkArgNotNull(b, "b");
 
@@ -6903,15 +6903,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.powExact(2, 3);    // returns 8
-     * Numbers.powExact(3, 4);    // returns 81
-     * Numbers.powExact(5, 0);    // returns 1
-     * Numbers.powExact(10, 9);   // returns 1000000000
-     * Numbers.powExact(10, 10);  // throws ArithmeticException (overflow)
-     * Numbers.powExact(2, 31);   // throws ArithmeticException (overflow)
-     * Numbers.powExact(-2, 30);  // returns 1073741824
-     * Numbers.powExact(-2, 31);  // returns Integer.MIN_VALUE   (exactly representable)
-     * Numbers.powExact(-2, 32);  // throws ArithmeticException (overflow)
+     * Numbers.powExact(2, 3);     // returns 8
+     * Numbers.powExact(3, 4);     // returns 81
+     * Numbers.powExact(5, 0);     // returns 1
+     * Numbers.powExact(10, 9);    // returns 1000000000
+     * Numbers.powExact(10, 10);   // throws ArithmeticException (overflow)
+     * Numbers.powExact(2, 31);    // throws ArithmeticException (overflow)
+     * Numbers.powExact(-2, 30);   // returns 1073741824
+     * Numbers.powExact(-2, 31);   // returns Integer.MIN_VALUE   (exactly representable)
+     * Numbers.powExact(-2, 32);   // throws ArithmeticException (overflow)
      * }</pre>
      *
      * @param b the base integer
@@ -7418,9 +7418,9 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.clamp(5, 1, 10);     // returns 5
-     * Numbers.clamp(-3, 1, 10);    // returns 1   (below min)
-     * Numbers.clamp(42, 1, 10);    // returns 10  (above max)
+     * Numbers.clamp(5, 1, 10);    // returns 5
+     * Numbers.clamp(-3, 1, 10);   // returns 1   (below min)
+     * Numbers.clamp(42, 1, 10);   // returns 10  (above max)
      * }</pre>
      *
      * @param value the value to clamp
@@ -7431,7 +7431,7 @@ public final class Numbers {
      * @see #clamp(long, long, long)
      * @see #clamp(double, double, double)
      */
-    public static int clamp(final int value, final int min, final int max) {
+    public static int clamp(final int value, final int min, final int max) throws IllegalArgumentException {
         N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
 
         return Math.min(max, Math.max(value, min));
@@ -7445,9 +7445,9 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.clamp(5L, 1L, 10L);     // returns 5L
-     * Numbers.clamp(-3L, 1L, 10L);    // returns 1L   (below min)
-     * Numbers.clamp(42L, 1L, 10L);    // returns 10L  (above max)
+     * Numbers.clamp(5L, 1L, 10L);    // returns 5L
+     * Numbers.clamp(-3L, 1L, 10L);   // returns 1L   (below min)
+     * Numbers.clamp(42L, 1L, 10L);   // returns 10L  (above max)
      * }</pre>
      *
      * @param value the value to clamp
@@ -7458,7 +7458,7 @@ public final class Numbers {
      * @see #clamp(int, int, int)
      * @see #clamp(double, double, double)
      */
-    public static long clamp(final long value, final long min, final long max) {
+    public static long clamp(final long value, final long min, final long max) throws IllegalArgumentException {
         N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
 
         return Math.min(max, Math.max(value, min));
@@ -7475,11 +7475,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.clamp(5.0f, 1.0f, 10.0f);         // returns 5.0f
-     * Numbers.clamp(-3.0f, 1.0f, 10.0f);        // returns 1.0f   (below min)
-     * Numbers.clamp(42.0f, 1.0f, 10.0f);        // returns 10.0f  (above max)
-     * Numbers.clamp(-0.0f, 0.0f, 1.0f);         // returns +0.0f  (-0.0f ordered below +0.0f, as in Math.clamp)
-     * Numbers.clamp(Float.NaN, 1.0f, 10.0f);    // returns NaN
+     * Numbers.clamp(5.0f, 1.0f, 10.0f);        // returns 5.0f
+     * Numbers.clamp(-3.0f, 1.0f, 10.0f);       // returns 1.0f   (below min)
+     * Numbers.clamp(42.0f, 1.0f, 10.0f);       // returns 10.0f  (above max)
+     * Numbers.clamp(-0.0f, 0.0f, 1.0f);        // returns +0.0f  (-0.0f ordered below +0.0f, as in Math.clamp)
+     * Numbers.clamp(Float.NaN, 1.0f, 10.0f);   // returns NaN
      * }</pre>
      *
      * @param value the value to clamp
@@ -7491,7 +7491,7 @@ public final class Numbers {
      * @see #clamp(long, long, long)
      * @see #clamp(double, double, double)
      */
-    public static float clamp(final float value, final float min, final float max) {
+    public static float clamp(final float value, final float min, final float max) throws IllegalArgumentException {
         N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
 
         return Math.min(max, Math.max(value, min));
@@ -7523,7 +7523,7 @@ public final class Numbers {
      * @see #clamp(int, int, int)
      * @see #clamp(long, long, long)
      */
-    public static double clamp(final double value, final double min, final double max) {
+    public static double clamp(final double value, final double min, final double max) throws IllegalArgumentException {
         N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
 
         return Math.min(max, Math.max(value, min));
@@ -7674,13 +7674,6 @@ public final class Numbers {
             return BigInteger.valueOf(long_factorials[n]);
         }
 
-        // Pre-allocate space for our list of intermediate BigIntegers.
-        // NOTE: the product {@code n * log2(n, CEILING)} is an int multiplication that could overflow for an
-        // astronomically large n (n > ~69 million, since log2(n) <= 31), which would make this a negative capacity
-        // hint and cause new ArrayList<>(...) to throw. This is unreachable in practice: such an n would require a
-        // BigInteger of billions of bits (and n loop iterations), exhausting memory/time long before. It is also a
-        // capacity HINT only (the list grows dynamically), so the computed factorial is unaffected. Behavior is
-        // identical to Guava's BigIntegerMath.factorial, from which this is ported. Left as-is by design.
         final int approxSize = divide(n * log2(n, CEILING), Long.SIZE, CEILING);
         final ArrayList<BigInteger> bignums = new ArrayList<>(approxSize);
 
@@ -7890,22 +7883,22 @@ public final class Numbers {
      *
      * <p>The binomial coefficient represents the number of ways to choose {@code k} items from {@code n} items
      * without regard to order. It is computed exactly (via {@link #binomialToBigInteger(int, int)}) and then
-     * converted to the nearest {@code double}; if the true result exceeds {@code Double.MAX_VALUE} this method
+     * converted to the nearest {@code double}; if the {@code true} result exceeds {@code Double.MAX_VALUE} this method
      * returns {@code Double.POSITIVE_INFINITY}. This is the {@code double}-valued rung of the binomial family,
      * mirroring {@link #factorialToDouble(int)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.binomialToDouble(5, 2);        // returns 10.0
-     * Numbers.binomialToDouble(52, 5);       // returns 2598960.0
-     * Numbers.binomialToDouble(100, 50);     // returns about 1.0089E29 (exceeds long, fits double)
-     * Numbers.binomialToDouble(2000, 1000);  // returns Double.POSITIVE_INFINITY (exceeds Double.MAX_VALUE)
+     * Numbers.binomialToDouble(5, 2);         // returns 10.0
+     * Numbers.binomialToDouble(52, 5);        // returns 2598960.0
+     * Numbers.binomialToDouble(100, 50);      // returns about 1.0089E29 (exceeds long, fits double)
+     * Numbers.binomialToDouble(2000, 1000);   // returns Double.POSITIVE_INFINITY (exceeds Double.MAX_VALUE)
      * }</pre>
      *
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
      * @return the binomial coefficient C(n, k) as a {@code double}, or {@code Double.POSITIVE_INFINITY}
-     *         if the true value exceeds {@code Double.MAX_VALUE}
+     *         if the {@code true} value exceeds {@code Double.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomial(int, int)
      * @see #binomialToLong(int, int)
@@ -7994,10 +7987,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(1, 2, 3, 4, 5);          // returns 3.0
-     * Numbers.mean(new int[] {10, 20});     // returns 15.0
-     * Numbers.mean(5);                      // returns 5.0
-     * Numbers.mean(-10, 0, 10);             // returns 0.0
+     * Numbers.mean(1, 2, 3, 4, 5);        // returns 3.0
+     * Numbers.mean(new int[] {10, 20});   // returns 15.0
+     * Numbers.mean(5);                    // returns 5.0
+     * Numbers.mean(-10, 0, 10);           // returns 0.0
      * }</pre>
      *
      * <p><b>Note:</b> this method throws an {@code IllegalArgumentException} for an empty array,
@@ -8032,10 +8025,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(1L, 2L, 3L, 4L, 5L);        // returns 3.0
-     * Numbers.mean(new long[] {10L, 20L});     // returns 15.0
-     * Numbers.mean(5L);                        // returns 5.0
-     * Numbers.mean(-10L, 0L, 10L);             // returns 0.0
+     * Numbers.mean(1L, 2L, 3L, 4L, 5L);      // returns 3.0
+     * Numbers.mean(new long[] {10L, 20L});   // returns 15.0
+     * Numbers.mean(5L);                      // returns 5.0
+     * Numbers.mean(-10L, 0L, 10L);           // returns 0.0
      * }</pre>
      *
      * <p><b>Note:</b> this method throws an {@code IllegalArgumentException} for an empty array,
@@ -8228,12 +8221,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.round(3.14159, 2);      // returns 3.14
-     * Numbers.round(123.456, 1);      // returns 123.5
-     * Numbers.round(2.5, 0);          // returns 3.0     (half rounds away from zero)
-     * Numbers.round(-2.5, 0);         // returns -3.0    (half rounds away from zero)
-     * Numbers.round(1.005, 2);        // returns 1.01    (decimal HALF_UP, same as the 3-arg overload)
-     * Numbers.round(12345.0, -2);     // returns 12300.0 (negative scale rounds to a power of ten)
+     * Numbers.round(3.14159, 2);    // returns 3.14
+     * Numbers.round(123.456, 1);    // returns 123.5
+     * Numbers.round(2.5, 0);        // returns 3.0     (half rounds away from zero)
+     * Numbers.round(-2.5, 0);       // returns -3.0    (half rounds away from zero)
+     * Numbers.round(1.005, 2);      // returns 1.01    (decimal HALF_UP, same as the 3-arg overload)
+     * Numbers.round(12345.0, -2);   // returns 12300.0 (negative scale rounds to a power of ten)
      * }</pre>
      *
      * @param x the double value to be rounded
@@ -8286,7 +8279,7 @@ public final class Numbers {
      * @see BigDecimal#setScale(int, RoundingMode)
      * @see BigDecimal#floatValue()
      */
-    public static float round(final float x, final int scale, final RoundingMode roundingMode) {
+    public static float round(final float x, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
 
         final BigDecimal bd = new BigDecimal(Float.toString(x)).setScale(scale, roundingMode);
@@ -8321,7 +8314,7 @@ public final class Numbers {
      * @see BigDecimal#setScale(int, RoundingMode)
      * @see BigDecimal#doubleValue()
      */
-    public static double round(final double x, final int scale, final RoundingMode roundingMode) {
+    public static double round(final double x, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
 
         final BigDecimal bd = BigDecimal.valueOf(x).setScale(scale, roundingMode);
@@ -8417,7 +8410,7 @@ public final class Numbers {
      * @see #toFloat(String)
      * @see #round(float, int)
      */
-    public static float round(final float x, final String decimalFormat) {
+    public static float round(final float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         // Round-trip through the same DecimalFormat so '%', grouping separators and
@@ -8456,7 +8449,7 @@ public final class Numbers {
      * @see #toDouble(String)
      * @see #round(double, int)
      */
-    public static double round(final double x, final String decimalFormat) {
+    public static double round(final double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         // Round-trip through the same DecimalFormat so '%', grouping separators and
@@ -8640,12 +8633,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.roundToBigInteger(5.5, RoundingMode.UP);           // returns BigInteger.valueOf(6)
-     * Numbers.roundToBigInteger(5.5, RoundingMode.DOWN);         // returns BigInteger.valueOf(5)
-     * Numbers.roundToBigInteger(5.5, RoundingMode.HALF_UP);      // returns BigInteger.valueOf(6)
-     * Numbers.roundToBigInteger(-5.5, RoundingMode.UP);          // returns BigInteger.valueOf(-6)
-     * Numbers.roundToBigInteger(5.0, RoundingMode.UNNECESSARY);  // returns BigInteger.valueOf(5)
-     * Numbers.roundToBigInteger(1e20, RoundingMode.DOWN);        // returns a BigInteger for large values
+     * Numbers.roundToBigInteger(5.5, RoundingMode.UP);            // returns BigInteger.valueOf(6)
+     * Numbers.roundToBigInteger(5.5, RoundingMode.DOWN);          // returns BigInteger.valueOf(5)
+     * Numbers.roundToBigInteger(5.5, RoundingMode.HALF_UP);       // returns BigInteger.valueOf(6)
+     * Numbers.roundToBigInteger(-5.5, RoundingMode.UP);           // returns BigInteger.valueOf(-6)
+     * Numbers.roundToBigInteger(5.0, RoundingMode.UNNECESSARY);   // returns BigInteger.valueOf(5)
+     * Numbers.roundToBigInteger(1e20, RoundingMode.DOWN);         // returns a BigInteger for large values
      * }</pre>
      *
      * @param x the value to round
@@ -9114,10 +9107,8 @@ public final class Numbers {
      *   <li>Range: all real numbers (-∞, +∞)</li>
      * </ul>
      *
-     * <p><b>Note:</b> for very large magnitudes ({@code |a| > ~1.34e154}, i.e. just above
-     * {@code sqrt(Double.MAX_VALUE)}) the intermediate {@code a * a} overflows to {@code +Infinity}, so the result
-     * saturates to {@code ±Infinity} even though the true value is finite. This is the same limitation as the naive
-     * formula in Guava/Commons-Math.</p>
+     * <p>For very large finite magnitudes, this implementation uses the asymptotically equivalent
+     * {@code log(|a|) + log(2)} form so that squaring {@code a} cannot overflow.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9140,7 +9131,9 @@ public final class Numbers {
         }
 
         double absAsinh;
-        if (a > 0.167) {
+        if (a > Math.sqrt(Double.MAX_VALUE)) {
+            absAsinh = Math.log(a) + LN_2;
+        } else if (a > 0.167) {
             absAsinh = Math.log(Math.sqrt(a * a + 1) + a);
         } else {
             final double a2 = a * a;
@@ -9177,9 +9170,9 @@ public final class Numbers {
      *   <li>For {@code x < 1}, the result is NaN</li>
      * </ul>
      *
-     * <p><b>Note:</b> for very large inputs ({@code a > ~1.34e154}, i.e. just above {@code sqrt(Double.MAX_VALUE)})
-     * the intermediate {@code a * a} overflows to {@code +Infinity}, so the result saturates to {@code +Infinity}
-     * even though the true value is finite. This is the same limitation as the naive formula in Guava/Commons-Math.</p>
+     * <p>For very large finite inputs, this implementation uses the asymptotically equivalent
+     * {@code log(a) + log(2)} form so that squaring {@code a} cannot overflow. For other inputs it
+     * uses {@code log1p((a - 1) + sqrt((a - 1) * (a + 1)))} to retain accuracy close to {@code 1}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9195,7 +9188,11 @@ public final class Numbers {
      * @see #atanh(double)
      */
     public static double acosh(final double a) {
-        return Math.log(a + Math.sqrt(a * a - 1));
+        if (a > Math.sqrt(Double.MAX_VALUE)) {
+            return Math.log(a) + LN_2;
+        }
+
+        return Math.log1p((a - 1) + Math.sqrt((a - 1) * (a + 1)));
     }
 
     /**

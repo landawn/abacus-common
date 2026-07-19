@@ -280,10 +280,18 @@ public final class Hex {
      * @throws IllegalArgumentException if {@code ch} is not a valid hexadecimal digit.
      */
     static int toDigit(final char ch, final int index) throws IllegalArgumentException {
-        final int digit = Character.digit(ch, 16);
-        if (digit == -1) {
-            throw new IllegalArgumentException("Illegal hexadecimal character " + ch + " at index " + index);
+        if (ch >= '0' && ch <= '9') {
+            return ch - '0';
         }
-        return digit;
+
+        if (ch >= 'A' && ch <= 'F') {
+            return ch - 'A' + 10;
+        }
+
+        if (ch >= 'a' && ch <= 'f') {
+            return ch - 'a' + 10;
+        }
+
+        throw new IllegalArgumentException("Illegal hexadecimal character " + ch + " at index " + index);
     }
 }

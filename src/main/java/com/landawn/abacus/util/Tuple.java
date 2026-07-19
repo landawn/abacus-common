@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * A comprehensive utility class for creating and managing immutable, fixed-size tuples that can contain
+ * A comprehensive utility class for creating and managing structurally immutable, fixed-size tuples that can contain
  * between 0 and 9 elements of potentially different types. This class provides a type-safe alternative
  * to arrays or collections when you need to group a fixed number of heterogeneous values together,
  * particularly useful for returning multiple values from methods without creating dedicated classes.
@@ -48,20 +48,21 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Type Safety:</b> Each tuple position has a specific generic type, preventing type errors at compile time</li>
- *   <li><b>Immutability:</b> All tuple instances are immutable, ensuring thread safety and preventing accidental modification</li>
+ *   <li><b>Structural Immutability:</b> Tuple positions cannot be reassigned; referenced element objects may still be mutable</li>
  *   <li><b>Fixed Size:</b> Compile-time known arity from 0 to 9 elements with specialized implementations</li>
  *   <li><b>Heterogeneous Elements:</b> Each position can contain a different type, unlike homogeneous collections</li>
  *   <li><b>Memory Efficient:</b> Optimized implementations for each arity with minimal overhead</li>
- *   <li><b>Null Safe:</b> Elements can be null, with proper null handling throughout the API</li>
+ *   <li><b>Null Safe:</b> Elements can be {@code null}, with proper {@code null} handling throughout the API</li>
  *   <li><b>Functional Programming:</b> Integration with functional programming patterns and lambda expressions</li>
  *   <li><b>Conversion Support:</b> Easy conversion to/from collections, arrays, and other data structures</li>
  * </ul>
  *
  * <p><b>⚠️ IMPORTANT - Immutable Design:</b>
  * <ul>
- *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
+ *   <li>This class implements {@link Immutable}; its tuple positions cannot be reassigned after construction</li>
  *   <li>All tuple elements are final fields set only during construction</li>
- *   <li>Thread-safe by design due to immutability and lack of mutable state</li>
+ *   <li>Immutability is shallow: referenced element objects are neither copied nor frozen</li>
+ *   <li>Thread safety therefore also depends on the thread-safety and usage of the contained elements</li>
  *   <li>All operations return new instances rather than modifying existing ones</li>
  * </ul>
  *
@@ -173,20 +174,23 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Comparison Cost:</b> O(n) for {@code equals()}, compares all elements</li>
  * </ul>
  *
+ * <p><b>Equality:</b> Tuple elements are compared with {@link N#equals(Object, Object)} and
+ * hashed with {@link N#hashCode(Object)}. Array-valued elements therefore use recursive
+ * content equality and content hashing rather than the identity semantics of ordinary arrays.</p>
+ *
  * <p><b>Thread Safety:</b>
  * <ul>
  *   <li><b>Immutable Fields:</b> All element fields are final and set only during construction</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent read access from multiple threads</li>
- *   <li><b>No Synchronization:</b> No locks or synchronization needed due to immutability</li>
- *   <li><b>Safe Publication:</b> Can be safely published between threads without additional synchronization</li>
+ *   <li><b>Safe Publication:</b> Final fields safely publish the element references when the tuple itself is safely obtained</li>
+ *   <li><b>Concurrent Access:</b> Safe when the contained elements are immutable or are otherwise accessed safely</li>
+ *   <li><b>No Element Synchronization:</b> Tuples do not coordinate concurrent access to mutable contained objects</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
  * <ul>
  *   <li><b>Efficient Allocation:</b> Small object size with minimal memory footprint</li>
- *   <li><b>No Memory Leaks:</b> Immutable design prevents accidental reference retention</li>
- *   <li><b>GC Friendly:</b> Immutable objects are optimized for garbage collection</li>
- *   <li><b>Reference Equality:</b> Can be cached and reused safely due to immutability</li>
+ *   <li><b>Reference Retention:</b> A tuple strongly references each element for as long as the tuple remains reachable</li>
+ *   <li><b>Reuse:</b> A tuple can be cached or shared when doing so is also safe for its contained elements</li>
  * </ul>
  *
  * <p><b>Comparison with Alternative Approaches:</b>
@@ -224,7 +228,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>{@link Pair}:</b> Specialized two-element container with named fields (left/right)</li>
  *   <li><b>{@link Triple}:</b> Specialized three-element container with named fields (left/middle/right)</li>
  *   <li><b>{@link Result}:</b> Can be converted to tuple for success/failure handling</li>
- *   <li><b>{@link Optional}:</b> Individual tuple elements can be wrapped in Optional for null safety</li>
+ *   <li><b>{@link Optional}:</b> Individual tuple elements can be wrapped in Optional for {@code null} safety</li>
  *   <li><b>Collections API:</b> Seamless conversion to/from lists and other collections</li>
  * </ul>
  *
@@ -323,7 +327,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * boolean hasNull2 = t2.anyNull();   // returns false
      * }</pre>
      *
-     * @return {@code true} if at least one element in this tuple is {@code null}, {@code false} if all elements are non-null.
+     * @return {@code true} if at least one element in this tuple is {@code null}, {@code false} if all elements are {@code non-null}.
      */
     public abstract boolean anyNull();
 
@@ -342,7 +346,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * boolean allNull2 = t2.allNull();   // returns false
      * }</pre>
      *
-     * @return {@code true} if every element in this tuple is {@code null}, {@code false} if at least one element is non-null.
+     * @return {@code true} if every element in this tuple is {@code null}, {@code false} if at least one element is {@code non-null}.
      */
     public abstract boolean allNull();
 
@@ -368,8 +372,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     /**
      * Returns an array containing all elements of this tuple in their positional order.
      *
-     * <p>The returned array is a new instance and modifications to it do not affect the tuple.
-     * The array length equals the arity of this tuple.</p>
+     * <p>For non-empty tuples, the returned array is a new instance and modifications to the
+     * array itself do not affect the tuple. {@link Tuple0} may return a shared zero-length array.
+     * In every case the array length equals the arity and element references are copied shallowly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -448,6 +453,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed on this tuple, must not be {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}.
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E {
@@ -474,6 +480,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <E> the type of exception that the mapper may throw.
      * @param mapper the mapping function to apply to this tuple, must not be {@code null}.
      * @return the result of applying the mapping function to this tuple.
+     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper throws an exception.
      */
     public <R, E extends Exception> R map(final Throwables.Function<? super TP, R, E> mapper) throws E {
@@ -501,6 +508,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the predicate to test this tuple against, must not be {@code null}.
      * @return an Optional containing this tuple if the predicate returns {@code true}, otherwise an empty Optional.
+     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
      */
     @Beta
@@ -1281,7 +1289,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Checks if all elements in this tuple are {@code null}.
          *
          * <p>For Tuple0, this always returns {@code true} by vacuous truth: an empty tuple
-         * has no non-null elements, so the condition holds trivially.</p>
+         * has no {@code non-null} elements, so the condition holds trivially.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1289,7 +1297,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * boolean allNull = empty.allNull();   // returns true
          * }</pre>
          *
-         * @return {@code true}, since there are no elements that could be non-null.
+         * @return {@code true}, since there are no elements that could be {@code non-null}.
          */
         @Override
         public boolean allNull() {
@@ -1380,6 +1388,28 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
             // do nothing.
+        }
+
+        /**
+         * Returns the hash code for an empty tuple.
+         *
+         * @return {@code 1}, the initial hash value used by the other tuple arities before incorporating elements.
+         */
+        @Override
+        public int hashCode() {
+            return 1;
+        }
+
+        /**
+         * Compares this empty tuple with another object for value equality.
+         * All {@code Tuple0} instances are equal because neither instance contains an element that can differ.
+         *
+         * @param obj the object to compare with.
+         * @return {@code true} if {@code obj} is also a {@code Tuple0}; otherwise {@code false}.
+         */
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof Tuple0;
         }
 
         /**
@@ -1583,7 +1613,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Returns a hash code value for this tuple.
          *
          * <p>The hash code is computed based on the element value. Equal elements produce
-         * equal hash codes, making Tuple1 suitable for use as a Map key or Set element.</p>
+         * equal hash codes. Tuple1 is suitable for use as a Map key or Set element while
+         * the equality and hash-code state of its element remains unchanged.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1699,7 +1730,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *   </tr>
      *   <tr>
      *     <td>Mutability</td>
-     *     <td><b>Effectively immutable</b> — {@link #_1} and {@link #_2} are {@code public final}</td>
+     *     <td><b>Structurally immutable</b> — {@link #_1} and {@link #_2} are {@code public final}; referenced objects may still be mutable</td>
      *     <td><b>Mutable</b> — implements {@link Mutable}; supports {@code setLeft} / {@code setRight}</td>
      *   </tr>
      *   <tr>
@@ -1721,8 +1752,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *   </tr>
      *   <tr>
      *     <td>Hash/equals stability</td>
-     *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
-     *     <td>Hash code changes when elements are mutated — unsafe as a hash-table key while mutating</td>
+     *     <td>Stable only while the equality/hash state of both referenced elements remains unchanged</td>
+     *     <td>Hash code changes when fields or referenced element state is mutated — unsafe as a hash-table key while mutating</td>
      *   </tr>
      *   <tr>
      *     <td>Use when</td>
@@ -1978,6 +2009,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the action may throw.
          * @param action the bi-consumer action to be performed on the tuple elements.
+         * @throws NullPointerException if {@code action} is {@code null}.
          * @throws E if the action throws an exception.
          */
         public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws E {
@@ -2003,6 +2035,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the mapper may throw.
          * @param mapper the bi-function to apply to the tuple elements.
          * @return the result of applying the bi-function to this tuple's elements.
+         * @throws NullPointerException if {@code mapper} is {@code null}.
          * @throws E if the mapper throws an exception.
          */
         public <R, E extends Exception> R map(final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> mapper) throws E {
@@ -2028,6 +2061,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the predicate may throw.
          * @param predicate the bi-predicate to test the tuple elements against.
          * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
+         * @throws NullPointerException if {@code predicate} is {@code null}.
          * @throws E if the predicate throws an exception.
          */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
@@ -2038,7 +2072,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Returns a hash code value for this tuple.
          *
          * <p>The hash code is computed based on the values of both elements,
-         * making Tuple2 suitable for use as a Map key or Set element.</p>
+         * making Tuple2 suitable for use as a Map key or Set element while the equality
+         * and hash-code state of both elements remains unchanged.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2155,7 +2190,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *   </tr>
      *   <tr>
      *     <td>Mutability</td>
-     *     <td><b>Effectively immutable</b> — {@link #_1}, {@link #_2}, {@link #_3} are {@code public final}</td>
+     *     <td><b>Structurally immutable</b> — {@link #_1}, {@link #_2}, {@link #_3} are {@code public final}; referenced objects may still be mutable</td>
      *     <td><b>Mutable</b> — implements {@link Mutable}; supports {@code setLeft} / {@code setMiddle} / {@code setRight}</td>
      *   </tr>
      *   <tr>
@@ -2172,8 +2207,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *   </tr>
      *   <tr>
      *     <td>Hash/equals stability</td>
-     *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
-     *     <td>Hash code changes when elements are mutated — unsafe as a hash-table key while mutating</td>
+     *     <td>Stable only while the equality/hash state of all referenced elements remains unchanged</td>
+     *     <td>Hash code changes when fields or referenced element state is mutated — unsafe as a hash-table key while mutating</td>
      *   </tr>
      *   <tr>
      *     <td>Use when</td>
@@ -2231,7 +2266,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if any of the three elements is null.
+         * @return {@code true} if any of the three elements is {@code null}.
          */
         @Override
         public boolean anyNull() {
@@ -2241,7 +2276,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if all three elements are null.
+         * @return {@code true} if all three elements are {@code null}.
          */
         @Override
         public boolean allNull() {
@@ -2357,6 +2392,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the action may throw.
          * @param action the tri-consumer action to be performed on the tuple elements.
+         * @throws NullPointerException if {@code action} is {@code null}.
          * @throws E if the action throws an exception.
          */
         public <E extends Exception> void accept(final Throwables.TriConsumer<? super T1, ? super T2, ? super T3, E> action) throws E {
@@ -2379,6 +2415,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the mapper may throw.
          * @param mapper the tri-function to apply to the tuple elements.
          * @return the result of applying the tri-function to this tuple's elements.
+         * @throws NullPointerException if {@code mapper} is {@code null}.
          * @throws E if the mapper throws an exception.
          */
         public <R, E extends Exception> R map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> mapper) throws E {
@@ -2400,6 +2437,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the predicate may throw.
          * @param predicate the tri-predicate to test the tuple elements against.
          * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
+         * @throws NullPointerException if {@code predicate} is {@code null}.
          * @throws E if the predicate throws an exception.
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
@@ -2526,7 +2564,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if any of the four elements is null.
+         * @return {@code true} if any of the four elements is {@code null}.
          */
         @Override
         public boolean anyNull() {
@@ -2536,7 +2574,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if all four elements are null.
+         * @return {@code true} if all four elements are {@code null}.
          */
         @Override
         public boolean allNull() {
@@ -2747,7 +2785,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if any of the five elements is null.
+         * @return {@code true} if any of the five elements is {@code null}.
          */
         @Override
         public boolean anyNull() {
@@ -2757,7 +2795,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if all five elements are null.
+         * @return {@code true} if all five elements are {@code null}.
          */
         @Override
         public boolean allNull() {
@@ -2978,7 +3016,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if any of the six elements is null.
+         * @return {@code true} if any of the six elements is {@code null}.
          */
         @Override
         public boolean anyNull() {
@@ -2988,7 +3026,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if all six elements are null.
+         * @return {@code true} if all six elements are {@code null}.
          */
         @Override
         public boolean allNull() {
@@ -3218,7 +3256,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if any of the seven elements is null.
+         * @return {@code true} if any of the seven elements is {@code null}.
          */
         @Override
         public boolean anyNull() {
@@ -3228,7 +3266,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if all seven elements are null.
+         * @return {@code true} if all seven elements are {@code null}.
          */
         @Override
         public boolean allNull() {
@@ -3466,7 +3504,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if any of the eight elements is null.
+         * @return {@code true} if any of the eight elements is {@code null}.
          */
         @Override
         public boolean anyNull() {
@@ -3476,7 +3514,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * {@inheritDoc}.
          *
-         * @return {@code true} if all eight elements are null.
+         * @return {@code true} if all eight elements are {@code null}.
          */
         @Override
         public boolean allNull() {
@@ -3805,7 +3843,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * boolean found4 = t.contains(null);   // returns false
          * }</pre>
          *
-         * @param valueToFind the value to search for, may be null.
+         * @param valueToFind the value to search for, may be {@code null}.
          * @return {@code true} if any element equals the specified value, {@code false} otherwise.
          */
         @Override
@@ -3934,7 +3972,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * }</pre>
          *
          * @param <E> the type of exception that the consumer may throw.
-         * @param consumer the action to perform on each element, must not be null.
+         * @param consumer the action to perform on each element, must not be {@code null}.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
          */

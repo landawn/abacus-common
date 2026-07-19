@@ -212,6 +212,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @param predicate the predicate to test the current value; receives current value as parameter
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the predicate returned {@code true} and the value was updated, {@code false} otherwise
+     * @throws NullPointerException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {

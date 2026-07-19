@@ -40,7 +40,9 @@ public class AccountStatusTest extends TestBase {
 
     @Test
     public void testValueOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> AccountStatus.fromCode(-1));
+        IllegalArgumentException failure = assertThrows(IllegalArgumentException.class, () -> AccountStatus.fromCode(-1));
+        Assertions.assertTrue(failure.getMessage().contains("AccountStatus"));
+        Assertions.assertTrue(failure.getMessage().contains("-1"));
         assertThrows(IllegalArgumentException.class, () -> AccountStatus.fromCode(6));
         assertThrows(IllegalArgumentException.class, () -> AccountStatus.fromCode(100));
     }

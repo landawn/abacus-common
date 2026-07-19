@@ -266,7 +266,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * these rules:</p>
      * <ul>
      *   <li>If attribute type is provided and compatible with property type, use attribute type</li>
-     *   <li>If attribute type is incompatible or null, use property type</li>
+     *   <li>If attribute type is incompatible or {@code null}, use property type</li>
      *   <li>This enables proper handling of polymorphic deserialization</li>
      * </ul>
      *
@@ -318,7 +318,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <ol>
      *   <li>If attribute type is provided and compatible, instantiate attribute type</li>
      *   <li>If attribute type instantiation fails or is incompatible, fall back to property class</li>
-     *   <li>If both fail or are null, throw ParsingException</li>
+     *   <li>If both fail or are {@code null}, throw ParsingException</li>
      * </ol>
      *
      * <p>This enables polymorphic deserialization where the serialized data contains type information
@@ -357,8 +357,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <p>This method resolves which class should be used when both a target class and a type class
      * are available, following these rules:</p>
      * <ul>
-     *   <li>If type class is null, use target class</li>
-     *   <li>If target class is null or the same as type class, use type class</li>
+     *   <li>If type class is {@code null}, use target class</li>
+     *   <li>If target class is {@code null} or the same as type class, use type class</li>
      *   <li>If type class is assignable to target class, use type class (more specific)</li>
      *   <li>Otherwise, use target class (type class is incompatible)</li>
      * </ul>
@@ -388,7 +388,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *   <li>Empty collections: Returns an empty array of the target type</li>
      * </ul>
      *
-     * <p>The method inspects the first non-null element to determine if a more specific
+     * <p>The method inspects the first {@code non-null} element to determine if a more specific
      * array type should be used than the declared target type.</p>
      *
      * @param <T> the return type

@@ -126,7 +126,10 @@ public class ImmutableArrayTest extends TestBase {
         ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
         Assertions.assertEquals(0, array.length());
         Assertions.assertTrue(array.isEmpty());
-        Assertions.assertSame(ImmutableArray.empty(), array);
+        Assertions.assertNotSame(ImmutableArray.empty(), array);
+
+        String[] copy = array.copy(0, 0);
+        Assertions.assertEquals(String[].class, copy.getClass());
     }
 
     @Test
@@ -332,7 +335,7 @@ public class ImmutableArrayTest extends TestBase {
     @Test
     public void testForEach_NullConsumer() {
         ImmutableArray<String> array = ImmutableArray.of("a");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> array.forEach((Consumer<String>) null));
+        Assertions.assertThrows(NullPointerException.class, () -> array.forEach((Consumer<String>) null));
     }
 
     @Test

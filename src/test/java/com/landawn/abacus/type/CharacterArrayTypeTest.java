@@ -31,7 +31,18 @@ public class CharacterArrayTypeTest extends TestBase {
     public void testStringOf_SpecialCharacters() {
         Character[] array = new Character[] { '\'', '"', '\n', '\t' };
         String result = type.stringOf(array);
-        assertEquals("[''', '\"', '\n', '\t']", result);
+        assertEquals("['\\\'', '\\\"', '\\n', '\\t']", result);
+        assertArrayEquals(array, type.valueOf(result));
+    }
+
+    @Test
+    public void testCanonicalStringRoundTripsAllEscapedCharacterKinds() {
+        Character[] array = { '\\', '\r', '\b', '\f', ',', '[', ']', '\u0000', '\u2028', null };
+
+        String str = type.stringOf(array);
+
+        assertEquals("['\\\\', '\\r', '\\b', '\\f', ',', '[', ']', '\\u0000', '\\u2028', null]", str);
+        assertArrayEquals(array, type.valueOf(str));
     }
 
     @Test

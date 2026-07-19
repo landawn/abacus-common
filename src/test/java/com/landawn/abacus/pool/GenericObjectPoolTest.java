@@ -14,11 +14,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Condition;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +31,45 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class GenericObjectPoolTest extends TestBase {
+
+    private static final class SpuriousWakeupCondition implements Condition {
+        private int awaitCount;
+
+        @Override
+        public long awaitNanos(final long nanosTimeout) {
+            return ++awaitCount <= 10_000 ? 1 : 0;
+        }
+
+        @Override
+        public void await() throws InterruptedException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void awaitUninterruptibly() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean await(final long time, final TimeUnit unit) throws InterruptedException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean awaitUntil(final Date deadline) throws InterruptedException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void signal() {
+            // no-op for this deterministic test condition
+        }
+
+        @Override
+        public void signalAll() {
+            // no-op for this deterministic test condition
+        }
+    }
 
     private GenericObjectPool<TestPoolable> pool;
 
@@ -1471,6 +1514,57 @@ public class GenericObjectPoolTest extends TestBase {
         assertEquals(0, pool.hitCount.get(), "Closed-pool abort must not be counted as a hit");
     }
 
+    @Test
+    public void testConcurrentCloseWaitsForDestructionCallbacks() throws InterruptedException {
+        final GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        final CountDownLatch destroyStarted = new CountDownLatch(1);
+        final CountDownLatch allowDestroyToFinish = new CountDownLatch(1);
+        final CountDownLatch secondCloseReturned = new CountDownLatch(1);
+
+        final TestPoolable element = new TestPoolable("blocking-destroy") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                destroyStarted.countDown();
+
+                try {
+                    allowDestroyToFinish.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                super.destroy(caller);
+            }
+        };
+
+        assertTrue(p.add(element));
+
+        final Thread firstCloser = new Thread(p::close);
+        final Thread secondCloser = new Thread(() -> {
+            p.close();
+            secondCloseReturned.countDown();
+        });
+
+        firstCloser.start();
+        assertTrue(destroyStarted.await(2, TimeUnit.SECONDS));
+
+        secondCloser.start();
+
+        try {
+            assertFalse(secondCloseReturned.await(200, TimeUnit.MILLISECONDS),
+                    "a concurrent close must not return while the first close is still destroying resources");
+        } finally {
+            allowDestroyToFinish.countDown();
+        }
+
+        firstCloser.join(2000);
+        secondCloser.join(2000);
+
+        assertFalse(firstCloser.isAlive());
+        assertFalse(secondCloser.isAlive());
+        assertEquals(0, secondCloseReturned.getCount());
+        assertTrue(element.isDestroyed());
+    }
+
     // --- regression tests for 2026-06-10 deep-review fixes ---
 
     @Test
@@ -1492,5 +1586,262 @@ public class GenericObjectPoolTest extends TestBase {
         assertEquals(0, memPool.size(), "an element that expired inside the lock must not be pooled");
 
         memPool.close();
+    }
+
+    @Test
+    public void testEvictRemovesObjectBeforeDestroyCallbackAndReleasesLock() {
+        final GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        final AtomicReference<TestPoolable> observedDuringDestroy = new AtomicReference<>();
+        final AtomicReference<Boolean> lockHeldDuringDestroy = new AtomicReference<>();
+        final TestPoolable doomed = new TestPoolable("doomed") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeldDuringDestroy.set(p.lock.isHeldByCurrentThread());
+                observedDuringDestroy.set(p.poll());
+                super.destroy(caller);
+            }
+        };
+
+        try {
+            assertTrue(p.add(doomed));
+            p.evict();
+
+            assertNull(observedDuringDestroy.get(), "a destroy callback must not retrieve an object already selected for eviction");
+            assertEquals(Boolean.FALSE, lockHeldDuringDestroy.get(), "explicit eviction must not invoke user callbacks while holding the pool lock");
+            assertEquals(0, p.size());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testAutoBalanceDestroyCallbackRunsAfterUnlockAndReplacementIsStored() {
+        final GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        final AtomicReference<Boolean> lockHeldDuringDestroy = new AtomicReference<>();
+        final AtomicReference<Boolean> victimStillPresent = new AtomicReference<>();
+        final AtomicReference<Boolean> replacementPresent = new AtomicReference<>();
+        final TestPoolable replacement = new TestPoolable("replacement");
+        final TestPoolable victim = new TestPoolable("victim") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeldDuringDestroy.set(p.lock.isHeldByCurrentThread());
+                victimStillPresent.set(p.contains(this));
+                replacementPresent.set(p.contains(replacement));
+                super.destroy(caller);
+            }
+        };
+
+        try {
+            assertTrue(p.add(victim));
+            assertTrue(p.add(replacement));
+
+            assertEquals(Boolean.FALSE, lockHeldDuringDestroy.get(), "auto-balance must invoke destroy after releasing the pool lock");
+            assertEquals(Boolean.FALSE, victimStillPresent.get(), "the victim must be detached before its destroy callback");
+            assertEquals(Boolean.TRUE, replacementPresent.get(), "the successful add must be visible before the victim's destroy callback");
+            assertEquals(Poolable.Caller.VACATE, victim.getDestroyedByCaller());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testPollExpiredDestroyCallbackRunsAfterUnlockAndDetachment() {
+        final GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        final AtomicReference<Boolean> lockHeldDuringDestroy = new AtomicReference<>();
+        final AtomicReference<Boolean> victimStillPresent = new AtomicReference<>();
+        final TestPoolable expired = new TestPoolable("expired") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeldDuringDestroy.set(p.lock.isHeldByCurrentThread());
+                victimStillPresent.set(p.contains(this));
+                super.destroy(caller);
+            }
+        };
+
+        try {
+            assertTrue(p.add(expired));
+            expired.activityPrint().setCreatedTime(System.currentTimeMillis() - 20_000);
+
+            assertNull(p.poll());
+            assertEquals(Boolean.FALSE, lockHeldDuringDestroy.get(), "poll must destroy an expired object after releasing the pool lock");
+            assertEquals(Boolean.FALSE, victimStillPresent.get(), "the expired object must be detached before its destroy callback");
+            assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
+            assertEquals(0, p.size());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testRemoveExpiredAccountsBeforeUnlockingForDestroyCallback() throws Exception {
+        assertRemovalAccountingVisibleBeforeCallback(false);
+    }
+
+    @Test
+    public void testClearAccountsBeforeUnlockingForDestroyCallback() throws Exception {
+        assertRemovalAccountingVisibleBeforeCallback(true);
+    }
+
+    private static void assertRemovalAccountingVisibleBeforeCallback(final boolean clear) throws Exception {
+        final CountDownLatch destructionPhaseReached = new CountDownLatch(1);
+        final CountDownLatch releaseDestruction = new CountDownLatch(1);
+        final AtomicReference<Throwable> cleanupFailure = new AtomicReference<>();
+        final AtomicReference<Boolean> lockHeldDuringCallback = new AtomicReference<>();
+
+        class AccountingProbePool extends GenericObjectPool<TestPoolable> {
+            AccountingProbePool() {
+                super(2, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 10L, value -> 10L);
+            }
+
+            @Override
+            protected void destroyAll(final Collection<TestPoolable> values, final Poolable.Caller caller) {
+                // Legacy removeExpired/removeAll reached this hook after unlocking but before
+                // destroy() performed memory accounting. Pausing here makes that stale window
+                // deterministic; the fixed paths bypass it because only callbacks remain.
+                destructionPhaseReached.countDown();
+                awaitCleanupRelease(releaseDestruction);
+                super.destroyAll(values, caller);
+            }
+        }
+
+        final AccountingProbePool p = new AccountingProbePool();
+        final TestPoolable victim = new TestPoolable("victim") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeldDuringCallback.set(p.lock.isHeldByCurrentThread());
+                destructionPhaseReached.countDown();
+                awaitCleanupRelease(releaseDestruction);
+                super.destroy(caller);
+            }
+        };
+
+        assertTrue(p.add(victim));
+
+        if (!clear) {
+            victim.activityPrint().setCreatedTime(System.currentTimeMillis() - 20_000);
+        }
+
+        final Thread cleanup = new Thread(() -> {
+            try {
+                if (clear) {
+                    p.clear();
+                } else {
+                    p.removeExpired();
+                }
+            } catch (final Throwable e) {
+                cleanupFailure.set(e);
+            }
+        }, clear ? "clear-accounting-probe" : "expiry-accounting-probe");
+
+        cleanup.start();
+
+        try {
+            assertTrue(destructionPhaseReached.await(2, TimeUnit.SECONDS), "cleanup did not reach its post-unlock destruction phase");
+            assertTrue(p.add(new TestPoolable("replacement")), "detached victim memory must be subtracted before another add checks the limit");
+            assertEquals(10L, p.totalDataSize.get());
+        } finally {
+            releaseDestruction.countDown();
+            cleanup.join(2_000);
+
+            if (!p.isClosed()) {
+                p.close();
+            }
+        }
+
+        assertFalse(cleanup.isAlive(), "cleanup remained blocked");
+        assertNull(cleanupFailure.get(), "cleanup failed: " + cleanupFailure.get());
+        assertEquals(Boolean.FALSE, lockHeldDuringCallback.get(), "cleanup callback must run after unlocking");
+        assertEquals(0L, p.totalDataSize.get(), "close must account the replacement before completing its callbacks");
+    }
+
+    private static void awaitCleanupRelease(final CountDownLatch release) {
+        try {
+            release.await(5, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    @Test
+    public void testTimedAddHonorsTimeoutAcrossMoreThanTenThousandWakeups() throws Exception {
+        final GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
+        assertTrue(p.add(new TestPoolable("existing")));
+
+        final SpuriousWakeupCondition condition = new SpuriousWakeupCondition();
+        p.notFull = condition;
+
+        try {
+            assertFalse(p.add(new TestPoolable("new"), 1, TimeUnit.MILLISECONDS));
+            assertEquals(10_001, condition.awaitCount);
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testTimedOperationsRejectNullTimeUnit() {
+        assertThrows(IllegalArgumentException.class, () -> pool.add(new TestPoolable("value"), 1, null));
+        assertThrows(IllegalArgumentException.class, () -> pool.poll(1, null));
+    }
+
+    @Test
+    public void testCloseContinuesAfterNonFatalDestroyError() {
+        final TestPoolable survivor = new TestPoolable("survivor");
+        final TestPoolable broken = new TestPoolable("broken") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                throw new AssertionError("simulated callback failure");
+            }
+        };
+
+        assertTrue(pool.add(survivor));
+        assertTrue(pool.add(broken));
+        pool.close();
+
+        assertTrue(survivor.isDestroyed(), "one broken callback must not prevent later resources from being destroyed");
+    }
+
+    @Test
+    public void testEvictSelectsCountAndVictimsInSingleCriticalSection() {
+        final AtomicReference<TestPoolable> removedDuringFormerGap = new AtomicReference<>();
+
+        class AtomicEvictPool extends GenericObjectPool<TestPoolable> {
+            AtomicEvictPool() {
+                super(8, 0, EvictionPolicy.FIFO, true, 0.5f);
+            }
+
+            @Override
+            protected void vacate(final int numberToEvict) {
+                // Legacy evict() computed numberToEvict, unlocked, and then dispatched here.
+                // Mutating in that gap made its count stale and removed three of four objects.
+                final Thread interloper = new Thread(() -> removedDuringFormerGap.set(poll()), "evict-gap-interloper");
+                interloper.start();
+
+                try {
+                    interloper.join(2_000);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+
+                super.vacate(numberToEvict);
+            }
+        }
+
+        final AtomicEvictPool p = new AtomicEvictPool();
+
+        try {
+            assertTrue(p.add(new TestPoolable("one")));
+            assertTrue(p.add(new TestPoolable("two")));
+            assertTrue(p.add(new TestPoolable("three")));
+            assertTrue(p.add(new TestPoolable("four")));
+
+            p.evict();
+
+            assertNull(removedDuringFormerGap.get(), "evict must not expose a mutation gap between counting and detaching victims");
+            assertEquals(2, p.size(), "a 0.5 balance factor must atomically remove two of four objects");
+        } finally {
+            p.close();
+        }
     }
 }

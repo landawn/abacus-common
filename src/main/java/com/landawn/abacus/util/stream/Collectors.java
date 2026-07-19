@@ -127,7 +127,7 @@ import com.landawn.abacus.util.function.TriFunction;
  *   <li><b>Bidirectional Maps:</b> BiMap collectors for reversible key-value associations</li>
  *   <li><b>Functional Composition:</b> Teeing and combining collectors for parallel processing</li>
  *   <li><b>Performance Optimization:</b> Specialized collectors optimized for specific data types</li>
- *   <li><b>Null Safety:</b> Consistent null handling across all collector implementations</li>
+ *   <li><b>Null Safety:</b> Consistent {@code null} handling across all collector implementations</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -249,17 +249,22 @@ import com.landawn.abacus.util.function.TriFunction;
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Collector Instances:</b> All collectors are thread-safe and can be reused</li>
- *   <li><b>Concurrent Collections:</b> Some collectors produce thread-safe results</li>
- *   <li><b>Parallel Streams:</b> Full support for parallel stream operations</li>
- *   <li><b>Accumulator Safety:</b> Internal accumulators handle concurrent access appropriately</li>
+ *   <li><b>Collector Instances:</b> Returned collectors are reusable when their supplied functions,
+ *       factories, and downstream collectors satisfy the {@link Collector} contract</li>
+ *   <li><b>Concurrent Accumulation:</b> Only collectors declaring
+ *       {@link Characteristics#CONCURRENT CONCURRENT} permit multiple threads to update one
+ *       accumulation container; other parallel collectors rely on isolated partial containers</li>
+ *   <li><b>Result Containers:</b> A result is thread-safe only when its documented result type or
+ *       supplied factory provides that guarantee</li>
+ *   <li><b>Parallel Streams:</b> Most collectors support parallel reduction; sequential-only
+ *       collectors are identified in their method documentation</li>
  * </ul>
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li>Throws {@link IllegalArgumentException} for null required parameters</li>
+ *   <li>Throws {@link IllegalArgumentException} for {@code null} required parameters</li>
  *   <li>Throws {@link IllegalStateException} for constraint violations (e.g., duplicate keys)</li>
- *   <li>Handles null elements according to the specific collector's documented behavior</li>
+ *   <li>Handles {@code null} elements according to the specific collector's documented behavior</li>
  *   <li>Provides clear error messages for debugging collection failures</li>
  * </ul>
  *
@@ -301,7 +306,7 @@ import com.landawn.abacus.util.function.TriFunction;
  *   <li><b>Extended Types:</b> Support for primitive and immutable collections</li>
  *   <li><b>Enhanced Features:</b> BiMaps, Multimaps, and advanced statistical operations</li>
  *   <li><b>Better Performance:</b> Optimized implementations for specific use cases</li>
- *   <li><b>Null Safety:</b> More predictable null handling across all operations</li>
+ *   <li><b>Null Safety:</b> More predictable {@code null} handling across all operations</li>
  * </ul>
  *
  * @see java.util.stream.Collector
@@ -1098,8 +1103,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * {@code toSet()}, etc.). The collection factory should return a new, empty collection
      * instance each time it's called.</p>
      *
-     * <p><b>Null Handling:</b> The collector allows null elements if the underlying collection
-     * supports null values. The behavior depends on the collection implementation provided
+     * <p><b>Null Handling:</b> The collector allows {@code null} elements if the underlying collection
+     * supports {@code null} values. The behavior depends on the collection implementation provided
      * by the factory.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams. When used
@@ -1148,8 +1153,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * {@code subList} for efficiency. For other collection types, it iterates through its
      * elements until the size limit is reached.</p>
      *
-     * <p><b>Null Handling:</b> The collector allows null elements if the underlying collection
-     * supports null values. Null elements count toward the size limit.</p>
+     * <p><b>Null Handling:</b> The collector allows {@code null} elements if the underlying collection
+     * supports {@code null} values. Null elements count toward the size limit.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams with
      * appropriate combining logic to maintain the size limit.</p>
@@ -1175,7 +1180,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #first(int)
      * @see #toList(int)
      */
-    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final int atMostSize, final Supplier<? extends C> collectionFactory) {
+    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final int atMostSize, final Supplier<? extends C> collectionFactory)
+            throws IllegalArgumentException {
         N.checkArgNotNegative(atMostSize, "atMostSize");
 
         final BiConsumer<C, T> accumulator = (c, t) -> {
@@ -1221,7 +1227,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * partial collection to the earlier one, preserving encounter order.</p>
      *
      * <p><b>Null Handling:</b> Null handling depends on the custom accumulator implementation.
-     * The accumulator function is responsible for handling null elements appropriately.</p>
+     * The accumulator function is responsible for handling {@code null} elements appropriately.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams with
      * a default combiner that appends the later partial collection to the earlier one.</p>
@@ -1266,7 +1272,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * essential for parallel stream processing.</p>
      *
      * <p><b>Null Handling:</b> Null handling depends on the custom accumulator and combiner
-     * implementations. These functions are responsible for handling null elements and null
+     * implementations. These functions are responsible for handling {@code null} elements and null
      * collections appropriately.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams with
@@ -1378,8 +1384,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>For streams with defined encounter order, the elements will appear in the
      * resulting list in the same order. For unordered streams, no order is guaranteed.</p>
      *
-     * <p><b>Null Handling:</b> This collector accepts null elements. The resulting list
-     * will contain null values in the positions where they were encountered in the stream.</p>
+     * <p><b>Null Handling:</b> This collector accepts {@code null} elements. The resulting list
+     * will contain {@code null} values in the positions where they were encountered in the stream.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * efficiently combines partial results.</p>
@@ -1423,8 +1429,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Unlike the generic {@code toList()} collector, this method guarantees that the
      * returned collection will be a {@code LinkedList}.</p>
      *
-     * <p><b>Null Handling:</b> This collector accepts null elements as {@code LinkedList}
-     * supports null values.</p>
+     * <p><b>Null Handling:</b> This collector accepts {@code null} elements as {@code LinkedList}
+     * supports {@code null} values.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * efficiently combines partial results.</p>
@@ -1462,8 +1468,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This is useful when you need to ensure that the collected data cannot be
      * accidentally modified after collection. Elements are preserved in encounter order.</p>
      *
-     * <p><b>Null Handling:</b> This collector accepts null elements if they are present
-     * in the stream. The resulting immutable list will contain null values.</p>
+     * <p><b>Null Handling:</b> This collector accepts {@code null} elements if they are present
+     * in the stream. The resulting immutable list will contain {@code null} values.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * efficiently combines partial results.</p>
@@ -1506,8 +1512,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableList()} method
      * and provides the same guarantees. Elements are preserved in encounter order.</p>
      *
-     * <p><b>Null Handling:</b> This collector does not accept null elements. If the stream
-     * contains any null values, a {@code NullPointerException} will be thrown.</p>
+     * <p><b>Null Handling:</b> This collector does not accept {@code null} elements. If the stream
+     * contains any {@code null} values, a {@code NullPointerException} will be thrown.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * efficiently combines partial results.</p>
@@ -1545,8 +1551,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * are inherently unordered collections (unless a specific ordered set implementation
      * is used).</p>
      *
-     * <p><b>Null Handling:</b> This collector accepts null elements if the underlying
-     * set implementation supports null values.</p>
+     * <p><b>Null Handling:</b> This collector accepts {@code null} elements if the underlying
+     * set implementation supports {@code null} values.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * has the UNORDERED characteristic for optimal performance.</p>
@@ -1662,8 +1668,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This method delegates to the JDK's {@code Collectors.toUnmodifiableSet()} method
      * and provides the same guarantees.</p>
      *
-     * <p><b>Null Handling:</b> This collector does not accept null elements. If the stream
-     * contains any null values, a {@code NullPointerException} will be thrown.</p>
+     * <p><b>Null Handling:</b> This collector does not accept {@code null} elements. If the stream
+     * contains any {@code null} values, a {@code NullPointerException} will be thrown.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * efficiently combines partial results.</p>
@@ -1699,8 +1705,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned queue supports all optional {@code Queue} operations. There are no
      * guarantees on the thread-safety of the {@code Queue} returned.</p>
      *
-     * <p><b>Null Handling:</b> This collector accepts null elements as the underlying
-     * {@code Queue} implementation supports null values.</p>
+     * <p><b>Null Handling:</b> This collector accepts {@code null} elements as the underlying
+     * {@code Queue} implementation supports {@code null} values.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * efficiently combines partial results.</p>
@@ -1735,8 +1741,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are added to the deque in encounter order. The deque can be used for
      * both FIFO and LIFO (Last-In-First-Out) operations.</p>
      *
-     * <p><b>Null Handling:</b> This collector accepts null elements as the underlying
-     * {@code Deque} implementation supports null values.</p>
+     * <p><b>Null Handling:</b> This collector accepts {@code null} elements as the underlying
+     * {@code Deque} implementation supports {@code null} values.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams and
      * efficiently combines partial results.</p>
@@ -1952,6 +1958,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects all input elements into an array
      */
     public static <T, A> Collector<T, ?, A[]> toArray(final Supplier<A[]> arraySupplier) {
+        N.checkArgNotNull(arraySupplier, "arraySupplier");
+
         final Supplier<List<A>> supplier = Suppliers.ofList();
         @SuppressWarnings("rawtypes")
         final BiConsumer<List<A>, T> accumulator = (BiConsumer) BiConsumers.ofAdd();
@@ -2001,6 +2009,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects all input elements into an array
      */
     public static <T, A> Collector<T, ?, A[]> toArray(final IntFunction<A[]> arraySupplier) {
+        N.checkArgNotNull(arraySupplier, "arraySupplier");
+
         final Supplier<List<A>> supplier = Suppliers.ofList();
         @SuppressWarnings("rawtypes")
         final BiConsumer<List<A>, T> accumulator = (BiConsumer) BiConsumers.ofAdd();
@@ -2647,8 +2657,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector captures the first element encountered in the stream. If the stream
      * is empty, it returns an empty {@code Optional}. This collector is designed for
-     * sequential streams only and will throw an {@code UnsupportedOperationException}
-     * if used with parallel streams.</p>
+     * sequential streams only. Its combiner throws an {@code UnsupportedOperationException}
+     * when two nonempty partial results are combined, so parallel use is unsupported even
+     * though an empty or otherwise unsplit parallel reduction might happen to complete.</p>
      *
      * <p>Note that this is different from {@code findFirst()} as it's implemented as a
      * collector and can be combined with other collectors.</p>
@@ -2663,7 +2674,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T> the type of input elements
      * @return a {@code Collector} which collects the first element into an {@code Optional}
-     * @throws UnsupportedOperationException if used with parallel streams
+     * @throws UnsupportedOperationException if a reduction combines two nonempty partial results
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> first() {
@@ -2681,8 +2692,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector captures the last element encountered in the stream. If the stream
      * is empty, it returns an empty {@code Optional}. This collector is designed for
-     * sequential streams only and will throw an {@code UnsupportedOperationException}
-     * if used with parallel streams.</p>
+     * sequential streams only. Its combiner throws an {@code UnsupportedOperationException}
+     * when two nonempty partial results are combined, so parallel use is unsupported even
+     * though an empty or otherwise unsplit parallel reduction might happen to complete.</p>
      *
      * <p>Each element encountered replaces the previous one, so the final result is
      * the last element in encounter order.</p>
@@ -2697,7 +2709,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T> the type of input elements
      * @return a {@code Collector} which collects the last element into an {@code Optional}
-     * @throws UnsupportedOperationException if used with parallel streams
+     * @throws UnsupportedOperationException if a reduction combines two nonempty partial results
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> last() {
@@ -2715,8 +2727,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector captures up to the first n elements encountered in the stream.
      * If the stream contains fewer than n elements, all elements are collected. This
-     * collector is designed for sequential streams only and will throw an
-     * {@code UnsupportedOperationException} if used with parallel streams.</p>
+     * collector is designed for sequential streams only. Its combiner throws an
+     * {@code UnsupportedOperationException} when two nonempty partial results are combined,
+     * so parallel use is unsupported even though an empty or otherwise unsplit parallel
+     * reduction might happen to complete.</p>
      *
      * <p>The collector stops accumulating once n elements have been collected, making
      * it efficient for large streams when you only need the first few elements.</p>
@@ -2733,7 +2747,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param n the maximum number of elements to collect
      * @return a {@code Collector} which collects the first n elements into a {@code List}
      * @throws IllegalArgumentException if n is negative
-     * @throws UnsupportedOperationException if used with parallel streams
+     * @throws UnsupportedOperationException if a reduction combines two nonempty partial results
      */
     public static <T> Collector<T, ?, List<T>> first(final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -2763,11 +2777,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector maintains a sliding window of the last n elements encountered.
      * It uses a {@code LinkedList}-based {@code Deque} internally for efficient addition
-     * and removal of elements at both ends, which also allows null elements to be
+     * and removal of elements at both ends, which also allows {@code null} elements to be
      * collected.</p>
      *
-     * <p>This collector is designed for sequential streams only and will throw an
-     * {@code UnsupportedOperationException} if used with parallel streams.</p>
+     * <p>This collector is designed for sequential streams only. Its combiner throws an
+     * {@code UnsupportedOperationException} when two nonempty partial results are combined,
+     * so parallel use is unsupported even though an empty or otherwise unsplit parallel
+     * reduction might happen to complete.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2781,7 +2797,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param n the maximum number of elements to collect
      * @return a {@code Collector} which collects the last n elements into a {@code List}
      * @throws IllegalArgumentException if n is negative
-     * @throws UnsupportedOperationException if used with parallel streams
+     * @throws UnsupportedOperationException if a reduction combines two nonempty partial results
      */
     public static <T> Collector<T, ?, List<T>> last(final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -2861,6 +2877,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param delimiter the delimiter to be used between each element
      * @return a {@code Collector} which concatenates input elements, separated by the
      *         specified delimiter, into a {@code String}
+     * @throws IllegalArgumentException if {@code delimiter} is {@code null}
      */
     public static Collector<Object, ?, String> joining(final CharSequence delimiter) {
         return joining(delimiter, "", "");
@@ -2878,6 +2895,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * internal buffers for better performance. Elements are converted to strings using
      * their {@code toString()} method.</p>
      *
+     * <p>The delimiter, prefix, and suffix are converted to immutable {@code String}
+     * snapshots when this method is called. Later mutations of a supplied mutable
+     * {@code CharSequence} therefore do not change the collector's formatting.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a formatted list
@@ -2891,11 +2912,22 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param suffix the sequence of characters to be used at the end
      * @return a {@code Collector} which concatenates input elements, separated by the
      *         specified delimiter, into a {@code String} with the specified prefix and suffix
+     * @throws IllegalArgumentException if {@code delimiter}, {@code prefix}, or {@code suffix} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static Collector<Object, ?, String> joining(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) {
+        N.checkArgNotNull(delimiter, "delimiter");
+        N.checkArgNotNull(prefix, "prefix");
+        N.checkArgNotNull(suffix, "suffix");
+
+        // Snapshot mutable CharSequence arguments once. Every parallel accumulation container
+        // must use the same formatting configuration even if a caller later mutates an argument.
+        final String delimiterString = delimiter.toString();
+        final String prefixString = prefix.toString();
+        final String suffixString = suffix.toString();
+
         @SuppressWarnings("resource")
-        final Supplier<Joiner> supplier = () -> Joiner.with(delimiter, prefix, suffix).reuseBuffer();
+        final Supplier<Joiner> supplier = () -> Joiner.with(delimiterString, prefixString, suffixString).reuseBuffer();
 
         final BiConsumer<Joiner, Object> accumulator = Joiner_Accumulator;
         final BinaryOperator<Joiner> combiner = Joiner_Combiner;
@@ -2933,6 +2965,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #filteringToList(Predicate)
      */
     public static <T, A, R> Collector<T, ?, R> filtering(final Predicate<? super T> predicate, final Collector<? super T, A, R> downstream) {
+        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(downstream, "downstream");
+
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
 
         final BiConsumer<A, T> accumulator = (a, t) -> {
@@ -3005,6 +3040,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         provides the mapped results to the downstream collector
      */
     public static <T, U, A, R> Collector<T, ?, R> mapping(final Function<? super T, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(downstream, "downstream");
+
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
         final BiConsumer<A, T> accumulator = (a, t) -> downstreamAccumulator.accept(a, mapper.apply(t));
@@ -3073,6 +3111,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends U>> mapper,
             final Collector<? super U, A, R> downstream) {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(downstream, "downstream");
+
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
         final BiConsumer<A, T> accumulator = (a, t) -> {
@@ -3153,6 +3194,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends U>> mapper, // NOSONAR
             final Collector<? super U, A, R> downstream) {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(downstream, "downstream");
+
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
         final BiConsumer<A, T> accumulator = (a, t) -> {
@@ -3207,7 +3251,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * collected data.</p>
      *
      * <p>The characteristics of the returned collector are derived from the downstream
-     * collector, with {@code IDENTITY_FINISH} and {@code CONCURRENT} removed if present.</p>
+     * collector, with only {@code IDENTITY_FINISH} removed. In particular, a concurrent
+     * downstream collector remains concurrent because the additional finisher runs only
+     * after accumulation has completed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3240,10 +3286,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         Set<Characteristics> characteristics = downstream.characteristics();
 
-        if (characteristics.contains(Characteristics.IDENTITY_FINISH) || characteristics.contains(Characteristics.CONCURRENT)) {
+        if (characteristics.contains(Characteristics.IDENTITY_FINISH)) {
             characteristics = EnumSet.copyOf(characteristics);
             characteristics.remove(Characteristics.IDENTITY_FINISH);
-            characteristics.remove(Characteristics.CONCURRENT);
             characteristics = characteristics.isEmpty() ? N.emptySet() : Collections.unmodifiableSet(characteristics);
         }
 
@@ -3279,7 +3324,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param collector the downstream collector
      * @return a collector which returns an {@code Optional} of the collected result,
      *         or empty if no elements were collected
-     * @throws IllegalArgumentException if collector is null
+     * @throws IllegalArgumentException if {@code collector} is {@code null}
      */
     @Beta
     public static <T, A, R> Collector<T, ?, Optional<R>> collectingOrEmpty(final Collector<T, A, R> collector) throws IllegalArgumentException {
@@ -3346,7 +3391,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param defaultForEmpty the default value to return if no elements are collected
      * @return a collector which returns the collected result, or the default value if
      *         no elements were collected
-     * @throws IllegalArgumentException if collector is null
+     * @throws IllegalArgumentException if {@code collector} is {@code null}
      */
     @Beta
     public static <T, A, R> Collector<T, ?, R> collectingOrDefaultIfEmpty(final Collector<T, A, R> collector, final R defaultForEmpty) {
@@ -3379,12 +3424,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param defaultForEmpty a supplier for the default value if no elements are collected
      * @return a collector which returns the collected result, or the supplied default value
      *         if no elements were collected
-     * @throws IllegalArgumentException if collector is null
+     * @throws IllegalArgumentException if {@code collector} or {@code defaultForEmpty} is {@code null}
      */
     @Beta
     public static <T, A, R> Collector<T, ?, R> collectingOrElseGetIfEmpty(final Collector<T, A, R> collector, final Supplier<? extends R> defaultForEmpty)
             throws IllegalArgumentException {
         N.checkArgNotNull(collector);
+        N.checkArgNotNull(defaultForEmpty, "defaultForEmpty");
 
         final Supplier<A> downstreamSupplier = collector.supplier();
         final BiConsumer<A, T> downstreamAccumulator = collector.accumulator();
@@ -3480,12 +3526,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param exceptionSupplier supplier for the exception to throw if no elements are collected
      * @return a collector which returns the collected result, or throws if no elements
      *         were collected
-     * @throws IllegalArgumentException if collector is null
+     * @throws IllegalArgumentException if {@code collector} or {@code exceptionSupplier} is {@code null}
      * @throws RuntimeException the exception supplied by {@code exceptionSupplier} if no elements are collected
      */
     @Beta
     public static <T, A, R> Collector<T, ?, R> collectingOrElseThrowIfEmpty(final Collector<T, A, R> collector,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
+        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+
         return collectingOrElseGetIfEmpty(collector, () -> {
             throw exceptionSupplier.get();
         });
@@ -3549,6 +3597,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> distinctByToCollection(final Function<? super T, ?> keyMapper,
             final Supplier<? extends C> supplier) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(supplier, cs.supplier);
+
         final Supplier<Map<Object, T>> mappSupplier = Suppliers.ofLinkedHashMap();
 
         final BiConsumer<Map<Object, T>, T> accumulator = (map, t) -> {
@@ -3606,6 +3657,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         function returns for the stream elements
      */
     public static <T> Collector<T, ?, Integer> distinctByToCounting(final Function<? super T, ?> keyMapper) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+
         final Supplier<Set<Object>> supplier = Suppliers.ofSet();
 
         final BiConsumer<Set<Object>, T> accumulator = (c, t) -> c.add(keyMapper.apply(t));
@@ -4491,6 +4544,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you want to find all minimal elements but
      * limit the result size for memory efficiency.</p>
      *
+     * <p>Comparator-equal elements are retained in encounter order. Consequently, the returned
+     * collector does not have the {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find at most 5 minimum values
@@ -4505,6 +4561,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which finds at most the specified number of minimal elements
      */
     public static <T> Collector<T, ?, List<T>> minAll(final Comparator<? super T> comparator, final int atMostSize) {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return maxAll(Comparators.reverseOrder(comparator), atMostSize);
     }
 
@@ -4553,6 +4611,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * specified {@link Comparator}. The found elements are reduced using the
      * specified downstream {@code Collector}.
      *
+     * <p>The returned collector is unordered only when the downstream collector is unordered;
+     * otherwise comparator-equal elements retain the downstream collector's encounter-order requirements.</p>
+     *
+     * <p>Whenever a strictly smaller element is encountered, a fresh downstream accumulation
+     * container is obtained from the downstream supplier. This permits downstream collectors
+     * whose accumulation state cannot be reset by clearing collection or map elements.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find all people with minimum age and collect to a set
@@ -4579,6 +4644,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #minAll()
      */
     public static <T, R> Collector<T, ?, R> minAll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return maxAll(Comparators.reverseOrder(comparator), downstream);
     }
 
@@ -4649,6 +4716,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides maximum flexibility by allowing transformation
      * of the final result.</p>
      *
+     * <p>If several minimal elements compare equal, the pair contains the first encountered one.
+     * Consequently, the returned collector does not have the
+     * {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find minimum and format result
@@ -4672,6 +4743,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     @Beta
     public static <T, R, RR> Collector<T, ?, RR> minAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
             final Function<Optional<Pair<T, R>>, RR> finisher) {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return maxAllWith(Comparators.reverseOrder(comparator), downstream, finisher);
     }
 
@@ -4746,6 +4819,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when you want to find all maximal elements but
      * limit the result size for memory efficiency.</p>
      *
+     * <p>Comparator-equal elements are retained in encounter order. Consequently, the returned
+     * collector does not have the {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find at most 3 maximum values
@@ -4759,7 +4835,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param atMostSize the maximum number of maximal elements to collect
      * @return a {@code Collector} which finds at most the specified number of maximal elements
      */
-    public static <T> Collector<T, ?, List<T>> maxAll(final Comparator<? super T> comparator, final int atMostSize) {
+    public static <T> Collector<T, ?, List<T>> maxAll(final Comparator<? super T> comparator, final int atMostSize) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
         N.checkArgNotNegative(atMostSize, "atMostSize");
 
         final Supplier<Pair<T, List<T>>> supplier = () -> {
@@ -4816,7 +4893,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Pair<T, List<T>>, List<T>> finisher = Pair::right;
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        // Comparator-equal elements retain encounter order in the result list.
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -4864,6 +4942,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * specified {@link Comparator}. The found elements are reduced using the
      * specified downstream {@code Collector}.
      *
+     * <p>The returned collector is unordered only when the downstream collector is unordered;
+     * otherwise comparator-equal elements retain the downstream collector's encounter-order requirements.</p>
+     *
+     * <p>Whenever a strictly greater element is encountered, a fresh downstream accumulation
+     * container is obtained from the downstream supplier. This permits downstream collectors
+     * whose accumulation state cannot be reset by clearing collection or map elements.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find all people with maximum age and collect to a set
@@ -4889,40 +4974,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #maxAll(Collector)
      * @see #maxAll()
      */
-    @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> maxAll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(downstream, "downstream");
+
         final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
         final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) downstream.accumulator();
         final BinaryOperator<Object> downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
         final Function<Object, R> downstreamFinisher = (Function<Object, R>) downstream.finisher();
-        final MutableBoolean isCollection = MutableBoolean.of(false);
-        final MutableBoolean isMap = MutableBoolean.of(false);
-
-        final Supplier<Pair<T, Object>> supplier = () -> {
-            final Object container = downstreamSupplier.get();
-
-            if (container instanceof Collection<?> coll && coll.isEmpty()) {
-                try {
-                    //noinspection RedundantOperationOnEmptyContainer
-                    coll.clear();
-
-                    isCollection.setTrue();
-                } catch (final Exception e) {
-                    // ignore
-                }
-            } else if (container instanceof Map<?, ?> map && map.isEmpty()) {
-                try {
-                    //noinspection RedundantOperationOnEmptyContainer
-                    map.clear();
-
-                    isMap.setTrue();
-                } catch (final Exception e) {
-                    // ignore
-                }
-            }
-
-            return Pair.of((T) none(), container);
-        };
+        final Supplier<Pair<T, Object>> supplier = () -> Pair.of((T) none(), downstreamSupplier.get());
 
         final BiConsumer<Pair<T, Object>, T> accumulator = (a, t) -> {
             if (a.left() == NONE) {
@@ -4932,14 +4992,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 final int cmp = comparator.compare(t, a.left());
 
                 if (cmp > 0) {
-                    if (isCollection.isTrue()) {
-                        ((Collection) a.right()).clear();
-                    } else if (isMap.isTrue()) {
-                        ((Map) a.right()).clear();
-                    } else {
-                        a.setRight(downstreamSupplier.get());
-                    }
-
+                    // Downstream accumulation containers are opaque. clear() is not guaranteed to
+                    // restore state outside Collection/Map elements, so obtain a fresh identity.
+                    a.setRight(downstreamSupplier.get());
                     a.setLeft(t);
                 }
 
@@ -4971,7 +5026,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Pair<T, Object>, R> finisher = t -> downstreamFinisher.apply(t.right());
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        // Selecting the maximum is order-insensitive, but accumulating comparator-equal
+        // elements is only unordered when the downstream collector is unordered.
+        final Characteristics[] characteristics = downstream.characteristics().contains(Characteristics.UNORDERED) ? CH_UNORDERED_NOID : CH_NOID;
+        return create(supplier, accumulator, combiner, finisher, characteristics);
     }
 
     /**
@@ -5041,6 +5099,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides maximum flexibility by allowing transformation
      * of the final result.</p>
      *
+     * <p>If several maximal elements compare equal, the pair contains the first encountered one.
+     * Consequently, the returned collector does not have the
+     * {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
+     *
+     * <p>Whenever a strictly greater element is encountered, a fresh downstream accumulation
+     * container is obtained from the downstream supplier. This permits downstream collectors
+     * whose accumulation state cannot be reset by clearing collection or map elements.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find maximum and create custom result
@@ -5061,41 +5127,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which finds the maximum and transforms the result
      */
     @Beta
-    @SuppressWarnings("rawtypes")
     public static <T, R, RR> Collector<T, ?, RR> maxAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
             final Function<Optional<Pair<T, R>>, RR> finisher) {
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(downstream, "downstream");
+        N.checkArgNotNull(finisher, cs.finisher);
+
         final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
         final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) downstream.accumulator();
         final BinaryOperator<Object> downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
         final Function<Object, R> downstreamFinisher = (Function<Object, R>) downstream.finisher();
-        final MutableBoolean isCollection = MutableBoolean.of(false);
-        final MutableBoolean isMap = MutableBoolean.of(false);
-
-        final Supplier<Pair<T, Object>> supplier = () -> {
-            final Object container = downstreamSupplier.get();
-
-            if (container instanceof Collection<?> coll && coll.isEmpty()) {
-                try {
-                    //noinspection RedundantOperationOnEmptyContainer
-                    coll.clear();
-
-                    isCollection.setTrue();
-                } catch (final Exception e) {
-                    // ignore
-                }
-            } else if (container instanceof Map<?, ?> map && map.isEmpty()) {
-                try {
-                    //noinspection RedundantOperationOnEmptyContainer
-                    map.clear();
-
-                    isMap.setTrue();
-                } catch (final Exception e) {
-                    // ignore
-                }
-            }
-
-            return Pair.of((T) none(), container);
-        };
+        final Supplier<Pair<T, Object>> supplier = () -> Pair.of((T) none(), downstreamSupplier.get());
 
         final BiConsumer<Pair<T, Object>, T> accumulator = (a, t) -> {
             if (a.left() == NONE) {
@@ -5105,14 +5147,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 final int cmp = comparator.compare(t, a.left());
 
                 if (cmp > 0) {
-                    if (isCollection.isTrue()) {
-                        ((Collection) a.right()).clear();
-                    } else if (isMap.isTrue()) {
-                        ((Map) a.right()).clear();
-                    } else {
-                        a.setRight(downstreamSupplier.get());
-                    }
-
+                    // See maxAll(comparator, downstream): a fresh downstream identity is required.
+                    a.setRight(downstreamSupplier.get());
                     a.setLeft(t);
                 }
 
@@ -5147,7 +5183,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             return finisher.apply(result);
         };
 
-        return create(supplier, accumulator, combiner, finalFinisher, CH_UNORDERED_NOID);
+        // The representative maximum stored in Pair.left is the first comparator-equal element,
+        // so the result remains encounter-order-sensitive even with an unordered downstream.
+        return create(supplier, accumulator, combiner, finalFinisher, CH_NOID);
     }
 
     /**
@@ -5155,7 +5193,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * a stream of {@code Comparable} elements.
      *
      * <p>This collector finds both the minimum and maximum elements according to their
-     * natural ordering. Null values are ignored if the stream contains any non-null element.
+     * natural ordering. Null values are ignored if the stream contains any {@code non-null} element.
      * If the stream is empty, an empty {@code Optional} is returned. If all elements are
      * {@code null}, an {@code Optional} containing {@code Pair.of(null, null)} is returned.</p>
      *
@@ -5184,7 +5222,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * a stream according to the specified comparator.
      *
      * <p>This collector finds both the minimum and maximum elements according to the
-     * provided comparator. If the stream is empty, an empty {@code Optional} is returned.</p>
+     * provided comparator. If the stream is empty, an empty {@code Optional} is returned.
+     * Null input elements are passed to the comparator, so a null-aware comparator can select
+     * {@code null} as a legitimate minimum or maximum.</p>
      *
      * <p>The collector produces a stable result for ordered streams: if several
      * minimal or maximal elements appear, the collector always selects the
@@ -5202,6 +5242,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator comparator used to compare elements
      * @return a {@code Collector} which finds the minimum and maximum elements,
      *         wrapped in an {@code Optional<Pair>}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #minMax(Comparator, BiFunction)
      */
     public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMax(final Comparator<? super T> comparator) {
@@ -5223,7 +5264,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>If there are no input elements, the finisher method is not called and
      * empty {@code Optional} is returned. Otherwise, the finisher result is
-     * wrapped into {@code Optional}.</p>
+     * wrapped into {@code Optional}; a {@code null} finisher result produces an empty
+     * {@code Optional}. Null input elements are passed to the supplied comparator, so
+     * null-aware comparators can select {@code null} as a legitimate minimum or maximum.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5238,14 +5281,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator comparator which is used to find the minimal and maximal elements
      * @param finisher a {@link BiFunction} which takes the minimal and maximal elements and produces the final result
      * @return a {@code Collector} which finds minimal and maximal elements
+     * @throws IllegalArgumentException if {@code comparator} or {@code finisher} is {@code null}
      */
     public static <T, R> Collector<T, ?, Optional<R>> minMax(final Comparator<? super T> comparator,
             final BiFunction<? super T, ? super T, ? extends R> finisher) {
+        N.checkArgNotNull(finisher, cs.finisher);
 
-        final BiFunction<Optional<T>, Optional<T>, Optional<R>> finisher2 = (min,
-                max) -> min.isPresent() ? Optional.of((R) finisher.apply(min.get(), max.get())) : Optional.empty();
-
-        return MoreCollectors.combine(Collectors.min(comparator), Collectors.max(comparator), finisher2);
+        return minMax(comparator, a -> a.present ? Optional.ofNullable((R) finisher.apply(a.min, a.max)) : Optional.empty());
     }
 
     /**
@@ -5310,7 +5352,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector is similar to {@link #minMax()}, but instead of returning an
      * {@code Optional}, it returns the result of the supplier function when the stream
-     * is empty. Null values are ignored if the stream contains any non-null element. If
+     * is empty. Null values are ignored if the stream contains any {@code non-null} element. If
      * all elements are {@code null}, {@code Pair.of(null, null)} is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5325,9 +5367,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param supplierForEmpty supplier that provides a default {@code Pair} when stream is empty
      * @return a {@code Collector} which finds the minimum and maximum elements,
      *         or returns the supplied default if stream is empty
+     * @throws IllegalArgumentException if {@code supplierForEmpty} is {@code null}
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(
             final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) {
+        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+
         return naturalMinMax(a -> a.present ? Pair.of(a.min, a.max) : (Pair<T, T>) supplierForEmpty.get());
     }
 
@@ -5336,7 +5381,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to the specified comparator, returning a default value if the stream is empty.
      *
      * <p>This collector finds both extremes according to the given comparator.
-     * If the stream is empty, the supplier function is called to provide a default result.</p>
+     * If the stream is empty, the supplier function is called to provide a default result.
+     * Null input elements are passed to the comparator, so a null-aware comparator can select
+     * {@code null} as a legitimate minimum or maximum without invoking the fallback.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5353,16 +5400,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param supplierForEmpty supplier that provides a default {@code Pair} when stream is empty
      * @return a {@code Collector} which finds the minimum and maximum elements,
      *         or returns the supplied default if stream is empty
+     * @throws IllegalArgumentException if {@code comparator} or {@code supplierForEmpty} is {@code null}
      */
     public static <T> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(final Comparator<? super T> comparator,
             final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) {
-        return MoreCollectors.combine(Collectors.min(comparator), Collectors.max(comparator), (min, max) -> {
-            if (min.isPresent()) {
-                return Pair.of(min.get(), max.get());
-            } else {
-                return (Pair<T, T>) supplierForEmpty.get();
-            }
-        });
+        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+
+        return minMax(comparator, a -> a.present ? Pair.of(a.min, a.max) : (Pair<T, T>) supplierForEmpty.get());
     }
 
     /**
@@ -5371,7 +5415,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector is useful when an empty stream represents an error condition
      * in your application logic. Null values are ignored if the stream contains any
-     * non-null element. If all elements are {@code null}, {@code Pair.of(null, null)}
+     * {@code non-null} element. If all elements are {@code null}, {@code Pair.of(null, null)}
      * is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5401,7 +5445,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * to the specified comparator, throwing an exception if the stream is empty.
      *
      * <p>This collector finds both extremes according to the given comparator.
-     * If the stream is empty, a {@code NoSuchElementException} is thrown.</p>
+     * If the stream is empty, a {@code NoSuchElementException} is thrown. Null input elements
+     * are passed to the comparator, so a null-aware comparator can select {@code null} as a
+     * legitimate minimum or maximum.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5416,9 +5462,75 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator comparator used to compare elements
      * @return a {@code Collector} which finds the minimum and maximum elements
      * @throws NoSuchElementException if the stream is empty
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     public static <T> Collector<T, ?, Pair<T, T>> minMaxOrElseThrow(final Comparator<? super T> comparator) {
-        return MoreCollectors.combine(Collectors.minOrElseThrow(comparator), Collectors.maxOrElseThrow(comparator), Fn.pair());
+        return minMax(comparator, a -> {
+            if (a.present) {
+                return Pair.of(a.min, a.max);
+            }
+
+            throw noSuchElementExceptionSupplier.get();
+        });
+    }
+
+    private static <T, R> Collector<T, ?, R> minMax(final Comparator<? super T> comparator, final Function<MinMaxHolder<T>, R> finisher) {
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(finisher, cs.finisher);
+
+        final Supplier<MinMaxHolder<T>> supplier = () -> new MinMaxHolder<>(comparator);
+
+        return create(supplier, MinMaxHolder::accept, MinMaxHolder::combine, finisher, CH_NOID);
+    }
+
+    private static final class MinMaxHolder<T> {
+        private final Comparator<? super T> comparator;
+        private T min;
+        private T max;
+        private boolean present;
+
+        MinMaxHolder(final Comparator<? super T> comparator) {
+            this.comparator = comparator;
+        }
+
+        void accept(final T value) {
+            if (!present) {
+                min = value;
+                max = value;
+                present = true;
+                return;
+            }
+
+            if (comparator.compare(value, min) < 0) {
+                min = value;
+            }
+
+            if (comparator.compare(value, max) > 0) {
+                max = value;
+            }
+        }
+
+        MinMaxHolder<T> combine(final MinMaxHolder<T> other) {
+            if (!other.present) {
+                return this;
+            } else if (!present) {
+                min = other.min;
+                max = other.max;
+                present = true;
+                return this;
+            }
+
+            // Keep the left (earlier) value on ties to preserve encounter-order stability.
+            if (comparator.compare(other.min, min) < 0) {
+                min = other.min;
+            }
+
+            if (comparator.compare(other.max, max) > 0) {
+                max = other.max;
+            }
+
+            return this;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -5447,6 +5559,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the sum of the extracted values
      */
     public static <T> Collector<T, ?, Integer> summingInt(final ToIntFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<int[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
 
         return create(SummingInt_Supplier, accumulator, SummingInt_Combiner, SummingInt_Finisher, CH_UNORDERED_NOID);
@@ -5473,6 +5587,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the sum as a {@code Long}
      */
     public static <T> Collector<T, ?, Long> summingIntToLong(final ToIntFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
 
         return create(SummingIntToLong_Supplier, accumulator, SummingIntToLong_Combiner, SummingIntToLong_Finisher, CH_UNORDERED_NOID);
@@ -5498,6 +5614,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the sum of the extracted values
      */
     public static <T> Collector<T, ?, Long> summingLong(final ToLongFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsLong(t);
 
         return create(SummingLong_Supplier, accumulator, SummingLong_Combiner, SummingLong_Finisher, CH_UNORDERED_NOID);
@@ -5511,6 +5629,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If no elements are present, the result is 0.0. The sum is computed using
      * Kahan summation algorithm for improved numerical accuracy with floating-point values.</p>
      *
+     * <p>Floating-point addition remains order-sensitive even with compensated summation,
+     * so the returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sum prices with decimal values
@@ -5523,9 +5645,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the sum of the extracted values
      */
     public static <T> Collector<T, ?, Double> summingDouble(final ToDoubleFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
-        return create(SummingDouble_Supplier, accumulator, SummingDouble_Combiner, SummingDouble_Finisher, CH_UNORDERED_NOID);
+        return create(SummingDouble_Supplier, accumulator, SummingDouble_Combiner, SummingDouble_Finisher, CH_NOID);
     }
 
     /**
@@ -5549,6 +5673,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the sum of the extracted values
      */
     public static <T> Collector<T, ?, BigInteger> summingBigInteger(final Function<? super T, BigInteger> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<BigInteger[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
 
         return create(SummingBigInteger_Supplier, accumulator, SummingBigInteger_Combiner, SummingBigInteger_Finisher, CH_UNORDERED_NOID);
@@ -5574,6 +5700,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the sum of the extracted values
      */
     public static <T> Collector<T, ?, BigDecimal> summingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
 
         return create(SummingBigDecimal_Supplier, accumulator, SummingBigDecimal_Combiner, SummingBigDecimal_Finisher, CH_UNORDERED_NOID);
@@ -5622,6 +5750,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see java.util.stream.Collectors#averagingInt(ToIntFunction)
      */
     public static <T> Collector<T, ?, Double> averagingInt(final ToIntFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return java.util.stream.Collectors.averagingInt(mapper);
     }
 
@@ -5633,7 +5763,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * using the provided mapper function, then calculating the arithmetic mean of all values.
      * Unlike {@link #averagingInt(ToIntFunction)}, this method returns an {@code OptionalDouble}
      * which will be empty if no elements are present in the stream. This allows for safer
-     * handling of empty streams without having to distinguish between a true zero average
+     * handling of empty streams without having to distinguish between a {@code true} zero average
      * and the absence of elements.</p>
      *
      * <p>The average is computed and returned as a double-precision floating-point value
@@ -5668,6 +5798,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingIntOrElseThrow(ToIntFunction)
      */
     public static <T> Collector<T, ?, OptionalDouble> averagingIntOrEmpty(final ToIntFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsInt(t);
             a[1]++;
@@ -5724,6 +5856,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingIntOrEmpty(ToIntFunction)
      */
     public static <T> Collector<T, ?, Double> averagingIntOrElseThrow(final ToIntFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsInt(t);
             a[1]++;
@@ -5743,6 +5877,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This method delegates to the standard Java {@link java.util.stream.Collectors#averagingLong(ToLongFunction)}
      * implementation for compatibility with the Java Stream API.</p>
+     *
+     * <p>The running sum and element count use {@code long} arithmetic, so either can wrap on overflow.
+     * A wrapped nonzero count is used in the final division; if the count wraps to zero, the finisher
+     * returns {@code 0.0}, just as it does for an empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5774,6 +5912,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see java.util.stream.Collectors#averagingLong(ToLongFunction)
      */
     public static <T> Collector<T, ?, Double> averagingLong(final ToLongFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return java.util.stream.Collectors.averagingLong(mapper);
     }
 
@@ -5785,11 +5925,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * using the provided mapper function, then calculating the arithmetic mean of all values.
      * Unlike {@link #averagingLong(ToLongFunction)}, this method returns an {@code OptionalDouble}
      * which will be empty if no elements are present in the stream. This allows for safer
-     * handling of empty streams without having to distinguish between a true zero average
+     * handling of empty streams without having to distinguish between a {@code true} zero average
      * and the absence of elements.</p>
      *
      * <p>The average is computed and returned as a double-precision floating-point value
      * to preserve fractional precision.</p>
+     *
+     * <p>The running sum and element count use {@code long} arithmetic, so either can wrap on overflow.
+     * A wrapped nonzero count is used in the final division; if the count wraps to zero, the finisher
+     * returns {@link OptionalDouble#empty()} even though elements were processed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5821,6 +5965,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingLongOrElseThrow(ToLongFunction)
      */
     public static <T> Collector<T, ?, OptionalDouble> averagingLongOrEmpty(final ToLongFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsLong(t);
             a[1]++;
@@ -5843,6 +5989,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>The average is computed and returned as a double-precision floating-point value
      * to preserve fractional precision.</p>
+     *
+     * <p>The running sum and element count use {@code long} arithmetic, so either can wrap on overflow.
+     * A wrapped nonzero count is used in the final division; if the count wraps to zero, the finisher
+     * throws {@link NoSuchElementException}, just as it does for an empty input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5873,6 +6023,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingLongOrEmpty(ToLongFunction)
      */
     public static <T> Collector<T, ?, Double> averagingLongOrElseThrow(final ToLongFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<long[], T> accumulator = (a, t) -> {
             a[0] += mapper.applyAsLong(t);
             a[1]++;
@@ -5925,6 +6077,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
      */
     public static <T> Collector<T, ?, Double> averagingDouble(final ToDoubleFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return java.util.stream.Collectors.averagingDouble(mapper);
     }
 
@@ -5936,10 +6090,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * using the provided mapper function, then calculating the arithmetic mean of all values.
      * Unlike {@link #averagingDouble(ToDoubleFunction)}, this method returns an {@code OptionalDouble}
      * which will be empty if no elements are present in the stream. This allows for safer
-     * handling of empty streams without having to distinguish between a true zero average
+     * handling of empty streams without having to distinguish between a {@code true} zero average
      * and the absence of elements.</p>
      *
      * <p>The average is computed and returned as a double-precision floating-point value.</p>
+     *
+     * <p>Floating-point addition remains order-sensitive even with compensated summation,
+     * so the returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5972,9 +6130,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingDoubleOrElseThrow(ToDoubleFunction)
      */
     public static <T> Collector<T, ?, OptionalDouble> averagingDoubleOrEmpty(final ToDoubleFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
-        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_op, CH_UNORDERED_NOID);
+        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_op, CH_NOID);
     }
 
     /**
@@ -5990,6 +6150,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * a default value.</p>
      *
      * <p>The average is computed and returned as a double-precision floating-point value.</p>
+     *
+     * <p>Floating-point addition remains order-sensitive even with compensated summation,
+     * so the returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6025,9 +6189,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingDoubleOrEmpty(ToDoubleFunction)
      */
     public static <T> Collector<T, ?, Double> averagingDoubleOrElseThrow(final ToDoubleFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
 
-        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_orElseThrow, CH_UNORDERED_NOID);
+        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher_orElseThrow, CH_NOID);
     }
 
     /**
@@ -6069,6 +6235,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingBigIntegerOrElseThrow(Function)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -6085,7 +6253,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * using the provided mapper function, then calculating the arithmetic mean of all values.
      * Unlike {@link #averagingBigInteger(Function)}, this method returns an {@code Optional<BigDecimal>}
      * which will be empty if no elements are present in the stream. This allows for safer handling
-     * of empty streams without having to distinguish between a true zero average and the absence
+     * of empty streams without having to distinguish between a {@code true} zero average and the absence
      * of elements.</p>
      *
      * <p>The average is calculated as a {@code BigDecimal} to preserve precision.</p>
@@ -6118,6 +6286,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingBigIntegerOrElseThrow(Function)
      */
     public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigIntegerOrEmpty(final Function<? super T, BigInteger> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -6168,6 +6338,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingBigIntegerOrEmpty(Function)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerOrElseThrow(final Function<? super T, BigInteger> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -6224,6 +6396,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingBigDecimalOrElseThrow(Function)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -6240,7 +6414,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * using the provided mapper function, then calculating the arithmetic mean of all values.
      * Unlike {@link #averagingBigDecimal(Function)}, this method returns an {@code Optional<BigDecimal>}
      * which will be empty if no elements are present in the stream. This allows for safer handling
-     * of empty streams without having to distinguish between a true zero average and the absence
+     * of empty streams without having to distinguish between a {@code true} zero average and the absence
      * of elements.</p>
      *
      * <p>This collector is particularly useful for precise decimal arithmetic in scenarios where
@@ -6277,6 +6451,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingBigDecimalOrElseThrow(Function)
      */
     public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigDecimalOrEmpty(final Function<? super T, BigDecimal> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -6328,6 +6504,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #averagingBigDecimalOrEmpty(Function)
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalOrElseThrow(final Function<? super T, BigDecimal> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
             a.setLeft(a.left().add(mapper.apply(t)));
             a.right()[0] += 1;
@@ -6372,6 +6550,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, CharSummaryStatistics> summarizingChar(final ToCharFunction<? super T> mapper) { // NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<CharSummaryStatistics> supplier = SummarizingChar_Supplier;
 
         final BiConsumer<CharSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsChar(t));
@@ -6418,6 +6598,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) { // NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<ByteSummaryStatistics> supplier = SummarizingByte_Supplier;
 
         final BiConsumer<ByteSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsByte(t));
@@ -6463,6 +6645,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) { // NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<ShortSummaryStatistics> supplier = SummarizingShort_Supplier;
 
         final BiConsumer<ShortSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsShort(t));
@@ -6508,6 +6692,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, IntSummaryStatistics> summarizingInt(final ToIntFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<IntSummaryStatistics> supplier = SummarizingInt_Supplier;
 
         final BiConsumer<IntSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsInt(t));
@@ -6556,6 +6742,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, LongSummaryStatistics> summarizingLong(final ToLongFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<LongSummaryStatistics> supplier = SummarizingLong_Supplier;
 
         final BiConsumer<LongSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsLong(t));
@@ -6575,7 +6763,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * This is useful for analyzing floating-point data and obtaining multiple statistical measures
      * in a single, efficient pass through the stream.</p>
      *
-     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     * <p>The collector supports parallel streams, but its floating-point sum is
+     * order-sensitive. It therefore retains encounter-order requirements and does not have
+     * the {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6605,13 +6795,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) { // NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<FloatSummaryStatistics> supplier = SummarizingFloat_Supplier;
 
         final BiConsumer<FloatSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsFloat(t));
 
         final BinaryOperator<FloatSummaryStatistics> combiner = SummarizingFloat_Combiner;
 
-        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     /**
@@ -6624,7 +6816,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * This is useful for analyzing double-precision floating-point data and obtaining multiple
      * statistical measures in a single, efficient pass through the stream.</p>
      *
-     * <p>The collector is unordered and can be used efficiently in parallel streams.</p>
+     * <p>The collector supports parallel streams, but its floating-point sum is
+     * order-sensitive. It therefore retains encounter-order requirements and does not have
+     * the {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6654,13 +6848,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, DoubleSummaryStatistics> summarizingDouble(final ToDoubleFunction<? super T> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<DoubleSummaryStatistics> supplier = SummarizingDouble_Supplier;
 
         final BiConsumer<DoubleSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.applyAsDouble(t));
 
         final BinaryOperator<DoubleSummaryStatistics> combiner = SummarizingDouble_Combiner;
 
-        return create(supplier, accumulator, combiner, CH_UNORDERED_ID);
+        return create(supplier, accumulator, combiner, CH_ID);
     }
 
     /**
@@ -6705,6 +6901,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, BigIntegerSummaryStatistics> summarizingBigInteger(final Function<? super T, BigInteger> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<BigIntegerSummaryStatistics> supplier = SummarizingBigInteger_Supplier;
 
         final BiConsumer<BigIntegerSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.apply(t));
@@ -6755,6 +6953,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static <T> Collector<T, ?, BigDecimalSummaryStatistics> summarizingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final Supplier<BigDecimalSummaryStatistics> supplier = SummarizingBigDecimal_Supplier;
 
         final BiConsumer<BigDecimalSummaryStatistics, T> accumulator = (a, t) -> a.accept(mapper.apply(t));
@@ -6781,8 +6981,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     return result;
      * }</pre>
      *
-     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
-     * operator is associative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6816,6 +7017,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see java.util.stream.Collectors#reducing(Object, BinaryOperator)
      */
     public static <T> Collector<T, ?, T> reducing(final T identity, final BinaryOperator<T> op) {
+        N.checkArgNotNull(op, "op");
+
         final BiConsumer<Holder<T>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), t));
 
         final BinaryOperator<Holder<T>> combiner = (a, b) -> {
@@ -6826,7 +7029,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         @SuppressWarnings("rawtypes")
         final Function<Holder<T>, T> finisher = (Function) Reducing_Finisher_0;
 
-        return create(holderSupplier(identity), accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(holderSupplier(identity), accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -6841,8 +7044,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>If the stream is empty, an empty {@code Optional} is returned. This allows for safe
      * handling of the case where no reduction can be performed.</p>
      *
-     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
-     * operator is associative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6879,6 +7083,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> reducing(final BinaryOperator<T> op) {
+        N.checkArgNotNull(op, "op");
+
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
         final BiConsumer<OptHolder<T>, T> accumulator = (BiConsumer) Reducing_Accumulator;
@@ -6898,8 +7104,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the result of the supplier function instead of an empty {@code Optional} when
      * the stream is empty.</p>
      *
-     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
-     * operator is associative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6916,6 +7123,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> reducingOrElseGet(final BinaryOperator<T> op, final Supplier<? extends T> supplierForEmpty) {
+        N.checkArgNotNull(op, "op");
+        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
         final BiConsumer<OptHolder<T>, T> accumulator = (BiConsumer) Reducing_Accumulator;
@@ -6923,7 +7133,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<OptHolder<T>, T> finisher = a -> a.present ? a.value : supplierForEmpty.get();
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -6933,8 +7143,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector is useful when an empty stream represents an error condition.
      * It guarantees that a result will be produced or an exception will be thrown.</p>
      *
-     * <p>The collector is unordered, allowing for efficient parallel processing when the binary
-     * operator is associative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6961,8 +7172,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * with a custom exception. The collector applies the binary operator sequentially to combine
      * elements into a single result.</p>
      *
-     * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
-     * streams unless the binary operator is associative and commutative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6983,6 +7195,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> reducingOrElseThrow(final BinaryOperator<T> op, final Supplier<? extends RuntimeException> exceptionSupplier) {
+        N.checkArgNotNull(op, "op");
+        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
         final BiConsumer<OptHolder<T>, T> accumulator = (BiConsumer) Reducing_Accumulator;
@@ -6996,7 +7211,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -7008,8 +7223,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * value is used as the initial accumulation value and should be the identity for the binary
      * operator.</p>
      *
-     * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
-     * streams unless the binary operator is associative and commutative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7027,6 +7243,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which reduces the input elements
      */
     public static <T, R> Collector<T, ?, R> reducing(final R identity, final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(op, "op");
+
         final BiConsumer<Holder<R>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), mapper.apply(t)));
 
         final BinaryOperator<Holder<R>> combiner = (a, b) -> {
@@ -7038,7 +7257,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         @SuppressWarnings("rawtypes")
         final Function<Holder<R>, R> finisher = (Function) Reducing_Finisher_0;
 
-        return create(holderSupplier(identity), accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(holderSupplier(identity), accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -7049,8 +7268,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the mapped values using the binary operator. If no elements are present, an empty
      * {@code Optional} is returned.</p>
      *
-     * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
-     * streams unless the binary operator is associative and commutative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7071,13 +7291,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, Optional<R>> reducing(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(op, "op");
+
         final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
         final BiConsumer<MappingOptHolder<T, R>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
         final BinaryOperator<MappingOptHolder<T, R>> combiner = (BinaryOperator) Reducing_Combiner_2;
         final Function<MappingOptHolder<T, R>, Optional<R>> finisher = (Function) Reducing_Finisher_2;
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     private static <T> Supplier<Holder<T>> holderSupplier(final T identity) {
@@ -7189,8 +7412,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the mapped values using the binary operator. If no elements are present, the value from
      * the supplier is returned.</p>
      *
-     * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
-     * streams unless the binary operator is associative and commutative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7214,13 +7438,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> reducingOrElseGet(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op,
             final Supplier<? extends R> supplierForEmpty) {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(op, "op");
+        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+
         final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
         final BiConsumer<MappingOptHolder<T, R>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
         final BinaryOperator<MappingOptHolder<T, R>> combiner = (BinaryOperator) Reducing_Combiner_2;
         final Function<MappingOptHolder<T, R>, R> finisher = a -> a.present ? a.value : supplierForEmpty.get();
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -7231,8 +7459,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the mapped values using the binary operator. If no elements are present, the exception
      * from the supplier is thrown.</p>
      *
-     * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
-     * streams unless the binary operator is associative and commutative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7257,6 +7486,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> reducingOrElseThrow(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(op, "op");
+        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+
         final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
         final BiConsumer<MappingOptHolder<T, R>, T> accumulator = (BiConsumer) Reducing_Accumulator_2;
@@ -7269,7 +7502,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             }
         };
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -7280,8 +7513,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the mapped values using the binary operator. If no elements are present, a
      * {@code NoSuchElementException} is thrown.</p>
      *
-     * <p>The returned collector is unordered, meaning the order of reduction may vary in parallel
-     * streams unless the binary operator is associative and commutative.</p>
+     * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic, so encounter-order reduction semantics are retained. The operator must be
+     * associative for parallel collection, but it need not be commutative.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7722,7 +7956,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * exactly two entries: one for {@code true} and one for {@code false}, each containing a
      * list of elements (which may be empty).</p>
      *
-     * <p>The returned collector is unordered.</p>
+     * <p>The lists preserve stream encounter order. Consequently, the returned collector
+     * does not have the {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7753,7 +7988,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * collector to all elements in each partition. The returned map always contains exactly
      * two entries: one for {@code true} and one for {@code false}.</p>
      *
-     * <p>The returned collector is unordered.</p>
+     * <p>The returned collector is unordered only when the downstream collector is unordered;
+     * otherwise it preserves the downstream collector's encounter-order requirements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7775,18 +8011,24 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} implementing the cascaded partitioning operation
      */
     public static <T, A, D> Collector<T, ?, Map<Boolean, D>> partitioningBy(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream) {
+        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(downstream, "downstream");
+
+        final Supplier<A> downstreamSupplier = downstream.supplier();
+        final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
+        final BinaryOperator<A> op = downstream.combiner();
+        final Function<A, D> downstreamFinisher = downstream.finisher();
+
         final Supplier<Map<Boolean, A>> supplier = () -> {
             final Map<Boolean, A> map = N.newHashMap(2);
-            map.put(true, downstream.supplier().get());
-            map.put(false, downstream.supplier().get());
+            map.put(true, downstreamSupplier.get());
+            map.put(false, downstreamSupplier.get());
             return map;
         };
 
-        final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
         final BiConsumer<Map<Boolean, A>, T> accumulator = (a, t) -> downstreamAccumulator
                 .accept(predicate.test(t) ? a.get(Boolean.TRUE) : a.get(Boolean.FALSE), t);
 
-        final BinaryOperator<A> op = downstream.combiner();
         final BinaryOperator<Map<Boolean, A>> combiner = (a, b) -> {
             a.put(Boolean.TRUE, op.apply(a.get(Boolean.TRUE), b.get(Boolean.TRUE)));
             a.put(Boolean.FALSE, op.apply(a.get(Boolean.FALSE), b.get(Boolean.FALSE)));
@@ -7797,13 +8039,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             @SuppressWarnings("rawtypes")
             final Map<Boolean, D> result = (Map) a;
 
-            result.put(Boolean.TRUE, downstream.finisher().apply((a.get(Boolean.TRUE))));
-            result.put(Boolean.FALSE, downstream.finisher().apply((a.get(Boolean.FALSE))));
+            result.put(Boolean.TRUE, downstreamFinisher.apply(a.get(Boolean.TRUE)));
+            result.put(Boolean.FALSE, downstreamFinisher.apply(a.get(Boolean.FALSE)));
 
             return result;
         };
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        final Characteristics[] characteristics = downstream.characteristics().contains(Characteristics.UNORDERED) ? CH_UNORDERED_NOID : CH_NOID;
+        return create(supplier, accumulator, combiner, finisher, characteristics);
     }
 
     /**
@@ -7942,7 +8185,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * accumulates them into a new map. If duplicate keys are encountered, an
      * {@code IllegalStateException} is thrown.</p>
      *
-     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
+     * <p><b>Null Handling:</b> Both {@code null} keys and {@code null} values are supported if the
      * underlying map implementation allows them.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
@@ -7978,8 +8221,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * accumulates them into a new map. When duplicate keys are encountered, the merge
      * function is used to combine the values.</p>
      *
-     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
-     * underlying map implementation allows them. The merge function must handle null values
+     * <p><b>Null Handling:</b> Both {@code null} keys and {@code null} values are supported if the
+     * underlying map implementation allows them. The merge function must handle {@code null} values
      * if they may be present.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
@@ -8078,9 +8321,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * when the collection operation is performed. To handle duplicate keys, use
      * {@link #toMap(Function, Function, BinaryOperator)} instead.</p>
      *
-     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
+     * <p><b>Null Handling:</b> Both {@code null} keys and {@code null} values are supported if the
      * underlying map implementation allows them. The key and value mapper functions must
-     * handle null input elements appropriately.</p>
+     * handle {@code null} input elements appropriately.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
      *
@@ -8120,9 +8363,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned map is a general-purpose {@code Map} implementation. The map is created
      * using the default map factory which typically returns a {@code HashMap}.</p>
      *
-     * <p><b>Null Handling:</b> Both null keys and null values are supported if the
+     * <p><b>Null Handling:</b> Both {@code null} keys and {@code null} values are supported if the
      * underlying map implementation allows them. The key and value mapper functions as well
-     * as the merge function must handle null values if they may be present.</p>
+     * as the merge function must handle {@code null} values if they may be present.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams.</p>
      *
@@ -8219,7 +8462,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Null Handling:</b> Null keys and values are supported if the map implementation
      * created by the factory allows them. The key mapper, value mapper, and merge function must
-     * handle null values appropriately if they may be present.</p>
+     * handle {@code null} values appropriately if they may be present.</p>
      *
      * <p><b>Parallel Stream Support:</b> This collector supports parallel streams while preserving
      * encounter-order-sensitive merge semantics. It does not advertise {@code UNORDERED} because
@@ -8258,6 +8501,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(mergeFunction, "mergeFunction");
+        N.checkArgNotNull(mapFactory, "mapFactory");
+
         // Use the null-safe merge() helper rather than Map.merge(...). Map.merge throws NPE on
         // a null value, but the Javadoc on this collector explicitly says null values are
         // supported when the underlying map permits them.
@@ -8534,6 +8782,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(mergeFunction, "mergeFunction");
+
         // Build the collector inline so the LinkedHashMap supplier stays explicit while keeping
         // the ordered CH_ID characteristics used by toMap(...).
         final Supplier<Map<K, V>> mapFactory = Suppliers.ofLinkedHashMap();
@@ -8656,14 +8908,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * all aspects of the collection process. The collector is suitable for parallel streams
      * and produces a thread-safe result.</p>
      *
-     * <p><b>Note on null values:</b> Unlike {@link #toMap(Function, Function, BinaryOperator, Supplier) toMap},
+     * <p><b>Note on {@code null} values:</b> Unlike {@link #toMap(Function, Function, BinaryOperator, Supplier) toMap},
      * this collector does <i>not</i> perform null-safe merging. It delegates directly to
-     * {@link ConcurrentMap#merge(Object, Object, BiFunction)}, which by contract throws a
-     * {@code NullPointerException} if either the key or the value is {@code null}. The default
+     * {@link ConcurrentMap#merge(Object, Object, BiFunction)}, which requires a non-null input
+     * value and applies the map implementation's null-key policy. The default
      * {@link java.util.concurrent.ConcurrentHashMap} (and most {@link ConcurrentMap} implementations)
-     * additionally forbid null keys and null values entirely. Callers that need to collect
+     * additionally forbid {@code null} keys and {@code null} values entirely. Callers that need to collect
      * {@code null} values should use {@link #toMap(Function, Function, BinaryOperator, Supplier) toMap}
      * with a null-permitting map factory instead.</p>
+     *
+     * <p>As with {@code ConcurrentMap.merge}, if the merge function returns {@code null} for a
+     * duplicate key, that key is removed from the result.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8690,10 +8945,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(mergeFunction, "mergeFunction");
+        N.checkArgNotNull(mapFactory, "mapFactory");
 
         final BiConsumer<M, T> accumulator = (map, element) -> map.merge(keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
-        final BinaryOperator<M> combiner = mapMerger(mergeFunction);
+        final BinaryOperator<M> combiner = concurrentMapMerger(mergeFunction);
 
         return create(mapFactory, accumulator, combiner, CH_CONCURRENT_ID);
     }
@@ -8839,6 +9098,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(mergeFunction, "mergeFunction");
+        N.checkArgNotNull(mapFactory, "mapFactory");
+
         final BiConsumer<BiMap<K, V>, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
         final BinaryOperator<BiMap<K, V>> combiner = biMapMerger(mergeFunction);
@@ -9060,6 +9324,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> toMultimap(
             final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(mapFactory, "mapFactory");
+
         final BiConsumer<M, T> accumulator = (map, element) -> map.put(keyMapper.apply(element), valueMapper.apply(element));
 
         final BinaryOperator<M> combiner = Collectors.multimapMerger();
@@ -9136,6 +9404,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingValueToMultimap(
             final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor,
             final Supplier<? extends M> mapFactory) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(flatValueExtractor, "flatValueExtractor");
+        N.checkArgNotNull(mapFactory, "mapFactory");
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final K key = keyMapper.apply(element);
@@ -9223,6 +9494,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingValueToMultimap( // NOSONAR
             final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor,
             final Supplier<? extends M> mapFactory) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(flatValueExtractor, "flatValueExtractor");
+        N.checkArgNotNull(mapFactory, "mapFactory");
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final K key = keyMapper.apply(element);
@@ -9319,6 +9593,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingKeyToMultimap(
             final Function<? super T, Stream<? extends K>> flatKeyExtractor, final Function<? super T, ? extends V> valueMapper,
             final Supplier<? extends M> mapFactory) {
+        N.checkArgNotNull(flatKeyExtractor, "flatKeyExtractor");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(mapFactory, "mapFactory");
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final V value = valueMapper.apply(element);
@@ -9419,6 +9696,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingKeyToMultimap( // NOSONAR
             final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, ? extends V> valueMapper,
             final Supplier<? extends M> mapFactory) {
+        N.checkArgNotNull(flatKeyExtractor, "flatKeyExtractor");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(mapFactory, "mapFactory");
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final V value = valueMapper.apply(element);
@@ -9462,6 +9742,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                     m1.put(e.getKey(), mergeFunction.apply(oldValue, e.getValue()));
                 }
             }
+            return m1;
+        };
+    }
+
+    private static <K, V, M extends ConcurrentMap<K, V>> BinaryOperator<M> concurrentMapMerger(final BinaryOperator<V> mergeFunction) {
+        N.checkArgNotNull(mergeFunction);
+
+        return (m1, m2) -> {
+            for (final Map.Entry<K, V> e : m2.entrySet()) {
+                m1.merge(e.getKey(), e.getValue(), mergeFunction);
+            }
+
             return m1;
         };
     }
@@ -9555,6 +9847,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <li>Combining multiple collectors with custom merging functions</li>
      * </ul>
      *
+     * <p>All mapper arguments are required to be non-null and are validated when the
+     * collector is created, rather than on the first accumulated element.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Calculate sum of two integer properties in one pass
@@ -9569,7 +9864,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static final class MoreCollectors extends Collectors {
         MoreCollectors() {
-            // for extension.
+            // Prevent external instantiation.
+        }
+
+        private static void checkMappers(final Object... mappers) {
+            for (int i = 0; i < mappers.length; i++) {
+                N.checkArgNotNull(mappers[i], "mapper[" + i + "]");
+            }
         }
 
         /**
@@ -9581,9 +9882,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * both sums. This is useful when you need to calculate multiple integer sums from
          * the same stream in a single pass.</p>
          *
-         * <p>The collector handles integer overflow by wrapping around as per Java's
-         * integer arithmetic rules. The computation is performed in encounter order
-         * and is not affected by stream ordering.</p>
+         * <p>The collector handles integer overflow by wrapping around as specified by
+         * Java's integer arithmetic rules. The tuple of sums is independent of encounter
+         * order.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9602,6 +9903,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<Integer, Integer>> summingInt(final ToIntFunction<? super T> firstMapper,
                 final ToIntFunction<? super T> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<int[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
                 a[1] += secondMapper.applyAsInt(t);
@@ -9619,9 +9922,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * all three sums. This is useful when you need to calculate multiple integer sums
          * from the same stream in a single pass.</p>
          *
-         * <p>The collector handles integer overflow by wrapping around as per Java's
-         * integer arithmetic rules. The computation is performed in encounter order
-         * and is not affected by stream ordering.</p>
+         * <p>The collector handles integer overflow by wrapping around as specified by
+         * Java's integer arithmetic rules. The tuple of sums is independent of encounter
+         * order.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9642,6 +9945,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<Integer, Integer, Integer>> summingInt(final ToIntFunction<? super T> firstMapper,
                 final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<int[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
                 a[1] += secondMapper.applyAsInt(t);
@@ -9680,6 +9985,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<Long, Long>> summingIntToLong(final ToIntFunction<? super T> firstMapper,
                 final ToIntFunction<? super T> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
                 a[1] += secondMapper.applyAsInt(t);
@@ -9719,6 +10026,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingIntToLong(final ToIntFunction<? super T> firstMapper,
                 final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
                 a[1] += secondMapper.applyAsInt(t);
@@ -9737,9 +10046,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * both sums. This is useful when you need to calculate multiple long sums from
          * the same stream in a single pass.</p>
          *
-         * <p>The collector handles long overflow by wrapping around as per Java's
-         * long arithmetic rules. The computation is performed in encounter order
-         * and is not affected by stream ordering.</p>
+         * <p>The collector handles long overflow by wrapping around as specified by
+         * Java's long arithmetic rules. The tuple of sums is independent of encounter
+         * order.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9758,6 +10067,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<Long, Long>> summingLong(final ToLongFunction<? super T> firstMapper,
                 final ToLongFunction<? super T> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsLong(t);
                 a[1] += secondMapper.applyAsLong(t);
@@ -9775,9 +10086,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * all three sums. This is useful when you need to calculate multiple long sums
          * from the same stream in a single pass.</p>
          *
-         * <p>The collector handles long overflow by wrapping around as per Java's
-         * long arithmetic rules. The computation is performed in encounter order
-         * and is not affected by stream ordering.</p>
+         * <p>The collector handles long overflow by wrapping around as specified by
+         * Java's long arithmetic rules. The tuple of sums is independent of encounter
+         * order.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9798,6 +10109,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingLong(final ToLongFunction<? super T> firstMapper,
                 final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsLong(t);
                 a[1] += secondMapper.applyAsLong(t);
@@ -9816,9 +10129,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * both sums. This is useful when you need to calculate multiple double sums from
          * the same stream in a single pass.</p>
          *
-         * <p>The computation is performed in encounter order and is not affected by
-         * stream ordering. Special floating-point values (NaN, infinity) are handled
-         * according to IEEE 754 standard.</p>
+         * <p>The computation is performed in encounter order. Floating-point addition remains
+         * order-sensitive even with compensated summation, so the returned collector does not
+         * have the {@link Characteristics#UNORDERED UNORDERED} characteristic. Special
+         * floating-point values (NaN and infinity) follow IEEE 754 arithmetic.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9837,12 +10151,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> summingDouble(final ToDoubleFunction<? super T> firstMapper,
                 final ToDoubleFunction<? super T> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
                 a[1].add(secondMapper.applyAsDouble(t));
             };
 
-            return create(SummingDouble_Supplier_2, accumulator, SummingDouble_Combiner_2, SummingDouble_Finisher_2, CH_UNORDERED_NOID);
+            return create(SummingDouble_Supplier_2, accumulator, SummingDouble_Combiner_2, SummingDouble_Finisher_2, CH_NOID);
         }
 
         /**
@@ -9854,9 +10170,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * all three sums. This is useful when you need to calculate multiple double sums
          * from the same stream in a single pass.</p>
          *
-         * <p>The computation is performed in encounter order and is not affected by
-         * stream ordering. Special floating-point values (NaN, infinity) are handled
-         * according to IEEE 754 standard.</p>
+         * <p>The computation is performed in encounter order. Floating-point addition remains
+         * order-sensitive even with compensated summation, so the returned collector does not
+         * have the {@link Characteristics#UNORDERED UNORDERED} characteristic. Special
+         * floating-point values (NaN and infinity) follow IEEE 754 arithmetic.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9877,13 +10194,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> summingDouble(final ToDoubleFunction<? super T> firstMapper,
                 final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
                 a[1].add(secondMapper.applyAsDouble(t));
                 a[2].add(thirdMapper.applyAsDouble(t));
             };
 
-            return create(SummingDouble_Supplier_3, accumulator, SummingDouble_Combiner_3, SummingDouble_Finisher_3, CH_UNORDERED_NOID);
+            return create(SummingDouble_Supplier_3, accumulator, SummingDouble_Combiner_3, SummingDouble_Finisher_3, CH_NOID);
         }
 
         /**
@@ -9915,6 +10234,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> firstMapper,
                 final Function<? super T, BigInteger> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<BigInteger[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
                 a[1] = a[1].add(secondMapper.apply(t));
@@ -9954,6 +10275,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<BigInteger, BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> firstMapper,
                 final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<BigInteger[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
                 a[1] = a[1].add(secondMapper.apply(t));
@@ -9992,6 +10315,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
                 final Function<? super T, BigDecimal> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
                 a[1] = a[1].add(secondMapper.apply(t));
@@ -10032,6 +10357,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
                 final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
                 a[1] = a[1].add(secondMapper.apply(t));
@@ -10046,13 +10373,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * functions applied to the input elements.
          *
          * <p>This collector calculates the average of values extracted by two different
-         * mapping functions from each element. The averages are computed using double
-         * arithmetic to avoid precision loss. If no elements are collected, both averages
-         * will be 0.0.</p>
+         * mapping functions from each element. It accumulates each sum and count in
+         * {@code long} values and performs the final division in {@code double}. If no
+         * elements are collected, both averages are 0.0.</p>
          *
-         * <p>The computation maintains running sums and counts internally, converting to
-         * averages only in the final step. This approach minimizes rounding errors during
-         * parallel computation.</p>
+         * <p>The running sums and counts use Java {@code long} arithmetic and therefore wrap
+         * on overflow. A wrapped nonzero count is used in the division; if a count wraps to
+         * zero, the corresponding average is 0.0, as for an empty input.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10071,6 +10398,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingInt(final ToIntFunction<? super T> firstMapper,
                 final ToIntFunction<? super T> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsInt(t);
                 a.left()[1] += secondMapper.applyAsInt(t);
@@ -10086,13 +10415,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * functions applied to the input elements.
          *
          * <p>This collector calculates the average of values extracted by three different
-         * mapping functions from each element. The averages are computed using double
-         * arithmetic to avoid precision loss. If no elements are collected, all averages
-         * will be 0.0.</p>
+         * mapping functions from each element. It accumulates each sum and count in
+         * {@code long} values and performs the final division in {@code double}. If no
+         * elements are collected, all averages are 0.0.</p>
          *
-         * <p>The computation maintains running sums and counts internally, converting to
-         * averages only in the final step. This approach minimizes rounding errors during
-         * parallel computation.</p>
+         * <p>The running sums and counts use Java {@code long} arithmetic and therefore wrap
+         * on overflow. A wrapped nonzero count is used in the division; if a count wraps to
+         * zero, the corresponding average is 0.0, as for an empty input.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10113,6 +10442,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingInt(final ToIntFunction<? super T> firstMapper,
                 final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsInt(t);
                 a.left()[1] += secondMapper.applyAsInt(t);
@@ -10135,8 +10466,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * will be 0.0.</p>
          *
          * <p>The computation maintains running sums and counts internally, converting to
-         * averages only in the final step. This approach minimizes rounding errors during
-         * parallel computation and handles large long values correctly.</p>
+         * averages only in the final step. Both use {@code long} arithmetic and therefore
+         * wrap on overflow. A wrapped nonzero count is used in the division; if a count wraps
+         * to zero, the corresponding average is {@code 0.0}, as for an empty input.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10155,6 +10487,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingLong(final ToLongFunction<? super T> firstMapper,
                 final ToLongFunction<? super T> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsLong(t);
                 a.left()[1] += secondMapper.applyAsLong(t);
@@ -10175,8 +10509,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * will be 0.0.</p>
          *
          * <p>The computation maintains running sums and counts internally, converting to
-         * averages only in the final step. This approach minimizes rounding errors during
-         * parallel computation and handles large long values correctly.</p>
+         * averages only in the final step. Both use {@code long} arithmetic and therefore
+         * wrap on overflow. A wrapped nonzero count is used in the division; if a count wraps
+         * to zero, the corresponding average is {@code 0.0}, as for an empty input.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10197,6 +10532,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingLong(final ToLongFunction<? super T> firstMapper,
                 final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsLong(t);
                 a.left()[1] += secondMapper.applyAsLong(t);
@@ -10218,8 +10555,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * arithmetic to handle the division. If no elements are collected, both averages
          * will be 0.0.</p>
          *
-         * <p>The computation uses Kahan summation for improved numerical accuracy,
-         * minimizing rounding errors during parallel computation.</p>
+         * <p>The computation uses Kahan summation for improved numerical accuracy.
+         * Floating-point addition remains order-sensitive even with compensated summation,
+         * so the returned collector does not have the
+         * {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10238,12 +10577,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingDouble(final ToDoubleFunction<? super T> firstMapper,
                 final ToDoubleFunction<? super T> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
                 a[1].add(secondMapper.applyAsDouble(t));
             };
 
-            return create(AveragingDouble_Supplier_2, accumulator, AveragingDouble_Combiner_2, AveragingDouble_Finisher_2, CH_UNORDERED_NOID);
+            return create(AveragingDouble_Supplier_2, accumulator, AveragingDouble_Combiner_2, AveragingDouble_Finisher_2, CH_NOID);
         }
 
         /**
@@ -10255,8 +10596,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * arithmetic to handle the division. If no elements are collected, all averages
          * will be 0.0.</p>
          *
-         * <p>The computation uses Kahan summation for improved numerical accuracy,
-         * minimizing rounding errors during parallel computation.</p>
+         * <p>The computation uses Kahan summation for improved numerical accuracy.
+         * Floating-point addition remains order-sensitive even with compensated summation,
+         * so the returned collector does not have the
+         * {@link Characteristics#UNORDERED UNORDERED} characteristic.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10277,13 +10620,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingDouble(final ToDoubleFunction<? super T> firstMapper,
                 final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
                 a[1].add(secondMapper.applyAsDouble(t));
                 a[2].add(thirdMapper.applyAsDouble(t));
             };
 
-            return create(AveragingDouble_Supplier_3, accumulator, AveragingDouble_Combiner_3, AveragingDouble_Finisher_3, CH_UNORDERED_NOID);
+            return create(AveragingDouble_Supplier_3, accumulator, AveragingDouble_Combiner_3, AveragingDouble_Finisher_3, CH_NOID);
         }
 
         /**
@@ -10318,6 +10663,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> firstMapper,
                 final Function<? super T, BigInteger> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<Pair<BigInteger[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
                 a.left()[1] = a.left()[1].add(secondMapper.apply(t));
@@ -10362,6 +10709,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> firstMapper,
                 final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<Pair<BigInteger[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
                 a.left()[1] = a.left()[1].add(secondMapper.apply(t));
@@ -10406,6 +10755,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
                 final Function<? super T, BigDecimal> secondMapper) {
+            checkMappers(firstMapper, secondMapper);
+
             final BiConsumer<Pair<BigDecimal[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
                 a.left()[1] = a.left()[1].add(secondMapper.apply(t));
@@ -10450,6 +10801,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
                 final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) {
+            checkMappers(firstMapper, secondMapper, thirdMapper);
+
             final BiConsumer<Pair<BigDecimal[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
                 a.left()[1] = a.left()[1].add(secondMapper.apply(t));
@@ -11043,7 +11396,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param merger a function to merge the results array from all component collectors
          * @return a {@code Collector} which combines the results of multiple component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if downstreams is {@code null} or empty, or if merger is null
+         * @throws IllegalArgumentException if {@code downstreams} is {@code null}, empty, or contains
+         *         a null collector, or if {@code merger} is null
          */
         public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
                 final Function<Object[], R> merger) { //NOSONAR
@@ -11051,6 +11405,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             N.checkArgNotNull(merger, cs.merger);
 
             final int size = downstreams.size();
+
+            int downstreamIndex = 0;
+            for (final Collector<? super T, ?, ?> downstream : downstreams) {
+                N.checkArgNotNull(downstream, "downstreams[" + downstreamIndex++ + "]");
+            }
 
             final Supplier<Object>[] suppliers = downstreams.stream().map(Collector::supplier).toArray(i -> new Supplier[size]);
             final BiConsumer<Object, ? super T>[] accumulators = downstreams.stream().map(Collector::accumulator).toArray(i -> new BiConsumer[size]);
@@ -11167,7 +11526,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *         with the specified column names
          * @throws IllegalArgumentException if {@code columnNames} is {@code null} or empty
          */
-        public static <T> Collector<T, ?, Dataset> toDataset(final List<String> columnNames) {
+        public static <T> Collector<T, ?, Dataset> toDataset(final List<String> columnNames) throws IllegalArgumentException {
             N.checkArgNotEmpty(columnNames, cs.columnNames);
 
             @SuppressWarnings("rawtypes")

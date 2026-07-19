@@ -32,6 +32,8 @@ package com.landawn.abacus.util;
  * <p>This behavior differs from {@link Math#min} and {@link Math#max}, which return NaN
  * if any argument is NaN.</p>
  *
+ * <p>The class is stateless; all operations are safe for concurrent use.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Standard Math.min returns NaN if any argument is NaN

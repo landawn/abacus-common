@@ -74,16 +74,12 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
         this.typeClass = typeClass;
 
-        if (SetMultimap.class.isAssignableFrom(typeClass)) {
-            parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType("Set<" + valueTypeName + ">"));
-        } else {
-            parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType("List<" + valueTypeName + ">"));
-        }
+        parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName));
 
-        jdc = JsonDeserConfig.create()
-                .setMapKeyType(parameterTypes.get(0))
-                .setMapValueType(parameterTypes.get(1))
-                .setElementType(parameterTypes.get(1).elementType());
+        final Type<?> collectionValueType = SetMultimap.class.isAssignableFrom(typeClass) ? TypeFactory.getType("Set<" + valueTypeName + ">")
+                : TypeFactory.getType("List<" + valueTypeName + ">");
+
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0)).setMapValueType(collectionValueType).setElementType(parameterTypes.get(1));
     }
 
     /**
@@ -109,12 +105,11 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     }
 
     /**
-     * Returns an immutable list containing the parameter types of this generic multimap type.
-     * For multimap types, this includes the key type and the collection value type.
-     * {@link SetMultimap} types return {@code [KeyType, Set<ValueType>]};
-     * all other multimaps return {@code [KeyType, List<ValueType>]}.
+     * Returns the two declared generic arguments of this Guava multimap type: the key type
+     * and the individual value type. The collection used internally for each key is a
+     * serialization detail and is not a declared {@code Multimap<K, V>} type argument.
      *
-     * @return an immutable list containing the key type and collection value type
+     * @return an immutable list containing {@code [KeyType, ValueType]}
      */
     @Override
     public List<Type<?>> parameterTypes() {

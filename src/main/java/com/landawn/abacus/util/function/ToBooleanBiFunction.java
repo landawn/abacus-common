@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Throwables;
  * @see ToBooleanFunction
  */
 @FunctionalInterface
-public interface ToBooleanBiFunction<T, U> extends Throwables.ToBooleanBiFunction<T, U, RuntimeException> {
+public interface ToBooleanBiFunction<T, U> extends Throwables.ToBooleanBiFunction<T, U, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

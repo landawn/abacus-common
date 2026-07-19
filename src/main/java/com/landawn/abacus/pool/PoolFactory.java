@@ -81,9 +81,9 @@ public final class PoolFactory { //NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjectPool<Poolable> pool = PoolFactory.createObjectPool(100);
-     * pool.capacity();  // returns 100
-     * pool.size();      // returns 0 (empty until objects are added)
-     * pool.isEmpty();   // returns true
+     * pool.capacity();   // returns 100
+     * pool.size();       // returns 0 (empty until objects are added)
+     * pool.isEmpty();    // returns true
      *
      * // A capacity of 0 creates a pool that can never hold an object
      * ObjectPool<Poolable> zeroPool = PoolFactory.createObjectPool(0);
@@ -106,8 +106,8 @@ public final class PoolFactory { //NOSONAR
      * <pre>{@code
      * // Capacity 50, eviction runs every 5 minutes
      * ObjectPool<Poolable> pool = PoolFactory.createObjectPool(50, 300_000);
-     * pool.capacity();  // returns 50
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 50
+     * pool.size();       // returns 0
      *
      * // Passing 0 as the eviction delay disables periodic eviction
      * ObjectPool<Poolable> noEvict = PoolFactory.createObjectPool(50, 0);
@@ -131,8 +131,8 @@ public final class PoolFactory { //NOSONAR
      * // LFU-style pool: evicts least frequently accessed objects when balancing
      * ObjectPool<Poolable> pool = PoolFactory.createObjectPool(
      *     100, 60_000, EvictionPolicy.ACCESS_COUNT);
-     * pool.capacity();  // returns 100
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 100
+     * pool.size();       // returns 0
      *
      * // Time-based eviction order
      * ObjectPool<Poolable> timePool = PoolFactory.createObjectPool(
@@ -161,8 +161,8 @@ public final class PoolFactory { //NOSONAR
      * ObjectPool<Poolable> pool = PoolFactory.createObjectPool(
      *     1000, 30_000, EvictionPolicy.LAST_ACCESS_TIME,
      *     100L * 1024 * 1024, measure);
-     * pool.capacity();  // returns 1000
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 1000
+     * pool.size();       // returns 0
      *
      * // Passing 0 for maxMemorySize disables the memory limit
      * ObjectPool<Poolable> noLimit = PoolFactory.createObjectPool(
@@ -175,8 +175,9 @@ public final class PoolFactory { //NOSONAR
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
-     * @param memoryMeasure the function to calculate memory size of pool elements
+     * @param memoryMeasure the function to calculate memory size of pool elements; required when {@code maxMemorySize > 0}
      * @return a new ObjectPool instance with memory constraints
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
@@ -192,8 +193,8 @@ public final class PoolFactory { //NOSONAR
      * // Auto-balance enabled, removing 30% of objects when the pool is full
      * ObjectPool<Poolable> pool = PoolFactory.createObjectPool(
      *     100, 60_000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.3f);
-     * pool.capacity();  // returns 100
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 100
+     * pool.size();       // returns 0
      *
      * // Auto-balance disabled: add() simply fails once the pool is full
      * ObjectPool<Poolable> strict = PoolFactory.createObjectPool(
@@ -225,8 +226,8 @@ public final class PoolFactory { //NOSONAR
      * ObjectPool<Poolable> pool = PoolFactory.createObjectPool(
      *     500, 30_000, EvictionPolicy.LAST_ACCESS_TIME,
      *     true, 0.25f, 50L * 1024 * 1024, measure);
-     * pool.capacity();  // returns 500
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 500
+     * pool.size();       // returns 0
      *
      * // No memory limit (maxMemorySize 0, null measure)
      * ObjectPool<Poolable> plain = PoolFactory.createObjectPool(
@@ -241,8 +242,9 @@ public final class PoolFactory { //NOSONAR
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
-     * @param memoryMeasure the function to calculate memory size of pool elements, or {@code null} if not using memory limits
+     * @param memoryMeasure the function to calculate memory size of pool elements; required when {@code maxMemorySize > 0}
      * @return a new ObjectPool instance with full configuration
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
@@ -256,9 +258,9 @@ public final class PoolFactory { //NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KeyedObjectPool<String, Poolable> pool = PoolFactory.createKeyedObjectPool(100);
-     * pool.capacity();  // returns 100
-     * pool.size();      // returns 0 (no keys mapped yet)
-     * pool.isEmpty();   // returns true
+     * pool.capacity();   // returns 100
+     * pool.size();       // returns 0 (no keys mapped yet)
+     * pool.isEmpty();    // returns true
      *
      * // A capacity of 0 creates a pool that can never hold an entry
      * KeyedObjectPool<String, Poolable> zeroPool = PoolFactory.createKeyedObjectPool(0);
@@ -282,8 +284,8 @@ public final class PoolFactory { //NOSONAR
      * <pre>{@code
      * // Capacity 50, eviction runs every minute
      * KeyedObjectPool<String, Poolable> pool = PoolFactory.createKeyedObjectPool(50, 60_000);
-     * pool.capacity();  // returns 50
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 50
+     * pool.size();       // returns 0
      *
      * // Passing 0 as the eviction delay disables periodic eviction
      * KeyedObjectPool<String, Poolable> noEvict = PoolFactory.createKeyedObjectPool(50, 0);
@@ -308,8 +310,8 @@ public final class PoolFactory { //NOSONAR
      * // LFU-style keyed pool: evicts least frequently accessed entries when balancing
      * KeyedObjectPool<String, Poolable> pool = PoolFactory.createKeyedObjectPool(
      *     100, 60_000, EvictionPolicy.ACCESS_COUNT);
-     * pool.capacity();  // returns 100
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 100
+     * pool.size();       // returns 0
      *
      * // Time-based eviction order
      * KeyedObjectPool<Integer, Poolable> timePool = PoolFactory.createKeyedObjectPool(
@@ -341,8 +343,8 @@ public final class PoolFactory { //NOSONAR
      * KeyedObjectPool<String, Poolable> pool = PoolFactory.createKeyedObjectPool(
      *     1000, 30_000, EvictionPolicy.LAST_ACCESS_TIME,
      *     50L * 1024 * 1024, measure);
-     * pool.capacity();  // returns 1000
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 1000
+     * pool.size();       // returns 0
      *
      * // Passing 0 for maxMemorySize disables the memory limit
      * KeyedObjectPool<String, Poolable> noLimit = PoolFactory.createKeyedObjectPool(
@@ -356,8 +358,9 @@ public final class PoolFactory { //NOSONAR
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
-     * @param memoryMeasure the function to calculate memory size of key-value pairs
+     * @param memoryMeasure the function to calculate memory size of key-value pairs; required when {@code maxMemorySize > 0}
      * @return a new KeyedObjectPool instance with memory constraints
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -373,8 +376,8 @@ public final class PoolFactory { //NOSONAR
      * // Auto-balance enabled, removing 30% of entries when the pool is full
      * KeyedObjectPool<String, Poolable> pool = PoolFactory.createKeyedObjectPool(
      *     100, 60_000, EvictionPolicy.LAST_ACCESS_TIME, true, 0.3f);
-     * pool.capacity();  // returns 100
-     * pool.size();      // returns 0
+     * pool.capacity();   // returns 100
+     * pool.size();       // returns 0
      *
      * // Auto-balance disabled: put() simply fails once the pool is full
      * KeyedObjectPool<String, Poolable> strict = PoolFactory.createKeyedObjectPool(
@@ -426,8 +429,9 @@ public final class PoolFactory { //NOSONAR
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
-     * @param memoryMeasure the function to calculate memory size of key-value pairs, or {@code null} if not using memory limits
+     * @param memoryMeasure the function to calculate memory size of key-value pairs; required when {@code maxMemorySize > 0}
      * @return a new KeyedObjectPool instance with full configuration
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,

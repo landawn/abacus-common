@@ -60,16 +60,16 @@ public class InstantType extends AbstractTemporalType<Instant> {
 
     /**
      * Serializes an {@link Instant} to its ISO-8601 timestamp string representation.
-     * Uses a format equivalent to {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
-     * with the UTC zone, so the result ends in {@code 'Z'} (e.g., {@code "2023-12-25T10:30:45.123Z"}).
+     * Uses the fixed-millisecond ISO timestamp format with the UTC zone, so the result ends in
+     * {@code 'Z'} (e.g., {@code "2023-12-25T10:30:45.123Z"}). Sub-millisecond precision is truncated.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * via {@link #valueOf(String)}; millisecond-aligned values round-trip exactly. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
      * @param x the {@link Instant} to serialize; may be {@code null}
-     * @return the ISO-8601 timestamp string, or {@code null} if {@code x} is {@code null}
+     * @return the fixed-millisecond ISO-8601 timestamp string, or {@code null} if {@code x} is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -114,9 +114,8 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * including the second-precision form (e.g. {@code "2023-10-15T10:30:45Z"}) and fractional seconds of any
      * precision (e.g. {@code "2023-10-15T10:30:45.123456789Z"}).</p>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. The value returned by {@link Instant#toString()} round-trips
-     * as well.</p>
+     * <p>This method parses the fixed-millisecond string produced by {@code stringOf}. The value returned by
+     * {@link Instant#toString()} round-trips as well, including higher fractional precision.</p>
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed {@link Instant}, or {@code null} if {@code str} is {@code null} or a null-datetime string
@@ -169,7 +168,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
      * @param len    the number of characters to use
-     * @return an {@link Instant} parsed from the specified character region,
+     * @return the parsed instant
      *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      */
     @Override
@@ -288,9 +287,8 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * The output format depends on the serialization configuration:
      * <ul>
      *   <li>{@code LONG}: writes epoch milliseconds as an unquoted number</li>
-     *   <li>{@code ISO_8601_DATE_TIME} / {@code ISO_8601_TIMESTAMP}: writes ISO-8601 with UTC offset via
-     *       {@code DateTimeFormatter.ISO_OFFSET_DATE_TIME} (e.g., {@code 2023-12-25T10:30:45.123Z};
-     *       fractional seconds are omitted when zero)</li>
+     *   <li>{@code ISO_8601_DATE_TIME}: writes ISO-8601 UTC at whole-second precision</li>
+     *   <li>{@code ISO_8601_TIMESTAMP}: writes ISO-8601 UTC at exactly millisecond precision</li>
      *   <li>No config / {@code null} format: uses {@link #stringOf(Instant)}</li>
      * </ul>
      * Non-{@code LONG} formats are quoted when {@code config} specifies a string quotation character.

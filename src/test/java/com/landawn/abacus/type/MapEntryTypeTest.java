@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -140,6 +141,41 @@ public class MapEntryTypeTest extends TestBase {
         Writer writer = newFailingWriter();
         Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
         assertThrows(IOException.class, () -> mapEntryType.appendTo(writer, entry));
+    }
+
+    @Test
+    public void testAppendToDoesNotMaskRuntimeFailureDuringCleanup() {
+        final RuntimeException writeFailure = new IllegalStateException("write failure");
+        final IOException cleanupFailure = new IOException("cleanup failure");
+        final Writer writer = new Writer() {
+            private int writeCount;
+
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                if (writeCount++ == 0) {
+                    throw writeFailure;
+                }
+
+                throw cleanupFailure;
+            }
+
+            @Override
+            public void flush() {
+                // no-op
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+        final Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> mapEntryType.appendTo(writer, entry));
+
+        assertSame(writeFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
     }
 
     @Test

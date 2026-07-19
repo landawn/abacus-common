@@ -107,11 +107,11 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
-     * config.setIgnoreNullOrEmpty(true);              // returns this (config)
-     * boolean enabled = config.isIgnoreNullOrEmpty(); // returns true
+     * config.setIgnoreNullOrEmpty(true);                 // returns this (config)
+     * boolean enabled = config.isIgnoreNullOrEmpty();    // returns true
      *
-     * config.setIgnoreNullOrEmpty(false);              // returns this (config)
-     * boolean disabled = config.isIgnoreNullOrEmpty(); // returns false (default)
+     * config.setIgnoreNullOrEmpty(false);                // returns this (config)
+     * boolean disabled = config.isIgnoreNullOrEmpty();   // returns false (default)
      * }</pre>
      *
      * @param ignoreNullOrEmpty {@code true} to skip assigning {@code null} or empty JSON values
@@ -149,11 +149,11 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
-     * config.setReadNullToEmpty(true);              // returns this (config)
-     * boolean asEmpty = config.isReadNullToEmpty(); // returns true
+     * config.setReadNullToEmpty(true);                // returns this (config)
+     * boolean asEmpty = config.isReadNullToEmpty();   // returns true
      *
-     * config.setReadNullToEmpty(false);            // returns this (config)
-     * boolean asNull = config.isReadNullToEmpty(); // returns false (default)
+     * config.setReadNullToEmpty(false);               // returns this (config)
+     * boolean asNull = config.isReadNullToEmpty();    // returns false (default)
      * }</pre>
      *
      * @param readNullToEmpty {@code true} to read {@code null} as empty, {@code false} otherwise

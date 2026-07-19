@@ -26,6 +26,14 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
+    public void testNewInstanceRejectsNullVarargsClearly() {
+        final NullPointerException exception = Assertions.assertThrows(NullPointerException.class,
+                () -> TypeAttrParser.newInstance(SingleArrayArg.class, "SingleArrayArg(alpha)", (Object[]) null));
+
+        Assertions.assertEquals("args", exception.getMessage());
+    }
+
+    @Test
     public void testGetClassName() {
         TypeAttrParser parser = TypeAttrParser.parse("HashMap<String, Integer>(16)");
         Assertions.assertEquals("HashMap", parser.getClassName());
@@ -166,7 +174,12 @@ public class TypeAttrParserTest extends TestBase {
 
         if (typeParams1.length > 0) {
             typeParams1[0] = "Modified";
-            Assertions.assertEquals("Modified", parser.getTypeParameters()[0]);
+            Assertions.assertEquals("String", parser.getTypeParameters()[0]);
+        }
+
+        if (params1.length > 0) {
+            params1[0] = "Modified";
+            Assertions.assertEquals("16", parser.getParameters()[0]);
         }
     }
 
@@ -212,6 +225,94 @@ public class TypeAttrParserTest extends TestBase {
     @Test
     public void testParseRejectsExtraClosingGenericBracket() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String>>"));
+    }
+
+    @Test
+    public void testParseRejectsUnmatchedOrOutOfOrderDelimiters() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map>ignored<String>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("StringBuilder("));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("StringBuilder)"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("StringBuilder)ignored(value)"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map(16)<String>"));
+    }
+
+    @Test
+    public void testParseRejectsUnbalancedNestedConstructorParentheses() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Factory((value)"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Factory(value))"));
+
+        TypeAttrParser balanced = TypeAttrParser.parse("Factory((value))");
+        Assertions.assertArrayEquals(new String[] { "(value)" }, balanced.getParameters());
+
+        TypeAttrParser quoted = TypeAttrParser.parse("Factory(\"value)\")");
+        Assertions.assertArrayEquals(new String[] { "value)" }, quoted.getParameters());
+    }
+
+    @Test
+    public void testParseRejectsMissingNamesAndEmptyGenericParameters() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse(""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("<String>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("List<>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String,>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<,String>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("List<Map<String,>>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("List<Map<,String>>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String, List<>>"));
+    }
+
+    @Test
+    public void testQuotedDelimiterScanningMatchesCsvEscapes() {
+        final String backslashEscaped = "Factory(\"alpha\\\")>beta\")";
+        TypeAttrParser parsed = TypeAttrParser.parse(backslashEscaped);
+        Assertions.assertArrayEquals(new String[] { "alpha\")>beta" }, parsed.getParameters());
+
+        final String doubledQuote = "Factory(\"alpha\"\")>beta\")";
+        parsed = TypeAttrParser.parse(doubledQuote);
+        Assertions.assertArrayEquals(new String[] { "alpha\")>beta" }, parsed.getParameters());
+
+        final String nested = "Factory(\"alpha\\\")>beta\")";
+        parsed = TypeAttrParser.parse("Holder<" + nested + ", String>");
+        Assertions.assertArrayEquals(new String[] { nested, "String" }, parsed.getTypeParameters());
+    }
+
+    @Test
+    public void testSingleQuotesDoNotShieldTypeDelimiters() {
+        final TypeAttrParser apostrophe = TypeAttrParser.parse("Factory(O'Reilly)");
+        Assertions.assertArrayEquals(new String[] { "O'Reilly" }, apostrophe.getParameters());
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Factory('alpha)beta')"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Holder<Factory('alpha)>beta'), String>"));
+    }
+
+    @Test
+    public void testNestedConstructorArgumentsDoNotSplitOuterGenericParameters() {
+        TypeAttrParser parsed = TypeAttrParser.parse("Map<Factory(alpha,beta), List<String>>");
+        Assertions.assertArrayEquals(new String[] { "Factory(alpha,beta)", "List<String>" }, parsed.getTypeParameters());
+
+        parsed = TypeAttrParser.parse("Holder<Factory(\"alpha,beta\")>");
+        Assertions.assertArrayEquals(new String[] { "Factory(\"alpha,beta\")" }, parsed.getTypeParameters());
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Holder<Factory(alpha,beta>"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Holder<Factory(\"alpha,beta)>"));
+    }
+
+    @Test
+    public void testAngleBracketsInConstructorArgumentsAreNotGenericDelimiters() {
+        TypeAttrParser parsed = TypeAttrParser.parse("Holder<String>(\"alpha>beta\")");
+        Assertions.assertArrayEquals(new String[] { "String" }, parsed.getTypeParameters());
+        Assertions.assertArrayEquals(new String[] { "alpha>beta" }, parsed.getParameters());
+
+        parsed = TypeAttrParser.parse("Holder<Factory(alpha>beta), String>");
+        Assertions.assertArrayEquals(new String[] { "Factory(alpha>beta)", "String" }, parsed.getTypeParameters());
+
+        parsed = TypeAttrParser.parse("String(\"alpha>beta\")");
+        Assertions.assertArrayEquals(new String[0], parsed.getTypeParameters());
+        Assertions.assertArrayEquals(new String[] { "alpha>beta" }, parsed.getParameters());
+
+        parsed = TypeAttrParser.parse("String(\"alpha<beta>\")");
+        Assertions.assertArrayEquals(new String[0], parsed.getTypeParameters());
+        Assertions.assertArrayEquals(new String[] { "alpha<beta>" }, parsed.getParameters());
     }
 
     @Test

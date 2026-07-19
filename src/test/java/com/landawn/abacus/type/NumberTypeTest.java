@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
@@ -161,6 +162,16 @@ public class NumberTypeTest extends TestBase {
     public void testSerializeToWithNull() throws IOException {
         intNumberType.serializeTo(writer, null, config);
         verify(writer).write(new char[] { 'n', 'u', 'l', 'l' });
+    }
+
+    @Test
+    public void testSerializeToWithNullAsZero() throws IOException {
+        NumberType<java.math.BigInteger> genericNumberType = new NumberType<>(java.math.BigInteger.class);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
+
+        genericNumberType.serializeTo(writer, null, config);
+
+        verify(writer).write('0');
     }
 
     @Test

@@ -23,7 +23,7 @@ import com.landawn.abacus.annotation.Beta;
  * A functional programming utility class for creating fluent conditional execution chains that provides
  * an alternative to traditional if-else statements through method chaining. This class enables elegant
  * conditional logic in functional programming contexts while maintaining readability and supporting
- * various condition types including null checks, emptiness validation, and custom boolean conditions.
+ * various condition types including {@code null} checks, emptiness validation, and custom boolean conditions.
  *
  * <p>The {@code If} class follows a fluent API pattern where conditions are evaluated once and subsequent
  * actions are executed based on that evaluation. It provides a more expressive way to handle conditional
@@ -39,7 +39,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Fluent API Design:</b> Method chaining for readable conditional logic</li>
- *   <li><b>Comprehensive Condition Types:</b> Boolean, null, empty, blank, and existence checks</li>
+ *   <li><b>Comprehensive Condition Types:</b> Boolean, {@code null}, empty, blank, and existence checks</li>
  *   <li><b>Exception Safety:</b> Built-in exception handling with custom exception suppliers</li>
  *   <li><b>Type Safety:</b> Generic support for various data types and collections</li>
  *   <li><b>Functional Integration:</b> Seamless integration with lambda expressions and method references</li>
@@ -156,7 +156,7 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li><b>Condition Evaluation:</b> O(1) for boolean conditions, O(1) for null checks</li>
+ *   <li><b>Condition Evaluation:</b> O(1) for boolean conditions, O(1) for {@code null} checks</li>
  *   <li><b>Collection Checks:</b> O(1) for size-based emptiness checks</li>
  *   <li><b>String Operations:</b> O(n) for blank checking (whitespace scanning)</li>
  *   <li><b>Memory Overhead:</b> Minimal object creation, cached instances for common cases</li>
@@ -173,7 +173,7 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li><b>IllegalArgumentException:</b> Thrown for null action parameters where not allowed</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown for {@code null} action parameters where not allowed</li>
  *   <li><b>Custom Exceptions:</b> Support for throwing custom exceptions via suppliers</li>
  *   <li><b>Exception Propagation:</b> Exceptions from lambda expressions are propagated correctly</li>
  *   <li><b>Type Safety:</b> Compile-time checking prevents many runtime errors</li>
@@ -396,8 +396,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false};
-     * If.isEmpty(flags).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty((boolean[]) null).then(() -> System.out.println("Empty"));    // prints "Empty"
+     * If.isEmpty(flags).then(() -> System.out.println("Empty"));              // does nothing
+     * If.isEmpty((boolean[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the boolean array to check
@@ -413,8 +413,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'a', 'b', 'c'};
-     * If.isEmpty(chars).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty((char[]) null).then(() -> System.out.println("Empty"));    // prints "Empty"
+     * If.isEmpty(chars).then(() -> System.out.println("Empty"));           // does nothing
+     * If.isEmpty((char[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the char array to check
@@ -430,7 +430,7 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3};
-     * If.isEmpty(data).then(() -> System.out.println("Empty"));   // does nothing
+     * If.isEmpty(data).then(() -> System.out.println("Empty"));            // does nothing
      * If.isEmpty((byte[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
@@ -447,8 +447,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {10, 20, 30};
-     * If.isEmpty(values).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty((short[]) null).then(() -> System.out.println("Empty"));     // prints "Empty"
+     * If.isEmpty(values).then(() -> System.out.println("Empty"));           // does nothing
+     * If.isEmpty((short[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the short array to check
@@ -464,8 +464,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3};
-     * If.isEmpty(numbers).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty((int[]) null).then(() -> System.out.println("Empty"));      // prints "Empty"
+     * If.isEmpty(numbers).then(() -> System.out.println("Empty"));        // does nothing
+     * If.isEmpty((int[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the int array to check
@@ -481,7 +481,7 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids = {100L, 200L, 300L};
-     * If.isEmpty(ids).then(() -> System.out.println("Empty"));    // does nothing
+     * If.isEmpty(ids).then(() -> System.out.println("Empty"));             // does nothing
      * If.isEmpty((long[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
@@ -498,8 +498,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] prices = {1.5f, 2.5f, 3.5f};
-     * If.isEmpty(prices).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty((float[]) null).then(() -> System.out.println("Empty"));     // prints "Empty"
+     * If.isEmpty(prices).then(() -> System.out.println("Empty"));           // does nothing
+     * If.isEmpty((float[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the float array to check
@@ -515,8 +515,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] scores = {98.5, 87.3, 92.1};
-     * If.isEmpty(scores).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty((double[]) null).then(() -> System.out.println("Empty"));     // prints "Empty"
+     * If.isEmpty(scores).then(() -> System.out.println("Empty"));            // does nothing
+     * If.isEmpty((double[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the double array to check
@@ -583,9 +583,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
-     * If.isEmpty(numbers).then(() -> System.out.println("Empty"));        // does nothing
-     * If.isEmpty((PrimitiveList) null).then(() -> System.out.println("Empty"));           // prints "Empty"
-     * If.isEmpty(IntList.of()).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty(numbers).then(() -> System.out.println("Empty"));                // does nothing
+     * If.isEmpty((PrimitiveList) null).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty(IntList.of()).then(() -> System.out.println("Empty"));           // prints "Empty"
      * }</pre>
      *
      * @param list the PrimitiveList to check (can be {@code null})
@@ -604,9 +604,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> words = Multiset.of("apple", "banana", "apple");
-     * If.isEmpty(words).then(() -> System.out.println("Empty"));           // does nothing
-     * If.isEmpty((Multiset<?>) null).then(() -> System.out.println("Empty"));            // prints "Empty"
-     * If.isEmpty(Multiset.of()).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty(words).then(() -> System.out.println("Empty"));                // does nothing
+     * If.isEmpty((Multiset<?>) null).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty(Multiset.of()).then(() -> System.out.println("Empty"));        // prints "Empty"
      * }</pre>
      *
      * @param s the Multiset to check (can be {@code null})
@@ -624,9 +624,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> map = ListMultimap.of("a", 1, "a", 2, "b", 3);
-     * If.isEmpty(map).then(() -> System.out.println("Empty"));                  // does nothing
-     * If.isEmpty((Multimap<?, ?, ?>) null).then(() -> System.out.println("Empty"));                 // prints "Empty"
-     * If.isEmpty(N.newListMultimap()).then(() -> System.out.println("Empty"));  // prints "Empty"
+     * If.isEmpty(map).then(() -> System.out.println("Empty"));                        // does nothing
+     * If.isEmpty((Multimap<?, ?, ?>) null).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty(N.newListMultimap()).then(() -> System.out.println("Empty"));        // prints "Empty"
      * }</pre>
      *
      * @param m the Multimap to check (can be {@code null})
@@ -644,9 +644,9 @@ public final class If {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * If.isBlank("   ").then(() -> System.out.println("blank"));    // prints "blank"
-     * If.isBlank("").then(() -> System.out.println("blank"));       // prints "blank"
-     * If.isBlank("abc").then(() -> System.out.println("blank"));    // does nothing
+     * If.isBlank("   ").then(() -> System.out.println("blank"));   // prints "blank"
+     * If.isBlank("").then(() -> System.out.println("blank"));      // prints "blank"
+     * If.isBlank("abc").then(() -> System.out.println("blank"));   // does nothing
      * }</pre>
      *
      * @param s the CharSequence to check (can be {@code null})
@@ -696,8 +696,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false};
-     * If.notEmpty(flags).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty((boolean[]) null).then(() -> System.out.println("Has data"));    // does nothing
+     * If.notEmpty(flags).then(() -> System.out.println("Has data"));              // prints "Has data"
+     * If.notEmpty((boolean[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the boolean array to check
@@ -713,8 +713,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'a', 'b', 'c'};
-     * If.notEmpty(chars).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty((char[]) null).then(() -> System.out.println("Has data"));    // does nothing
+     * If.notEmpty(chars).then(() -> System.out.println("Has data"));           // prints "Has data"
+     * If.notEmpty((char[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the char array to check
@@ -730,7 +730,7 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3};
-     * If.notEmpty(data).then(() -> System.out.println("Has data"));   // prints "Has data"
+     * If.notEmpty(data).then(() -> System.out.println("Has data"));            // prints "Has data"
      * If.notEmpty((byte[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
@@ -747,8 +747,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = {10, 20, 30};
-     * If.notEmpty(values).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty((short[]) null).then(() -> System.out.println("Has data"));     // does nothing
+     * If.notEmpty(values).then(() -> System.out.println("Has data"));           // prints "Has data"
+     * If.notEmpty((short[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the short array to check
@@ -764,8 +764,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3};
-     * If.notEmpty(numbers).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty((int[]) null).then(() -> System.out.println("Has data"));      // does nothing
+     * If.notEmpty(numbers).then(() -> System.out.println("Has data"));        // prints "Has data"
+     * If.notEmpty((int[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the int array to check
@@ -781,7 +781,7 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] ids = {100L, 200L, 300L};
-     * If.notEmpty(ids).then(() -> System.out.println("Has data"));    // prints "Has data"
+     * If.notEmpty(ids).then(() -> System.out.println("Has data"));             // prints "Has data"
      * If.notEmpty((long[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
@@ -798,8 +798,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] prices = {1.5f, 2.5f, 3.5f};
-     * If.notEmpty(prices).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty((float[]) null).then(() -> System.out.println("Has data"));     // does nothing
+     * If.notEmpty(prices).then(() -> System.out.println("Has data"));           // prints "Has data"
+     * If.notEmpty((float[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the float array to check
@@ -815,8 +815,8 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] scores = {98.5, 87.3, 92.1};
-     * If.notEmpty(scores).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty((double[]) null).then(() -> System.out.println("Has data"));     // does nothing
+     * If.notEmpty(scores).then(() -> System.out.println("Has data"));            // prints "Has data"
+     * If.notEmpty((double[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the double array to check
@@ -883,9 +883,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
-     * If.notEmpty(numbers).then(() -> System.out.println("Has data"));        // prints "Has data"
-     * If.notEmpty((PrimitiveList) null).then(() -> System.out.println("Has data"));           // does nothing
-     * If.notEmpty(IntList.of()).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty(numbers).then(() -> System.out.println("Has data"));                // prints "Has data"
+     * If.notEmpty((PrimitiveList) null).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty(IntList.of()).then(() -> System.out.println("Has data"));           // does nothing
      * }</pre>
      *
      * @param list the PrimitiveList to check (can be {@code null})
@@ -904,9 +904,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> words = Multiset.of("apple", "banana", "apple");
-     * If.notEmpty(words).then(() -> System.out.println("Has data"));           // prints "Has data"
-     * If.notEmpty((Multiset<?>) null).then(() -> System.out.println("Has data"));            // does nothing
-     * If.notEmpty(Multiset.of()).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty(words).then(() -> System.out.println("Has data"));                // prints "Has data"
+     * If.notEmpty((Multiset<?>) null).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty(Multiset.of()).then(() -> System.out.println("Has data"));        // does nothing
      * }</pre>
      *
      * @param s the Multiset to check (can be {@code null})
@@ -924,9 +924,9 @@ public final class If {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> map = ListMultimap.of("a", 1, "a", 2, "b", 3);
-     * If.notEmpty(map).then(() -> System.out.println("Has data"));                  // prints "Has data"
-     * If.notEmpty((Multimap<?, ?, ?>) null).then(() -> System.out.println("Has data"));                 // does nothing
-     * If.notEmpty(N.newListMultimap()).then(() -> System.out.println("Has data"));  // does nothing
+     * If.notEmpty(map).then(() -> System.out.println("Has data"));                        // prints "Has data"
+     * If.notEmpty((Multimap<?, ?, ?>) null).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty(N.newListMultimap()).then(() -> System.out.println("Has data"));        // does nothing
      * }</pre>
      *
      * @param m the Multimap to check (can be {@code null})
@@ -944,9 +944,9 @@ public final class If {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * If.notBlank("admin").then(() -> loginUser("admin"));          // executes
-     * If.notBlank("   ").then(() -> loginUser("   "));              // does nothing
-     * If.notBlank(null).then(() -> loginUser("guest"));             // does nothing
+     * If.notBlank("admin").then(() -> loginUser("admin"));   // executes
+     * If.notBlank("   ").then(() -> loginUser("   "));       // does nothing
+     * If.notBlank(null).then(() -> loginUser("guest"));      // does nothing
      * }</pre>
      *
      * @param s the CharSequence to check (can be {@code null})
@@ -1018,7 +1018,7 @@ public final class If {
      * }</pre>
      *
      * @param <E> the type of exception that the runnable may throw
-     * @param cmd the runnable to execute if the condition is true (must not be {@code null})
+     * @param cmd the runnable to execute if the condition is {@code true} (must not be {@code null})
      * @return an OrElse instance for optional chaining of an else clause
      * @throws IllegalArgumentException if cmd is null
      * @throws E if the runnable throws an exception during execution
@@ -1063,7 +1063,7 @@ public final class If {
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that the consumer may throw
      * @param init the input value to pass to the consumer (can be {@code null})
-     * @param action the consumer to execute if the condition is true (must not be {@code null})
+     * @param action the consumer to execute if the condition is {@code true} (must not be {@code null})
      * @return an OrElse instance for optional chaining of an else clause
      * @throws IllegalArgumentException if action is null
      * @throws E if the consumer throws an exception during execution
@@ -1152,6 +1152,7 @@ public final class If {
      *   .then(() -> actionIfTrue())
      *   .orElse(() -> actionIfFalse());
      * }</pre>
+     *
      */
     public static final class OrElse {
         /**
@@ -1238,7 +1239,7 @@ public final class If {
          * }</pre>
          *
          * @param <E> the type of exception that the runnable may throw
-         * @param cmd the runnable to execute if the initial condition was false (must not be {@code null})
+         * @param cmd the runnable to execute if the initial condition was {@code false} (must not be {@code null})
          * @throws IllegalArgumentException if cmd is null
          * @throws E if the runnable throws an exception during execution
          */
@@ -1276,7 +1277,7 @@ public final class If {
          * @param <T> the type of the input to the consumer
          * @param <E> the type of exception that the consumer may throw
          * @param init the input value to pass to the consumer (can be {@code null})
-         * @param action the consumer to execute if the initial condition was false (must not be {@code null})
+         * @param action the consumer to execute if the initial condition was {@code false} (must not be {@code null})
          * @throws IllegalArgumentException if action is null
          * @throws E if the consumer throws an exception during execution
          */

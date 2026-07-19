@@ -17,7 +17,7 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
- * An immutable container that pairs a key with a value, where equality and hashing
+ * A shallowly immutable container that pairs a key with a value, where equality and hashing
  * are based solely on the key. This design provides significant performance improvements
  * in collections by avoiding expensive value comparisons.
  *
@@ -25,6 +25,10 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * the {@code hashCode} and {@code equals} methods. This makes it ideal for scenarios where you need
  * to store key-value pairs in sets or as map keys, but only want to consider the
  * key for uniqueness.</p>
+ *
+ * <p>The key and value references never change, but this class does not copy or freeze the
+ * referenced objects. In particular, a mutable key must not be changed in a way that affects
+ * {@code equals} or {@code hashCode} while this object is stored in a hash-based collection.</p>
  *
  * <p>This class is sealed and only permits {@link IndexedKeyed} as a subclass.</p>
  *
@@ -73,7 +77,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * Creates a new {@code Keyed} instance with the specified key and value.
      *
      * <p>This factory method provides a convenient way to create instances without
-     * directly calling the constructor. The resulting object is immutable.</p>
+     * directly calling the constructor. The resulting container retains the supplied references.</p>
      *
      * <p>Both {@code key} and {@code val} can be {@code null}. However, be aware that
      * a {@code null} key will result in a hash code of 0 and may affect collection behavior.</p>
@@ -97,8 +101,8 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
     /**
      * Returns the key of this key-value pair.
      *
-     * <p>The key is used for hashing and equality comparisons in collections.
-     * This value is immutable once the {@code Keyed} instance is created.</p>
+     * <p>The key is used for hashing and equality comparisons in collections. The stored reference
+     * cannot be replaced, although the referenced object may itself be mutable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -120,8 +124,8 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * Returns the value of this key-value pair.
      *
      * <p>The value is not used in hashing or equality comparisons, allowing for
-     * efficient lookups based solely on the key. This value is immutable once
-     * the {@code Keyed} instance is created.</p>
+     * efficient lookups based solely on the key. The stored reference cannot be replaced,
+     * although the referenced object may itself be mutable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -214,9 +218,9 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Keyed.of("abc", 123).toString();      // returns "{key=abc, val=123}"
-     * Keyed.of(null, "value").toString();   // returns "{key=null, val=value}"
-     * Keyed.of("key", null).toString();     // returns "{key=key, val=null}"
+     * Keyed.of("abc", 123).toString();      // "{key=abc, val=123}"
+     * Keyed.of(null, "value").toString();   // "{key=null, val=value}"
+     * Keyed.of("key", null).toString();     // "{key=key, val=null}"
      * }</pre>
      *
      * @return a string representation of this object in the format "{key=&lt;key&gt;, val=&lt;value&gt;}".

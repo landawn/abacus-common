@@ -471,11 +471,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml4("&lt;p&gt;Hello&lt;/p&gt;")   = "<p>Hello</p>"
-     * EscapeUtil.unescapeHtml4("bread &amp; butter")         = "bread & butter"
-     * EscapeUtil.unescapeHtml4("&copy; 2024")                = "© 2024"
-     * EscapeUtil.unescapeHtml4("&#65;")                      = "A"
-     * EscapeUtil.unescapeHtml4(null)                         = null
+     * EscapeUtil.unescapeHtml4("<p>Hello</p>")         = "<p>Hello</p>"
+     * EscapeUtil.unescapeHtml4("bread &amp; butter")   = "bread & butter"
+     * EscapeUtil.unescapeHtml4("&copy; 2024")          = "© 2024"
+     * EscapeUtil.unescapeHtml4("&#65;")                = "A"
+     * EscapeUtil.unescapeHtml4(null)                   = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -501,9 +501,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml3("&lt;div&gt;")   = "<div>"
-     * EscapeUtil.unescapeHtml3("A &amp; B")     = "A & B"
-     * EscapeUtil.unescapeHtml3(null)            = null
+     * EscapeUtil.unescapeHtml3("<div>")       = "<div>"
+     * EscapeUtil.unescapeHtml3("A &amp; B")   = "A & B"
+     * EscapeUtil.unescapeHtml3(null)          = null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -602,7 +602,7 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeXml("&lt;root&gt;")         = "<root>"
+     * EscapeUtil.unescapeXml("<root>")               = "<root>"
      * EscapeUtil.unescapeXml("A &amp; B")            = "A & B"
      * EscapeUtil.unescapeXml("&apos;quoted&apos;")   = "'quoted'"
      * EscapeUtil.unescapeXml("&#65;")                = "A"
@@ -709,21 +709,21 @@ public final class EscapeUtil {
          * the top level API may reliably ignore StringWriter IOExceptions.
          *
          * <p>A return value of {@code 0} means the codepoint at {@code index} was not handled by this
-         * translator (nothing is written); the caller then copies that single character through
-         * unchanged and advances by one.</p>
+         * translator (nothing is written); the caller then copies that complete Unicode code point
+         * through unchanged and advances by its UTF-16 width.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * java.io.StringWriter out = new java.io.StringWriter();
          *
          * // A character that this translator handles: ESCAPE_JAVA escapes a double quote
-         * int consumed = EscapeUtil.ESCAPE_JAVA.translate("\"abc", 0, out); // returns 1 (one codepoint consumed)
-         * out.toString();                                                   // returns "\\\"" (a backslash followed by a quote)
+         * int consumed = EscapeUtil.ESCAPE_JAVA.translate("\"abc", 0, out);   // returns 1 (one codepoint consumed)
+         * out.toString();                                                     // returns "\\\"" (a backslash followed by a quote)
          *
          * // A character it does not handle: nothing is consumed or written
          * java.io.StringWriter out2 = new java.io.StringWriter();
-         * int consumed2 = EscapeUtil.ESCAPE_JAVA.translate("abc", 0, out2); // returns 0 (not handled here)
-         * out2.toString();                                                  // returns "" (empty; caller passes the char through)
+         * int consumed2 = EscapeUtil.ESCAPE_JAVA.translate("abc", 0, out2);   // returns 0 (not handled here)
+         * out2.toString();                                                    // returns "" (empty; caller passes the char through)
          * }</pre>
          *
          * @param input CharSequence that is being translated
@@ -743,10 +743,10 @@ public final class EscapeUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld")      = "Hello\\nWorld"
-         * EscapeUtil.UNESCAPE_HTML4.translate("&lt;p&gt;")      = "<p>"
-         * EscapeUtil.ESCAPE_CSV.translate("hello,world")        = "\"hello,world\""
-         * EscapeUtil.ESCAPE_JAVA.translate(null)                = null
+         * EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld")   = "Hello\\nWorld"
+         * EscapeUtil.UNESCAPE_HTML4.translate("<p>")         = "<p>"
+         * EscapeUtil.ESCAPE_CSV.translate("hello,world")     = "\"hello,world\""
+         * EscapeUtil.ESCAPE_JAVA.translate(null)             = null
          * }</pre>
          *
          * @param input CharSequence to be translated, may be null
@@ -829,7 +829,7 @@ public final class EscapeUtil {
          * <pre>{@code
          * // Chain translators: first HTML escape, then fall back to Java escape
          * CharSequenceTranslator combined = EscapeUtil.ESCAPE_HTML4.with(EscapeUtil.ESCAPE_JAVA);
-         * combined.translate("<tag>\n")         = "&lt;tag&gt;\\n"
+         * String escaped = combined.translate("<tag>\n"); // returns "&lt;tag&gt;\\n"
          *
          * // Multiple translators can be chained in one call
          * CharSequenceTranslator triple = EscapeUtil.ESCAPE_HTML4
@@ -852,9 +852,9 @@ public final class EscapeUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CharSequenceTranslator.hex(0)       = "0"
-         * CharSequenceTranslator.hex(15)      = "F"
-         * CharSequenceTranslator.hex(255)     = "FF"
+         * CharSequenceTranslator.hex(0)     = "0"
+         * CharSequenceTranslator.hex(15)    = "F"
+         * CharSequenceTranslator.hex(255)   = "FF"
          * }</pre>
          *
          * @param codepoint The codepoint to convert.

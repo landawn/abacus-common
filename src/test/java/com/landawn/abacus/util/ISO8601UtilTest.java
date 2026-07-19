@@ -154,6 +154,15 @@ public class ISO8601UtilTest extends TestBase {
         assertEquals("2023-12-25T10:30:45Z".length(), position.getIndex());
     }
 
+    @Test
+    public void testParseRejectsMixedDateAndTimeSeparators() {
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-1225"));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("202312-25"));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:3045Z"));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T1030:45Z"));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:30:Z"));
+    }
+
     // ===== Round-trip tests =====
 
     @Test
@@ -439,6 +448,35 @@ public class ISO8601UtilTest extends TestBase {
         Date date = ISO8601Util.parse("20231225", pos);
         assertNotNull(date);
         assertEquals(8, pos.getIndex());
+    }
+
+    @Test
+    public void testParsePositionSupportsTrailingTextAfterNumericTimezone() {
+        final String input = "2023-12-25T10:30:45+05:30 trailing";
+        final ParsePosition pos = new ParsePosition(0);
+
+        assertNotNull(ISO8601Util.parse(input, pos));
+        assertEquals("2023-12-25T10:30:45+05:30".length(), pos.getIndex());
+
+        final String compactInput = "2023-12-25T10:30:45+0530 trailing";
+        final ParsePosition compactPosition = new ParsePosition(0);
+        assertNotNull(ISO8601Util.parse(compactInput, compactPosition));
+        assertEquals("2023-12-25T10:30:45+0530".length(), compactPosition.getIndex());
+
+        final ParsePosition dateOnlyPosition = new ParsePosition(0);
+        assertNotNull(ISO8601Util.parse("2023-12-25 trailing", dateOnlyPosition));
+        assertEquals("2023-12-25".length(), dateOnlyPosition.getIndex());
+    }
+
+    @Test
+    public void testParsePositionIsUnchangedWhenCalendarValidationFails() {
+        final ParsePosition invalidDatePosition = new ParsePosition(2);
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("xx2023-02-30", invalidDatePosition));
+        assertEquals(2, invalidDatePosition.getIndex());
+
+        final ParsePosition invalidTimePosition = new ParsePosition(2);
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("xx2023-12-25T25:00:00Z", invalidTimePosition));
+        assertEquals(2, invalidTimePosition.getIndex());
     }
 
     // ===== Edge cases =====

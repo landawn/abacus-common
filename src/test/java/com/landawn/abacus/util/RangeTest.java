@@ -858,6 +858,16 @@ public class RangeTest extends AbstractTest {
     }
 
     @Test
+    public void test_containsRange_emptyRange() {
+        Range<Integer> range = Range.closed(1, 10);
+
+        assertTrue(range.containsRange(Range.open(-5, -5)));
+        assertTrue(range.containsRange(Range.openClosed(20, 20)));
+        assertTrue(Range.closedOpen(30, 30).containsRange(Range.openClosed(40, 40)));
+        assertFalse(Range.open(5, 5).containsRange(Range.closed(5, 5)));
+    }
+
+    @Test
     public void test_isAfterRange_rangeAfter() {
         Range<Integer> range1 = Range.closed(10, 15);
         Range<Integer> range2 = Range.closed(1, 5);

@@ -894,7 +894,10 @@ public class AbstractCharStreamTest extends TestBase {
         List<Character> result = s1.zipWith(s2, s3, (c1, c2, c3) -> (char) (c1 + c2 + c3)).boxed().toList();
         assertEquals(Arrays.asList((char) ('1' + 'a' + 'x'), (char) ('2' + 'b' + 'y')), result);
 
-        result = createCharStream(new char[] {}).zipWith(s2, s3, (c1, c2, c3) -> c1).boxed().toList();
+        result = createCharStream(new char[] {})
+                .zipWith(createCharStream(new char[] { 'a', 'b', 'c' }), createCharStream(new char[] { 'x', 'y' }), (c1, c2, c3) -> c1)
+                .boxed()
+                .toList();
         assertEquals(0, result.size());
     }
 
@@ -1290,6 +1293,11 @@ public class AbstractCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testJoinToRejectsNullForEmptyStream() {
+        assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[0]).joinTo(null));
+    }
+
+    @Test
     public void testCollectSupplierAccumulator() {
         StringBuilder sb = createCharStream(new char[] { 'a', 'b', 'c' }).collect(StringBuilder::new, StringBuilder::append);
         assertEquals("abc", sb.toString());
@@ -1349,6 +1357,27 @@ public class AbstractCharStreamTest extends TestBase {
         revIter2.nextChar();
         assertEquals(3L, revIter2.count());
         assertFalse(revIter2.hasNext());
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
+        CharIteratorEx reversed = (CharIteratorEx) createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' }).map(c -> c).reversed().iteratorEx();
+        assertEquals(5, reversed.toArray().length);
+        assertFalse(reversed.hasNext());
+        assertEquals(0, reversed.toArray().length);
+
+        CharIteratorEx rotated = (CharIteratorEx) createCharStream(new char[] { 'a', 'b', 'c', 'd', 'e' }).map(c -> c).rotated(2).iteratorEx();
+        rotated.nextChar();
+        assertEquals(4, rotated.toArray().length);
+        assertFalse(rotated.hasNext());
+        assertEquals(0, rotated.toArray().length);
+
+        CharIteratorEx reverseSorted = (CharIteratorEx) createCharStream(new char[] { 'c', 'a', 'd', 'a', 'e' }).map(c -> c).reverseSorted().iteratorEx();
+        reverseSorted.nextChar();
+        reverseSorted.nextChar();
+        assertEquals(3, reverseSorted.toArray().length);
+        assertFalse(reverseSorted.hasNext());
+        assertEquals(0, reverseSorted.toArray().length);
     }
 
     @Test

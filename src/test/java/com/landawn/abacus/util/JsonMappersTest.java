@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -81,6 +83,17 @@ public class JsonMappersTest extends TestBase {
         }
     }
 
+    public static class HiddenFieldBean {
+        private String value;
+
+        public HiddenFieldBean() {
+        }
+
+        HiddenFieldBean(final String value) {
+            this.value = value;
+        }
+    }
+
     @TempDir
     File tempDir;
 
@@ -91,6 +104,31 @@ public class JsonMappersTest extends TestBase {
         Person deserialized = JsonMappers.fromJson(json, Person.class);
 
         Assertions.assertEquals(original, deserialized);
+    }
+
+    @Test
+    public void testSerializationConfigurationDoesNotLeakThroughMapperCache() {
+        final ObjectMapper fieldMapper = new ObjectMapper();
+        fieldMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        final SerializationConfig fieldConfig = fieldMapper.getSerializationConfig();
+
+        Assertions.assertEquals("{\"value\":\"secret\"}", JsonMappers.toJson(new HiddenFieldBean("secret"), fieldConfig));
+
+        final SerializationConfig defaultConfig = JsonMappers.createSerializationConfig();
+        Assertions.assertThrows(RuntimeException.class, () -> JsonMappers.toJson(new HiddenFieldBean("secret"), defaultConfig));
+    }
+
+    @Test
+    public void testDeserializationConfigurationDoesNotLeakThroughMapperCache() {
+        final ObjectMapper fieldMapper = new ObjectMapper();
+        fieldMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        final DeserializationConfig fieldConfig = fieldMapper.getDeserializationConfig();
+
+        final HiddenFieldBean bean = JsonMappers.fromJson("{\"value\":\"secret\"}", HiddenFieldBean.class, fieldConfig);
+        Assertions.assertEquals("secret", bean.value);
+
+        final DeserializationConfig defaultConfig = JsonMappers.createDeserializationConfig();
+        Assertions.assertThrows(RuntimeException.class, () -> JsonMappers.fromJson("{\"value\":\"secret\"}", HiddenFieldBean.class, defaultConfig));
     }
 
     @Test
@@ -1892,6 +1930,40 @@ public class JsonMappersTest extends TestBase {
 
         Assertions.assertNotNull(list);
         Assertions.assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testByteArraySegmentsAreValidatedConsistently() {
+        final byte[] json = "xx{\"name\":\"Ada\",\"age\":37}yy".getBytes(StandardCharsets.UTF_8);
+        final int offset = 2;
+        final int len = json.length - 4;
+        final TypeReference<Person> type = new TypeReference<Person>() {
+        };
+        final JsonMappers.One one = JsonMappers.wrap(new ObjectMapper());
+
+        Assertions.assertEquals("Ada", JsonMappers.fromJson(json, offset, len, Person.class).name);
+        Assertions.assertEquals("Ada", JsonMappers.fromJson(json, offset, len, type).name);
+        Assertions.assertEquals("Ada", one.fromJson(json, offset, len, Person.class).name);
+        Assertions.assertEquals("Ada", one.fromJson(json, offset, len, type).name);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson((byte[]) null, 0, 0, Person.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(json, 0, -1, Person.class));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> JsonMappers.fromJson(json, -1, 1, type));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> one.fromJson(json, json.length, 1, Person.class));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> one.fromJson(json, 1, Integer.MAX_VALUE, type));
+    }
+
+    @Test
+    public void testFeatureAndMapperArgumentsAreValidated() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> JsonMappers.toJson(new Person(), (SerializationFeature) null, new SerializationFeature[0]));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> JsonMappers.toJson(new Person(), SerializationFeature.INDENT_OUTPUT, (SerializationFeature[]) null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> JsonMappers.fromJson("{}", Person.class, (DeserializationFeature) null, new DeserializationFeature[0]));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson("{}", new TypeReference<Person>() {
+        }, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, (DeserializationFeature[]) null));
+        Assertions.assertThrows(NullPointerException.class, () -> JsonMappers.wrap(null));
     }
 
     @Test

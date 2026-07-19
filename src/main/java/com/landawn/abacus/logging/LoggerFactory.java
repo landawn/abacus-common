@@ -35,7 +35,9 @@ import com.landawn.abacus.util.cs;
  * </ol>
  *
  * <p>The factory maintains a cache of logger instances to avoid creating multiple instances
- * for the same logger name.</p>
+ * for the same logger name. Failure to initialize an optional backend causes the factory to try
+ * the next backend, but JVM-fatal errors ({@link VirtualMachineError} and {@link ThreadDeath}) are
+ * propagated instead of being silently converted into a logging fallback.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -128,7 +130,7 @@ public final class LoggerFactory {
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
-    public static Logger getLogger(final String name) {
+    public static Logger getLogger(final String name) throws IllegalArgumentException {
         N.checkArgNotNull(name, cs.name);
 
         Logger logger = namedLoggers.get(name);
@@ -160,7 +162,7 @@ public final class LoggerFactory {
 
                             break;
                         } catch (final Throwable e) {
-                            // ignore
+                            rethrowIfFatal(e);
                         }
                     }
 
@@ -179,7 +181,7 @@ public final class LoggerFactory {
 
                             break;
                         } catch (final Throwable e) {
-                            // ignore
+                            rethrowIfFatal(e);
                         }
                     }
 
@@ -198,7 +200,7 @@ public final class LoggerFactory {
 
                             break;
                         } catch (final Throwable e) {
-                            // ignore
+                            rethrowIfFatal(e);
                         }
                     }
 
@@ -221,6 +223,17 @@ public final class LoggerFactory {
 
             namedLoggers.put(name, logger);
             return logger;
+        }
+    }
+
+    /** Propagates errors for which continuing backend discovery is unsafe. */
+    static void rethrowIfFatal(final Throwable e) {
+        if (e instanceof ThreadDeath threadDeath) {
+            throw threadDeath;
+        }
+
+        if (e instanceof VirtualMachineError virtualMachineError) {
+            throw virtualMachineError;
         }
     }
 }

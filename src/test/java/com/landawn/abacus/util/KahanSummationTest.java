@@ -141,6 +141,20 @@ public class KahanSummationTest extends TestBase {
     }
 
     @Test
+    public void testCombineWithSelfIsAliasSafe() {
+        final double[] values = { 1e-16, Math.ulp(1.0) / 2, 1e-16, 1.0 };
+
+        final KahanSummation expected = KahanSummation.of(values);
+        expected.combine(KahanSummation.of(values));
+
+        final KahanSummation actual = KahanSummation.of(values);
+        actual.combine(actual);
+
+        Assertions.assertEquals(expected.count(), actual.count());
+        Assertions.assertEquals(Double.doubleToLongBits(expected.sum()), Double.doubleToLongBits(actual.sum()));
+    }
+
+    @Test
     public void testAverage() {
         KahanSummation sum = new KahanSummation();
         sum.add(1.0);

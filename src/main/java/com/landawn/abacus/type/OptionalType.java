@@ -31,8 +31,9 @@ import com.landawn.abacus.util.u.Optional;
  * mapped to {@code Optional.empty()} on read, and {@code Optional.empty()} maps to SQL
  * {@code NULL} on write.
  * <p>
- * This type handler supports generic type parameters of the form {@code Optional<T>}
- * and delegates element serialization/deserialization to the appropriate element type handler.
+ * This type handler supports generic type parameters of the form {@code Optional<T>}.
+ * {@link #stringOf(Optional)} and {@link #valueOf(String)} use the declared element type so they remain
+ * symmetric; streaming append/serialization methods use the contained value's runtime type.
  *
  * @param <T> the type of value wrapped by the {@code Optional}
  */
@@ -148,8 +149,9 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Converts an {@link Optional} object to its string representation.
      * If the Optional is {@code null} or empty, returns {@code null}. Otherwise,
-     * delegates to {@link com.landawn.abacus.util.N#stringOf(Object)}, which selects
-     * a converter based on the runtime class of the contained value.
+     * delegates to the declared {@linkplain #elementType() element type}. Using the
+     * declared type keeps this method symmetric with {@link #valueOf(String)}, which
+     * parses the result with that same type handler.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -173,7 +175,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public String stringOf(final Optional<T> x) {
-        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());   //NOSONAR
+        return (x == null || x.isEmpty()) ? null : elementType.stringOf(x.get());
     }
 
     /**
@@ -187,7 +189,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<Integer>> type = TypeFactory.getType("Optional<Integer>");
-     * Optional<Integer> opt = type.valueOf("42");   // Returns Optional.of(42)
+     * Optional<Integer> opt = type.valueOf("42");     // Returns Optional.of(42)
      *
      * Optional<Integer> empty = type.valueOf(null);   // Returns Optional.empty()
      * }</pre>

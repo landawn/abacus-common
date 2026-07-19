@@ -469,6 +469,23 @@ public class HttpHeadersTest extends TestBase {
         assertFalse(headers.containsHeader("Accept"));
     }
 
+    @Test
+    public void testHeaderNamesAreCaseInsensitive() {
+        final HttpHeaders headers = HttpHeaders.create().set("Content-Type", "text/plain");
+
+        assertEquals("text/plain", headers.get("content-type"));
+        assertEquals("text/plain", headers.getFirst("CONTENT-TYPE"));
+        assertTrue(headers.containsHeader("cOnTeNt-TyPe"));
+
+        headers.setIfAbsent("CONTENT-TYPE", "application/xml");
+        assertEquals("text/plain", headers.get("Content-Type"));
+
+        headers.set("content-type", "application/json");
+        assertEquals(1, headers.toMap().size());
+        assertEquals("application/json", headers.remove("CONTENT-type"));
+        assertTrue(headers.isEmpty());
+    }
+
     // --- getFirst (M8) ---
 
     @Test
@@ -624,6 +641,18 @@ public class HttpHeadersTest extends TestBase {
         headers2.set("Header1", "value1");
 
         assertEquals(headers1.hashCode(), headers2.hashCode());
+    }
+
+    @Test
+    public void testEqualsAndHashCodeIgnoreHeaderNameCase() {
+        final HttpHeaders lowerCase = HttpHeaders.of("content-type", "application/json", "x-request-id", "123");
+        final HttpHeaders mixedCase = HttpHeaders.of("Content-Type", "application/json", "X-Request-ID", "123");
+
+        assertEquals(lowerCase, mixedCase);
+        assertEquals(mixedCase, lowerCase);
+        assertEquals(lowerCase.hashCode(), mixedCase.hashCode());
+
+        assertFalse(HttpHeaders.of("a", null).equals(HttpHeaders.of("b", null)));
     }
 
     // --- equals ---

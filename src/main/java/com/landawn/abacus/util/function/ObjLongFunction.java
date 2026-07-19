@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -59,7 +59,6 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * @param u the second function argument, a primitive long value
      * @return the function result of type R
      */
-    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     R apply(T t, long u);
 
@@ -75,16 +74,19 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ObjLongFunction<TimeZone, Date> createDate = (timezone, millis) -> {
+     * ObjLongFunction<TimeZone, Calendar> createCalendar = (timezone, millis) -> {
      *     Calendar cal = Calendar.getInstance(timezone);
      *     cal.setTimeInMillis(millis);
-     *     return cal.getTime();
+     *     return cal;
      * };
-     * Function<Date, String> formatDate = date ->
-     *     new SimpleDateFormat("yyyy-MM-dd").format(date);
+     * Function<Calendar, String> formatDate = cal -> {
+     *     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+     *     formatter.setTimeZone(cal.getTimeZone());
+     *     return formatter.format(cal.getTime());
+     * };
      *
      * ObjLongFunction<TimeZone, String> timestampToString =
-     *     createDate.andThen(formatDate);
+     *     createCalendar.andThen(formatDate);
      *
      * String result = timestampToString.apply(TimeZone.getDefault(),
      *     System.currentTimeMillis());

@@ -90,8 +90,8 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * List<Type<?>> paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.size());        // Output: 1
-     * System.out.println(paramTypes.get(0).name()); // Output: short
+     * System.out.println(paramTypes.size());          // Output: 1
+     * System.out.println(paramTypes.get(0).name());   // Output: short
      * }</pre>
      *
      * @return an immutable list containing the primitive {@code short} Type that describes the elements of this list type
@@ -188,6 +188,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * type.appendTo(nullSb, null);
      * System.out.println(nullSb.toString());   // Output: null
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -235,6 +236,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * type.serializeTo(nullWriter, null, config);
      * System.out.println(nullWriter.toString());   // Output: null
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization

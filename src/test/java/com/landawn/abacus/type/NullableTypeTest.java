@@ -238,4 +238,33 @@ public class NullableTypeTest extends TestBase {
         nullableStringType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
+
+    @Test
+    public void testStringOfUsesDeclaredElementTypeForSubtype() {
+        TypeFactory.registerType(NullableBaseValue.class, value -> "base:" + value.value, str -> new NullableBaseValue(str.substring(5)));
+        TypeFactory.registerType(NullableDerivedValue.class, value -> "derived:" + value.value, str -> new NullableDerivedValue(str.substring(8)));
+
+        final NullableType<NullableBaseValue> type = new NullableType<>(TypeFactory.getType(NullableBaseValue.class).name());
+        final NullableBaseValue value = new NullableDerivedValue("test");
+
+        final String str = type.stringOf(Nullable.of(value));
+        final Nullable<NullableBaseValue> roundTripped = type.valueOf(str);
+
+        assertEquals("base:test", str);
+        assertEquals("test", roundTripped.get().value);
+    }
+
+    public static class NullableBaseValue {
+        final String value;
+
+        NullableBaseValue(final String value) {
+            this.value = value;
+        }
+    }
+
+    public static final class NullableDerivedValue extends NullableBaseValue {
+        NullableDerivedValue(final String value) {
+            super(value);
+        }
+    }
 }

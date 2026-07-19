@@ -16,6 +16,7 @@ package com.landawn.abacus.util.stream;
 
 import java.nio.FloatBuffer;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -185,7 +186,6 @@ import com.landawn.abacus.util.function.TriFunction;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
-@com.landawn.abacus.annotation.Immutable
 @LazyEvaluation
 public abstract class FloatStream extends StreamBase<Float, float[], FloatPredicate, FloatConsumer, OptionalFloat, IndexedFloat, FloatIterator, FloatStream> {
 
@@ -218,17 +218,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
@@ -282,17 +283,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
@@ -349,18 +351,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
@@ -393,17 +396,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to float
      * @return a new FloatStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#map(Function)
      */
     @ParallelSupported
@@ -441,17 +445,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(FloatUnaryOperator)
      * @see #mapToObj(FloatFunction)
      */
@@ -485,17 +490,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to long
      * @return a new LongStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(FloatUnaryOperator)
      * @see #mapToDouble(FloatToDoubleFunction)
      */
@@ -529,17 +535,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(FloatUnaryOperator)
      * @see #mapToLong(FloatToLongFunction)
      */
@@ -573,18 +580,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from float to T
      * @return a new Stream of objects resulting from applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(FloatUnaryOperator)
      * @see #mapToInt(FloatToIntFunction)
      */
@@ -595,10 +603,9 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Returns a stream consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying
-     * the provided mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * the provided mapping function to each element. Each non-null mapped stream is
+     * closed after its contents are consumed or when the resulting stream is closed.
+     * A null mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -618,17 +625,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to FloatStream
      * @return a new {@link FloatStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      */
     @ParallelSupported
@@ -675,17 +683,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to {@code Collection<Float>}
      * @return a new {@code FloatStream} consisting of the flattened contents of the collections produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(FloatFunction)
      * @see #flatMapArray(FloatFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -720,17 +729,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to float[]
      * @return a new {@code FloatStream} consisting of the flattened contents of the arrays produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(FloatFunction)
      * @see #flatMapToInt(FloatFunction)
      * @see #flatMapToObj(FloatFunction)
@@ -743,10 +753,9 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Returns an IntStream consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying
-     * the provided mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * the provided mapping function to each element. Each non-null mapped stream is
+     * closed after its contents are consumed or when the resulting stream is closed.
+     * A null mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -766,17 +775,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to IntStream
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -785,10 +795,9 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Returns a LongStream consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying
-     * the provided mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * the provided mapping function to each element. Each non-null mapped stream is
+     * closed after its contents are consumed or when the resulting stream is closed.
+     * A null mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -808,17 +817,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to LongStream
      * @return a new {@link LongStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -827,10 +837,9 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Returns a DoubleStream consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying
-     * the provided mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * the provided mapping function to each element. Each non-null mapped stream is
+     * closed after its contents are consumed or when the resulting stream is closed.
+     * A null mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -850,17 +859,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from float to DoubleStream
      * @return a new {@link DoubleStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -869,10 +879,9 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying
-     * the provided mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * the provided mapping function to each element. Each non-null mapped stream is
+     * closed after its contents are consumed or when the resulting stream is closed.
+     * A null mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -892,18 +901,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from float to Stream
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -932,18 +942,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from float to Collection
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -972,18 +983,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from float to T[]
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the arrays produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1010,17 +1022,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a function to apply to each element which produces an OptionalFloat
      * @return a new FloatStream with the non-empty mapped elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1051,19 +1064,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
-     * @param sameRange a non-null predicate that determines if the next element belongs to the same range as the first element of the current range.
+     * @param sameRange a {@code non-null} predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
-     * @param mapper a non-null function that maps a range (defined by its first and last element) to an output element
+     * @param mapper a {@code non-null} function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#rangeMap(BiPredicate, BiFunction)
@@ -1099,20 +1112,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
-     * @param sameRange a non-null predicate that determines if the next element belongs to the same range as the first element of the current range.
+     * @param sameRange a {@code non-null} predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
-     * @param mapper a non-null function that maps a range (defined by its first and last element) to an output object of type T
+     * @param mapper a {@code non-null} function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#rangeMap(BiPredicate, BiFunction)
@@ -1144,13 +1157,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1186,13 +1199,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1230,13 +1243,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
@@ -1279,17 +1292,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator a {@code FloatBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code FloatStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
@@ -1324,19 +1338,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      *        It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * @param accumulator a {@code FloatBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code FloatStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
@@ -1369,19 +1384,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value used as the starting accumulated value. When {@code initIncluded} is {@code true}, it is also emitted as the first element of the returned stream.
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator a {@code FloatBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code FloatStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
@@ -1407,17 +1423,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to prepend to this stream
      * @return a new stream with the specified elements prepended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1442,17 +1459,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append to this stream
      * @return a new stream with the specified elements appended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1483,17 +1501,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append if this stream is empty
      * @return this stream if not empty, otherwise a new stream containing the specified elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1518,7 +1537,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *     .top(5)
      *     .toArray();   // returns all 3 elements (fewer than n)
      *
-     * float sum = FloatStream.of(10f, 20f, 5f, 15f, 30f)
+     * double sum = FloatStream.of(10f, 20f, 5f, 15f, 30f)
      *     .top(2)
      *     .sum();   // returns 50.0 (sum of top 2: 30 + 20)
      * }</pre>
@@ -1526,17 +1545,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to return
      * @return a new FloatStream containing the top n elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -1570,18 +1590,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to return
      * @param comparator a comparator to order the elements
      * @return a new FloatStream containing the top n elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -1606,7 +1627,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1616,6 +1637,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * </table>
      *
      * @return a FloatList containing all stream elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -1638,7 +1660,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1654,6 +1676,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param keyMapper a function to produce keys for the map
      * @param valueMapper a function to produce values for the map
      * @return a Map containing the mapped key-value pairs
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function)
@@ -1680,7 +1703,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1698,6 +1721,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueMapper a function to produce values for the map
      * @param mapFactory a supplier providing a new Map into which the results will be inserted
      * @return a Map containing the mapped key-value pairs
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function)
@@ -1726,7 +1750,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1743,6 +1767,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueMapper a function to produce values for the map
      * @param mergeFunction a function to resolve collisions between values associated with the same key
      * @return a Map containing the mapped key-value pairs
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -1771,7 +1796,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1790,6 +1815,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mergeFunction a function to resolve collisions between values associated with the same key
      * @param mapFactory a supplier providing a new Map into which the results will be inserted
      * @return a Map containing the mapped key-value pairs
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1819,7 +1845,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1834,6 +1860,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param keyMapper a classifier function mapping input elements to keys
      * @param downstream a Collector implementing the downstream reduction
      * @return a Map containing the results of the group-by operation
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -1865,7 +1892,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1882,6 +1909,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param downstream a Collector implementing the downstream reduction
      * @param mapFactory a supplier providing a new Map into which the results will be inserted
      * @return a Map containing the results of the group-by operation
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -1921,18 +1949,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param identity the identity value for the accumulator function, and the value returned when the stream is empty
      * @param accumulator the function for combining the current accumulated value and the current stream element
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
@@ -1961,17 +1990,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return an OptionalFloat describing the result of the reduction. If the stream is empty, an empty {@code OptionalFloat} is returned.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
@@ -1998,13 +2028,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> The type of the result
@@ -2013,6 +2043,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param combiner an associative, non-interfering, stateless function for combining two values, which must be compatible with the accumulator function.
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -2043,18 +2074,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> The type of the result. It must be {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
      * @return the result of the reduction
@@ -2083,7 +2115,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * FloatList collected = new FloatList();
      * FloatStream.of(1.0f, 2.0f, 3.0f).forEach(collected::add);
-     * collected.toArray();   // returns [1.0, 2.0, 3.0]
+     * collected.toArray();                                // returns [1.0, 2.0, 3.0]
      *
      * FloatStream.empty().forEach(System.out::println);   // prints nothing
      * }</pre>
@@ -2091,17 +2123,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the action may throw
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2131,17 +2164,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the action may throw
      * @param action a non-interfering action to perform on the elements, taking both index and value
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2173,19 +2207,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if any elements of the stream match the provided predicate,
      *         otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2218,19 +2253,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either all elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2263,19 +2299,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either no elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2299,16 +2336,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalFloat} containing the first element of the stream, or an empty {@code OptionalFloat} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.FloatPredicate)
@@ -2317,6 +2355,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public OptionalFloat findFirst() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2341,16 +2381,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalFloat} containing the first element of the stream, or an empty {@code OptionalFloat} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.FloatPredicate)
@@ -2359,6 +2400,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public OptionalFloat findAny() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2387,18 +2430,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an OptionalFloat describing the first matching element of this stream, or an empty {@code OptionalFloat} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2426,18 +2470,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an OptionalFloat describing any matching element of this stream, or an empty {@code OptionalFloat} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2466,18 +2511,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an OptionalFloat describing the last matching element of this stream, or an empty {@code OptionalFloat} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Beta
@@ -2494,15 +2540,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FloatStream.of(5.5f, 2.3f, 8.1f, 1.7f, 9.2f).min();   // returns OptionalFloat[1.7f]
+     * FloatStream.of(5.5f, 2.3f, 8.1f, 1.7f, 9.2f).min();                        // returns OptionalFloat[1.7f]
      *
-     * FloatStream.empty().min();   // returns OptionalFloat.empty()
+     * FloatStream.empty().min();                                                 // returns OptionalFloat.empty()
      *
      * // NaN propagates: any NaN makes the result NaN
-     * FloatStream.of(1.0f, Float.NaN, 3.0f).min();   // returns OptionalFloat[NaN]
+     * FloatStream.of(1.0f, Float.NaN, 3.0f).min();                               // returns OptionalFloat[NaN]
      *
      * // -0.0f is less than +0.0f (per Float.compare semantics)
-     * FloatStream.of(-0.0f, 0.0f).min().getAsFloat();   // returns -0.0f
+     * FloatStream.of(-0.0f, 0.0f).min().getAsFloat();                            // returns -0.0f
      *
      * // Safe retrieval with default value
      * float minValue = FloatStream.of(10.5f, 20.3f, 30.8f).min().orElse(0.0f);   // returns 10.5f
@@ -2511,16 +2557,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalFloat} containing the minimum element, or an empty {@code OptionalFloat} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2535,15 +2582,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FloatStream.of(5.5f, 2.3f, 8.1f, 1.7f, 9.2f).max();   // returns OptionalFloat[9.2f]
+     * FloatStream.of(5.5f, 2.3f, 8.1f, 1.7f, 9.2f).max();                        // returns OptionalFloat[9.2f]
      *
-     * FloatStream.empty().max();   // returns OptionalFloat.empty()
+     * FloatStream.empty().max();                                                 // returns OptionalFloat.empty()
      *
      * // NaN propagates: any NaN makes the result NaN
-     * FloatStream.of(1.0f, Float.NaN, 3.0f).max();   // returns OptionalFloat[NaN]
+     * FloatStream.of(1.0f, Float.NaN, 3.0f).max();                               // returns OptionalFloat[NaN]
      *
      * // Positive infinity is less than NaN
-     * FloatStream.of(1.0f, Float.POSITIVE_INFINITY).max().getAsFloat();   // returns Float.POSITIVE_INFINITY
+     * FloatStream.of(1.0f, Float.POSITIVE_INFINITY).max().getAsFloat();          // returns Float.POSITIVE_INFINITY
      *
      * // Safe retrieval with default value
      * float maxValue = FloatStream.of(10.5f, 20.3f, 30.8f).max().orElse(0.0f);   // returns 30.8f
@@ -2552,16 +2599,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalFloat} containing the maximum element, or an empty {@code OptionalFloat} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2591,17 +2639,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalFloat} containing the k-th largest element, or an empty {@code OptionalFloat} if the stream is empty or contains fewer than {@code k} elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code k} is not positive
      */
     @SequentialOnly
@@ -2641,16 +2690,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return the sum of elements in this stream as a double, or {@code 0.0} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #average()
      * @see #reduce(float, FloatBinaryOperator)
      */
@@ -2670,17 +2720,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).average();   // returns OptionalDouble[3.0]
+     * FloatStream.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).average();                  // returns OptionalDouble[3.0]
      *
-     * FloatStream.of(10.5f, 20.3f, 30.8f).average();   // returns OptionalDouble[20.533333...]
+     * FloatStream.of(10.5f, 20.3f, 30.8f).average();                           // returns OptionalDouble[20.533333...]
      *
-     * FloatStream.empty().average();   // returns OptionalDouble.empty()
+     * FloatStream.empty().average();                                           // returns OptionalDouble.empty()
      *
      * // NaN propagation
-     * FloatStream.of(1.0f, Float.NaN, 3.0f).average();   // returns OptionalDouble[NaN]
+     * FloatStream.of(1.0f, Float.NaN, 3.0f).average();                         // returns OptionalDouble[NaN]
      *
      * // Safe retrieval with default value
-     * double avg = FloatStream.of(98.5f, 87.3f).average().orElse(0.0);   // returns 92.9
+     * double avg = FloatStream.of(98.5f, 87.3f).average().orElse(0.0);         // returns 92.9
      *
      * // Infinity is handled
      * FloatStream.of(1.0f, Float.POSITIVE_INFINITY).average().getAsDouble();   // returns Double.POSITIVE_INFINITY
@@ -2689,17 +2739,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalDouble containing the average of elements of this stream,
      *         or an empty optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2722,16 +2773,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a FloatSummaryStatistics containing various statistics about the elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2765,7 +2817,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2775,6 +2827,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * </table>
      *
      * @return a Pair where the first element is FloatSummaryStatistics and the second is an Optional containing a map of percentiles
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2801,19 +2854,21 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the other FloatStream to merge with
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a new FloatStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -2838,18 +2893,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the FloatStream to be combined with the current FloatStream. Must be {@code non-null}.
      * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(FloatStream, float, float, FloatBinaryOperator)
      */
     @ParallelSupported
@@ -2874,19 +2930,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
      * @param c the third FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
      * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(FloatStream, FloatStream, float, float, float, FloatTernaryOperator)
      */
     @ParallelSupported
@@ -2910,13 +2967,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
@@ -2924,6 +2981,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneB the default value to use for the given FloatStream when it runs out of elements
      * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -2948,13 +3006,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
@@ -2964,6 +3022,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneC the default value to use for the third FloatStream when it runs out of elements
      * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -2992,16 +3051,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a DoubleStream containing the elements of this stream converted to doubles
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3029,16 +3089,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a Stream consisting of the elements of this stream, each boxed to a Float
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3061,7 +3122,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * FloatList list = FloatStream.empty().toFloatList();   // returns empty FloatList
      *
-     * OptionalFloat min = FloatStream.empty().min();   // returns OptionalFloat.empty()
+     * OptionalFloat min = FloatStream.empty().min();        // returns OptionalFloat.empty()
      * }</pre>
      *
      * @return an empty FloatStream
@@ -3318,7 +3379,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      *
      * float[][] jaggedArray = {{1f, 2f}, {3f, 4f, 5f}, {6f}};
-     * float sum = FloatStream.flatten(jaggedArray)
+     * double sum = FloatStream.flatten(jaggedArray)
      *     .sum();   // returns 21.0
      * }</pre>
      *
@@ -3547,7 +3608,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * float[] fives = FloatStream.repeat(5f, 3)
      *     .toArray();   // returns [5.0, 5.0, 5.0]
      *
-     * float sum = FloatStream.repeat(2.5f, 4)
+     * double sum = FloatStream.repeat(2.5f, 4)
      *     .sum();   // returns 10.0
      *
      * FloatList zeros = FloatStream.repeat(0f, 10)
@@ -3578,10 +3639,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
             @Override
             public float nextFloat() {
-                if (cnt-- <= 0) {
+                if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                cnt--;
                 return element;
             }
 
@@ -3649,6 +3711,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
     /**
      * Creates a stream that iterates using the given <i>hasNext</i> and <i>next</i> suppliers.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3678,12 +3742,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
         N.checkArgNotNull(next);
 
         return new IteratorFloatStream(new FloatIteratorEx() {
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -3704,6 +3773,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Creates a stream that iterates from an initial value, applying a function to generate subsequent values,
      * and continues as long as the {@code hasNext} supplier returns {@code true}.
+     * After that supplier first returns {@code false}, the stream remains exhausted and the supplier
+     * is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3730,12 +3801,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
         return new IteratorFloatStream(new FloatIteratorEx() {
             private float cur = 0;
             private boolean isFirst = true;
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -4059,6 +4135,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
     /**
      * Concatenates a collection of FloatStream into a single FloatStream.
+     * The collection's membership and encounter order are snapshotted when this method is called.
+     * Closing the returned stream closes every snapshotted input stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4075,13 +4153,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * double sum = FloatStream.concat(streamSet).sum();
      * }</pre>
      *
-     * @param streams the collection of FloatStream to concatenate
+     * @param streams the collection of FloatStream to concatenate; {@code null} elements are treated as empty streams
      * @return a FloatStream containing all the floats from the input collection of FloatStream
      * @see Stream#concat(Collection)
      */
     public static FloatStream concat(final Collection<? extends FloatStream> streams) {
-        return N.isEmpty(streams) ? empty() : new IteratorFloatStream(new FloatIteratorEx() { //NOSONAR
-            private final Iterator<? extends FloatStream> iterators = streams.iterator();
+        if (N.isEmpty(streams)) {
+            return empty();
+        }
+
+        final List<? extends FloatStream> sources = new ArrayList<>(streams);
+
+        return new IteratorFloatStream(new FloatIteratorEx() { //NOSONAR
+            private final Iterator<? extends FloatStream> iterators = sources.iterator();
             private FloatStream cur;
             private FloatIterator iter;
 
@@ -4107,7 +4191,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
                 return iter.nextFloat();
             }
-        }).onClose(newCloseHandler(streams));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -4388,7 +4472,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *         .toFloatList();   // returns [9.0f, 12.0f]
      * }</pre>
      *
-     * @param streams the collection of float streams to zip
+     * @param streams the collection of float streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine elements from all the streams. Must be non-null
      * @return a stream of combined values
      * @see Stream#zip(Collection, Function)
@@ -4673,7 +4757,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *         .toFloatList();   // returns [10.0f, 13.0f, 5.0f]
      * }</pre>
      *
-     * @param streams the collection of float streams to zip
+     * @param streams the collection of float streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the default values to use if the corresponding stream is shorter
      * @param zipFunction the function to combine elements from all the streams. Must be non-null
      * @return a stream of combined values
@@ -4703,12 +4787,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first float array
      * @param b the second float array
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the two input arrays
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
     public static FloatStream merge(final float[] a, final float[] b, final FloatBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(a)) {
             return of(b);
         } else if (N.isEmpty(b)) {
@@ -4760,9 +4847,10 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first float array
      * @param b the second float array
      * @param c the third float array
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the three input arrays
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
     public static FloatStream merge(final float[] a, final float[] b, final float[] c, final FloatBiFunction<MergeResult> nextSelector) {
@@ -4791,12 +4879,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first FloatIterator
      * @param b the second FloatIterator
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the two input iterators
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
     public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return new IteratorFloatStream(new FloatIteratorEx() {
             private final FloatIterator iterA = a == null ? FloatIterator.empty() : a;
             private final FloatIterator iterB = b == null ? FloatIterator.empty() : b;
@@ -4876,9 +4967,10 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first FloatIterator
      * @param b the second FloatIterator
      * @param c the third FloatIterator
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the three input iterators
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
     public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatBiFunction<MergeResult> nextSelector) {
@@ -4907,12 +4999,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first FloatStream
      * @param b the second FloatStream
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the two input streams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
     public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
     }
 
@@ -4933,9 +5028,10 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first FloatStream
      * @param b the second FloatStream
      * @param c the third FloatStream
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the three input streams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatStream c, final FloatBiFunction<MergeResult> nextSelector) {
@@ -4962,17 +5058,21 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * FloatStream combined = FloatStream.merge(streamSet, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
      * }</pre>
      *
-     * @param streams the collection of FloatStream instances to merge
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param streams the collection of FloatStream instances to merge; a {@code null} collection and {@code null} elements are treated as empty
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the input FloatStreams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Collection, BiFunction)
      */
     public static FloatStream merge(final Collection<? extends FloatStream> streams, final FloatBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(streams)) {
             return empty();
         } else if (streams.size() == 1) {
-            return streams.iterator().next();
+            final FloatStream stream = streams.iterator().next();
+            return stream == null ? empty() : stream;
         } else if (streams.size() == 2) {
             final Iterator<? extends FloatStream> iter = streams.iterator();
             return merge(iter.next(), iter.next(), nextSelector);

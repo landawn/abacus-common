@@ -63,6 +63,11 @@ public class MergeResultTest extends TestBase {
     }
 
     @Test
+    public void testMinFirst_comparator_nullThrowsConsistentException() {
+        assertThrows(IllegalArgumentException.class, () -> MergeResult.minFirst(1, 2, null));
+    }
+
+    @Test
     public void testMinFirst_comparator_stringLength() {
         Comparator<String> lengthComparator = Comparator.comparing(String::length);
         MergeResult result = MergeResult.minFirst("hi", "hello", lengthComparator);
@@ -190,6 +195,11 @@ public class MergeResultTest extends TestBase {
         Comparator<Integer> cmp = Integer::compare;
         MergeResult result = MergeResult.maxFirst(5, 5, cmp);
         assertEquals(MergeResult.TAKE_FIRST, result);
+    }
+
+    @Test
+    public void testMaxFirst_comparator_nullThrowsConsistentException() {
+        assertThrows(IllegalArgumentException.class, () -> MergeResult.maxFirst(1, 2, null));
     }
 
     @Test

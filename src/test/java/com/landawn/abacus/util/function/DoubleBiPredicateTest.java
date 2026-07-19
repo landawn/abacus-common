@@ -103,6 +103,18 @@ public class DoubleBiPredicateTest extends TestBase {
     }
 
     @Test
+    public void testComparisonConstantsUseTotalOrdering() {
+        assertTrue(DoubleBiPredicate.EQUAL.test(Double.NaN, Double.NaN));
+        assertFalse(DoubleBiPredicate.EQUAL.test(0.0d, -0.0d));
+        assertTrue(DoubleBiPredicate.NOT_EQUAL.test(0.0d, -0.0d));
+        assertTrue(DoubleBiPredicate.GREATER_THAN.test(Double.NaN, Double.POSITIVE_INFINITY));
+        assertTrue(DoubleBiPredicate.GREATER_THAN.test(0.0d, -0.0d));
+        assertTrue(DoubleBiPredicate.LESS_THAN.test(-0.0d, 0.0d));
+        assertTrue(DoubleBiPredicate.GREATER_THAN_OR_EQUAL.test(Double.NaN, Double.NaN));
+        assertTrue(DoubleBiPredicate.LESS_THAN_OR_EQUAL.test(Double.NaN, Double.NaN));
+    }
+
+    @Test
     public void testWithNegativeValues() {
         DoubleBiPredicate predicate = (t, u) -> t < u;
         assertTrue(predicate.test(-5.0, -3.0));

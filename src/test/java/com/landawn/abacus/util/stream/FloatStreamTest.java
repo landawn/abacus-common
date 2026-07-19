@@ -4710,6 +4710,21 @@ public class FloatStreamTest extends TestBase {
     }
 
     @Test
+    public void testConcatCollectionSnapshotsSources() {
+        List<FloatStream> sources = new ArrayList<>(Arrays.asList(FloatStream.of(1.0f, 2.0f), FloatStream.of(3.0f, 4.0f)));
+        FloatStream concatenated = FloatStream.concat(sources);
+
+        sources.clear();
+
+        assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, concatenated.toArray());
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        assertEquals(0, FloatStream.merge(Arrays.asList((FloatStream) null), (a, b) -> MergeResult.TAKE_FIRST).count());
+    }
+
+    @Test
     public void testConcat() {
         FloatStream s1 = FloatStream.of(1.1f, 2.2f);
         FloatStream s2 = FloatStream.of(3.3f, 4.4f);
@@ -6227,5 +6242,34 @@ public class FloatStreamTest extends TestBase {
                 () -> FloatStream.of(1.0f, 2.0f, 3.0f).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> FloatStream.of(1.0f, 2.0f, 3.0f).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
+
+    @Test
+    public void testRepeatIteratorRemainsExhaustedAfterFailedNext() {
+        final FloatIteratorEx iter = FloatStream.repeat(1.5f, 10).iteratorEx();
+        iter.advance(Long.MAX_VALUE);
+
+        assertThrows(NoSuchElementException.class, iter::nextFloat);
+        assertEquals(0, iter.count());
+        assertArrayEquals(new float[0], iter.toArray(), 0.0f);
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        FloatIterator iter = FloatStream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 1.0f).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextFloat);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = FloatStream.iterate(1.0f, () -> conditionCalls.getAndIncrement() > 0, value -> value + 1.0f).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextFloat);
+        assertEquals(1, conditionCalls.get());
     }
 }

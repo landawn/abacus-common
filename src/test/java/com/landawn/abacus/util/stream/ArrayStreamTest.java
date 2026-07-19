@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,7 +45,7 @@ public class ArrayStreamTest extends TestBase {
     private Integer[] integerArray;
     private String[] emptyArray;
 
-    private static final class DistinctItem {
+    private static final class DistinctItem implements Comparable<DistinctItem> {
         private final int id;
         private final int rank;
 
@@ -62,6 +63,11 @@ public class ArrayStreamTest extends TestBase {
         public int hashCode() {
             return id;
         }
+
+        @Override
+        public int compareTo(final DistinctItem other) {
+            return Integer.compare(rank, other.rank);
+        }
     }
 
     @BeforeEach
@@ -69,6 +75,17 @@ public class ArrayStreamTest extends TestBase {
         stringArray = new String[] { "apple", "banana", "cherry", "date", "elderberry" };
         integerArray = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         emptyArray = new String[0];
+    }
+
+    @Test
+    public void testToJdkStreamCloseRunsSourceHandlersOnce() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(integerArray).onClose(closeCount::incrementAndGet);
+
+        source.toJdkStream().close();
+        source.close();
+
+        assertEquals(1, closeCount.get());
     }
 
     @Test
@@ -163,6 +180,34 @@ public class ArrayStreamTest extends TestBase {
         assertSame(arr, result);
         assertEquals(1, result[0]);
         assertEquals(3, result[1]);
+    }
+
+    @Test
+    public void testSpecializedIteratorsToArrayNullTerminateOversizedArray() {
+        assertIteratorToArrayNullTerminates(Stream.of("a", "b", "c").step(2), "a", "c");
+        assertIteratorToArrayNullTerminates(Stream.of("a", "b", "c").map(String::toUpperCase), "A", "B", "C");
+        assertIteratorToArrayNullTerminates(Stream.of("a", "b", "c").mapFirst(s -> "first-" + s), "first-a", "b", "c");
+        assertIteratorToArrayNullTerminates(Stream.of("a", "b", "c").mapFirstOrElse(s -> "first-" + s, s -> "else-" + s), "first-a", "else-b", "else-c");
+        assertIteratorToArrayNullTerminates(Stream.of("a", "b", "c").mapLast(s -> "last-" + s), "a", "b", "last-c");
+        assertIteratorToArrayNullTerminates(Stream.of("a", "b", "c").mapLastOrElse(s -> "last-" + s, s -> "else-" + s), "else-a", "else-b", "last-c");
+        assertIteratorToArrayNullTerminates(Stream.of("a", "b", "c").peek(s -> {
+            // no-op
+        }), "a", "b", "c");
+    }
+
+    private static void assertIteratorToArrayNullTerminates(final Stream<String> stream, final String... expected) {
+        try {
+            final String[] output = new String[expected.length + 2];
+            Arrays.fill(output, "stale");
+
+            final String[] result = stream.iteratorEx().toArray(output);
+
+            assertSame(output, result);
+            assertArrayEquals(expected, Arrays.copyOf(result, expected.length));
+            assertNull(result[expected.length]);
+        } finally {
+            stream.close();
+        }
     }
 
     @Test
@@ -1430,6 +1475,11 @@ public class ArrayStreamTest extends TestBase {
     }
 
     @Test
+    public void testSkipLastRejectsNegativeCount() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(integerArray).skipLast(-1));
+    }
+
+    @Test
     public void testMin() {
         Stream<Integer> stream = Stream.of(integerArray);
         Optional<Integer> result = stream.min(Integer::compareTo);
@@ -1543,6 +1593,17 @@ public class ArrayStreamTest extends TestBase {
                 .sorted(Comparator.comparingInt(item -> item.rank))
                 .distinct()
                 .toList();
+
+        assertEquals(Arrays.asList(first, second), result);
+    }
+
+    @Test
+    public void testDistinctAfterNaturalSortUsesEqualityForNonAdjacentDuplicates() {
+        DistinctItem first = new DistinctItem(1, 1);
+        DistinctItem second = new DistinctItem(2, 2);
+        DistinctItem duplicateOfFirst = new DistinctItem(1, 3);
+
+        List<DistinctItem> result = new ArrayStream<>(new DistinctItem[] { first, second, duplicateOfFirst }, true, null, null).distinct().toList();
 
         assertEquals(Arrays.asList(first, second), result);
     }

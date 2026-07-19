@@ -197,8 +197,8 @@ public class MutableIntType extends NumberType<MutableInt> {
     /**
      * Writes the integer value of a {@link MutableInt} to a {@link CharacterWriter}
      * using the optimized {@code writeInt} method.
-     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
-     * The {@code config} parameter is not used for integer values.
+     * Writes {@code null} when {@code x} is {@code null}, or zero when
+     * {@link JsonXmlSerConfig#isWriteNullNumberAsZero()} is enabled.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
@@ -209,7 +209,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableInt} to write, may be {@code null}
-     * @param config the serialization configuration (unused for integer values)
+     * @param config the serialization configuration controlling null-number output; may be {@code null}
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

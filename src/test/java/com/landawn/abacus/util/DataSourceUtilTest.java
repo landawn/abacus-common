@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -83,6 +84,34 @@ public class DataSourceUtilTest extends TestBase {
         verify(mockRs).close();
         verify(mockStmt).close();
         verify(mockConn).close();
+    }
+
+    @Test
+    public void testCloseResultSetPreservesLookupFailureWhenCloseAlsoFails() throws SQLException {
+        ResultSet mockRs = mock(ResultSet.class);
+        when(mockRs.getStatement()).thenThrow(new SQLException("statement lookup"));
+        doThrow(new SQLException("result set close")).when(mockRs).close();
+
+        UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(mockRs, true));
+
+        assertEquals("statement lookup", thrown.getCause().getMessage());
+        assertEquals(1, thrown.getCause().getSuppressed().length);
+        assertEquals("result set close", thrown.getCause().getSuppressed()[0].getMessage());
+        verify(mockRs).close();
+    }
+
+    @Test
+    public void testCloseResultSetDoesNotSuppressExceptionOnItself() throws SQLException {
+        ResultSet mockRs = mock(ResultSet.class);
+        SQLException sharedFailure = new SQLException("shared failure");
+        when(mockRs.getStatement()).thenThrow(sharedFailure);
+        doThrow(sharedFailure).when(mockRs).close();
+
+        UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(mockRs, true));
+
+        assertSame(sharedFailure, thrown.getCause());
+        assertEquals(0, sharedFailure.getSuppressed().length);
+        verify(mockRs).close();
     }
 
     @Test

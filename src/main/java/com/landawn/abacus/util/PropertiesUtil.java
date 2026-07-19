@@ -378,11 +378,18 @@ public final class PropertiesUtil {
         File configurationFile = new File(configFileName);
 
         if (configurationFile.exists()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("Found configuration file: " + configurationFile.getAbsolutePath());
-            }
+            if (configurationFile.isDirectory() == isDir) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Found configuration file: " + configurationFile.getAbsolutePath());
+                }
 
-            return configurationFile;
+                return configurationFile;
+            } else if (configurationFile.isAbsolute()) {
+                // An exact absolute path exists but denotes the wrong kind of entry. Do not
+                // return a regular file from findDir (or a directory from findFile), and do
+                // not turn an absolute path into an unrelated recursive name search.
+                return null;
+            }
         }
 
         final String cachedPath = configFilePathPool.get(configFileName);
@@ -390,7 +397,7 @@ public final class PropertiesUtil {
         if (cachedPath != null) {
             final File file = new File(cachedPath);
 
-            if (file.exists()) {
+            if (file.exists() && file.isDirectory() == isDir) {
                 return file;
             } else {
                 configFilePathPool.remove(configFileName);
@@ -403,8 +410,7 @@ public final class PropertiesUtil {
         final int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
 
         if (index > -1) {
-            folderPrefix = simpleConfigFileName.substring(0, index);
-            folderPrefix = !folderPrefix.isEmpty() && folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
+            folderPrefix = normalizeFolderPrefix(simpleConfigFileName.substring(0, index));
             folderPrefix = folderPrefix.replace(".." + File.separatorChar, "");
 
             simpleConfigFileName = simpleConfigFileName.substring(index + 1);
@@ -464,12 +470,12 @@ public final class PropertiesUtil {
     public static File findFileRelativeTo(final File srcFile, final String targetFileName) {
         File targetFile = new File(targetFileName);
 
-        if (!targetFile.exists()) {
+        if (!targetFile.isFile()) {
             if ((srcFile != null) && srcFile.exists()) {
                 targetFile = findFileInDir(targetFileName, srcFile.getParentFile(), false);
             }
 
-            if (targetFile == null || !targetFile.exists()) {
+            if (targetFile == null || !targetFile.isFile()) {
                 return findFile(targetFileName);
             }
         }
@@ -508,8 +514,7 @@ public final class PropertiesUtil {
         final int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
 
         if (index > -1) {
-            folderPrefix = simpleConfigFileName.substring(0, index);
-            folderPrefix = !folderPrefix.isEmpty() && folderPrefix.charAt(0) == '.' ? folderPrefix.substring(1) : folderPrefix;
+            folderPrefix = normalizeFolderPrefix(simpleConfigFileName.substring(0, index));
 
             simpleConfigFileName = simpleConfigFileName.substring(index + 1);
         }
@@ -532,15 +537,16 @@ public final class PropertiesUtil {
             return null;
         }
 
-        dir = PropertiesUtil.formatPath(dir);
+        dir = normalizeFilePath(PropertiesUtil.formatPath(dir));
+        final String directoryPath = dir.getPath();
 
         if (foundDir == null) {
             foundDir = N.newHashSet();
-        } else if (foundDir.contains(dir.getAbsolutePath())) {
+        } else if (foundDir.contains(directoryPath)) {
             return null;
         }
 
-        foundDir.add(dir.getAbsolutePath());
+        foundDir.add(directoryPath);
 
         final String absolutePath = dir.getAbsolutePath().replace("%20", " "); //NOSONAR
 
@@ -558,8 +564,7 @@ public final class PropertiesUtil {
             return null;
         }
 
-        if (Strings.isEmpty(folderPrefix) || ((absolutePath.length() > folderPrefix.length())
-                && absolutePath.substring(absolutePath.length() - folderPrefix.length()).equalsIgnoreCase(folderPrefix))) {
+        if (Strings.isEmpty(folderPrefix) || pathEndsWithFolderPrefix(absolutePath, folderPrefix)) {
             for (final File file : files) {
                 if (file.getName().equalsIgnoreCase(configFileName)) {
                     if ((isDir && file.isDirectory()) || (!isDir && !file.isDirectory())) { //NOSONAR
@@ -575,7 +580,7 @@ public final class PropertiesUtil {
         }
 
         for (final File file : files) {
-            if (file.isDirectory() && !foundDir.contains(file.getAbsolutePath())) {
+            if (file.isDirectory()) {
                 final File result = findFileInDir(folderPrefix, configFileName, file, isDir, foundDir);
 
                 if (result != null) {
@@ -585,6 +590,49 @@ public final class PropertiesUtil {
         }
 
         return null;
+    }
+
+    /**
+     * Removes only an explicit current-directory prefix ({@code ./} or {@code .\}), preserving
+     * legitimate hidden-directory names such as {@code .config}.
+     */
+    private static String normalizeFolderPrefix(final String folderPrefix) {
+        if (Strings.isEmpty(folderPrefix) || ".".equals(folderPrefix)) {
+            return Strings.EMPTY;
+        }
+
+        final String currentDirectoryPrefix = "." + File.separatorChar;
+        return folderPrefix.startsWith(currentDirectoryPrefix) ? folderPrefix.substring(currentDirectoryPrefix.length()) : folderPrefix;
+    }
+
+    /**
+     * Tests a directory suffix on a path-segment boundary. For example, {@code config}
+     * matches {@code /app/config} but not {@code /app/myconfig}.
+     */
+    private static boolean pathEndsWithFolderPrefix(final String path, final String folderPrefix) {
+        final int prefixStart = path.length() - folderPrefix.length();
+
+        if (prefixStart < 0 || !path.regionMatches(true, prefixStart, folderPrefix, 0, folderPrefix.length())) {
+            return false;
+        }
+
+        return prefixStart == 0 || isPathSeparator(path.charAt(prefixStart - 1)) || isPathSeparator(folderPrefix.charAt(0));
+    }
+
+    private static boolean isPathSeparator(final char ch) {
+        return ch == '/' || ch == '\\';
+    }
+
+    /**
+     * Returns a stable absolute representation so path aliases and symbolic-link cycles do not
+     * create duplicate resources or unbounded recursive searches.
+     */
+    private static File normalizeFilePath(final File file) {
+        try {
+            return file.getCanonicalFile();
+        } catch (final IOException e) {
+            return file.getAbsoluteFile().toPath().normalize().toFile();
+        }
     }
 
     /**
@@ -1220,6 +1268,10 @@ public final class PropertiesUtil {
     /**
      * Stores the specified properties to the given XML file.
      * The properties are written in XML format with the specified root element name.
+     * Each non-null mapping is written under its own key; in particular, keys such as
+     * {@code item} and {@code itemList} remain distinct. Null-valued mappings are omitted.
+     * Type information is required to reconstruct non-string scalar and collection values
+     * when the XML is loaded again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1340,59 +1392,17 @@ public final class PropertiesUtil {
             }
 
             String propName = null;
-            String listPropName = null;
-            String elementPropName = null;
             Object propValue = null;
-            Object listPropValue;
             Type<Object> type = null;
             for (final Map.Entry<?, ?> entry : properties.entrySet()) { //NOSONAR
                 propName = entry.getKey().toString();
                 propValue = entry.getValue();
 
-                elementPropName = propName;
-
-                if (elementPropName.endsWith("List")) {
-                    elementPropName = elementPropName.substring(0, elementPropName.length() - 4);
-                }
-
-                listPropName = elementPropName + "List";
-
-                listPropValue = properties.get(listPropName);
-
-                if ((propValue == null) || (!(propValue instanceof List) && listPropValue instanceof List && ((List<?>) listPropValue).size() > 0)) {
+                if (propValue == null) {
                     continue;
                 }
 
-                if (propValue instanceof List && properties.containsKey(elementPropName)) {
-                    for (final Object e : ((List<?>) propValue)) {
-                        if (e == null) {
-                            // continue;
-                        } else if (e instanceof Properties) {
-                            bw.flush();
-
-                            storeToXml((Properties<?, ?>) e, elementPropName, writeTypeInfo, false, output);
-                        } else {
-                            type = Type.of(e.getClass());
-
-                            if (writeTypeInfo) {
-                                if (ClassUtil.isPrimitiveWrapper(type.javaType())) {
-                                    bw.write("<" + elementPropName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.javaType())) + "\">");
-                                } else {
-                                    // escape: parameterized declaring names contain '<'/'>', which are
-                                    // illegal inside an XML attribute value (the output couldn't be re-parsed).
-                                    bw.write("<" + elementPropName + " type=\"" + escapeTypeAttr(type.declaringName()) + "\">");
-                                }
-                            } else {
-                                bw.write("<" + elementPropName + ">");
-                            }
-
-                            type.serializeTo(bw, e, xsc);
-
-                            bw.write("</" + elementPropName + ">");
-                        }
-                    }
-
-                } else if (propValue instanceof Properties) {
+                if (propValue instanceof Properties) {
                     bw.flush();
 
                     storeToXml((Properties<?, ?>) propValue, propName, writeTypeInfo, false, output);
@@ -1663,25 +1673,6 @@ public final class PropertiesUtil {
 
             Node childNode = null;
             String propName = null;
-
-            for (int i = 0; i < childNodes.getLength(); i++) {
-                childNode = childNodes.item(i);
-
-                if (childNode.getNodeType() != Node.ELEMENT_NODE) {
-                    continue;
-                }
-
-                propName = Beans.normalizePropName(childNode.getNodeName());
-
-                if (propNameSet.contains(propName)) {
-                    continue;
-                }
-
-                propNameSet.add(propName);
-
-            }
-
-            propNameSet.clear();
 
             final String methodSpace = spaces + "    ";
             String typeName = null;
@@ -2217,7 +2208,8 @@ public final class PropertiesUtil {
     /**
      * Internal descriptor for a registered auto-refresh resource, tracking the source file,
      * the target Properties class, and the timestamp of the last successful load.
-     * Two Resource instances are considered equal when their target class, file path, and resource type all match.
+     * Two Resource instances are considered equal when their target class, normalized file path,
+     * and resource type all match.
      */
     static class Resource {
 
@@ -2245,8 +2237,8 @@ public final class PropertiesUtil {
          */
         public Resource(final Class<?> cls, final File file, final ResourceType resourceType) {
             targetClass = cls;
-            this.file = file;
-            filePath = file.getPath();
+            this.file = normalizeFilePath(file);
+            filePath = this.file.getPath();
             this.resourceType = resourceType;
         }
 

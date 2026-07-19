@@ -554,6 +554,7 @@ public class IntListTest extends TestBase {
 
     @Test
     public void testRandomWithLargeRange() {
+        // The interval width exceeds Integer.MAX_VALUE and exercises the bounded-long path.
         IntList list = IntList.random(Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
         assertEquals(100, list.size());
         for (int i = 0; i < 100; i++) {
@@ -3893,6 +3894,15 @@ public class IntListTest extends TestBase {
         // trimmed-capacity behavior unchanged
         assertEquals(IntList.of(3, 2, 1), IntList.of(1, 2, 3).copy(3, -1, -1));
         assertEquals(IntList.of(2, 3), IntList.of(1, 2, 3).copy(1, 3, 1));
+    }
+
+    @Test
+    public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
+        final IntList empty = new IntList();
+        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, null));
+        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, null));
+        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, ignored -> null));
     }
 
 }

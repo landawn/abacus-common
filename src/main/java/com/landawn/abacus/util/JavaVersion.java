@@ -19,8 +19,9 @@ package com.landawn.abacus.util;
 /**
  * An enumeration representing all versions of the Java specification.
  * <p>
- * This enum provides a comprehensive list of Java versions from Java 0.9 (Android) through Java 39,
- * plus a special JAVA_RECENT constant that represents the most recent Java version detected at runtime.
+ * This enum recognizes specification-version identifiers from Java 0.9 (Android) through Java 39,
+ * including placeholders for versions that may not yet have been released, plus a special JAVA_RECENT
+ * constant that represents a newer version detected at runtime.
  * The enum mirrors values available from the {@code java.specification.version} system property.
  * </p>
  *
@@ -46,7 +47,6 @@ package com.landawn.abacus.util;
  * <p>
  * Note: This class includes codes copied from Apache Commons Lang, under the Apache License 2.0.
  * </p>
- *
  */
 public enum JavaVersion {
 
@@ -265,7 +265,7 @@ public enum JavaVersion {
     /**
      * Java 26.
      * <p>
-     * Expected release in March 2026. Features are subject to change until official release.
+     * Released in March 2026.
      * </p>
      */
     JAVA_26(26.0f, "26"),
@@ -428,6 +428,7 @@ public enum JavaVersion {
      * @param requiredVersion the minimum version to check against, not null
      * @return {@code true} if this version is equal to or greater than the specified version,
      *         {@code false} otherwise
+     * @throws NullPointerException if {@code requiredVersion} is {@code null}
      * @see #atMost(JavaVersion)
      */
     public boolean atLeast(final JavaVersion requiredVersion) {
@@ -454,6 +455,7 @@ public enum JavaVersion {
      * @param requiredVersion the maximum version to check against, not null
      * @return {@code true} if this version is equal to or less than the specified version,
      *         {@code false} otherwise
+     * @throws NullPointerException if {@code requiredVersion} is {@code null}
      * @see #atLeast(JavaVersion)
      */
     public boolean atMost(final JavaVersion requiredVersion) {

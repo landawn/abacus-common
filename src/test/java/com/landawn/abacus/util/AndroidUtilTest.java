@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -78,6 +80,19 @@ public class AndroidUtilTest extends TestBase {
 
         Thread.sleep(100);
         assertNotNull(executor);
+    }
+
+    @Test
+    public void testFallbackExecutorThreadsAreDaemon() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeFalse(IOUtil.IS_PLATFORM_ANDROID);
+
+        CompletableFuture<Boolean> serialDaemon = new CompletableFuture<>();
+        CompletableFuture<Boolean> poolDaemon = new CompletableFuture<>();
+        AndroidUtil.getSerialExecutor().execute(() -> serialDaemon.complete(Thread.currentThread().isDaemon()));
+        AndroidUtil.getThreadPoolExecutor().execute(() -> poolDaemon.complete(Thread.currentThread().isDaemon()));
+
+        Assertions.assertTrue(serialDaemon.get(2, TimeUnit.SECONDS));
+        Assertions.assertTrue(poolDaemon.get(2, TimeUnit.SECONDS));
     }
 
 }

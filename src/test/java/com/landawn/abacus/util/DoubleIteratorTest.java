@@ -1296,6 +1296,22 @@ public class DoubleIteratorTest extends TestBase {
     }
 
     @Test
+    public void testIndexed_StartIndexOverflow() {
+        ObjIterator<IndexedDouble> indexed = DoubleIterator.of(1.0, 2.0).indexed(Long.MAX_VALUE);
+
+        IndexedDouble first = indexed.next();
+        assertEquals(Long.MAX_VALUE, first.longIndex());
+        assertEquals(1.0, first.value());
+        assertTrue(indexed.hasNext());
+        assertThrows(ArithmeticException.class, indexed::next);
+
+        ObjIterator<IndexedDouble> exhausted = DoubleIterator.of(1.0).indexed(Long.MAX_VALUE);
+        exhausted.next();
+        assertFalse(exhausted.hasNext());
+        assertThrows(NoSuchElementException.class, exhausted::next);
+    }
+
+    @Test
     public void testIndexedWithStartIndex() {
         DoubleIterator iter = DoubleIterator.of(10.5, 20.5, 30.5);
         ObjIterator<IndexedDouble> indexed = iter.indexed(100);

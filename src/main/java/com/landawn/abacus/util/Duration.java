@@ -185,7 +185,7 @@ import java.time.temporal.TemporalUnit;
  *
  * <p><b>ISO 8601 String Representation:</b>
  * <ul>
- *   <li><b>Format:</b> {@code PT[nH][nM][n[.nnn]S]} following ISO 8601 duration format</li>
+ *   <li><b>Format:</b> {@code [-]PT[nH][nM][n[.nnn]S]} following ISO 8601 duration format</li>
  *   <li><b>Examples:</b> {@code "PT0S"} (zero), {@code "PT2H30M"} (2.5 hours), {@code "PT1.500S"} (1.5 seconds)</li>
  *   <li><b>Negative Durations:</b> Represented with negative sign on the entire duration</li>
  *   <li><b>Milliseconds:</b> Represented as fractional seconds when present</li>
@@ -470,7 +470,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
-    public static Duration between(final java.util.Date start, final java.util.Date end) {
+    public static Duration between(final java.util.Date start, final java.util.Date end) throws IllegalArgumentException {
         N.checkArgNotNull(start, "Start Date cannot be null");
         N.checkArgNotNull(end, "End Date cannot be null");
 
@@ -524,7 +524,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
-    public static Duration between(final java.util.Calendar start, final java.util.Calendar end) {
+    public static Duration between(final java.util.Calendar start, final java.util.Calendar end) throws IllegalArgumentException {
         N.checkArgNotNull(start, "Start Calendar cannot be null");
         N.checkArgNotNull(end, "End Calendar cannot be null");
 
@@ -579,7 +579,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see ChronoUnit#between(Temporal, Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
-    public static Duration between(final Temporal start, final Temporal end) {
+    public static Duration between(final Temporal start, final Temporal end) throws IllegalArgumentException {
         N.checkArgNotNull(start, "Start Temporal cannot be null");
         N.checkArgNotNull(end, "End Temporal cannot be null");
 
@@ -1047,9 +1047,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration negativeTwoHours = twoHours.negated();  // returns -2 hours
      *
      * Duration negativeOneHour = Duration.ofHours(-1);
-     * Duration oneHour = negativeOneHour.negated();  // returns 1 hour
+     * Duration oneHour = negativeOneHour.negated();   // returns 1 hour
      *
-     * Duration zero = Duration.ZERO.negated();  // returns 0 (zero stays zero)
+     * Duration zero = Duration.ZERO.negated();        // returns 0 (zero stays zero)
      * }</pre>
      *
      * @return a Duration based on this duration with the amount negated.
@@ -1277,8 +1277,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
     /**
      * Gets the number of seconds within a minute in this duration (the part of the second count that does not form a whole minute).
      * <p>
-     * The returned value is in the range -59 to 59 (inclusive). This mirrors {@code java.time.Duration.toSecondsPart()}
-     * (Java 9+) and is useful when formatting a duration into minute/second components.
+     * The returned value is in the range -59 to 59 (inclusive). It is calculated from
+     * {@link #toSeconds()}, which truncates fractional seconds toward zero. Consequently, for a
+     * negative duration with a fractional second this can differ from
+     * {@code java.time.Duration.toSecondsPart()}, whose internal seconds field is floor-normalized.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1298,8 +1300,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
     /**
      * Gets the number of milliseconds within a second in this duration (the part of the millisecond count that does not form a whole second).
      * <p>
-     * The returned value is in the range -999 to 999 (inclusive). This mirrors {@code java.time.Duration.toMillisPart()}
-     * (Java 9+) and is useful when formatting a duration into second/millisecond components.
+     * The returned value is in the range -999 to 999 (inclusive) and is the signed remainder of
+     * the total millisecond value. For negative durations this differs from
+     * {@code java.time.Duration.toMillisPart()}, which derives a non-negative part from its
+     * normalized nanosecond field.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1330,7 +1334,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * java.time.Duration jdkDuration = d.toJdkDuration();   // returns 2 hours
      * }</pre>
      *
-     * @return a {@code java.time.Duration} with the same milliseconds value, not null.
+     * @return a {@code java.time.Duration} with the same milliseconds value, not {@code null}.
      */
     public java.time.Duration toJdkDuration() {
         return java.time.Duration.ofMillis(milliseconds);
@@ -1349,9 +1353,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration oneHour = Duration.ofHours(1);
      * Duration thirtyMinutes = Duration.ofMinutes(30);
      *
-     * int cmp = oneHour.compareTo(thirtyMinutes);           // returns > 0 (1 hour > 30 min)
-     * int cmp2 = thirtyMinutes.compareTo(oneHour);          // returns < 0 (30 min < 1 hour)
-     * int cmp3 = oneHour.compareTo(Duration.ofMinutes(60)); // returns == 0 (equal)
+     * int cmp = oneHour.compareTo(thirtyMinutes);             // returns > 0 (1 hour > 30 min)
+     * int cmp2 = thirtyMinutes.compareTo(oneHour);            // returns < 0 (30 min < 1 hour)
+     * int cmp3 = oneHour.compareTo(Duration.ofMinutes(60));   // returns == 0 (equal)
      *
      * // Sorting durations
      * List<Duration> times = Arrays.asList(
@@ -1404,9 +1408,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
     /**
      * Returns a string representation of this duration using ISO-8601 seconds based representation.
      * <p>
-     * The format of the returned string will be {@code PTnHnMnS}, where:
+     * The format of the returned string will be {@code [-]PTnHnMnS}, where:
      * <ul>
      *   <li>P is the duration designator (historically called "period") placed at the start</li>
+     *   <li>An optional leading minus sign before P negates the entire duration</li>
      *   <li>T is the time designator that precedes the time components</li>
      *   <li>H represents hours and is shown only if non-zero</li>
      *   <li>M represents minutes and is shown only if non-zero</li>
@@ -1419,7 +1424,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>"PT1H30M" - 1 hour and 30 minutes</li>
      *   <li>"PT1H30M25S" - 1 hour, 30 minutes and 25 seconds</li>
      *   <li>"PT25.500S" - 25.5 seconds (25 seconds and 500 milliseconds); milliseconds are always padded to 3 digits</li>
-     *   <li>"PT-0.500S" - negative 500 milliseconds; a single leading '-' after "PT" indicates a negative duration</li>
+     *   <li>"-PT0.500S" - negative 500 milliseconds; the leading '-' negates the whole duration</li>
      * </ul>
      *
      * @return an ISO-8601 representation of this duration, not {@code null}.
@@ -1430,11 +1435,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
             return "PT0S";
         }
 
-        // Use the absolute value for component decomposition so that each field
-        // is non-negative. We prefix the string with '-' when the duration is
-        // negative.  Without this, a duration like -90_500 ms would incorrectly
-        // produce "PT-1M-30.500S" (each component carrying its own sign) instead
-        // of the correct "PT-1M30.500S".
+        // Use the absolute value for component decomposition so that each field is non-negative.
+        // A single sign before P negates the whole ISO-8601 duration. Placing that sign after
+        // "PT" would only negate the first component when parsed (for example,
+        // "PT-1M30.500S" represents -29.5 seconds, not -90.5 seconds).
         final long absMillis = milliseconds == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(milliseconds);
         long hours = absMillis / MILLIS_PER_HOUR;
         long remainder = absMillis % MILLIS_PER_HOUR;
@@ -1454,11 +1458,11 @@ public final class Duration implements Comparable<Duration>, Immutable {
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
-        sb.append("PT");
-
         if (milliseconds < 0) {
             sb.append('-');
         }
+
+        sb.append("PT");
 
         if (hours != 0) {
             sb.append(hours).append('H');
@@ -1468,7 +1472,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
             sb.append(minutes).append('M');
         }
 
-        if (seconds == 0 && millis == 0 && sb.length() > 2) {
+        if (seconds == 0 && millis == 0 && sb.length() > (milliseconds < 0 ? 3 : 2)) {
             final String result = sb.toString();
             Objectory.recycle(sb);
             return result;

@@ -20,8 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.util.Strings;
-
 /**
  * Type handler for {@link java.net.URI} instances.
  * <p>
@@ -118,7 +116,9 @@ public class URIType extends AbstractType<URI> {
      * Parses a string representation to create a URI instance.
      * <p>
      * This method creates a URI instance from the provided string using {@link URI#create(String)}.
-     * If the string is {@code null} or empty, this method returns {@code null}.
+     * If the string is {@code null}, this method returns {@code null}. An empty string is a valid
+     * relative URI reference under {@link URI}; it is therefore preserved as {@code URI.create("")}
+     * instead of being conflated with {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -132,14 +132,14 @@ public class URIType extends AbstractType<URI> {
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to convert to a URI
-     * @return a URI instance created from the string, or {@code null} if the string is {@code null} or empty
+     * @return a URI instance created from the string, or {@code null} if the string is {@code null}
      * @throws IllegalArgumentException if the string violates RFC 2396 URI syntax rules
      * @see #valueOf(Object)
      * @see #stringOf(URI)
      */
     @Override
     public URI valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (str == null) {
             return null; // NOSONAR
         }
 

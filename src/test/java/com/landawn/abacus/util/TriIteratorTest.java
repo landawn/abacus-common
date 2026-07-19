@@ -69,6 +69,26 @@ public class TriIteratorTest extends TestBase {
                 () -> empty.forEachRemaining((com.landawn.abacus.util.function.TriConsumer<? super String, ? super Integer, ? super Double>) null));
         assertThrows(IllegalArgumentException.class,
                 () -> empty.foreachRemaining((Throwables.TriConsumer<? super String, ? super Integer, ? super Double, RuntimeException>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> empty.map((com.landawn.abacus.util.function.TriFunction<? super String, ? super Integer, ? super Double, Object>) null));
+    }
+
+    @Test
+    public void testEmptyDerivedIteratorsRejectNullCallbacksImmediately() {
+        List<TriIterator<Integer, Integer, Integer>> iterators = Arrays.asList(TriIterator.generate(() -> false, triple -> {
+        }), TriIterator.generate(0, 0, (index, triple) -> {
+        }), TriIterator.zip(new Integer[0], new Integer[0], new Integer[0]), TriIterator.zip(new Integer[0], new Integer[0], new Integer[0], 0, 0, 0),
+                TriIterator.<Integer, Integer, Integer> empty().skip(1), TriIterator.<Integer, Integer, Integer> empty().limit(1),
+                TriIterator.<Integer, Integer, Integer> empty().filter((a, b, c) -> true));
+
+        for (TriIterator<Integer, Integer, Integer> iter : iterators) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> iter.forEachRemaining((com.landawn.abacus.util.function.TriConsumer<Integer, Integer, Integer>) null));
+            assertThrows(IllegalArgumentException.class,
+                    () -> iter.foreachRemaining((Throwables.TriConsumer<Integer, Integer, Integer, RuntimeException>) null));
+            assertThrows(IllegalArgumentException.class,
+                    () -> iter.map((com.landawn.abacus.util.function.TriFunction<Integer, Integer, Integer, Object>) null));
+        }
     }
 
     @Test
@@ -1274,6 +1294,20 @@ public class TriIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().limit(-1));
     }
 
+    @Test
+    public void testLimit_mappedViewSharesRemainingCount() {
+        TriIterator<Integer, Integer, Integer> limited = TriIterator
+                .zip(new Integer[] { 1, 2, 3, 4 }, new Integer[] { 10, 20, 30, 40 }, new Integer[] { 100, 200, 300, 400 })
+                .limit(2);
+
+        ObjIterator<Integer> mapped = limited.map((a, b, c) -> a + b + c);
+
+        assertEquals(111, mapped.next().intValue());
+        assertEquals(222, mapped.next().intValue());
+        assertFalse(mapped.hasNext());
+        assertFalse(limited.hasNext());
+    }
+
     // =====================================================================
     // filter(TriPredicate)
     // =====================================================================
@@ -1422,7 +1456,7 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testMapWithNullMapper() {
-        TriIterator.empty().stream(null).forEach(s -> Assertions.fail("Should not be called"));
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().stream(null));
     }
 
     // =====================================================================
@@ -1692,6 +1726,101 @@ public class TriIteratorTest extends TestBase {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
 
         assertThrows(IllegalArgumentException.class, () -> iter.unzipToSets(() -> null));
+    }
+
+    @Test
+    public void testReusableGeneratorOutputIsClearedBetweenElements() {
+        TriIterator<Integer, String, Boolean> indexed = TriIterator.generate(0, 2, (index, output) -> {
+            if (index == 0) {
+                output.set(0, "first", true);
+            } else {
+                output.setLeft(1);
+            }
+        });
+
+        assertEquals(Triple.of(0, "first", true), indexed.next());
+        assertEquals(Triple.of(1, null, null), indexed.next());
+
+        AtomicInteger index = new AtomicInteger();
+        TriIterator<Integer, String, Boolean> conditional = TriIterator.generate(() -> index.get() < 2, output -> {
+            if (index.getAndIncrement() == 0) {
+                output.set(0, "first", true);
+            } else {
+                output.setLeft(1);
+            }
+        });
+
+        assertEquals(Triple.of(0, "first", true), conditional.next());
+        assertEquals(Triple.of(1, null, null), conditional.next());
+    }
+
+    @Test
+    public void testConditionalGeneratorLatchesExhaustion() {
+        AtomicInteger probes = new AtomicInteger();
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.generate(() -> probes.getAndIncrement() > 0, output -> output.set(1, 1, 1));
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertEquals(1, probes.get(), "A false hasNext result must permanently exhaust the iterator");
+    }
+
+    @Test
+    public void testIndexedGeneratorAndLimitRetryAfterOutputFailure() {
+        AtomicInteger attempts = new AtomicInteger();
+        TriIterator<Integer, Integer, Integer> limited = TriIterator.<Integer, Integer, Integer> generate(7, 8, (index, output) -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw new IllegalStateException("transient");
+            }
+
+            output.set(index, index, index);
+        }).limit(1);
+
+        assertThrows(IllegalStateException.class, limited::next);
+        assertEquals(Triple.of(7, 7, 7), limited.next());
+        assertFalse(limited.hasNext());
+    }
+
+    @Test
+    public void testSkipRetainsProgressAcrossOutputFailure() {
+        AtomicInteger failures = new AtomicInteger();
+        TriIterator<Integer, Integer, Integer> skipped = TriIterator.<Integer, Integer, Integer> generate(0, 4, (index, output) -> {
+            if (index == 1 && failures.getAndIncrement() == 0) {
+                throw new IllegalStateException("transient");
+            }
+
+            output.set(index, index, index);
+        }).skip(2);
+
+        assertThrows(IllegalStateException.class, skipped::hasNext);
+        assertTrue(skipped.hasNext());
+        assertEquals(Triple.of(2, 2, 2), skipped.next());
+    }
+
+    @Test
+    public void testLongSkipAndLimitDoNotOverflow() {
+        assertFalse(TriIterator.zip(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).skip(Long.MAX_VALUE).hasNext());
+        assertEquals(2, TriIterator.zip(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).limit(Long.MAX_VALUE).toList().size());
+    }
+
+    @Test
+    public void testUnzipToCollectionsRejectsNullSupplierResultsBeforeConsumption() {
+        TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1 }, new String[] { "a" }, new Boolean[] { true });
+
+        assertThrows(IllegalArgumentException.class, () -> iter.unzipToCollections(ArrayList::new, () -> null, ArrayList::new));
+        assertTrue(iter.hasNext(), "No source element should be consumed while validating output collections");
+    }
+
+    @Test
+    public void testUnzipFailureReflectsPartialSourceConsumption() {
+        Iterator<Integer> source = List.of(1).iterator();
+        TriIterator<Integer, Integer, Integer> iter = TriIterator.unzip(source, (value, output) -> {
+            throw new IllegalStateException("cannot decode");
+        });
+
+        assertThrows(IllegalStateException.class, iter::next);
+        assertFalse(iter.hasNext(), "The source element was consumed before the unzip callback failed");
+        assertThrows(NoSuchElementException.class, iter::next);
     }
 
     @Test

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -260,6 +261,17 @@ public class IntegerArrayTypeTest extends TestBase {
         verify(characterWriter).writeInt(2);
         verify(characterWriter).writeInt(3);
         verify(characterWriter).write(']');
+    }
+
+    @Test
+    public void testSerializeTo_NullElementHonorsWriteNullNumberAsZero() throws IOException {
+        Integer[] arr = { null };
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
+
+        integerArrayType.serializeTo(characterWriter, arr, config);
+
+        verify(characterWriter).writeInt(0);
     }
 
     @Test

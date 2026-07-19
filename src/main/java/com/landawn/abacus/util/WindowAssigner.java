@@ -16,21 +16,12 @@
 package com.landawn.abacus.util;
 
 /**
- * An abstract class that defines how elements in a stream should be assigned to windows.
- * This class supports windowing operations that group stream elements into logical windows
- * based on various criteria such as count or custom logic.
+ * A minimal extension point for iterator transformations used by stream-windowing integrations.
  *
- * <p>WindowAssigner implementations determine the boundaries of windows and control how
- * elements are grouped together for processing. Common windowing strategies include:</p>
- * <ul>
- *   <li>Fixed-size windows (e.g., every N elements)</li>
- *   <li>Time-based windows (e.g., every 5 seconds)</li>
- *   <li>Sliding windows (e.g., overlapping windows)</li>
- *   <li>Session windows (e.g., grouped by activity with gaps)</li>
- * </ul>
- *
- * <p>This is a base class for windowing strategies intended for stream windowing operations.
- * Concrete windowing strategies subclass it and implement {@link #process(ObjIterator)}.</p>
+ * <p>The base class defines only the protected {@link #process(ObjIterator)} hook. It does not
+ * itself create window objects, impose window boundaries, validate input, or prescribe ownership
+ * and closing behavior. Concrete strategies, including implementations outside this package,
+ * define those semantics.</p>
  */
 public abstract class WindowAssigner {
 
@@ -43,17 +34,13 @@ public abstract class WindowAssigner {
     }
 
     /**
-     * Processes the input iterator and returns a new iterator whose elements have been
-     * assigned to windows according to this assigner's strategy.
-     * Implementations define how elements from the input iterator are grouped into windows.
-     *
-     * <p>Implementations should define how elements from the input iterator are assigned
-     * to windows and exposed through the returned iterator. Both the input and the returned
-     * iterator carry elements of the same type {@code T}.</p>
+     * Transforms the input iterator according to this assigner's strategy. Both the input and
+     * returned iterators carry the same element type; any grouping, filtering, ordering, null
+     * handling, or resource-ownership behavior is defined by the implementation.
      *
      * @param <T> the type of elements in the stream
-     * @param iter the input iterator containing the stream elements
-     * @return a new iterator over elements of type {@code T} reflecting the applied windowing
+     * @param iter the input iterator; this base type performs no null validation
+     * @return the transformed iterator; the implementation defines whether {@code null} is permitted
      */
-    abstract <T> ObjIterator<T> process(ObjIterator<T> iter);
+    protected abstract <T> ObjIterator<T> process(ObjIterator<T> iter);
 }

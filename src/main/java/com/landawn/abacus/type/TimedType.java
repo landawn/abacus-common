@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -135,7 +134,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      *
      * @param str the string to parse
      * @return a Timed object containing the parsed timestamp and value, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer than 2 elements
+     * @throws IllegalArgumentException if the parsed value is not an array containing exactly two elements
      * @see #valueOf(Object)
      * @see #stringOf(Timed)
      */
@@ -148,8 +147,8 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
-        if (a == null || a.length < 2) {
-            throw new IllegalArgumentException("Invalid Timed format. Expected array with at least 2 elements [timestamp, value] but got: " + str);
+        if (a == null || a.length != 2) {
+            throw new IllegalArgumentException("Invalid Timed format. Expected an array with exactly 2 elements [timestamp, value] but got: " + str);
         }
 
         final long timestamp = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));
@@ -169,7 +168,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      *
      * @param appendable the Appendable to write to
      * @param x the Timed object to append
-     * @throws IOException if an I/O error occurs during the append operation (when the target is a {@code Writer}, the error is rethrown wrapped in an {@code UncheckedIOException})
+     * @throws IOException if an I/O error occurs during the append operation
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -188,6 +187,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                Throwable failure = null;
 
                 try {
                     bw.write(SK._BRACKET_L);
@@ -201,11 +201,12 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
+                } catch (final IOException | RuntimeException | Error e) {
+                    failure = e;
+                    throw e;
                 } finally {
                     if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
+                        Utils.recycle((BufferedWriter) bw, failure);
                     }
                 }
             } else {
@@ -236,25 +237,20 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @param writer the CharacterWriter to write to
      * @param x the Timed object to write
      * @param config the serialization configuration for formatting options
-     * @throws UncheckedIOException if an I/O error occurs during the write operation (the underlying {@code IOException} is wrapped)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Timed<T> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            try {
-                writer.write(SK._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
-                writer.write(String.valueOf(x.timestamp()));
-                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                valueType.serializeTo(writer, x.value(), config);
+            writer.write(String.valueOf(x.timestamp()));
+            writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+            valueType.serializeTo(writer, x.value(), config);
 
-                writer.write(SK._BRACKET_R);
-
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            writer.write(SK._BRACKET_R);
         }
     }
 

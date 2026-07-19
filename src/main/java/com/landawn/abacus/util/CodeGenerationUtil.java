@@ -87,11 +87,12 @@ public final class CodeGenerationUtil {
     /**
      * Built-in formatter for {@code min(property)} expressions.
      *
-     * <p>Returns {@code null} for non-{@link Comparable} property types so those properties are
-     * skipped during function-name generation.
+     * <p>Primitive property types are evaluated through their wrapper types. Returns {@code null}
+     * for non-{@link Comparable} property types so those properties are skipped during
+     * function-name generation.
      */
     public static final TriFunction<Class<?>, Class<?>, String, String> MIN_FUNC = (entityClass, propClass, propName) -> {
-        if (Comparable.class.isAssignableFrom(propClass)) {
+        if (Comparable.class.isAssignableFrom(ClassUtil.wrap(propClass))) {
             return "min(" + propName + ")";
         }
 
@@ -101,11 +102,12 @@ public final class CodeGenerationUtil {
     /**
      * Built-in formatter for {@code max(property)} expressions.
      *
-     * <p>Returns {@code null} for non-{@link Comparable} property types so those properties are
-     * skipped during function-name generation.
+     * <p>Primitive property types are evaluated through their wrapper types. Returns {@code null}
+     * for non-{@link Comparable} property types so those properties are skipped during
+     * function-name generation.
      */
     public static final TriFunction<Class<?>, Class<?>, String, String> MAX_FUNC = (entityClass, propClass, propName) -> {
-        if (Comparable.class.isAssignableFrom(propClass)) {
+        if (Comparable.class.isAssignableFrom(ClassUtil.wrap(propClass))) {
             return "max(" + propName + ")";
         }
 
@@ -126,6 +128,28 @@ public final class CodeGenerationUtil {
 
     private CodeGenerationUtil() {
         // Utility class - prevent instantiation
+    }
+
+    private static String checkJavaIdentifier(final String identifier, final String argumentName) {
+        N.checkArgNotEmpty(identifier, argumentName);
+        N.checkArgument(Strings.isValidJavaIdentifier(identifier), "%s must be a valid Java identifier: %s", argumentName, identifier);
+
+        return identifier;
+    }
+
+    private static void checkGeneratedFieldName(final String fieldName, final String sourceDescription) {
+        final String emittedName = Strings.isJavaKeyword(fieldName) ? "_" + fieldName : fieldName;
+        N.checkArgument(Strings.isValidJavaIdentifier(emittedName), "%s produced an invalid Java field name: %s", sourceDescription, fieldName);
+    }
+
+    private static void checkPackageName(final String packageName) {
+        if (Strings.isEmpty(packageName)) {
+            return;
+        }
+
+        for (final String identifier : packageName.split("\\.", -1)) {
+            N.checkArgument(Strings.isValidJavaIdentifier(identifier), "packageName must be a valid Java package name: %s", packageName);
+        }
     }
 
     /**
@@ -159,11 +183,10 @@ public final class CodeGenerationUtil {
      * }</pre>
      *
      * @param entityClass the entity class that contributes bean property names; must not be {@code null}
-     * @param propNameTableClassName interface name for generated constants; must not be {@code null} or empty
+     * @param propNameTableClassName interface name for generated constants; must be a valid Java identifier
      * @return generated Java source that declares the inner interface and constants
-     * @throws IllegalArgumentException if {@code entityClass} is {@code null}
-     * @throws NullPointerException if {@code propNameTableClassName} is {@code null}
-     * @throws StringIndexOutOfBoundsException if {@code propNameTableClassName} is empty
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}, or
+     *         {@code propNameTableClassName} is not a valid Java identifier
      * @see #generatePropNameTableClass(Class, String, String)
      */
     @Beta
@@ -185,16 +208,18 @@ public final class CodeGenerationUtil {
      * }</pre>
      *
      * @param entityClass the entity class that contributes bean property names; must not be {@code null}
-     * @param propNameTableClassName interface name for generated constants; must not be {@code null} or empty
+     * @param propNameTableClassName interface name for generated constants; must be a valid Java identifier
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source that declares the inner interface and constants
-     * @throws IllegalArgumentException if {@code entityClass} is {@code null}
-     * @throws NullPointerException if {@code propNameTableClassName} is {@code null}
-     * @throws StringIndexOutOfBoundsException if {@code propNameTableClassName} is empty
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}, or
+     *         {@code propNameTableClassName} is not a valid Java identifier
      * @throws RuntimeException if writing the modified source file fails
      */
     @Beta
     public static String generatePropNameTableClass(final Class<?> entityClass, final String propNameTableClassName, final String srcDir) {
+        N.checkArgNotNull(entityClass, "entityClass");
+        checkJavaIdentifier(propNameTableClassName, "propNameTableClassName");
+
         final StringBuilder sb = new StringBuilder();
 
         final String interfaceName = "public interface " + propNameTableClassName;
@@ -326,9 +351,9 @@ public final class CodeGenerationUtil {
      * }</pre>
      *
      * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
-     * @param propNameTableClassName top-level interface name to generate; must not be {@code null} or empty
+     * @param propNameTableClassName top-level interface name to generate; must be a valid Java identifier
      * @return generated Java source for the standalone property-name table
-     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or {@code propNameTableClassName} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or {@code propNameTableClassName} is not a valid Java identifier
      * @see #generatePropNameTableClasses(Collection, String, String, String)
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName) {
@@ -345,12 +370,13 @@ public final class CodeGenerationUtil {
      * }</pre>
      *
      * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
-     * @param propNameTableClassName top-level interface name to generate; must not be {@code null} or empty
+     * @param propNameTableClassName top-level interface name to generate; must be a valid Java identifier
      * @param propNameTableClassPackageName package for generated source; if {@code null} or empty,
-     *        uses the first entity's package
+     *        uses the first entity's package; otherwise it must be a valid dot-separated Java package name
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source for the standalone property-name table
-     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or {@code propNameTableClassName} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, the class name is not a valid Java identifier,
+     *         or the package name is not a valid Java package name
      * @throws RuntimeException if writing the generated file fails
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName,
@@ -387,16 +413,15 @@ public final class CodeGenerationUtil {
      *        non-empty {@code entityClasses} collection and a non-empty {@code className}
      * @return generated Java source for the property-name table class
      * @throws IllegalArgumentException if {@code codeConfig} is {@code null}, its {@code entityClasses}
-     *         is {@code null} or empty, its {@code className} is {@code null} or empty, or
-     *         {@code generateClassPropNameList} is enabled while the entities have duplicate simple class names
-     * @throws java.util.NoSuchElementException if no usable entity class remains after filtering out
-     *         interfaces and Lombok builder classes
+     *         is {@code null} or empty, its class/package/converted property names are not valid Java names, or
+     *         {@code generateClassPropNameList} is enabled while the entities have duplicate simple class names,
+     *         or no usable entity class remains after filtering out interfaces and Lombok builder classes
      * @throws RuntimeException if writing to file fails when {@code srcDir} is configured
      */
-    public static String generatePropNameTableClasses(final PropNameTableCodeConfig codeConfig) {
+    public static String generatePropNameTableClasses(final PropNameTableCodeConfig codeConfig) throws IllegalArgumentException {
         N.checkArgNotNull(codeConfig, cs.codeConfig);
 
-        final Collection<Class<?>> entityClasses = N.checkArgNotEmpty(codeConfig.getEntityClasses(), "entityClasses");
+        final Collection<Class<?>> entityClasses = N.checkArgNotEmpty(codeConfig.getEntityClasses(), "codeConfig.getEntityClasses()");
 
         final List<Class<?>> entityClassesToUse = Stream.of(entityClasses).filter(cls -> {
             if (cls.isInterface()) {
@@ -410,17 +435,20 @@ public final class CodeGenerationUtil {
                     || !simpleClassName.equals(ClassUtil.getSimpleClassName(cls.getDeclaringClass()) + BUILDER);
         }).toList();
 
+        N.checkArgNotEmpty(entityClassesToUse, "entity classes after filtering interfaces and Lombok builder classes");
+
         final Class<?> entityClass = N.firstElement(entityClassesToUse).orElseThrow();
         final boolean generateClassPropNameList = codeConfig.isGenerateClassPropNameList();
         final String propNameTableClassPackageName = codeConfig.getPackageName();
         final String packageName = N.defaultIfEmpty(propNameTableClassPackageName, ClassUtil.getPackageName(entityClass));
-        final String propNameTableClassName = N.checkArgNotEmpty(codeConfig.getClassName(), "className");
+        final String propNameTableClassName = checkJavaIdentifier(codeConfig.getClassName(), "codeConfig.getClassName()");
+        checkPackageName(packageName);
         final Collection<Class<?>> extendedInterfaces = codeConfig.getExtendedInterfaces();
         final BiFunction<Class<?>, String, String> propNameConverter = N.defaultIfNull(codeConfig.getPropNameConverter(), identityPropNameConverter);
 
         final String interfaceName = Stream.of(extendedInterfaces)
                 .map(ClassUtil::getCanonicalClassName)
-                .map(it -> Strings.isEmpty(packageName) ? it : Strings.replaceAll(it, packageName + ".", ""))
+                .map(it -> Strings.isNotEmpty(packageName) && it.startsWith(packageName + ".") ? it.substring(packageName.length() + 1) : it)
                 .mapFirst(it -> " extends " + it)
                 .join(", ", "public interface " + propNameTableClassName, "");
 
@@ -455,6 +483,8 @@ public final class CodeGenerationUtil {
                     if (Strings.isEmpty(newPropName)) {
                         continue;
                     }
+
+                    checkGeneratedFieldName(newPropName, "propNameConverter");
 
                     if (newPropName.equals(propName)) {
                         propNameMap.put(newPropName, simpleClassName);
@@ -532,6 +562,8 @@ public final class CodeGenerationUtil {
 
         {
             if (codeConfig.isGenerateSnakeCase()) {
+                final String snakeCaseClassName = N.defaultIfEmpty(codeConfig.getClassNameForSnakeCase(), SL);
+                checkJavaIdentifier(snakeCaseClassName, "codeConfig.getClassNameForSnakeCase()");
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
                 final BiFunction<Class<?>, String, String> propNameConverterForSnakeCase = CommonUtil
@@ -548,6 +580,8 @@ public final class CodeGenerationUtil {
                         if (Strings.isEmpty(newPropName)) {
                             continue;
                         }
+
+                        checkGeneratedFieldName(newPropName, "propNameConverter");
 
                         propNameInSnakeCase = propNameConverterForSnakeCase.apply(cls, newPropName);
 
@@ -583,9 +617,9 @@ public final class CodeGenerationUtil {
                 sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append("public interface ")
-                        .append(N.defaultIfEmpty(codeConfig.getClassNameForSnakeCase(), SL))
+                        .append(snakeCaseClassName)
                         .append(" {")
-                        .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
+                        .append(Character.isLowerCase(snakeCaseClassName.charAt(0)) ? NOSONAR_COMMENTS : "")
                         .append(LINE_SEPARATOR); //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
@@ -642,6 +676,8 @@ public final class CodeGenerationUtil {
 
         {
             if (codeConfig.isGenerateScreamingSnakeCase()) {
+                final String screamingSnakeCaseClassName = N.defaultIfEmpty(codeConfig.getClassNameForScreamingSnakeCase(), SU);
+                checkJavaIdentifier(screamingSnakeCaseClassName, "codeConfig.getClassNameForScreamingSnakeCase()");
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
                 final BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase = CommonUtil
@@ -658,6 +694,8 @@ public final class CodeGenerationUtil {
                         if (Strings.isEmpty(newPropName)) {
                             continue;
                         }
+
+                        checkGeneratedFieldName(newPropName, "propNameConverter");
 
                         propNameInScreamingSnakeCase = propNameConverterForScreamingSnakeCase.apply(cls, newPropName);
 
@@ -693,9 +731,9 @@ public final class CodeGenerationUtil {
                 sb.append(LINE_SEPARATOR)
                         .append(INDENTATION)
                         .append("public interface ")
-                        .append(N.defaultIfEmpty(codeConfig.getClassNameForScreamingSnakeCase(), SU))
+                        .append(screamingSnakeCaseClassName)
                         .append(" {")
-                        .append(Character.isLowerCase(propNameTableClassName.charAt(0)) ? " // NOSONAR" : "")
+                        .append(Character.isLowerCase(screamingSnakeCaseClassName.charAt(0)) ? NOSONAR_COMMENTS : "")
                         .append(LINE_SEPARATOR); //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
@@ -752,6 +790,7 @@ public final class CodeGenerationUtil {
         {
             if (codeConfig.isGenerateFunctionPropName()) {
                 final String functionClassName = N.defaultIfEmpty(codeConfig.getFunctionClassName(), SF);
+                checkJavaIdentifier(functionClassName, "codeConfig.getFunctionClassName()");
                 final Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFuncMap = N.nullToEmpty(codeConfig.getPropFunctions());
 
                 final List<ListMultimap<Tuple2<String, String>, String>> funcPropNameMapList = new ArrayList<>();
@@ -773,6 +812,8 @@ public final class CodeGenerationUtil {
                                 continue;
                             }
 
+                            checkGeneratedFieldName(newPropName, "propNameConverter");
+
                             final Method propGetMethod = Beans.getPropGetter(cls, propName);
 
                             if (propGetMethod == null) {
@@ -785,7 +826,9 @@ public final class CodeGenerationUtil {
                                 continue;
                             }
 
-                            funcPropNameMap.put(Tuple.of(funcName + "_" + newPropName, funcPropName), simpleClassName);
+                            final String generatedFieldName = funcName + "_" + newPropName;
+                            checkGeneratedFieldName(generatedFieldName, "propFunctions key");
+                            funcPropNameMap.put(Tuple.of(generatedFieldName, funcPropName), simpleClassName);
                         }
                     }
 
@@ -910,23 +953,28 @@ public final class CodeGenerationUtil {
         /** Entity classes to scan for bean properties. Required. */
         private Collection<Class<?>> entityClasses;
 
-        /** Top-level interface name for generated property constants. Required. */
+        /** Top-level interface name for generated property constants. Required and must be a valid Java identifier. */
         private String className;
 
-        /** Package for generated source; if {@code null} or empty, uses the first entity's package. */
+        /** Package for generated source; if non-empty, it must be a valid dot-separated Java package name. */
         private String packageName;
 
         /** Source root to write files into; if {@code null} or empty, only the generated source text is returned. */
         private String srcDir;
 
-        /** Optional interfaces that the generated top-level interface should extend. */
+        /**
+         * Optional interfaces that the generated top-level interface should extend. Interfaces in
+         * the generated package are emitted relative to that package; other interfaces retain their
+         * fully qualified canonical names.
+         */
         private Collection<Class<?>> extendedInterfaces;
 
         /**
          * Converts property names before constants are emitted.
          *
          * <p>The function receives {@code (entityClass, propName)}. Return {@code null} or empty
-         * to skip a property. If {@code null}, identity mapping is used.
+         * to skip a property. A non-empty result must be a Java identifier (Java keywords are
+         * accepted and emitted with an underscore prefix). If {@code null}, identity mapping is used.
          */
         private BiFunction<Class<?>, String, String> propNameConverter;
 
@@ -941,7 +989,7 @@ public final class CodeGenerationUtil {
         /** Whether to generate a snake_case nested interface. Default is {@code false}. */
         private boolean generateSnakeCase;
 
-        /** Nested interface name for snake_case constants. Defaults to {@link CodeGenerationUtil#SL}. */
+        /** Nested interface name for snake_case constants. Must be a valid Java identifier; defaults to {@link CodeGenerationUtil#SL}. */
         private String classNameForSnakeCase;
 
         /**
@@ -954,7 +1002,7 @@ public final class CodeGenerationUtil {
         /** Whether to generate a SCREAMING_SNAKE_CASE nested interface. Default is {@code false}. */
         private boolean generateScreamingSnakeCase;
 
-        /** Nested interface name for SCREAMING_SNAKE_CASE constants. Defaults to {@link CodeGenerationUtil#SU}. */
+        /** Nested interface name for SCREAMING_SNAKE_CASE constants. Must be a valid Java identifier; defaults to {@link CodeGenerationUtil#SU}. */
         private String classNameForScreamingSnakeCase;
 
         /**
@@ -967,7 +1015,7 @@ public final class CodeGenerationUtil {
         /** Whether to generate a nested interface for function-based names (for example, {@code min(age)}). */
         private boolean generateFunctionPropName;
 
-        /** Nested interface name for function-based constants. Defaults to {@link CodeGenerationUtil#SF}. */
+        /** Nested interface name for function-based constants. Must be a valid Java identifier; defaults to {@link CodeGenerationUtil#SF}. */
         private String functionClassName;
 
         /**
@@ -975,7 +1023,8 @@ public final class CodeGenerationUtil {
          *
          * <p>Map key is a constant prefix (for example {@code min}); function input is
          * {@code (entityClass, propertyType, convertedPropertyName)}; returning {@code null} or
-         * empty skips the property.
+         * empty skips the property. Each key, when combined with an underscore and a converted
+         * property name, must form a valid Java identifier.
          */
         private Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions;
 
@@ -990,11 +1039,11 @@ public final class CodeGenerationUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropNameTableCodeConfig config = new PropNameTableCodeConfig();
-         * config.getEntityClasses();        // returns null (object fields default to null)
-         * config.isGenerateSnakeCase();     // returns false (boolean flags default to false)
+         * config.getEntityClasses();                             // returns null (object fields default to null)
+         * config.isGenerateSnakeCase();                          // returns false (boolean flags default to false)
          *
-         * config.setClassName("S").setGenerateSnakeCase(true); // returns this (chainable setters)
-         * config.getClassName();                               // returns "S"
+         * config.setClassName("S").setGenerateSnakeCase(true);   // returns this (chainable setters)
+         * config.getClassName();                                 // returns "S"
          * }</pre>
          *
          */

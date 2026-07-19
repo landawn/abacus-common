@@ -328,8 +328,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
-     * Boolean boxed = iter.next();            // returns true (boxed) — avoid this
-     * boolean primitive = iter.nextBoolean(); // returns false — prefer this
+     * Boolean boxed = iter.next();              // returns true (boxed) — avoid this
+     * boolean primitive = iter.nextBoolean();   // returns false — prefer this
      * }</pre>
      *
      * @return the next boolean value as a boxed {@link Boolean} object
@@ -615,15 +615,17 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedBoolean} elements with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
-    public ObjIterator<IndexedBoolean> indexed(final long startIndex) {
+    public ObjIterator<IndexedBoolean> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final BooleanIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -632,7 +634,24 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
             @Override
             public IndexedBoolean next() {
-                return IndexedBoolean.of(iter.nextBoolean(), idx++);
+                if (indexOverflow) {
+                    if (iter.hasNext()) {
+                        throw new ArithmeticException("long overflow");
+                    }
+
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final boolean value = iter.nextBoolean();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedBoolean.of(value, currentIndex);
             }
         };
     }
@@ -653,7 +672,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 

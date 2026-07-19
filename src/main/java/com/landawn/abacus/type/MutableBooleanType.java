@@ -203,7 +203,8 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     /**
      * Writes the character representation of a {@link MutableBoolean} to a {@link CharacterWriter}.
      * Writes the pre-allocated {@code TRUE_CHAR_ARRAY}, {@code FALSE_CHAR_ARRAY}, or {@code NULL_CHAR_ARRAY}.
-     * The {@code config} parameter is not used for boolean values.
+     * When configured with {@link JsonXmlSerConfig#isWriteNullBooleanAsFalse()}, a {@code null}
+     * wrapper is written as {@code false}; otherwise it is written as {@code null}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
@@ -214,7 +215,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableBoolean} to write, may be {@code null}
-     * @param config the serialization configuration (unused for boolean values)
+     * @param config the serialization configuration controlling null-boolean output; may be {@code null}
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

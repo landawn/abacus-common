@@ -611,11 +611,15 @@ public final class FilenameUtil {
      *
      * @param filename the filename to find the last extension separator in, {@code null} returns -1
      * @return the index of the last extension separator character, or -1 if there is no such character or if {@code null}
+     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
      */
     public static int indexOfExtension(final String filename) {
         if (filename == null) {
             return NOT_FOUND;
         }
+
+        failIfNullBytePresent(filename);
+
         final int extensionPos = filename.lastIndexOf(EXTENSION_SEPARATOR);
         final int lastSeparator = indexOfLastSeparator(filename);
         return lastSeparator > extensionPos ? NOT_FOUND : extensionPos;
@@ -638,7 +642,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the prefix of the file, or {@code null} if the filename is {@code null} or invalid
-     * @throws IllegalArgumentException if the resolved prefix contains a {@code null} byte
+     * @throws IllegalArgumentException if the resolved full path contains a {@code null} byte
      */
     @MayReturnNull
     public static String getPrefix(final String filename) {
@@ -760,6 +764,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the full path of the file without trailing separator, an empty string if none exists,
      *         or {@code null} if the filename is {@code null} or invalid
+     * @throws IllegalArgumentException if the resolved full path contains a {@code null} byte
      * @see #getFullPath(String)
      */
     @MayReturnNull
@@ -779,18 +784,23 @@ public final class FilenameUtil {
             if (includeSeparator) {
                 return getPrefix(filename); // add end slash if necessary
             } else {
+                failIfNullBytePresent(filename);
                 return filename;
             }
         }
         final int index = indexOfLastSeparator(filename);
         if (index < 0) {
-            return filename.substring(0, prefix);
+            final String path = filename.substring(0, prefix);
+            failIfNullBytePresent(path);
+            return path;
         }
         int end = index + (includeSeparator ? 1 : 0);
         if (end == 0) {
             end++;
         }
-        return filename.substring(0, end);
+        final String path = filename.substring(0, end);
+        failIfNullBytePresent(path);
+        return path;
     }
 
     /**
@@ -879,6 +889,7 @@ public final class FilenameUtil {
      * @param filename the filename to retrieve the extension of, {@code null} returns {@code null}
      * @return the extension of the file or an empty string if none exists,
      *         or {@code null} if the filename is {@code null}
+     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
      * @see #getBaseName(String)
      * @see #removeExtension(String)
      */
@@ -955,7 +966,7 @@ public final class FilenameUtil {
      * @param filename the filename to modify, {@code null} returns {@code null}
      * @param extension the new extension (with or without a leading dot); {@code null} or empty removes the extension
      * @return the filename with the new extension, or {@code null} if the filename is {@code null}
-     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
+     * @throws IllegalArgumentException if {@code filename} is non-null and the supplied filename or new extension contains {@code null} bytes
      * @see #removeExtension(String)
      * @see #getExtension(String)
      */
@@ -970,6 +981,8 @@ public final class FilenameUtil {
         if (Strings.isEmpty(extension)) {
             return withoutExtension;
         }
+
+        failIfNullBytePresent(extension);
 
         if (extension.charAt(0) == EXTENSION_SEPARATOR) {
             return withoutExtension + extension;

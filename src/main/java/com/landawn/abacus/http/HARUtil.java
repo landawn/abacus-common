@@ -230,7 +230,8 @@ public final class HARUtil {
      * @see #configureCurlLoggingForCurrentThread(boolean)
      * @see #configureCurlLoggingForCurrentThread(boolean, char)
      */
-    public static void configureCurlLoggingForCurrentThread(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
+    public static void configureCurlLoggingForCurrentThread(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler)
+            throws IllegalArgumentException {
         N.checkArgNotNull(logHandler, "logHandler");
         logCurl_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
     }
@@ -376,7 +377,10 @@ public final class HARUtil {
         }
 
         return Stream.of(entries) //
-                .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR
+                .map(m -> m == null ? null : m.get("request"))
+                .filter(Map.class::isInstance)
+                .map(m -> (Map<String, Object>) m) //NOSONAR
+                .filter(m -> m != null && m.get("url") instanceof String)
                 // .peek(m -> N.println(m.get("url")))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .map(requestEntry -> sendRequestByRequestEntry(requestEntry, String.class))
@@ -438,7 +442,10 @@ public final class HARUtil {
         }
 
         return Stream.of(entries) //
-                .map(m -> (Map<String, Object>) m.get("request"))
+                .map(m -> m == null ? null : m.get("request"))
+                .filter(Map.class::isInstance)
+                .map(m -> (Map<String, Object>) m)
+                .filter(m -> m != null && m.get("url") instanceof String)
                 // .peek(m -> N.println(m.get("url")))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .map(requestEntry -> sendRequestByRequestEntry(requestEntry, String.class))
@@ -503,7 +510,10 @@ public final class HARUtil {
         }
 
         return Stream.of(entries) //
-                .map(m -> (Map<String, Object>) m.get("request"))
+                .map(m -> m == null ? null : m.get("request"))
+                .filter(Map.class::isInstance)
+                .map(m -> (Map<String, Object>) m)
+                .filter(m -> m != null && m.get("url") instanceof String)
                 // .peek(m -> N.println(m.get("url")))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .map(requestEntry -> Tuple.of(requestEntry, sendRequestByRequestEntry(requestEntry, HttpResponse.class)));
@@ -552,7 +562,7 @@ public final class HARUtil {
         final String requestBody = bodyAndMimeType._1;
         final String bodyContentType = bodyAndMimeType._2;
 
-        if (Strings.isNotEmpty(requestBody)) {
+        if (Strings.isNotEmpty(bodyContentType)) {
             WebUtil.setContentTypeByRequestBodyType(bodyContentType, httpHeaders);
         }
 
@@ -629,7 +639,10 @@ public final class HARUtil {
         }
 
         return Stream.of(entries) //
-                .map(m -> (Map<String, Object>) m.get("request"))
+                .map(m -> m == null ? null : m.get("request"))
+                .filter(Map.class::isInstance)
+                .map(m -> (Map<String, Object>) m)
+                .filter(m -> m != null && m.get("url") instanceof String)
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .first();
     }
@@ -679,7 +692,8 @@ public final class HARUtil {
      *
      * <p>This method retrieves all headers from the request entry and applies the
      * configured header filter to determine which headers should be included.
-     * Headers that don't pass the filter are excluded from the returned {@code HttpHeaders} object.</p>
+     * Headers that don't pass the filter are excluded from the returned {@code HttpHeaders} object.
+     * Malformed array entries that are {@code null} or have no name are skipped.</p>
      *
      * <p>The header filter can be configured using {@link #setThreadLocalHeaderFilter(BiPredicate)}.</p>
      *
@@ -704,6 +718,10 @@ public final class HARUtil {
         }
 
         for (final Map<String, String> m : headers) {
+            if (m == null) {
+                continue;
+            }
+
             headerName = m.get("name");
             headerValue = m.get("value");
 
@@ -724,7 +742,9 @@ public final class HARUtil {
      * <p>This method retrieves the POST data from the request entry, including both
      * the text content and the MIME type. If {@code postData.text} is absent or empty and HAR
      * {@code postData.params} are present, the params are encoded as
-     * {@code application/x-www-form-urlencoded} form data.</p>
+     * {@code application/x-www-form-urlencoded} form data. Because the synthesized bytes are URL-encoded,
+     * the returned MIME type is also {@code application/x-www-form-urlencoded}, even if a different
+     * (for example multipart) MIME type was recorded without its original body text.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -746,7 +766,7 @@ public final class HARUtil {
             final String requestBodyFromParams = getRequestBodyFromPostDataParams(requestEntry);
 
             if (Strings.isNotEmpty(requestBodyFromParams)) {
-                return Tuple.of(requestBodyFromParams, Strings.isNotEmpty(bodyContentType) ? bodyContentType : HttpHeaders.Values.APPLICATION_URL_ENCODED);
+                return Tuple.of(requestBodyFromParams, HttpHeaders.Values.APPLICATION_URL_ENCODED);
             }
         }
 

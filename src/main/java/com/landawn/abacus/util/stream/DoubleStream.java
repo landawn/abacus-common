@@ -16,6 +16,7 @@ package com.landawn.abacus.util.stream;
 
 import java.nio.DoubleBuffer;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -46,7 +47,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.ParallelSupported;
@@ -260,7 +260,6 @@ import com.landawn.abacus.util.function.TriFunction;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
-@Immutable
 @LazyEvaluation
 public abstract class DoubleStream
         extends StreamBase<Double, double[], DoublePredicate, DoubleConsumer, OptionalDouble, IndexedDouble, DoubleIterator, DoubleStream> {
@@ -301,17 +300,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
@@ -365,17 +365,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
@@ -435,18 +436,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
@@ -486,17 +488,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from double to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#map(Function)
      */
     @ParallelSupported
@@ -527,17 +530,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from double to int
      * @return a new IntStream consisting of the results of applying the mapper function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToLong(DoubleToLongFunction)
      * @see #mapToFloat(DoubleToFloatFunction)
      * @see #mapToObj(DoubleFunction)
@@ -570,17 +574,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from double to long
      * @return a new LongStream consisting of the results of applying the mapper function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(DoubleToIntFunction)
      * @see #mapToFloat(DoubleToFloatFunction)
      * @see #mapToObj(DoubleFunction)
@@ -613,17 +618,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from double to float
      * @return a new FloatStream consisting of the results of applying the mapper function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(DoubleToIntFunction)
      * @see #mapToLong(DoubleToLongFunction)
      * @see #mapToObj(DoubleFunction)
@@ -656,18 +662,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from double to T
      * @return a new Stream consisting of the results of applying the mapper function to the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapToInt(DoubleToIntFunction)
      * @see #mapToLong(DoubleToLongFunction)
      * @see #mapToFloat(DoubleToFloatFunction)
@@ -680,7 +687,8 @@ public abstract class DoubleStream
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents of
      * a mapped stream produced by applying the provided mapping function to each element.
-     * Each mapped stream is closed after its contents have been placed into this stream.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * <p>This operation is stateless and can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -702,17 +710,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a DoubleStream
      * @return a new DoubleStream consisting of the flattened contents of all mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapArray(DoubleFunction)
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
@@ -764,17 +773,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from double to {@code Collection<Double>}
      * @return a new {@code DoubleStream} consisting of the flattened contents of the collections produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(DoubleFunction)
      * @see #flatMapArray(DoubleFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -808,17 +818,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a double array
      * @return a new DoubleStream consisting of the flattened contents of all mapped arrays
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(DoubleFunction)
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
@@ -853,17 +864,21 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped JDK stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK DoubleStream
      * @return a new DoubleStream consisting of the flattened contents of all mapped JDK streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(DoubleFunction)
      * @see #flatMapArray(DoubleFunction)
      */
@@ -897,17 +912,21 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to an IntStream
      * @return a new IntStream consisting of the flattened contents of all mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToLong(DoubleFunction)
      * @see #flatMapToFloat(DoubleFunction)
      * @see #flatMapToObj(DoubleFunction)
@@ -940,17 +959,21 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a LongStream
      * @return a new LongStream consisting of the flattened contents of all mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToFloat(DoubleFunction)
      * @see #flatMapToObj(DoubleFunction)
@@ -983,17 +1006,21 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a FloatStream
      * @return a new FloatStream consisting of the flattened contents of all mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
      * @see #flatMapToObj(DoubleFunction)
@@ -1028,18 +1055,22 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
+     *
      * @param mapper a non-interfering, stateless function that transforms each element to a Stream
      * @return a new Stream consisting of the flattened contents of all mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
      * @see #flatmapToObj(DoubleFunction)
@@ -1075,18 +1106,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to a Collection
      * @return a new Stream consisting of the flattened contents of all mapped collections
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToObj(DoubleFunction)
      * @see #flatMapArrayToObj(DoubleFunction)
      * @see #mapToObj(DoubleFunction)
@@ -1121,18 +1153,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to a {@code T[]}
      * @return a new Stream consisting of the flattened contents of all mapped arrays
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToObj(DoubleFunction)
      * @see #flatmapToObj(DoubleFunction)
      * @see #mapToObj(DoubleFunction)
@@ -1174,17 +1207,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that generates zero or more output values for each input value
      * @return a new DoubleStream consisting of the results of applying the mapper function
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(DoubleFunction)
      * @see #flatMapArray(DoubleFunction)
      */
@@ -1216,17 +1250,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to an OptionalDouble
      * @return a new stream containing only the values from non-empty OptionalDoubles
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1257,17 +1292,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK {@code java.util.OptionalDouble}
      * @return a new stream containing only the values from non-empty {@code java.util.OptionalDouble}s
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1300,13 +1336,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -1351,13 +1387,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
@@ -1401,13 +1437,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1450,13 +1486,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1496,13 +1532,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
@@ -1548,17 +1584,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator a {@code DoubleBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code DoubleStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
@@ -1596,19 +1633,20 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      *        It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * @param accumulator a {@code DoubleBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code DoubleStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
@@ -1644,19 +1682,20 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator a {@code DoubleBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code DoubleStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
@@ -1683,17 +1722,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to prepend to this stream
      * @return a new stream with the specified elements prepended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1719,17 +1759,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append to this stream
      * @return a new stream with the specified elements appended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1763,17 +1804,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append if this stream is empty
      * @return this stream if not empty, otherwise a new stream containing the specified elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1804,17 +1846,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to select
      * @return a new stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -1847,18 +1890,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to select
      * @param comparator a non-interfering, stateless comparator to compare elements of this stream; if {@code null}, natural ordering is used (the {@code n} greatest elements are returned)
      * @return a new stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -1886,7 +1930,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1896,6 +1940,7 @@ public abstract class DoubleStream
      * </table>
      *
      * @return a {@code DoubleList} containing all the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -1926,7 +1971,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1942,6 +1987,7 @@ public abstract class DoubleStream
      * @param keyMapper a non-interfering, stateless function to apply to each element to derive the key
      * @param valueMapper a non-interfering, stateless function to apply to each element to derive the value
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @throws IllegalStateException if duplicate keys are encountered
@@ -1978,7 +2024,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1996,6 +2042,7 @@ public abstract class DoubleStream
      * @param valueMapper a non-interfering, stateless function to apply to each element to derive the value
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @throws IllegalStateException if duplicate keys are encountered
@@ -2036,7 +2083,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2053,6 +2100,7 @@ public abstract class DoubleStream
      * @param valueMapper a non-interfering, stateless function to apply to each element to derive the value
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -2095,7 +2143,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2114,6 +2162,7 @@ public abstract class DoubleStream
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -2151,7 +2200,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2166,6 +2215,7 @@ public abstract class DoubleStream
      * @param keyMapper a non-interfering, stateless function to be used for classifying elements
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Map} containing the results of the group-by operation
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -2203,7 +2253,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2220,6 +2270,7 @@ public abstract class DoubleStream
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} containing the results of the group-by operation
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -2263,18 +2314,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param identity the identity value for the accumulator function, and the value returned when the stream is empty
      * @param accumulator the function for combining the current accumulated value and the current stream element
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
@@ -2307,17 +2359,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return an OptionalDouble describing the result of the reduction. If the stream is empty, an empty {@code OptionalDouble} is returned.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
@@ -2357,13 +2410,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> The type of the result
@@ -2372,6 +2425,7 @@ public abstract class DoubleStream
      * @param combiner an associative, non-interfering, stateless function for combining two values, which must be compatible with the accumulator function.
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -2413,18 +2467,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> The type of the result. It must be {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
      * @return the result of the reduction
@@ -2456,21 +2511,24 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #forEach(Throwables.DoubleConsumer)
      */
     @ParallelSupported
     @TerminalOp
     public void foreach(final DoubleConsumer action) { // NOSONAR
+        assertNotClosed();
+
         forEach(action::accept);
     }
 
@@ -2493,17 +2551,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2533,17 +2592,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements, accepting the index and the element
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2578,18 +2638,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if any elements of the stream match the provided predicate, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2628,18 +2689,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either all elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2678,18 +2740,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either no elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2707,7 +2770,7 @@ public abstract class DoubleStream
      * OptionalDouble first = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0)
      *                                 .findFirst();   // returns OptionalDouble[1.0]
      *
-     * DoubleStream.empty().findFirst();   // returns OptionalDouble.empty()
+     * DoubleStream.empty().findFirst();                                         // returns OptionalDouble.empty()
      *
      * double result = DoubleStream.of(9.5, 8.3, 7.1).findFirst().orElse(0.0);   // returns 9.5
      * }</pre>
@@ -2715,16 +2778,17 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalDouble} containing the first element of the stream, or an empty {@code OptionalDouble} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.DoublePredicate)
@@ -2733,6 +2797,8 @@ public abstract class DoubleStream
     @ParallelSupported
     @TerminalOp
     public OptionalDouble findFirst() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2758,16 +2824,17 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalDouble} containing the first element of the stream, or an empty {@code OptionalDouble} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.DoublePredicate)
@@ -2776,6 +2843,8 @@ public abstract class DoubleStream
     @ParallelSupported
     @TerminalOp
     public OptionalDouble findAny() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2812,18 +2881,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an {@code OptionalDouble} describing the first element that matches the predicate, or an empty {@code OptionalDouble} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2867,18 +2937,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an {@code OptionalDouble} describing any element that matches the predicate, or an empty {@code OptionalDouble} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2920,18 +2991,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an {@code OptionalDouble} describing the last element that matches the predicate, or an empty {@code OptionalDouble} if no such element exists
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Beta
@@ -2951,9 +3023,9 @@ public abstract class DoubleStream
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DoubleStream.of(5.5, 2.3, 8.1, 1.7, 9.2).min();   // returns OptionalDouble[1.7]
+     * DoubleStream.of(5.5, 2.3, 8.1, 1.7, 9.2).min();                          // returns OptionalDouble[1.7]
      *
-     * DoubleStream.empty().min();   // returns OptionalDouble.empty()
+     * DoubleStream.empty().min();                                              // returns OptionalDouble.empty()
      *
      * // Safe retrieval with default value
      * double minValue = DoubleStream.of(10.5, 20.3, 30.8).min().orElse(0.0);   // returns 10.5
@@ -2970,16 +3042,17 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalDouble} containing the minimum element of this stream, or an empty optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2997,9 +3070,9 @@ public abstract class DoubleStream
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DoubleStream.of(5.5, 2.3, 8.1, 1.7, 9.2).max();   // returns OptionalDouble[9.2]
+     * DoubleStream.of(5.5, 2.3, 8.1, 1.7, 9.2).max();                          // returns OptionalDouble[9.2]
      *
-     * DoubleStream.empty().max();   // returns OptionalDouble.empty()
+     * DoubleStream.empty().max();                                              // returns OptionalDouble.empty()
      *
      * // Safe retrieval with default value
      * double maxValue = DoubleStream.of(10.5, 20.3, 30.8).max().orElse(0.0);   // returns 30.8
@@ -3016,16 +3089,17 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalDouble} containing the maximum element of this stream, or an empty optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3059,17 +3133,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalDouble} containing the k-th largest element, or an empty {@code OptionalDouble} if the stream is empty or contains fewer than {@code k} elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code k} is not positive
      */
     @SequentialOnly
@@ -3089,7 +3164,7 @@ public abstract class DoubleStream
      * <pre>{@code
      * double total = DoubleStream.of(1.5, 2.3, 3.7, 4.2, 5.8).sum();   // returns 17.5
      *
-     * DoubleStream.empty().sum();   // returns 0.0
+     * DoubleStream.empty().sum();                                      // returns 0.0
      *
      * // NaN propagation
      * double nanSum = DoubleStream.of(1.0, Double.NaN, 3.0).sum();
@@ -3106,16 +3181,17 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return the sum of elements in this stream, or {@code 0.0} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3134,9 +3210,9 @@ public abstract class DoubleStream
      * <pre>{@code
      * DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).average();   // returns OptionalDouble[3.0]
      *
-     * DoubleStream.of(10.5, 20.3, 30.8).average();   // returns OptionalDouble[20.533333...]
+     * DoubleStream.of(10.5, 20.3, 30.8).average();          // returns OptionalDouble[20.533333...]
      *
-     * DoubleStream.empty().average();   // returns OptionalDouble.empty()
+     * DoubleStream.empty().average();                       // returns OptionalDouble.empty()
      *
      * // NaN propagation
      * double nanAvg = DoubleStream.of(1.0, Double.NaN, 3.0).average().getAsDouble();
@@ -3149,17 +3225,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalDouble containing the average of elements of this stream,
      *         or an empty optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3192,16 +3269,17 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a {@code DoubleSummaryStatistics} describing various summary data about the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3237,7 +3315,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3247,6 +3325,7 @@ public abstract class DoubleStream
      * </table>
      *
      * @return a {@code Pair} containing the {@code DoubleSummaryStatistics} and an optional map of percentile values
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3276,19 +3355,21 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the other stream to merge with this stream
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the new merged stream
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3313,18 +3394,19 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the DoubleStream to be combined with the current DoubleStream. Must be {@code non-null}.
      * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(DoubleStream, double, double, DoubleBinaryOperator)
      */
     @ParallelSupported
@@ -3349,19 +3431,20 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second DoubleStream to be combined with the current DoubleStream. Will be closed along with this DoubleStream.
      * @param c the third DoubleStream to be combined with the current DoubleStream. Will be closed along with this DoubleStream.
      * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStreams
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(DoubleStream, DoubleStream, double, double, double, DoubleTernaryOperator)
      * @see #zipWith(DoubleStream, DoubleBinaryOperator)
      */
@@ -3386,13 +3469,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the DoubleStream to be combined with the current DoubleStream. Will be closed along with this DoubleStream.
@@ -3400,6 +3483,7 @@ public abstract class DoubleStream
      * @param valueForNoneB the default value to use for the given DoubleStream when it runs out of elements
      * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStream
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -3424,13 +3508,13 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second DoubleStream to be combined with the current DoubleStream. Will be closed along with this DoubleStream.
@@ -3440,6 +3524,7 @@ public abstract class DoubleStream
      * @param valueForNoneC the default value to use for the third DoubleStream when it runs out of elements
      * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStreams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -3471,16 +3556,17 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a Stream consisting of the elements of this stream, each boxed to a Double
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3512,16 +3598,20 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
+     * <p>If this stream has close handlers, closing the returned JDK stream closes this stream and
+     * invokes those handlers exactly once.</p>
+     *
      * @return a JDK {@code DoubleStream} consisting of the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3549,17 +3639,18 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param transfer the function to transform the JDK stream. Must not be {@code null}.
      * @return the transformed stream as a DoubleStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #transformB(Function, boolean)
      * @see #toJdkStream()
      */
@@ -3567,6 +3658,8 @@ public abstract class DoubleStream
     @SequentialOnly
     @IntermediateOp
     public DoubleStream transformB(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer) {
+        assertNotClosed();
+
         return transformB(transfer, false);
     }
 
@@ -3612,20 +3705,20 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param transfer the function to transform the JDK stream. Must not be {@code null}.
      * @param deferred if {@code true}, the transformation is deferred until the stream is consumed;
      *                 if {@code false}, the transformation is applied immediately
      * @return the transformed stream as a DoubleStream
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if transfer is null
      * @see #transformB(Function)
      * @see #toJdkStream()
@@ -3999,18 +4092,6 @@ public abstract class DoubleStream
     public static DoubleStream of(final DoubleIterator iterator) {
         return iterator == null ? empty() : new IteratorDoubleStream(iterator);
     }
-
-    //    /**
-    //     * Creates a DoubleStream from a java.util.stream.DoubleStream.
-    //     *
-    //     * @param stream the java.util.stream.DoubleStream to convert
-    //     * @return a new DoubleStream containing the same elements
-    //     * @deprecated Use {@link #from(java.util.stream.DoubleStream)} instead
-    //     */
-    //    @Deprecated
-    //    public static DoubleStream of(final java.util.stream.DoubleStream stream) { // Should the name be from?
-    //        return from(stream);
-    //    }
 
     /**
      * Creates a DoubleStream from the specified {@link DoubleBuffer}, reading elements
@@ -4441,10 +4522,11 @@ public abstract class DoubleStream
 
             @Override
             public double nextDouble() {
-                if (cnt-- <= 0) {
+                if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                cnt--;
                 return element;
             }
 
@@ -4522,6 +4604,8 @@ public abstract class DoubleStream
     /**
      * Creates a DoubleStream that generates elements using the provided hasNext and next suppliers.
      * The stream continues as long as hasNext returns {@code true}.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4556,12 +4640,17 @@ public abstract class DoubleStream
         N.checkArgNotNull(next);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -4582,6 +4671,8 @@ public abstract class DoubleStream
     /**
      * Creates a DoubleStream that starts with an initial value and generates subsequent values by applying a function.
      * The stream continues as long as hasNext returns {@code true}.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4620,12 +4711,17 @@ public abstract class DoubleStream
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private double cur = 0;
             private boolean isFirst = true;
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -5000,6 +5096,7 @@ public abstract class DoubleStream
     /**
      * Concatenates a collection of DoubleStreams into a single DoubleStream.
      * The input streams will be closed when the returned stream is closed.
+     * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5020,13 +5117,19 @@ public abstract class DoubleStream
      *     .sum();   // returns 36.0
      * }</pre>
      *
-     * @param streams the collection of DoubleStreams to concatenate
+     * @param streams the collection of DoubleStreams to concatenate; {@code null} elements are treated as empty streams
      * @return a DoubleStream containing all elements from the input streams in order
      * @see Stream#concat(Collection)
      */
     public static DoubleStream concat(final Collection<? extends DoubleStream> streams) {
-        return N.isEmpty(streams) ? empty() : new IteratorDoubleStream(new DoubleIteratorEx() { //NOSONAR
-            private final Iterator<? extends DoubleStream> iterators = streams.iterator();
+        if (N.isEmpty(streams)) {
+            return empty();
+        }
+
+        final List<? extends DoubleStream> sources = new ArrayList<>(streams);
+
+        return new IteratorDoubleStream(new DoubleIteratorEx() { //NOSONAR
+            private final Iterator<? extends DoubleStream> iterators = sources.iterator();
             private DoubleStream cur;
             private DoubleIterator iter;
 
@@ -5052,7 +5155,7 @@ public abstract class DoubleStream
 
                 return iter.nextDouble();
             }
-        }).onClose(newCloseHandler(streams));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -5363,7 +5466,7 @@ public abstract class DoubleStream
      * the typed two-stream / three-stream overloads (which use {@link DoubleBinaryOperator} /
      * {@link DoubleTernaryOperator} and avoid boxing).
      *
-     * @param streams the collection of double streams to zip
+     * @param streams the collection of double streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine values from all the streams. Must be {@code non-null}.
      * @return a stream of combined values
      * @see Stream#zip(Collection, Function)
@@ -5671,7 +5774,7 @@ public abstract class DoubleStream
      * the typed two-stream / three-stream overloads (which use {@link DoubleBinaryOperator} /
      * {@link DoubleTernaryOperator} and avoid boxing).
      *
-     * @param streams the collection of double streams to zip
+     * @param streams the collection of double streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the array of default values to use when streams run out of values
      * @param zipFunction the function to combine values from all the streams. Must be {@code non-null}.
      * @return a stream of combined values
@@ -5713,12 +5816,15 @@ public abstract class DoubleStream
      *
      * @param a the first double array
      * @param b the second double array
-     * @param nextSelector a function that determines which element should be selected next.
+     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select from array a, otherwise selects from array b
      * @return a DoubleStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
     public static DoubleStream merge(final double[] a, final double[] b, final DoubleBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(a)) {
             return of(b);
         } else if (N.isEmpty(b)) {
@@ -5778,9 +5884,10 @@ public abstract class DoubleStream
      * @param a the first double array
      * @param b the second double array
      * @param c the third double array
-     * @param nextSelector a function that determines which element should be selected next.
+     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
     public static DoubleStream merge(final double[] a, final double[] b, final double[] c, final DoubleBiFunction<MergeResult> nextSelector) {
@@ -5812,12 +5919,15 @@ public abstract class DoubleStream
      *
      * @param a the first DoubleIterator
      * @param b the second DoubleIterator
-     * @param nextSelector a function that determines which element should be selected next.
+     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select from iterator a, otherwise selects from iterator b
      * @return a DoubleStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
     public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private final DoubleIterator iterA = a == null ? DoubleIterator.empty() : a;
             private final DoubleIterator iterB = b == null ? DoubleIterator.empty() : b;
@@ -5897,9 +6007,10 @@ public abstract class DoubleStream
      * @param a the first DoubleIterator
      * @param b the second DoubleIterator
      * @param c the third DoubleIterator
-     * @param nextSelector a function that determines which element should be selected next.
+     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
     public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleBiFunction<MergeResult> nextSelector) {
@@ -5929,12 +6040,15 @@ public abstract class DoubleStream
      *
      * @param a the first DoubleStream
      * @param b the second DoubleStream
-     * @param nextSelector a function that determines which element should be selected next.
+     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select from stream a, otherwise selects from stream b
      * @return a DoubleStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
     public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
     }
 
@@ -5956,9 +6070,10 @@ public abstract class DoubleStream
      * @param a the first DoubleStream
      * @param b the second DoubleStream
      * @param c the third DoubleStream
-     * @param nextSelector a function that determines which element should be selected next.
+     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleBiFunction<MergeResult> nextSelector) {
@@ -5991,17 +6106,21 @@ public abstract class DoubleStream
      *     .toArray();
      * }</pre>
      *
-     * @param streams the collection of DoubleStreams to merge
-     * @param nextSelector a function that determines which element should be selected next.
+     * @param streams the collection of DoubleStreams to merge; a {@code null} collection and {@code null} elements are treated as empty
+     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Collection, BiFunction)
      */
     public static DoubleStream merge(final Collection<? extends DoubleStream> streams, final DoubleBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(streams)) {
             return empty();
         } else if (streams.size() == 1) {
-            return streams.iterator().next();
+            final DoubleStream stream = streams.iterator().next();
+            return stream == null ? empty() : stream;
         } else if (streams.size() == 2) {
             final Iterator<? extends DoubleStream> iter = streams.iterator();
             return merge(iter.next(), iter.next(), nextSelector);

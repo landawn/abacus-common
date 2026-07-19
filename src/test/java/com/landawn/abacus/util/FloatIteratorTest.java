@@ -950,6 +950,22 @@ public class FloatIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
     }
 
+    @Test
+    public void testIndexed_StartIndexOverflow() {
+        ObjIterator<IndexedFloat> indexed = FloatIterator.of(1.0f, 2.0f).indexed(Long.MAX_VALUE);
+
+        IndexedFloat first = indexed.next();
+        assertEquals(Long.MAX_VALUE, first.longIndex());
+        assertEquals(1.0f, first.value());
+        assertTrue(indexed.hasNext());
+        assertThrows(ArithmeticException.class, indexed::next);
+
+        ObjIterator<IndexedFloat> exhausted = FloatIterator.of(1.0f).indexed(Long.MAX_VALUE);
+        exhausted.next();
+        assertFalse(exhausted.hasNext());
+        assertThrows(NoSuchElementException.class, exhausted::next);
+    }
+
     // =================================================
     // forEachRemaining() [deprecated]
     // =================================================

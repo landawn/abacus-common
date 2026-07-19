@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.util.ClassUtil;
 
 /**
  * Type handler for JDBC {@link Clob} (Character Large Object) values.
@@ -52,12 +53,14 @@ public class ClobType extends AbstractType<Clob> {
 
     /**
      * Package-private constructor for {@code ClobType} with a specific {@link Clob} implementation class.
-     * Used when a concrete JDBC driver CLOB subtype needs to be registered.
+     * Used when a concrete JDBC driver CLOB subtype needs to be registered. The handler name is
+     * derived from {@code clazz}, so the subtype remains distinguishable from the standard
+     * {@code Clob} interface in type metadata.
      *
      * @param clazz the specific {@link Clob} implementation class to handle
      */
     ClobType(final Class<? extends Clob> clazz) {
-        super(CLOB);
+        super(ClassUtil.getSimpleClassName(clazz));
         this.clazz = (Class<Clob>) clazz;
     }
 

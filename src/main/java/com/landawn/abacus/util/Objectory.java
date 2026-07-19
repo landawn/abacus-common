@@ -21,6 +21,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -48,8 +50,10 @@ import com.landawn.abacus.logging.LoggerFactory;
  *   <li>Provide pre-sized buffers for common I/O operations</li>
  * </ul>
  *
- * <p><b>Important:</b> Objects obtained from Objectory should be properly recycled after use
- * to maintain pool efficiency. Failing to recycle objects will result in new allocations.</p>
+ * <p><b>Important:</b> Recycle only objects obtained from the matching {@code create*} method,
+ * recycle each object at most once, and do not access it after recycling because another caller
+ * may immediately acquire the same instance. Failing to recycle an acquired object only reduces
+ * pool efficiency; it does not leak an external resource.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -406,8 +410,11 @@ public final class Objectory {
      *
      * @param capacity the minimum desired capacity of the buffer
      * @return a {@code char[]} buffer at least {@code capacity} long
+     * @throws IllegalArgumentException if {@code capacity} is negative
      */
-    public static char[] createCharArrayBuffer(final int capacity) {
+    public static char[] createCharArrayBuffer(final int capacity) throws IllegalArgumentException {
+        N.checkArgNotNegative(capacity, cs.capacity);
+
         if (capacity > BUFFER_SIZE) {
             // logCreated("createCharArrayBuffer");
 
@@ -473,8 +480,11 @@ public final class Objectory {
      *
      * @param capacity the minimum desired capacity of the buffer
      * @return a {@code byte[]} buffer at least {@code capacity} long
+     * @throws IllegalArgumentException if {@code capacity} is negative
      */
-    public static byte[] createByteArrayBuffer(final int capacity) {
+    public static byte[] createByteArrayBuffer(final int capacity) throws IllegalArgumentException {
+        N.checkArgNotNegative(capacity, cs.capacity);
+
         if (capacity > BUFFER_SIZE) {
             // logCreated("createByteArrayBuffer");
 
@@ -544,8 +554,11 @@ public final class Objectory {
      * @return an empty {@code StringBuilder}; freshly allocated with capacity
      *         {@code initCapacity} when that exceeds the default buffer size,
      *         otherwise obtained from the pool
+     * @throws IllegalArgumentException if {@code initCapacity} is negative
      */
-    public static StringBuilder createStringBuilder(final int initCapacity) {
+    public static StringBuilder createStringBuilder(final int initCapacity) throws IllegalArgumentException {
+        N.checkArgNotNegative(initCapacity, cs.initCapacity);
+
         if (initCapacity > BUFFER_SIZE) {
             return new StringBuilder(initCapacity);
         }
@@ -608,8 +621,11 @@ public final class Objectory {
      * @return an empty {@code ByteArrayOutputStream}; freshly allocated with capacity
      *         {@code initCapacity} when that exceeds the default buffer size,
      *         otherwise obtained from the pool
+     * @throws IllegalArgumentException if {@code initCapacity} is negative
      */
-    public static ByteArrayOutputStream createByteArrayOutputStream(final int initCapacity) {
+    public static ByteArrayOutputStream createByteArrayOutputStream(final int initCapacity) throws IllegalArgumentException {
+        N.checkArgNotNegative(initCapacity, cs.initCapacity);
+
         if (initCapacity > BUFFER_SIZE) {
             // logCreated("createByteArrayOutputStream");
 
@@ -1178,6 +1194,8 @@ public final class Objectory {
      * The list is cleared before being added to the pool. A {@code null} list,
      * a list whose size exceeds the internal poolable-size limit, or a list
      * offered when the pool is already full is silently ignored (not pooled).
+     * Only an exact {@link ArrayList} instance, as produced by {@link #createList()},
+     * is eligible; other {@code List} implementations are left unchanged.
      *
      * <p>This method should be called in a {@code finally} block to ensure
      * proper recycling:</p>
@@ -1198,7 +1216,7 @@ public final class Objectory {
      */
     @Deprecated
     public static void recycle(final List<?> list) {
-        if ((list == null) || (list.size() > POOLABLE_SIZE)) {
+        if ((list == null) || (list.getClass() != ArrayList.class) || (list.size() > POOLABLE_SIZE)) {
             return;
         }
 
@@ -1213,8 +1231,8 @@ public final class Objectory {
      * The set is cleared before being added to the pool. A {@code null} set, a
      * set whose size exceeds the internal poolable-size limit, or a set offered
      * when the relevant pool is already full is silently ignored (not pooled).
-     * {@link LinkedHashSet} instances are pooled separately from other
-     * {@code Set} implementations.
+     * Exact {@link LinkedHashSet} instances are pooled separately from exact
+     * {@link HashSet} instances. Other {@code Set} implementations are left unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1233,11 +1251,11 @@ public final class Objectory {
      */
     @Deprecated
     public static void recycle(final Set<?> set) {
-        if ((set == null) || (set.size() > POOLABLE_SIZE)) {
+        if ((set == null) || (set.getClass() != HashSet.class && set.getClass() != LinkedHashSet.class) || (set.size() > POOLABLE_SIZE)) {
             return;
         }
 
-        if (set instanceof LinkedHashSet) {
+        if (set.getClass() == LinkedHashSet.class) {
             if (linkedHashSetPool.size() < POOL_SIZE_FOR_COLLECTION) {
                 set.clear();
                 linkedHashSetPool.offer(set);
@@ -1255,8 +1273,8 @@ public final class Objectory {
      * The map is cleared before being added to the pool. A {@code null} map, a
      * map whose size exceeds the internal poolable-size limit, or a map offered
      * when the relevant pool is already full is silently ignored (not pooled).
-     * {@link LinkedHashMap} instances are pooled separately from other
-     * {@code Map} implementations.
+     * Exact {@link LinkedHashMap} instances are pooled separately from exact
+     * {@link HashMap} instances. Other {@code Map} implementations are left unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1276,11 +1294,11 @@ public final class Objectory {
      */
     @Deprecated
     public static void recycle(final Map<?, ?> map) {
-        if ((map == null) || (map.size() > POOLABLE_SIZE)) {
+        if ((map == null) || (map.getClass() != HashMap.class && map.getClass() != LinkedHashMap.class) || (map.size() > POOLABLE_SIZE)) {
             return;
         }
 
-        if (map instanceof LinkedHashMap) {
+        if (map.getClass() == LinkedHashMap.class) {
             if (linkedHashMapPool.size() < POOL_SIZE_FOR_COLLECTION) {
                 map.clear();
                 linkedHashMapPool.offer(map);
@@ -1297,8 +1315,9 @@ public final class Objectory {
      * Returns an {@code Object[]} to the object pool for reuse.
      * The array is cleared (all elements set to {@code null}) before being
      * added to the pool. A {@code null} array, an empty array, an array longer
-     * than the maximum poolable length ({@code 128}), or an array offered when
-     * the per-length pool is already full is silently ignored (not pooled).
+     * than the maximum poolable length ({@code 128}), a covariant array such as
+     * {@code String[]}, or an array offered when the per-length pool is already
+     * full is silently ignored (not pooled).
      * Arrays are pooled in separate queues keyed by their exact length.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1315,7 +1334,7 @@ public final class Objectory {
      * @see #createObjectArray(int)
      */
     public static void recycle(final Object[] objArray) {
-        if ((objArray == null) || (objArray.length == 0) || (objArray.length > POOLABLE_ARRAY_LENGTH)) {
+        if ((objArray == null) || (objArray.getClass() != Object[].class) || (objArray.length == 0) || (objArray.length > POOLABLE_ARRAY_LENGTH)) {
             return;
         }
 
@@ -1338,7 +1357,8 @@ public final class Objectory {
     /**
      * Returns a {@code char[]} buffer to the object pool for reuse.
      * Only arrays whose length is exactly the internal default buffer size are
-     * pooled; a {@code null} array or any other length is silently ignored.
+     * pooled; a {@code null} array or any other length is silently ignored. Accepted
+     * buffers are filled with {@code '\0'} before they become available for reuse.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1363,13 +1383,15 @@ public final class Objectory {
             return;
         }
 
+        Arrays.fill(cbuf, (char) 0);
         charArrayBufferPool.offer(cbuf);
     }
 
     /**
      * Returns a {@code byte[]} buffer to the object pool for reuse.
      * Only arrays whose length is exactly the internal default buffer size are
-     * pooled; a {@code null} array or any other length is silently ignored.
+     * pooled; a {@code null} array or any other length is silently ignored. Accepted
+     * buffers are zero-filled before they become available for reuse.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1390,6 +1412,7 @@ public final class Objectory {
             return;
         }
 
+        Arrays.fill(bbuf, (byte) 0);
         byteArrayBufferPool.offer(bbuf);
     }
 
@@ -1427,7 +1450,7 @@ public final class Objectory {
 
     /**
      * Returns a {@link ByteArrayOutputStream} to the object pool for reuse.
-     * The stream is reset before being added to the pool. A {@code null}
+     * The stream's valid bytes are zeroed and the stream is reset before it is added to the pool. A {@code null}
      * stream, a stream whose capacity exceeds the internal default buffer size,
      * or a stream offered when the pool is already full is silently ignored
      * (not pooled).
@@ -1452,6 +1475,9 @@ public final class Objectory {
         }
 
         if (byteArrayOutputStreamPool.size() < POOL_SIZE_FOR_BUFFER) {
+            // ByteArrayOutputStream.array() exposes the backing storage. Clear valid data before
+            // reset/pooling so the next borrower cannot observe the previous borrower's bytes.
+            Arrays.fill(os.array(), 0, os.size(), (byte) 0);
             os.reset();
             byteArrayOutputStreamPool.offer(os);
         }

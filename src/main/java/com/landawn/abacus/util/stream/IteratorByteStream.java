@@ -15,7 +15,6 @@
 package com.landawn.abacus.util.stream;
 
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +169,7 @@ class IteratorByteStream extends AbstractByteStream {
     }
 
     /**
-     * Returns a stream of elements taken from this stream as long as the given predicate holds true.
+     * Returns a stream of elements taken from this stream as long as the given predicate holds {@code true}.
      * Once an element fails the predicate, the stream terminates immediately. Lazily pulls from
      * the underlying iterator.
      *
@@ -217,7 +216,7 @@ class IteratorByteStream extends AbstractByteStream {
     }
 
     /**
-     * Returns a stream that skips elements as long as the given predicate is true, then includes
+     * Returns a stream that skips elements as long as the given predicate is {@code true}, then includes
      * all remaining elements. Once the predicate returns {@code false} for the first time, all
      * subsequent elements are included without further predicate evaluation.
      *
@@ -366,27 +365,18 @@ class IteratorByteStream extends AbstractByteStream {
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private ByteIterator cur = null;
             private ByteStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextByte());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -409,8 +399,15 @@ class IteratorByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -521,27 +518,18 @@ class IteratorByteStream extends AbstractByteStream {
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextByte());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -564,8 +552,15 @@ class IteratorByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -590,27 +585,18 @@ class IteratorByteStream extends AbstractByteStream {
         final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextByte());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -633,8 +619,15 @@ class IteratorByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -844,6 +837,10 @@ class IteratorByteStream extends AbstractByteStream {
 
             @Override
             public void advance(final long n2) {
+                if (n2 <= 0) {
+                    return;
+                }
+
                 if (!skipped) {
                     skipped = true;
                     elements.advance(n);
@@ -1329,9 +1326,13 @@ class IteratorByteStream extends AbstractByteStream {
                 while (elements.hasNext()) {
                     final byte v = elements.nextByte();
                     if (window == null) {
-                        window = new byte[k];
+                        window = new byte[Math.min(k, 16)];
                     }
                     if (size < k) {
+                        if (size == window.length) {
+                            window = java.util.Arrays.copyOf(window, (int) Math.min(k, (long) window.length * 2));
+                        }
+
                         window[size++] = v;
                     } else {
                         window[idx] = v;

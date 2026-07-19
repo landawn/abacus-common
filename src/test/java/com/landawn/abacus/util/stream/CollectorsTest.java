@@ -54,6 +54,7 @@ import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
+import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.FloatList;
@@ -1170,6 +1171,17 @@ public class CollectorsTest extends TestBase {
     public void testCollectingAndThen() {
         Integer result = stringList.stream().collect(Collectors.collectingAndThen(Collectors.toList(), List::size));
         assertEquals(5, result);
+    }
+
+    @Test
+    public void testCollectingAndThenPreservesConcurrentCharacteristic() {
+        final Collector<String, ?, Integer> collector = Collectors
+                .collectingAndThen(Collectors.toConcurrentMap(Function.identity(), Function.identity(), (a, b) -> a, ConcurrentHashMap::new), Map::size);
+
+        assertTrue(collector.characteristics().contains(Characteristics.CONCURRENT));
+        assertTrue(collector.characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(collector.characteristics().contains(Characteristics.IDENTITY_FINISH));
+        assertEquals(3, java.util.stream.Stream.of("a", "b", "c", "a").parallel().collect(collector));
     }
 
     @Test
@@ -3898,6 +3910,25 @@ public class CollectorsTest extends TestBase {
     }
 
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testToConcurrentMapCombinerUsesMapMergeSemantics() {
+        final Collector<String, ?, ConcurrentMap<String, String>> collector = Collectors.toConcurrentMap(Function.identity(), Function.identity(),
+                (left, right) -> null);
+        final ConcurrentMap<String, String> left = new ConcurrentHashMap<>();
+        final ConcurrentMap<String, String> right = new ConcurrentHashMap<>();
+        left.put("duplicate", "left");
+        left.put("leftOnly", "left");
+        right.put("duplicate", "right");
+        right.put("rightOnly", "right");
+
+        final ConcurrentMap<String, String> result = (ConcurrentMap<String, String>) ((BinaryOperator) collector.combiner()).apply(left, right);
+
+        assertFalse(result.containsKey("duplicate"));
+        assertEquals("left", result.get("leftOnly"));
+        assertEquals("right", result.get("rightOnly"));
+    }
+
+    @Test
     public void testToConcurrentMapWithMapFactory() {
         ConcurrentHashMap<String, Integer> map = Stream.of("a", "bb", "ccc")
                 .parallel()
@@ -4467,6 +4498,63 @@ public class CollectorsTest extends TestBase {
     }
 
     @Test
+    public void testReducingCollectorsRetainEncounterOrderRequirements() {
+        assertFalse(Collectors.reducing(0, Integer::sum).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.<Integer> reducing(Integer::sum).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.reducingOrElseGet(Integer::sum, () -> 0).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.reducingOrElseThrow(Integer::sum).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.reducingOrElseThrow(Integer::sum, IllegalStateException::new).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.reducing(0, String::length, Integer::sum).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.<String, Integer> reducing(String::length, Integer::sum).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.reducingOrElseGet(String::length, Integer::sum, () -> 0).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.reducingOrElseThrow(String::length, Integer::sum).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(
+                Collectors.reducingOrElseThrow(String::length, Integer::sum, IllegalStateException::new).characteristics().contains(Characteristics.UNORDERED));
+
+        String expected = java.util.stream.IntStream.range(0, 500).mapToObj(String::valueOf).collect(java.util.stream.Collectors.joining());
+        String actual = java.util.stream.IntStream.range(0, 500).mapToObj(String::valueOf).parallel().collect(Collectors.reducing("", String::concat));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPartitioningByPropagatesDownstreamOrdering() {
+        assertFalse(Collectors.partitioningBy((Integer i) -> i % 2 == 0).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.partitioningBy((Integer i) -> i % 2 == 0, Collectors.toList()).characteristics().contains(Characteristics.UNORDERED));
+        assertTrue(Collectors.partitioningBy((Integer i) -> i % 2 == 0, Collectors.toSet()).characteristics().contains(Characteristics.UNORDERED));
+
+        Map<Boolean, List<Integer>> result = java.util.stream.IntStream.range(0, 2000).boxed().parallel().collect(Collectors.partitioningBy(i -> i % 2 == 0));
+        List<Integer> expectedEven = new ArrayList<>();
+        List<Integer> expectedOdd = new ArrayList<>();
+
+        for (int i = 0; i < 2000; i++) {
+            (i % 2 == 0 ? expectedEven : expectedOdd).add(i);
+        }
+
+        assertEquals(expectedEven, result.get(Boolean.TRUE));
+        assertEquals(expectedOdd, result.get(Boolean.FALSE));
+    }
+
+    @Test
+    public void testMinMaxAllCollectorsPropagateTieOrdering() {
+        Comparator<String> byLength = Comparator.comparingInt(String::length);
+
+        assertFalse(Collectors.maxAll(byLength, 3).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.minAll(byLength, 3).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.maxAll(byLength, Collectors.<String> toList()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.minAll(byLength, Collectors.<String> toList()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.maxAllWith(byLength, Collectors.<String> toList()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.minAllWith(byLength, Collectors.<String> toList()).characteristics().contains(Characteristics.UNORDERED));
+
+        assertTrue(Collectors.maxAll(byLength, Collectors.<String> toSet()).characteristics().contains(Characteristics.UNORDERED));
+        assertTrue(Collectors.minAll(byLength, Collectors.<String> toSet()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.maxAllWith(byLength, Collectors.<String> toSet()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.minAllWith(byLength, Collectors.<String> toSet()).characteristics().contains(Characteristics.UNORDERED));
+
+        List<String> firstThreeTies = java.util.stream.Stream.of("a", "b", "c", "d", "e").parallel().collect(Collectors.maxAll(byLength, 3));
+        assertEquals(Arrays.asList("a", "b", "c"), firstThreeTies);
+    }
+
+    @Test
     public void testEmptyAwareCollectorsStripConcurrentCharacteristic() {
         final Collector<String, ?, Optional<ConcurrentMap<String, String>>> optionalCollector = Collectors
                 .collectingOrEmpty(Collectors.toConcurrentMap(Function.identity(), Function.identity(), (a, b) -> a, ConcurrentHashMap::new));
@@ -4491,6 +4579,179 @@ public class CollectorsTest extends TestBase {
         assertEquals(2000, set.size());
         assertEquals(2, multiset.count(1));
         assertEquals(3, multiset.count(2));
+    }
+
+    @Test
+    public void testMaxAllResetsOpaqueDownstreamStateWithFreshContainer() {
+        class StatefulList extends ArrayList<Integer> {
+            private static final long serialVersionUID = 1L;
+            int sum;
+        }
+
+        final Collector<Integer, StatefulList, Integer> downstream = Collector.of(StatefulList::new, (state, value) -> {
+            state.add(value);
+            state.sum += value;
+        }, (left, right) -> {
+            left.addAll(right);
+            left.sum += right.sum;
+            return left;
+        }, state -> state.sum);
+
+        // A downstream accumulation container is opaque: Collection.clear() does not reset
+        // StatefulList.sum. A new winner must therefore start with a fresh container.
+        assertEquals(10, Stream.of(1, 5, 5).collect(Collectors.maxAll(Comparator.<Integer> naturalOrder(), downstream)));
+        assertEquals(2, Stream.of(5, 1, 1).collect(Collectors.minAll(Comparator.<Integer> naturalOrder(), downstream)));
+
+        final Optional<Pair<Integer, Integer>> withRepresentative = Stream.of(1, 5, 5).collect(Collectors.maxAllWith(Comparators.naturalOrder(), downstream));
+        assertTrue(withRepresentative.isPresent());
+        assertEquals(Integer.valueOf(5), withRepresentative.get().left());
+        assertEquals(Integer.valueOf(10), withRepresentative.get().right());
+    }
+
+    @Test
+    public void testFloatingPointCollectorsRetainEncounterOrderRequirements() {
+        assertFalse(Collectors.summingDouble((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.averagingDoubleOrEmpty((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.averagingDoubleOrElseThrow((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.summarizingFloat((Integer value) -> value.floatValue()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.summarizingDouble((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(MoreCollectors.summingDouble((Integer value) -> value.doubleValue(), (Integer value) -> -value.doubleValue())
+                .characteristics()
+                .contains(Characteristics.UNORDERED));
+        assertFalse(MoreCollectors.averagingDouble((Integer value) -> value.doubleValue(), (Integer value) -> -value.doubleValue())
+                .characteristics()
+                .contains(Characteristics.UNORDERED));
+
+        // Exact integer statistics remain genuinely order-insensitive.
+        assertTrue(Collectors.summarizingInt((Integer value) -> value).characteristics().contains(Characteristics.UNORDERED));
+    }
+
+    @Test
+    public void testJoiningSnapshotsMutableFormattingArguments() {
+        final StringBuilder delimiter = new StringBuilder(",");
+        final StringBuilder prefix = new StringBuilder("[");
+        final StringBuilder suffix = new StringBuilder("]");
+        final Collector<Object, ?, String> collector = Collectors.joining(delimiter, prefix, suffix);
+
+        delimiter.append(';');
+        prefix.append('<');
+        suffix.append('>');
+
+        assertEquals("[a,b]", Stream.of("a", "b").collect(collector));
+        assertThrows(IllegalArgumentException.class, () -> Collectors.joining((CharSequence) null));
+        assertThrows(IllegalArgumentException.class, () -> Collectors.joining(",", null, "]"));
+    }
+
+    @Test
+    public void testComparatorMinMaxDistinguishesNullWinnerFromEmptyInput() {
+        final Comparator<Integer> nullsFirst = Comparator.nullsFirst(Comparator.naturalOrder());
+        final Comparator<Integer> nullsLast = Comparator.nullsLast(Comparator.naturalOrder());
+
+        final Pair<Integer, Integer> firstResult = Stream.of((Integer) null, 2, 1).collect(Collectors.minMax(nullsFirst)).get();
+        assertNull(firstResult.left());
+        assertEquals(Integer.valueOf(2), firstResult.right());
+
+        final Pair<Integer, Integer> lastResult = Stream.of((Integer) null, 2, 1).collect(Collectors.minMax(nullsLast)).get();
+        assertEquals(Integer.valueOf(1), lastResult.left());
+        assertNull(lastResult.right());
+
+        final Pair<Integer, Integer> allNull = Stream.of((Integer) null, (Integer) null).collect(Collectors.minMax(nullsFirst)).get();
+        assertNull(allNull.left());
+        assertNull(allNull.right());
+
+        // A present null extreme must not invoke the empty-stream fallback.
+        final Pair<Integer, Integer> withFallback = Stream.of((Integer) null, 2).collect(Collectors.minMaxOrElseGet(nullsFirst, () -> Pair.of(-1, -1)));
+        assertNull(withFallback.left());
+        assertEquals(Integer.valueOf(2), withFallback.right());
+        assertFalse(Stream.<Integer> empty().collect(Collectors.minMax(nullsFirst)).isPresent());
+    }
+
+    @Test
+    public void testRequiredCollectorArgumentsAreValidatedEagerly() {
+        assertThrows(IllegalArgumentException.class,
+                () -> MoreCollectors.summingInt((java.util.function.ToIntFunction<Integer>) null, (Integer value) -> value));
+        assertThrows(IllegalArgumentException.class,
+                () -> MoreCollectors.averagingDouble((java.util.function.ToDoubleFunction<Integer>) null, (Integer value) -> value.doubleValue()));
+
+        final List<Collector<? super Integer, ?, ?>> downstreams = new ArrayList<>();
+        downstreams.add(Collectors.counting());
+        downstreams.add(null);
+        assertThrows(IllegalArgumentException.class, () -> MoreCollectors.combine(downstreams, values -> values));
+
+        assertThrows(IllegalArgumentException.class, () -> Collectors.filtering((java.util.function.Predicate<Integer>) null, Collectors.toList()));
+        assertThrows(IllegalArgumentException.class, () -> Collectors.toArray((java.util.function.IntFunction<Integer[]>) null));
+        assertThrows(IllegalArgumentException.class, () -> Collectors.toMap((Function<Integer, Integer>) null, Function.identity()));
+        assertThrows(IllegalArgumentException.class, () -> Collectors.partitioningBy((java.util.function.Predicate<Integer>) null));
+    }
+
+    @Test
+    public void testMoreCollectorsCollectionCombineIntersectsEveryCharacteristicSet() {
+        final List<Collector<? super Integer, ?, ?>> components = new ArrayList<>();
+        components.add(Collectors.toList());
+        components.add(Collectors.toSet());
+
+        final Collector<Integer, ?, Object[]> combined = MoreCollectors.combine(components, values -> values);
+        assertFalse(combined.characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(combined.characteristics().contains(Characteristics.IDENTITY_FINISH));
+
+        final Object[] result = java.util.stream.IntStream.range(0, 1000).boxed().parallel().collect(combined);
+        assertEquals(java.util.stream.IntStream.range(0, 1000).boxed().toList(), result[0]);
+        assertEquals(1000, ((Set<?>) result[1]).size());
+    }
+
+    @Test
+    public void testFlatMappingClosesMappedStreams() {
+        final java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
+
+        final List<Integer> result = Stream.of(1)
+                .collect(Collectors.flatMapping(value -> Stream.of(value, value + 1).onClose(() -> closed.set(true)), Collectors.toList()));
+
+        assertEquals(Arrays.asList(1, 2), result);
+        assertTrue(closed.get());
+    }
+
+    @Test
+    public void testPartitioningCapturesDownstreamFunctionsOnce() {
+        final int[] accessorCalls = new int[4];
+        final Collector<Integer, List<Integer>, Integer> downstream = new Collector<Integer, List<Integer>, Integer>() {
+            @Override
+            public Supplier<List<Integer>> supplier() {
+                accessorCalls[0]++;
+                return ArrayList::new;
+            }
+
+            @Override
+            public BiConsumer<List<Integer>, Integer> accumulator() {
+                accessorCalls[1]++;
+                return List::add;
+            }
+
+            @Override
+            public BinaryOperator<List<Integer>> combiner() {
+                accessorCalls[2]++;
+                return (left, right) -> {
+                    left.addAll(right);
+                    return left;
+                };
+            }
+
+            @Override
+            public Function<List<Integer>, Integer> finisher() {
+                accessorCalls[3]++;
+                return List::size;
+            }
+
+            @Override
+            public Set<Characteristics> characteristics() {
+                return java.util.Collections.emptySet();
+            }
+        };
+
+        final Collector<Integer, ?, Map<Boolean, Integer>> collector = Collectors.partitioningBy(value -> value % 2 == 0, downstream);
+        assertArrayEquals(new int[] { 1, 1, 1, 1 }, accessorCalls);
+        assertEquals(N.asMap(false, 2, true, 2), Stream.of(1, 2, 3, 4).collect(collector));
+        assertEquals(N.asMap(false, 0, true, 0), Stream.<Integer> empty().collect(collector));
+        assertArrayEquals(new int[] { 1, 1, 1, 1 }, accessorCalls);
     }
 
 }

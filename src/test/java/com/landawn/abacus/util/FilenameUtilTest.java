@@ -1855,4 +1855,21 @@ public class FilenameUtilTest extends TestBase {
     public void testNormalize_NullByteRejected() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> FilenameUtil.normalize("foo bar"));
     }
+
+    @Test
+    public void testExtensionOperationsRejectNullBytes() {
+        final String poisonedFilename = "report" + '\0' + ".txt";
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FilenameUtil.indexOfExtension(poisonedFilename));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FilenameUtil.getExtension(poisonedFilename));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FilenameUtil.changeExtension("report.txt", "log" + '\0'));
+    }
+
+    @Test
+    public void testFullPathOperationsRejectNullBytesInReturnedPath() {
+        final String poisonedPath = "safe" + File.separator + "bad" + '\0' + File.separator + "report.txt";
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FilenameUtil.getFullPath(poisonedPath));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FilenameUtil.getFullPathNoEndSeparator(poisonedPath));
+    }
 }

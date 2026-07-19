@@ -27,6 +27,10 @@ public class IntToByteFunctionTest extends TestBase {
         assertEquals((byte) 100, IntToByteFunction.DEFAULT.applyAsByte(100));
         assertEquals((byte) 0, IntToByteFunction.DEFAULT.applyAsByte(0));
         assertEquals((byte) -50, IntToByteFunction.DEFAULT.applyAsByte(-50));
+        assertEquals((byte) -1, IntToByteFunction.DEFAULT.applyAsByte(255));
+        assertEquals((byte) 0, IntToByteFunction.DEFAULT.applyAsByte(256));
+        assertEquals((byte) -1, IntToByteFunction.DEFAULT.applyAsByte(Integer.MAX_VALUE));
+        assertEquals((byte) 0, IntToByteFunction.DEFAULT.applyAsByte(Integer.MIN_VALUE));
     }
 
     @Test

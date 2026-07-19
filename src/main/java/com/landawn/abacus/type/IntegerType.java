@@ -77,7 +77,7 @@ public final class IntegerType extends AbstractIntegerType {
      *
      * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnIndex the 1-based column index
-     * @return the {@link Integer} value at the specified column,
+     * @return the converted {@code Integer} value
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      * @throws NumberFormatException if a non-numeric string value cannot be parsed as an {@code int}
@@ -106,7 +106,7 @@ public final class IntegerType extends AbstractIntegerType {
      *
      * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnName the label of the column to retrieve
-     * @return the {@link Integer} value in the specified column,
+     * @return the converted {@code Integer} value
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      * @throws NumberFormatException if a non-numeric string value cannot be parsed as an {@code int}

@@ -3,12 +3,16 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyChar;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +77,8 @@ public class TimedTypeTest extends TestBase {
         assertNull(timedType.valueOf(null));
         assertNull(timedType.valueOf(""));
         assertThrows(IllegalArgumentException.class, () -> timedType.valueOf(" "));
+        assertThrows(IllegalArgumentException.class, () -> timedType.valueOf("[123456789]"));
+        assertThrows(IllegalArgumentException.class, () -> timedType.valueOf("[123456789,\"test\",\"unexpected\"]"));
     }
 
     @SuppressWarnings("unchecked")
@@ -104,6 +110,40 @@ public class TimedTypeTest extends TestBase {
     }
 
     @Test
+    public void testAppendToPreservesCheckedFailureAndSuppressesCleanupFailure() {
+        final IOException writeFailure = new IOException("write failure");
+        final IOException cleanupFailure = new IOException("cleanup failure");
+        final Writer writer = new Writer() {
+            private int writeCount;
+
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                if (writeCount++ == 0) {
+                    throw writeFailure;
+                }
+
+                throw cleanupFailure;
+            }
+
+            @Override
+            public void flush() {
+                // no-op
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+
+        final IOException thrown = assertThrows(IOException.class, () -> timedType.appendTo(writer, Timed.of("test", 1L)));
+
+        assertSame(writeFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+    }
+
+    @Test
     public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
@@ -113,6 +153,15 @@ public class TimedTypeTest extends TestBase {
 
         timedType.serializeTo(writer, null, config);
         assertNotNull(timed);
+    }
+
+    @Test
+    public void testSerializeToPropagatesCheckedIOException() throws IOException {
+        final IOException failure = new IOException("write failure");
+        final CharacterWriter writer = createCharacterWriter();
+        doThrow(failure).when(writer).write(anyChar());
+
+        assertSame(failure, assertThrows(IOException.class, () -> timedType.serializeTo(writer, Timed.of("test", 1L), null)));
     }
 
     @Test

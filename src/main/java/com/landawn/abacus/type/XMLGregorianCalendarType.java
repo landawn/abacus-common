@@ -121,9 +121,9 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * XMLGregorianCalendar cal2 = type.valueOf("SYS_TIME");   // Current time
      * }</pre>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method accepts the normalized whole-second representation produced by {@code stringOf}. It treats the
+     * value as a date-time instant through {@link Dates}; it is not a general XML Schema lexical parser for partial
+     * calendar values.</p>
      *
      * @param str the string to convert to XMLGregorianCalendar
      * @return an XMLGregorianCalendar instance, or {@code null} if the string is {@code null} or empty
@@ -185,10 +185,9 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * String str = type.stringOf(cal);   // Returns formatted date/time string
      * }</pre>
      *
-     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * <p>The returned value is normalized as a whole-second UTC date-time by {@link Dates#format(XMLGregorianCalendar)}.
+     * Fractional seconds, the original offset, and partial XML Schema calendar fields are therefore not preserved;
+     * use {@link XMLGregorianCalendar#toXMLFormat()} when the exact XML lexical representation is required.</p>
      *
      * @param x the XMLGregorianCalendar instance to convert to string
      * @return the string representation of the XMLGregorianCalendar, or {@code null} if the input is null
@@ -306,6 +305,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, xmlGregorianCalendar);   // Appends formatted date/time
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -356,6 +356,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * JsonSerConfig config = JsonSerConfig.create();
      * type.serializeTo(writer, xmlGregorianCalendar, config);   // Writes formatted date/time
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization

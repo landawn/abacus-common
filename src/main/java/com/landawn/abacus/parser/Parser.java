@@ -360,7 +360,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * Deserializes an object from a file using custom configuration.
      *
      * <p>This method allows fine-grained control over the deserialization process.
-     * The configuration parameter can specify type mappings, property handling, null handling,
+     * The configuration parameter can specify type mappings, property handling, {@code null} handling,
      * and other parser-specific options. The source file must exist and be
      * readable, otherwise an {@link UncheckedIOException} will be thrown.</p>
      *
@@ -385,7 +385,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * Deserializes an object from a file using custom configuration.
      *
      * <p>This method allows fine-grained control over the deserialization process.
-     * The configuration parameter can specify type mappings, property handling, null handling,
+     * The configuration parameter can specify type mappings, property handling, {@code null} handling,
      * and other parser-specific options. The source file must exist and be
      * readable, otherwise an {@link UncheckedIOException} will be thrown.</p>
      *

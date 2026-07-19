@@ -75,5 +75,14 @@ public class UUIDTypeTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             uuidType.valueOf("not-a-valid-uuid");
         });
+
+        // UUID.fromString itself accepts this shortened form on some JDKs, but it is
+        // not the canonical 8-4-4-4-12 wire format documented by UUIDType.
+        assertThrows(IllegalArgumentException.class, () -> uuidType.valueOf("1-1-1-1-1"));
+    }
+
+    @Test
+    public void testValueOfAcceptsCanonicalUpperCaseUUID() {
+        assertEquals(testUUID, uuidType.valueOf("550E8400-E29B-41D4-A716-446655440000"));
     }
 }

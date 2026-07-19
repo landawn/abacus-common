@@ -99,6 +99,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         final LongConsumer action = it -> rateLimiter.acquire();
@@ -113,6 +115,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream delay(final Duration delay) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(delay, cs.delay);
 
         final long millis = delay.toMillis();
@@ -139,7 +143,9 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public LongStream debounce(Duration duration) {
+    public LongStream debounce(Duration duration) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
@@ -149,7 +155,7 @@ abstract class AbstractLongStream extends LongStream {
 
         final LongIteratorEx iter = iteratorEx();
 
-        return newStream(new LongIteratorEx() {
+        return newStream(new LongIteratorEx() { //NOSONAR
             private final long durationMillis = duration.toMillis();
             private long prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
@@ -255,6 +261,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream mapMulti(final LongMapMultiConsumer mapper) {
+        assertNotClosed();
+
         final LongFunction<LongStream> secondMapper = t -> {
             final SpinedBuffer.OfLong buffer = new SpinedBuffer.OfLong();
 
@@ -268,6 +276,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream mapPartial(final LongFunction<OptionalLong> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_LONG).mapToLong(Fn.GET_AS_LONG));
@@ -279,6 +289,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream mapPartialJdk(final LongFunction<java.util.OptionalLong> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_LONG_JDK).mapToLong(Fn.GET_AS_LONG_JDK));
@@ -622,7 +634,7 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public LongStream top(final int n) throws IllegalStateException {
+    public LongStream top(final int n) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 
@@ -735,6 +747,8 @@ abstract class AbstractLongStream extends LongStream {
                     a[i] = elements[cursor - i - 1];
                 }
 
+                cursor = fromIndex;
+
                 return a;
             }
 
@@ -822,6 +836,8 @@ abstract class AbstractLongStream extends LongStream {
                 for (int i = cnt; i < len; i++) {
                     a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
+
+                cnt = len;
 
                 return a;
             }
@@ -949,6 +965,8 @@ abstract class AbstractLongStream extends LongStream {
                 for (int i = 0; i < cursor; i++) {
                     a[i] = sortedArray[cursor - i - 1];
                 }
+
+                cursor = 0;
 
                 return a;
             }
@@ -1270,7 +1288,7 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.LongFunction<? extends K, E> keyMapper,
-            final Collector<? super Long, ?, D> downstream) throws E {
+            final Collector<? super Long, ?, D> downstream) throws IllegalStateException, E {
         assertNotClosed();
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
@@ -1413,9 +1431,15 @@ abstract class AbstractLongStream extends LongStream {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}
+     */
     @Override
-    public Joiner joinTo(final Joiner joiner) throws IllegalStateException {
+    public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(joiner, cs.joiner);
 
         try {
             @SuppressWarnings("resource")

@@ -49,6 +49,7 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -113,6 +114,7 @@ import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.WindowAssigner;
 import com.landawn.abacus.util.u;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -2711,6 +2713,204 @@ public class StreamTest extends AbstractTest {
     public void testFlatMap() {
         Stream<Integer> stream = Stream.of(1, 2, 3).flatMap(n -> Stream.of(n, n * 10));
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), stream.toList());
+    }
+
+    @Test
+    public void testFlatMapClosesMappedStreamsAcrossImplementations() {
+        assertFlatMapClosesMappedStreams(Stream.of(0, 1));
+        assertFlatMapClosesMappedStreams(Stream.of(Arrays.asList(0, 1).iterator()));
+        assertFlatMapClosesMappedStreams(Stream.of(0, 1).parallel(2));
+        assertFlatMapClosesMappedStreams(Stream.of(Arrays.asList(0, 1).iterator()).parallel(2));
+    }
+
+    private static void assertFlatMapClosesMappedStreams(final Stream<Integer> source) {
+        final List<Stream<Integer>> mappedStreams = Arrays.asList(Stream.empty(), Stream.of(20));
+
+        assertEquals(1, source.flatMap(mappedStreams::get).count());
+
+        for (final Stream<Integer> mappedStream : mappedStreams) {
+            assertThrows(IllegalStateException.class, () -> mappedStream.count());
+        }
+    }
+
+    @Test
+    public void testClosingFlatMapClosesCurrentMappedStream() {
+        final Stream<Integer> mappedStream = Stream.of(10, 20);
+        final Stream<Integer> flattened = Stream.of(1).flatMap(ignored -> mappedStream);
+
+        assertEquals(10, flattened.iteratorEx().next().intValue());
+        flattened.close();
+
+        assertThrows(IllegalStateException.class, () -> mappedStream.count());
+    }
+
+    @Test
+    public void testPrimitiveFlatMapClosesMappedStreamsAcrossArrayAndIteratorSources() {
+        assertByteFlatMapClosesMappedStream(ByteStream.of((byte) 1));
+        assertByteFlatMapClosesMappedStream(ByteStream.of(ByteIterator.of((byte) 1)));
+        assertCharFlatMapClosesMappedStream(CharStream.of('a'));
+        assertCharFlatMapClosesMappedStream(CharStream.of(CharIterator.of('a')));
+        assertShortFlatMapClosesMappedStream(ShortStream.of((short) 1));
+        assertShortFlatMapClosesMappedStream(ShortStream.of(ShortIterator.of((short) 1)));
+        assertIntFlatMapClosesMappedStream(IntStream.of(1));
+        assertIntFlatMapClosesMappedStream(IntStream.of(IntIterator.of(1)));
+        assertLongFlatMapClosesMappedStream(LongStream.of(1L));
+        assertLongFlatMapClosesMappedStream(LongStream.of(LongIterator.of(1L)));
+        assertFloatFlatMapClosesMappedStream(FloatStream.of(1F));
+        assertFloatFlatMapClosesMappedStream(FloatStream.of(FloatIterator.of(1F)));
+        assertDoubleFlatMapClosesMappedStream(DoubleStream.of(1D));
+        assertDoubleFlatMapClosesMappedStream(DoubleStream.of(DoubleIterator.of(1D)));
+    }
+
+    private static void assertByteFlatMapClosesMappedStream(final ByteStream source) {
+        final ByteStream mapped = ByteStream.of((byte) 2);
+        final ByteStream flattened = source.flatMap(ignored -> mapped);
+
+        flattened.iteratorEx().toArray();
+        assertThrows(IllegalStateException.class, mapped::count);
+        flattened.close();
+    }
+
+    private static void assertCharFlatMapClosesMappedStream(final CharStream source) {
+        final CharStream mapped = CharStream.of('b');
+        final CharStream flattened = source.flatMap(ignored -> mapped);
+
+        flattened.iteratorEx().toArray();
+        assertThrows(IllegalStateException.class, mapped::count);
+        flattened.close();
+    }
+
+    private static void assertShortFlatMapClosesMappedStream(final ShortStream source) {
+        final ShortStream mapped = ShortStream.of((short) 2);
+        final ShortStream flattened = source.flatMap(ignored -> mapped);
+
+        flattened.iteratorEx().toArray();
+        assertThrows(IllegalStateException.class, mapped::count);
+        flattened.close();
+    }
+
+    private static void assertIntFlatMapClosesMappedStream(final IntStream source) {
+        final IntStream mapped = IntStream.of(2);
+        final IntStream flattened = source.flatMap(ignored -> mapped);
+
+        flattened.iteratorEx().toArray();
+        assertThrows(IllegalStateException.class, mapped::count);
+        flattened.close();
+    }
+
+    private static void assertLongFlatMapClosesMappedStream(final LongStream source) {
+        final LongStream mapped = LongStream.of(2L);
+        final LongStream flattened = source.flatMap(ignored -> mapped);
+
+        flattened.iteratorEx().toArray();
+        assertThrows(IllegalStateException.class, mapped::count);
+        flattened.close();
+    }
+
+    private static void assertFloatFlatMapClosesMappedStream(final FloatStream source) {
+        final FloatStream mapped = FloatStream.of(2F);
+        final FloatStream flattened = source.flatMap(ignored -> mapped);
+
+        flattened.iteratorEx().toArray();
+        assertThrows(IllegalStateException.class, mapped::count);
+        flattened.close();
+    }
+
+    private static void assertDoubleFlatMapClosesMappedStream(final DoubleStream source) {
+        final DoubleStream mapped = DoubleStream.of(2D);
+        final DoubleStream flattened = source.flatMap(ignored -> mapped);
+
+        flattened.iteratorEx().toArray();
+        assertThrows(IllegalStateException.class, mapped::count);
+        flattened.close();
+    }
+
+    @Test
+    public void testFlatMapToPrimitiveClosesMappedStreamsAcrossImplementations() {
+        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(0, 1));
+        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(Arrays.asList(0, 1).iterator()));
+        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(0, 1).parallel(2));
+        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(Arrays.asList(0, 1).iterator()).parallel(2));
+    }
+
+    private static void assertFlatMapToPrimitiveClosesMappedStreams(final Supplier<Stream<Integer>> sourceFactory) {
+        final List<Runnable> charCloseProbes = Collections.synchronizedList(new ArrayList<>());
+        CharStream charStream = sourceFactory.get().flatMapToChar(value -> {
+            final CharStream mapped = CharStream.of((char) ('a' + value));
+            charCloseProbes.add(mapped::count);
+            return mapped;
+        });
+        charStream.iteratorEx().toArray();
+        assertMappedStreamsClosed(charCloseProbes, 2);
+        charStream.close();
+
+        final List<Runnable> byteCloseProbes = Collections.synchronizedList(new ArrayList<>());
+        ByteStream byteStream = sourceFactory.get().flatMapToByte(value -> {
+            final ByteStream mapped = ByteStream.of(value.byteValue());
+            byteCloseProbes.add(mapped::count);
+            return mapped;
+        });
+        byteStream.iteratorEx().toArray();
+        assertMappedStreamsClosed(byteCloseProbes, 2);
+        byteStream.close();
+
+        final List<Runnable> shortCloseProbes = Collections.synchronizedList(new ArrayList<>());
+        ShortStream shortStream = sourceFactory.get().flatMapToShort(value -> {
+            final ShortStream mapped = ShortStream.of(value.shortValue());
+            shortCloseProbes.add(mapped::count);
+            return mapped;
+        });
+        shortStream.iteratorEx().toArray();
+        assertMappedStreamsClosed(shortCloseProbes, 2);
+        shortStream.close();
+
+        final List<Runnable> intCloseProbes = Collections.synchronizedList(new ArrayList<>());
+        IntStream intStream = sourceFactory.get().flatMapToInt(value -> {
+            final IntStream mapped = IntStream.of(value);
+            intCloseProbes.add(mapped::count);
+            return mapped;
+        });
+        intStream.iteratorEx().toArray();
+        assertMappedStreamsClosed(intCloseProbes, 2);
+        intStream.close();
+
+        final List<Runnable> longCloseProbes = Collections.synchronizedList(new ArrayList<>());
+        LongStream longStream = sourceFactory.get().flatMapToLong(value -> {
+            final LongStream mapped = LongStream.of(value.longValue());
+            longCloseProbes.add(mapped::count);
+            return mapped;
+        });
+        longStream.iteratorEx().toArray();
+        assertMappedStreamsClosed(longCloseProbes, 2);
+        longStream.close();
+
+        final List<Runnable> floatCloseProbes = Collections.synchronizedList(new ArrayList<>());
+        FloatStream floatStream = sourceFactory.get().flatMapToFloat(value -> {
+            final FloatStream mapped = FloatStream.of(value.floatValue());
+            floatCloseProbes.add(mapped::count);
+            return mapped;
+        });
+        floatStream.iteratorEx().toArray();
+        assertMappedStreamsClosed(floatCloseProbes, 2);
+        floatStream.close();
+
+        final List<Runnable> doubleCloseProbes = Collections.synchronizedList(new ArrayList<>());
+        DoubleStream doubleStream = sourceFactory.get().flatMapToDouble(value -> {
+            final DoubleStream mapped = DoubleStream.of(value.doubleValue());
+            doubleCloseProbes.add(mapped::count);
+            return mapped;
+        });
+        doubleStream.iteratorEx().toArray();
+        assertMappedStreamsClosed(doubleCloseProbes, 2);
+        doubleStream.close();
+    }
+
+    private static void assertMappedStreamsClosed(final List<Runnable> closeProbes, final int expectedCount) {
+        assertEquals(expectedCount, closeProbes.size());
+
+        for (final Runnable closeProbe : new ArrayList<>(closeProbes)) {
+            assertThrows(IllegalStateException.class, closeProbe::run);
+        }
     }
 
     @Test
@@ -6269,6 +6469,7 @@ public class StreamTest extends AbstractTest {
 
 
 
+
     //    @Test
     //    public void test_window_02() throws Exception {
     //        assertDoesNotThrow(() -> {
@@ -9217,6 +9418,38 @@ public class StreamTest extends AbstractTest {
 
 
     @Test
+    public void testConcat_CollectionSnapshotPreservesTraversalAndClosing() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final List<Stream<Integer>> sources = new ArrayList<>();
+        sources.add(createStream(1, 2).onClose(closeCount::incrementAndGet));
+
+        final Stream<Integer> concatenated = Stream.concat(sources);
+        sources.clear();
+
+        try (concatenated) {
+            assertEquals(Arrays.asList(1, 2), concatenated.toList());
+        }
+
+        assertEquals(1, closeCount.get());
+    }
+
+    @Test
+    public void testConcat_ClosePreservesFirstErrorAndContinuesClosing() {
+        final AssertionError failure = new AssertionError("first close failure");
+        final AtomicInteger laterCloseCalls = new AtomicInteger();
+        final Stream<Integer> first = createStream(1).onClose(() -> {
+            throw failure;
+        });
+        final Stream<Integer> second = createStream(2).onClose(laterCloseCalls::incrementAndGet);
+        final Stream<Integer> concatenated = Stream.concat(first, second);
+
+        final AssertionError thrown = assertThrows(AssertionError.class, concatenated::close);
+
+        assertSame(failure, thrown);
+        assertEquals(1, laterCloseCalls.get());
+    }
+
+    @Test
     public void testConcatArrays() {
         Integer[] arr1 = { 1, 2, 3 };
         Integer[] arr2 = { 4, 5 };
@@ -9316,6 +9549,21 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
+    public void testConcatIterableAndIteratorCollectionsSnapshotMembership() {
+        final List<Iterable<Integer>> iterableSources = new ArrayList<>();
+        iterableSources.add(Arrays.asList(1, 2));
+        final Stream<Integer> iterableConcat = Stream.concatIterables(iterableSources);
+        iterableSources.clear();
+        assertEquals(Arrays.asList(1, 2), iterableConcat.toList());
+
+        final List<Iterator<Integer>> iteratorSources = new ArrayList<>();
+        iteratorSources.add(Arrays.asList(3, 4).iterator());
+        final Stream<Integer> iteratorConcat = Stream.concatIterators(iteratorSources);
+        iteratorSources.clear();
+        assertEquals(Arrays.asList(3, 4), iteratorConcat.toList());
+    }
+
+    @Test
     public void testParallelConcat() {
         Stream<Integer> s1 = Stream.of(1, 2, 3);
         Stream<Integer> s2 = Stream.of(4, 5, 6);
@@ -9355,6 +9603,21 @@ public class StreamTest extends AbstractTest {
         List<Integer> result = Stream.parallelConcatIterators(Arrays.asList(it1, it2), 2).toList();
         assertEquals(4, result.size());
         assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4)));
+    }
+
+    @Test
+    public void testParallelConcatCollectionsSnapshotMembership() {
+        final List<Stream<Integer>> streamSources = new ArrayList<>();
+        streamSources.add(Stream.of(1, 2));
+        final Stream<Integer> streamConcat = Stream.parallelConcat(streamSources, 1, 8);
+        streamSources.clear();
+        assertEquals(Arrays.asList(1, 2), streamConcat.toList());
+
+        final List<Iterator<Integer>> iteratorSources = new ArrayList<>();
+        iteratorSources.add(Arrays.asList(3, 4).iterator());
+        final Stream<Integer> iteratorConcat = Stream.parallelConcatIterators(iteratorSources, 1, 8);
+        iteratorSources.clear();
+        assertEquals(Arrays.asList(3, 4), iteratorConcat.toList());
     }
 
     @Test
@@ -11768,6 +12031,7 @@ public class StreamTest extends AbstractTest {
         // regression: readThreadNum <= 0 started zero reader threads and silently produced an EMPTY stream
         assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcat(N.asList(Stream.of(1), Stream.of(2)), 0));
         assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcatIterators(N.asList(N.asList(1).iterator(), N.asList(2).iterator()), -1));
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcat(N.asList(Stream.of(1)), 1, 0));
 
         // null collections return an empty stream, matching concat(Collection) and the 3-arg overloads
         assertTrue(Stream.parallelConcat((Collection<Stream<Integer>>) null, 2).toList().isEmpty());
@@ -11777,6 +12041,105 @@ public class StreamTest extends AbstractTest {
         assertEquals(N.asSet(1, 2, 3), Stream.parallelConcat(N.asList(Stream.of(1, 2), Stream.of(3)), 2).toSet());
     }
 
+
+
+
+    @Test
+    public void testPrimitiveCollectionZipCloseHandlersUseSourceSnapshots() {
+        final AtomicInteger closedCount = new AtomicInteger();
+
+        List<ByteStream> byteStreams = new ArrayList<>(Collections.singletonList(ByteStream.of((byte) 1).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(byteStreams, Stream.zip(byteStreams, values -> values[0]), closedCount);
+        byteStreams = new ArrayList<>(Collections.singletonList(ByteStream.of((byte) 1).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(byteStreams, Stream.zip(byteStreams, new byte[] { 0 }, values -> values[0]), closedCount);
+
+        List<ShortStream> shortStreams = new ArrayList<>(Collections.singletonList(ShortStream.of((short) 1).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(shortStreams, Stream.zip(shortStreams, values -> values[0]), closedCount);
+        shortStreams = new ArrayList<>(Collections.singletonList(ShortStream.of((short) 1).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(shortStreams, Stream.zip(shortStreams, new short[] { 0 }, values -> values[0]), closedCount);
+
+        List<CharStream> charStreams = new ArrayList<>(Collections.singletonList(CharStream.of('a').onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(charStreams, Stream.zip(charStreams, values -> values[0]), closedCount);
+        charStreams = new ArrayList<>(Collections.singletonList(CharStream.of('a').onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(charStreams, Stream.zip(charStreams, new char[] { 0 }, values -> values[0]), closedCount);
+
+        List<IntStream> intStreams = new ArrayList<>(Collections.singletonList(IntStream.of(1).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(intStreams, Stream.zip(intStreams, values -> values[0]), closedCount);
+        intStreams = new ArrayList<>(Collections.singletonList(IntStream.of(1).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(intStreams, Stream.zip(intStreams, new int[] { 0 }, values -> values[0]), closedCount);
+
+        List<LongStream> longStreams = new ArrayList<>(Collections.singletonList(LongStream.of(1L).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(longStreams, Stream.zip(longStreams, values -> values[0]), closedCount);
+        longStreams = new ArrayList<>(Collections.singletonList(LongStream.of(1L).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(longStreams, Stream.zip(longStreams, new long[] { 0 }, values -> values[0]), closedCount);
+
+        List<FloatStream> floatStreams = new ArrayList<>(Collections.singletonList(FloatStream.of(1F).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(floatStreams, Stream.zip(floatStreams, values -> values[0]), closedCount);
+        floatStreams = new ArrayList<>(Collections.singletonList(FloatStream.of(1F).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(floatStreams, Stream.zip(floatStreams, new float[] { 0 }, values -> values[0]), closedCount);
+
+        List<DoubleStream> doubleStreams = new ArrayList<>(Collections.singletonList(DoubleStream.of(1D).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(doubleStreams, Stream.zip(doubleStreams, values -> values[0]), closedCount);
+        doubleStreams = new ArrayList<>(Collections.singletonList(DoubleStream.of(1D).onClose(closedCount::incrementAndGet)));
+        assertCollectionZipClosesSnapshottedSource(doubleStreams, Stream.zip(doubleStreams, new double[] { 0 }, values -> values[0]), closedCount);
+    }
+
+    @Test
+    public void testPrimitiveCollectionZipWithDefaultsTreatsNullStreamAsEmpty() {
+        assertEquals(Collections.singletonList((byte) 3),
+                Stream.zip(Arrays.asList(ByteStream.of((byte) 1), null), new byte[] { 0, 2 }, values -> (byte) (values[0] + values[1])).toList());
+    }
+
+    private static void assertCollectionZipClosesSnapshottedSource(final List<?> sources, final Stream<?> zipped, final AtomicInteger closedCount) {
+        sources.clear();
+        zipped.close();
+        assertEquals(1, closedCount.getAndSet(0));
+    }
+
+    @Test
+    public void testParallelMergeSnapshotsSourceCollection() {
+        final List<Stream<Integer>> sources = new ArrayList<>(Arrays.asList(Stream.of(1, 5), Stream.of(2, 6), Stream.of(3, 7), Stream.of(4, 8)));
+        final Stream<Integer> merged = Stream.parallelMerge(sources, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2);
+
+        sources.clear();
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), merged.toList());
+    }
+
+    @Test
+    public void testParallelMergeIteratorsSnapshotsSourceCollection() {
+        final List<Iterator<Integer>> sources = new ArrayList<>(
+                Arrays.asList(Arrays.asList(1, 5).iterator(), Arrays.asList(2, 6).iterator(), Arrays.asList(3, 7).iterator(), Arrays.asList(4, 8).iterator()));
+        final Stream<Integer> merged = Stream.parallelMergeIterators(sources, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2);
+
+        sources.clear();
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), merged.toList());
+    }
+
+
+    @Test
+    public void testPrimitiveMergeRejectsNullSelectorEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(new byte[0], new byte[0], null));
+        assertThrows(IllegalArgumentException.class, () -> CharStream.merge(new char[0], new char[0], null));
+        assertThrows(IllegalArgumentException.class, () -> ShortStream.merge(new short[0], new short[0], null));
+        assertThrows(IllegalArgumentException.class, () -> IntStream.merge(new int[0], new int[0], null));
+        assertThrows(IllegalArgumentException.class, () -> LongStream.merge(new long[0], new long[0], null));
+        assertThrows(IllegalArgumentException.class, () -> FloatStream.merge(new float[0], new float[0], null));
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.merge(new double[0], new double[0], null));
+
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteIterator.empty(), ByteIterator.empty(), null));
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteStream.empty(), ByteStream.empty(), null));
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(Collections.<ByteStream> emptyList(), null));
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        final List<Stream<Integer>> sources = Collections.singletonList(null);
+
+        assertTrue(Stream.merge(sources, (x, y) -> MergeResult.TAKE_FIRST).toList().isEmpty());
+        assertTrue(Stream.parallelMerge(sources, (x, y) -> MergeResult.TAKE_FIRST, 2).toList().isEmpty());
+    }
 
 
 
@@ -11840,6 +12203,162 @@ public class StreamTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce((com.landawn.abacus.util.Duration) null).toList());
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toList());
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
+    }
+
+
+    private static final class IdentityWindowAssigner extends WindowAssigner {
+
+        @Override
+        protected <T> ObjIterator<T> process(final ObjIterator<T> iter) {
+            return iter;
+        }
+
+        <T> ObjIterator<T> apply(final ObjIterator<T> iter) {
+            return process(iter);
+        }
+    }
+
+
+    @Test
+    @Timeout(10)
+    public void testParallelZipDoesNotAdvanceInputsForIncompleteTuple() {
+        final AtomicInteger pairLeftNextCalls = new AtomicInteger();
+        final CountDownLatch pairRightExhausted = new CountDownLatch(1);
+        final Iterator<Integer> pairLeft = countingIterator(Arrays.asList(1, 2), pairLeftNextCalls);
+        final Iterator<Integer> pairRight = signallingIterator(Collections.singletonList(10), pairRightExhausted);
+
+        assertEquals(Collections.singletonList(11), Stream.parallelZip(pairLeft, pairRight, (a, b) -> {
+            await(pairRightExhausted);
+            return a + b;
+        }, 2).toList());
+        assertEquals(1, pairLeftNextCalls.get());
+        assertEquals(2, pairLeft.next());
+
+        final AtomicInteger triFirstNextCalls = new AtomicInteger();
+        final AtomicInteger triSecondNextCalls = new AtomicInteger();
+        final CountDownLatch triThirdExhausted = new CountDownLatch(1);
+        final Iterator<Integer> triFirst = countingIterator(Arrays.asList(1, 2), triFirstNextCalls);
+        final Iterator<Integer> triSecond = countingIterator(Arrays.asList(10, 20), triSecondNextCalls);
+        final Iterator<Integer> triThird = signallingIterator(Collections.singletonList(100), triThirdExhausted);
+
+        assertEquals(Collections.singletonList(111), Stream.parallelZip(triFirst, triSecond, triThird, (a, b, c) -> {
+            await(triThirdExhausted);
+            return a + b + c;
+        }, 2).toList());
+        assertEquals(1, triFirstNextCalls.get());
+        assertEquals(1, triSecondNextCalls.get());
+        assertEquals(2, triFirst.next());
+        assertEquals(20, triSecond.next());
+
+        final AtomicInteger collectionFirstNextCalls = new AtomicInteger();
+        final AtomicInteger collectionSecondNextCalls = new AtomicInteger();
+        final CountDownLatch collectionThirdExhausted = new CountDownLatch(1);
+        final Iterator<Integer> collectionFirst = countingIterator(Arrays.asList(1, 2), collectionFirstNextCalls);
+        final Iterator<Integer> collectionSecond = countingIterator(Arrays.asList(10, 20), collectionSecondNextCalls);
+        final Iterator<Integer> collectionThird = signallingIterator(Collections.singletonList(100), collectionThirdExhausted);
+
+        assertEquals(Collections.singletonList(111), Stream.parallelZipIterators(Arrays.asList(collectionFirst, collectionSecond, collectionThird), values -> {
+            await(collectionThirdExhausted);
+            return values.get(0) + values.get(1) + values.get(2);
+        }, 2).toList());
+        assertEquals(1, collectionFirstNextCalls.get());
+        assertEquals(1, collectionSecondNextCalls.get());
+        assertEquals(2, collectionFirst.next());
+        assertEquals(20, collectionSecond.next());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testParallelConcatNullVarargsAreEmpty() {
+        assertTrue(Stream.parallelConcat((Iterator<Integer>[]) null).toList().isEmpty());
+        assertTrue(Stream.parallelConcat((Stream<Integer>[]) null).toList().isEmpty());
+    }
+
+    @Test
+    public void testReferenceArrayMergeRejectsNullSelectorEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[0], new Integer[0], null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[0], new Integer[0], new Integer[0], null));
+    }
+
+    @Test
+    public void testAsyncTerminalWrappersAlwaysCloseStream() throws Exception {
+        final AtomicInteger closeCount = new AtomicInteger();
+        Stream<Integer> source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+
+        source.runAsync(s -> {
+            // A terminal wrapper must close even when the callback itself does not consume the stream.
+        }).get();
+        assertEquals(1, closeCount.get());
+        assertThrows(IllegalStateException.class, source::count);
+
+        source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+        assertEquals(7, source.callAsync(s -> 7, customExecutor).get());
+        assertEquals(2, closeCount.get());
+        assertThrows(IllegalStateException.class, source::count);
+
+        source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> failedRunSource = source;
+        assertThrows(ExecutionException.class, () -> failedRunSource.runAsync(s -> {
+            throw new IOException("expected");
+        }, customExecutor).get());
+        assertEquals(3, closeCount.get());
+        assertThrows(IllegalStateException.class, source::count);
+
+        source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> failedCallSource = source;
+        assertThrows(ExecutionException.class, () -> failedCallSource.callAsync(s -> {
+            throw new IOException("expected");
+        }).get());
+        assertEquals(4, closeCount.get());
+        assertThrows(IllegalStateException.class, source::count);
+    }
+
+    private static <T> Iterator<T> countingIterator(final List<T> values, final AtomicInteger nextCalls) {
+        final Iterator<T> delegate = values.iterator();
+
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            @Override
+            public T next() {
+                nextCalls.incrementAndGet();
+                return delegate.next();
+            }
+        };
+    }
+
+    private static <T> Iterator<T> signallingIterator(final List<T> values, final CountDownLatch exhausted) {
+        final Iterator<T> delegate = values.iterator();
+
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                final boolean hasNext = delegate.hasNext();
+
+                if (!hasNext) {
+                    exhausted.countDown();
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public T next() {
+                return delegate.next();
+            }
+        };
+    }
+
+    private static void await(final CountDownLatch latch) {
+        try {
+            assertTrue(latch.await(5, TimeUnit.SECONDS), "parallel zip did not check the exhausted source");
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
 
 }

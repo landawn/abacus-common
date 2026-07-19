@@ -1008,4 +1008,23 @@ public class IteratorCharStreamTest extends TestBase {
         // result must match non-sorted path on the same data
         assertEquals(createCharStream(data).kthLargest(2).get(), createCharStream(data).sorted().kthLargest(2).get());
     }
+
+    @Test
+    public void testKthLargestHugeRankDoesNotPreallocateRequestedCapacity() {
+        assertFalse(createCharStream('a').sorted().kthLargest(Integer.MAX_VALUE).isPresent());
+    }
+
+    @Test
+    public void testSkipIteratorAdvanceIgnoresNonPositiveCounts() {
+        final int[] seen = { 0 };
+        final CharStream stream = createCharStream('a', 'b', 'c').onEach(value -> seen[0]++).skip(2);
+        final CharIteratorEx iterator = stream.iteratorEx();
+
+        iterator.advance(0);
+        iterator.advance(-1);
+        assertEquals(0, seen[0]);
+        assertEquals('c', iterator.nextChar());
+        assertEquals(3, seen[0]);
+        stream.close();
+    }
 }

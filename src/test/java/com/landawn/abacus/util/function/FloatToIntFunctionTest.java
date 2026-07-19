@@ -50,4 +50,15 @@ public class FloatToIntFunctionTest extends TestBase {
 
         assertEquals(42, function.applyAsInt(42.5f));
     }
+
+    @Test
+    public void testDEFAULT_SpecialValuesAndSaturation() {
+        final FloatToIntFunction function = FloatToIntFunction.DEFAULT;
+
+        assertEquals(0, function.applyAsInt(Float.NaN));
+        assertEquals(Integer.MAX_VALUE, function.applyAsInt(Float.POSITIVE_INFINITY));
+        assertEquals(Integer.MIN_VALUE, function.applyAsInt(Float.NEGATIVE_INFINITY));
+        assertEquals(Integer.MAX_VALUE, function.applyAsInt(Float.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, function.applyAsInt(-Float.MAX_VALUE));
+    }
 }

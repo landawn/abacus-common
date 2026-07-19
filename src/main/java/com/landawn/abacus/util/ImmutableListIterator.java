@@ -119,7 +119,10 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * The returned iterator provides read-only access to the elements.
      *
      * <p>If the provided iterator is {@code null}, an empty ImmutableListIterator is returned.
-     * If the provided iterator is already an ImmutableListIterator, it is returned as-is.
+     * Otherwise, a new read-only wrapper is returned (apart from the shared iterator returned by
+     * {@link #empty()}). Wrapping an arbitrary {@code ImmutableListIterator} prevents a mutable
+     * subclass from overriding the inherited modification methods and leaking those operations
+     * through this factory.
      *
      * <p>The returned iterator reflects the current state of the provided iterator,
      * including its current position. Modifications to the underlying collection
@@ -140,15 +143,15 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      *
      * @param <T> the type of elements returned by the iterator
      * @param iter the {@link ListIterator} to wrap; may be {@code null}
-     * @return an {@code ImmutableListIterator} wrapping the provided iterator; the same instance
-     *         if {@code iter} is already an {@code ImmutableListIterator}; or {@link #empty()} if {@code iter} is {@code null}
+     * @return an {@code ImmutableListIterator} wrapping the provided iterator, or
+     *         {@link #empty()} if {@code iter} is {@code null}
      * @see #empty()
      */
     public static <T> ImmutableListIterator<T> of(final ListIterator<? extends T> iter) {
         if (iter == null) {
             return empty();
-        } else if (iter instanceof ImmutableListIterator) {
-            return (ImmutableListIterator<T>) iter;
+        } else if (iter == EMPTY) {
+            return empty();
         }
 
         return new ImmutableListIterator<>() {

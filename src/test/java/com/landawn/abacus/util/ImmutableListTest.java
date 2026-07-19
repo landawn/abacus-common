@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Assertions;
@@ -16,6 +17,10 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class ImmutableListTest extends TestBase {
+
+    private static final class MutableImmutableNamedList<E> extends ArrayList<E> {
+        private static final long serialVersionUID = 1L;
+    }
 
     @Test
     public void testEmpty() {
@@ -594,6 +599,22 @@ public class ImmutableListTest extends TestBase {
         mutable.add("c");
         Assertions.assertEquals(3, wrapped.size());
         Assertions.assertEquals("c", wrapped.get(2));
+    }
+
+    @Test
+    public void testWrapDoesNotTrustBackingListClassNameForImmutability() {
+        MutableImmutableNamedList<String> backing = new MutableImmutableNamedList<>();
+        backing.add("a");
+
+        ImmutableList<String> wrapped = ImmutableList.wrap(backing);
+        Iterator<String> iterator = wrapped.iterator();
+        iterator.next();
+        ListIterator<String> listIterator = wrapped.listIterator();
+        listIterator.next();
+
+        Assertions.assertThrows(UnsupportedOperationException.class, iterator::remove);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> listIterator.set("b"));
+        Assertions.assertEquals(Arrays.asList("a"), backing);
     }
 
     @Test

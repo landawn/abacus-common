@@ -740,6 +740,25 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testIndexed_IndexOverflowDoesNotConsumeSource() {
+        LongIterator source = LongIterator.of(1L, 2L);
+        ObjIterator<IndexedLong> indexed = source.indexed(Long.MAX_VALUE);
+
+        assertEquals(Long.MAX_VALUE, indexed.next().longIndex());
+        assertThrows(ArithmeticException.class, indexed::next);
+        assertEquals(2L, source.nextLong());
+    }
+
+    @Test
+    public void testIndexed_MaxIndexExhaustionThrowsNoSuchElementException() {
+        ObjIterator<IndexedLong> indexed = LongIterator.of(1L).indexed(Long.MAX_VALUE);
+
+        assertEquals(Long.MAX_VALUE, indexed.next().longIndex());
+        assertFalse(indexed.hasNext());
+        assertThrows(NoSuchElementException.class, indexed::next);
+    }
+
+    @Test
     public void testForEachRemaining() {
         LongIterator iter = LongIterator.of(1L, 2L, 3L);
         AtomicLong sum = new AtomicLong(0);
@@ -774,6 +793,11 @@ public class LongIteratorTest extends TestBase {
         iter.forEachRemaining((Long l) -> sum.addAndGet(l));
 
         assertEquals(6L, sum.get());
+    }
+
+    @Test
+    public void testForEachRemainingRejectsNullAction() {
+        assertThrows(NullPointerException.class, () -> LongIterator.of(1L).forEachRemaining((java.util.function.Consumer<Long>) null));
     }
 
     @Test

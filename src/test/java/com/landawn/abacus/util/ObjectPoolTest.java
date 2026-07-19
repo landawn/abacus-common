@@ -171,6 +171,111 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testConditionalRemove() {
+        final ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        pool.put("key", 100);
+
+        Assertions.assertFalse(pool.remove("key", 200));
+        Assertions.assertEquals(100, pool.get("key"));
+        Assertions.assertTrue(pool.remove("key", 100));
+        Assertions.assertFalse(pool.containsKey("key"));
+        Assertions.assertFalse(pool.remove(null, 100));
+        Assertions.assertFalse(pool.remove("key", null));
+    }
+
+    @Test
+    public void testConditionalRemoveDoesNotDeleteConcurrentReplacement() throws Exception {
+        final java.util.concurrent.CountDownLatch comparisonStarted = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch releaseComparison = new java.util.concurrent.CountDownLatch(1);
+
+        final class BlockingValue {
+            private final String id;
+
+            BlockingValue(final String id) {
+                this.id = id;
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                comparisonStarted.countDown();
+
+                try {
+                    releaseComparison.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+
+                return obj instanceof BlockingValue other && id.equals(other.id);
+            }
+
+            @Override
+            public int hashCode() {
+                return id.hashCode();
+            }
+        }
+
+        final ObjectPool<String, BlockingValue> pool = new ObjectPool<>(2);
+        final BlockingValue original = new BlockingValue("original");
+        final BlockingValue expected = new BlockingValue("original");
+        final BlockingValue replacement = new BlockingValue("replacement");
+        final java.util.concurrent.atomic.AtomicBoolean removed = new java.util.concurrent.atomic.AtomicBoolean();
+        final java.util.concurrent.atomic.AtomicReference<Throwable> failure = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch replacementCompleted = new java.util.concurrent.CountDownLatch(1);
+        pool.put("key", original);
+
+        final Thread remover = new Thread(() -> {
+            try {
+                removed.set(pool.remove("key", expected));
+            } catch (final Throwable e) {
+                failure.compareAndSet(null, e);
+            }
+        });
+        remover.setDaemon(true);
+        remover.start();
+        Assertions.assertTrue(comparisonStarted.await(5, java.util.concurrent.TimeUnit.SECONDS));
+
+        final Thread replacer = new Thread(() -> {
+            try {
+                pool.put("key", replacement);
+            } catch (final Throwable e) {
+                failure.compareAndSet(null, e);
+            } finally {
+                replacementCompleted.countDown();
+            }
+        });
+        replacer.setDaemon(true);
+        replacer.start();
+
+        boolean replacementAttemptObserved = false;
+
+        try {
+            final long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(5);
+
+            while (System.nanoTime() < deadline) {
+                if (replacementCompleted.getCount() == 0 || replacer.getState() == Thread.State.BLOCKED) {
+                    replacementAttemptObserved = true;
+                    break;
+                }
+
+                Thread.yield();
+            }
+        } finally {
+            releaseComparison.countDown();
+        }
+
+        remover.join(java.util.concurrent.TimeUnit.SECONDS.toMillis(5));
+        replacer.join(java.util.concurrent.TimeUnit.SECONDS.toMillis(5));
+
+        Assertions.assertTrue(replacementAttemptObserved, "replacement thread did not reach the conditional removal");
+        Assertions.assertFalse(remover.isAlive());
+        Assertions.assertFalse(replacer.isAlive());
+        Assertions.assertNull(failure.get());
+        Assertions.assertTrue(removed.get());
+        Assertions.assertSame(replacement, pool.get("key"));
+    }
+
+    @Test
     public void testRemoveEmpty() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         Integer removed = pool.remove("nonexistent");

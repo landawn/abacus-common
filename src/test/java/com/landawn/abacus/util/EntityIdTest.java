@@ -314,4 +314,18 @@ public class EntityIdTest extends AbstractTest {
         Assertions.assertEquals(4, id.size());
     }
 
+    @Test
+    public void test_builder_buildReturnsIndependentSnapshots() {
+        EntityId.EntityIdBuilder builder = EntityId.builder("User").put("id", 1);
+        EntityId first = builder.build();
+
+        builder.put("name", "Alice");
+        EntityId second = builder.build();
+
+        Assertions.assertEquals(1, first.size());
+        Assertions.assertFalse(first.containsKey("name"));
+        Assertions.assertEquals(2, second.size());
+        Assertions.assertEquals("Alice", second.get("name"));
+    }
+
 }

@@ -74,7 +74,8 @@ public enum MergeResult {
      * Compares two comparable values and returns a MergeResult indicating
      * which value is smaller (or equal).
      *
-     * <p>This method uses natural ordering to compare the values. If the first
+     * <p>This method uses natural ordering to compare the values, with {@code null} ordered before
+     * every non-null value. If the first
      * value is less than or equal to the second, {@link #TAKE_FIRST} is returned;
      * otherwise, {@link #TAKE_SECOND} is returned.</p>
      *
@@ -111,10 +112,13 @@ public enum MergeResult {
      * @param <T> the type of the values being compared
      * @param a the first value to compare
      * @param b the second value to compare
-     * @param cmp the comparator to use for comparison
+     * @param cmp the comparator to use for comparison; must not be {@code null}
      * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
-    public static <T> MergeResult minFirst(final T a, final T b, final Comparator<? super T> cmp) {
+    public static <T> MergeResult minFirst(final T a, final T b, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return cmp.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
     }
 
@@ -122,7 +126,8 @@ public enum MergeResult {
      * Compares two comparable values and returns a MergeResult indicating
      * which value is larger (or equal).
      *
-     * <p>This method uses natural ordering to compare the values. If the first
+     * <p>This method uses natural ordering to compare the values, with {@code null} ordered before
+     * every non-null value. If the first
      * value is greater than or equal to the second, {@link #TAKE_FIRST} is returned;
      * otherwise, {@link #TAKE_SECOND} is returned.</p>
      *
@@ -159,10 +164,13 @@ public enum MergeResult {
      * @param <T> the type of the values being compared
      * @param a the first value to compare
      * @param b the second value to compare
-     * @param cmp the comparator to use for comparison
+     * @param cmp the comparator to use for comparison; must not be {@code null}
      * @return {@link #TAKE_FIRST} if a is greater than or equal to b, {@link #TAKE_SECOND} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
-    public static <T> MergeResult maxFirst(final T a, final T b, final Comparator<? super T> cmp) {
+    public static <T> MergeResult maxFirst(final T a, final T b, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
     }
 
@@ -174,7 +182,8 @@ public enum MergeResult {
      * Returns a BiFunction that compares two comparable values and returns
      * the MergeResult indicating which is smaller.
      *
-     * <p>The returned function uses natural ordering for comparison. This is useful
+     * <p>The returned function uses natural ordering for comparison, with {@code null} ordered
+     * before every non-null value. This is useful
      * when you need to pass a merge strategy to methods that accept BiFunctions.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -225,7 +234,8 @@ public enum MergeResult {
      * Returns a BiFunction that compares two comparable values and returns
      * the MergeResult indicating which is larger.
      *
-     * <p>The returned function uses natural ordering for comparison. This is useful
+     * <p>The returned function uses natural ordering for comparison, with {@code null} ordered
+     * before every non-null value. This is useful
      * when you need to pass a merge strategy to methods that accept BiFunctions.</p>
      *
      * <p><b>Usage Examples:</b></p>

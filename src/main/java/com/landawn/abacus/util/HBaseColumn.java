@@ -23,12 +23,14 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Represents a column value in HBase with its associated version (timestamp).
  * This class provides a type-safe wrapper for HBase column values along with their version information.
  *
- * <p>The class is immutable and implements {@link Comparable}, ordering instances primarily by
+ * <p>The value and version references are fixed after construction (the value is not defensively
+ * copied), and the class implements {@link Comparable}, ordering instances primarily by
  * version timestamp in ascending order with a value-based tie-break (see {@link #compareTo(HBaseColumn)}).
  * It provides various factory methods for creating instances and converting them to different collection types.</p>
  *
@@ -48,6 +50,8 @@ import java.util.TreeSet;
  * @param <T> the type of the column value
  */
 public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
+
+    private static final AtomicLong nextSequence = new AtomicLong();
 
     /** Empty boolean column instance with value {@code false} and version {@code 0}. */
     public static final HBaseColumn<Boolean> EMPTY_BOOLEAN_COLUMN = HBaseColumn.valueOf(false, 0);
@@ -110,6 +114,10 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     private final T value;
 
     private final long version;
+
+    // Provides a collision-free tie-break during the lifetime of any realistic JVM. Unlike
+    // identityHashCode, distinct live instances cannot accidentally receive the same value.
+    private final long sequence = nextSequence.getAndIncrement();
 
     /**
      * Constructs an HBaseColumn with the specified value and the latest timestamp.
@@ -516,7 +524,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * HBaseColumn<String> copy = original.copy();
      * }</pre>
      *
-     * @return a new HBaseColumn instance with the same value and version
+     * @return a shallow copy with the same value reference and version
      */
     public HBaseColumn<T> copy() {
         return new HBaseColumn<>(value, version);
@@ -549,7 +557,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * The primary comparison is ascending order of versions. If the versions are equal,
      * a value-based tie-break is used so that {@code compareTo} stays consistent with
      * {@link #equals(Object)}: nulls come first, then {@link Comparable#compareTo} when
-     * applicable, then class-name, hash-code, string-form, and finally identity-hash-code.
+     * applicable to values of the same runtime class, then class-name, hash-code, string-form,
+     * and finally a per-instance sequence. Restricting natural comparison to an identical runtime
+     * class prevents asymmetric comparisons between a base-class value and a subclass value.
      *
      * @param o the HBaseColumn to compare with
      * @return a negative integer, zero, or a positive integer as this column is
@@ -580,7 +590,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
             return 1;
         }
 
-        if ((value instanceof Comparable<?>) && value.getClass().isInstance(o.value)) {
+        if ((value instanceof Comparable<?>) && value.getClass() == o.value.getClass()) {
             result = ((Comparable<Object>) value).compareTo(o.value);
 
             if (result != 0) {
@@ -606,7 +616,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
             return result;
         }
 
-        return Integer.compare(System.identityHashCode(this), System.identityHashCode(o));
+        return Long.compare(sequence, o.sequence);
     }
 
     /**

@@ -108,7 +108,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Design Philosophy:</b>
  * <ul>
  *   <li><b>Optional First:</b> Aggregation/search methods prefer returning {@code Optional}/{@code Nullable}
- *       over element types to handle empty results gracefully and avoid null pointer exceptions</li>
+ *       over element types to handle empty results gracefully and avoid {@code null} pointer exceptions</li>
  *   <li><b>Null Safety:</b> Methods handle {@code null} inputs gracefully, typically returning
  *       an empty {@code Optional}/{@code Nullable} or {@code null} rather than throwing exceptions</li>
  *   <li><b>Read-Only by Default:</b> Most methods only read input parameters; the {@code fill}
@@ -191,14 +191,14 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Error Handling Strategy:</b>
  * <ul>
  *   <li><b>Graceful Degradation:</b> Aggregation/search methods handle edge cases without exceptions</li>
- *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the aggregation API</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive {@code null} input handling throughout the aggregation API</li>
  *   <li><b>Empty Collection Support:</b> Proper handling of empty collections in aggregation operations</li>
- *   <li><b>Optional Returns:</b> Use of {@code Optional}/{@code Nullable} types to avoid null return values</li>
+ *   <li><b>Optional Returns:</b> Use of {@code Optional}/{@code Nullable} types to avoid {@code null} return values</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
  * <ul>
- *   <li>Use {@code Optional}/{@code Nullable}-returning methods to avoid null pointer exceptions</li>
+ *   <li>Use {@code Optional}/{@code Nullable}-returning methods to avoid {@code null} pointer exceptions</li>
  *   <li>Prefer {@code Iterables} utilities over manual iteration for aggregation and set operations</li>
  *   <li>Leverage the null-safe design for robust code</li>
  *   <li>Take advantage of the statistical functions for data analysis</li>
@@ -453,8 +453,8 @@ public final class Iterables {
      * OptionalFloat result = Iterables.min(array);          // OptionalFloat[1.0]
      *
      * float[] withNaN = {1.0f, Float.NaN, 3.0f};
-     * OptionalFloat nan = Iterables.min(withNaN);           // OptionalFloat[NaN]
-     * OptionalFloat empty = Iterables.min(new float[0]);    // OptionalFloat.empty()
+     * OptionalFloat nan = Iterables.min(withNaN);          // OptionalFloat[NaN]
+     * OptionalFloat empty = Iterables.min(new float[0]);   // OptionalFloat.empty()
      * }</pre>
      *
      * @param a the array of floats to evaluate.
@@ -1101,8 +1101,8 @@ public final class Iterables {
      * OptionalFloat result = Iterables.max(array);          // OptionalFloat[3.0]
      *
      * float[] withNaN = {1.0f, Float.NaN, 3.0f};
-     * OptionalFloat nan = Iterables.max(withNaN);           // OptionalFloat[NaN]
-     * OptionalFloat empty = Iterables.max(new float[0]);    // OptionalFloat.empty()
+     * OptionalFloat nan = Iterables.max(withNaN);          // OptionalFloat[NaN]
+     * OptionalFloat empty = Iterables.max(new float[0]);   // OptionalFloat.empty()
      * }</pre>
      *
      * @param a the array of floats to evaluate.
@@ -1652,7 +1652,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the array is {@code null} or empty, it returns an empty Optional.
      *
-     * <p>Null values are ignored if the array contains any non-null element. If all elements are {@code null},
+     * <p>Null values are ignored if the array contains any {@code non-null} element. If all elements are {@code null},
      * both values in the returned pair are {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1696,7 +1696,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
      *
-     * <p>Null values are ignored if the iterable contains any non-null element. If all elements are {@code null},
+     * <p>Null values are ignored if the iterable contains any {@code non-null} element. If all elements are {@code null},
      * both values in the returned pair are {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1744,7 +1744,7 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
-     * <p>Null values are ignored if the iterator contains any non-null element. If all elements are {@code null},
+     * <p>Null values are ignored if the iterator contains any {@code non-null} element. If all elements are {@code null},
      * both values in the returned pair are {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2552,9 +2552,9 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long[] array = {1L, 2L, 3L, 4L, 5L};
-     * Iterables.averageLong(array);          // OptionalDouble[3.0]
-     * Iterables.averageLong(new Long[0]);    // OptionalDouble.empty()
-     * Iterables.averageLong((Long[]) null);  // OptionalDouble.empty()
+     * Iterables.averageLong(array);           // OptionalDouble[3.0]
+     * Iterables.averageLong(new Long[0]);     // OptionalDouble.empty()
+     * Iterables.averageLong((Long[]) null);   // OptionalDouble.empty()
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -2728,6 +2728,8 @@ public final class Iterables {
     /**
      * Returns the average of the long values extracted from the elements in the provided iterable by the input {@code func} function as an {@code OptionalDouble}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     * The integral sum is accumulated without overflow before the final conversion to {@code double}, matching
+     * the corresponding overload in {@link N#averageLong(Iterable, ToLongFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2752,15 +2754,27 @@ public final class Iterables {
         }
 
         // Iterate the same iterator we already advanced; calling c.iterator() again breaks
-        // single-use iterables (e.g., stream::iterator).
-        double avg = 0;
+        // single-use iterables (e.g., stream::iterator). Keep an exact integral sum so opposite
+        // extreme values do not lose their low-order result through an online double average.
+        long sum = 0;
+        BigInteger overflowSafeSum = null;
         long count = 0;
         do {
+            final long value = func.applyAsLong(iter.next());
             count++;
-            avg += (func.applyAsLong(iter.next()) - avg) / count;
+
+            if (overflowSafeSum != null) {
+                overflowSafeSum = overflowSafeSum.add(BigInteger.valueOf(value));
+            } else {
+                try {
+                    sum = Math.addExact(sum, value);
+                } catch (final ArithmeticException e) {
+                    overflowSafeSum = BigInteger.valueOf(sum).add(BigInteger.valueOf(value));
+                }
+            }
         } while (iter.hasNext());
 
-        return OptionalDouble.of(avg);
+        return OptionalDouble.of((overflowSafeSum == null ? (double) sum : overflowSafeSum.doubleValue()) / count);
     }
 
     /**
@@ -2771,9 +2785,9 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Double[] array = {1.5, 2.5, 3.5, 4.5};
-     * Iterables.averageDouble(array);            // OptionalDouble[3.0]
-     * Iterables.averageDouble(new Double[0]);    // OptionalDouble.empty()
-     * Iterables.averageDouble((Double[]) null);  // OptionalDouble.empty()
+     * Iterables.averageDouble(array);             // OptionalDouble[3.0]
+     * Iterables.averageDouble(new Double[0]);     // OptionalDouble.empty()
+     * Iterables.averageDouble((Double[]) null);   // OptionalDouble.empty()
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -3020,9 +3034,9 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<BigInteger> nums = Arrays.asList(BigInteger.valueOf(2), BigInteger.valueOf(4), BigInteger.valueOf(6));
-     * Iterables.averageBigInteger(nums);                                  // Optional[4]
-     * Iterables.averageBigInteger(new ArrayList<BigInteger>());           // Optional.empty() (empty)
-     * Iterables.averageBigInteger((Iterable<BigInteger>) null);           // Optional.empty() (null)
+     * Iterables.averageBigInteger(nums);                          // Optional[4]
+     * Iterables.averageBigInteger(new ArrayList<BigInteger>());   // Optional.empty() (empty)
+     * Iterables.averageBigInteger((Iterable<BigInteger>) null);   // Optional.empty() (null)
      * }</pre>
      *
      * @param c the iterable of {@code BigInteger} elements to evaluate.
@@ -3044,8 +3058,8 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("2", "4", "6");
-     * Iterables.averageBigInteger(list, BigInteger::new);                    // Optional[4]
-     * Iterables.averageBigInteger(new ArrayList<String>(), BigInteger::new); // Optional.empty() (empty)
+     * Iterables.averageBigInteger(list, BigInteger::new);                      // Optional[4]
+     * Iterables.averageBigInteger(new ArrayList<String>(), BigInteger::new);   // Optional.empty() (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -3088,9 +3102,9 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<BigDecimal> nums = Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"));
-     * Iterables.averageBigDecimal(nums).get().doubleValue();             // 2.0
-     * Iterables.averageBigDecimal(new ArrayList<BigDecimal>());          // Optional.empty() (empty)
-     * Iterables.averageBigDecimal((Iterable<BigDecimal>) null);          // Optional.empty() (null)
+     * Iterables.averageBigDecimal(nums).get().doubleValue();      // 2.0
+     * Iterables.averageBigDecimal(new ArrayList<BigDecimal>());   // Optional.empty() (empty)
+     * Iterables.averageBigDecimal((Iterable<BigDecimal>) null);   // Optional.empty() (null)
      * }</pre>
      *
      * @param c the iterable of {@code BigDecimal} elements to evaluate.
@@ -3112,8 +3126,8 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("1.5", "2.5");
-     * Iterables.averageBigDecimal(list, BigDecimal::new).get().doubleValue();    // 2.0
-     * Iterables.averageBigDecimal(new ArrayList<String>(), BigDecimal::new);     // Optional.empty() (empty)
+     * Iterables.averageBigDecimal(list, BigDecimal::new).get().doubleValue();   // 2.0
+     * Iterables.averageBigDecimal(new ArrayList<String>(), BigDecimal::new);    // Optional.empty() (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -3652,10 +3666,10 @@ public final class Iterables {
      *
      * Integer[] b = new Integer[4];
      * int[] counter = {0};
-     * Iterables.fill(b, () -> ++counter[0]); // b is [1, 2, 3, 4]
+     * Iterables.fill(b, () -> ++counter[0]);        // b is [1, 2, 3, 4]
      *
-     * Iterables.fill(new String[0], () -> "x");   // no change (empty array)
-     * Iterables.fill((String[]) null, () -> "x"); // no change (null array)
+     * Iterables.fill(new String[0], () -> "x");     // no change (empty array)
+     * Iterables.fill((String[]) null, () -> "x");   // no change (null array)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -3709,7 +3723,7 @@ public final class Iterables {
      * @see Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
-    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) {
+    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
@@ -3891,6 +3905,8 @@ public final class Iterables {
     /**
      * Copies a portion of one list into another. The portion to be copied begins at the index srcPos in the source list and spans length elements.
      * The elements are copied into the destination list starting at position destPos. Both source and destination positions are zero-based.
+     * If {@code src} and {@code dest} are the same list and the ranges overlap, the source
+     * elements are copied as if they were first saved to a temporary list.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3911,17 +3927,30 @@ public final class Iterables {
      * @param dest the destination list into which to copy elements.
      * @param destPos the starting position (inclusive) in the destination list.
      * @param length the number of elements to be copied.
-     * @throws IndexOutOfBoundsException if {@code srcPos + length > src.size()} or {@code destPos + length > dest.size()} or any index is negative.
+     * @throws IllegalArgumentException if {@code length} is negative.
+     * @throws IndexOutOfBoundsException if {@code srcPos + length > src.size()} or {@code destPos + length > dest.size()} or either position is negative.
      * @see #copyInto(List, List)
      * @see N#copy(Object[], int, Object[], int, int)
      * @see Collections#copy(List, List)
      */
     public static <T> void copyInto(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
             throws IndexOutOfBoundsException {
-        N.checkFromToIndex(srcPos, srcPos + length, N.size(src));
-        N.checkFromToIndex(destPos, destPos + length, N.size(dest));
+        N.checkFromIndexSize(srcPos, length, N.size(src));
+        N.checkFromIndexSize(destPos, length, N.size(dest));
 
         if (N.isEmpty(src) && srcPos == 0 && length == 0) {
+            return;
+        }
+
+        if (src == dest && destPos > srcPos && destPos < srcPos + length) {
+            final List<T> sourceSnapshot = new ArrayList<>(src.subList(srcPos, srcPos + length));
+            final ListIterator<? super T> destIterator = dest.listIterator(destPos);
+
+            for (final T e : sourceSnapshot) {
+                destIterator.next();
+                destIterator.set(e);
+            }
+
             return;
         }
 
@@ -4061,7 +4090,7 @@ public final class Iterables {
         }
 
         @Override
-        public List<T> subList(final int fromIndex, final int toIndex) {
+        public List<T> subList(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
             N.checkFromToIndex(fromIndex, toIndex, size());
             return asReversed(forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)));
         }
@@ -4190,6 +4219,8 @@ public final class Iterables {
      * elements that are contained in either backing set. Iterating over the returned set iterates
      * first over all the elements of {@code set1}, then over each element of {@code set2}, in order,
      * that is not contained in {@code set1}.
+     * Changes to either non-{@code null} backing set are reflected in the view, including when
+     * that set was empty when this method was called.
      *
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the {@link Map#keySet} of an
@@ -4213,15 +4244,15 @@ public final class Iterables {
      * @param set2 the second set. May be {@code null} or empty.
      * @return an unmodifiable {@code SetView} containing all elements from both sets; never {@code null}.
      */
-    public static <T> SetView<T> union(final Set<? extends T> set1, final Set<? extends T> set2) {
+    public static <T> SetView<T> union(final Set<? extends T> set1, final Set<? extends T> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
         Set<? extends T> tmp = null;
 
-        if (N.isEmpty(set1)) {
-            tmp = N.isEmpty(set2) ? N.emptySet() : set2;
-        } else if (N.isEmpty(set2)) {
+        if (set1 == null) {
+            tmp = set2 == null ? N.emptySet() : set2;
+        } else if (set2 == null) {
             tmp = set1;
         } else {
             tmp = new AbstractSet<>() {
@@ -4316,6 +4347,8 @@ public final class Iterables {
      * Returns an unmodifiable <b>view</b> of the intersection of two sets. The returned set contains
      * all elements that are contained by both backing sets. The iteration order of the returned set
      * matches that of {@code set1}.
+     * Changes to either non-{@code null} backing set are reflected in the view, including when
+     * that set was empty when this method was called.
      *
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
@@ -4354,13 +4387,13 @@ public final class Iterables {
      * @see Collection#retainAll(Collection)
      * @see Maps#intersection(Map, Map)
      */
-    public static <T> SetView<T> intersection(final Set<T> set1, final Set<?> set2) {
+    public static <T> SetView<T> intersection(final Set<T> set1, final Set<?> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
         Set<T> tmp = null;
 
-        if (N.isEmpty(set1) || N.isEmpty(set2)) {
+        if (set1 == null || set2 == null) {
             tmp = N.emptySet();
         } else {
             tmp = new AbstractSet<>() {
@@ -4462,7 +4495,8 @@ public final class Iterables {
      *
      * <p>The iteration order of the returned set matches that of {@code set1}.
      * Elements in {@code set2} that are not present in {@code set1} are simply ignored.
-     * The returned view is backed by {@code set1}, so changes in {@code set1} may be reflected in the view.
+     * The returned view is backed by both non-{@code null} input sets, so changes to either set are
+     * reflected in the view, including when that set was empty when this method was called.
      *
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the keySet of an
@@ -4482,15 +4516,15 @@ public final class Iterables {
      * @see Difference#of(Collection, Collection)
      * @see Maps#difference(Map, Map)
      */
-    public static <T> SetView<T> difference(final Set<T> set1, final Set<?> set2) {
+    public static <T> SetView<T> difference(final Set<T> set1, final Set<?> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
         Set<T> tmp = null;
 
-        if (N.isEmpty(set1)) {
+        if (set1 == null) {
             tmp = N.emptySet();
-        } else if (N.isEmpty(set2)) {
+        } else if (set2 == null) {
             tmp = set1;
         } else {
             tmp = new AbstractSet<>() {
@@ -4581,7 +4615,8 @@ public final class Iterables {
      * }</pre>
      *
      * <p>The iteration order of the returned set is undefined.
-     * The returned view is backed by the input sets, so changes in the original sets may be reflected in the view.
+     * The returned view is backed by both non-{@code null} input sets, so changes in the original
+     * sets are reflected in the view, including when a set was empty when this method was called.
      *
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the keySet of an
@@ -4599,15 +4634,15 @@ public final class Iterables {
      * @see #union(Set, Set)
      * @see Maps#symmetricDifference(Map, Map)
      */
-    public static <T> SetView<T> symmetricDifference(final Set<? extends T> set1, final Set<? extends T> set2) {
+    public static <T> SetView<T> symmetricDifference(final Set<? extends T> set1, final Set<? extends T> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
         Set<? extends T> tmp = null;
 
-        if (N.isEmpty(set1)) {
-            tmp = N.isEmpty(set2) ? N.emptySet() : set2;
-        } else if (N.isEmpty(set2)) {
+        if (set1 == null) {
+            tmp = set2 == null ? N.emptySet() : set2;
+        } else if (set2 == null) {
             tmp = set1;
         } else {
             tmp = new AbstractSet<>() {
@@ -4700,7 +4735,8 @@ public final class Iterables {
      * The returned {@code NavigableSet} is backed by the original set — changes in either are reflected in the other.
      * The iteration order of the returned set matches that of the original set.
      *
-     * <p>If the specified set is {@code null} or empty, an empty {@code NavigableSet} is returned.</p>
+     * <p>If the specified set is empty, the returned range view is initially empty but remains
+     * backed by that set. If the set is {@code null}, a detached empty set is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4714,11 +4750,11 @@ public final class Iterables {
      * @param <T> the type of the elements, which must implement {@link Comparable}.
      * @param set the original {@code NavigableSet} from which to derive the subset. May be {@code null} or empty.
      * @param range the {@code Range} that defines the lower and upper bounds of the subset (inclusive/exclusive per bound type).
-     * @return a {@code NavigableSet} view of the elements within the specified range; an empty {@code NavigableSet} if {@code set} is {@code null} or empty.
+     * @return a {@code NavigableSet} view of the elements within the specified range; a detached empty {@code NavigableSet} only if {@code set} is {@code null}.
      * @throws IllegalArgumentException if the set uses a custom comparator inconsistent with the natural ordering and {@code range.lowerEndpoint()} compares greater than {@code range.upperEndpoint()} under that comparator.
      */
     public static <T extends Comparable<? super T>> NavigableSet<T> subSet(final NavigableSet<T> set, final Range<T> range) throws IllegalArgumentException {
-        if (N.isEmpty(set)) {
+        if (set == null) {
             return N.emptyNavigableSet();
         }
 
@@ -4836,9 +4872,9 @@ public final class Iterables {
      * Collection<List<Integer>> perms = Iterables.permutations(Arrays.asList(1, 2, 3));
      * // perms.size() => 6 : every ordering of {1, 2, 3}, e.g. [1,2,3], [1,3,2], [2,1,3], ...
      *
-     * Iterables.permutations(new ArrayList<Integer>()).size();   // 1 (the single empty permutation)
-     * Iterables.permutations(Arrays.asList(1, 1)).size();        // 2 (equal elements still permuted)
-     * Iterables.permutations((Collection<Integer>) null).size(); // 1 ({@code null} treated as empty)
+     * Iterables.permutations(new ArrayList<Integer>()).size();     // 1 (the single empty permutation)
+     * Iterables.permutations(Arrays.asList(1, 1)).size();          // 2 (equal elements still permuted)
+     * Iterables.permutations((Collection<Integer>) null).size();   // 1 ({@code null} treated as empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -4879,8 +4915,8 @@ public final class Iterables {
      * Collection<List<Integer>> perms = Iterables.orderedPermutations(Arrays.asList(3, 1, 2));
      * // perms.size() => 6, first is [1, 2, 3] (ascending), last is [3, 2, 1] (descending)
      *
-     * Iterables.orderedPermutations(Arrays.asList(1, 1, 2)).size();   // 3 (duplicates collapse: 3!/2!)
-     * Iterables.orderedPermutations(new ArrayList<Integer>()).size(); // 1 (the single empty permutation)
+     * Iterables.orderedPermutations(Arrays.asList(1, 1, 2)).size();     // 3 (duplicates collapse: 3!/2!)
+     * Iterables.orderedPermutations(new ArrayList<Integer>()).size();   // 1 (the single empty permutation)
      * }</pre>
      *
      * @param <T> the type of the elements.

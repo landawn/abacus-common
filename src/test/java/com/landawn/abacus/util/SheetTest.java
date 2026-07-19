@@ -6229,9 +6229,9 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testRowValues_afterMoveRow_reflectsCurrentPosition() {
-        // Regression: the lazy rowValues view must reflect the row's CURRENT position after a
-        // structural change, not a stale captured index (#51).
+    public void testRowValuesViewRemainsBoundToOriginalPositionAfterMove() {
+        // rowValues is a fixed-position live view: it observes later values at the captured numeric
+        // position, but does not follow the original row key through structural reordering.
         final Sheet<String, String, Integer> s = Sheet.rows(java.util.Arrays.asList("R1", "R2", "R3"), java.util.Arrays.asList("C1"),
                 new Integer[][] { { 1 }, { 2 }, { 3 } });
         final com.landawn.abacus.util.ImmutableList<Integer> r2 = s.rowValues("R2");
@@ -6446,6 +6446,89 @@ public class SheetTest extends AbstractTest {
 
         Sheet<String, String, Integer> zeroRow = new Sheet<>(Collections.<String> emptyList(), Arrays.asList("c1", "c2"));
         assertDoesNotThrow(() -> zeroRow.sortColumnsByRowValues(Collections.<String> emptyList(), (Object[] a, Object[] b) -> 0));
+    }
+
+    @Test
+    public void testRowOrientedStreamsPreserveRowsWhenThereAreNoColumns() {
+        final Sheet<String, String, Integer> zeroColumnSheet = new Sheet<>(Arrays.asList("r1", "r2"), Collections.emptyList());
+
+        assertEquals(2, zeroColumnSheet.rowCells().count());
+        assertEquals(2, zeroColumnSheet.rowStreams().count());
+
+        final List<Pair<String, Stream<Integer>>> rows = zeroColumnSheet.rows().toList();
+        assertEquals(Arrays.asList("r1", "r2"), rows.stream().map(Pair::left).toList());
+        assertTrue(rows.get(0).right().toList().isEmpty());
+        assertTrue(rows.get(1).right().toList().isEmpty());
+
+        final List<Integer> mappedRowSizes = zeroColumnSheet.rows((rowIndex, row) -> row.length()).map(Pair::right).toList();
+        assertEquals(Arrays.asList(0, 0), mappedRowSizes);
+    }
+
+    @Test
+    public void testColumnOrientedStreamsPreserveColumnsWhenThereAreNoRows() {
+        final Sheet<String, String, Integer> zeroRowSheet = new Sheet<>(Collections.emptyList(), Arrays.asList("c1", "c2"));
+
+        assertEquals(2, zeroRowSheet.columnCells().count());
+        assertEquals(2, zeroRowSheet.columnStreams().count());
+
+        final List<Pair<String, Stream<Integer>>> columns = zeroRowSheet.columns().toList();
+        assertEquals(Arrays.asList("c1", "c2"), columns.stream().map(Pair::left).toList());
+        assertTrue(columns.get(0).right().toList().isEmpty());
+        assertTrue(columns.get(1).right().toList().isEmpty());
+
+        final List<Integer> mappedColumnSizes = zeroRowSheet.columns((columnIndex, column) -> column.length()).map(Pair::right).toList();
+        assertEquals(Arrays.asList(0, 0), mappedColumnSizes);
+    }
+
+    @Test
+    public void testNestedNullRowsAndColumnsAreRejectedConsistently() {
+        final List<String> oneRow = Arrays.asList("r1");
+        final List<String> oneColumn = Arrays.asList("c1");
+
+        assertThrows(IllegalArgumentException.class, () -> new Sheet<String, String, Integer>(oneRow, oneColumn, new Object[][] { null }));
+        assertThrows(IllegalArgumentException.class, () -> Sheet.<String, String, Integer> rows(oneRow, oneColumn, new Object[][] { null }));
+
+        final List<List<Integer>> rows = new ArrayList<>();
+        rows.add(null);
+        assertThrows(IllegalArgumentException.class, () -> Sheet.rows(oneRow, oneColumn, rows));
+
+        assertThrows(IllegalArgumentException.class, () -> Sheet.<String, String, Integer> columns(oneRow, oneColumn, new Object[][] { null }));
+
+        final List<List<Integer>> columns = new ArrayList<>();
+        columns.add(null);
+        assertThrows(IllegalArgumentException.class, () -> Sheet.columns(oneRow, oneColumn, columns));
+    }
+
+    @Test
+    public void testSortRowsByMultipleColumnsUsesObjectArrayOrderingWhenComparatorIsNull() {
+        final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1", "c2", "data"),
+                new Integer[][] { { 1, 2, 10 }, { 1, 1, 20 }, { null, 9, 30 } });
+
+        s.sortRowsByColumnValues(Arrays.asList("c1", "c2"), null);
+
+        assertEquals(Arrays.asList("r3", "r2", "r1"), new ArrayList<>(s.rowKeySet()));
+        assertEquals(Arrays.asList(30, 20, 10), new ArrayList<>(s.columnValues("data")));
+    }
+
+    @Test
+    public void testSortColumnsByMultipleRowsUsesObjectArrayOrderingWhenComparatorIsNull() {
+        final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "data"), Arrays.asList("c1", "c2", "c3"),
+                new Integer[][] { { 1, 1, null }, { 2, 1, 9 }, { 10, 20, 30 } });
+
+        s.sortColumnsByRowValues(Arrays.asList("r1", "r2"), null);
+
+        assertEquals(Arrays.asList("c3", "c2", "c1"), new ArrayList<>(s.columnKeySet()));
+        assertEquals(Arrays.asList(30, 20, 10), new ArrayList<>(s.rowValues("data")));
+    }
+
+    @Test
+    public void testColumnValuesViewRemainsBoundToOriginalPositionAfterMove() {
+        final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1", "c2", "c3"), new Integer[][] { { 1, 2, 3 } });
+        final ImmutableList<Integer> c2 = s.columnValues("c2");
+
+        assertEquals(Integer.valueOf(2), c2.get(0));
+        s.moveColumn("c2", 2);
+        assertEquals(Integer.valueOf(3), c2.get(0));
     }
 
 }

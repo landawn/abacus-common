@@ -25,6 +25,9 @@ import com.landawn.abacus.util.cs;
  * <p>The 'N' in NPredicate stands for <i>N-ary</i>, indicating that this predicate can accept
  * any number of arguments of the same type.
  *
+ * <p>Composition does not copy the varargs array: each evaluated predicate receives the same
+ * array reference. Implementations should avoid mutating it unless order-dependent behavior is intentional.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NPredicate<Integer> allPositive = args -> {

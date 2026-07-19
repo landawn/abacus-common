@@ -8,10 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -22,6 +29,42 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class WrapperTest extends TestBase {
+
+    private static final class EmptyArrayComponent {
+    }
+
+    @Test
+    public void test_emptyArrayPool_concurrentFirstAccessReturnsSameInstance() throws Exception {
+        Wrapper.ArrayWrapper.WRAPPER_POOL.remove(EmptyArrayComponent.class);
+
+        int threadCount = 24;
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch ready = new CountDownLatch(threadCount);
+        CountDownLatch start = new CountDownLatch(1);
+
+        try {
+            List<Future<Wrapper<EmptyArrayComponent[]>>> futures = new ArrayList<>(threadCount);
+
+            for (int i = 0; i < threadCount; i++) {
+                futures.add(executor.submit(() -> {
+                    ready.countDown();
+                    start.await();
+                    return Wrapper.of(new EmptyArrayComponent[0]);
+                }));
+            }
+
+            assertTrue(ready.await(10, TimeUnit.SECONDS));
+            start.countDown();
+            Wrapper<EmptyArrayComponent[]> expected = futures.get(0).get();
+
+            for (Future<Wrapper<EmptyArrayComponent[]>> future : futures) {
+                assertSame(expected, future.get());
+            }
+        } finally {
+            start.countDown();
+            executor.shutdownNow();
+        }
+    }
 
     @Test
     public void test_wrapperPool_differentTypes() {
@@ -578,6 +621,34 @@ public class WrapperTest extends TestBase {
 
         assertTrue(wrapper1.equals(wrapper2));
         assertTrue(wrapper2.equals(wrapper1));
+    }
+
+    @Test
+    public void test_equals_symmetryAcrossDifferentStrategies() {
+        Wrapper<String> deep = Wrapper.of("value");
+        Wrapper<String> customRejecting = Wrapper.of("value", String::hashCode, (left, right) -> false);
+        Wrapper<String> customAcceptingWithDifferentHash = Wrapper.of("value", value -> 7, String::equals);
+
+        assertFalse(deep.equals(customRejecting));
+        assertFalse(customRejecting.equals(deep));
+        assertFalse(deep.equals(customAcceptingWithDifferentHash));
+        assertFalse(customAcceptingWithDifferentHash.equals(deep));
+
+        Wrapper<String> oneWay = Wrapper.of("left", value -> 0, (left, right) -> true);
+        Wrapper<String> reverseRejecting = Wrapper.of("right", value -> 0, (left, right) -> false);
+
+        assertFalse(oneWay.equals(reverseRejecting));
+        assertFalse(reverseRejecting.equals(oneWay));
+
+        ToIntFunction<String> hashByLengthA = String::length;
+        ToIntFunction<String> hashByLengthB = String::length;
+        BiPredicate<String, String> equalByLengthA = (left, right) -> left.length() == right.length();
+        BiPredicate<String, String> equalByLengthB = (left, right) -> left.length() == right.length();
+
+        Wrapper<String> strategyA = Wrapper.of("one", hashByLengthA, equalByLengthA);
+        Wrapper<String> strategyB = Wrapper.of("two", hashByLengthB, equalByLengthB);
+        assertFalse(strategyA.equals(strategyB));
+        assertFalse(strategyB.equals(strategyA));
     }
 
     @Test

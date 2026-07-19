@@ -176,6 +176,7 @@ public class HttpRequestTest extends TestBase {
         HttpClient client = HttpClient.create(baseUrl);
         HttpRequest request = HttpRequest.create(client);
         assertNotNull(request);
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.create(null));
     }
 
     @Test

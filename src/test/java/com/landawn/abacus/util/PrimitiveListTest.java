@@ -2781,4 +2781,19 @@ public class PrimitiveListTest extends AbstractTest {
         assertEquals("[]", emptyList.toString());
     }
 
+    @Test
+    public void testCompactAfterRemovingIndicesSupportsPrimitiveArraysAndValidatesBeforeMutation() {
+        final int[] ints = { 10, 20, 30, 40, 50, 99 };
+        assertEquals(3, PrimitiveList.compactAfterRemovingIndices(ints, 5, new int[] { 3, 1, 3, 1 }));
+        assertArrayEquals(new int[] { 10, 30, 50 }, Arrays.copyOf(ints, 3));
+
+        final boolean[] booleans = { true, false, true, false };
+        assertEquals(2, PrimitiveList.compactAfterRemovingIndices(booleans, 4, new int[] { 2, 0 }));
+        assertArrayEquals(new boolean[] { false, false }, Arrays.copyOf(booleans, 2));
+
+        final long[] invalid = { 1L, 2L, 3L };
+        assertThrows(IndexOutOfBoundsException.class, () -> PrimitiveList.compactAfterRemovingIndices(invalid, 3, new int[] { 1, 3 }));
+        assertArrayEquals(new long[] { 1L, 2L, 3L }, invalid);
+    }
+
 }

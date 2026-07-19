@@ -4647,8 +4647,22 @@ public class NoCachingNoUpdatingTest extends TestBase {
         DisposableEntry<String, Integer> disposable1 = DisposableEntry.wrap(entry1);
         DisposableEntry<String, Integer> disposable2 = DisposableEntry.wrap(entry2);
 
-        assertNotEquals(disposable1.hashCode(), disposable2.hashCode());
-        assertNotEquals(disposable1, disposable2);
+        assertEquals(disposable1.hashCode(), disposable2.hashCode());
+        assertEquals(disposable1, disposable2);
+        assertEquals(entry1, disposable1);
+        assertEquals(disposable1, entry1);
+    }
+
+    @Test
+    public void testDisposableEntry_usesMapEntryArrayEqualitySemantics() {
+        final Object[] key1 = { "key" };
+        final Object[] key2 = { "key" };
+        final Map.Entry<Object[], Integer> entry1 = new AbstractMap.SimpleEntry<>(key1, 100);
+        final Map.Entry<Object[], Integer> entry2 = new AbstractMap.SimpleEntry<>(key2, 100);
+        final DisposableEntry<Object[], Integer> disposable = DisposableEntry.wrap(entry1);
+
+        assertNotEquals(disposable, entry2);
+        assertNotEquals(entry2, disposable);
     }
 
     @Test
@@ -5177,6 +5191,229 @@ public class NoCachingNoUpdatingTest extends TestBase {
 
         Timed<String> timed2 = Timed.of(null, 1000L);
         assertTrue(timed.equals(timed2));
+    }
+
+    @Test
+    public void testToCollectionRejectsNullSupplierAndNullResultForEveryView() {
+        DisposableArray<Object> objects = DisposableArray.wrap(new Object[0]);
+        DisposableBooleanArray booleans = DisposableBooleanArray.wrap(new boolean[0]);
+        DisposableCharArray chars = DisposableCharArray.wrap(new char[0]);
+        DisposableByteArray bytes = DisposableByteArray.wrap(new byte[0]);
+        DisposableShortArray shorts = DisposableShortArray.wrap(new short[0]);
+        DisposableIntArray ints = DisposableIntArray.wrap(new int[0]);
+        DisposableLongArray longs = DisposableLongArray.wrap(new long[0]);
+        DisposableFloatArray floats = DisposableFloatArray.wrap(new float[0]);
+        DisposableDoubleArray doubles = DisposableDoubleArray.wrap(new double[0]);
+        DisposableDeque<Object> deque = DisposableDeque.wrap(new ArrayDeque<>());
+
+        assertThrows(NullPointerException.class, () -> objects.<List<Object>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> booleans.<List<Boolean>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> chars.<List<Character>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> bytes.<List<Byte>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> shorts.<List<Short>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> ints.<List<Integer>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> longs.<List<Long>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> floats.<List<Float>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> doubles.<List<Double>> toCollection(null));
+        assertThrows(NullPointerException.class, () -> deque.<List<Object>> toCollection(null));
+
+        assertThrows(NullPointerException.class, () -> objects.<List<Object>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> booleans.<List<Boolean>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> chars.<List<Character>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> bytes.<List<Byte>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> shorts.<List<Short>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> ints.<List<Integer>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> longs.<List<Long>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> floats.<List<Float>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> doubles.<List<Double>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> deque.<List<Object>> toCollection(size -> null));
+    }
+
+    @Test
+    public void testDisposableArrayCreateRejectsNullComponentType() {
+        assertThrows(IllegalArgumentException.class, () -> DisposableArray.create(null, 0));
+    }
+
+    @Test
+    public void testEmptyForeachRejectsNullCallbackForEveryView() {
+        assertThrows(NullPointerException.class, () -> DisposableArray.wrap(new Object[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableBooleanArray.wrap(new boolean[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableCharArray.wrap(new char[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableByteArray.wrap(new byte[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableShortArray.wrap(new short[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableIntArray.wrap(new int[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableLongArray.wrap(new long[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableFloatArray.wrap(new float[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableDoubleArray.wrap(new double[0]).foreach(null));
+        assertThrows(NullPointerException.class, () -> DisposableDeque.wrap(new ArrayDeque<>()).foreach(null));
+    }
+
+    @Test
+    public void testApplyAndAcceptRejectNullCallbacksAndAllowNullFunctionResults() throws Exception {
+        DisposableArray<Object> objects = DisposableArray.wrap(new Object[0]);
+        DisposableBooleanArray booleans = DisposableBooleanArray.wrap(new boolean[0]);
+        DisposableCharArray chars = DisposableCharArray.wrap(new char[0]);
+        DisposableByteArray bytes = DisposableByteArray.wrap(new byte[0]);
+        DisposableShortArray shorts = DisposableShortArray.wrap(new short[0]);
+        DisposableIntArray ints = DisposableIntArray.wrap(new int[0]);
+        DisposableLongArray longs = DisposableLongArray.wrap(new long[0]);
+        DisposableFloatArray floats = DisposableFloatArray.wrap(new float[0]);
+        DisposableDoubleArray doubles = DisposableDoubleArray.wrap(new double[0]);
+        DisposableDeque<Object> deque = DisposableDeque.wrap(new ArrayDeque<>());
+
+        assertThrows(NullPointerException.class, () -> objects.apply(null));
+        assertThrows(NullPointerException.class, () -> booleans.apply(null));
+        assertThrows(NullPointerException.class, () -> chars.apply(null));
+        assertThrows(NullPointerException.class, () -> bytes.apply(null));
+        assertThrows(NullPointerException.class, () -> shorts.apply(null));
+        assertThrows(NullPointerException.class, () -> ints.apply(null));
+        assertThrows(NullPointerException.class, () -> longs.apply(null));
+        assertThrows(NullPointerException.class, () -> floats.apply(null));
+        assertThrows(NullPointerException.class, () -> doubles.apply(null));
+        assertThrows(NullPointerException.class, () -> deque.apply(null));
+
+        assertThrows(NullPointerException.class, () -> objects.accept(null));
+        assertThrows(NullPointerException.class, () -> booleans.accept(null));
+        assertThrows(NullPointerException.class, () -> chars.accept(null));
+        assertThrows(NullPointerException.class, () -> bytes.accept(null));
+        assertThrows(NullPointerException.class, () -> shorts.accept(null));
+        assertThrows(NullPointerException.class, () -> ints.accept(null));
+        assertThrows(NullPointerException.class, () -> longs.accept(null));
+        assertThrows(NullPointerException.class, () -> floats.accept(null));
+        assertThrows(NullPointerException.class, () -> doubles.accept(null));
+        assertThrows(NullPointerException.class, () -> deque.accept(null));
+
+        assertNull(objects.apply(array -> null));
+        assertNull(booleans.apply(array -> null));
+        assertNull(deque.apply(value -> null));
+
+        DisposableEntry<String, Integer> entry = DisposableEntry.wrap(new AbstractMap.SimpleEntry<>("key", 1));
+        assertThrows(NullPointerException.class, () -> entry.apply((Throwables.Function<DisposableEntry<String, Integer>, Object, RuntimeException>) null));
+        assertThrows(NullPointerException.class, () -> entry.apply((Throwables.BiFunction<String, Integer, Object, RuntimeException>) null));
+        assertThrows(NullPointerException.class, () -> entry.accept((Throwables.Consumer<DisposableEntry<String, Integer>, RuntimeException>) null));
+        assertThrows(NullPointerException.class, () -> entry.accept((Throwables.BiConsumer<String, Integer, RuntimeException>) null));
+        assertNull(entry.apply((key, value) -> null));
+
+        DisposablePair<String, Integer> pair = DisposablePair.wrap(Pair.of("left", 1));
+        assertThrows(NullPointerException.class, () -> pair.apply(null));
+        assertThrows(NullPointerException.class, () -> pair.accept(null));
+        assertNull(pair.apply((left, right) -> null));
+
+        DisposableTriple<String, Integer, Boolean> triple = DisposableTriple.wrap(Triple.of("left", 1, true));
+        assertThrows(NullPointerException.class, () -> triple.apply(null));
+        assertThrows(NullPointerException.class, () -> triple.accept(null));
+        assertNull(triple.apply((left, middle, right) -> null));
+    }
+
+    @Test
+    public void testWrappedValuesAreLiveViewsAndConversionsAreIndependentSnapshots() {
+        String[] source = { "a", "b" };
+        DisposableArray<String> array = DisposableArray.wrap(source);
+        String[] arrayCopy = array.copy();
+        List<String> listCopy = array.toList();
+        source[0] = "updated";
+        assertEquals("updated", array.get(0));
+        assertEquals("a", arrayCopy[0]);
+        assertEquals("a", listCopy.get(0));
+        listCopy.set(1, "list-only");
+        assertEquals("b", source[1]);
+
+        Deque<String> sourceDeque = new ArrayDeque<>(Arrays.asList("first", "last"));
+        DisposableDeque<String> deque = DisposableDeque.wrap(sourceDeque);
+        List<String> dequeCopy = deque.toList();
+        sourceDeque.removeFirst();
+        assertEquals("last", deque.getFirst());
+        assertEquals(Arrays.asList("first", "last"), dequeCopy);
+
+        AbstractMap.SimpleEntry<String, Integer> sourceEntry = new AbstractMap.SimpleEntry<>("key", 1);
+        DisposableEntry<String, Integer> entry = DisposableEntry.wrap(sourceEntry);
+        Map.Entry<String, Integer> entryCopy = entry.copy();
+        sourceEntry.setValue(2);
+        assertEquals(2, entry.getValue());
+        assertEquals(1, entryCopy.getValue());
+
+        Pair<String, Integer> sourcePair = Pair.of("left", 1);
+        DisposablePair<String, Integer> pair = DisposablePair.wrap(sourcePair);
+        Pair<String, Integer> pairCopy = pair.copy();
+        sourcePair.setRight(2);
+        assertEquals(2, pair.right());
+        assertEquals(1, pairCopy.right());
+
+        Triple<String, Integer, Boolean> sourceTriple = Triple.of("left", 1, true);
+        DisposableTriple<String, Integer, Boolean> triple = DisposableTriple.wrap(sourceTriple);
+        Triple<String, Integer, Boolean> tripleCopy = triple.copy();
+        sourceTriple.setMiddle(2);
+        assertEquals(2, triple.middle());
+        assertEquals(1, tripleCopy.middle());
+    }
+
+    @Test
+    public void testSmallIntegralSumsDetectOverflow() {
+        char[] chars = new char[Integer.MAX_VALUE / Character.MAX_VALUE + 1];
+        Arrays.fill(chars, Character.MAX_VALUE);
+        assertThrows(ArithmeticException.class, () -> DisposableCharArray.wrap(chars).sum());
+
+        short[] shorts = new short[Integer.MAX_VALUE / Short.MAX_VALUE + 1];
+        Arrays.fill(shorts, Short.MAX_VALUE);
+        assertThrows(ArithmeticException.class, () -> DisposableShortArray.wrap(shorts).sum());
+
+        byte[] bytes = new byte[Integer.MAX_VALUE / Byte.MAX_VALUE + 1];
+        Arrays.fill(bytes, Byte.MAX_VALUE);
+        assertThrows(ArithmeticException.class, () -> DisposableByteArray.wrap(bytes).sum());
+    }
+
+    @Test
+    public void testNumericEmptyNaNInfinitySignedZeroAndLongOverflowContracts() {
+        assertThrows(IllegalArgumentException.class, () -> DisposableCharArray.wrap(new char[0]).min());
+        assertThrows(IllegalArgumentException.class, () -> DisposableByteArray.wrap(new byte[0]).max());
+        assertThrows(IllegalArgumentException.class, () -> DisposableShortArray.wrap(new short[0]).min());
+        assertThrows(IllegalArgumentException.class, () -> DisposableIntArray.wrap(new int[0]).max());
+        assertThrows(IllegalArgumentException.class, () -> DisposableLongArray.wrap(new long[0]).min());
+        assertThrows(IllegalArgumentException.class, () -> DisposableFloatArray.wrap(new float[0]).max());
+        assertThrows(IllegalArgumentException.class, () -> DisposableDoubleArray.wrap(new double[0]).min());
+
+        assertEquals(Long.MIN_VALUE, DisposableLongArray.wrap(new long[] { Long.MAX_VALUE, 1 }).sum());
+        assertEquals((double) Long.MAX_VALUE, DisposableLongArray.wrap(new long[] { Long.MAX_VALUE, Long.MAX_VALUE }).average());
+
+        DisposableFloatArray floatNaN = DisposableFloatArray.wrap(new float[] { 1, Float.NaN });
+        assertTrue(Float.isNaN(floatNaN.sum()));
+        assertTrue(Double.isNaN(floatNaN.average()));
+        assertTrue(Float.isNaN(floatNaN.min()));
+        assertTrue(Float.isNaN(floatNaN.max()));
+
+        DisposableDoubleArray doubleInfinity = DisposableDoubleArray.wrap(new double[] { Double.POSITIVE_INFINITY, 1 });
+        assertEquals(Double.POSITIVE_INFINITY, doubleInfinity.sum());
+        assertEquals(Double.POSITIVE_INFINITY, doubleInfinity.average());
+
+        DisposableDoubleArray zeros = DisposableDoubleArray.wrap(new double[] { 0.0d, -0.0d });
+        assertEquals(Double.doubleToLongBits(-0.0d), Double.doubleToLongBits(zeros.min()));
+        assertEquals(Double.doubleToLongBits(0.0d), Double.doubleToLongBits(zeros.max()));
+    }
+
+    @Test
+    public void testTimedCopySnapshotsReusableStateAndArrayHashMatchesEquals() {
+        class MutableTimed<T> extends Timed<T> {
+            MutableTimed(final T value, final long timestamp) {
+                super(value, timestamp);
+            }
+
+            void update(final T value, final long timestamp) {
+                set(value, timestamp);
+            }
+        }
+
+        StringBuilder mutableValue = new StringBuilder("value");
+        MutableTimed<StringBuilder> reusable = new MutableTimed<>(mutableValue, 1L);
+        Timed<StringBuilder> snapshot = reusable.copy();
+        reusable.update(new StringBuilder("next"), 2L);
+        assertNotSame(reusable, snapshot);
+        assertSame(mutableValue, snapshot.value());
+        assertEquals(1L, snapshot.timestamp());
+
+        Timed<int[]> first = Timed.of(new int[] { 1, 2, 3 }, 10L);
+        Timed<int[]> second = Timed.of(new int[] { 1, 2, 3 }, 10L);
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
     }
 
 }

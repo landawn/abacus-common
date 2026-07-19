@@ -132,6 +132,17 @@ public abstract class AbstractPool implements Pool {
         return lock.newCondition();
     }
 
+    /** Propagates JVM-fatal failures while allowing callers to contain other optional/user-code failures. */
+    static void rethrowIfFatal(final Throwable e) {
+        if (e instanceof ThreadDeath threadDeath) {
+            throw threadDeath;
+        }
+
+        if (e instanceof VirtualMachineError virtualMachineError) {
+            throw virtualMachineError;
+        }
+    }
+
     /**
      * Maximum number of objects the pool can hold.
      */

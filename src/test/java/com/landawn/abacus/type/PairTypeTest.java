@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyChar;
@@ -168,10 +169,11 @@ public class PairTypeTest extends TestBase {
 
     @Test
     public void testAppendToPreservesCheckedIOException() {
+        final IOException failure = new IOException("write failed");
         Writer failingWriter = new Writer() {
             @Override
             public void write(final char[] cbuf, final int off, final int len) throws IOException {
-                throw new IOException("write failed");
+                throw failure;
             }
 
             @Override
@@ -185,7 +187,7 @@ public class PairTypeTest extends TestBase {
             }
         };
 
-        org.junit.jupiter.api.Assertions.assertThrows(IOException.class, () -> stringIntPairType.appendTo(failingWriter, Pair.of("a", 1)));
+        assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IOException.class, () -> stringIntPairType.appendTo(failingWriter, Pair.of("a", 1))));
     }
 
     @Test

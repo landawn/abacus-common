@@ -20,7 +20,7 @@ package com.landawn.abacus.util;
 /**
  * A marker interface that provides mutable access to a value.
  *
- * <p>This interface serves as a generic marker for the mutable wrapper implementations
+ * <p>This interface serves as a common marker for the mutable wrapper implementations
  * in this package. It identifies classes that wrap primitive or object values and allow
  * those values to be modified after construction.</p>
  *
@@ -68,6 +68,10 @@ package com.landawn.abacus.util;
  * <p><strong>Thread Safety:</strong> Implementations of this interface are generally
  * NOT thread-safe. If multiple threads access a mutable instance concurrently,
  * and at least one thread modifies it, external synchronization is required.</p>
+ *
+ * <p><strong>Hash-based collections:</strong> Implementations with value-based
+ * {@code equals}/{@code hashCode} should not be mutated while used as keys in a hash-based
+ * collection; changing the value can make the entry unreachable in its current bucket.</p>
  *
  * <p>Note: This interface is adapted from Apache Commons Lang.</p>
  */

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -122,6 +123,17 @@ public class PasswordTest extends AbstractTest {
         Password p1 = new Password("SHA-256");
         Password p2 = new Password("SHA-256");
         assertEquals(p1, p2);
+    }
+
+    @Test
+    public void testAlgorithmAliasesUseCanonicalIdentity() {
+        Password upperCase = new Password("SHA-256");
+        Password lowerCase = new Password("sha-256");
+
+        assertEquals(upperCase, lowerCase);
+        assertEquals(upperCase.hashCode(), lowerCase.hashCode());
+        assertEquals(upperCase.getAlgorithm(), lowerCase.getAlgorithm());
+        assertThrows(NullPointerException.class, () -> new Password(null));
     }
 
     @Test

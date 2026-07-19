@@ -1,9 +1,14 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -23,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -70,22 +77,64 @@ public class InputStreamTypeTest extends TestBase {
     }
 
     @Test
+    public void testWellFormedUtf8RoundTrip() throws IOException {
+        byte[] bytes = "h\u00e9llo".getBytes(StandardCharsets.UTF_8);
+
+        String encoded = inputStreamType.stringOf(new ByteArrayInputStream(bytes));
+
+        assertArrayEquals(bytes, inputStreamType.valueOf(encoded).readAllBytes());
+    }
+
+    @Test
     public void testValueOfString() {
         assertNull(inputStreamType.valueOf((String) null));
 
     }
 
     @Test
-    public void testValueOfObject() throws SQLException {
+    public void testValueOfObject() throws SQLException, IOException {
         assertNull(inputStreamType.valueOf((Object) null));
 
         InputStream expectedStream = new ByteArrayInputStream(new byte[0]);
         when(blob.getBinaryStream()).thenReturn(expectedStream);
 
         InputStream result = inputStreamType.valueOf(blob);
-        assertEquals(expectedStream, result);
+        assertNotNull(result);
+        result.close();
+        result.close();
         verify(blob).getBinaryStream();
+        verify(blob, times(1)).free();
+    }
 
+    @Test
+    public void testValueOfBlobFreesLocatorWhenOpeningFails() throws SQLException {
+        final SQLException openFailure = new SQLException("open");
+        final SQLException freeFailure = new SQLException("free");
+        when(blob.getBinaryStream()).thenThrow(openFailure);
+        doThrow(freeFailure).when(blob).free();
+
+        final UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> inputStreamType.valueOf(blob));
+
+        assertSame(openFailure, thrown.getCause());
+        assertSame(freeFailure, openFailure.getSuppressed()[0]);
+        verify(blob).free();
+    }
+
+    @Test
+    public void testValueOfBlobFreesLocatorWhenDelegateCloseFails() throws SQLException, IOException {
+        final InputStream delegate = org.mockito.Mockito.mock(InputStream.class);
+        final IOException closeFailure = new IOException("close");
+        final SQLException freeFailure = new SQLException("free");
+        when(blob.getBinaryStream()).thenReturn(delegate);
+        doThrow(closeFailure).when(delegate).close();
+        doThrow(freeFailure).when(blob).free();
+
+        final InputStream result = inputStreamType.valueOf(blob);
+        final IOException thrown = assertThrows(IOException.class, result::close);
+
+        assertSame(closeFailure, thrown);
+        assertSame(freeFailure, thrown.getSuppressed()[0]);
+        verify(blob).free();
     }
 
     @Test

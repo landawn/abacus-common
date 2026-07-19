@@ -179,6 +179,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         }
 
         final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
+        Throwable failure = null;
 
         try {
             bw.write(prefix);
@@ -189,9 +190,14 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
 
             return bw.toString();
         } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+            final UncheckedIOException uncheckedException = new UncheckedIOException(e);
+            failure = uncheckedException;
+            throw uncheckedException;
+        } catch (final RuntimeException | Error e) {
+            failure = e;
+            throw e;
         } finally {
-            Objectory.recycle(bw);
+            Utils.recycle(bw, failure);
         }
     }
 

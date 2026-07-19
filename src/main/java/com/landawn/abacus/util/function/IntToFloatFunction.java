@@ -31,8 +31,8 @@ public interface IntToFloatFunction {
     /**
      * A default implementation that performs a widening primitive conversion
      * from {@code int} to {@code float}. Note that this conversion may result
-     * in loss of precision for large int values, as float has only 24 bits
-     * of mantissa compared to int's 32 bits.
+     * in loss of precision for large int values, as {@code float} has only 24 bits
+     * of binary significand precision compared with the 32-bit {@code int} value range.
      */
     IntToFloatFunction DEFAULT = value -> value;
 

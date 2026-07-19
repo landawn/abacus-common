@@ -15,8 +15,6 @@
 package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,9 +22,10 @@ import com.landawn.abacus.TestBase;
 
 public class ShortConsumerTest extends TestBase {
 
+    private short acceptedValue;
+
     private void acceptHelper(short t) {
-        // Helper method for method reference test
-        assertTrue(t >= Short.MIN_VALUE && t <= Short.MAX_VALUE);
+        acceptedValue = t;
     }
 
     @Test
@@ -66,12 +65,10 @@ public class ShortConsumerTest extends TestBase {
 
     @Test
     public void test_accept_methodReference() {
-        final short[] result = { 0 };
-
         ShortConsumer consumer = this::acceptHelper;
 
         consumer.accept((short) 42);
-        assertNotNull(consumer);
+        assertEquals(42, acceptedValue);
     }
 
     @Test

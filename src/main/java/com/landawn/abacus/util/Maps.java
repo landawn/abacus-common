@@ -82,7 +82,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Exception Minimization:</b> Methods avoid throwing unnecessary exceptions when contracts
  *       are not violated, preferring sensible defaults for edge cases</li>
  *   <li><b>Empty Over Null:</b> Methods prefer returning empty maps over {@code null} values when possible</li>
- *   <li><b>Null Safety First:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Null Safety First:</b> Comprehensive {@code null} input handling throughout the API</li>
  * </ul>
  *
  * <p><b>{@code Maps} vs. related map APIs:</b> {@code Maps} provides <em>static utility methods</em> that operate
@@ -187,7 +187,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Comparison of the flagship value-retrieval methods:</b>
  * <table border="1">
- *   <caption>How each retrieval method treats a missing key/path vs. a null value</caption>
+ *   <caption>How each retrieval method treats a missing key/path vs. a {@code null} value</caption>
  *   <tr>
  *     <th>Method</th>
  *     <th>Keys</th>
@@ -262,7 +262,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <ul>
  *   <li><b>Map Creation:</b> {@code zip} for combining separate key/value collections</li>
  *   <li><b>Access Operations:</b> {@code getIfExists}, {@code getOrDefaultIfAbsent}, {@code getByPath*},
- *       and {@code getAs*} retrieval methods with raw, optional, nullable, and default-returning forms</li>
+ *       and {@code getAs*} retrieval methods with raw, optional, {@code nullable}, and default-returning forms</li>
  *   <li><b>Containment Operations:</b> {@code containsEntry} for key-value pair membership tests</li>
  *   <li><b>Transformation Operations:</b> {@code filter}, {@code invert}, {@code flatInvert}, {@code replaceKeys}</li>
  *   <li><b>Comparison Operations:</b> {@code difference}, {@code symmetricDifference}, {@code intersection}</li>
@@ -315,7 +315,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Value Retrieval Access:</b>
  * <ul>
- *   <li><b>Existence-aware:</b> {@code getIfExists()} returning {@link Nullable} - preserves null values</li>
+ *   <li><b>Existence-aware:</b> {@code getIfExists()} returning {@link Nullable} - preserves {@code null} values</li>
  *   <li><b>Null-as-absent:</b> {@code getOrDefaultIfAbsent()}, {@code getOrEmpty*IfAbsent()} with fallback values</li>
  *   <li><b>Get-or-create:</b> {@code getOrPut*IfAbsent()} - inserts default into map when absent</li>
  *   <li><b>Type-converting:</b> {@code getAs*()}, {@code getAs*OrDefaultIfAbsent()} with automatic type conversion</li>
@@ -364,24 +364,24 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Null Handling Strategy:</b>
  * <ul>
- *   <li><b>Present/Absent Model:</b> Clear distinction between missing keys and null values</li>
- *   <li><b>Graceful Degradation:</b> Methods handle null maps gracefully without exceptions</li>
- *   <li><b>Optional Returns:</b> Use of Optional types to avoid null return values</li>
- *   <li><b>Null Value Support:</b> Proper handling of null values within map operations</li>
+ *   <li><b>Present/Absent Model:</b> Clear distinction between missing keys and {@code null} values</li>
+ *   <li><b>Graceful Degradation:</b> Methods handle {@code null} maps gracefully without exceptions</li>
+ *   <li><b>Optional Returns:</b> Use of Optional types to avoid {@code null} return values</li>
+ *   <li><b>Null Value Support:</b> Proper handling of {@code null} values within map operations</li>
  * </ul>
  *
  * <p><b>Error Handling Strategy:</b>
  * <ul>
  *   <li><b>Contract Preservation:</b> Exceptions thrown only when method contracts are violated</li>
- *   <li><b>Edge Case Handling:</b> Graceful handling of empty maps, null inputs, missing keys</li>
+ *   <li><b>Edge Case Handling:</b> Graceful handling of empty maps, {@code null} inputs, missing keys</li>
  *   <li><b>Clear Documentation:</b> Well-defined behavior for all edge cases</li>
  *   <li><b>Consistent API:</b> Uniform error handling patterns across all methods</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
  * <ul>
- *   <li>Use Optional-returning methods to avoid null pointer exceptions</li>
- *   <li>Leverage the present/absent model for clear null value handling</li>
+ *   <li>Use Optional-returning methods to avoid {@code null} pointer exceptions</li>
+ *   <li>Leverage the present/absent model for clear {@code null} value handling</li>
  *   <li>Prefer map transformation utilities over manual iteration</li>
  *   <li>Use appropriate map types for specific use cases (HashMap, LinkedHashMap, TreeMap)</li>
  *   <li>Take advantage of the null-safe design for robust code</li>
@@ -643,7 +643,7 @@ public final class Maps {
      * }</pre>
      *
      * @param <K> the type of keys in the map.
-     * @param map the map whose keys are to be returned, may be null.
+     * @param map the map whose keys are to be returned, may be {@code null}.
      * @return an unmodifiable view of the map's key set if non-empty, otherwise an empty immutable set.
      * @see N#nullToEmpty(Map)
      */
@@ -676,7 +676,7 @@ public final class Maps {
      * }</pre>
      *
      * @param <V> the type of values in the map.
-     * @param map the map whose values are to be returned, may be null.
+     * @param map the map whose values are to be returned, may be {@code null}.
      * @return an unmodifiable view of the map's values if non-empty, otherwise an empty immutable list.
      * @see N#nullToEmpty(Map)
      */
@@ -711,7 +711,7 @@ public final class Maps {
      *
      * @param <K> the type of keys in the map.
      * @param <V> the type of values in the map.
-     * @param map the map whose entry set is to be returned, may be null.
+     * @param map the map whose entry set is to be returned, may be {@code null}.
      * @return the entry set of the map if non-empty, otherwise an empty immutable set.
      * @see N#nullToEmpty(Map)
      */
@@ -850,123 +850,6 @@ public final class Maps {
 
         return result;
     }
-
-    //    //    3.7 zip(keys, values, defaultForKey, defaultForValue) — adjacent same-role defaults + surplus-value
-    //    //    collapse. [Low — documented]
-    //    //    Maps.java:896 (delegates with Fn.selectFirst() at :897). When K==V the two defaults are silently
-    //    //    swappable; all surplus values collapse into the single defaultForKey entry under Fn.selectFirst.
-    //    //    STATUS: documented with a pointer to the 6-arg overload (:933) and a null-value NPE note on the
-    //    //    merge path (:906-909). Close as documented-by-design (see 6.4).
-    //    /**
-    //     * Creates a Map by zipping together two Iterables with default values for missing elements.
-    //     * If one Iterable is shorter, the default value is used for the missing elements.
-    //     * Note that if {@code values} is longer than {@code keys}, all extra values share the single
-    //     * {@code defaultForKey} entry, so the result may be smaller than the longer Iterable (see note below).
-    //     * Returns an empty map only if both Iterables are {@code null} or empty.
-    //     *
-    //     * <p><b>Important:</b> When using default keys, if multiple values map to the same default key,
-    //     * the merge function {@code Fn.selectFirst()} is applied, which keeps the first value and
-    //     * discards subsequent values for duplicate keys. This means if {@code values} has more elements
-    //     * than {@code keys}, only the first extra value will be mapped to {@code defaultForKey}.
-    //     * To control how such surplus values are merged, use
-    //     * {@link #zip(Iterable, Iterable, Object, Object, BiFunction, IntFunction)} instead.
-    //     *
-    //     * <p><b>Note:</b> Entries are inserted via {@link Map#merge(Object, Object, BiFunction)}, which does not
-    //     * accept {@code null} values - a {@code null} element in {@code values} (or a {@code null}
-    //     * {@code defaultForValue} when it is needed) causes a {@link NullPointerException}.
-    //     * The non-merging {@link #zip(Iterable, Iterable)} overload accepts {@code null} values.</p>
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * List<String> keys = Arrays.asList("a", "b");
-    //     * List<Integer> values = Arrays.asList(1, 2, 3, 4);
-    //     * Map<String, Integer> result = Maps.zip(keys, values, "default", 0);
-    //     * // result: {a=1, b=2, default=3}
-    //     * // Note: Only the first extra value (3) is kept; value 4 is discarded
-    //     * //       because "default" key is reused and Fn.selectFirst() keeps the first value
-    //     * }</pre>
-    //     *
-    //     * @param <K> the type of keys in the resulting Map.
-    //     * @param <V> the type of values in the resulting Map.
-    //     * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
-    //     * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
-    //     * @param defaultForKey the default key to use when {@code keys} is shorter than {@code values}.
-    //     * @param defaultForValue the default value to use when {@code values} is shorter than {@code keys}.
-    //     * @return a new {@code HashMap} covering all elements from both iterables, using defaults for
-    //     *         missing elements; an empty map if both inputs are {@code null} or empty.
-    //     */
-    //    public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
-    //        return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), IntFunctions.ofMap());
-    //    }
-    //
-    //    //  3.7 zip(keys, values, defaultForKey, defaultForValue) — adjacent same-role defaults + surplus-value
-    //    //  collapse. [Low — documented]
-    //    //  Maps.java:896 (delegates with Fn.selectFirst() at :897). When K==V the two defaults are silently
-    //    //  swappable; all surplus values collapse into the single defaultForKey entry under Fn.selectFirst.
-    //    //  STATUS: documented with a pointer to the 6-arg overload (:933) and a null-value NPE note on the
-    //    //  merge path (:906-909). Close as documented-by-design (see 6.4).
-    //    /**
-    //     * Creates a Map by zipping together two Iterables with default values and custom merge function.
-    //     * The resulting Map will have entries for all elements from both Iterables.
-    //     * If one Iterable is shorter, default values are used. Duplicate keys are handled by the merge function.
-    //     * Returns an empty map only if both Iterables are {@code null} or empty.
-    //     *
-    //     * <p><b>Note:</b> Entries are inserted via {@link Map#merge(Object, Object, BiFunction)}, which does not
-    //     * accept {@code null} values - a {@code null} element in {@code values} (or a {@code null}
-    //     * {@code defaultForValue} when it is needed) causes a {@link NullPointerException}.
-    //     * The non-merging {@link #zip(Iterable, Iterable)} overload accepts {@code null} values.</p>
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * List<String> keys = Arrays.asList("a", "b");
-    //     * List<Integer> values = Arrays.asList(1, 2, 3);
-    //     * Map<String, Integer> result = Maps.zip(keys, values, "sum", 10,
-    //     *     (v1, v2) -> v1 + v2, HashMap::new);
-    //     * // result: {a=1, b=2, sum=3}
-    //     * }</pre>
-    //     *
-    //     * @param <K> the type of keys in the resulting Map.
-    //     * @param <V> the type of values in the resulting Map.
-    //     * @param <M> the type of the resulting Map.
-    //     * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
-    //     * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
-    //     * @param defaultForKey the default key to use when {@code keys} is shorter than {@code values}.
-    //     * @param defaultForValue the default value to use when {@code values} is shorter than {@code keys}.
-    //     * @param mergeFunction a function used to resolve conflicts when duplicate keys are encountered; must not be {@code null}.
-    //     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
-    //     * @return a Map covering all elements from both iterables, using defaults for missing elements;
-    //     *         an empty map (from {@code mapSupplier.apply(0)}) if both inputs are {@code null} or empty.
-    //     * @throws NullPointerException if {@code mergeFunction} or {@code mapSupplier} is {@code null}.
-    //     */
-    //    public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
-    //            final V defaultForValue, final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-    //        if (N.isEmptyCollection(keys) && N.isEmptyCollection(values)) {
-    //            return mapSupplier.apply(0);
-    //        }
-    //
-    //        // Either side may be null/empty (per the contract): treat a null/empty side as an empty iterator so
-    //        // the surplus elements from the other side get the configured defaults, instead of throwing NPE.
-    //        final Iterator<? extends K> keyIter = N.isEmptyCollection(keys) ? N.<K> emptyIterator() : keys.iterator();
-    //        final Iterator<? extends V> valueIter = N.isEmptyCollection(values) ? N.<V> emptyIterator() : values.iterator();
-    //
-    //        final int maxLen = N.max(keys instanceof Collection ? ((Collection<K>) keys).size() : 0,
-    //                values instanceof Collection ? ((Collection<V>) values).size() : 0);
-    //        final M result = mapSupplier.apply(maxLen);
-    //
-    //        while (keyIter.hasNext() && valueIter.hasNext()) {
-    //            result.merge(keyIter.next(), valueIter.next(), mergeFunction);
-    //        }
-    //
-    //        while (keyIter.hasNext()) {
-    //            result.merge(keyIter.next(), defaultForValue, mergeFunction);
-    //        }
-    //
-    //        while (valueIter.hasNext()) {
-    //            result.merge(defaultForKey, valueIter.next(), mergeFunction);
-    //        }
-    //
-    //        return result;
-    //    }
 
     /**
      * Retrieves the value associated with the specified key, wrapped in a {@link Nullable}.
@@ -1180,10 +1063,10 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("name", "John", "age", null, "tags", Arrays.asList("a", "b")));
      *
-     * String name = Maps.getByPath(map, "user.name");         // returns "John"
-     * String firstTag = Maps.getByPath(map, "user.tags[0]");  // returns "a"
-     * Integer age = Maps.getByPath(map, "user.age");          // returns null (path exists)
-     * String missing = Maps.getByPath(map, "user.height");    // returns null (path missing)
+     * String name = Maps.getByPath(map, "user.name");          // returns "John"
+     * String firstTag = Maps.getByPath(map, "user.tags[0]");   // returns "a"
+     * Integer age = Maps.getByPath(map, "user.age");           // returns null (path exists)
+     * String missing = Maps.getByPath(map, "user.height");     // returns null (path missing)
      * }</pre>
      *
      * @param <T> the type of the value to be returned
@@ -1269,8 +1152,8 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("age", "25"));
      *
-     * OptionalInt age = Maps.getByPathAsInt(map, "user.age");      // OptionalInt.of(25)
-     * OptionalInt missing = Maps.getByPathAsInt(map, "user.score"); // OptionalInt.empty()
+     * OptionalInt age = Maps.getByPathAsInt(map, "user.age");         // OptionalInt.of(25)
+     * OptionalInt missing = Maps.getByPathAsInt(map, "user.score");   // OptionalInt.empty()
      * }</pre>
      *
      * @param map  the root map to traverse, may be {@code null}
@@ -1304,8 +1187,8 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("age", "25"));
      *
-     * int age = Maps.getByPathAsIntOrDefaultIfAbsent(map, "user.age", 0);       // 25
-     * int missing = Maps.getByPathAsIntOrDefaultIfAbsent(map, "user.score", -1); // -1
+     * int age = Maps.getByPathAsIntOrDefaultIfAbsent(map, "user.age", 0);          // 25
+     * int missing = Maps.getByPathAsIntOrDefaultIfAbsent(map, "user.score", -1);   // -1
      * }</pre>
      *
      * @param map          the root map to traverse, may be {@code null}
@@ -1341,8 +1224,8 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("name", "John", "age", 25));
      *
-     * Optional<String> name = Maps.getByPathAsString(map, "user.name"); // Optional.of("John")
-     * Optional<String> age = Maps.getByPathAsString(map, "user.age");   // Optional.of("25")
+     * Optional<String> name = Maps.getByPathAsString(map, "user.name");   // Optional.of("John")
+     * Optional<String> age = Maps.getByPathAsString(map, "user.age");     // Optional.of("25")
      * }</pre>
      *
      * @param map  the root map to traverse, may be {@code null}
@@ -1376,8 +1259,8 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("name", "John", "age", 25));
      *
-     * String name = Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.name", "Unknown"); // "John"
-     * String missing = Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.email", "Unknown"); // "Unknown"
+     * String name = Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.name", "Unknown");       // "John"
+     * String missing = Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.email", "Unknown");   // "Unknown"
      * }</pre>
      *
      * @param map          the root map to traverse, may be {@code null}
@@ -1389,7 +1272,8 @@ public final class Maps {
      * @see #getAsStringOrDefaultIfAbsent(Map, Object, String)
      * @see #getByPathAsString(Map, String)
      */
-    public static String getByPathAsStringOrDefaultIfAbsent(final Map<String, ?> map, final String path, final String defaultValue) {
+    public static String getByPathAsStringOrDefaultIfAbsent(final Map<String, ?> map, final String path, final String defaultValue)
+            throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
 
         final Object val = resolveByPathOrDefaultValue(map, path, NONE, null);
@@ -1416,8 +1300,8 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("age", "25"));
      *
-     * Optional<Integer> age = Maps.getByPathAs(map, "user.age", Integer.class); // Optional.of(25)
-     * Optional<Long> missing = Maps.getByPathAs(map, "user.id", Long.class);    // Optional.empty()
+     * Optional<Integer> age = Maps.getByPathAs(map, "user.age", Integer.class);   // Optional.of(25)
+     * Optional<Long> missing = Maps.getByPathAs(map, "user.id", Long.class);      // Optional.empty()
      * }</pre>
      *
      * @param <T>        the target type
@@ -1432,7 +1316,8 @@ public final class Maps {
      * @see #getByPathAsInt(Map, String)
      * @see #getByPathAsString(Map, String)
      */
-    public static <T> Optional<T> getByPathAs(final Map<String, ?> map, final String path, final Class<? extends T> targetType) {
+    public static <T> Optional<T> getByPathAs(final Map<String, ?> map, final String path, final Class<? extends T> targetType)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType); // NOSONAR
 
         final Object val = resolveByPathOrDefaultValue(map, path, NONE, targetType);
@@ -1463,8 +1348,8 @@ public final class Maps {
      * Map<String, Object> map = new HashMap<>();
      * map.put("user", N.asMap("age", "25", "email", null));
      *
-     * int age = Maps.getByPathAsOrDefaultIfAbsent(map, "user.age", 0, Integer.class);          // returns 25 (converted from String)
-     * int missing = Maps.getByPathAsOrDefaultIfAbsent(map, "user.height", 180, Integer.class); // returns 180
+     * int age = Maps.getByPathAsOrDefaultIfAbsent(map, "user.age", 0, Integer.class);            // returns 25 (converted from String)
+     * int missing = Maps.getByPathAsOrDefaultIfAbsent(map, "user.height", 180, Integer.class);   // returns 180
      * String email = Maps.getByPathAsOrDefaultIfAbsent(map, "user.email", "unknown", String.class);
      * // returns "unknown" (null treated as absent)
      * }</pre>
@@ -1482,7 +1367,8 @@ public final class Maps {
      * @see #getByPathAs(Map, String, Class)
      * @see #getAsOrDefaultIfAbsent(Map, Object, Object, Class)
      */
-    public static <T> T getByPathAsOrDefaultIfAbsent(final Map<String, ?> map, final String path, final T defaultValue, final Class<? extends T> targetType) {
+    public static <T> T getByPathAsOrDefaultIfAbsent(final Map<String, ?> map, final String path, final T defaultValue, final Class<? extends T> targetType)
+            throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
         N.checkArgNotNull(targetType, cs.targetType); // NOSONAR
 
@@ -1631,9 +1517,9 @@ public final class Maps {
      * map.put("key1", "value1");
      * map.put("key2", null);
      *
-     * Maps.getOrDefaultIfAbsent(map, "key1", "default"); // returns "value1"
-     * Maps.getOrDefaultIfAbsent(map, "key2", "default"); // returns "default" (null treated as absent)
-     * Maps.getOrDefaultIfAbsent(map, "key3", "default"); // returns "default"
+     * Maps.getOrDefaultIfAbsent(map, "key1", "default");   // returns "value1"
+     * Maps.getOrDefaultIfAbsent(map, "key2", "default");   // returns "default" (null treated as absent)
+     * Maps.getOrDefaultIfAbsent(map, "key3", "default");   // returns "default"
      * }</pre>
      *
      * @param <K> the key type
@@ -1647,7 +1533,7 @@ public final class Maps {
      * @see #getAsOrDefaultIfAbsent(Map, Object, Object, Class)
      */
     // @ai-ignore getOrDefaultIfAbsent variants - null-treating-as-absent retrieval with default values/suppliers and nested map support. Do not suggest consolidation.
-    public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) {
+    public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, cs.defaultValue);
 
         if (N.isEmpty(map)) {
@@ -1687,9 +1573,9 @@ public final class Maps {
      * Map<String, Map<String, Integer>> nested = new HashMap<>();
      * nested.put("data", Collections.singletonMap("count", 5));
      *
-     * Maps.getOrDefaultIfAbsent(nested, "data", "count", 0);    // returns 5
-     * Maps.getOrDefaultIfAbsent(nested, "data", "missing", 0);  // returns 0
-     * Maps.getOrDefaultIfAbsent(nested, "missing", "count", 0); // returns 0
+     * Maps.getOrDefaultIfAbsent(nested, "data", "count", 0);      // returns 5
+     * Maps.getOrDefaultIfAbsent(nested, "data", "missing", 0);    // returns 0
+     * Maps.getOrDefaultIfAbsent(nested, "missing", "count", 0);   // returns 0
      * }</pre>
      *
      * @param <K> the outer map key type
@@ -1704,7 +1590,7 @@ public final class Maps {
      * @see #getIfExists(Map, Object, Object)
      */
     public static <K, K2, V2> V2 getOrDefaultIfAbsent(final Map<K, ? extends Map<? extends K2, ? extends V2>> map, final K key, final K2 k2,
-            final V2 defaultValue) {
+            final V2 defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, cs.defaultValue);
 
         if (N.isEmpty(map)) {
@@ -1740,10 +1626,10 @@ public final class Maps {
      * map.put("key1", "value1");
      * map.put("key2", null);
      *
-     * Maps.getOrDefaultIfAbsent(map, "key1", () -> "default");                        // returns "value1"
-     * Maps.getOrDefaultIfAbsent(map, "key2", () -> "default");                        // returns "default" (null treated as absent)
-     * Maps.getOrDefaultIfAbsent(map, "key3", () -> "default");                        // returns "default" (key missing)
-     * Maps.getOrDefaultIfAbsent((Map<String, String>) null, "key1", () -> "default"); // returns "default" (null map)
+     * Maps.getOrDefaultIfAbsent(map, "key1", () -> "default");                          // returns "value1"
+     * Maps.getOrDefaultIfAbsent(map, "key2", () -> "default");                          // returns "default" (null treated as absent)
+     * Maps.getOrDefaultIfAbsent(map, "key3", () -> "default");                          // returns "default" (key missing)
+     * Maps.getOrDefaultIfAbsent((Map<String, String>) null, "key1", () -> "default");   // returns "default" (null map)
      * }</pre>
      *
      * @param <K> the key type
@@ -1755,7 +1641,8 @@ public final class Maps {
      * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null}.
      * @throws NullPointerException if {@code defaultValueSupplier} returns {@code null}.
      */
-    public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
+    public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final Supplier<? extends V> defaultValueSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(defaultValueSupplier, cs.defaultValueSupplier);
 
         if (N.isEmpty(map)) {
@@ -3452,7 +3339,7 @@ public final class Maps {
      * @param map the map to put the value in; must not be {@code null}.
      * @param key the key to associate the value with.
      * @param value the value to put if the key is absent.
-     * @return the existing non-null value associated with the specified key, or {@code null} if the key was absent or mapped to {@code null} (in which case the new value is put).
+     * @return the existing {@code non-null} value associated with the specified key, or {@code null} if the key was absent or mapped to {@code null} (in which case the new value is put).
      * @throws NullPointerException if {@code map} is {@code null}.
      * @see Map#putIfAbsent(Object, Object)
      */
@@ -3501,7 +3388,7 @@ public final class Maps {
      * @param map the map to put the value in; must not be {@code null}.
      * @param key the key to associate the value with.
      * @param supplier the supplier to get the value from if the key is absent; must not be {@code null}.
-     * @return the existing non-null value associated with the specified key, or {@code null} if the
+     * @return the existing {@code non-null} value associated with the specified key, or {@code null} if the
      *         key was absent or mapped to {@code null} (in which case the supplier is invoked and its
      *         value is put).
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
@@ -3771,6 +3658,8 @@ public final class Maps {
      * // map: {b=2, c=3}  // Only "a"=1 was removed
      * }</pre>
      *
+     * <p>{@code entriesToRemove} may be {@code map} itself or another view backed by it.</p>
+     *
      * @param map the map from which the entries are to be removed.
      * @param entriesToRemove the map containing the entries to be removed.
      * @return {@code true} if any entries were removed, {@code false} otherwise.
@@ -3782,7 +3671,13 @@ public final class Maps {
 
         final int originalSize = map.size();
 
+        final List<Map.Entry<?, ?>> entries = new ArrayList<>(entriesToRemove.size());
+
         for (final Map.Entry<?, ?> entry : entriesToRemove.entrySet()) {
+            entries.add(N.newImmutableEntry(entry.getKey(), entry.getValue()));
+        }
+
+        for (final Map.Entry<?, ?> entry : entries) {
             final Object curValue = map.get(entry.getKey());
             if (N.equals(curValue, entry.getValue()) && (curValue != null || map.containsKey(entry.getKey()))) {
                 map.remove(entry.getKey());
@@ -3810,6 +3705,8 @@ public final class Maps {
      * // map: {b=2}
      * }</pre>
      *
+     * <p>{@code keysToRemove} may be a live view backed by {@code map}, such as {@link Map#keySet()}.</p>
+     *
      * @param map the map from which the keys are to be removed.
      * @param keysToRemove the collection of keys to be removed from the map.
      * @return {@code true} if any keys were removed, {@code false} otherwise.
@@ -3821,7 +3718,7 @@ public final class Maps {
 
         final int originalSize = map.size();
 
-        for (final Object key : keysToRemove) {
+        for (final Object key : new ArrayList<>(keysToRemove)) {
             map.remove(key);
         }
 

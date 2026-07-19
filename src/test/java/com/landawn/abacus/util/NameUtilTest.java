@@ -45,6 +45,16 @@ public class NameUtilTest extends TestBase {
     }
 
     @Test
+    public void testCacheNameReturnsExistingCanonicalInstance() {
+        final String value = "cacheNameCanonicalInstance";
+        final String cached = NameUtil.cacheName(new String(value), true);
+        final String equalButDistinct = new String(value);
+
+        Assertions.assertNotSame(cached, equalButDistinct);
+        Assertions.assertSame(cached, NameUtil.cacheName(equalButDistinct, false));
+    }
+
+    @Test
     public void testIsCanonicalName() {
         Assertions.assertTrue(NameUtil.isCanonicalName("com.example", "com.example.Person"));
         Assertions.assertTrue(NameUtil.isCanonicalName("com.example.Person", "com.example.Person.firstName"));
@@ -121,8 +131,15 @@ public class NameUtilTest extends TestBase {
 
     @Test
     public void testCacheName_Null() {
-        // Bug fix: cacheName(null, ...) should not throw NPE
         Assertions.assertNull(NameUtil.cacheName(null, false));
         Assertions.assertNull(NameUtil.cacheName(null, true));
+    }
+
+    @Test
+    public void testParsingMethodsRejectNullNames() {
+        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.isCanonicalName(null, "a.b"));
+        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.isCanonicalName("a", null));
+        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.getSimpleName(null));
+        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.getParentName(null));
     }
 }

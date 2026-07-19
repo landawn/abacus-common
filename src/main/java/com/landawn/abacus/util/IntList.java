@@ -175,7 +175,8 @@ import com.landawn.abacus.util.stream.IntStream;
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation,
+ *       including mutation through an aliased backing array</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
@@ -197,8 +198,8 @@ import com.landawn.abacus.util.stream.IntStream;
  * <p><b>Serialization Support:</b>
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
- *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of int arrays</li>
+ *   <li><b>Version Identification:</b> A fixed {@code serialVersionUID} identifies this serialized form</li>
+ *   <li><b>Default Format:</b> Default Java serialization includes the backing array, including spare capacity</li>
  *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
  * </ul>
  *
@@ -347,7 +348,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public IntList(final int initialCapacity) {
+    public IntList(final int initialCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_INT_ARRAY : new int[initialCapacity];
@@ -432,9 +433,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] src = {1, 2, 3, 4, 5};
-     * IntList a = IntList.of(src, 3);    // a is [1, 2, 3] (first 3 elements)
-     * IntList b = IntList.of(src, 0);    // b is [] (empty list)
-     * IntList.of(src, 6);                // throws IndexOutOfBoundsException (size > length)
+     * IntList a = IntList.of(src, 3);   // a is [1, 2, 3] (first 3 elements)
+     * IntList b = IntList.of(src, 0);   // b is [] (empty list)
+     * IntList.of(src, 6);               // throws IndexOutOfBoundsException (size > length)
      * }</pre>
      *
      * @param a the array of int values to be used as the backing array. Can be {@code null}.
@@ -531,10 +532,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntList a = IntList.range(0, 10, 2);   // a is [0, 2, 4, 6, 8]
-     * IntList b = IntList.range(10, 0, -2);  // b is [10, 8, 6, 4, 2]
-     * IntList c = IntList.range(0, 0, 1);    // c is [] (start == end)
-     * IntList.range(1, 5, 0);                // throws IllegalArgumentException (by is 0)
+     * IntList a = IntList.range(0, 10, 2);    // a is [0, 2, 4, 6, 8]
+     * IntList b = IntList.range(10, 0, -2);   // b is [10, 8, 6, 4, 2]
+     * IntList c = IntList.range(0, 0, 1);     // c is [] (start == end)
+     * IntList.range(1, 5, 0);                 // throws IllegalArgumentException (by is 0)
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -680,8 +681,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             }
         } else {
             for (int i = 0; i < len; i++) {
-                final long randomValue = RAND.nextLong();
-                a[i] = (int) ((randomValue & Long.MAX_VALUE) % mod + startInclusive);
+                a[i] = (int) (RAND.nextLong(mod) + startInclusive);
             }
         }
 
@@ -717,9 +717,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList a = IntList.of(10, 20, 30);
-     * a.get(0);    // returns 10
-     * a.get(2);    // returns 30
-     * a.get(5);    // throws IndexOutOfBoundsException (index >= size)
+     * a.get(0);   // returns 10
+     * a.get(2);   // returns 30
+     * a.get(5);   // throws IndexOutOfBoundsException (index >= size)
      * }</pre>
      *
      * @param index the index of the element to return
@@ -738,9 +738,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList a = IntList.of(1, 2, 3);
-     * a.set(1, 9);    // returns 2 (old value), a is now [1, 9, 3]
-     * a.set(0, 8);    // returns 1 (old value), a is now [8, 9, 3]
-     * a.set(5, 0);    // throws IndexOutOfBoundsException (index >= size)
+     * a.set(1, 9);   // returns 2 (old value), a is now [1, 9, 3]
+     * a.set(0, 8);   // returns 1 (old value), a is now [8, 9, 3]
+     * a.set(5, 0);   // throws IndexOutOfBoundsException (index >= size)
      * }</pre>
      *
      * @param index the index of the element to replace
@@ -794,10 +794,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList a = IntList.of(1, 2, 3);
-     * a.add(1, 9);      // a is now [1, 9, 2, 3]
-     * a.add(0, 8);      // a is now [8, 1, 9, 2, 3]
-     * a.add(5, 7);      // a is now [8, 1, 9, 2, 3, 7] (append at end)
-     * a.add(99, 0);     // throws IndexOutOfBoundsException (index > size)
+     * a.add(1, 9);    // a is now [1, 9, 2, 3]
+     * a.add(0, 8);    // a is now [8, 1, 9, 2, 3]
+     * a.add(5, 7);    // a is now [8, 1, 9, 2, 3, 7] (append at end)
+     * a.add(99, 0);   // throws IndexOutOfBoundsException (index > size)
      * }</pre>
      *
      * @param index the index at which the specified element is to be inserted
@@ -1214,20 +1214,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return numRemoved;
     }
 
-    //    /**
-    //     * Removes the element at the specified position in this list and returns it.
-    //     * Shifts any subsequent elements to the left (subtracts one from their indices).
-    //     *
-    //     * @param index the index of the element to be removed
-    //     * @return the element that was removed from the list
-    //     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-    //     * @deprecated replaced by {@link #removeAt(int)}.
-    //     */
-    //    @Deprecated
-    //    public int delete(final int index) {
-    //        return removeAt(index);
-    //    }
-
     /**
      * Removes and returns the element at the specified index.
      *
@@ -1237,9 +1223,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList a = IntList.of(10, 20, 30);
-     * a.removeAt(1);    // returns 20, a is now [10, 30]
-     * a.removeAt(0);    // returns 10, a is now [30]
-     * a.removeAt(5);    // throws IndexOutOfBoundsException (index >= size)
+     * a.removeAt(1);   // returns 20, a is now [10, 30]
+     * a.removeAt(0);   // returns 10, a is now [30]
+     * a.removeAt(5);   // throws IndexOutOfBoundsException (index >= size)
      * }</pre>
      *
      * <p><b>Note:</b> this single-index form returns the removed {@code int} value; the varargs
@@ -1279,20 +1265,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             return;
         }
 
-        for (final int index : indices) {
-            N.checkElementIndex(index, size);
-        }
-
-        final int[] tmp = N.removeAt(elementData, indices);
-
-        N.copy(tmp, 0, elementData, 0, tmp.length);
-
-        if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, 0);
-        }
-
-        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
-        size = size - (elementData.length - tmp.length);
+        final int newSize = compactAfterRemovingIndices(elementData, size, indices);
+        N.fill(elementData, newSize, size, 0);
+        size = newSize;
     }
 
     /**
@@ -1492,7 +1467,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList a = IntList.of(1, 2, 3);
-     * a.replaceAll(e -> e * 10);   // a is now [10, 20, 30]
+     * a.replaceAll(e -> e * 10);              // a is now [10, 20, 30]
      *
      * new IntList().replaceAll(e -> e + 1);   // empty list remains empty
      * }</pre>
@@ -1547,7 +1522,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList a = IntList.of(1, 2, 3);
-     * a.fill(0);   // a is now [0, 0, 0]
+     * a.fill(0);               // a is now [0, 0, 0]
      *
      * new IntList().fill(9);   // empty list remains empty
      * }</pre>
@@ -2062,10 +2037,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList a = IntList.of(1, 2, 3, 2, 1);
-     * a.indexOf(2, 0);    // returns 1
-     * a.indexOf(2, 2);    // returns 3 (first 2 at index 1 is skipped)
-     * a.indexOf(1, 1);    // returns 4
-     * a.indexOf(2, 5);    // returns -1 (fromIndex >= size)
+     * a.indexOf(2, 0);   // returns 1
+     * a.indexOf(2, 2);   // returns 3 (first 2 at index 1 is skipped)
+     * a.indexOf(1, 1);   // returns 4
+     * a.indexOf(2, 5);   // returns -1 (fromIndex >= size)
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -2149,8 +2124,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(5, 2, 8, 1, 9);
-     * OptionalInt min = list.min();               // returns OptionalInt[1]
-     * OptionalInt empty = new IntList().min();    // returns OptionalInt.empty
+     * OptionalInt min = list.min();              // returns OptionalInt[1]
+     * OptionalInt empty = new IntList().min();   // returns OptionalInt.empty
      * }</pre>
      *
      * @return an OptionalInt containing the minimum element, or an empty OptionalInt if the list is empty
@@ -2187,8 +2162,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(5, 2, 8, 1, 9);
-     * OptionalInt max = list.max();               // returns OptionalInt[9]
-     * OptionalInt empty = new IntList().max();    // returns OptionalInt.empty
+     * OptionalInt max = list.max();              // returns OptionalInt[9]
+     * OptionalInt empty = new IntList().max();   // returns OptionalInt.empty
      * }</pre>
      *
      * @return an OptionalInt containing the maximum element, or an empty OptionalInt if the list is empty
@@ -2269,7 +2244,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <pre>{@code
      * IntList a = IntList.of(1, 2, 3);
      * int[] sum = {0};
-     * a.forEach(e -> sum[0] += e);   // sum[0] is now 6
+     * a.forEach(e -> sum[0] += e);            // sum[0] is now 6
      *
      * new IntList().forEach(e -> sum[0]++);   // action never invoked, sum[0] unchanged
      * }</pre>
@@ -2277,7 +2252,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final IntConsumer action) {
+    public void forEach(final IntConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
@@ -2302,7 +2277,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * list.forEach(4, -1, action);   // Backward: processes indices 4,3,2,1,0
      * }</pre>
      *
-     * @param fromIndex the starting index (inclusive)
+     * @param fromIndex the starting index (inclusive); for backward traversal, {@code size()} is
+     *        accepted and clamped to the last logical element
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws IndexOutOfBoundsException if the specified range is out of bounds, i.e. if
@@ -2310,7 +2286,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *         {@code max(fromIndex, toIndex) > size()} (except for the special {@code toIndex == -1} case)
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2497,8 +2473,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4, 5);
-     * int idx = list.binarySearch(3);       // returns 2
-     * int notFound = list.binarySearch(6);  // returns -6
+     * int idx = list.binarySearch(3);        // returns 2
+     * int notFound = list.binarySearch(6);   // returns -6
      * }</pre>
      *
      * @param valueToFind the value to search for
@@ -2650,7 +2626,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
-    public void shuffle(final Random rnd) {
+    public void shuffle(final Random rnd) throws IllegalArgumentException {
         N.checkArgNotNull(rnd, cs.rnd);
 
         if (size() > 1) {
@@ -2999,7 +2975,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final C c = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -3024,7 +3001,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final Multiset<Integer> multiset = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final Multiset<Integer> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

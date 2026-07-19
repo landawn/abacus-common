@@ -39,8 +39,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * Write operations ({@link #put}, {@link #putAll}) throw {@link NullPointerException} for
  * {@code null} keys or values, consistent with the underlying {@link ConcurrentHashMap}.
  * Read and query operations are null-safe: {@link #get(Object)} and {@link #remove(Object)}
- * return {@code null}, while {@link #containsKey(Object)} and {@link #containsValue(Object)}
- * return {@code false} for {@code null} arguments instead of throwing.</p>
+ * return {@code null}, while {@link #containsKey(Object)}, {@link #containsValue(Object)}, and
+ * {@link #remove(Object, Object)} return {@code false} for {@code null} arguments instead of throwing.</p>
  *
  * <p><b>View collections:</b> The {@link #keySet()}, {@link #values()}, and {@link #entrySet()}
  * methods return live views backed by the underlying map. Changes to the map are reflected
@@ -58,13 +58,15 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * Type<?> type = typeCache.get("int");
  * }</pre>
  *
- * <p><b>Thread safety note:</b> {@link #putIfAbsent(Object, Object)} is overridden to delegate
- * directly to the underlying {@link ConcurrentHashMap} and is therefore genuinely atomic.
- * However, this class extends {@link AbstractMap} and does <i>not</i> override the other
+ * <p><b>Thread safety note:</b> {@link #putIfAbsent(Object, Object)} and
+ * {@link #remove(Object, Object)} delegate directly to the underlying {@link ConcurrentHashMap}
+ * and are therefore genuinely atomic. However, this class extends {@link AbstractMap} and does
+ * <i>not</i> override the other
  * default compound methods. As a result, default {@link Map} methods inherited from
  * {@code AbstractMap} (such as {@link Map#computeIfAbsent}, {@link Map#merge},
  * {@link Map#compute}) are <i>not</i> guaranteed to be atomic on this class. For atomic
- * compound operations beyond {@code putIfAbsent}, use a {@link ConcurrentHashMap} directly or
+ * compound operations beyond {@code putIfAbsent} and conditional {@code remove}, use a
+ * {@link ConcurrentHashMap} directly or
  * apply explicit external synchronization.</p>
  *
  * @param <K> the type of keys maintained by this map
@@ -115,8 +117,8 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
-     * @return the value to which the specified key is mapped,
-     *         or {@code null} if the key is {@code null} or no mapping exists
+     * @return the value mapped to {@code key}, or {@code null} if the key is {@code null}
+     *         or no mapping exists
      */
     @MayReturnNull
     @Override
@@ -207,8 +209,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * }</pre>
      *
      * @param key key whose mapping is to be removed from the map
-     * @return the previous value associated with {@code key},
-     *         or {@code null} if the key is {@code null} or no mapping existed
+     * @return the removed value, or {@code null} if the key is {@code null} or no mapping existed
      */
     @MayReturnNull
     @Override
@@ -218,6 +219,28 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         }
 
         return map.remove(key);
+    }
+
+    /**
+     * Atomically removes the mapping for {@code key} only when it is currently mapped to
+     * {@code value}. Delegating to {@link ConcurrentHashMap#remove(Object, Object)} prevents a
+     * concurrent replacement from being removed by a non-atomic get-then-remove sequence.
+     *
+     * <p>For consistency with this class's other null-safe query operations, this method returns
+     * {@code false} when either argument is {@code null}.</p>
+     *
+     * @param key key whose mapping is to be conditionally removed
+     * @param value value expected to be associated with {@code key}
+     * @return {@code true} if the matching mapping was removed; {@code false} if either argument
+     *         is {@code null}, the key was absent, or it was mapped to a different value
+     */
+    @Override
+    public boolean remove(final Object key, final Object value) {
+        if (key == null || value == null) {
+            return false;
+        }
+
+        return map.remove(key, value);
     }
 
     /**

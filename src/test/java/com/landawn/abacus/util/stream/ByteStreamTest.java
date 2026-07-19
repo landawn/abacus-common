@@ -2959,6 +2959,33 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
+    public void testConcatCollectionSnapshotsSources() {
+        List<ByteStream> sources = new ArrayList<>(Arrays.asList(ByteStream.of((byte) 1, (byte) 2), ByteStream.of((byte) 3, (byte) 4)));
+        ByteStream concatenated = ByteStream.concat(sources);
+
+        sources.clear();
+
+        assertArrayEquals(new byte[] { 1, 2, 3, 4 }, concatenated.toArray());
+
+        AtomicBoolean firstClosed = new AtomicBoolean();
+        AtomicBoolean secondClosed = new AtomicBoolean();
+        sources.add(ByteStream.of((byte) 1).onClose(() -> firstClosed.set(true)));
+        sources.add(ByteStream.of((byte) 2).onClose(() -> secondClosed.set(true)));
+        concatenated = ByteStream.concat(sources);
+
+        sources.clear();
+        concatenated.close();
+
+        assertTrue(firstClosed.get());
+        assertTrue(secondClosed.get());
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        assertEquals(0, ByteStream.merge(Arrays.asList((ByteStream) null), (a, b) -> MergeResult.TAKE_FIRST).count());
+    }
+
+    @Test
     public void testConcatByteArrays() {
         List<Byte> result = ByteStream.concat(new byte[] { 1, 2 }, new byte[] { 3, 4, 5 }).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
@@ -4198,5 +4225,38 @@ public class ByteStreamTest extends TestBase {
                 () -> ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
+
+    @Test
+    public void testFiniteFactoryIteratorsRemainExhaustedAfterFailedNext() {
+        final ByteIteratorEx[] iterators = { ByteStream.range((byte) 1, (byte) 3).iteratorEx(), ByteStream.range((byte) 1, (byte) 5, (byte) 2).iteratorEx(),
+                ByteStream.rangeClosed((byte) 1, (byte) 3).iteratorEx(), ByteStream.rangeClosed((byte) 1, (byte) 5, (byte) 2).iteratorEx(),
+                ByteStream.repeat((byte) 7, 10).iteratorEx() };
+
+        for (final ByteIteratorEx iter : iterators) {
+            iter.advance(Long.MAX_VALUE);
+            assertThrows(NoSuchElementException.class, iter::nextByte);
+            assertEquals(0, iter.count());
+            assertArrayEquals(new byte[0], iter.toArray());
+        }
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        ByteIterator iter = ByteStream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> (byte) 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = ByteStream.iterate((byte) 1, () -> conditionCalls.getAndIncrement() > 0, value -> (byte) (value + 1)).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
+        assertEquals(1, conditionCalls.get());
     }
 }

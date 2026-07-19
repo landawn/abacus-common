@@ -244,7 +244,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
-     * literal form and ignores string quotation/escaping config.
+     * literal form and also honors null-number substitution from the serialization config.
      *
      * @param appendable the target to write to
      * @param x the number value to append, may be {@code null}
@@ -273,7 +273,8 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * to {@link #appendTo(Appendable, Object)}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
-     * {@code CharacterWriter}. String quotation/escaping config is ignored.
+     * {@code CharacterWriter}. If {@code x} is {@code null} and the config requests
+     * {@code writeNullNumberAsZero}, it writes {@code 0}; otherwise a {@code null} value is written as {@code null}.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -281,11 +282,15 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the number value to write, may be {@code null}
-     * @param config the serialization configuration (unused for number values)
+     * @param config the serialization configuration controlling null-number substitution; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
-        appendTo(writer, x);
+        if (x == null && config != null && config.isWriteNullNumberAsZero()) {
+            writer.write('0');
+        } else {
+            appendTo(writer, x);
+        }
     }
 }

@@ -55,6 +55,11 @@ public class XmlParserImplTest extends TestBase {
         deserializationConfig = new XmlDeserConfig();
     }
 
+    @Test
+    public void testStaxDocumentWithoutRootElementReportsParsingException() {
+        Assertions.assertThrows(ParsingException.class, () -> staxParser.deserialize("<?xml version=\"1.0\"?>", Map.class));
+    }
+
     public static class TestBean {
         private String name;
         private int age;

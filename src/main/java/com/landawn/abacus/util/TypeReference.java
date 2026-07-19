@@ -14,7 +14,15 @@
 
 package com.landawn.abacus.util;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
@@ -28,7 +36,8 @@ import com.landawn.abacus.type.TypeFactory;
  * <p>Due to Java's type erasure, generic type information is normally lost at runtime.
  * This class captures that information by analyzing the generic superclass of concrete
  * subclasses, allowing frameworks to access complete type information including
- * generic parameters.
+ * generic parameters. Named intermediate subclasses are supported: type-variable
+ * substitutions are resolved while walking the superclass hierarchy.
  *
  * <p><b>To use this class, create an anonymous subclass with the desired generic type:</b></p>
  * <pre>{@code
@@ -78,8 +87,8 @@ public abstract class TypeReference<T> {
 
     /**
      * Constructs a new TypeReference by capturing the generic type parameter
-     * from the concrete subclass. This constructor uses reflection to extract
-     * the actual type argument from the parameterized superclass.
+     * from the concrete subclass. This constructor walks the superclass hierarchy and
+     * resolves type-variable substitutions until it reaches {@code TypeReference}.
      *
      * <p>This constructor must be called from a concrete subclass that specifies
      * the generic type parameter. Direct instantiation of TypeReference is not
@@ -87,8 +96,8 @@ public abstract class TypeReference<T> {
      *
      * <p>The constructor performs several validation steps:
      * <ol>
-     *   <li>Verifies the superclass is a ParameterizedType (not a raw type)</li>
-     *   <li>Ensures at least one type argument is present</li>
+     *   <li>Rejects a raw superclass that loses the required type information</li>
+     *   <li>Resolves type variables through any named intermediate subclasses</li>
      *   <li>Resolves the type using TypeFactory</li>
      *   <li>Validates the resolved Type is not null</li>
      * </ol>
@@ -99,29 +108,287 @@ public abstract class TypeReference<T> {
      * TypeReference<List<String>> ref = new TypeReference<List<String>>() {};
      * }</pre>
      *
-     * @throws IllegalArgumentException if the TypeReference is constructed without actual type information,
-     *         or if the parameterized type has no type arguments
+     * @throws IllegalArgumentException if a raw superclass loses the type information, the captured
+     *         type still contains an unresolved type variable, or the hierarchy is unsupported
      * @throws IllegalStateException if the type cannot be resolved by TypeFactory
      */
     protected TypeReference() {
-        java.lang.reflect.Type superClass = getClass().getGenericSuperclass();
-
-        if (superClass instanceof Class<?>) {
-            throw new IllegalArgumentException("TypeReference constructed without actual type information");
-        }
-
-        java.lang.reflect.Type[] typeArguments = ((ParameterizedType) superClass).getActualTypeArguments();
-
-        if (typeArguments.length == 0) {
-            throw new IllegalArgumentException("TypeReference constructed without type arguments");
-        }
-
-        javaType = typeArguments[0];
+        javaType = captureTypeArgument(getClass());
 
         type = TypeFactory.getType(javaType);
 
         if (type == null) {
             throw new IllegalStateException("Failed to resolve type from TypeFactory for: " + javaType);
+        }
+    }
+
+    private static java.lang.reflect.Type captureTypeArgument(final Class<?> concreteClass) {
+        final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables = new HashMap<>();
+        Class<?> currentClass = concreteClass;
+
+        while (currentClass != Object.class) {
+            final java.lang.reflect.Type genericSuperClass = currentClass.getGenericSuperclass();
+
+            if (genericSuperClass instanceof ParameterizedType parameterizedSuperClass) {
+                if (!(parameterizedSuperClass.getRawType() instanceof Class<?> rawSuperClass)) {
+                    throw new IllegalArgumentException("Unsupported generic superclass for TypeReference: " + parameterizedSuperClass);
+                }
+
+                final TypeVariable<?>[] typeParameters = rawSuperClass.getTypeParameters();
+                final java.lang.reflect.Type[] typeArguments = parameterizedSuperClass.getActualTypeArguments();
+
+                for (int i = 0; i < typeParameters.length; i++) {
+                    resolvedVariables.put(typeParameters[i], resolveType(typeArguments[i], resolvedVariables));
+                }
+
+                if (rawSuperClass == TypeReference.class) {
+                    final java.lang.reflect.Type result = resolvedVariables.get(TypeReference.class.getTypeParameters()[0]);
+
+                    if (result == null || containsTypeVariable(result)) {
+                        throw new IllegalArgumentException("TypeReference constructed without concrete type information: " + result);
+                    }
+
+                    return result;
+                }
+
+                currentClass = rawSuperClass;
+            } else if (genericSuperClass instanceof Class<?> rawSuperClass) {
+                if (rawSuperClass == TypeReference.class) {
+                    throw new IllegalArgumentException("TypeReference constructed without actual type information");
+                }
+
+                currentClass = rawSuperClass;
+            } else {
+                throw new IllegalArgumentException("Unsupported generic superclass for TypeReference: " + genericSuperClass);
+            }
+        }
+
+        throw new IllegalArgumentException("TypeReference constructed without actual type information");
+    }
+
+    private static boolean containsTypeVariable(final java.lang.reflect.Type typeToCheck) {
+        if (typeToCheck instanceof TypeVariable<?>) {
+            return true;
+        }
+
+        if (typeToCheck instanceof ParameterizedType parameterizedType) {
+            if (parameterizedType.getOwnerType() != null && containsTypeVariable(parameterizedType.getOwnerType())) {
+                return true;
+            }
+
+            for (final java.lang.reflect.Type argument : parameterizedType.getActualTypeArguments()) {
+                if (containsTypeVariable(argument)) {
+                    return true;
+                }
+            }
+        } else if (typeToCheck instanceof GenericArrayType arrayType) {
+            return containsTypeVariable(arrayType.getGenericComponentType());
+        } else if (typeToCheck instanceof WildcardType wildcardType) {
+            for (final java.lang.reflect.Type bound : wildcardType.getUpperBounds()) {
+                if (containsTypeVariable(bound)) {
+                    return true;
+                }
+            }
+
+            for (final java.lang.reflect.Type bound : wildcardType.getLowerBounds()) {
+                if (containsTypeVariable(bound)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static java.lang.reflect.Type resolveType(final java.lang.reflect.Type source,
+            final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables) {
+        if (source instanceof TypeVariable<?> variable) {
+            final java.lang.reflect.Type resolved = resolvedVariables.get(variable);
+            return resolved == null || resolved == variable ? variable : resolveType(resolved, resolvedVariables);
+        }
+
+        if (source instanceof ParameterizedType parameterizedType) {
+            final java.lang.reflect.Type owner = parameterizedType.getOwnerType();
+            final java.lang.reflect.Type resolvedOwner = owner == null ? null : resolveType(owner, resolvedVariables);
+            final java.lang.reflect.Type[] arguments = parameterizedType.getActualTypeArguments();
+            final java.lang.reflect.Type[] resolvedArguments = new java.lang.reflect.Type[arguments.length];
+            boolean changed = resolvedOwner != owner;
+
+            for (int i = 0; i < arguments.length; i++) {
+                resolvedArguments[i] = resolveType(arguments[i], resolvedVariables);
+                changed |= resolvedArguments[i] != arguments[i];
+            }
+
+            return changed ? new ResolvedParameterizedType(resolvedOwner, parameterizedType.getRawType(), resolvedArguments) : parameterizedType;
+        }
+
+        if (source instanceof GenericArrayType arrayType) {
+            final java.lang.reflect.Type componentType = arrayType.getGenericComponentType();
+            final java.lang.reflect.Type resolvedComponentType = resolveType(componentType, resolvedVariables);
+
+            if (resolvedComponentType == componentType) {
+                return arrayType;
+            }
+
+            return resolvedComponentType instanceof Class<?> componentClass ? Array.newInstance(componentClass, 0).getClass()
+                    : new ResolvedGenericArrayType(resolvedComponentType);
+        }
+
+        if (source instanceof WildcardType wildcardType) {
+            final java.lang.reflect.Type[] upperBounds = resolveTypes(wildcardType.getUpperBounds(), resolvedVariables);
+            final java.lang.reflect.Type[] lowerBounds = resolveTypes(wildcardType.getLowerBounds(), resolvedVariables);
+
+            return Arrays.equals(upperBounds, wildcardType.getUpperBounds()) && Arrays.equals(lowerBounds, wildcardType.getLowerBounds()) ? wildcardType
+                    : new ResolvedWildcardType(upperBounds, lowerBounds);
+        }
+
+        return source;
+    }
+
+    private static java.lang.reflect.Type[] resolveTypes(final java.lang.reflect.Type[] sources,
+            final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables) {
+        final java.lang.reflect.Type[] result = new java.lang.reflect.Type[sources.length];
+
+        for (int i = 0; i < sources.length; i++) {
+            result[i] = resolveType(sources[i], resolvedVariables);
+        }
+
+        return result;
+    }
+
+    private static final class ResolvedParameterizedType implements ParameterizedType {
+        private final java.lang.reflect.Type ownerType;
+        private final java.lang.reflect.Type rawType;
+        private final java.lang.reflect.Type[] typeArguments;
+
+        ResolvedParameterizedType(final java.lang.reflect.Type ownerType, final java.lang.reflect.Type rawType, final java.lang.reflect.Type[] typeArguments) {
+            this.ownerType = ownerType;
+            this.rawType = rawType;
+            this.typeArguments = typeArguments.clone();
+        }
+
+        @Override
+        public java.lang.reflect.Type[] getActualTypeArguments() {
+            return typeArguments.clone();
+        }
+
+        @Override
+        public java.lang.reflect.Type getRawType() {
+            return rawType;
+        }
+
+        @Override
+        public java.lang.reflect.Type getOwnerType() {
+            return ownerType;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof ParameterizedType other && Objects.equals(ownerType, other.getOwnerType()) && Objects.equals(rawType, other.getRawType())
+                    && Arrays.equals(typeArguments, other.getActualTypeArguments());
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(typeArguments) ^ Objects.hashCode(ownerType) ^ Objects.hashCode(rawType);
+        }
+
+        @Override
+        public String getTypeName() {
+            final StringBuilder result = new StringBuilder(rawType.getTypeName()).append('<');
+
+            for (int i = 0; i < typeArguments.length; i++) {
+                if (i > 0) {
+                    result.append(", ");
+                }
+
+                result.append(typeArguments[i].getTypeName());
+            }
+
+            return result.append('>').toString();
+        }
+
+        @Override
+        public String toString() {
+            return getTypeName();
+        }
+    }
+
+    private static final class ResolvedGenericArrayType implements GenericArrayType {
+        private final java.lang.reflect.Type componentType;
+
+        ResolvedGenericArrayType(final java.lang.reflect.Type componentType) {
+            this.componentType = componentType;
+        }
+
+        @Override
+        public java.lang.reflect.Type getGenericComponentType() {
+            return componentType;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof GenericArrayType other && Objects.equals(componentType, other.getGenericComponentType());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(componentType);
+        }
+
+        @Override
+        public String getTypeName() {
+            return componentType.getTypeName() + "[]";
+        }
+
+        @Override
+        public String toString() {
+            return getTypeName();
+        }
+    }
+
+    private static final class ResolvedWildcardType implements WildcardType {
+        private final java.lang.reflect.Type[] upperBounds;
+        private final java.lang.reflect.Type[] lowerBounds;
+
+        ResolvedWildcardType(final java.lang.reflect.Type[] upperBounds, final java.lang.reflect.Type[] lowerBounds) {
+            this.upperBounds = upperBounds.clone();
+            this.lowerBounds = lowerBounds.clone();
+        }
+
+        @Override
+        public java.lang.reflect.Type[] getUpperBounds() {
+            return upperBounds.clone();
+        }
+
+        @Override
+        public java.lang.reflect.Type[] getLowerBounds() {
+            return lowerBounds.clone();
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof WildcardType other && Arrays.equals(upperBounds, other.getUpperBounds())
+                    && Arrays.equals(lowerBounds, other.getLowerBounds());
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(upperBounds) ^ Arrays.hashCode(lowerBounds);
+        }
+
+        @Override
+        public String getTypeName() {
+            if (lowerBounds.length > 0) {
+                return "? super " + lowerBounds[0].getTypeName();
+            }
+
+            return upperBounds.length == 0 || upperBounds[0] == Object.class ? "?" : "? extends " + upperBounds[0].getTypeName();
+        }
+
+        @Override
+        public String toString() {
+            return getTypeName();
         }
     }
 
@@ -137,10 +404,12 @@ public abstract class TypeReference<T> {
      * <ul>
      *   <li>A {@link Class} object for simple types (e.g., {@code String.class})</li>
      *   <li>A {@link ParameterizedType} for generic types (e.g., {@code List<String>})</li>
-     *   <li>A {@link java.lang.reflect.GenericArrayType} for generic arrays (e.g., {@code T[]})</li>
-     *   <li>A {@link java.lang.reflect.TypeVariable} for type variables (e.g., {@code T})</li>
-     *   <li>A {@link java.lang.reflect.WildcardType} for wildcard types (e.g., {@code ? extends Number})</li>
+     *   <li>A {@link java.lang.reflect.GenericArrayType} for arrays whose component is a
+     *       parameterized type (e.g., {@code List<String>[]})</li>
      * </ul>
+     * Wildcards can occur inside a returned parameterized type, such as the type argument in
+     * {@code List<? extends Number>}. An unresolved {@link java.lang.reflect.TypeVariable} is
+     * rejected by the constructor rather than returned from this method.
      *
      * <p>This raw Type representation is particularly useful when working with reflection-based
      * frameworks, serialization libraries, or any code that needs to introspect generic types
@@ -297,8 +566,8 @@ public abstract class TypeReference<T> {
          * TypeToken<List<String>> token = new TypeToken<List<String>>() {};
          * }</pre>
          *
-         * @throws IllegalArgumentException if the TypeToken is constructed without actual type information,
-         *         or if the parameterized type has no type arguments
+         * @throws IllegalArgumentException if a raw superclass loses the type information, the captured
+         *         type still contains an unresolved type variable, or the hierarchy is unsupported
          * @throws IllegalStateException if the type cannot be resolved by TypeFactory
          * @see TypeReference#TypeReference()
          */

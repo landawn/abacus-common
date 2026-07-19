@@ -50,6 +50,8 @@ public class GuavaMultimapTypeTest extends TestBase {
         List<Type<?>> paramTypes = multimapType.parameterTypes();
         assertNotNull(paramTypes);
         assertEquals(2, paramTypes.size());
+        assertEquals(String.class, paramTypes.get(0).javaType());
+        assertEquals(Integer.class, paramTypes.get(1).javaType());
     }
 
     @Test
@@ -155,6 +157,7 @@ public class GuavaMultimapTypeTest extends TestBase {
         SetMultimap<String, Integer> result = type.valueOf("{\"a\":[1,2]}");
         assertNotNull(result);
         assertTrue(result.containsKey("a"));
+        assertEquals(Integer.class, type.parameterTypes().get(1).javaType());
     }
 
     @Test

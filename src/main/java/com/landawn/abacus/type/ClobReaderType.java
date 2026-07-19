@@ -26,6 +26,8 @@ import java.sql.SQLException;
  * This class extends {@link ReaderType} and overrides the JDBC accessors so that CLOB columns
  * are read via {@link Clob#getCharacterStream()} and written via
  * {@link java.sql.PreparedStatement#setClob(int, Reader) setClob}.
+ * Callers must close readers returned by the {@code get} methods; closing a returned reader also
+ * releases the internally acquired {@code Clob} locator.
  *
  * @see ReaderType
  * @see Clob
@@ -54,7 +56,7 @@ public class ClobReaderType extends ReaderType {
      *
      * @param rs          the {@link java.sql.ResultSet} to read from
      * @param columnIndex the 1-based column index
-     * @return a {@link Reader} for the CLOB's character stream,
+     * @return a {@link Reader} for the CLOB's character stream; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
@@ -72,7 +74,7 @@ public class ClobReaderType extends ReaderType {
      *
      * @param rs         the {@link java.sql.ResultSet} to read from
      * @param columnName the label of the column to retrieve
-     * @return a {@link Reader} for the CLOB's character stream,
+     * @return a {@link Reader} for the CLOB's character stream; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the column label is not found
      */
@@ -144,6 +146,8 @@ public class ClobReaderType extends ReaderType {
     /**
      * Extracts a character {@link Reader} from a {@link Clob}.
      * This is a package-private utility used by both {@code get} overloads.
+     * Closing the returned reader closes the delegate and calls {@link Clob#free()}.
+     * This method therefore assumes ownership of a non-null {@code clob}.
      *
      * @param clob the {@link Clob} to read from; may be {@code null}
      * @return a {@link Reader} for the CLOB's character stream,
@@ -151,10 +155,6 @@ public class ClobReaderType extends ReaderType {
      * @throws SQLException if a database access error occurs while accessing the CLOB
      */
     static Reader clobToReader(final Clob clob) throws SQLException {
-        if (clob != null) {
-            return clob.getCharacterStream();
-        }
-
-        return null; // NOSONAR
+        return Utils.openCharacterStream(clob);
     }
 }

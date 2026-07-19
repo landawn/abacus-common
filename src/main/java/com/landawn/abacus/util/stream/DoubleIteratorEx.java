@@ -372,8 +372,8 @@ public abstract class DoubleIteratorEx extends DoubleIterator implements Iterato
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIteratorEx iter = DoubleIteratorEx.of(1.0, 2.0);
-     * iter.closeResource(); // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext()); // closeResource() does not consume elements
+     * iter.closeResource();         // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * DoubleIteratorEx iter2 = DoubleIteratorEx.of(3.0, 4.0);

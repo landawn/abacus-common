@@ -64,6 +64,7 @@ public interface EntityId {
      * @param propName property name with entity name, for example {@code Account.id}
      * @param propValue the property value
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     static EntityId of(final String propName, final Object propValue) {
         return Seid.of(propName, propValue);
@@ -290,6 +291,7 @@ public interface EntityId {
      * @param <T> the expected type of the property value
      * @param propName the property name
      * @return the property value, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     @MayReturnNull
     <T> T get(String propName);
@@ -308,6 +310,7 @@ public interface EntityId {
      *
      * @param propName the property name
      * @return the property value as an {@code int}, or {@code 0} if the property is absent or {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     int getInt(String propName);
 
@@ -325,6 +328,7 @@ public interface EntityId {
      *
      * @param propName the property name
      * @return the property value as a {@code long}, or {@code 0L} if the property is absent or {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     long getLong(String propName);
 
@@ -347,6 +351,7 @@ public interface EntityId {
      * @return the property value converted to the target type, or the target type's
      *         default value (which is {@code null} for reference types) if the property
      *         is absent or its value is {@code null}
+     * @throws IllegalArgumentException if {@code propName} or {@code targetType} is {@code null}
      */
     @MayReturnNull
     <T> T get(String propName, Class<? extends T> targetType);
@@ -363,11 +368,12 @@ public interface EntityId {
      *
      * @param propName the property name to check
      * @return {@code true} if the property exists, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     boolean containsKey(String propName);
 
     /**
-     * Returns a set of all property names in this EntityId.
+     * Returns an unmodifiable set of all property names in this EntityId.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -375,12 +381,13 @@ public interface EntityId {
      * Set<String> keys = id.keySet();   // returns {"id", "name"}
      * }</pre>
      *
-     * @return a Set containing all property names
+     * @return an unmodifiable {@code Set} containing all property names
      */
     Set<String> keySet();
 
     /**
-     * Returns a set of all property name-value entries in this EntityId.
+     * Returns an unmodifiable set of all property name-value entries in this EntityId.
+     * The returned entries do not support {@link Map.Entry#setValue(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -390,7 +397,8 @@ public interface EntityId {
      * }
      * }</pre>
      *
-     * @return a Set of Map.Entry objects containing property names and values
+     * @return an unmodifiable {@code Set} of read-only {@code Map.Entry} objects containing
+     *         property names and values
      */
     Set<Map.Entry<String, Object>> entrySet();
 
@@ -523,7 +531,10 @@ public interface EntityId {
          *     .build();
          * }</pre>
          *
-         * @return the constructed EntityId
+         * <p>Each invocation returns a snapshot. Subsequent calls to {@link #put(String, Object)}
+         * do not modify identifiers returned by earlier invocations.</p>
+         *
+         * @return a snapshot of the constructed EntityId
          */
         @SuppressWarnings("deprecation")
         public EntityId build() {
@@ -531,7 +542,7 @@ public interface EntityId {
                 entityId = new Seid(Strings.EMPTY);
             }
 
-            return entityId;
+            return entityId.copy();
         }
     }
 }

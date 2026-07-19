@@ -137,7 +137,7 @@ public enum AccountStatus {
                 return DELETED;
 
             default:
-                throw new IllegalArgumentException("No mapping instance found by int value: " + code);
+                throw new IllegalArgumentException("No AccountStatus for code: " + code + ". Expected range: 0-5");
         }
     }
 }

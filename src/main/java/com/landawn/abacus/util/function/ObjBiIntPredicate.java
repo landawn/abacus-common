@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -33,8 +33,8 @@ import com.landawn.abacus.util.cs;
  * boolean valid = isSubstringValid.test("Hello", 0, 5);   // returns true
  *
  * ObjBiIntPredicate<int[][]> isValidPosition = (matrix, row, col) ->
- *     row >= 0 && row < matrix.length &&
- *     col >= 0 && matrix.length > 0 && col < matrix[0].length;
+ *     row >= 0 && row < matrix.length && matrix[row] != null &&
+ *     col >= 0 && col < matrix[row].length;
  *
  * ObjBiIntPredicate<List<?>> isRangeWithinBounds = (list, from, to) ->
  *     from >= 0 && to <= list.size() && from <= to;

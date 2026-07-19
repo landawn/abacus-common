@@ -280,7 +280,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code String} value to write, may be {@code null}
-     * @param config the serialization configuration controlling quotation and null handling,
+     * @param config the serialization configuration controlling quotation and {@code null} handling,
      *               may be {@code null}
      * @throws IOException if an I/O error occurs
      */

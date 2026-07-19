@@ -69,7 +69,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Rich Operations:</b> Comprehensive API for sorting, filtering, merging, and transforming data</li>
  *   <li><b>Stream Integration:</b> Full support for functional programming with Stream operations</li>
  *   <li><b>Export Capabilities:</b> Convert to arrays, datasets, and formatted output</li>
- *   <li><b>Immutability Support:</b> Freeze functionality for creating immutable snapshots</li>
+ *   <li><b>Immutability Support:</b> In-place freeze functionality for preventing further structural or cell updates</li>
  *   <li><b>Memory Efficient:</b> Optimized internal storage with column-wise organization</li>
  * </ul>
  *
@@ -176,21 +176,21 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Use external synchronization for write operations</li>
  *   <li>Read operations can be safely performed concurrently if no writes occur</li>
- *   <li>Use {@link #freeze()} on a dedicated instance, or {@link #clone(boolean) clone(true)}, before sharing mutable sheet state across threads</li>
+ *   <li>Use {@link #freeze()} on a safely published dedicated instance, or {@link #clone(boolean) clone(true)}, before sharing sheet structure across threads</li>
  *   <li>Consider creating thread-local copies using {@link #clone()}</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
  * <ul>
  *   <li>Use {@link #trimToSize()} to reduce memory footprint after bulk operations</li>
- *   <li>Use {@link #clear()} to release all data when sheet is no longer needed</li>
- *   <li>Frozen sheets can share underlying data structures for memory efficiency</li>
- *   <li>Consider using primitive types for values to reduce object overhead</li>
+ *   <li>Use {@link #clear()} to release references held by cells while preserving keys and allocated storage</li>
+ *   <li>Use {@link #copy()} for an independent structure or {@link #clone(boolean)} for a deep copy when Kryo is available</li>
+ *   <li>Cell values are stored as object references; primitive values are boxed</li>
  * </ul>
  *
  * <p><b>Integration Points:</b>
  * <ul>
- *   <li><b>{@link Dataset}:</b> Convert to/from Dataset for advanced data processing</li>
+ *   <li><b>{@link Dataset}:</b> Convert a Sheet to a Dataset for advanced data processing</li>
  *   <li><b>{@link Stream}:</b> Functional programming operations on sheet data</li>
  *   <li><b>Arrays:</b> Export to 2D arrays for mathematical operations</li>
  *   <li><b>Collections Framework:</b> Maps and lists for row/column access</li>
@@ -336,7 +336,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a new Sheet with the specified row keys, column keys, and initial data.
      * <p>
      * The data is provided as a two-dimensional array where each inner array represents a row.
-     * The dimensions of the array must match the sizes of the row and column key sets exactly.
+     * A {@code null} or empty outer array creates a Sheet whose cells initially read as {@code null}.
+     * Otherwise, the dimensions of the array must match the sizes of the row and column key sets exactly,
+     * and no inner row may be {@code null}.
      * The array can contain {@code null} values which will be stored as {@code null} cells in the Sheet.
      * </p>
      *
@@ -356,8 +358,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param rows the initial data as a two-dimensional array where rows[i][j] is the value at row i, column j;
-     *             must have length equal to rowKeySet size, and each inner array must have length equal to columnKeySet size
-     * @throws IllegalArgumentException if any row/column keys are {@code null} or duplicated, or if array dimensions don't match the key sets
+     *             {@code null} or empty is treated as no initial values; otherwise it must have length equal to rowKeySet size,
+     *             and every inner array must be non-{@code null} and have length equal to columnKeySet size
+     * @throws IllegalArgumentException if any row/column keys are {@code null} or duplicated, an inner row is {@code null},
+     *             or the array dimensions don't match the key sets
      * @see #Sheet(Collection, Collection)
      * @see #rows(Collection, Collection, Object[][])
      * @see #columns(Collection, Collection, Object[][])
@@ -372,6 +376,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             N.checkArgument(rows.length == rowLength, "The length of array is not equal to size of row/column key set"); //NOSONAR
 
             for (final Object[] e : rows) {
+                N.checkArgument(e != null, "Row cannot be null");
                 N.checkArgument(e.length == columnLength, "The length of array is not equal to size of row/column key set");
             }
 
@@ -448,9 +453,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <V> the type of the values stored in the cells
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
-     * @param rows the data as a two-dimensional array where each inner array represents a row
+     * @param rows the data as a two-dimensional array where each inner array represents a row; {@code null} or empty means no initial values,
+     *             and a non-empty array must not contain {@code null} rows
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner row is {@code null}, or dimensions don't match
      * @see #Sheet(Collection, Collection, Object[][])
      * @see #rows(Collection, Collection, Collection)
      * @see #columns(Collection, Collection, Object[][])
@@ -464,7 +470,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a new Sheet from row-oriented collection data.
      * <p>
      * Each inner collection represents a complete row of data. The order of values
-     * in each inner collection must correspond to the order of column keys.
+     * in each inner collection must correspond to the order of column keys. A {@code null} or empty
+     * outer collection means no initial values; a non-empty collection must not contain {@code null} rows.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -484,9 +491,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <V> the type of the values stored in the cells
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
-     * @param rows the data as a collection of collections where each inner collection represents a row
+     * @param rows the data as a collection of collections where each inner collection represents a row; {@code null} or empty means no initial values
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner row is {@code null}, or dimensions don't match
      * @see #rows(Collection, Collection, Object[][])
      * @see #columns(Collection, Collection, Collection)
      */
@@ -501,6 +508,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             N.checkArgument(rows.size() == rowLength, "The size of row collection is not equal to size of row key set"); //NOSONAR
 
             for (final Collection<? extends V> e : rows) {
+                N.checkArgument(e != null, "Row cannot be null");
                 N.checkArgument(e.size() == columnLength, "The size of row is not equal to size of column key set");
             }
 
@@ -531,7 +539,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a new Sheet from column-oriented data.
      * <p>
      * Each inner array represents a complete column of data. This is useful when
-     * your data is naturally organized by columns rather than rows.
+     * your data is naturally organized by columns rather than rows. A {@code null} or empty outer
+     * array means no initial values; a non-empty array must not contain {@code null} columns.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -551,9 +560,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <V> the type of the values stored in the cells
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
-     * @param columns the data as a two-dimensional array where each inner array represents a column
+     * @param columns the data as a two-dimensional array where each inner array represents a column; {@code null} or empty means no initial values
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner column is {@code null}, or dimensions don't match
      * @see #columns(Collection, Collection, Collection)
      * @see #rows(Collection, Collection, Object[][])
      */
@@ -568,6 +577,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             N.checkArgument(columns.length == columnLength, "The length of column array is not equal to size of column key set");
 
             for (final Object[] e : columns) {
+                N.checkArgument(e != null, "Column cannot be null");
                 N.checkArgument(e.length == rowLength, "The length of column is not equal to size of row key set");
             }
 
@@ -589,7 +599,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a new Sheet from column-oriented collection data.
      * <p>
      * Each inner collection represents a complete column of data. The order of values
-     * in each inner collection must correspond to the order of row keys.
+     * in each inner collection must correspond to the order of row keys. A {@code null} or empty
+     * outer collection means no initial values; a non-empty collection must not contain {@code null} columns.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -609,9 +620,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <V> the type of the values stored in the cells
      * @param rowKeySet the collection of row keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
-     * @param columns the data as a collection of collections where each inner collection represents a column
+     * @param columns the data as a collection of collections where each inner collection represents a column; {@code null} or empty means no initial values
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner column is {@code null}, or dimensions don't match
      * @see #columns(Collection, Collection, Object[][])
      * @see #rows(Collection, Collection, Collection)
      */
@@ -626,6 +637,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             N.checkArgument(columns.size() == columnLength, "The size of column collection is not equal to size of column key set");
 
             for (final Collection<? extends V> e : columns) {
+                N.checkArgument(e != null, "Column cannot be null");
                 N.checkArgument(e.size() == rowLength, "The size of column is not equal to size of row key set");
             }
 
@@ -646,8 +658,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Returns an immutable set of all row keys in this Sheet.
      * <p>
-     * The returned set maintains the insertion order of row keys. Modifications to the
-     * returned set are not allowed and will throw {@code UnsupportedOperationException}.
+     * The returned set maintains the insertion order of row keys. It is a live read-only view: changes
+     * made through this Sheet are reflected in the view, while attempts to modify the view directly
+     * throw {@code UnsupportedOperationException}.
      * This is useful for iterating over rows or checking row existence.
      * </p>
      *
@@ -666,7 +679,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }
      * }</pre>
      *
-     * @return an immutable set containing all row keys in insertion order
+     * @return a live, immutable set view containing all row keys in insertion order
      * @see #columnKeySet()
      * @see #containsRow(Object)
      */
@@ -677,8 +690,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Returns an immutable set of all column keys in this Sheet.
      * <p>
-     * The returned set maintains the insertion order of column keys. Modifications to the
-     * returned set are not allowed and will throw {@code UnsupportedOperationException}.
+     * The returned set maintains the insertion order of column keys. It is a live read-only view: changes
+     * made through this Sheet are reflected in the view, while attempts to modify the view directly
+     * throw {@code UnsupportedOperationException}.
      * This is useful for iterating over columns or checking column existence.
      * </p>
      *
@@ -697,7 +711,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }
      * }</pre>
      *
-     * @return an immutable set containing all column keys in insertion order
+     * @return a live, immutable set view containing all column keys in insertion order
      * @see #rowKeySet()
      * @see #containsColumn(Object)
      */
@@ -1400,8 +1414,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Returns an immutable list view containing all values in the specified row, in the order
      * corresponding to the column keys. Values are read lazily from this Sheet by row index and
-     * column index when the returned list is accessed. The list may contain {@code null} values
-     * if cells in the row are empty or this Sheet has not been initialized with values.
+     * column index when the returned list is accessed. The view's size and numeric row position are
+     * fixed at creation time: later value updates at that position are visible, but moving or sorting
+     * rows does not make the view follow the original row key, and structural removal may invalidate it.
+     * The list may contain {@code null} values if cells in the row are empty or this Sheet has not been
+     * initialized with values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1419,7 +1436,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param rowKey the row key identifying the row to retrieve
-     * @return a lazy immutable list view of values in the row, in column order
+     * @return a lazy immutable list view of values at the row's current numeric position, in column order
      * @throws IllegalArgumentException if the row key does not exist in this Sheet
      * @see #columnValues(Object)
      * @see #setRow(Object, Collection)
@@ -2040,9 +2057,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Retrieves all the values in the column identified by the specified column key.
      * <p>
      * Returns an immutable list view of the specified column's values, in the order corresponding to
-     * the row keys. The view reflects subsequent value changes made to the column through this Sheet;
-     * its size is fixed to the row count at the time of the call (like {@link #rowValues(Object)}). The
-     * list may contain {@code null} values if cells in the column are empty.
+     * the row keys. The view's size and numeric column position are fixed at creation time: later value
+     * updates at that position are visible, but moving or sorting columns does not make the view follow
+     * the original column key, and structural removal may invalidate it. The list may contain
+     * {@code null} values if cells in the column are empty.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2061,7 +2079,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param columnKey the key identifying the column to retrieve
-     * @return an immutable view of the column's values in row order; reflects subsequent value changes to the Sheet
+     * @return a lazy immutable list view of values at the column's current numeric position, in row order
      * @throws IllegalArgumentException if the column key does not exist in this Sheet
      * @see #rowValues(Object)
      * @see #setColumn(Object, Collection)
@@ -3280,7 +3298,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param columnKeysToSort the keys of columns whose values will determine row ordering; must not be
      *            {@code null} or empty, and every key must exist in this Sheet
-     * @param cmp the comparator applied to arrays of values from the specified columns
+     * @param cmp the comparator applied to arrays of values from the specified columns; if {@code null}, arrays are compared
+     *            lexicographically with {@code null} elements ordered first, as by {@link Comparators#OBJECT_ARRAY_COMPARATOR}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if {@code columnKeysToSort} is {@code null} or empty (an empty collection
      *         is accepted only on a zero-column Sheet), or if any specified column key does not exist in this Sheet
@@ -3331,7 +3350,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             return;
         }
 
-        final Comparator<Indexed<Object[]>> pairCmp = createComparatorForIndexedObject(cmp);
+        final Comparator<Indexed<Object[]>> pairCmp = createComparatorForIndexedObjectArray(cmp);
 
         N.sort(arrayOfPair, pairCmp);
 
@@ -3630,7 +3649,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKeysToSort the keys of rows whose values will determine column ordering; must not be
      *            {@code null} or empty, and every key must exist in this Sheet
-     * @param cmp the comparator applied to arrays of values from the specified rows
+     * @param cmp the comparator applied to arrays of values from the specified rows; if {@code null}, arrays are compared
+     *            lexicographically with {@code null} elements ordered first, as by {@link Comparators#OBJECT_ARRAY_COMPARATOR}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if {@code rowKeysToSort} is {@code null} or empty (an empty collection
      *         is accepted only on a zero-row Sheet), or if any specified row key does not exist in this Sheet
@@ -3681,7 +3701,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             return;
         }
 
-        final Comparator<Indexed<Object[]>> pairCmp = createComparatorForIndexedObject(cmp);
+        final Comparator<Indexed<Object[]>> pairCmp = createComparatorForIndexedObjectArray(cmp);
 
         N.sort(arrayOfPair, pairCmp);
 
@@ -3741,11 +3761,19 @@ public final class Sheet<R, C, V> implements Cloneable {
         return pairCmp;
     }
 
+    private Comparator<Indexed<Object[]>> createComparatorForIndexedObjectArray(final Comparator<? super Object[]> cmp) {
+        if (cmp != null) {
+            return (a, b) -> cmp.compare(a.value(), b.value());
+        }
+
+        return (a, b) -> Comparators.OBJECT_ARRAY_COMPARATOR.compare(a.value(), b.value());
+    }
+
     /**
      * Creates a shallow copy of this Sheet.
      * <p>
-     * The returned Sheet has the same row keys, column keys, and cell values as this Sheet.
-     * The copy is independent: changes to one Sheet do not affect the other.
+     * The returned Sheet has the same row keys, column keys, and cell value references as this Sheet.
+     * Its key collections and cell assignments are independent, but mutable key and value objects are shared.
      * The copy is always mutable, regardless of whether this Sheet is frozen.
      * </p>
      *
@@ -3755,12 +3783,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      *         N.asList("r1", "r2"), N.asList("c1", "c2"),
      *         new Integer[][] {{1, 2}, {3, 4}});
      * Sheet<String, String, Integer> copy = sheet.copy();
-     * copy.get("r1", "c2");        // returns 2
-     * copy.set("r1", "c1", 99);    // mutate the copy
-     * sheet.get("r1", "c1");       // returns 1 (original unaffected)
+     * copy.get("r1", "c2");       // returns 2
+     * copy.set("r1", "c1", 99);   // mutate the copy
+     * sheet.get("r1", "c1");      // returns 1 (original unaffected)
      * }</pre>
      *
-     * @return a new mutable Sheet with the same keys and values as this Sheet
+     * @return a new mutable Sheet with independent structure and the same key and cell value references as this Sheet
      * @see #copy(Collection, Collection)
      * @see #clone()
      * @see #transpose()
@@ -3787,8 +3815,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a shallow copy of this Sheet containing only the specified row and column keys.
      * <p>
      * The returned Sheet has the same values as this Sheet for the cells at the intersection of the
-     * specified row keys and column keys. The copy is independent: changes to one Sheet do not affect
-     * the other. The copy is always mutable, regardless of whether this Sheet is frozen.
+     * specified row keys and column keys. Its key collections and cell assignments are independent, but
+     * mutable key and value objects are shared. The copy is always mutable, regardless of whether this Sheet is frozen.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3898,8 +3926,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *         N.asList("r1", "r2"), N.asList("c1", "c2"),
      *         new Integer[][] {{1, 2}, {3, 4}});
      * Sheet<String, String, Integer> frozen = sheet.clone(true);
-     * frozen.get("r2", "c2");      // returns 4
-     * frozen.isFrozen();           // returns true
+     * frozen.get("r2", "c2");   // returns 4
+     * frozen.isFrozen();        // returns true
      *
      * Sheet<String, String, Integer> mutable = sheet.clone(false);
      * mutable.isFrozen();          // returns false
@@ -4093,7 +4121,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Once frozen, all modification operations will throw {@code IllegalStateException}.
      * This includes adding/removing rows/columns, changing values, sorting, etc.
-     * The frozen state cannot be reversed.
+     * The frozen state cannot be reversed. Freezing is in-place and shallow: it does not create a snapshot,
+     * make mutable key/value objects immutable, or by itself safely publish the instance to other threads.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4676,6 +4705,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Creates a nested stream structure for the specified row range [fromRowIndex, toRowIndex).
      * Each inner stream contains the cells of one row ordered by columns.
+     * If the Sheet has no columns, the outer stream still contains one empty stream per selected row.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4704,7 +4734,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Stream<Stream<Cell<R, C, V>>> rowCells(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // A zero-column Sheet can still have rows. Return an empty cell stream for each
+        // selected row instead of dropping the row dimension altogether.
+        if (rowCount() == 0) {
             return Stream.empty();
         }
 
@@ -4819,6 +4851,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Creates a nested stream structure for the specified column range [fromColumnIndex, toColumnIndex).
      * Each inner stream contains the cells of one column ordered by rows.
+     * If the Sheet has no rows, the outer stream still contains one empty stream per selected column.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4847,7 +4880,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Stream<Stream<Cell<R, C, V>>> columnCells(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // A zero-row Sheet can still have columns. Return an empty cell stream for each
+        // selected column instead of dropping the column dimension altogether.
+        if (columnCount() == 0) {
             return Stream.empty();
         }
 
@@ -5429,6 +5464,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Creates a nested stream structure for the specified row range [fromRowIndex, toRowIndex).
      * Each inner stream contains the values of one row ordered by columns. Includes {@code null} values.
+     * If the Sheet has no columns, the outer stream still contains one empty stream per selected row.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5457,7 +5493,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Stream<Stream<V>> rowStreams(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // A zero-column Sheet can still have rows. Return an empty value stream for each
+        // selected row instead of dropping the row dimension altogether.
+        if (rowCount() == 0) {
             return Stream.empty();
         }
 
@@ -5571,6 +5609,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Creates a nested stream structure for the specified column range [fromColumnIndex, toColumnIndex).
      * Each inner stream contains the values of one column ordered by rows. Includes {@code null} values.
+     * If the Sheet has no rows, the outer stream still contains one empty stream per selected column.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5599,7 +5638,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Stream<Stream<V>> columnStreams(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // A zero-row Sheet can still have columns. Return an empty value stream for each
+        // selected column instead of dropping the column dimension altogether.
+        if (columnCount() == 0) {
             return Stream.empty();
         }
 
@@ -5680,6 +5721,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Each pair contains a row key and a stream of all values in that row (ordered by columns).
      * Only rows in the specified range [fromRowIndex, toRowIndex) are included. Includes {@code null} values.
+     * A row with no columns is represented by its key and an empty value stream.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5710,7 +5752,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Stream<Pair<R, Stream<V>>> rows(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // Rows remain addressable even when each row contains zero values.
+        if (rowCount() == 0) {
             return Stream.empty();
         }
 
@@ -5838,6 +5881,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Each pair in the stream represents a row in the specified range [fromRowIndex, toRowIndex), with the row key and a value obtained by applying the provided {@code rowMapper} function to the row's values.
      * The pairs are ordered by rows.
+     * The mapper is invoked with an empty array for every selected row when the Sheet has no columns.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5872,7 +5916,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     public <T> Stream<Pair<R, T>> rows(final int fromRowIndex, final int toRowIndex, final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // Invoke the mapper once per selected row even when the row array is empty.
+        if (rowCount() == 0) {
             return Stream.empty();
         }
 
@@ -5961,6 +6006,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Each pair contains a column key and a stream of all values in that column (ordered by rows).
      * Only columns in the specified range [fromColumnIndex, toColumnIndex) are included. Includes {@code null} values.
+     * A column with no rows is represented by its key and an empty value stream.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5990,7 +6036,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Stream<Pair<C, Stream<V>>> columns(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // Columns remain addressable even when each column contains zero values.
+        if (columnCount() == 0) {
             return Stream.empty();
         }
 
@@ -6082,6 +6129,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Each pair in the stream represents a column in the specified range [fromColumnIndex, toColumnIndex), with the column key and a value obtained by applying the provided {@code columnMapper} function to the column's values.
      * The pairs are ordered by columns.
+     * The mapper is invoked with an empty array for every selected column when the Sheet has no rows.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6117,7 +6165,8 @@ public final class Sheet<R, C, V> implements Cloneable {
             final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
 
-        if (rowCount() == 0 || columnCount() == 0) {
+        // Invoke the mapper once per selected column even when the column array is empty.
+        if (columnCount() == 0) {
             return Stream.empty();
         }
 
@@ -6173,7 +6222,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Each row in the Sheet becomes a row in the Dataset, with the column keys serving as the column names.
      * The data preserves its row structure, making this ideal for row-oriented data processing. The Dataset's
-     * columns are named using the Sheet's column key strings.
+     * columns are named using {@link N#toString(Object)} on the Sheet's column keys. The resulting names
+     * must be non-empty and unique. Because Dataset derives its row count from its columns, a Sheet with
+     * rows but no columns converts to an empty Dataset and cannot preserve those row keys.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6191,6 +6242,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet rows and columns named by Sheet column keys
+     * @throws IllegalArgumentException if converted column-key names are empty or duplicated
      * @see #toTransposedDataset()
      * @see #toArray()
      */
@@ -6225,7 +6277,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Each column in the Sheet becomes a row in the Dataset, with the row keys serving as the column names.
      * This effectively transposes the data, making Sheet columns into Dataset rows. The Dataset's
-     * columns are named using the Sheet's row key strings.
+     * columns are named using {@link N#toString(Object)} on the Sheet's row keys. The resulting names
+     * must be non-empty and unique. Because Dataset derives its row count from its columns, a Sheet with
+     * columns but no rows converts to an empty Dataset and cannot preserve those column keys as Dataset rows.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6243,6 +6297,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet columns and columns named by Sheet row keys (transposed)
+     * @throws IllegalArgumentException if converted row-key names are empty or duplicated
      * @see #toDataset()
      * @see #toTransposedArray()
      */
@@ -6488,8 +6543,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Applies a transformation function to this Sheet if it's not empty, returning an Optional result.
      * <p>
-     * This method provides safe functional-style operations by only applying the function
-     * when the Sheet contains data. Returns an empty Optional if the Sheet is empty.
+     * This method provides conditional functional-style operations by applying the function only when
+     * the Sheet has at least one row and one column. Cell values may all still be {@code null}.
+     * Returns an empty Optional if either axis is empty.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6511,8 +6567,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <T> the type of the result produced by the function
      * @param <E> the type of exception the function may throw
-     * @param func the function to apply to this Sheet if not empty
-     * @return an Optional containing the result if Sheet is not empty, empty Optional otherwise
+     * @param func the function to apply if this Sheet has at least one row and one column
+     * @return an Optional containing the result if both axes are non-empty, or an empty Optional otherwise
      * @throws E if the function throws an exception
      * @see #apply(Throwables.Function)
      * @see #isEmpty()
@@ -6560,8 +6616,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Executes an action on this Sheet if it's not empty, returning whether the action was performed.
      * <p>
-     * This method provides conditional execution of side effects based on whether the Sheet contains data.
-     * Returns {@link OrElse#TRUE} if the action was executed, {@link OrElse#FALSE} if the Sheet was empty.
+     * This method provides conditional execution based on whether the Sheet has at least one row and one
+     * column; cell values may all still be {@code null}. Returns {@link OrElse#TRUE} if the action was executed,
+     * or {@link OrElse#FALSE} if either axis was empty.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6585,8 +6642,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on this Sheet if not empty
-     * @return OrElse.TRUE if the action was executed, OrElse.FALSE if the Sheet was empty
+     * @param action the action to perform if this Sheet has at least one row and one column
+     * @return OrElse.TRUE if the action was executed, or OrElse.FALSE if either axis was empty
      * @throws E if the action throws an exception
      * @see #accept(Throwables.Consumer)
      * @see #isEmpty()

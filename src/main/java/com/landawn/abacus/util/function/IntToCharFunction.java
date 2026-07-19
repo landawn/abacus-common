@@ -43,8 +43,9 @@ public interface IntToCharFunction {
      * {@code char} value. The default narrowing conversion retains only the low
      * 16 bits as a UTF-16 code unit.
      *
-     * <p>Note that {@code char} values in Java are 16-bit unsigned values
-     * representing Unicode characters in the range from 0 to 65,535 (0xFFFF).
+     * <p>Note that {@code char} values in Java are 16-bit unsigned UTF-16 code units
+     * in the range from 0 to 65,535 (0xFFFF); a code unit may be a surrogate and
+     * need not represent a complete Unicode code point.
      * If the input int value is outside this range, only the lower 16 bits
      * will be used for the conversion.
      *

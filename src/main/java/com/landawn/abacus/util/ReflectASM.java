@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.esotericsoftware.reflectasm.FieldAccess;
 import com.esotericsoftware.reflectasm.MethodAccess;
@@ -25,23 +22,20 @@ import com.landawn.abacus.annotation.MayReturnNull;
 /**
  * High-performance reflection utility class that leverages ASM (bytecode manipulation) for faster
  * field access, method invocation, and object construction compared to standard Java reflection.
- * This class provides a fluent API for reflection operations while maintaining type safety through generics.
+ * This class provides a fluent API, but its generic result casts are unchecked and callers remain
+ * responsible for requesting the actual field or method result type.
  *
  * <p>ReflectASM uses the EsotericSoftware's ReflectASM library internally, which generates bytecode
  * at runtime to create direct field accessors and method invokers, avoiding the overhead of Java's
  * built-in reflection API. This results in significantly better performance for repeated operations.</p>
  *
- * <p><b>Performance benefits:</b></p>
- * <ul>
- *   <li>Field access: 5-10x faster than standard reflection</li>
- *   <li>Method invocation: 5-10x faster than standard reflection</li>
- *   <li>Constructor calls: 3-5x faster than standard reflection</li>
- * </ul>
+ * <p>Generated accessors are cached per target class. Actual performance depends on the JVM,
+ * access pattern, and warm-up state; callers should benchmark their own workload.</p>
  *
  * <p><b>Limitations:</b></p>
  * <ul>
  *   <li>Cannot access private fields or methods</li>
- *   <li>Cannot work with final fields</li>
+ *   <li>Can read, but cannot assign, final fields</li>
  *   <li>Requires public no-argument constructor for instantiation</li>
  *   <li>Initial setup has overhead due to bytecode generation</li>
  * </ul>
@@ -88,11 +82,26 @@ final class ReflectASM<T> {
     @SuppressWarnings("rawtypes")
     static final Class[] EMPTY_CLASSES = {};
 
-    static final Map<Class<?>, FieldAccess> clsFieldPool = new ConcurrentHashMap<>();
+    private static final ClassValue<FieldAccess> FIELD_ACCESS_CACHE = new ClassValue<>() {
+        @Override
+        protected FieldAccess computeValue(final Class<?> type) {
+            return FieldAccess.get(type);
+        }
+    };
 
-    static final Map<Class<?>, ConstructorAccess<?>> clsConstructorPool = new ConcurrentHashMap<>();
+    private static final ClassValue<ConstructorAccess<?>> CONSTRUCTOR_ACCESS_CACHE = new ClassValue<>() {
+        @Override
+        protected ConstructorAccess<?> computeValue(final Class<?> type) {
+            return ConstructorAccess.get(type);
+        }
+    };
 
-    static final Map<Class<?>, MethodAccess> clsMethodPool = new ConcurrentHashMap<>();
+    private static final ClassValue<MethodAccess> METHOD_ACCESS_CACHE = new ClassValue<>() {
+        @Override
+        protected MethodAccess computeValue(final Class<?> type) {
+            return MethodAccess.get(type);
+        }
+    };
 
     private final Class<T> cls;
 
@@ -157,7 +166,7 @@ final class ReflectASM<T> {
      * @return a ReflectASM instance for the specified class
      * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
-    public static <T> ReflectASM<T> on(final Class<T> cls) {
+    public static <T> ReflectASM<T> on(final Class<T> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         return new ReflectASM<>(cls, null);
@@ -193,7 +202,7 @@ final class ReflectASM<T> {
      * @return a ReflectASM instance for the specified object
      * @throws IllegalArgumentException if {@code instance} is {@code null}
      */
-    public static <T> ReflectASM<T> on(final T instance) {
+    public static <T> ReflectASM<T> on(final T instance) throws IllegalArgumentException {
         N.checkArgNotNull(instance, "instance");
 
         return new ReflectASM<>((Class<T>) instance.getClass(), instance);
@@ -487,13 +496,6 @@ final class ReflectASM<T> {
                 }
             }
 
-            // MethodAccess resolves the convenience invoke(Object, String, Object...) by method name
-            // and argument count only - it ignores the argument types. So it is only safe to use the
-            // ReflectASM fast path when there is exactly one visible method with that name and count
-            // AND its parameter types are compatible with the provided arguments. When more than one
-            // overload matches the name+count (e.g. f(int) vs f(String)), or the single visible match
-            // is not type-compatible (e.g. a private/inherited overload is the real target), the
-            // caller must fall back to the type-aware standard-reflection path to pick the right one.
             return matchCount == 1 && parametersAssignable(parameterTypes[matchIndex], args);
         } catch (final RuntimeException e) {
             // MethodAccess generation failed for this class; let the caller use standard reflection.
@@ -524,14 +526,7 @@ final class ReflectASM<T> {
     }
 
     private FieldAccess getFieldAccess() {
-        FieldAccess fieldAccess = clsFieldPool.get(cls);
-
-        if (fieldAccess == null) {
-            fieldAccess = FieldAccess.get(cls);
-            clsFieldPool.put(cls, fieldAccess);
-        }
-
-        return fieldAccess;
+        return FIELD_ACCESS_CACHE.get(cls);
     }
 
     /**
@@ -542,24 +537,10 @@ final class ReflectASM<T> {
      * @throws SecurityException if a security manager denies access
      */
     private ConstructorAccess<T> getConstructorAccess(final Class<T> cls) throws SecurityException {
-        ConstructorAccess<?> constructorAccess = clsConstructorPool.get(cls);
-
-        if (constructorAccess == null) {
-            constructorAccess = ConstructorAccess.get(cls);
-            clsConstructorPool.put(cls, constructorAccess);
-        }
-
-        return (ConstructorAccess<T>) constructorAccess;
+        return (ConstructorAccess<T>) CONSTRUCTOR_ACCESS_CACHE.get(cls);
     }
 
     private MethodAccess getMethodAccess(final Class<?> cls) {
-        MethodAccess methodAccess = clsMethodPool.get(cls);
-
-        if (methodAccess == null) {
-            methodAccess = MethodAccess.get(cls);
-            clsMethodPool.put(cls, methodAccess);
-        }
-
-        return methodAccess;
+        return METHOD_ACCESS_CACHE.get(cls);
     }
 }

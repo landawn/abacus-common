@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -47,7 +47,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * @param u the object argument of type {@code T} (second parameter)
      * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
      */
-    // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
     boolean test(int t, T u);
 

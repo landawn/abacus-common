@@ -8,6 +8,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -479,6 +482,7 @@ public class ObjectoryTest extends TestBase {
 
         Objectory.recycle(baos);
         Assertions.assertEquals(0, baos.size());
+        Assertions.assertEquals(0, baos.array()[0]);
     }
 
     @Test
@@ -544,6 +548,7 @@ public class ObjectoryTest extends TestBase {
 
         Objectory.recycle(buffer);
         assertNotNull(buffer);
+        Assertions.assertEquals('\0', buffer[0]);
     }
 
     @Test
@@ -553,6 +558,7 @@ public class ObjectoryTest extends TestBase {
 
         Objectory.recycle(buffer);
         assertNotNull(buffer);
+        Assertions.assertEquals(0, buffer[0]);
     }
 
     @Test
@@ -644,6 +650,48 @@ public class ObjectoryTest extends TestBase {
         assertDoesNotThrow(() -> {
             Objectory.recycle((Map<?, ?>) null);
         });
+    }
+
+    @Test
+    public void testRecycleIgnoresForeignCollectionImplementations() {
+        final List<String> list = Collections.singletonList("value");
+        final Set<String> set = Collections.singleton("value");
+        final Map<String, String> map = Collections.singletonMap("key", "value");
+
+        assertDoesNotThrow(() -> Objectory.recycle(list));
+        assertDoesNotThrow(() -> Objectory.recycle(set));
+        assertDoesNotThrow(() -> Objectory.recycle(map));
+        Assertions.assertEquals(Collections.singletonList("value"), list);
+        Assertions.assertEquals(Collections.singleton("value"), set);
+        Assertions.assertEquals(Collections.singletonMap("key", "value"), map);
+
+        final Set<Object> setWithUnsupportedSize = new HashSet<>() {
+            @Override
+            public int size() {
+                throw new UnsupportedOperationException("size must not be queried");
+            }
+        };
+        final Map<Object, Object> mapWithUnsupportedSize = new HashMap<>() {
+            @Override
+            public int size() {
+                throw new UnsupportedOperationException("size must not be queried");
+            }
+        };
+
+        assertDoesNotThrow(() -> Objectory.recycle(setWithUnsupportedSize));
+        assertDoesNotThrow(() -> Objectory.recycle(mapWithUnsupportedSize));
+    }
+
+    @Test
+    public void testRecycleIgnoresCovariantObjectArray() {
+        final String[] strings = { "retained" };
+
+        Objectory.recycle(strings);
+
+        Assertions.assertEquals("retained", strings[0]);
+        final Object[] pooled = Objectory.createObjectArray(1);
+        assertDoesNotThrow(() -> pooled[0] = new Object());
+        Objectory.recycle(pooled);
     }
 
     @Test
@@ -793,6 +841,14 @@ public class ObjectoryTest extends TestBase {
     @Test
     public void testCreateObjectArray_NegativeSize() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Objectory.createObjectArray(-1));
+    }
+
+    @Test
+    public void testPooledBufferFactoriesRejectNegativeCapacity() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Objectory.createCharArrayBuffer(-1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Objectory.createByteArrayBuffer(-1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Objectory.createStringBuilder(-1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Objectory.createByteArrayOutputStream(-1));
     }
 
     /** Exhausting and re-recycling repeatedly must not leak or block. */

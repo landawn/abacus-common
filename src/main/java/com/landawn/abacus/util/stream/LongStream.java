@@ -17,6 +17,7 @@ package com.landawn.abacus.util.stream;
 import java.math.BigInteger;
 import java.nio.LongBuffer;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -254,7 +255,6 @@ import com.landawn.abacus.util.function.ToLongFunction;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
-@com.landawn.abacus.annotation.Immutable
 @LazyEvaluation
 public abstract class LongStream extends StreamBase<Long, long[], LongPredicate, LongConsumer, OptionalLong, IndexedLong, LongIterator, LongStream> {
 
@@ -296,17 +296,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
@@ -354,17 +355,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
@@ -415,18 +417,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
@@ -453,17 +456,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to long
      * @return a new LongStream consisting of the results of applying the mapper function to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#map(Function)
      */
     @ParallelSupported
@@ -496,17 +500,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(LongUnaryOperator)
      * @see #mapToObj(LongFunction)
      */
@@ -540,17 +545,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to float
      * @return a new FloatStream consisting of the results of applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(LongUnaryOperator)
      * @see #mapToDouble(LongToDoubleFunction)
      */
@@ -584,17 +590,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(LongUnaryOperator)
      * @see #mapToFloat(LongToFloatFunction)
      * @see java.util.stream.LongStream#mapToDouble(LongToDoubleFunction)
@@ -629,18 +636,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from long to T
      * @return a new Stream of objects resulting from applying the mapper function to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(LongUnaryOperator)
      * @see java.util.stream.LongStream#mapToObj(LongFunction)
      */
@@ -651,10 +659,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     /**
      * Returns a stream consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying
-     * the provided mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * the provided mapping function to each element. Each non-null mapped stream is
+     * closed after its contents are consumed or when the resulting stream is closed.
+     * A null mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -674,17 +681,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to LongStream
      * @return a new {@link LongStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      */
     @ParallelSupported
@@ -733,17 +741,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to {@code Collection<Long>}
      * @return a new {@code LongStream} consisting of the flattened contents of the collections produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(LongFunction)
      * @see #flatMapArray(LongFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -778,17 +787,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to long[]
      * @return a new {@code LongStream} consisting of the flattened contents of the arrays produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(LongFunction)
      * @see #flattMap(LongFunction)
      * @see #flatMapToInt(LongFunction)
@@ -810,18 +820,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a Collection
      *               (parameter is not used as this method always throws)
      * @return the new stream (this method never returns as it always throws)
+     * @throws IllegalStateException if the stream is already closed
      * @throws UnsupportedOperationException always thrown as this method is not supported
      * @deprecated This method is not supported. Use {@link #flatmapToObj(LongFunction)} instead
      * @see #flatmapToObj(LongFunction)
@@ -830,6 +841,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @ParallelSupported
     @IntermediateOp
     LongStream flattmap(@SuppressWarnings("unused") final LongFunction<? extends Collection<Long>> mapper) throws UnsupportedOperationException { // NOSONAR
+        assertNotClosed();
+
         throw new UnsupportedOperationException("Method 'flattmap' is deprecated and unsupported; use 'flatmapToObj' or 'flatMap' instead");
     }
 
@@ -856,17 +869,21 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
+     *
+     * Each non-null mapped JDK stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to java.util.stream.LongStream
      * @return a new {@code LongStream} consisting of the flattened contents of the mapped JDK {@code LongStream} instances
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(LongFunction)
      * @see #flatMapArray(LongFunction)
      */
@@ -879,10 +896,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     /**
      * Returns an {@code IntStream} consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying the provided
-     * mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * mapping function to each element. Each non-null mapped stream is closed after
+     * its contents are consumed or when the resulting stream is closed. A null
+     * mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -903,17 +919,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to IntStream
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -922,10 +939,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     /**
      * Returns a {@code FloatStream} consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying the provided
-     * mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * mapping function to each element. Each non-null mapped stream is closed after
+     * its contents are consumed or when the resulting stream is closed. A null
+     * mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -945,17 +961,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to FloatStream
      * @return a new {@link FloatStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -964,10 +981,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     /**
      * Returns a {@code DoubleStream} consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying the provided
-     * mapping function to each element. Each mapped stream is
-     * {@link BaseStream#close() closed} after its contents have been placed
-     * into this stream. (If a mapped stream is {@code null} an empty stream
-     * is used, instead.)
+     * mapping function to each element. Each non-null mapped stream is closed after
+     * its contents are consumed or when the resulting stream is closed. A null
+     * mapped stream is treated as empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -987,17 +1003,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from long to DoubleStream
      * @return a new {@link DoubleStream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1006,8 +1023,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
      * with the contents of a mapped stream produced by applying the provided mapping function to each element.
-     * Each mapped stream is closed after its contents have been placed into this stream.
-     * (If a mapped stream is {@code null} an empty stream is used, instead.)
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed. A null mapped stream is treated as empty.
      *
      * <p>This operation is stateless and can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -1030,18 +1047,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from long to Stream of T
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(LongFunction)
      * @see #flatmapToObj(LongFunction)
      */
@@ -1074,18 +1092,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from long to Collection of T
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToObj(LongFunction)
      * @see #flatMapArrayToObj(LongFunction)
      */
@@ -1118,18 +1137,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from long to T[]
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the arrays produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapToObj(LongFunction)
      * @see #flatmapToObj(LongFunction)
      */
@@ -1167,17 +1187,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function that generates replacement elements
      * @return a new {@link LongStream} consisting of the elements generated by applying the mapper to each element of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -1206,17 +1227,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function to apply to each element which returns an {@code OptionalLong}
      * @return a new {@link LongStream} consisting of the present values from the non-empty {@code OptionalLong} results produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1246,17 +1268,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param mapper a non-interfering, stateless function to apply to each element which returns a {@code java.util.OptionalLong}
      * @return a new {@link LongStream} consisting of the present values from the non-empty {@code java.util.OptionalLong} results produced by the mapper
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
@@ -1289,13 +1312,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -1339,13 +1362,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <T> the element type of the new stream
@@ -1388,13 +1411,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1432,13 +1455,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
@@ -1467,24 +1490,24 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * // Collapse based on range from first to next element
      * LongStream.of(1L, 2L, 5L, 6L, 7L, 10L)
      *       .collapse((first, last, next) -> next - first < 5, Long::sum)
-     *       .toArray();   // returns [8L, 23L] - sums of groups [1,2,5] and [6,7,10] where span from first element is &lt; 5
+     *       .toArray();   // returns [8L, 23L] - sums of groups [1,2,5] and [6,7,10] where span from first element is < 5
      *
      * // Advanced grouping with first/last tracking
      * LongStream.of(100L, 105L, 110L, 200L, 205L)
      *       .collapse((first, last, next) -> (next - first) <= 20, Long::sum)
-     *       .toArray();   // returns [315L, 405L] - sums of groups [100,105,110] and [200,205] where span from first element is &lt;= 20
+     *       .toArray();   // returns [315L, 405L] - sums of groups [100,105,110] and [200,205] where span from first element is <= 20
      * }</pre>
      *
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param collapsible a predicate that determines if the next element should be collapsed with the first and last elements of the group.
@@ -1530,17 +1553,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator a {@code LongBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code LongStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
@@ -1573,19 +1597,20 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      *        It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * @param accumulator a {@code LongBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code LongStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
@@ -1616,19 +1641,20 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator a {@code LongBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code LongStream} consisting of the results of the scan operation on the elements of the original stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
@@ -1656,17 +1682,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to prepend to this stream
      * @return a new stream with the specified elements prepended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1693,17 +1720,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append to this stream
      * @return a new stream with the specified elements appended
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1731,17 +1759,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param a the elements to append if this stream is empty
      * @return this stream if not empty, otherwise a new stream containing the specified elements
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1773,17 +1802,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to select
      * @return a new {@link LongStream} consisting of the top {@code n} elements; the order of the returned elements is not guaranteed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -1816,18 +1846,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param n the number of elements to select
      * @param comparator a non-interfering, stateless comparator to be used to compare stream elements
      * @return a new {@link LongStream} consisting of the top {@code n} elements as determined by the comparator; the order of the returned elements is not guaranteed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @SequentialOnly
@@ -1848,7 +1879,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1858,6 +1889,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * </table>
      *
      * @return a {@code LongList} containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -1881,7 +1913,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1897,6 +1929,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param keyMapper a non-interfering, stateless function to apply to each element to get the keys
      * @param valueMapper a non-interfering, stateless function to apply to each element to get the values
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @throws IllegalStateException if duplicate keys are encountered
@@ -1925,7 +1958,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1943,6 +1976,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueMapper a non-interfering, stateless function to apply to each element to get the values
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @throws IllegalStateException if duplicate keys are encountered
@@ -1973,7 +2007,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1990,6 +2024,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueMapper a non-interfering, stateless function to apply to each element to get the values
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -2019,7 +2054,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2038,6 +2073,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -2065,7 +2101,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2080,6 +2116,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param keyMapper a classifier function mapping input elements to keys
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Map} containing the results of the reduction operation on the values associated with each key
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -2107,7 +2144,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2124,6 +2161,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} containing the results of the reduction operation on the values associated with each key
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -2154,18 +2192,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param identity the identity value for the accumulating function
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
@@ -2194,17 +2233,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalLong} describing the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
@@ -2230,13 +2270,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> the type of the mutable result container
@@ -2245,6 +2285,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param combiner an associative, non-interfering, stateless function for combining two values, which must be compatible with the accumulator function.
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -2272,18 +2313,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <R> The type of the result. It must be {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
      * @return the result of the reduction
@@ -2315,21 +2357,24 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @see #forEach(Throwables.LongConsumer)
      */
     @ParallelSupported
     @TerminalOp
     public void foreach(final LongConsumer action) { // NOSONAR
+        assertNotClosed();
+
         forEach(action::accept);
     }
 
@@ -2352,17 +2397,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2392,17 +2438,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements, where the first parameter is the element index and the second is the element value
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      */
     @ParallelSupported
@@ -2428,18 +2475,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if any elements of the stream match the provided predicate, otherwise {@code false}. Returns {@code false} if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2469,18 +2517,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either all elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2510,18 +2559,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either no elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2546,16 +2596,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalLong} containing the first element of the stream, or an empty {@code OptionalLong} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.LongPredicate)
@@ -2564,6 +2615,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @ParallelSupported
     @TerminalOp
     public OptionalLong findFirst() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2585,16 +2638,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalLong} containing the first element of the stream, or an empty {@code OptionalLong} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.LongPredicate)
@@ -2603,6 +2657,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @ParallelSupported
     @TerminalOp
     public OptionalLong findAny() {
+        assertNotClosed();
+
         return first();
     }
 
@@ -2628,18 +2684,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an {@code OptionalLong} describing the first element of this stream that matches the given predicate, or an empty {@code OptionalLong} if no such element is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2671,18 +2728,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an {@code OptionalLong} describing some element of this stream that matches the given predicate, or an empty {@code OptionalLong} if no such element is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
@@ -2713,18 +2771,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an {@code OptionalLong} describing the last element of this stream that matches the given predicate, or an empty {@code OptionalLong} if no such element is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      */
     @Beta
@@ -2738,9 +2797,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongStream.of(5L, 2L, 8L, 1L, 9L).min();   // returns OptionalLong[1L]
+     * LongStream.of(5L, 2L, 8L, 1L, 9L).min();                         // returns OptionalLong[1L]
      *
-     * LongStream.empty().min();   // returns OptionalLong.empty()
+     * LongStream.empty().min();                                        // returns OptionalLong.empty()
      *
      * // Safe retrieval with default value
      * long minValue = LongStream.of(10L, 20L, 30L).min().orElse(0L);   // returns 10L
@@ -2749,16 +2808,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalLong} containing the minimum element of this stream, or an empty {@code OptionalLong} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2770,9 +2830,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongStream.of(5L, 2L, 8L, 1L, 9L).max();   // returns OptionalLong[9L]
+     * LongStream.of(5L, 2L, 8L, 1L, 9L).max();                         // returns OptionalLong[9L]
      *
-     * LongStream.empty().max();   // returns OptionalLong.empty()
+     * LongStream.empty().max();                                        // returns OptionalLong.empty()
      *
      * // Safe retrieval with default value
      * long maxValue = LongStream.of(10L, 20L, 30L).max().orElse(0L);   // returns 30L
@@ -2781,16 +2841,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an {@code OptionalLong} containing the maximum element of this stream, or an empty {@code OptionalLong} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2815,17 +2876,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalLong} containing the k-th largest element, or an empty {@code OptionalLong} if the stream is empty or the count of elements is less than k
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code k} is not positive
      */
     @SequentialOnly
@@ -2857,22 +2919,23 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * }</pre>
      *
      * <p>Note: the sum is accumulated in a {@code long}. Unlike {@link IntStream#sum()} (which accumulates
-     * in a wider type and throws {@link ArithmeticException} on overflow), if the true sum exceeds
+     * in a wider type and throws {@link ArithmeticException} on overflow), if the {@code true} sum exceeds
      * {@link Long#MAX_VALUE} this silently wraps around.
      *
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return the sum of elements in this stream. Returns 0 if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      * @see #average()
      * @see #reduce(long, LongBinaryOperator)
      */
@@ -2888,11 +2951,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongStream.of(1L, 2L, 3L, 4L, 5L).average();   // returns OptionalDouble[3.0]
+     * LongStream.of(1L, 2L, 3L, 4L, 5L).average();                    // returns OptionalDouble[3.0]
      *
-     * LongStream.of(10L, 20L, 30L).average();   // returns OptionalDouble[20.0]
+     * LongStream.of(10L, 20L, 30L).average();                         // returns OptionalDouble[20.0]
      *
-     * LongStream.empty().average();   // returns OptionalDouble.empty()
+     * LongStream.empty().average();                                   // returns OptionalDouble.empty()
      *
      * // Safe retrieval with default value
      * double avg = LongStream.of(100L, 200L).average().orElse(0.0);   // returns 150.0
@@ -2905,17 +2968,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return an OptionalDouble containing the arithmetic mean of elements of this stream,
      *         or an empty optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2939,16 +3003,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a {@code LongSummaryStatistics} describing various summary data about the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -2980,7 +3045,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2991,6 +3056,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @return a {@code Pair} containing a {@code LongSummaryStatistics} describing various summary data about the elements of this stream,
      *         and an {@code Optional} containing a map of percentile values
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @TerminalOp
@@ -3018,19 +3084,21 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the stream to merge with
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the new merged stream
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
@@ -3055,18 +3123,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the LongStream to be combined with the current LongStream. Must be {@code non-null}.
      * @param zipFunction a LongBinaryOperator that determines the combination of elements in the combined LongStream. Must be {@code non-null}.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(LongStream, long, long, LongBinaryOperator)
      */
     @ParallelSupported
@@ -3091,19 +3160,20 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second LongStream to be combined with the current LongStream. Will be closed along with this LongStream.
      * @param c the third LongStream to be combined with the current LongStream. Will be closed along with this LongStream.
      * @param zipFunction a LongTernaryOperator that determines the combination of elements in the combined LongStream. Must be {@code non-null}.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStreams
+     * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(LongStream, LongStream, long, long, long, LongTernaryOperator)
      */
     @ParallelSupported
@@ -3127,13 +3197,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the LongStream to be combined with the current LongStream. Will be closed along with this LongStream.
@@ -3141,6 +3211,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneB the default value to use for the given LongStream when it runs out of elements
      * @param zipFunction a LongBinaryOperator that determines the combination of elements in the combined LongStream. Must be {@code non-null}.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStream
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -3165,13 +3236,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param b the second LongStream to be combined with the current LongStream. Will be closed along with this LongStream.
@@ -3181,6 +3252,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneC the default value to use for the third LongStream when it runs out of elements
      * @param zipFunction a LongTernaryOperator that determines the combination of elements in the combined LongStream. Must be {@code non-null}.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStreams
+     * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
     @IntermediateOp
@@ -3248,16 +3320,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a FloatStream representation of this LongStream with each long value cast to float
+     * @throws IllegalStateException if the stream is already closed
      * @see #asDoubleStream()
      * @see #mapToFloat(LongToFloatFunction)
      * @see #mapToDouble(LongToDoubleFunction)
@@ -3296,16 +3369,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a DoubleStream representation of this LongStream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3326,16 +3400,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @return a Stream consisting of the elements of this stream, each boxed to a Long
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3356,16 +3431,20 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
+     * <p>If this stream has close handlers, closing the returned JDK stream closes this stream and
+     * invokes those handlers exactly once.</p>
+     *
      * @return a {@code java.util.stream.LongStream} consisting of the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -3388,17 +3467,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param transfer a function that transforms a {@code java.util.stream.LongStream} to another {@code java.util.stream.LongStream}
      * @return a new {@code LongStream} that is the result of applying the transfer function
+     * @throws IllegalStateException if the stream is already closed
      * @see #transformB(Function, boolean)
      * @see #toJdkStream()
      */
@@ -3406,6 +3486,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SequentialOnly
     @IntermediateOp
     public LongStream transformB(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer) {
+        assertNotClosed();
+
         return transformB(transfer, false);
     }
 
@@ -3426,18 +3508,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
      *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
      *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
      * </table>
      *
      * @param transfer a function that transforms a {@code java.util.stream.LongStream} to another {@code java.util.stream.LongStream}
      * @param deferred if {@code true}, the transformation is deferred until the stream is consumed
      * @return a new {@code LongStream} that is the result of applying the transfer function
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the transfer function is null
      * @see #transformB(Function)
      * @see #defer(Supplier)
@@ -3649,12 +3732,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     }
 
     /**
-     * Returns a LongStream containing the specified element if it is non-null, otherwise returns an empty LongStream.
-     * This is a static factory method that provides null-safe stream creation from nullable Long objects.
+     * Returns a LongStream containing the specified element if it is {@code non-null}, otherwise returns an empty LongStream.
+     * This is a static factory method that provides null-safe stream creation from {@code nullable} Long objects.
      *
-     * <p>This method is particularly useful when working with nullable Long values (such as from database
+     * <p>This method is particularly useful when working with {@code nullable} Long values (such as from database
      * queries, optional fields, or map lookups) and you want to seamlessly integrate them into stream
-     * pipelines without explicit null checks. It acts as a bridge between nullable boxed Long values
+     * pipelines without explicit {@code null} checks. It acts as a bridge between {@code nullable} boxed Long values
      * and primitive long streams.
      *
      * <p><b>Behavior:</b>
@@ -3719,7 +3802,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * }</pre>
      *
      * @param e the Long element to be wrapped in a LongStream; may be null
-     * @return a LongStream containing the single element if non-null, otherwise an empty LongStream
+     * @return a LongStream containing the single element if {@code non-null}, otherwise an empty LongStream
      * @see #of(long...)
      * @see #empty()
      * @see Optional#ofNullable(Object)
@@ -3734,7 +3817,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * an explicit array of primitive long values.
      *
      * <p>This method supports both varargs usage for convenience with literal values and
-     * array usage for passing existing arrays. For empty or null arrays, an empty stream is returned.
+     * array usage for passing existing arrays. For empty or {@code null} arrays, an empty stream is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3764,7 +3847,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * }</pre>
      *
      * @param a the array of long values; may be empty or used as varargs
-     * @return a LongStream containing the elements of the array, or an empty stream if the array is null or empty
+     * @return a LongStream containing the elements of the array, or an empty stream if the array is {@code null} or empty
      * @see #of(long[], int, int)
      * @see #empty()
      */
@@ -3851,7 +3934,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * }</pre>
      *
      * @param a the array of Long values; {@code null} elements are unboxed to {@code 0L} during stream processing
-     * @return a LongStream containing the unboxed elements of the array, or an empty stream if the array is null or empty
+     * @return a LongStream containing the unboxed elements of the array, or an empty stream if the array is {@code null} or empty
      * @see #of(long...)
      * @see #of(Long[], int, int)
      * @see #of(Collection)
@@ -3944,7 +4027,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * }</pre>
      *
      * @param c the collection of Long values; {@code null} elements are unboxed to {@code 0L} during stream processing
-     * @return a LongStream containing the unboxed elements of the collection, or an empty stream if the collection is null or empty
+     * @return a LongStream containing the unboxed elements of the collection, or an empty stream if the collection is {@code null} or empty
      * @see #of(Long[])
      * @see #of(LongIterator)
      * @see Stream#of(Collection)
@@ -3999,18 +4082,6 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public static LongStream of(final LongIterator iterator) {
         return iterator == null ? empty() : new IteratorLongStream(iterator);
     }
-
-    //    /**
-    //     * Returns a LongStream from the specified java.util.stream.LongStream.
-    //     *
-    //     * @param stream the java.util.stream.LongStream to convert
-    //     * @return a LongStream containing the elements from the input stream
-    //     * @deprecated Use {@link #from(java.util.stream.LongStream)} instead
-    //     */
-    //    @Deprecated
-    //    public static LongStream of(final java.util.stream.LongStream stream) { // Should the name be from?
-    //        return from(stream);
-    //    }
 
     /**
      * Returns a LongStream containing elements from the specified LongBuffer.
@@ -4105,7 +4176,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .count();   // returns 0
      * }</pre>
      *
-     * @param op the OptionalLong to convert; may be null or empty
+     * @param op the OptionalLong to convert; may be {@code null} or empty
      * @return a LongStream containing the value if present, otherwise an empty stream
      * @see #ofNullable(Long)
      * @see OptionalLong
@@ -4154,7 +4225,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .count();   // returns 0
      * }</pre>
      *
-     * @param op the java.util.OptionalLong to convert; may be null or empty
+     * @param op the java.util.OptionalLong to convert; may be {@code null} or empty
      * @return a LongStream containing the value if present, otherwise an empty stream
      * @see #of(OptionalLong)
      * @see #ofNullable(Long)
@@ -4174,7 +4245,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * then all elements from the second row, and so on.
      *
      * <p>This is a static factory method that provides a convenient way to convert nested array structures
-     * into a flat stream for processing. The method handles null or empty arrays gracefully by returning an empty stream.
+     * into a flat stream for processing. The method handles {@code null} or empty arrays gracefully by returning an empty stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4208,9 +4279,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .count();   // returns 0
      * }</pre>
      *
-     * @param a the two-dimensional array to flatten; may be null, empty, or contain null rows
+     * @param a the two-dimensional array to flatten; may be {@code null}, empty, or contain {@code null} rows
      * @return a LongStream containing all elements from the two-dimensional array in row-major order,
-     *         or an empty stream if the array is null or empty
+     *         or an empty stream if the array is {@code null} or empty
      * @see #flatten(long[][], boolean)
      * @see #flatten(long[][][])
      */
@@ -4256,11 +4327,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * // Column sums would be calculated by grouping vertically flattened elements
      * }</pre>
      *
-     * @param a the two-dimensional array to flatten; may be null, empty, or contain null/jagged rows
+     * @param a the two-dimensional array to flatten; may be {@code null}, empty, or contain null/jagged rows
      * @param vertically if {@code true}, elements are read column by column (column-major order);
      *                   if {@code false}, row by row (row-major order)
      * @return a LongStream containing all elements from the two-dimensional array in the specified traversal order,
-     *         or an empty stream if the array is null or empty
+     *         or an empty stream if the array is {@code null} or empty
      * @see #flatten(long[][])
      * @see #flatten(long[][], long, boolean)
      */
@@ -4364,12 +4435,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * // When flattened vertically with 0 padding, columns can be summed consistently
      * }</pre>
      *
-     * @param a the two-dimensional array to flatten; may be null, empty, or contain rows of different lengths
+     * @param a the two-dimensional array to flatten; may be {@code null}, empty, or contain rows of different lengths
      * @param valueForAlignment the value to use for padding shorter rows to match the longest row length
      * @param vertically if {@code true}, elements are read column by column with vertical padding;
      *                   if {@code false}, row by row with horizontal padding
      * @return a LongStream containing all elements with alignment padding applied to shorter rows,
-     *         or an empty stream if the array is null or empty
+     *         or an empty stream if the array is {@code null} or empty
      * @see #flatten(long[][], boolean)
      * @see #flatten(long[][])
      */
@@ -4507,9 +4578,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .count();   // returns 0
      * }</pre>
      *
-     * @param a the three-dimensional array to flatten; may be null, empty, or contain null elements at any level
+     * @param a the three-dimensional array to flatten; may be {@code null}, empty, or contain {@code null} elements at any level
      * @return a LongStream containing all elements from the three-dimensional array in depth-first order,
-     *         or an empty stream if the array is null or empty
+     *         or an empty stream if the array is {@code null} or empty
      * @see #flatten(long[][])
      * @see #flatten(long[][], boolean)
      */
@@ -5038,15 +5109,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .limit(10)
      *     .toArray();
      *
-     * // Generate random positive longs
-     * long[] positiveLongs = LongStream.random()
-     *     .map(Math::abs)
+     * // Generate random non-negative longs (Math.abs(Long.MIN_VALUE) is still negative)
+     * long[] nonNegativeLongs = LongStream.random()
+     *     .map(n -> n & Long.MAX_VALUE)
      *     .limit(5)
      *     .toArray();
      *
      * // Generate random longs in a specific range [0, 100)
      * long[] rangedRandoms = LongStream.random()
-     *     .map(n -> Math.abs(n) % 100)
+     *     .map(n -> Math.floorMod(n, 100))
      *     .limit(20)
      *     .toArray();
      *
@@ -5057,7 +5128,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * // Generate random IDs
      * List<Long> randomIds = LongStream.random()
-     *     .map(Math::abs)
+     *     .map(n -> n & Long.MAX_VALUE)
      *     .distinct()
      *     .limit(1000)
      *     .boxed()
@@ -5104,6 +5175,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param intervalInMillis the time interval in milliseconds between emissions
      * @return an infinite LongStream that emits timestamp values at the specified intervals
+     * @throws IllegalArgumentException if {@code intervalInMillis} is not positive
      * @see #interval(long, long, TimeUnit)
      * @see N#sleepUninterruptibly(long)
      * @see System#currentTimeMillis()
@@ -5132,6 +5204,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param delayInMillis the initial delay in milliseconds before the first emission
      * @param intervalInMillis the time interval in milliseconds between subsequent emissions
      * @return an infinite LongStream that emits timestamp values at the specified intervals after the delay
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative or
+     *         {@code intervalInMillis} is not positive
      * @see #interval(long, long, TimeUnit)
      * @see N#sleepUninterruptibly(long)
      * @see System#currentTimeMillis()
@@ -5197,6 +5271,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param unit the time unit for both delay and interval parameters
      * @return an infinite LongStream that emits timestamp values at the specified intervals
      * @throws NullPointerException if unit is null
+     * @throws IllegalArgumentException if {@code delay} is negative, {@code interval} is not positive,
+     *         or a positive interval is shorter than one millisecond after conversion
      *
      * @see #interval(long)
      * @see #interval(long, long)
@@ -5204,10 +5280,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see System#currentTimeMillis()
      */
     @Beta
-    public static LongStream interval(final long delay, final long interval, final TimeUnit unit) {
+    public static LongStream interval(final long delay, final long interval, final TimeUnit unit) throws IllegalArgumentException {
+        N.requireNonNull(unit, cs.unit);
+        N.checkArgNotNegative(delay, cs.delay);
+        N.checkArgPositive(interval, cs.interval);
+
+        final long delayInMillis = unit.toMillis(delay);
+        final long intervalInMillis = unit.toMillis(interval);
+
+        N.checkArgPositive(intervalInMillis, "interval in milliseconds");
+
         return of(new LongIteratorEx() {
-            private final long intervalInMillis = unit.toMillis(interval);
-            private long nextTime = System.currentTimeMillis() + unit.toMillis(delay);
+            private final long startTime = System.currentTimeMillis();
+            private long nextTime = startTime > Long.MAX_VALUE - delayInMillis ? Long.MAX_VALUE : startTime + delayInMillis;
             private long ret = 0;
 
             @Override
@@ -5225,7 +5310,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
                 ret = nextTime;
 
-                nextTime += intervalInMillis;
+                nextTime = nextTime > Long.MAX_VALUE - intervalInMillis ? Long.MAX_VALUE : nextTime + intervalInMillis;
 
                 return ret;
             }
@@ -5234,6 +5319,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
     /**
      * Creates a stream that iterates using the given hasNext and next suppliers.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5263,12 +5350,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
         N.checkArgNotNull(next);
 
         return new IteratorLongStream(new LongIteratorEx() {
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -5289,6 +5381,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     /**
      * Creates a stream that iterates from an initial value, applying a function to generate subsequent values,
      * and continues as long as a BooleanSupplier returns {@code true}.
+     * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
+     * and that supplier is not invoked again.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5316,12 +5410,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
         return new IteratorLongStream(new LongIteratorEx() {
             private long cur = 0;
             private boolean isFirst = true;
+            private boolean hasMore = true;
             private boolean hasNextVal = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextVal) {
+                if (!hasNextVal && hasMore) {
                     hasNextVal = hasNext.getAsBoolean();
+
+                    if (!hasNextVal) {
+                        hasMore = false;
+                    }
                 }
 
                 return hasNextVal;
@@ -5676,7 +5775,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * all provided arrays in the order they are specified.
      *
      * <p>The resulting stream contains all elements from the first array, followed by all elements
-     * from the second array, and so on. Empty or null arrays are handled gracefully. If all arrays
+     * from the second array, and so on. Empty or {@code null} arrays are handled gracefully. If all arrays
      * are empty or the varargs parameter is empty, an empty stream is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -5843,6 +5942,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
     /**
      * Concatenates a collection of LongStreams into a single LongStream.
+     * The collection's membership and encounter order are snapshotted when this method is called.
+     * Closing the returned stream closes every snapshotted input stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5864,13 +5965,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .toArray();   // returns [10L]
      * }</pre>
      *
-     * @param streams the collection of LongStreams to concatenate
+     * @param streams the collection of LongStreams to concatenate; {@code null} elements are treated as empty streams
      * @return a LongStream containing all the longs from the input streams in order
      * @see Stream#concat(Collection)
      */
     public static LongStream concat(final Collection<? extends LongStream> streams) {
-        return N.isEmpty(streams) ? empty() : new IteratorLongStream(new LongIteratorEx() { //NOSONAR
-            private final Iterator<? extends LongStream> iterators = streams.iterator();
+        if (N.isEmpty(streams)) {
+            return empty();
+        }
+
+        final List<? extends LongStream> sources = new ArrayList<>(streams);
+
+        return new IteratorLongStream(new LongIteratorEx() { //NOSONAR
+            private final Iterator<? extends LongStream> iterators = sources.iterator();
             private LongStream cur;
             private LongIterator iter;
 
@@ -5896,7 +6003,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
                 return iter.nextLong();
             }
-        }).onClose(newCloseHandler(streams));
+        }).onClose(newCloseHandler(sources));
     }
 
     /**
@@ -6200,7 +6307,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * the typed two-stream / three-stream overloads (which use {@link LongBinaryOperator} /
      * {@link LongTernaryOperator} and avoid boxing).
      *
-     * @param streams the collection of long streams to zip
+     * @param streams the collection of long streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine arrays of values from the streams. Must be {@code non-null}.
      * @return a stream of combined values. Empty if the collection is empty
      */
@@ -6497,7 +6604,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * the typed two-stream / three-stream overloads (which use {@link LongBinaryOperator} /
      * {@link LongTernaryOperator} and avoid boxing).
      *
-     * @param streams the collection of long streams to zip
+     * @param streams the collection of long streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
      * @param zipFunction the function to combine arrays of values from the streams. Must be {@code non-null}.
      * @return a stream of combined values that will close all input streams when closed
@@ -6538,12 +6645,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param a the first long array
      * @param b the second long array
-     * @param nextSelector a function to determine which element should be selected next.
+     * @param nextSelector a function to determine which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select from the first array, otherwise from the second
      * @return a LongStream containing the merged elements from the two input arrays
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
     public static LongStream merge(final long[] a, final long[] b, final LongBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(a)) {
             return of(b);
         } else if (N.isEmpty(b)) {
@@ -6599,9 +6709,10 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param a the first long array
      * @param b the second long array
      * @param c the third long array
-     * @param nextSelector a function to determine which element should be selected next.
+     * @param nextSelector a function to determine which element should be selected next. Must not be {@code null}.
      *                     Returns MergeResult.TAKE_FIRST to select from the first array, otherwise from the second
      * @return a LongStream containing the merged elements from the three input arrays
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
     public static LongStream merge(final long[] a, final long[] b, final long[] c, final LongBiFunction<MergeResult> nextSelector) {
@@ -6628,12 +6739,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param a the first LongIterator
      * @param b the second LongIterator
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the two input iterators
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
     public static LongStream merge(final LongIterator a, final LongIterator b, final LongBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return new IteratorLongStream(new LongIteratorEx() {
             private final LongIterator iterA = a == null ? LongIterator.empty() : a;
             private final LongIterator iterB = b == null ? LongIterator.empty() : b;
@@ -6712,9 +6826,10 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param a the first LongIterator
      * @param b the second LongIterator
      * @param c the third LongIterator
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the three input iterators
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
     public static LongStream merge(final LongIterator a, final LongIterator b, final LongIterator c, final LongBiFunction<MergeResult> nextSelector) {
@@ -6741,12 +6856,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param a the first LongStream
      * @param b the second LongStream
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the two input streams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
     public static LongStream merge(final LongStream a, final LongStream b, final LongBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
     }
 
@@ -6766,9 +6884,10 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param a the first LongStream
      * @param b the second LongStream
      * @param c the third LongStream
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the three input streams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static LongStream merge(final LongStream a, final LongStream b, final LongStream c, final LongBiFunction<MergeResult> nextSelector) {
@@ -6795,17 +6914,21 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .count();   // returns 0
      * }</pre>
      *
-     * @param streams the collection of LongStream instances to merge
-     * @param nextSelector a function to determine which element should be selected as the next element.
+     * @param streams the collection of LongStream instances to merge; a {@code null} collection and {@code null} elements are treated as empty
+     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the input LongStreams
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Collection, BiFunction)
      */
     public static LongStream merge(final Collection<? extends LongStream> streams, final LongBiFunction<MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         if (N.isEmpty(streams)) {
             return empty();
         } else if (streams.size() == 1) {
-            return streams.iterator().next();
+            final LongStream stream = streams.iterator().next();
+            return stream == null ? empty() : stream;
         } else if (streams.size() == 2) {
             final Iterator<? extends LongStream> iter = streams.iterator();
             return merge(iter.next(), iter.next(), nextSelector);

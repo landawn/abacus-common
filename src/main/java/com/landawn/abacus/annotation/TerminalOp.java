@@ -36,7 +36,8 @@ import java.lang.annotation.Target;
  *
  * <p>This annotation indicates methods that:</p>
  * <ul>
- *   <li>Consume the entire stream or pipeline.</li>
+ *   <li>Consume enough of the stream to produce a final result; short-circuiting operations may
+ *       stop before the source is exhausted.</li>
  *   <li>Produce a final result or side effect.</li>
  *   <li>Trigger execution of all pending lazy intermediate operations.</li>
  *   <li>Cannot be chained with further stream operations.</li>
@@ -44,7 +45,8 @@ import java.lang.annotation.Target;
  *
  * <p><b>Characteristics of terminal operations:</b></p>
  * <ul>
- *   <li><b>Eager evaluation:</b> Process all elements immediately upon invocation.</li>
+ *   <li><b>Eager evaluation:</b> Begin processing immediately upon invocation, subject to any
+ *       documented short-circuit behavior.</li>
  *   <li><b>Stream consumption:</b> Close and render the stream unusable after execution.</li>
  *   <li><b>Result production:</b> Return a value or collection, or perform side effects.</li>
  *   <li><b>Pipeline execution:</b> Trigger all pending intermediate operations in the pipeline.</li>

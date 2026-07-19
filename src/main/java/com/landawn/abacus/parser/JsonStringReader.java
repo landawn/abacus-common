@@ -50,7 +50,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li>Efficient character buffer management</li>
  *   <li>Direct number parsing without intermediate string creation</li>
  *   <li>Support for escape character handling</li>
- *   <li>Optimized parsing of common JSON values ({@code true}, {@code false}, {@code null})</li>
+ *   <li>Optimized parsing of common JSON values ({@code true}, false, {@code null})</li>
  * </ul>
  *
  * <p>This is an internal class and should not be used directly by application code.
@@ -114,6 +114,9 @@ class JsonStringReader extends AbstractJsonReader {
 
     /** The next character position in {@code cbuf}. */
     int nextChar = 0;
+
+    /** Whether whitespace has terminated the current unquoted value. */
+    boolean whitespaceAfterText = false;
 
     /** The string representation of the current token. */
     String text = null;
@@ -244,6 +247,7 @@ class JsonStringReader extends AbstractJsonReader {
         text = null;
         numValue = null;
         nextChar = 0;
+        whitespaceAfterText = false;
         startIndexForText = strBeginIndex;
 
         if (nextEvent == START_DOUBLE_QUOTE || nextEvent == START_SINGLE_QUOTE) {
@@ -512,10 +516,12 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
-     * Processes a token character: skips whitespace, resolves escape sequences, and appends to the
+     * Processes a token character: skips leading or trailing whitespace, resolves escape sequences, and appends to the
      * internal token buffer only when buffered mode is (or becomes) active (in zero-copy mode,
-     * ordinary characters remain tracked in the source array). Whitespace characters ({@code ch <= 32}) are skipped, and
-     * a backslash triggers escape-sequence resolution via {@link #readEscapeCharacter()}.
+     * ordinary characters remain tracked in the source array). Whitespace after an unquoted value
+     * terminates that value; a later non-whitespace character before a structural delimiter is rejected
+     * instead of being silently concatenated to the preceding text. A backslash triggers escape-sequence
+     * resolution via {@link #readEscapeCharacter()}.
      * This method manages the character buffer efficiently to minimize allocations.
      *
      * @param ch the input character to consider
@@ -528,8 +534,10 @@ class JsonStringReader extends AbstractJsonReader {
             }
 
             if (ch < 33) {
-                // skip whitespace char.
+                whitespaceAfterText = true;
             } else {
+                checkNoTextAfterWhitespace();
+
                 if (nextChar >= cbufLen) {
                     enlargeCharBuffer();
                 }
@@ -541,9 +549,8 @@ class JsonStringReader extends AbstractJsonReader {
                 if (startIndexForText == (strBeginIndex - 1)) {
                     startIndexForText++;
                 } else {
-                    // skip whitespace char.
-
                     saveToBuffer();
+                    whitespaceAfterText = true;
                 }
             } else if (ch == SK._BACKSLASH) {
                 saveToBuffer();
@@ -551,14 +558,23 @@ class JsonStringReader extends AbstractJsonReader {
                 ch = readEscapeCharacter();
 
                 if (ch < 33) {
-                    // skip whitespace char.
+                    whitespaceAfterText = true;
                 } else {
+                    checkNoTextAfterWhitespace();
                     cbuf[nextChar++] = (char) ch;
                 }
+            } else {
+                checkNoTextAfterWhitespace();
             }
         }
 
         return ch;
+    }
+
+    private void checkNoTextAfterWhitespace() {
+        if (whitespaceAfterText) {
+            throw new ParsingException("Unexpected non-whitespace character after an unquoted JSON value");
+        }
     }
 
     /**
@@ -720,14 +736,17 @@ class JsonStringReader extends AbstractJsonReader {
      */
 
     /**
-     * Increases the capacity of the internal character buffer (grows by ~1.75x).
+     * Increases the capacity of the internal character buffer (grows by ~1.75x, with a
+     * minimum increment of one character). The minimum increment matters for valid tiny
+     * caller-supplied buffers: truncating {@code 1 * 1.75} to an {@code int} otherwise leaves
+     * the capacity at one and makes the first required growth fail spuriously.
      *
      * @throws ParsingException if the buffer cannot grow any further (i.e. the new capacity
      *         would not exceed the current capacity, typically because {@link Integer#MAX_VALUE}
      *         has been reached)
      */
     void enlargeCharBuffer() {
-        final long newCapacityLong = (long) (cbufLen * 1.75);
+        final long newCapacityLong = Math.max((long) cbufLen + 1, (long) (cbufLen * 1.75));
         final int newCapacity = (int) Math.min(newCapacityLong, Integer.MAX_VALUE);
 
         if (newCapacity <= cbufLen) {

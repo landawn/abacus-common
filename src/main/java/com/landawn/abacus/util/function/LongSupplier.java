@@ -50,8 +50,8 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
     /**
      * A supplier that returns random long values.
      *
-     * <p>This supplier uses an internal random number generator to produce different long values
-     * on each invocation. The values are uniformly distributed across the entire range of long values.
+     * <p>This supplier uses an internal random number generator to draw values uniformly across the
+     * entire range of {@code long}. Successive values are not guaranteed to be distinct.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

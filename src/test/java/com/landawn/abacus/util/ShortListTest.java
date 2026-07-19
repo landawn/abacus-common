@@ -3222,4 +3222,12 @@ public class ShortListTest extends TestBase {
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.ShortPredicate) null, (short) 0));
     }
 
+    @Test
+    public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
+    }
+
 }

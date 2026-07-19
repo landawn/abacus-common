@@ -22,6 +22,10 @@ import com.landawn.abacus.exception.UncheckedSQLException;
 
 public class NClobTypeTest extends TestBase {
 
+    private abstract static class TestNClob implements NClob {
+        // Abstract test subtype is sufficient for verifying handler metadata.
+    }
+
     private NClobType nClobType;
     private ResultSet mockResultSet;
     private PreparedStatement mockPreparedStatement;
@@ -41,6 +45,14 @@ public class NClobTypeTest extends TestBase {
     public void testClazz() {
         Class<NClob> clazz = nClobType.javaType();
         assertEquals(NClob.class, clazz);
+    }
+
+    @Test
+    public void testConcreteNClobSubtypeMetadata() {
+        final NClobType subtype = new NClobType(TestNClob.class);
+
+        assertEquals(TestNClob.class, subtype.javaType());
+        assertEquals("TestNClob", subtype.name());
     }
 
     @Test

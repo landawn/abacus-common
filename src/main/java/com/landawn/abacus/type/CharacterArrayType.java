@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SK;
@@ -28,8 +29,9 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and output operations for {@code Character[]} arrays.
  *
  * <p>The canonical string format is a bracket-enclosed, comma-separated list where each non-null
- * character element is wrapped in single quotes (e.g., {@code ['a', 'b', null, 'z']}),
- * and null elements are written as the literal {@code null}.</p>
+ * character element is wrapped in single quotes (e.g., {@code ['a', 'b', null, 'z']}) and
+ * quotes, backslashes, and control characters are backslash-escaped,
+ * and {@code null} elements are written as the literal {@code null}.</p>
  *
  * @see ObjectArrayType
  */
@@ -46,7 +48,8 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     /**
      * Converts a {@code Character[]} to its canonical string representation.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Each non-null character is wrapped in single quotes; null elements are written as {@code null}.
+     * Each {@code non-null} character is wrapped in single quotes and escaped when necessary;
+     * {@code null} elements are written as {@code null}.
      *
      * <p>Examples:</p>
      * <ul>
@@ -85,7 +88,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                 sb.append(NULL_CHAR_ARRAY);
             } else {
                 sb.append(SK.SINGLE_QUOTE);
-                sb.append(x[i]);
+                sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
                 sb.append(SK.SINGLE_QUOTE);
             }
         }
@@ -102,8 +105,8 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     /**
      * Parses a string representation back into a {@code Character[]} array.
      * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
-     * Elements may be enclosed in single or double quotes; the literal {@code null} (4 characters)
-     * is converted to a {@code null} array element.
+     * Elements may be enclosed in single or double quotes; backslash escape sequences inside quoted
+     * elements are decoded. The literal {@code null} (4 characters) is converted to a {@code null} array element.
      *
      * <p>Special cases:</p>
      * <ul>
@@ -144,7 +147,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                 final char quoteChar = element.charAt(0);
 
                 if ((quoteChar == SK._SINGLE_QUOTE || quoteChar == SK._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
-                    array[i] = elementType.valueOf(element.substring(1, element.length() - 1));
+                    array[i] = elementType.valueOf(EscapeUtil.unescapeEcmaScript(element.substring(1, element.length() - 1)));
                     continue;
                 }
             }
@@ -158,7 +161,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     /**
      * Appends a {@code Character[]} to an {@link Appendable}.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Null elements are written as {@code null}; non-null characters are written unquoted.
+     * Null elements are written as {@code null}; {@code non-null} characters are written unquoted.
      * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
@@ -206,7 +209,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * Writes a {@code Character[]} to a {@link CharacterWriter} with optional per-element quotation.
      * The output format is a bracket-enclosed, comma-separated list.
      * <ul>
-     *   <li>If {@code config} specifies a non-zero {@code charQuotation}, each non-null character
+     *   <li>If {@code config} specifies a non-zero {@code charQuotation}, each {@code non-null} character
      *       is wrapped in that quote character, and a single quote ({@code '}) is escaped with a
      *       backslash when using single-quote quotation.</li>
      *   <li>Null elements are always written as {@code null}, without quotes.</li>

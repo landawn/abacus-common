@@ -132,6 +132,66 @@ public class ImmutableListIteratorTest extends TestBase {
     }
 
     @Test
+    public void testOf_DoesNotTrustMutableSubclass() {
+        ArrayList<String> list = new ArrayList<>(Arrays.asList("a", "b"));
+        ListIterator<String> delegate = list.listIterator();
+        ImmutableListIterator<String> mutableSubclass = new ImmutableListIterator<>() {
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return delegate.next();
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return delegate.hasPrevious();
+            }
+
+            @Override
+            public String previous() {
+                return delegate.previous();
+            }
+
+            @Override
+            public int nextIndex() {
+                return delegate.nextIndex();
+            }
+
+            @Override
+            public int previousIndex() {
+                return delegate.previousIndex();
+            }
+
+            @Override
+            public void remove() {
+                delegate.remove();
+            }
+
+            @Override
+            public void set(final String value) {
+                delegate.set(value);
+            }
+
+            @Override
+            public void add(final String value) {
+                delegate.add(value);
+            }
+        };
+
+        ImmutableListIterator<String> wrapped = ImmutableListIterator.of(mutableSubclass);
+        Assertions.assertNotSame(mutableSubclass, wrapped);
+        Assertions.assertEquals("a", wrapped.next());
+        Assertions.assertThrows(UnsupportedOperationException.class, wrapped::remove);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.set("x"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.add("x"));
+        Assertions.assertEquals(Arrays.asList("a", "b"), list);
+    }
+
+    @Test
     public void testIteratorWithNullElements() {
         ArrayList<String> list = new ArrayList<>(Arrays.asList("a", null, "c"));
         ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());

@@ -8,18 +8,26 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,15 +38,20 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 
 import okhttp3.CacheControl;
+import okhttp3.Dispatcher;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
+import okio.BufferedSource;
 
 public class OkHttpRequestTest extends TestBase {
 
@@ -827,7 +840,28 @@ public class OkHttpRequestTest extends TestBase {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
 
         // M11: OkHttpRequest now wraps IOException as UncheckedIOException (parity with the other builders).
-        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> request.execute(HttpMethod.GET, String.class));
+        final com.landawn.abacus.exception.UncheckedIOException ex = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                () -> request.execute(HttpMethod.GET, String.class));
+        final String message = ex.getCause() == null ? ex.getMessage() : ex.getCause().getMessage();
+
+        assertTrue(message.contains("404"));
+        assertTrue(message.contains("Not Found"), "the server's diagnostic response body should be retained: " + message);
+    }
+
+    @Test
+    public void testPerRequestClientConfigurationDoesNotShutDownCallerDispatcher() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(executor)).build();
+        server.enqueue(new MockResponse().setBody("configured"));
+
+        try {
+            assertEquals("configured", OkHttpRequest.create(baseUrl, client).readTimeout(2_000L).get(String.class));
+            assertFalse(executor.isShutdown(), "a client produced by newBuilder() shares the caller's dispatcher");
+            assertEquals(42, executor.submit(() -> 42).get());
+        } finally {
+            client.connectionPool().evictAll();
+            executor.shutdownNow();
+        }
     }
 
     @Test
@@ -1398,6 +1432,76 @@ public class OkHttpRequestTest extends TestBase {
 
         assertTrue(client.dispatcher().executorService().isShutdown());
         assertNull(getField(request, "pendingPerRequestClient"));
+    }
+
+    @Test
+    public void testAttachedResponseRunsClientCleanupOnceWhenClosedConcurrently() throws Exception {
+        final int threadCount = 16;
+        final CountDownLatch allClosing = new CountDownLatch(threadCount);
+        final CountDownLatch releaseClose = new CountDownLatch(1);
+        final ExecutorService clientExecutor = mock(ExecutorService.class);
+        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new okhttp3.Dispatcher(clientExecutor)).build();
+        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client).closeHttpClientAfterExecution(true);
+        final ResponseBody body = new ResponseBody() {
+            private final BufferedSource source = new Buffer();
+
+            @Override
+            public MediaType contentType() {
+                return null;
+            }
+
+            @Override
+            public long contentLength() {
+                return 0;
+            }
+
+            @Override
+            public BufferedSource source() {
+                return source;
+            }
+
+            @Override
+            public void close() {
+                allClosing.countDown();
+
+                try {
+                    releaseClose.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+            }
+        };
+        final Response rawResponse = new Response.Builder().request(new okhttp3.Request.Builder().url(baseUrl).build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("OK")
+                .body(body)
+                .build();
+        final Method attachCleanup = OkHttpRequest.class.getDeclaredMethod("attachCleanup", Response.class);
+        attachCleanup.setAccessible(true);
+        final Response response = (Response) attachCleanup.invoke(request, rawResponse);
+        final ExecutorService closerExecutor = Executors.newFixedThreadPool(threadCount);
+
+        try {
+            final Future<?>[] closes = new Future<?>[threadCount];
+
+            for (int i = 0; i < threadCount; i++) {
+                closes[i] = closerExecutor.submit(response::close);
+            }
+
+            assertTrue(allClosing.await(5, TimeUnit.SECONDS), "all close calls should reach the delegate body");
+            releaseClose.countDown();
+
+            for (final Future<?> close : closes) {
+                close.get(5, TimeUnit.SECONDS);
+            }
+
+            verify(clientExecutor, times(1)).shutdown();
+        } finally {
+            releaseClose.countDown();
+            closerExecutor.shutdownNow();
+        }
     }
 
     private static Object getField(final Object target, final String name) throws Exception {

@@ -328,9 +328,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = new FloatList();
-     * list.size();          // returns 0
-     * list.isEmpty();       // returns true
-     * list.add(1.5f);       // list is now [1.5]
+     * list.size();      // returns 0
+     * list.isEmpty();   // returns true
+     * list.add(1.5f);   // list is now [1.5]
      * }</pre>
      *
      */
@@ -346,18 +346,18 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = new FloatList(100);
-     * list.size();                       // returns 0 (capacity is not size)
-     * list.isEmpty();                    // returns true
+     * list.size();      // returns 0 (capacity is not size)
+     * list.isEmpty();   // returns true
      * FloatList empty = new FloatList(0);
-     * empty.size();                      // returns 0
-     * new FloatList(-1);                 // throws IllegalArgumentException
+     * empty.size();        // returns 0
+     * new FloatList(-1);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public FloatList(final int initialCapacity) {
+    public FloatList(final int initialCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_FLOAT_ARRAY : new float[initialCapacity];
@@ -373,8 +373,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * float[] arr = {1f, 2f, 3f};
      * FloatList list = new FloatList(arr);
-     * list.size();      // returns 3
-     * list.get(0);      // returns 1.0
+     * list.size();   // returns 3
+     * list.get(0);   // returns 1.0
      * arr[0] = 9f;      // backing array is shared
      * list.get(0);      // returns 9.0
      * }</pre>
@@ -395,9 +395,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * float[] arr = {1f, 2f, 3f, 4f, 5f};
      * FloatList list = new FloatList(arr, 3);
-     * list.size();                  // returns 3
-     * list.toString();              // returns "[1.0, 2.0, 3.0]"
-     * new FloatList(arr, 6);        // throws IndexOutOfBoundsException
+     * list.size();             // returns 3
+     * list.toString();         // returns "[1.0, 2.0, 3.0]"
+     * new FloatList(arr, 6);   // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
@@ -419,8 +419,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1.5f, 2.5f, 3.5f);
-     * list.size();                  // returns 3
-     * list.get(1);                  // returns 2.5
+     * list.size();   // returns 3
+     * list.get(1);   // returns 2.5
      * FloatList empty = FloatList.of();
      * empty.isEmpty();              // returns true
      * FloatList fromNull = FloatList.of((float[]) null);
@@ -445,8 +445,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * FloatList list = FloatList.of(arr, 2);
      * list.toString();              // returns "[1.0, 2.0]"
      * FloatList full = FloatList.of(arr, 4);
-     * full.size();                  // returns 4
-     * FloatList.of(arr, 5);         // throws IndexOutOfBoundsException
+     * full.size();            // returns 4
+     * FloatList.of(arr, 5);   // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param a the array of float values to be used as the backing array. Can be {@code null}.
@@ -591,10 +591,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1.5f, 2.5f, 3.5f);
-     * list.get(0);      // returns 1.5
-     * list.get(2);      // returns 3.5
-     * list.get(3);      // throws IndexOutOfBoundsException
-     * list.get(-1);     // throws IndexOutOfBoundsException
+     * list.get(0);    // returns 1.5
+     * list.get(2);    // returns 3.5
+     * list.get(3);    // throws IndexOutOfBoundsException
+     * list.get(-1);   // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param index the index of the element to return
@@ -644,8 +644,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f);
-     * list.add(3f);                    // list is now [1.0, 2.0, 3.0]
-     * list.add(Float.NaN);             // list is now [1.0, 2.0, 3.0, NaN]
+     * list.add(3f);          // list is now [1.0, 2.0, 3.0]
+     * list.add(Float.NaN);   // list is now [1.0, 2.0, 3.0, NaN]
      * FloatList empty = new FloatList();
      * empty.add(5f);                    // empty is now [5.0]
      * }</pre>
@@ -669,10 +669,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f);
-     * list.add(1, 9f);                  // list is now [1.0, 9.0, 2.0, 3.0]
-     * list.add(0, 0f);                  // list is now [0.0, 1.0, 9.0, 2.0, 3.0]
-     * list.add(list.size(), 7f);        // appends at end: [..., 3.0, 7.0]
-     * list.add(99, 1f);                 // throws IndexOutOfBoundsException
+     * list.add(1, 9f);             // list is now [1.0, 9.0, 2.0, 3.0]
+     * list.add(0, 0f);             // list is now [0.0, 1.0, 9.0, 2.0, 3.0]
+     * list.add(list.size(), 7f);   // appends at end: [..., 3.0, 7.0]
+     * list.add(99, 1f);            // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param index the index at which the specified element is to be inserted. Must be between 0 and size (inclusive).
@@ -821,8 +821,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f, 2f, 4f);
-     * list.remove(2f);                  // returns true, list is now [1.0, 3.0, 2.0, 4.0]
-     * list.remove(99f);                 // returns false, list unchanged
+     * list.remove(2f);    // returns true, list is now [1.0, 3.0, 2.0, 4.0]
+     * list.remove(99f);   // returns false, list unchanged
      * FloatList nans = FloatList.of(Float.NaN, 1f);
      * nans.remove(Float.NaN);          // returns true, list is now [1.0]
      * }</pre>
@@ -934,8 +934,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, -2f, 3f, -4f, 5f);
-     * list.removeIf(x -> x < 0);        // returns true, list is now [1.0, 3.0, 5.0]
-     * list.removeIf(x -> x > 100);      // returns false, list unchanged
+     * list.removeIf(x -> x < 0);     // returns true, list is now [1.0, 3.0, 5.0]
+     * list.removeIf(x -> x > 100);   // returns false, list unchanged
      * }</pre>
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
@@ -1086,20 +1086,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         return numRemoved;
     }
 
-    //    /**
-    //     * Removes the element at the specified position in this list. Shifts any subsequent elements
-    //     * to the left (subtracts one from their indices). Returns the element that was removed from the list.
-    //     *
-    //     * @param index the index of the element to be removed. Must be between 0 (inclusive) and size (exclusive).
-    //     * @return the element previously at the specified position
-    //     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
-    //     * @deprecated replaced by {@link #removeAt(int)}.
-    //     */
-    //    @Deprecated
-    //    public float delete(final int index) {
-    //        return removeAt(index);
-    //    }
-
     /**
      * Removes and returns the element at the specified index.
      *
@@ -1151,20 +1137,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             return;
         }
 
-        for (final int index : indices) {
-            N.checkElementIndex(index, size);
-        }
-
-        final float[] tmp = N.removeAt(elementData, indices);
-
-        N.copy(tmp, 0, elementData, 0, tmp.length);
-
-        if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, 0f);
-        }
-
-        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
-        size = size - (elementData.length - tmp.length);
+        final int newSize = compactAfterRemovingIndices(elementData, size, indices);
+        N.fill(elementData, newSize, size, 0f);
+        size = newSize;
     }
 
     /**
@@ -1358,8 +1333,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f);
-     * list.replaceAll(x -> x * 2f);     // list is now [2.0, 4.0, 6.0]
-     * list.replaceAll(x -> x + 1f);     // list is now [3.0, 5.0, 7.0]
+     * list.replaceAll(x -> x * 2f);   // list is now [2.0, 4.0, 6.0]
+     * list.replaceAll(x -> x + 1f);   // list is now [3.0, 5.0, 7.0]
      * }</pre>
      *
      * @param operator the operator to apply to each element. Must not be {@code null}.
@@ -1430,9 +1405,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f, 4f, 5f);
-     * list.fill(1, 4, 0f);             // list is now [1.0, 0.0, 0.0, 0.0, 5.0]
-     * list.fill(0, 0, 9f);             // empty range: list unchanged
-     * list.fill(0, 99, 1f);            // throws IndexOutOfBoundsException
+     * list.fill(1, 4, 0f);    // list is now [1.0, 0.0, 0.0, 0.0, 5.0]
+     * list.fill(0, 0, 9f);    // empty range: list unchanged
+     * list.fill(0, 99, 1f);   // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value. Must be non-negative.
@@ -1457,8 +1432,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f);
-     * list.contains(2f);                // returns true
-     * list.contains(9f);                // returns false
+     * list.contains(2f);   // returns true
+     * list.contains(9f);   // returns false
      * FloatList nans = FloatList.of(Float.NaN);
      * nans.contains(Float.NaN);        // returns true (NaN-aware comparison)
      * }</pre>
@@ -1881,9 +1856,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 2f, 3f, 2f);
-     * list.frequency(2f);               // returns 3
-     * list.frequency(1f);               // returns 1
-     * list.frequency(9f);               // returns 0
+     * list.frequency(2f);   // returns 3
+     * list.frequency(1f);   // returns 1
+     * list.frequency(9f);   // returns 0
      * }</pre>
      *
      * @param valueToFind the value whose occurrences are to be counted
@@ -1913,9 +1888,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f, 2f);
-     * list.indexOf(2f);                 // returns 1 (first occurrence)
-     * list.indexOf(3f);                 // returns 2
-     * list.indexOf(9f);                 // returns -1 (not found)
+     * list.indexOf(2f);   // returns 1 (first occurrence)
+     * list.indexOf(3f);   // returns 2
+     * list.indexOf(9f);   // returns -1 (not found)
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -1934,9 +1909,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f, 2f);
-     * list.indexOf(2f, 2);              // returns 3 (first 2 at or after index 2)
-     * list.indexOf(2f, 0);              // returns 1
-     * list.indexOf(2f, 4);              // returns -1 (fromIndex past end)
+     * list.indexOf(2f, 2);   // returns 3 (first 2 at or after index 2)
+     * list.indexOf(2f, 0);   // returns 1
+     * list.indexOf(2f, 4);   // returns -1 (fromIndex past end)
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -1966,9 +1941,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f, 2f);
-     * list.lastIndexOf(2f);             // returns 3 (last occurrence)
-     * list.lastIndexOf(1f);             // returns 0
-     * list.lastIndexOf(9f);             // returns -1 (not found)
+     * list.lastIndexOf(2f);   // returns 3 (last occurrence)
+     * list.lastIndexOf(1f);   // returns 0
+     * list.lastIndexOf(9f);   // returns -1 (not found)
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -1987,9 +1962,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f, 2f);
-     * list.lastIndexOf(2f, 2);          // returns 1 (last 2 at or before index 2)
-     * list.lastIndexOf(2f, 3);          // returns 3
-     * list.lastIndexOf(2f, -1);         // returns -1 (negative start index)
+     * list.lastIndexOf(2f, 2);    // returns 1 (last 2 at or before index 2)
+     * list.lastIndexOf(2f, 3);    // returns 3
+     * list.lastIndexOf(2f, -1);   // returns -1 (negative start index)
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -2039,9 +2014,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(5f, 3f, 1f, 4f, 2f);
-     * list.min(1, 4).getAsFloat();      // returns 1.0 (min of [3, 1, 4])
-     * list.min(2, 2).isPresent();       // returns false (empty range)
-     * list.min(0, 99);                  // throws IndexOutOfBoundsException
+     * list.min(1, 4).getAsFloat();   // returns 1.0 (min of [3, 1, 4])
+     * list.min(2, 2).isPresent();    // returns false (empty range)
+     * list.min(0, 99);               // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param fromIndex the index of the first element in the range (inclusive). Must be non-negative.
@@ -2082,9 +2057,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(5f, 3f, 1f, 4f, 2f);
-     * list.max(1, 4).getAsFloat();      // returns 4.0 (max of [3, 1, 4])
-     * list.max(2, 2).isPresent();       // returns false (empty range)
-     * list.max(0, 99);                  // throws IndexOutOfBoundsException
+     * list.max(1, 4).getAsFloat();   // returns 4.0 (max of [3, 1, 4])
+     * list.max(2, 2).isPresent();    // returns false (empty range)
+     * list.max(0, 99);               // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be included in the max calculation
@@ -2168,7 +2143,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final FloatConsumer action) {
+    public void forEach(final FloatConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
@@ -2199,7 +2174,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws IndexOutOfBoundsException if the indices are out of range
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final int fromIndex, final int toIndex, final FloatConsumer action) throws IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final FloatConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2462,7 +2437,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws IllegalArgumentException if the specified random source is {@code null}
      */
     @Override
-    public void shuffle(final Random rnd) {
+    public void shuffle(final Random rnd) throws IllegalArgumentException {
         N.checkArgNotNull(rnd, cs.rnd);
 
         if (size() > 1) {
@@ -2698,7 +2673,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final C c = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2722,7 +2698,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public Multiset<Float> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Float>> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final Multiset<Float> multiset = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final Multiset<Float> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);
@@ -2794,8 +2771,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f);
-     * list.getFirst();                  // returns 1.0
-     * new FloatList().getFirst();       // throws NoSuchElementException
+     * list.getFirst();              // returns 1.0
+     * new FloatList().getFirst();   // throws NoSuchElementException
      * }</pre>
      *
      * @return the first float value in the list
@@ -2813,8 +2790,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f);
-     * list.getLast();                   // returns 3.0
-     * new FloatList().getLast();        // throws NoSuchElementException
+     * list.getLast();              // returns 3.0
+     * new FloatList().getLast();   // throws NoSuchElementException
      * }</pre>
      *
      * @return the last float value in the list
@@ -2868,8 +2845,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f);
-     * list.removeFirst();               // returns 1.0, list is now [2.0, 3.0]
-     * new FloatList().removeFirst();    // throws NoSuchElementException
+     * list.removeFirst();              // returns 1.0, list is now [2.0, 3.0]
+     * new FloatList().removeFirst();   // throws NoSuchElementException
      * }</pre>
      *
      * @return the first float value that was removed from the list
@@ -2887,8 +2864,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1f, 2f, 3f);
-     * list.removeLast();                // returns 3.0, list is now [1.0, 2.0]
-     * new FloatList().removeLast();     // throws NoSuchElementException
+     * list.removeLast();              // returns 3.0, list is now [1.0, 2.0]
+     * new FloatList().removeLast();   // throws NoSuchElementException
      * }</pre>
      *
      * @return the last float value that was removed from the list

@@ -13,11 +13,14 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.TypeReference;
 
 import lombok.Data;
 
@@ -62,6 +65,32 @@ public class MapTypeTest extends TestBase {
         List<Type<?>> paramTypes = mapType.parameterTypes();
         Assertions.assertNotNull(paramTypes);
         assertEquals(2, paramTypes.size());
+    }
+
+    @Test
+    public void testSpringMultiValueMapUsesDeclaredValueParameter() {
+        final Type<LinkedMultiValueMap<String, Integer>> type = createType(new TypeReference<LinkedMultiValueMap<String, Integer>>() {
+        });
+
+        assertEquals(String.class, type.parameterTypes().get(0).javaType());
+        assertEquals(Integer.class, type.parameterTypes().get(1).javaType());
+
+        final LinkedMultiValueMap<String, Integer> result = type.valueOf("{\"a\":[1,2]}");
+        assertEquals(List.of(1, 2), result.get("a"));
+    }
+
+    @Test
+    public void testSpringMultiValueMapInterfaceUsesConcreteImplementation() {
+        final Type<MultiValueMap<String, Integer>> type = createType(new TypeReference<MultiValueMap<String, Integer>>() {
+        });
+
+        final MultiValueMap<String, Integer> populated = type.valueOf("{\"a\":[1,2]}");
+        final MultiValueMap<String, Integer> empty = type.valueOf("{}");
+
+        assertEquals(LinkedMultiValueMap.class, populated.getClass());
+        assertEquals(List.of(1, 2), populated.get("a"));
+        assertEquals(LinkedMultiValueMap.class, empty.getClass());
+        assertTrue(empty.isEmpty());
     }
 
     @Test

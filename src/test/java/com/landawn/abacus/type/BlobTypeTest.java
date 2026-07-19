@@ -17,6 +17,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.sql.rowset.serial.SerialBlob;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +32,14 @@ public class BlobTypeTest extends TestBase {
     public void testClazz() {
         Class<Blob> result = type.javaType();
         assertEquals(Blob.class, result);
+    }
+
+    @Test
+    public void testConcreteBlobSubclassMetadata() {
+        final BlobType subtype = new BlobType(SerialBlob.class);
+
+        assertEquals(SerialBlob.class, subtype.javaType());
+        assertEquals("SerialBlob", subtype.name());
     }
 
     @Test

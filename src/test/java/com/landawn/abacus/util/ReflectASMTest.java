@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -62,6 +63,15 @@ public class ReflectASMTest extends TestBase {
 
         Assertions.assertEquals("A2", p1.name);
         Assertions.assertEquals("B2", p2.name);
+    }
+
+    @Test
+    public void testConcurrentAccessorInitializationAndUse() {
+        IntStream.range(0, 100).parallel().forEach(i -> {
+            ReflectASM<TestPerson> reflect = ReflectASM.on(TestPerson.class).newInstance().set("name", "person-" + i).set("age", i);
+            Assertions.assertEquals("person-" + i, (String) reflect.get("name"));
+            Assertions.assertEquals(i, (int) reflect.<Integer> invoke("calculateBirthYear", i * 2));
+        });
     }
 
     @Test

@@ -97,8 +97,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Creates a BufferedReader that reads from the specified InputStream.
      *
-     * <p>The stream is wrapped with an InputStreamReader using the default
-     * character encoding.</p>
+     * <p>The stream is wrapped with an InputStreamReader using UTF-8.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -187,8 +186,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Reads characters into a portion of an array.
      *
-     * <p>This method implements efficient bulk reading of characters. It attempts
-     * to read as many characters as possible up to the specified length.</p>
+     * <p>This method implements efficient bulk reading of characters. As permitted by
+     * {@link Reader#read(char[], int, int)}, it may return after reading fewer than the
+     * requested number of characters.</p>
      *
      * @param cbuf destination buffer
      * @param off offset at which to start storing characters
@@ -203,9 +203,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
              * If the requested length is at least as large as the buffer, and if there is no mark/reset activity, and
              * if line feeds are not being skipped, do not bother to copy the characters into the local buffer. In this
              *  way, buffered streams will cascade harmlessly.
-             */
+            */
             if ((len >= Objectory.BUFFER_SIZE) && !skipLF) {
-                return IOUtil.read(in, cbuf, off, len);
+                return in.read(cbuf, off, len);
             }
 
             fill();
@@ -654,7 +654,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * <p>This method allows reusing the same BufferedReader instance for
      * reading different strings, which can be more efficient than creating
-     * new instances.</p>
+     * new instances. If this instance previously read from a {@link Reader},
+     * that reader is detached but is not closed; its owner remains responsible
+     * for closing it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -670,6 +672,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     @SuppressWarnings("deprecation")
     void reinit(final String st) {
         isClosed = false;
+        in = null;
         str = st;
         strValue = InternalUtil.getCharsForReadOnly(str);
         strLength = st.length();
@@ -682,8 +685,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Reinitializes this reader to read from the specified InputStream.
      *
-     * <p>The stream is wrapped with an InputStreamReader using the default
-     * character encoding.</p>
+     * <p>The stream is wrapped with an InputStreamReader using UTF-8.
+     * Any previous source is detached but is not closed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -704,7 +707,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * Reinitializes this reader to read from the specified Reader.
      *
      * <p>This method allows reusing the same BufferedReader instance for
-     * reading from different sources.</p>
+     * reading from different sources. Any previous source is detached but is
+     * not closed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -751,7 +755,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     }
 
     /**
-     * Fills the internal buffer with data from the underlying reader.
+     * Fills the internal buffer with one read from the underlying reader. A single fill
+     * deliberately does not try to fill the entire buffer: doing so could block after some
+     * characters are already available, contrary to the {@link Reader} read contract.
      *
      * @throws IOException if an I/O error occurs
      */
@@ -771,7 +777,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         nextChar = 0;
         nChars = len;
 
-        final int n = IOUtil.read(in, _cbuf, len, _cbuf.length - len);
+        final int n = in.read(_cbuf, len, _cbuf.length - len);
 
         if (n > 0) {
             nChars += n;

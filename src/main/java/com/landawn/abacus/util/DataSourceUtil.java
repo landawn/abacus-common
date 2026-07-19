@@ -196,8 +196,10 @@ public final class DataSourceUtil {
      * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
      * @param closeConnection if {@code true}, also closes the Connection (requires {@code closeStatement} to be {@code true})
      * @throws IllegalArgumentException if {@code closeStatement} is {@code false} while {@code closeConnection} is {@code true}
-     * @throws UncheckedSQLException if a database access error occurs while retrieving or closing the resources
+     * @throws UncheckedSQLException if a database access error occurs while retrieving or closing the resources;
+     *         the first failure is preserved and later close failures are attached as suppressed exceptions
      */
+    @SuppressWarnings("resource")
     public static void close(final ResultSet rs, final boolean closeStatement, final boolean closeConnection)
             throws IllegalArgumentException, UncheckedSQLException {
         if (closeConnection && !closeStatement) {
@@ -211,6 +213,8 @@ public final class DataSourceUtil {
         Connection conn = null;
         Statement stmt = null;
 
+        SQLException failure = null;
+
         try {
             if (closeStatement) {
                 stmt = rs.getStatement();
@@ -220,9 +224,33 @@ public final class DataSourceUtil {
                 conn = stmt.getConnection();
             }
         } catch (final SQLException e) {
-            throw new UncheckedSQLException(e);
-        } finally {
-            close(rs, stmt, conn);
+            failure = e;
+        }
+
+        try {
+            rs.close();
+        } catch (final SQLException e) {
+            failure = addCloseException(failure, e);
+        }
+
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (final SQLException e) {
+            failure = addCloseException(failure, e);
+        }
+
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (final SQLException e) {
+            failure = addCloseException(failure, e);
+        }
+
+        if (failure != null) {
+            throw new UncheckedSQLException(failure);
         }
     }
 
@@ -290,7 +318,13 @@ public final class DataSourceUtil {
             return closeException;
         }
 
-        firstException.addSuppressed(closeException);
+        // Throwable rejects self-suppression. Some drivers and mocks reuse the same SQLException
+        // instance for lookup and close failures; keep that original failure instead of masking it
+        // with IllegalArgumentException from addSuppressed.
+        if (firstException != closeException) {
+            firstException.addSuppressed(closeException);
+        }
+
         return firstException;
     }
 

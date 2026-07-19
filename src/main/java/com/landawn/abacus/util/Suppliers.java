@@ -105,9 +105,10 @@ import com.landawn.abacus.util.function.Supplier;
  * Collection<String> collection = dynamicSupplier.get();
  * }</pre>
  *
- * <p>This class is thread-safe and all returned suppliers are safe for concurrent use unless
- * otherwise specified. The class uses internal caching to optimize supplier creation for
- * frequently requested types.</p>
+ * <p>The built-in supplier registry is thread-safe and the standard collection/map suppliers can
+ * be invoked concurrently to create independent instances. Suppliers that capture a caller-provided
+ * function, object, or custom supplier inherit that object's thread-safety; in particular,
+ * {@link #ofInstance(Object)} deliberately returns the same instance on every invocation.</p>
  *
  * @see java.util.function.Supplier
  * @see java.util.Collection
@@ -277,8 +278,25 @@ public final class Suppliers {
         // utility class
     }
 
+    private static <T> java.util.function.Supplier<T> nonNullResultSupplier(final java.util.function.Supplier<? extends T> supplier,
+            final String argumentName) {
+        N.checkArgNotNull(supplier, argumentName);
+
+        return () -> N.requireNonNull(supplier.get(), "'" + argumentName + "' returned null");
+    }
+
+    private static boolean canInstantiateWithoutProbe(final Class<?> targetType) {
+        return ClassUtil.getDeclaredConstructor(targetType) != null
+                || (!Modifier.isStatic(targetType.getModifiers()) && ClassUtil.isAnonymousOrMemberClass(targetType));
+    }
+
+    private static <T> Supplier<T> registeredSupplier(final Class<T> targetClass, final java.util.function.Supplier<? extends T> supplier) {
+        return () -> targetClass.cast(N.requireNonNull(supplier.get(), "The registered supplier returned null"));
+    }
+
     /**
      * Returns the provided supplier as is - a shorthand identity method for suppliers.
+     * The supplier is not wrapped, invoked, or otherwise constrained; in particular, its result may be {@code null}.
      *
      * <p>This method serves as a shorthand convenience method that can help with type inference
      * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
@@ -294,6 +312,7 @@ public final class Suppliers {
      * @param <T> the type of results supplied by the supplier
      * @param supplier the supplier to return
      * @return the supplier unchanged
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @see #of(Object, Function)
      * @see Fn#s(Supplier)
      * @see Fn#s(Object, Function)
@@ -303,7 +322,7 @@ public final class Suppliers {
      */
     @Beta
     public static <T> Supplier<T> of(final Supplier<T> supplier) {
-        return supplier;
+        return N.checkArgNotNull(supplier, cs.supplier);
     }
 
     /**
@@ -313,7 +332,7 @@ public final class Suppliers {
      * and when the supplier is called, it applies the function to the value and returns the result.</p>
      *
      * <p>Note: the function is applied on every call to the returned supplier's
-     * {@code get()} method, not memoized.</p>
+     * {@code get()} method, not memoized. A {@code null} function result is returned unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -328,6 +347,7 @@ public final class Suppliers {
      * @param a the value to be processed by the function
      * @param func the function to apply to the value
      * @return a supplier that will return the result of applying the function to the value
+     * @throws IllegalArgumentException if {@code func} is {@code null}
      * @see #of(Supplier)
      * @see Fn#s(Supplier)
      * @see Fn#s(Object, Function)
@@ -337,6 +357,8 @@ public final class Suppliers {
      */
     @Beta
     public static <A, T> Supplier<T> of(final A a, final Function<? super A, ? extends T> func) {
+        N.checkArgNotNull(func, cs.func);
+
         return () -> func.apply(a);
     }
 
@@ -1250,17 +1272,22 @@ public final class Suppliers {
      * @param <T> the type of elements in the multiset
      * @param valueMapType the class of {@code Map} to use for storing element counts, must not be {@code null}
      * @return a supplier that creates new Multiset instances backed by the specified map type
+     * @throws IllegalArgumentException if {@code valueMapType} is {@code null} or cannot be used to create a map
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) {
-        return () -> N.newMultiset(valueMapType);
+        final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier = (java.util.function.Supplier) ofMap(valueMapType);
+
+        return () -> N.newMultiset(mapSupplier);
     }
 
     /**
      * Returns a supplier that creates new Multiset instances with a custom map supplier.
      *
-     * <p>Each call to the supplier's get() method will create a new, empty Multiset
-     * backed by a Map created by the provided supplier.</p>
+     * <p>Each call to the returned supplier creates a new Multiset wrapper and invokes
+     * {@code mapSupplier} exactly once for its backing map. A {@link NullPointerException} is thrown
+     * if that invocation returns {@code null}. To obtain independent multisets, the caller-provided
+     * supplier must return a fresh mutable map on every invocation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1274,9 +1301,12 @@ public final class Suppliers {
      * @param <T> the type of elements in the multiset
      * @param mapSupplier supplier to create the backing {@code Map} used for storing element counts, must not be {@code null}
      * @return a supplier that creates new Multiset instances backed by maps from the given supplier
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}
      */
     public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) {
-        return () -> N.newMultiset(mapSupplier);
+        final java.util.function.Supplier<Map<T, ?>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
+
+        return () -> N.newMultiset(checkedMapSupplier);
     }
 
     /**
@@ -1322,10 +1352,11 @@ public final class Suppliers {
      * @param <E> the type of mapped values
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances with the specified Map type
+     * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType) {
-        return () -> N.newListMultimap(mapType);
+        return ofListMultimap(mapType, ArrayList.class);
     }
 
     /**
@@ -1348,18 +1379,27 @@ public final class Suppliers {
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @param valueType the Class object representing the List implementation to use for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances with the specified types
+     * @throws IllegalArgumentException if either class is {@code null} or cannot be used to create the requested map or list
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
-        return () -> N.newListMultimap(mapType, valueType);
+        N.checkArgNotNull(valueType, "valueType");
+        N.checkArgument(List.class.isAssignableFrom(valueType), "'valueType': {} is not a List class", valueType);
+
+        final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier = (java.util.function.Supplier) ofMap(mapType);
+        final java.util.function.Supplier<? extends List<E>> valueSupplier = (java.util.function.Supplier) ofCollection(valueType);
+
+        return ofListMultimap(mapSupplier, valueSupplier);
     }
 
     /**
      * Returns a Supplier that creates a new ListMultimap using the provided map and value suppliers.
      *
      * <p>The returned supplier creates ListMultimaps using custom suppliers for both the backing Map
-     * and the List instances used for values. This allows for complete control over the multimap's
-     * internal structure.</p>
+     * and the List instances used for values. The map supplier is invoked exactly once for each created
+     * multimap; the value supplier is invoked lazily for each new key. A {@link NullPointerException} is
+     * thrown when either supplier is invoked and returns {@code null}. To obtain independent multimaps,
+     * the caller-provided suppliers must return fresh mutable instances.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1376,10 +1416,14 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the List instances for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances using the provided suppliers
+     * @throws IllegalArgumentException if either supplier is {@code null}
      */
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier,
             final java.util.function.Supplier<? extends List<E>> valueSupplier) {
-        return () -> N.newListMultimap(mapSupplier, valueSupplier);
+        final java.util.function.Supplier<Map<K, List<E>>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
+        final java.util.function.Supplier<List<E>> checkedValueSupplier = nonNullResultSupplier(valueSupplier, cs.valueSupplier);
+
+        return () -> N.newListMultimap(checkedMapSupplier, checkedValueSupplier);
     }
 
     /**
@@ -1425,10 +1469,11 @@ public final class Suppliers {
      * @param <E> the type of mapped values
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances with the specified Map type
+     * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType) {
-        return () -> N.newSetMultimap(mapType);
+        return ofSetMultimap(mapType, HashSet.class);
     }
 
     /**
@@ -1451,18 +1496,27 @@ public final class Suppliers {
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @param valueType the Class object representing the Set implementation to use for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances with the specified types
+     * @throws IllegalArgumentException if either class is {@code null} or cannot be used to create the requested map or set
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
-        return () -> N.newSetMultimap(mapType, valueType);
+        N.checkArgNotNull(valueType, "valueType");
+        N.checkArgument(Set.class.isAssignableFrom(valueType), "'valueType': {} is not a Set class", valueType);
+
+        final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier = (java.util.function.Supplier) ofMap(mapType);
+        final java.util.function.Supplier<? extends Set<E>> valueSupplier = (java.util.function.Supplier) ofCollection(valueType);
+
+        return ofSetMultimap(mapSupplier, valueSupplier);
     }
 
     /**
      * Returns a Supplier that creates a new SetMultimap using the provided map and value suppliers.
      *
      * <p>The returned supplier creates SetMultimaps using custom suppliers for both the backing Map
-     * and the Set instances used for values. This allows for complete control over the multimap's
-     * internal structure.</p>
+     * and the Set instances used for values. The map supplier is invoked exactly once for each created
+     * multimap; the value supplier is invoked lazily for each new key. A {@link NullPointerException} is
+     * thrown when either supplier is invoked and returns {@code null}. To obtain independent multimaps,
+     * the caller-provided suppliers must return fresh mutable instances.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1479,18 +1533,24 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the Set instances for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances using the provided suppliers
+     * @throws IllegalArgumentException if either supplier is {@code null}
      */
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final java.util.function.Supplier<? extends Set<E>> valueSupplier) {
-        return () -> N.newSetMultimap(mapSupplier, valueSupplier);
+        final java.util.function.Supplier<Map<K, Set<E>>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
+        final java.util.function.Supplier<Set<E>> checkedValueSupplier = nonNullResultSupplier(valueSupplier, cs.valueSupplier);
+
+        return () -> N.newSetMultimap(checkedMapSupplier, checkedValueSupplier);
     }
 
     /**
      * Returns a Supplier that creates a new Multimap using the provided map and value collection suppliers.
      *
      * <p>This is the most general multimap supplier, allowing any Collection type for values.
-     * The returned supplier creates Multimaps using custom suppliers for both the backing Map
-     * and the Collection instances used for values.</p>
+     * The map supplier is invoked exactly once for each created multimap; the value supplier is
+     * invoked lazily for each new key. A {@link NullPointerException} is thrown when either supplier
+     * is invoked and returns {@code null}. To obtain independent multimaps, the caller-provided
+     * suppliers must return fresh mutable instances.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1508,10 +1568,14 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the Collection instances for values, must not be {@code null}
      * @return a Supplier that creates new Multimap instances using the provided suppliers
+     * @throws IllegalArgumentException if either supplier is {@code null}
      */
     public static <K, E, V extends Collection<E>> Supplier<Multimap<K, E, V>> ofMultimap(final java.util.function.Supplier<? extends Map<K, V>> mapSupplier,
             final java.util.function.Supplier<? extends V> valueSupplier) {
-        return () -> N.newMultimap(mapSupplier, valueSupplier);
+        final java.util.function.Supplier<Map<K, V>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
+        final java.util.function.Supplier<V> checkedValueSupplier = nonNullResultSupplier(valueSupplier, cs.valueSupplier);
+
+        return () -> N.newMultimap(checkedMapSupplier, checkedValueSupplier);
     }
 
     /**
@@ -1532,13 +1596,20 @@ public final class Suppliers {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
 
     /**
-     * Returns a Supplier that creates Collection instances of the specified type.
+     * Returns a Supplier that creates mutable Collection instances for the specified type.
      *
      * <p>This method provides suppliers for various Collection implementations including List, Set, Queue,
-     * and their subtypes. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
+     * and their subtypes. The method uses a thread-safe cache to avoid creating duplicate suppliers for the same type.
+     * Concrete mutable classes are preserved when they have a usable no-argument construction path. Interfaces,
+     * abstract classes, and immutable collection types are mapped to the mutable implementations listed below.</p>
+    
+     * <p>Calling this method does not invoke a concrete collection's constructor. Each invocation of the returned
+     * supplier performs one construction attempt and, for the built-in and normally constructible concrete types,
+     * returns a fresh empty collection. An exception thrown by a concrete constructor is propagated by the returned
+     * supplier's {@code get()} call.</p>
      *
      * <p>Supported types include:</p>
      * <ul>
@@ -1565,18 +1636,19 @@ public final class Suppliers {
      *
      * @param <T> the element type of the collection
      * @param targetType the Class object representing the desired Collection implementation
-     * @return a Supplier that creates instances of the specified Collection type
-     * @throws IllegalArgumentException if targetType is not a Collection class, is abstract and cannot be instantiated,
-     *         or if no suitable implementation can be found
+     * @return a Supplier that creates mutable collections according to the mappings above
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Collection class, is an unsupported abstract class,
+     *         has no usable no-argument construction path, or has no suitable fallback implementation
      * @see #registerForCollection(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+        N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
+
         Supplier ret = collectionSupplierPool.get(targetType);
 
         if (ret == null) {
-            N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
-
             if (Collection.class.equals(targetType) || AbstractCollection.class.equals(targetType) || List.class.equals(targetType)
                     || AbstractList.class.equals(targetType) || ArrayList.class.equals(targetType)) {
                 ret = ofList();
@@ -1611,12 +1683,8 @@ public final class Suppliers {
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
                 throw new IllegalArgumentException("Can't create instance for abstract class: " + targetType);
             } else {
-                try {
-                    if (N.newInstance(targetType) != null) {
-                        ret = () -> N.newInstance(targetType);
-                    }
-                } catch (final Throwable e) { // NOSONAR
-                    // ignore
+                if (canInstantiateWithoutProbe(targetType)) {
+                    ret = () -> N.newInstance(targetType);
                 }
 
                 if (ret == null) {
@@ -1646,13 +1714,20 @@ public final class Suppliers {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
 
     /**
-     * Returns a Supplier that creates Map instances of the specified type.
+     * Returns a Supplier that creates mutable Map instances for the specified type.
      *
      * <p>This method provides suppliers for various Map implementations including HashMap, LinkedHashMap,
-     * TreeMap, and concurrent maps. The method uses a cache to avoid creating duplicate suppliers for the same type.</p>
+     * TreeMap, and concurrent maps. The method uses a thread-safe cache to avoid creating duplicate suppliers for the same type.
+     * Concrete mutable classes are preserved when they have a usable no-argument construction path. Interfaces,
+     * abstract classes, {@code EnumMap}, and immutable map types use the mutable fallbacks listed below.</p>
+    
+     * <p>Calling this method does not invoke a concrete map's constructor. Each invocation of the returned supplier
+     * performs one construction attempt and, for the built-in and normally constructible concrete types, returns a
+     * fresh empty map. An exception thrown by a concrete constructor is propagated by the returned supplier's
+     * {@code get()} call.</p>
      *
      * <p>Supported types include:</p>
      * <ul>
@@ -1661,10 +1736,12 @@ public final class Suppliers {
      *   <li>{@code LinkedHashMap} - returns LinkedHashMap supplier</li>
      *   <li>{@code ConcurrentNavigableMap}, {@code ConcurrentSkipListMap} - returns ConcurrentSkipListMap supplier</li>
      *   <li>{@code SortedMap}, {@code NavigableMap} interfaces (or an abstract sorted-map type) - returns TreeMap supplier; a concrete sorted-map subtype is instantiated as its own runtime type</li>
-     *   <li>{@code IdentityHashMap} (and subtypes) - returns IdentityHashMap supplier</li>
-     *   <li>{@code ConcurrentHashMap} (and subtypes) - returns ConcurrentHashMap supplier</li>
-     *   <li>{@code BiMap} (and subtypes) - returns BiMap supplier</li>
+     *   <li>{@code IdentityHashMap} - returns IdentityHashMap supplier</li>
+     *   <li>{@code ConcurrentHashMap} - returns ConcurrentHashMap supplier</li>
+     *   <li>{@code BiMap} - returns BiMap supplier</li>
      *   <li>{@code ImmutableMap} (and subtypes) - returns HashMap supplier</li>
+     *   <li>Concrete mutable map subclasses with an accessible no-argument constructor - returns
+     *       a supplier of the requested runtime type</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1676,18 +1753,19 @@ public final class Suppliers {
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @param targetType the Class object representing the desired Map implementation
-     * @return a Supplier that creates instances of the specified Map type
-     * @throws IllegalArgumentException if targetType is not a Map class, is abstract and cannot be instantiated,
-     *         or if no suitable implementation can be found
+     * @return a Supplier that creates mutable maps according to the mappings above
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Map class, is an unsupported abstract class,
+     *         has no usable no-argument construction path, or has no suitable fallback implementation
      * @see #registerForMap(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+        N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
+
         Supplier ret = mapSupplierPool.get(targetType);
 
         if (ret == null) {
-            N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
-
             if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType) || HashMap.class.equals(targetType) || EnumMap.class.equals(targetType)) {
                 ret = ofMap();
             } else if (ConcurrentMap.class.equals(targetType)) {
@@ -1700,23 +1778,19 @@ public final class Suppliers {
                 // Only downgrade the SortedMap/NavigableMap interfaces (or an abstract sorted-map type) to
                 // TreeMap; a concrete sorted-map subclass is instantiated below to preserve its runtime type.
                 ret = ofSortedMap();
-            } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {
+            } else if (IdentityHashMap.class.equals(targetType)) {
                 ret = ofIdentityHashMap();
-            } else if (ConcurrentHashMap.class.isAssignableFrom(targetType)) {
+            } else if (ConcurrentHashMap.class.equals(targetType)) {
                 ret = ofConcurrentHashMap();
-            } else if (BiMap.class.isAssignableFrom(targetType)) {
+            } else if (BiMap.class.equals(targetType)) {
                 ret = ofBiMap();
             } else if (ImmutableMap.class.isAssignableFrom(targetType)) {
                 ret = ofMap();
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
                 throw new IllegalArgumentException("Not able to create instance for abstract Map: " + targetType);
             } else {
-                try {
-                    if (N.newInstance(targetType) != null) {
-                        ret = () -> N.newInstance(targetType);
-                    }
-                } catch (final Throwable e) { // NOSONAR
-                    // ignore
+                if (canInstantiateWithoutProbe(targetType)) {
+                    ret = () -> N.newInstance(targetType);
                 }
 
                 if (ret == null) {
@@ -1750,7 +1824,11 @@ public final class Suppliers {
      * built-in or require special initialization. Once registered, the supplier will be used by
      * {@link #ofCollection(Class)} when creating instances of the target class.</p>
      *
-     * <p>Note: Built-in classes (like ArrayList, HashSet, etc.) cannot be registered with custom suppliers.</p>
+     * <p>Built-in classes (like ArrayList and HashSet) cannot be registered with custom suppliers.
+     * Registration and dynamic supplier caching are atomic with respect to one another: the first
+     * supplier stored for a class wins. The custom supplier is invoked only by the supplier returned
+     * from {@link #ofCollection(Class)} and must return a non-null instance of {@code targetClass}.
+     * Fresh-instance and thread-safety behavior otherwise remain the custom supplier's responsibility.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1762,8 +1840,9 @@ public final class Suppliers {
      * @param <T> the Collection type
      * @param targetClass the Class object of the Collection implementation to register
      * @param supplier the Supplier that creates instances of the target class
-     * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
-     * @throws IllegalArgumentException if targetClass or supplier is {@code null}, or if targetClass is a built-in class
+     * @return {@code true} if the registration was successful, {@code false} if a supplier was already cached or registered for this class
+     * @throws IllegalArgumentException if either argument is {@code null}, {@code targetClass} is not a Collection class,
+     *         or {@code targetClass} is a built-in class
      * @see #ofCollection(Class)
      */
     @SuppressWarnings("rawtypes")
@@ -1771,6 +1850,7 @@ public final class Suppliers {
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(supplier, cs.Supplier);
+        N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -1778,7 +1858,7 @@ public final class Suppliers {
 
         // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while
         // reporting failure to the overwriting caller.
-        return collectionSupplierPool.putIfAbsent(targetClass, Fn.from(supplier)) == null;
+        return collectionSupplierPool.putIfAbsent(targetClass, registeredSupplier(targetClass, supplier)) == null;
     }
 
     /**
@@ -1788,7 +1868,11 @@ public final class Suppliers {
      * built-in or require special initialization. Once registered, the supplier will be used by
      * {@link #ofMap(Class)} when creating instances of the target class.</p>
      *
-     * <p>Note: Built-in classes (like HashMap, TreeMap, etc.) cannot be registered with custom suppliers.</p>
+     * <p>Built-in classes (like HashMap and TreeMap) cannot be registered with custom suppliers.
+     * Registration and dynamic supplier caching are atomic with respect to one another: the first
+     * supplier stored for a class wins. The custom supplier is invoked only by the supplier returned
+     * from {@link #ofMap(Class)} and must return a non-null instance of {@code targetClass}.
+     * Fresh-instance and thread-safety behavior otherwise remain the custom supplier's responsibility.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1800,8 +1884,9 @@ public final class Suppliers {
      * @param <T> the Map type
      * @param targetClass the Class object of the Map implementation to register
      * @param supplier the Supplier that creates instances of the target class
-     * @return {@code true} if the registration was successful, {@code false} if a supplier was already registered for this class
-     * @throws IllegalArgumentException if targetClass or supplier is {@code null}, or if targetClass is a built-in class
+     * @return {@code true} if the registration was successful, {@code false} if a supplier was already cached or registered for this class
+     * @throws IllegalArgumentException if either argument is {@code null}, {@code targetClass} is not a Map class,
+     *         or {@code targetClass} is a built-in class
      * @see #ofMap(Class)
      */
     @SuppressWarnings("rawtypes")
@@ -1809,6 +1894,7 @@ public final class Suppliers {
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(supplier, cs.Supplier);
+        N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -1816,7 +1902,7 @@ public final class Suppliers {
 
         // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while
         // reporting failure to the overwriting caller.
-        return mapSupplierPool.putIfAbsent(targetClass, Fn.from(supplier)) == null;
+        return mapSupplierPool.putIfAbsent(targetClass, registeredSupplier(targetClass, supplier)) == null;
     }
 
     /**
@@ -1833,7 +1919,7 @@ public final class Suppliers {
      */
     @Deprecated
     public static Supplier<ImmutableList<?>> ofImmutableList() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("ImmutableList cannot be created as an empty, subsequently populated result");
     }
 
     /**
@@ -1850,7 +1936,7 @@ public final class Suppliers {
      */
     @Deprecated
     public static Supplier<ImmutableSet<?>> ofImmutableSet() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("ImmutableSet cannot be created as an empty, subsequently populated result");
     }
 
     /**
@@ -1867,7 +1953,7 @@ public final class Suppliers {
      */
     @Deprecated
     public static Supplier<ImmutableMap<?, ?>> ofImmutableMap() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("ImmutableMap cannot be created as an empty, subsequently populated result");
     }
 
     private static final Supplier<Exception> EXCEPTION = Exception::new;

@@ -183,7 +183,8 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
 
     /**
      * Writes a {@link java.math.BigDecimal} value to a {@link CharacterWriter}.
-     * Writes the literal {@code "null"} character array if {@code x} is {@code null}.
+     * Writes {@code 0} for a {@code null} value when the config requests {@code writeNullNumberAsZero};
+     * otherwise writes the literal {@code "null"} character array if {@code x} is {@code null}.
      * When {@code config} is non-{@code null} and
      * {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteBigDecimalAsPlain()} returns {@code true},
      * the value is written using {@link java.math.BigDecimal#toPlainString()} (no scientific notation);
@@ -203,7 +204,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     @Override
     public void serializeTo(final CharacterWriter writer, final BigDecimal x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            if (config != null && config.isWriteNullNumberAsZero()) {
+                writer.write('0');
+            } else {
+                writer.write(NULL_CHAR_ARRAY);
+            }
         } else {
             if (config != null && config.isWriteBigDecimalAsPlain()) {
                 writer.writeCharacter(x.toPlainString());

@@ -188,6 +188,22 @@ public class ByteBufferTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOf_PreservesMarkPositionAndLimit() {
+        ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.put((byte) 1).put((byte) 2);
+        buffer.mark();
+        buffer.put((byte) 3);
+        buffer.limit(6);
+
+        assertEquals("AQID", type.stringOf(buffer));
+        assertEquals(3, buffer.position());
+        assertEquals(6, buffer.limit());
+
+        buffer.reset();
+        assertEquals(2, buffer.position());
+    }
+
+    @Test
     public void test_get_ResultSet_byLabel() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         // Basic get test - actual implementation will vary by type

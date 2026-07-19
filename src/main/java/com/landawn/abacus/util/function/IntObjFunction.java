@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -53,7 +53,6 @@ public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, Ru
      * @param u the object argument of type {@code T} (second parameter)
      * @return the function result
      */
-    // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
     R apply(int t, T u);
 

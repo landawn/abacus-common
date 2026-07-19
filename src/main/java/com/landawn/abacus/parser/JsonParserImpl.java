@@ -54,6 +54,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.Charsets;
@@ -276,7 +277,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Object[] output) {
+    public void parse(final String source, final JsonDeserConfig config, final Object[] output) throws IllegalArgumentException {
         final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
 
@@ -322,7 +323,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws UnsupportedOperationException if the collection is unmodifiable
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) {
+    public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) throws IllegalArgumentException {
         final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
 
@@ -368,7 +369,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws UnsupportedOperationException if the map is unmodifiable
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Map<?, ?> output) {
+    public void parse(final String source, final JsonDeserConfig config, final Map<?, ?> output) throws IllegalArgumentException {
         final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
 
@@ -2284,7 +2285,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType) {
+    public <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(source));
 
         final JsonDeserConfig configToUse = check(config);
@@ -2565,7 +2566,29 @@ final class JsonParserImpl extends AbstractJsonParser {
      */
     protected <T> T read(final Object source, final JsonReader jr, final JsonDeserConfig config, final Class<? extends T> targetClass,
             final Type<? extends T> targetType) throws IOException {
-        return read(source, jr, UNDEFINED, config, true, targetClass, targetType);
+        final T result = read(source, jr, UNDEFINED, config, true, targetClass, targetType);
+
+        // Scalar SERIALIZABLE values are converted directly from the original source. Every
+        // structured path consumes JsonReader tokens and must reject a second root value or junk.
+        if (targetType.serializationType() != SerializationType.SERIALIZABLE || targetType.isArray() || targetType.isCollection()) {
+            verifyEndOfInput(jr);
+        }
+
+        return result;
+    }
+
+    /**
+     * Ensures that a complete structured JSON value is followed only by whitespace and EOF.
+     *
+     * @param jr the reader positioned immediately after the root value
+     * @throws ParsingException if another token or unquoted text follows the root value
+     */
+    private static void verifyEndOfInput(final JsonReader jr) {
+        final int token = jr.nextToken();
+
+        if (token != EOF || jr.hasText()) {
+            throw new ParsingException("Unexpected content after the root JSON value", token);
+        }
     }
 
     /**
@@ -2668,6 +2691,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         String propName = null;
         Object propValue = null;
         boolean isPropName = true;
+        boolean propNameComplete = false;
+        boolean valueComplete = false;
+        boolean commaJustRead = false;
         Type<Object> propType = null;
 
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
@@ -2687,6 +2713,14 @@ final class JsonParserImpl extends AbstractJsonParser {
             switch (token) {
                 case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
+                    if (isPropName) {
+                        if (propNameComplete || jr.hasText()) {
+                            throw new ParsingException("A colon is required after a JSON property name", token);
+                        }
+                    } else if (valueComplete || jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON object properties", token);
+                    }
+
                     break;
 
                 case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
@@ -2704,6 +2738,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                         } else {
                             propName = propInfo.name;
                         }
+
+                        propNameComplete = true;
+                        commaJustRead = false;
 
                         if (propInfo == null) {
                             propType = null;
@@ -2732,6 +2769,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                         }
                     }
 
+                    if (!isPropName) {
+                        valueComplete = true;
+                    }
+
                     break;
 
                 case COLON:
@@ -2739,7 +2780,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                     if (isPropName) {
                         isPropName = false;
 
-                        if (jr.hasText()) {
+                        if (propNameComplete) {
+                            if (jr.hasText()) {
+                                throw new ParsingException("A colon is required immediately after a JSON property name", token);
+                            }
+                        } else if (jr.hasText()) {
                             propName = jr.getText();
                             propInfo = beanInfo.getPropInfo(propName);
 
@@ -2760,7 +2805,12 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     throw new ParsingException("Unknown property: " + propName);
                                 }
                             }
+                        } else {
+                            throw new ParsingException("A JSON property name is required before a colon", token);
                         }
+
+                        propNameComplete = false;
+                        commaJustRead = false;
                     } else {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     }
@@ -2773,8 +2823,16 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else {
                         isPropName = true;
+                        propNameComplete = false;
+                        commaJustRead = true;
 
-                        if (jr.hasText()) {
+                        if (valueComplete) {
+                            if (jr.hasText()) {
+                                throw new ParsingException("A comma is required between JSON object properties", token);
+                            }
+
+                            valueComplete = false;
+                        } else if (jr.hasText()) {
                             if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                     || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                 // ignore.
@@ -2791,6 +2849,10 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if (isPropName) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
+
+                    if (valueComplete || jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON object properties", token);
                     }
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2837,12 +2899,18 @@ final class JsonParserImpl extends AbstractJsonParser {
                         setPropValue(propInfo, propValue, result, ignoreNullOrEmpty);
                     }
 
+                    valueComplete = true;
+
                     break;
 
                 case START_BRACKET:
 
                     if (isPropName) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
+
+                    if (valueComplete || jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON object properties", token);
                     }
 
                     if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2890,17 +2958,20 @@ final class JsonParserImpl extends AbstractJsonParser {
                         setPropValue(propInfo, propValue, result, ignoreNullOrEmpty);
                     }
 
+                    valueComplete = true;
+
                     break;
 
                 case END_BRACE, EOF:
 
-                    if ((isPropName && propInfo != null) /* check for empty JSON text {} */
-                            || (isPropName && Strings.isEmpty(propName) && jr.hasText()) /*check for invalid JSON text: {abc}*/) {
+                    if (isPropName && (propNameComplete || commaJustRead || jr.hasText())) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token); //NOSONAR
+                    } else if (valueComplete && jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON object properties", token);
                     } else {
-                        if (jr.hasText()) {
+                        if (!valueComplete && jr.hasText()) {
                             if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
                                     || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                 // ignore.
@@ -2998,6 +3069,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         String propName = null;
         boolean isKey = true;
+        boolean keyComplete = false;
+        boolean valueComplete = false;
+        boolean commaJustRead = false;
         propType = null;
 
         Object key = null;
@@ -3019,6 +3093,14 @@ final class JsonParserImpl extends AbstractJsonParser {
             switch (token) {
                 case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
+                    if (isKey) {
+                        if (keyComplete || jr.hasText()) {
+                            throw new ParsingException("A colon is required after a JSON object key", token);
+                        }
+                    } else if (valueComplete || jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON object properties", token);
+                    }
+
                     break;
 
                 case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
@@ -3027,6 +3109,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                         key = isStringKey && !jr.hasText() ? "" : readValue(jr, readNullToEmpty, keyType);
                         propName = isStringKey ? (String) key : (key == null ? "null" : key.toString());
                         propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
+                        keyComplete = true;
+                        commaJustRead = false;
                     } else {
                         if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key.toString())) {
                             // ignore.
@@ -3039,6 +3123,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                         }
                     }
 
+                    if (!isKey) {
+                        valueComplete = true;
+                    }
+
                     break;
 
                 case COLON:
@@ -3046,11 +3134,20 @@ final class JsonParserImpl extends AbstractJsonParser {
                     if (isKey) {
                         isKey = false;
 
-                        if (jr.hasText()) {
+                        if (keyComplete) {
+                            if (jr.hasText()) {
+                                throw new ParsingException("A colon is required immediately after a JSON object key", token);
+                            }
+                        } else if (jr.hasText()) {
                             key = readValue(jr, readNullToEmpty, keyType);
                             propName = isStringKey ? (String) key : (key == null ? "null" : key.toString());
                             propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
+                        } else {
+                            throw new ParsingException("A JSON object key is required before a colon", token);
                         }
+
+                        keyComplete = false;
+                        commaJustRead = false;
                     } else {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     }
@@ -3063,8 +3160,16 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else {
                         isKey = true;
+                        keyComplete = false;
+                        commaJustRead = true;
 
-                        if (jr.hasText()) {
+                        if (valueComplete) {
+                            if (jr.hasText()) {
+                                throw new ParsingException("A comma is required between JSON object properties", token);
+                            }
+
+                            valueComplete = false;
+                        } else if (jr.hasText()) {
                             if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key.toString())) {
                                 // ignore.
                             } else {
@@ -3082,10 +3187,20 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case START_BRACE:
 
                     if (isKey) {
+                        if (keyComplete || jr.hasText()) {
+                            throw new ParsingException("A colon is required after a JSON object key", token);
+                        }
+
                         key = readBracedValue(jr, config, keyType);
                         propName = isStringKey ? (String) key : (key == null ? "null" : key.toString());
                         propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
+                        keyComplete = true;
+                        commaJustRead = false;
                     } else {
+                        if (valueComplete || jr.hasText()) {
+                            throw new ParsingException("A comma is required between JSON object properties", token);
+                        }
+
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                             readMap(jr, defaultJsonDeserConfig, null, false, Map.class, null, null);
                         } else {
@@ -3096,6 +3211,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 result.put(key, value);
                             }
                         }
+
+                        valueComplete = true;
                     }
 
                     break;
@@ -3103,10 +3220,20 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case START_BRACKET:
 
                     if (isKey) {
+                        if (keyComplete || jr.hasText()) {
+                            throw new ParsingException("A colon is required after a JSON object key", token);
+                        }
+
                         key = readBracketedValue(jr, config, null, keyType);
                         propName = isStringKey ? (String) key : (key == null ? "null" : key.toString());
                         propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
+                        keyComplete = true;
+                        commaJustRead = false;
                     } else {
+                        if (valueComplete || jr.hasText()) {
+                            throw new ParsingException("A comma is required between JSON object properties", token);
+                        }
+
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                             readCollection(jr, defaultJsonDeserConfig, null, Strings.isEmpty(propName) ? null : config.getPropHandler(propName), false,
                                     List.class, null, null);
@@ -3119,19 +3246,22 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 result.put(key, value);
                             }
                         }
+
+                        valueComplete = true;
                     }
 
                     break;
 
                 case END_BRACE, EOF:
 
-                    if (isKey && key != null /* check for empty JSON text {} */
-                            || (isKey && key == null && jr.hasText()) /*check for invalid JSON text: {abc}*/) {
+                    if (isKey && (keyComplete || commaJustRead || jr.hasText())) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
+                    } else if (valueComplete && jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON object properties", token);
                     } else {
-                        if (jr.hasText()) {
+                        if (!valueComplete && jr.hasText()) {
                             if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key.toString())) {
                                 // ignore.
                             } else {
@@ -3219,12 +3349,17 @@ final class JsonParserImpl extends AbstractJsonParser {
         if (output == null) {
             final List<Object> c = Objectory.createList();
             Object value = null;
+            boolean valueComplete = false;
 
             try {
                 for (int preToken = firstToken,
                         token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
                     switch (token) {
                         case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
+
+                            if (valueComplete || jr.hasText()) {
+                                throw new ParsingException("A comma is required between JSON array elements", token);
+                            }
 
                             break;
 
@@ -3236,11 +3371,19 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 c.add(value);
                             }
 
+                            valueComplete = true;
+
                             break;
 
                         case COMMA:
 
-                            if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && c.size() == 0)) {
+                            if (valueComplete) {
+                                if (jr.hasText()) {
+                                    throw new ParsingException("A comma is required between JSON array elements", token);
+                                }
+
+                                valueComplete = false;
+                            } else if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && c.size() == 0)) {
                                 value = readValue(jr, readNullToEmpty, eleType);
 
                                 if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
@@ -3252,15 +3395,25 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         case START_BRACE:
 
+                            if (valueComplete || jr.hasText()) {
+                                throw new ParsingException("A comma is required between JSON array elements", token);
+                            }
+
                             value = readBracedValue(jr, config, eleType);
 
                             if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
                                 c.add(value);
                             }
 
+                            valueComplete = true;
+
                             break;
 
                         case START_BRACKET:
+
+                            if (valueComplete || jr.hasText()) {
+                                throw new ParsingException("A comma is required between JSON array elements", token);
+                            }
 
                             value = readBracketedValue(jr, config, null, eleType);
 
@@ -3268,13 +3421,17 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 c.add(value);
                             }
 
+                            valueComplete = true;
+
                             break;
 
                         case END_BRACKET, EOF:
 
                             if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
                                 throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
-                            } else if (jr.hasText() || preToken == COMMA) {
+                            } else if (valueComplete && jr.hasText()) {
+                                throw new ParsingException("A comma is required between JSON array elements", token);
+                            } else if (!valueComplete && (jr.hasText() || preToken == COMMA)) {
                                 value = readValue(jr, readNullToEmpty, eleType);
 
                                 if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
@@ -3294,11 +3451,16 @@ final class JsonParserImpl extends AbstractJsonParser {
         } else {
             int idx = 0;
             Object value = null;
+            boolean valueComplete = false;
 
             for (int preToken = firstToken,
                     token = firstToken == START_BRACKET ? jr.nextToken() : firstToken;; preToken = token, token = jr.nextToken(eleType)) {
                 switch (token) {
                     case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
+
+                        if (valueComplete || jr.hasText()) {
+                            throw new ParsingException("A comma is required between JSON array elements", token);
+                        }
 
                         break;
 
@@ -3310,11 +3472,19 @@ final class JsonParserImpl extends AbstractJsonParser {
                             output[idx++] = value;
                         }
 
+                        valueComplete = true;
+
                         break;
 
                     case COMMA:
 
-                        if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && idx == 0)) {
+                        if (valueComplete) {
+                            if (jr.hasText()) {
+                                throw new ParsingException("A comma is required between JSON array elements", token);
+                            }
+
+                            valueComplete = false;
+                        } else if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && idx == 0)) {
                             value = readValue(jr, readNullToEmpty, eleType);
 
                             if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
@@ -3326,15 +3496,25 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     case START_BRACE:
 
+                        if (valueComplete || jr.hasText()) {
+                            throw new ParsingException("A comma is required between JSON array elements", token);
+                        }
+
                         value = readBracedValue(jr, config, eleType);
 
                         if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
                             output[idx++] = value;
                         }
 
+                        valueComplete = true;
+
                         break;
 
                     case START_BRACKET:
+
+                        if (valueComplete || jr.hasText()) {
+                            throw new ParsingException("A comma is required between JSON array elements", token);
+                        }
 
                         value = readBracketedValue(jr, config, null, eleType);
 
@@ -3342,13 +3522,17 @@ final class JsonParserImpl extends AbstractJsonParser {
                             output[idx++] = value;
                         }
 
+                        valueComplete = true;
+
                         break;
 
                     case END_BRACKET, EOF:
 
                         if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
                             throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
-                        } else if (jr.hasText() || preToken == COMMA) {
+                        } else if (valueComplete && jr.hasText()) {
+                            throw new ParsingException("A comma is required between JSON array elements", token);
+                        } else if (!valueComplete && (jr.hasText() || preToken == COMMA)) {
                             value = readValue(jr, readNullToEmpty, eleType);
 
                             if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
@@ -3408,6 +3592,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 : output;
 
         Object value = null;
+        boolean valueComplete = false;
 
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
@@ -3436,6 +3621,10 @@ final class JsonParserImpl extends AbstractJsonParser {
             switch (token) {
                 case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
 
+                    if (valueComplete || jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON array elements", token);
+                    }
+
                     break;
 
                 case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
@@ -3447,11 +3636,19 @@ final class JsonParserImpl extends AbstractJsonParser {
                         propHandlerToUse.accept(result, value);
                     }
 
+                    valueComplete = true;
+
                     break;
 
                 case COMMA:
 
-                    if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && result.size() == 0)) {
+                    if (valueComplete) {
+                        if (jr.hasText()) {
+                            throw new ParsingException("A comma is required between JSON array elements", token);
+                        }
+
+                        valueComplete = false;
+                    } else if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && result.size() == 0)) {
                         value = readValue(jr, readNullToEmpty, eleType);
 
                         if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
@@ -3464,6 +3661,10 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                 case START_BRACE:
 
+                    if (valueComplete || jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON array elements", token);
+                    }
+
                     value = readBracedValue(jr, config, eleType);
 
                     if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
@@ -3471,9 +3672,15 @@ final class JsonParserImpl extends AbstractJsonParser {
                         propHandlerToUse.accept(result, value);
                     }
 
+                    valueComplete = true;
+
                     break;
 
                 case START_BRACKET:
+
+                    if (valueComplete || jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON array elements", token);
+                    }
 
                     value = readBracketedValue(jr, config, null, eleType);
 
@@ -3482,13 +3689,17 @@ final class JsonParserImpl extends AbstractJsonParser {
                         propHandlerToUse.accept(result, value);
                     }
 
+                    valueComplete = true;
+
                     break;
 
                 case END_BRACKET, EOF:
 
                     if ((firstToken == START_BRACKET) == (token != END_BRACKET)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
-                    } else if (jr.hasText() || preToken == COMMA) {
+                    } else if (valueComplete && jr.hasText()) {
+                        throw new ParsingException("A comma is required between JSON array elements", token);
+                    } else if (!valueComplete && (jr.hasText() || preToken == COMMA)) {
                         value = readValue(jr, readNullToEmpty, eleType);
 
                         if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) {
@@ -4152,7 +4363,25 @@ final class JsonParserImpl extends AbstractJsonParser {
         String rowKeyType = null;
         String columnKeyType = null;
         List<Type<?>> columnTypeList = null;
+        Type<?> rowKeyValueType = strType;
         Type<?> columnKeyValueType = strType;
+        Type<?> defaultColumnValueType = defaultValueType;
+
+        if (targetType != null && targetType.parameterTypes().size() == 3) {
+            final List<Type<?>> parameterTypes = targetType.parameterTypes();
+
+            if (!parameterTypes.get(0).isObject()) {
+                rowKeyValueType = parameterTypes.get(0);
+            }
+
+            if (!parameterTypes.get(1).isObject()) {
+                columnKeyValueType = parameterTypes.get(1);
+            }
+
+            if (!parameterTypes.get(2).isObject()) {
+                defaultColumnValueType = parameterTypes.get(2);
+            }
+        }
 
         String columnName = null;
         Type<?> valueType = defaultValueType;
@@ -4182,11 +4411,20 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                             case 10:
                                 rowKeyType = jr.readValue(strType);
+
+                                if (Strings.isNotEmpty(rowKeyType)) {
+                                    rowKeyValueType = Type.of(rowKeyType);
+                                }
+
                                 break;
 
                             case 11:
                                 columnKeyType = jr.readValue(strType);
-                                columnKeyValueType = Strings.isEmpty(columnKeyType) ? strType : Type.of(columnKeyType);
+
+                                if (Strings.isNotEmpty(columnKeyType)) {
+                                    columnKeyValueType = Type.of(columnKeyType);
+                                }
+
                                 break;
 
                             default:
@@ -4229,11 +4467,20 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                                 case 10:
                                     rowKeyType = jr.readValue(strType);
+
+                                    if (Strings.isNotEmpty(rowKeyType)) {
+                                        rowKeyValueType = Type.of(rowKeyType);
+                                    }
+
                                     break;
 
                                 case 11:
                                     columnKeyType = jr.readValue(strType);
-                                    columnKeyValueType = Strings.isEmpty(columnKeyType) ? strType : Type.of(columnKeyType);
+
+                                    if (Strings.isNotEmpty(columnKeyType)) {
+                                        columnKeyValueType = Type.of(columnKeyType);
+                                    }
+
                                     break;
 
                                 default:
@@ -4257,9 +4504,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                             break;
 
                         case 8:
-                            rowKeyList = readCollection(jr,
-                                    JsonDeserConfig.create().setElementType(Strings.isEmpty(rowKeyType) ? strType : Type.of(rowKeyType)), null, null, false,
-                                    List.class, null, null);
+                            rowKeyList = readCollection(jr, JsonDeserConfig.create().setElementType(rowKeyValueType), null, null, false, List.class, null,
+                                    null);
                             break;
 
                         case 9:
@@ -4344,7 +4590,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     valueType = N.isEmpty(columnTypeList) ? null : columnTypeList.get(index);
 
                                     if (valueType == null) {
-                                        valueType = defaultValueType;
+                                        valueType = defaultColumnValueType;
                                     }
 
                                     final List<Object> column = readCollection(jr, JsonDeserConfig.create().setElementType(valueType), null,
@@ -4775,6 +5021,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         final int firstToken = jr.nextToken();
 
         if (firstToken == EOF) {
+            if (jr.hasText()) {
+                throw new ParsingException("Only a JSON array can be consumed as a stream", EOF);
+            }
+
             return Stream.empty();
         } else if (firstToken != START_BRACKET) {
             throw new UnsupportedOperationException("Only Collection/Array JSON are supported by stream Methods");
@@ -4789,24 +5039,55 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (tokenHolder.value() == START_BRACKET) {
-                if (tokenHolder.setAndGet(jr.nextToken()) != END_BRACKET) {
-                    hasNextFlag.setTrue();
+                tokenHolder.setAndGet(jr.nextToken());
 
-                    return true;
+                if (tokenHolder.value() == END_BRACKET) {
+                    verifyEndOfInput(jr);
+                    return false;
+                } else if (tokenHolder.value() == EOF) {
+                    throw new ParsingException("The JSON array is missing its closing bracket", EOF);
                 }
+
+                hasNextFlag.setTrue();
+                return true;
+            } else if (tokenHolder.value() == COMMA) {
+                // A consecutive comma denotes an empty element. The comma token also acts as
+                // the separator before the following element, so consume that element directly.
+                tokenHolder.setAndGet(jr.nextToken());
+
+                if (tokenHolder.value() == END_BRACKET) {
+                    verifyEndOfInput(jr);
+                    return false;
+                } else if (tokenHolder.value() == EOF) {
+                    throw new ParsingException("The JSON array is missing its closing bracket", EOF);
+                }
+
+                hasNextFlag.setTrue();
+                return true;
             } else {
-                if (tokenHolder.setAndGet(jr.nextToken()) == COMMA) {
+                tokenHolder.setAndGet(jr.nextToken());
+
+                if (tokenHolder.value() == COMMA) {
                     tokenHolder.setAndGet(jr.nextToken());
-                }
 
-                if (tokenHolder.value() != END_BRACKET) {
+                    if (tokenHolder.value() == END_BRACKET) {
+                        verifyEndOfInput(jr);
+                        return false;
+                    } else if (tokenHolder.value() == EOF) {
+                        throw new ParsingException("The JSON array is missing its closing bracket", EOF);
+                    }
+
                     hasNextFlag.setTrue();
-
                     return true;
+                } else if (tokenHolder.value() == END_BRACKET) {
+                    verifyEndOfInput(jr);
+                    return false;
+                } else if (tokenHolder.value() == EOF) {
+                    throw new ParsingException("The JSON array is missing its closing bracket", EOF);
                 }
-            }
 
-            return false;
+                throw new ParsingException("A comma or closing bracket is expected between JSON array elements", tokenHolder.value());
+            }
         };
 
         final Supplier<T> next = () -> {
@@ -4815,7 +5096,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             try {
                 T result = null;
 
-                if (tokenHolder.value() == COMMA) {
+                final boolean emptyElement = tokenHolder.value() == COMMA;
+
+                if (emptyElement) {
                     result = jr.readValue(elementType);
                 } else {
                     result = read(source, jr, tokenHolder.value(), configToUse, false, elementClass, elementType);
@@ -4825,7 +5108,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 // one token (e.g. inner "[1]" or "[]"), lastToken() is the inner START_BRACKET,
                 // which hasNext treats as the "positioned at array start" sentinel and then
                 // mistakes the separator COMMA for an element - injecting spurious nulls.
-                tokenHolder.setAndGet(UNDEFINED);
+                tokenHolder.setAndGet(emptyElement ? COMMA : UNDEFINED);
 
                 return result;
             } catch (final IOException e) {

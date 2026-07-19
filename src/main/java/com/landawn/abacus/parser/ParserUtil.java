@@ -909,11 +909,11 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BeanInfo first = ParserUtil.getBeanInfo(User.class);
-     * BeanInfo cached = ParserUtil.getBeanInfo(User.class);   // same cached instance as first
+     * BeanInfo cached = ParserUtil.getBeanInfo(User.class);      // same cached instance as first
      *
-     * ParserUtil.refreshBeanPropInfo(User.class);             // evicts the cached BeanInfo for User.class
+     * ParserUtil.refreshBeanPropInfo(User.class);                // evicts the cached BeanInfo for User.class
      *
-     * BeanInfo recreated = ParserUtil.getBeanInfo(User.class);  // a new BeanInfo instance (not the cached one)
+     * BeanInfo recreated = ParserUtil.getBeanInfo(User.class);   // a new BeanInfo instance (not the cached one)
      * }</pre>
      *
      * @param beanType the java type of the bean class to refresh
@@ -930,28 +930,6 @@ public final class ParserUtil {
             beanInfoPool.remove(beanType);
         }
     }
-
-    //    static MethodHandle unreflect(final Class<?> entityClass, final Method method) {
-    //        if (method == null) {
-    //            return null;
-    //        }
-    //
-    //        final Lookup lookup = MethodHandles.lookup();
-    //
-    //        try {
-    //            return lookup.unreflect(method);
-    //        } catch (IllegalAccessException e) {
-    //            try {
-    //                final Lookup privateLookup = MethodHandles.privateLookupIn(entityClass, lookup);
-    //
-    //                return privateLookup.unreflect(method);
-    //            } catch (IllegalAccessException e2) {
-    //                logger.debug("Faield to unreflect method: {}, error: {}", method, e);
-    //            }
-    //        }
-    //
-    //        return null;
-    //    }
 
     static VarHandle unreflect(final Class<?> entityClass, final Field field) {
         if (field == null) {
@@ -2305,7 +2283,7 @@ public final class ParserUtil {
 
         /**
          * Per-thread clones of {@link #numberFormat} to avoid synchronized parse/format on the hot path.
-         * Null when {@link #numberFormat} is null.
+         * Null when {@link #numberFormat} is {@code null}.
          */
         private final ThreadLocal<NumberFormat> numberFormatTL;
 

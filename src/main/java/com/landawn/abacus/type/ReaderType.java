@@ -242,7 +242,8 @@ public class ReaderType extends AbstractType<Reader> {
 
     /**
      * Creates a Reader from various object types.
-     * If the object is a Clob, its character stream is returned.
+     * If the object is a Clob, its character stream is returned in an owning wrapper.
+     * Closing the returned reader closes the character stream and releases the Clob locator.
      * Otherwise, the object is converted to string and then to a Reader.
      *
      * <p><b>Usage Examples:</b></p>
@@ -262,7 +263,8 @@ public class ReaderType extends AbstractType<Reader> {
      * }</pre>
      *
      * @param obj the object to convert to a Reader
-     * @return a Reader representation of the object, or {@code null} if the input is null
+     * @return a Reader representation of the object, or {@code null} if the input is null;
+     *         for a Clob, closing the returned reader also releases the locator
      * @throws UncheckedSQLException if accessing the Clob's character stream fails
      */
     @SuppressFBWarnings
@@ -272,7 +274,7 @@ public class ReaderType extends AbstractType<Reader> {
             return null; // NOSONAR
         } else if (obj instanceof Clob clob) {
             try {
-                return clob.getCharacterStream();
+                return Utils.openCharacterStream(clob);
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
@@ -441,6 +443,7 @@ public class ReaderType extends AbstractType<Reader> {
      * type.appendTo(writer, reader2);
      * System.out.println(writer.toString());   // Output: Content
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -494,6 +497,7 @@ public class ReaderType extends AbstractType<Reader> {
      * type.serializeTo(writer2, reader2, null);
      * System.out.println(writer2.toString());   // Output: No quotes
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -507,8 +511,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @param writer the CharacterWriter to write to
      * @param x the Reader whose content should be written
      * @param config the serialization configuration that determines string quotation
-     * @throws IOException if an I/O error occurs while writing to the {@code writer}
-     * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
+     * @throws IOException if an I/O error occurs while reading from {@code x} or writing to {@code writer}
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Reader x, final JsonXmlSerConfig<?> config) throws IOException {
@@ -527,8 +530,6 @@ public class ReaderType extends AbstractType<Reader> {
                 while (IOUtil.EOF != (count = IOUtil.read(x, buf, 0, buf.length))) {
                     writer.writeCharacter(buf, 0, count);
                 }
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(buf);
             }

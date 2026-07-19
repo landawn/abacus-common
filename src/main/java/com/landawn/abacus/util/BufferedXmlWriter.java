@@ -18,11 +18,12 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 /**
- * A specialized writer for efficient XML output with automatic character escaping.
+ * A specialized writer for efficient XML output with character escaping through the
+ * {@code writeCharacter(...)} methods.
  * This class extends CharacterWriter and provides optimized writing of XML content
  * with proper escaping of special XML characters.
  *
- * <p>The following characters are automatically escaped:</p>
+ * <p>The following characters are escaped by the {@code writeCharacter(...)} methods:</p>
  * <ul>
  *   <li>&amp; becomes &amp;amp;</li>
  *   <li>&lt; becomes &amp;lt;</li>
@@ -32,10 +33,11 @@ import java.io.Writer;
  *   <li>Control characters (0x00-0x1F) and the DEL character (0x7F) are escaped as numeric character references</li>
  * </ul>
  *
- * <p>This writer is designed for high-performance XML generation and automatically
- * handles character escaping to ensure valid XML output. It provides three modes
- * of operation: internal buffering, writing to an OutputStream, or writing to
- * another Writer.</p>
+ * <p>This writer is designed for high-performance XML generation and automatically handles the
+ * configured character substitutions. Escaping alone does not validate a complete XML document,
+ * and callers remain responsible for choosing characters permitted by their XML version. It
+ * provides three modes of operation: internal buffering, writing to an OutputStream, or writing
+ * to another Writer.</p>
  *
  * <p>Note that escaping is performed only by the {@code writeCharacter(...)} methods
  * inherited from {@link CharacterWriter}. The plain {@code write(...)} methods write
@@ -83,7 +85,7 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * XML character replacement mappings.
      * The predefined XML entities are used for quotes, apostrophes, angle brackets, and ampersands.
      * Other control characters (U+0000 through U+001F and U+007F) are escaped as XML numeric character
-     * references of the form <code>&amp;#xNN;</code> (for example U+001F becomes <code>&amp;#x1f;</code>).
+     * references of the form {@code &amp;#xNN;} (for example U+001F becomes {@code &amp;#x1f;}).
      */
     private static final char[][] REPLACEMENT_CHARS;
 
@@ -135,11 +137,12 @@ public final class BufferedXmlWriter extends CharacterWriter {
 
     /**
      * Creates a new BufferedXmlWriter that writes to the specified OutputStream.
-     * Characters are encoded using the default character encoding.
+     * Characters are encoded as UTF-8 ({@link IOUtil#DEFAULT_CHARSET}), independent of the
+     * JVM's platform-default charset.
      *
-     * <p>The writer will automatically escape XML special characters as they
-     * are written to the output stream. Closing this writer will also close
-     * the underlying {@code OutputStream}.</p>
+     * <p>The {@code writeCharacter(...)} methods escape XML special characters; the ordinary
+     * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
+     * {@code OutputStream}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -159,8 +162,9 @@ public final class BufferedXmlWriter extends CharacterWriter {
     /**
      * Creates a new BufferedXmlWriter that writes to the specified Writer.
      *
-     * <p>The writer will automatically escape XML special characters as they
-     * are written. Closing this writer will also close the underlying {@code Writer}.</p>
+     * <p>The {@code writeCharacter(...)} methods escape XML special characters; the ordinary
+     * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
+     * {@code Writer}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -179,14 +183,14 @@ public final class BufferedXmlWriter extends CharacterWriter {
 
     /**
      * Returns the character used as the quotation delimiter in XML string serialization.
-     * This implementation always returns {@link SK#CHAR_ZERO} (the null character, {@code '\0'}),
+     * This implementation always returns {@link SK#CHAR_ZERO} (the {@code null} character, {@code '\0'}),
      * which signals to the serialization infrastructure that no explicit quotation character
      * wrapping is required for XML element text content.
      *
      * <p>This method is used internally by the writer infrastructure and
      * typically should not be called directly by client code.</p>
      *
-     * @return {@link SK#CHAR_ZERO} (the null character {@code '\0'})
+     * @return {@link SK#CHAR_ZERO} (the {@code null} character {@code '\0'})
      */
     @SuppressWarnings("SameReturnValue")
     char getCharQuotation() {

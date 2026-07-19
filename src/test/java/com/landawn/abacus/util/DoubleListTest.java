@@ -3257,4 +3257,13 @@ public class DoubleListTest extends TestBase {
         assertEquals(DoubleList.of(3d, 1d), backed.copy(3, -1, -2));
     }
 
+    @Test
+    public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
+        final DoubleList empty = new DoubleList();
+        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, null));
+        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, null));
+        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, ignored -> null));
+    }
+
 }

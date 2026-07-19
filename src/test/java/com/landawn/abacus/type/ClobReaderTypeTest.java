@@ -2,13 +2,18 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
@@ -32,7 +37,7 @@ public class ClobReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testGet_ResultSet_Int() throws SQLException {
+    public void testGet_ResultSet_Int() throws SQLException, IOException {
         ResultSet rs = mock(ResultSet.class);
         Clob clob = mock(Clob.class);
         Reader expectedReader = new StringReader("test content");
@@ -42,9 +47,13 @@ public class ClobReaderTypeTest extends TestBase {
 
         Reader result = type.get(rs, 1);
 
-        assertEquals(expectedReader, result);
+        final StringWriter output = new StringWriter();
+        result.transferTo(output);
+        assertEquals("test content", output.toString());
+        result.close();
         verify(rs).getClob(1);
         verify(clob).getCharacterStream();
+        verify(clob).free();
     }
 
     @Test
@@ -59,7 +68,7 @@ public class ClobReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testGet_ResultSet_String() throws SQLException {
+    public void testGet_ResultSet_String() throws SQLException, IOException {
         ResultSet rs = mock(ResultSet.class);
         Clob clob = mock(Clob.class);
         Reader expectedReader = new StringReader("column data");
@@ -69,9 +78,13 @@ public class ClobReaderTypeTest extends TestBase {
 
         Reader result = type.get(rs, "columnName");
 
-        assertEquals(expectedReader, result);
+        final StringWriter output = new StringWriter();
+        result.transferTo(output);
+        assertEquals("column data", output.toString());
+        result.close();
         verify(rs).getClob("columnName");
         verify(clob).getCharacterStream();
+        verify(clob).free();
     }
 
     @Test
@@ -169,15 +182,20 @@ public class ClobReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testClob2Reader() throws SQLException {
+    public void testClob2Reader() throws SQLException, IOException {
         Clob clob = mock(Clob.class);
         Reader expectedReader = new StringReader("clob content");
         when(clob.getCharacterStream()).thenReturn(expectedReader);
 
         Reader result = ClobReaderType.clobToReader(clob);
 
-        assertEquals(expectedReader, result);
+        final StringWriter output = new StringWriter();
+        result.transferTo(output);
+        assertEquals("clob content", output.toString());
+        result.close();
+        result.close();
         verify(clob).getCharacterStream();
+        verify(clob, times(1)).free();
     }
 
     @Test
@@ -187,7 +205,7 @@ public class ClobReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testClob2Reader_MultipleInvocations() throws SQLException {
+    public void testClob2Reader_MultipleInvocations() throws SQLException, IOException {
         Clob clob = mock(Clob.class);
         Reader reader1 = new StringReader("first");
         Reader reader2 = new StringReader("second");
@@ -197,9 +215,40 @@ public class ClobReaderTypeTest extends TestBase {
         Reader result1 = ClobReaderType.clobToReader(clob);
         Reader result2 = ClobReaderType.clobToReader(clob);
 
-        assertEquals(reader1, result1);
-        assertEquals(reader2, result2);
+        final StringWriter output1 = new StringWriter();
+        final StringWriter output2 = new StringWriter();
+        result1.transferTo(output1);
+        result2.transferTo(output2);
+        assertEquals("first", output1.toString());
+        assertEquals("second", output2.toString());
+        result1.close();
+        result2.close();
         verify(clob, times(2)).getCharacterStream();
+        verify(clob, times(2)).free();
+    }
+
+    @Test
+    public void testClob2Reader_FreesClobWhenOpeningFails() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        final SQLException openFailure = new SQLException("open");
+        when(clob.getCharacterStream()).thenThrow(openFailure);
+
+        assertSame(openFailure, assertThrows(SQLException.class, () -> ClobReaderType.clobToReader(clob)));
+        verify(clob).free();
+    }
+
+    @Test
+    public void testClob2Reader_FreesClobWhenDelegateCloseFails() throws SQLException, IOException {
+        final Clob clob = mock(Clob.class);
+        final Reader delegate = mock(Reader.class);
+        final IOException closeFailure = new IOException("close");
+        when(clob.getCharacterStream()).thenReturn(delegate);
+        doThrow(closeFailure).when(delegate).close();
+
+        final Reader result = ClobReaderType.clobToReader(clob);
+
+        assertSame(closeFailure, assertThrows(IOException.class, result::close));
+        verify(clob).free();
     }
 
 }

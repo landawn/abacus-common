@@ -15,21 +15,17 @@
 package com.landawn.abacus.util;
 
 /**
- * A marker interface for immutable data structures in the abacus-common framework.
- * Classes implementing this interface indicate that their instances are immutable
- * and cannot be modified after creation.
+ * Marker interface for objects whose own structure cannot be modified through their public API.
  *
- * <p>This interface serves as a type marker for immutable collections, maps, and other
- * data structures. All mutating operations on implementing classes should throw
- * {@link UnsupportedOperationException}.</p>
+ * <p>This is a <em>shallow</em> contract. An implementation may contain or expose mutable values,
+ * or may be an unmodifiable view backed by a mutable object. Consequently, this marker alone does
+ * not guarantee deep immutability, thread safety, safe publication, or a stable hash code. Consult
+ * the implementing class's contract before sharing an instance between threads or using it as a
+ * map key.</p>
  *
- * <p>Immutable objects provide several benefits:</p>
- * <ul>
- * <li>Thread-safety: Immutable objects can be shared between threads without synchronization</li>
- * <li>Simplicity: No need to worry about defensive copying or unexpected modifications</li>
- * <li>Caching: Immutable objects can be cached and reused safely</li>
- * <li>Hash stability: Hash codes never change, making them ideal for use as map keys</li>
- * </ul>
+ * <p>Collection and map implementations carrying this marker reject their own mutating operations,
+ * normally with {@link UnsupportedOperationException}. Mutating an element, a value, or a backing
+ * collection may still change their observable contents.</p>
  *
  * <p>Common implementations include:</p>
  * <ul>
@@ -41,10 +37,9 @@ package com.landawn.abacus.util;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Check if an object is immutable
+ * // Check whether the object's public API is structurally read-only.
  * if (myCollection instanceof Immutable) {
- *     // Safe to share without defensive copying
- *     sharedCollection = myCollection;
+ *     // Inspect the concrete type's element/backing-store contract before sharing it.
  * }
  * }</pre>
  *

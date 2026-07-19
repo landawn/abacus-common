@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -540,6 +542,21 @@ public class AvroParserTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             parser.serialize(data, null, os);
         });
+    }
+
+    @Test
+    public void testInvalidSerializationDoesNotTruncateExistingFile() throws IOException {
+        File file = new File(tempDir, "existing.avro");
+        Files.writeString(file.toPath(), "preserve-me", StandardCharsets.UTF_8);
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", "No schema");
+
+        assertThrows(IllegalArgumentException.class, () -> parser.serialize(data, null, file));
+        assertEquals("preserve-me", Files.readString(file.toPath(), StandardCharsets.UTF_8));
+
+        List<SpecificRecord> invalidRecords = Arrays.asList(new MockSpecificRecord("id"), null);
+        assertThrows(IllegalArgumentException.class, () -> parser.serialize(invalidRecords, null, file));
+        assertEquals("preserve-me", Files.readString(file.toPath(), StandardCharsets.UTF_8));
     }
 
     // Exercise private Avro record conversion helpers that are otherwise hard to reach through the public API.

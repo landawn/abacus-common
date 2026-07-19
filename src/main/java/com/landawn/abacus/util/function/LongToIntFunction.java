@@ -67,7 +67,8 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      *   <li>Custom business logic requiring int output</li>
      * </ul>
      *
-     * <p>Important: When converting from long to int, be aware that:
+     * <p>Implementations that use a narrowing primitive conversion, such as {@link #DEFAULT},
+     * have the following properties:
      * <ul>
      *   <li>Values outside the int range will be truncated</li>
      *   <li>The sign of the result may differ from the original</li>
@@ -75,8 +76,7 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
      * </ul>
      *
      * @param value the {@code long} function argument
-     * @return the {@code int} result of applying this function to the argument; values outside
-     *         the {@code int} range will be truncated to the low-order 32 bits
+     * @return the {@code int} result of applying this function to the argument
      */
     @Override
     int applyAsInt(long value);

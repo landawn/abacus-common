@@ -18,13 +18,18 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * An input stream that decompresses data in the LZ4 block format.
+ * An input stream that decompresses data in the block-stream format produced by
+ * {@link LZ4BlockOutputStream}.
  * This class wraps the net.jpountz.lz4.LZ4BlockInputStream to provide
  * LZ4 decompression capabilities with a consistent API.
  *
  * <p>LZ4 is a fast compression algorithm that provides a good balance between
  * compression ratio and speed. This stream automatically decompresses data that
- * was compressed using LZ4BlockOutputStream or compatible LZ4 block format.</p>
+ * was compressed using {@code net.jpountz.lz4.LZ4BlockOutputStream}. This is that
+ * library's custom streaming container, not the standardized LZ4 Frame format, so
+ * generic {@code .lz4} tools are not necessarily interoperable with it.</p>
+ *
+ * <p>This class is not thread-safe and does not support mark/reset.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -53,9 +58,11 @@ public final class LZ4BlockInputStream extends InputStream {
      * LZ4BlockInputStream lz4In = new LZ4BlockInputStream(fileIn);
      * }</pre>
      *
-     * @param is the input stream to read compressed data from
+     * @param is the input stream to read compressed data from; must not be {@code null}
+     * @throws IllegalArgumentException if {@code is} is {@code null}
      */
     public LZ4BlockInputStream(final InputStream is) {
+        N.checkArgNotNull(is, "is");
         in = new net.jpountz.lz4.LZ4BlockInputStream(is);
     }
 
@@ -104,7 +111,7 @@ public final class LZ4BlockInputStream extends InputStream {
      */
     @Override
     public int read(final byte[] b) throws IOException {
-        return in.read(b);
+        return read(b, 0, b.length);
     }
 
     /**
@@ -131,6 +138,21 @@ public final class LZ4BlockInputStream extends InputStream {
      */
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
+        if (len == 0) {
+            if (b == null) {
+                throw new NullPointerException("b");
+            }
+
+            if (off < 0 || off > b.length) {
+                throw new IndexOutOfBoundsException("off: " + off + ", length: " + b.length);
+            }
+
+            // Let the delegate retain its closed-stream behavior, but normalize its EOF
+            // result to the InputStream contract for a zero-length request.
+            in.read(b, off, 0);
+            return 0;
+        }
+
         return in.read(b, off, len);
     }
 
@@ -186,9 +208,8 @@ public final class LZ4BlockInputStream extends InputStream {
     /**
      * Marks the current position in this input stream.
      *
-     * <p>This call is delegated to the underlying LZ4 block input stream; its effect (and whether
-     * a subsequent {@link #reset()} succeeds) depends on whether that stream supports mark/reset.
-     * See {@link #markSupported()}.</p>
+     * <p>The underlying LZ4 block stream does not support mark/reset, so this call has no useful
+     * effect and a subsequent {@link #reset()} fails.</p>
      *
      * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid
      * @see #reset()
@@ -203,8 +224,8 @@ public final class LZ4BlockInputStream extends InputStream {
      * Repositions this stream to the position at the time the {@code mark} method
      * was last called on this input stream.
      *
-     * <p>This call is delegated to the underlying LZ4 block input stream. If that stream does not
-     * support mark/reset, or no valid mark is set, it throws an {@link IOException}.</p>
+     * <p>The underlying LZ4 block stream does not support mark/reset; this method throws an
+     * {@link IOException}.</p>
      *
      * @throws IOException if the underlying stream does not support mark/reset or the mark is invalid
      * @see #mark(int)
@@ -217,9 +238,8 @@ public final class LZ4BlockInputStream extends InputStream {
 
     /**
      * Tests if this input stream supports the {@code mark} and {@code reset} methods.
-     * The result is delegated to the underlying LZ4 block input stream.
      *
-     * @return {@code true} if the underlying LZ4 block input stream supports mark/reset; {@code false} otherwise
+     * @return {@code false}; mark/reset is not supported
      * @see #mark(int)
      * @see #reset()
      */

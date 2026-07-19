@@ -2667,6 +2667,14 @@ public class MapsTest extends AbstractTest {
     }
 
     @Test
+    public void testRemoveEntriesAcceptsSameMapAsRemovalSource() {
+        Map<String, String> map = new LinkedHashMap<>(testMap);
+
+        assertTrue(Maps.removeEntries(map, map));
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
     public void testRemoveKeys() {
         Map<String, String> map = new HashMap<>(testMap);
         List<String> keysToRemove = Arrays.asList("key1", "key3", "missing");
@@ -2688,6 +2696,14 @@ public class MapsTest extends AbstractTest {
     @Test
     public void testRemoveKeys_nullMap() {
         assertFalse(Maps.removeKeys(null, Arrays.asList("key1")));
+    }
+
+    @Test
+    public void testRemoveKeysAcceptsLiveKeySetView() {
+        Map<String, String> map = new LinkedHashMap<>(testMap);
+
+        assertTrue(Maps.removeKeys(map, map.keySet()));
+        assertTrue(map.isEmpty());
     }
 
     @Test

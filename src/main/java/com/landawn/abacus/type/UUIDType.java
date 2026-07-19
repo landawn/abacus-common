@@ -125,7 +125,21 @@ public class UUIDType extends AbstractType<UUID> {
      */
     @Override
     public UUID valueOf(final String str) {
-        return Strings.isBlank(str) ? null : java.util.UUID.fromString(str.trim()); // NOSONAR
+        if (Strings.isBlank(str)) {
+            return null;
+        }
+
+        final String value = str.trim();
+        final UUID result = java.util.UUID.fromString(value);
+
+        // UUID.fromString accepts shortened hexadecimal groups on some supported JDKs
+        // (for example, "1-1-1-1-1"). The Type contract documents and emits the
+        // canonical 8-4-4-4-12 representation, so reject those non-canonical aliases.
+        if (value.length() != 36 || !result.toString().equalsIgnoreCase(value)) {
+            throw new IllegalArgumentException("Invalid UUID string: " + str);
+        }
+
+        return result;
     }
 
     /**

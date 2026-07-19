@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -59,7 +59,6 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * @param u the second object argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
-    // @ai-ignore BiIntObj*/IntBiObj*/BiObjInt*/ObjBiInt* argument order convention - intentional: class name prefix determines parameter order. BiIntObj* has two ints first; IntBiObj* has int then two objects; BiObjInt* has two objects then int; ObjBiInt* has object then two ints. Do not suggest reordering.
     @Override
     boolean test(int i, T t, U u);
 

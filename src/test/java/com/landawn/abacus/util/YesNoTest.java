@@ -108,7 +108,9 @@ public class YesNoTest extends TestBase {
 
     @Test
     public void testOf_invalid_negative() {
-        assertThrows(IllegalArgumentException.class, () -> YesNo.of(-1));
+        IllegalArgumentException failure = assertThrows(IllegalArgumentException.class, () -> YesNo.of(-1));
+        Assertions.assertTrue(failure.getMessage().contains("YesNo"));
+        Assertions.assertTrue(failure.getMessage().contains("-1"));
     }
 
     @Test

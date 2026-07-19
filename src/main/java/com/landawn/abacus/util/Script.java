@@ -15,15 +15,14 @@
 package com.landawn.abacus.util;
 
 /**
- * A placeholder class for script execution functionality.
+ * An empty compatibility shell that exposes no script execution functionality.
  *
- * <p>This class is currently under development and does not contain any implemented functionality.
- * It is intended to provide script execution capabilities in future releases.
+ * <p>This type does not evaluate, execute, or sandbox scripts and must not be treated as
+ * an execution or security API. It is retained as a non-instantiable public type for compatibility.
  *
  * <p>The class is declared {@code final} to prevent subclassing. The {@code //NOSONAR} comment
  * suppresses SonarQube warnings about the otherwise-empty class body.
  */
-// TODO Design to be done.
 public final class Script { //NOSONAR
 
     /**

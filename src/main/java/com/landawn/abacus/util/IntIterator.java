@@ -27,6 +27,8 @@ import com.landawn.abacus.util.stream.IntStream;
  * A specialized iterator for primitive int values, providing better performance than Iterator&lt;Integer&gt;
  * by avoiding boxing/unboxing overhead. This abstract class provides various utility methods for
  * creating, transforming, and consuming int iterators.
+ * Instances are mutable traversal cursors and are not safe for concurrent consumption unless a
+ * particular implementation explicitly documents stronger guarantees.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -135,7 +137,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code IntIterator} over the specified range, or an empty iterator if the validated range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0},
+     *         {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -336,8 +339,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2);
-     * Integer boxed = iter.next();    // returns 1 (boxed) — avoid this
-     * int primitive = iter.nextInt(); // returns 2 — prefer this
+     * Integer boxed = iter.next();      // returns 1 (boxed) — avoid this
+     * int primitive = iter.nextInt();   // returns 2 — prefer this
      * }</pre>
      *
      * @return the next element in the iteration as a boxed Integer
@@ -635,15 +638,17 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedInt} elements with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
-    public ObjIterator<IndexedInt> indexed(final long startIndex) {
+    public ObjIterator<IndexedInt> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final IntIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -652,7 +657,24 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
             @Override
             public IndexedInt next() {
-                return IndexedInt.of(iter.nextInt(), idx++);
+                if (indexOverflow) {
+                    if (!iter.hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    throw new ArithmeticException("long overflow");
+                }
+
+                final int value = iter.nextInt();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedInt.of(value, currentIndex);
             }
         };
     }
@@ -674,7 +696,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 

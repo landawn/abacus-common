@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.stream.EntryStream;
 
 public class PrefixSearchTableTest extends TestBase {
 
@@ -297,5 +299,38 @@ public class PrefixSearchTableTest extends TestBase {
         assertTrue(it.hasNext());
         it.next();
         assertThrows(java.util.NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void testGetAllMatchedPrefixIsSnapshot() {
+        PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder().add(Arrays.asList("a", "b"), "value").build();
+        List<String> query = new ArrayList<>(Arrays.asList("a", "b", "c"));
+
+        Map.Entry<List<String>, String> match = table.getAll(query).iterator().next();
+        query.set(0, "changed");
+
+        assertEquals(Arrays.asList("a", "b"), match.getKey());
+        assertThrows(UnsupportedOperationException.class, () -> match.getKey().set(0, "changed"));
+    }
+
+    @Test
+    public void testGetAllSnapshotsQueryBeforeLazyTraversal() {
+        PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder()
+                .add(Arrays.asList("a"), "short")
+                .add(Arrays.asList("a", "b"), "long")
+                .build();
+        List<String> query = new ArrayList<>(Arrays.asList("a", "b"));
+
+        EntryStream<List<String>, String> matches = table.getAll(query);
+        query.set(0, "changed");
+
+        assertEquals(N.asMap(Arrays.asList("a"), "short", Arrays.asList("a", "b"), "long"), matches.toMap());
+    }
+
+    @Test
+    public void testGetAllRejectsEveryNullElementEagerly() {
+        PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder().add(Arrays.asList("a"), "value").build();
+
+        assertThrows(NullPointerException.class, () -> table.getAll(Arrays.asList("missing", null)));
     }
 }

@@ -28,7 +28,8 @@ import java.sql.SQLException;
  * {@code setBlob} methods.
  *
  * <p>When reading, the returned stream reads directly from the underlying BLOB object.
- * Callers are responsible for closing the stream after use.</p>
+ * Callers must close the stream after use; closing it also releases the internally acquired
+ * {@code Blob} locator.</p>
  *
  * @see InputStreamType
  * @see java.sql.Blob
@@ -56,7 +57,7 @@ public class BlobInputStreamType extends InputStreamType {
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the BLOB column
-     * @return an {@code InputStream} for reading the BLOB's binary content,
+     * @return an {@code InputStream} for reading the BLOB's binary content; closing it also releases the Blob locator,
      *         or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
@@ -73,7 +74,7 @@ public class BlobInputStreamType extends InputStreamType {
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
-     * @return an {@code InputStream} for reading the BLOB's binary content,
+     * @return an {@code InputStream} for reading the BLOB's binary content; closing it also releases the Blob locator,
      *         or {@code null} if the column value is SQL NULL
      * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
@@ -147,8 +148,10 @@ public class BlobInputStreamType extends InputStreamType {
 
     /**
      * Converts a {@link java.sql.Blob} to an {@link java.io.InputStream} for reading its binary content.
-     * Returns {@code null} if {@code blob} is {@code null}; otherwise delegates to
-     * {@link java.sql.Blob#getBinaryStream()}.
+     * Returns null if {@code blob} is null; otherwise opens its binary stream.
+     * Closing the returned stream closes the delegate and calls {@link Blob#free()}.
+     * This method therefore assumes ownership of a non-null {@code blob}; callers must not rely
+     * on that locator remaining usable after the returned stream is closed.
      *
      * @param blob the SQL {@code Blob} to convert; may be {@code null}
      * @return an {@code InputStream} for reading the BLOB's binary content,
@@ -156,10 +159,6 @@ public class BlobInputStreamType extends InputStreamType {
      * @throws SQLException if a database access error occurs while opening the BLOB stream
      */
     static InputStream blobToInputStream(final Blob blob) throws SQLException {
-        if (blob != null) {
-            return blob.getBinaryStream();
-        }
-
-        return null; // NOSONAR
+        return Utils.openBinaryStream(blob);
     }
 }

@@ -15,7 +15,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -81,11 +80,11 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed {@code BiPredicate} that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> other) {
-        N.checkArgNotNull(other, cs.other);
+        java.util.Objects.requireNonNull(other, cs.other);
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -106,17 +105,21 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed {@code BiPredicate} that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> other) {
-        N.checkArgNotNull(other, cs.other);
+        java.util.Objects.requireNonNull(other, cs.other);
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 
     /**
-     * Converts this {@code BiPredicate} to a {@code Throwables.BiPredicate} that can throw a checked exception.
-     * This method provides a way to use this predicate in contexts that require explicit exception handling.
+     * Returns this predicate as a {@link Throwables.BiPredicate} view.
+     *
+     * <p>The returned predicate has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.BiPredicate}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -124,8 +127,8 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * var throwablePredicate = fileExists.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned predicate can throw
-     * @return a {@code Throwables.BiPredicate} view of this predicate that can throw exceptions of type {@code E}
+     * @param <E> the target exception type for compatibility with {@code Throwables.BiPredicate}
+     * @return a {@code Throwables.BiPredicate} view of this predicate
      */
     default <E extends Throwable> Throwables.BiPredicate<T, U, E> toThrowable() {
         return (Throwables.BiPredicate<T, U, E>) this;

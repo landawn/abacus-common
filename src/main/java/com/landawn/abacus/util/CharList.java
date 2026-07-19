@@ -372,7 +372,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public CharList(final int initialCapacity) {
+    public CharList(final int initialCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
@@ -499,9 +499,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'a', 'b', 'c', 'd'};
-     * CharList list = CharList.copyOf(arr, 1, 3);   // list is ['b', 'c']
-     * CharList empty = CharList.copyOf(arr, 2, 2);  // list is [] (empty range)
-     * CharList.copyOf(arr, 0, 5);                   // throws IndexOutOfBoundsException
+     * CharList list = CharList.copyOf(arr, 1, 3);    // list is ['b', 'c']
+     * CharList empty = CharList.copyOf(arr, 2, 2);   // list is [] (empty range)
+     * CharList.copyOf(arr, 0, 5);                    // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param a the array from which a range is to be copied; must not be {@code null}
@@ -522,9 +522,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharList list = CharList.range('a', 'd');   // returns ['a', 'b', 'c']
-     * CharList one = CharList.range('a', 'b');    // returns ['a']
-     * CharList empty = CharList.range('a', 'a');  // returns [] (empty)
+     * CharList list = CharList.range('a', 'd');    // returns ['a', 'b', 'c']
+     * CharList one = CharList.range('a', 'b');     // returns ['a']
+     * CharList empty = CharList.range('a', 'a');   // returns [] (empty)
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -565,9 +565,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharList list = CharList.rangeClosed('a', 'd');   // returns ['a', 'b', 'c', 'd']
-     * CharList one = CharList.rangeClosed('a', 'a');    // returns ['a']
-     * CharList digits = CharList.rangeClosed('0', '9'); // returns ['0', '1', ..., '9']
+     * CharList list = CharList.rangeClosed('a', 'd');     // returns ['a', 'b', 'c', 'd']
+     * CharList one = CharList.rangeClosed('a', 'a');      // returns ['a']
+     * CharList digits = CharList.rangeClosed('0', '9');   // returns ['0', '1', ..., '9']
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -608,9 +608,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharList list = CharList.repeat('a', 3);   // returns ['a', 'a', 'a']
-     * CharList empty = CharList.repeat('a', 0);  // returns [] (empty)
-     * CharList one = CharList.repeat('z', 1);    // returns ['z']
+     * CharList list = CharList.repeat('a', 3);    // returns ['a', 'a', 'a']
+     * CharList empty = CharList.repeat('a', 0);   // returns [] (empty)
+     * CharList one = CharList.repeat('z', 1);     // returns ['z']
      * }</pre>
      *
      * @param element the element to repeat
@@ -628,9 +628,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharList list = CharList.random(5);     // returns a list of 5 random chars, e.g. size() == 5
-     * CharList empty = CharList.random(0);    // returns [] (empty)
-     * CharList.random(-1);                    // throws NegativeArraySizeException
+     * CharList list = CharList.random(5);    // returns a list of 5 random chars, e.g. size() == 5
+     * CharList empty = CharList.random(0);   // returns [] (empty)
+     * CharList.random(-1);                   // throws NegativeArraySizeException
      * }</pre>
      *
      * @param len the length of the list to create
@@ -653,9 +653,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharList list = CharList.random('a', 'z', 4);   // returns 4 random chars in ['a', 'z'), e.g. size() == 4
-     * CharList empty = CharList.random('a', 'z', 0);  // returns [] (empty)
-     * CharList.random('z', 'a', 3);                   // throws IllegalArgumentException (start >= end)
+     * CharList list = CharList.random('a', 'z', 4);    // returns 4 random chars in ['a', 'z'), e.g. size() == 4
+     * CharList empty = CharList.random('a', 'z', 0);   // returns [] (empty)
+     * CharList.random('z', 'a', 3);                    // throws IllegalArgumentException (start >= end)
      * }</pre>
      *
      * @param startInclusive the minimum value (inclusive)
@@ -687,9 +687,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] candidates = {'a', 'b', 'c'};
-     * CharList list = CharList.random(candidates, 5);   // returns 5 chars, each one of 'a'/'b'/'c'
-     * CharList empty = CharList.random(candidates, 0);  // returns [] (empty)
-     * CharList.random(new char[0], 3);                  // throws IllegalArgumentException (empty candidates)
+     * CharList list = CharList.random(candidates, 5);    // returns 5 chars, each one of 'a'/'b'/'c'
+     * CharList empty = CharList.random(candidates, 0);   // returns [] (empty)
+     * CharList.random(new char[0], 3);                   // throws IllegalArgumentException (empty candidates)
      * }</pre>
      *
      * @param candidates the array of candidate chars to choose from; must not be {@code null}, empty,
@@ -819,9 +819,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'c');
-     * list.add(1, 'b');   // list is now ['a', 'b', 'c']
-     * list.add(0, 'x');   // list is now ['x', 'a', 'b', 'c']
-     * list.add(10, 'z');  // throws IndexOutOfBoundsException
+     * list.add(1, 'b');    // list is now ['a', 'b', 'c']
+     * list.add(0, 'x');    // list is now ['x', 'a', 'b', 'c']
+     * list.add(10, 'z');   // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param index the index at which the specified element is to be inserted
@@ -967,8 +967,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'a', 'c');
-     * boolean removed = list.remove('a');     // returns true, list is now ['b', 'a', 'c']
-     * boolean notFound = list.remove('z');    // returns false, list unchanged
+     * boolean removed = list.remove('a');    // returns true, list is now ['b', 'a', 'c']
+     * boolean notFound = list.remove('z');   // returns false, list unchanged
      * }</pre>
      *
      * @param e the element to be removed from this list, if present
@@ -995,8 +995,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'a', 'c', 'a');
-     * boolean removed = list.removeAllOccurrences('a');   // returns true, list is now ['b', 'c']
-     * boolean notFound = list.removeAllOccurrences('z');  // returns false, list unchanged
+     * boolean removed = list.removeAllOccurrences('a');    // returns true, list is now ['b', 'c']
+     * boolean notFound = list.removeAllOccurrences('z');   // returns false, list unchanged
      * }</pre>
      *
      * @param e the element to be removed from this list
@@ -1077,8 +1077,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c', 'd');
-     * boolean removed = list.removeIf(c -> c > 'b');   // returns true, list is now ['a', 'b']
-     * boolean noChange = list.removeIf(c -> c > 'z');  // returns false, list unchanged
+     * boolean removed = list.removeIf(c -> c > 'b');    // returns true, list is now ['a', 'b']
+     * boolean noChange = list.removeIf(c -> c > 'z');   // returns false, list unchanged
      * }</pre>
      *
      * @param p a predicate which returns {@code true} for elements to be removed; must not be {@code null}
@@ -1238,20 +1238,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return numRemoved;
     }
 
-    //    /**
-    //     * Removes the element at the specified position in this list.
-    //     * Shifts any subsequent elements to the left (subtracts one from their indices).
-    //     *
-    //     * @param index the index of the element to be removed
-    //     * @return the element that was removed from the list
-    //     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
-    //     * @deprecated replaced by {@link #removeAt(int)}.
-    //     */
-    //    @Deprecated
-    //    public char delete(final int index) {
-    //        return removeAt(index);
-    //    }
-
     /**
      * Removes and returns the element at the specified index.
      *
@@ -1307,20 +1293,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             return;
         }
 
-        for (final int index : indices) {
-            N.checkElementIndex(index, size);
-        }
-
-        final char[] tmp = N.removeAt(elementData, indices);
-
-        N.copy(tmp, 0, elementData, 0, tmp.length);
-
-        if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, (char) 0);
-        }
-
-        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
-        size = size - (elementData.length - tmp.length);
+        final int newSize = compactAfterRemovingIndices(elementData, size, indices);
+        N.fill(elementData, newSize, size, (char) 0);
+        size = newSize;
     }
 
     /**
@@ -1507,8 +1482,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'a', 'c');
-     * int count = list.replaceAll('a', 'x');    // returns 2, list is now ['x', 'b', 'x', 'c']
-     * int none = list.replaceAll('z', 'y');     // returns 0, list unchanged
+     * int count = list.replaceAll('a', 'x');   // returns 2, list is now ['x', 'b', 'x', 'c']
+     * int none = list.replaceAll('z', 'y');    // returns 0, list unchanged
      * }</pre>
      *
      * @param oldVal the old value to be replaced
@@ -1608,8 +1583,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c', 'd');
-     * list.fill(1, 3, 'x');     // list is now ['a', 'x', 'x', 'd']
-     * list.fill(0, 5, 'z');     // throws IndexOutOfBoundsException
+     * list.fill(1, 3, 'x');   // list is now ['a', 'x', 'x', 'd']
+     * list.fill(0, 5, 'z');   // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value
@@ -1633,8 +1608,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
-     * boolean has = list.contains('b');      // returns true
-     * boolean missing = list.contains('z');  // returns false
+     * boolean has = list.contains('b');       // returns true
+     * boolean missing = list.contains('z');   // returns false
      * }</pre>
      *
      * @param valueToFind the element whose presence in this list is to be tested
@@ -1650,8 +1625,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
-     * boolean any = list.containsAny(CharList.of('c', 'z'));     // returns true ('c' is shared)
-     * boolean none = list.containsAny(CharList.of('x', 'z'));    // returns false
+     * boolean any = list.containsAny(CharList.of('c', 'z'));    // returns true ('c' is shared)
+     * boolean none = list.containsAny(CharList.of('x', 'z'));   // returns false
      * }</pre>
      *
      * @param c the CharList to check for common elements
@@ -1672,8 +1647,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
-     * boolean any = list.containsAny(new char[] {'c', 'z'});     // returns true ('c' is shared)
-     * boolean none = list.containsAny(new char[] {'x', 'z'});    // returns false
+     * boolean any = list.containsAny(new char[] {'c', 'z'});    // returns true ('c' is shared)
+     * boolean none = list.containsAny(new char[] {'x', 'z'});   // returns false
      * }</pre>
      *
      * @param a the array to check for common elements
@@ -1694,9 +1669,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
-     * boolean all = list.containsAll(CharList.of('a', 'b'));     // returns true
-     * boolean notAll = list.containsAll(CharList.of('a', 'z'));  // returns false ('z' missing)
-     * boolean empty = list.containsAll(new CharList());          // returns true (empty is always contained)
+     * boolean all = list.containsAll(CharList.of('a', 'b'));      // returns true
+     * boolean notAll = list.containsAll(CharList.of('a', 'z'));   // returns false ('z' missing)
+     * boolean empty = list.containsAll(new CharList());           // returns true (empty is always contained)
      * }</pre>
      *
      * @param c the CharList to be checked for containment in this list
@@ -1735,9 +1710,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
-     * boolean all = list.containsAll(new char[] {'a', 'b'});     // returns true
-     * boolean notAll = list.containsAll(new char[] {'a', 'z'});  // returns false ('z' missing)
-     * boolean empty = list.containsAll(new char[0]);             // returns true (empty is always contained)
+     * boolean all = list.containsAll(new char[] {'a', 'b'});      // returns true
+     * boolean notAll = list.containsAll(new char[] {'a', 'z'});   // returns false ('z' missing)
+     * boolean empty = list.containsAll(new char[0]);              // returns true (empty is always contained)
      * }</pre>
      *
      * @param a the array to be checked for containment in this list
@@ -2045,8 +2020,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'a', 'c', 'a');
-     * int count = list.frequency('a');     // returns 3
-     * int none = list.frequency('z');      // returns 0
+     * int count = list.frequency('a');   // returns 3
+     * int none = list.frequency('z');    // returns 0
      * }</pre>
      *
      * @param valueToFind the value whose occurrences are to be counted
@@ -2298,7 +2273,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final CharConsumer action) {
+    public void forEach(final CharConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
@@ -2330,7 +2305,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2430,8 +2405,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean sorted = CharList.of('a', 'b', 'c').isSorted();     // returns true
-     * boolean notSorted = CharList.of('c', 'b', 'a').isSorted();  // returns false
+     * boolean sorted = CharList.of('a', 'b', 'c').isSorted();      // returns true
+     * boolean notSorted = CharList.of('c', 'b', 'a').isSorted();   // returns false
      * }</pre>
      *
      * @return {@code true} if all elements are in ascending order (allowing equal consecutive values),
@@ -2509,8 +2484,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList sorted = CharList.of('a', 'c', 'e', 'g');
-     * int found = sorted.binarySearch('e');       // returns 2
-     * int notFound = sorted.binarySearch('b');    // returns -2 (would insert at index 1)
+     * int found = sorted.binarySearch('e');      // returns 2
+     * int notFound = sorted.binarySearch('b');   // returns -2 (would insert at index 1)
      * }</pre>
      *
      * @param valueToFind the value to search for
@@ -2533,8 +2508,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList sorted = CharList.of('a', 'c', 'e', 'g');
-     * int found = sorted.binarySearch(0, 4, 'e');       // returns 2
-     * int notFound = sorted.binarySearch(0, 4, 'b');    // returns -2 (would insert at index 1)
+     * int found = sorted.binarySearch(0, 4, 'e');      // returns 2
+     * int notFound = sorted.binarySearch(0, 4, 'b');   // returns -2 (would insert at index 1)
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to search
@@ -2662,7 +2637,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
-    public void shuffle(final Random rnd) {
+    public void shuffle(final Random rnd) throws IllegalArgumentException {
         N.checkArgNotNull(rnd, cs.rnd);
 
         if (size() > 1) {
@@ -2721,8 +2696,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c', 'd');
-     * CharList sub = list.copy(1, 3);   // returns ['b', 'c']
-     * CharList empty = list.copy(2, 2); // returns [] (empty range)
+     * CharList sub = list.copy(1, 3);     // returns ['b', 'c']
+     * CharList empty = list.copy(2, 2);   // returns [] (empty range)
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
@@ -2975,7 +2950,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final C c = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -3001,7 +2977,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final Multiset<Character> multiset = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final Multiset<Character> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

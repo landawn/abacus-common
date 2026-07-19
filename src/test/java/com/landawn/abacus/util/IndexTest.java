@@ -4979,9 +4979,20 @@ public class IndexTest extends TestBase {
 
     @Test
     public void test_allOf_doubleArray_tolerance_negative_throws() {
-        // Numbers.fuzzyEquals throws on negative tolerance; allOf now propagates this.
+        // The tolerance contract rejects negative values.
         double[] arr = { 1.0, 2.0, 3.0 };
         assertThrows(IllegalArgumentException.class, () -> Index.allOf(arr, 2.0, 0, -0.1));
+    }
+
+    @Test
+    public void testToleranceIsValidatedBeforeEarlyReturn() {
+        assertThrows(IllegalArgumentException.class, () -> Index.of((float[]) null, 1f, 0, -1f));
+        assertThrows(IllegalArgumentException.class, () -> Index.last(new float[0], 1f, -1, Float.NaN));
+        assertThrows(IllegalArgumentException.class, () -> Index.allOf(new float[0], 1f, 0, -1f));
+
+        assertThrows(IllegalArgumentException.class, () -> Index.of((double[]) null, 1d, 0, Double.NaN));
+        assertThrows(IllegalArgumentException.class, () -> Index.last(new double[0], 1d, -1, -1d));
+        assertThrows(IllegalArgumentException.class, () -> Index.allOf(new double[0], 1d, 0, Double.NaN));
     }
 
     @Test

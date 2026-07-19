@@ -604,4 +604,17 @@ public class AppendableWriterTest extends TestBase {
         Assertions.assertDoesNotThrow(writer::close);
         assertThrows(IOException.class, () -> writer.write("x"));
     }
+
+    @Test
+    public void testCloseDoesNotSuppressFailureOnItself() {
+        IOException sharedFailure = new IOException("shared failure");
+        FailingFlushAndCloseAppendable underlying = new FailingFlushAndCloseAppendable(sharedFailure, sharedFailure);
+        AppendableWriter writer = new AppendableWriter(underlying);
+
+        IOException thrown = assertThrows(IOException.class, writer::close);
+
+        assertSame(sharedFailure, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+        assertTrue(underlying.closed);
+    }
 }

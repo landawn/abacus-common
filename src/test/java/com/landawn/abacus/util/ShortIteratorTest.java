@@ -1253,6 +1253,28 @@ public class ShortIteratorTest extends TestBase {
     }
 
     @Test
+    public void testIndexed_LongIndexOverflowDoesNotWrapOrConsume() {
+        ShortIterator source = ShortIterator.of((short) 1, (short) 2);
+        ObjIterator<IndexedShort> indexed = source.indexed(Long.MAX_VALUE);
+
+        IndexedShort first = indexed.next();
+        assertEquals(1, first.value());
+        assertEquals(Long.MAX_VALUE, first.longIndex());
+        assertTrue(indexed.hasNext());
+        assertThrows(ArithmeticException.class, indexed::next);
+        assertEquals(2, source.nextShort());
+    }
+
+    @Test
+    public void testIndexed_LongMaxExhaustionStillUsesIteratorContract() {
+        ObjIterator<IndexedShort> indexed = ShortIterator.of((short) 1).indexed(Long.MAX_VALUE);
+
+        assertEquals(Long.MAX_VALUE, indexed.next().longIndex());
+        assertFalse(indexed.hasNext());
+        assertThrows(NoSuchElementException.class, indexed::next);
+    }
+
+    @Test
     @DisplayName("Test indexed on empty iterator returns empty")
     public void testIndexed_OnEmpty() {
         ObjIterator<IndexedShort> indexed = ShortIterator.empty().indexed();

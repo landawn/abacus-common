@@ -26,8 +26,8 @@ import com.landawn.abacus.util.Strings;
  * Type handler for boxed-double array ({@code Double[]}) values.
  * This class provides serialization, deserialization, and output operations for {@code Double[]} arrays.
  *
- * <p>The canonical string format is a bracket-enclosed, comma-separated list where null elements
- * are written as the literal {@code null} (e.g., {@code [1.5, null, 3.14, -0.5]}).
+ * <p>The canonical string format is a bracket-enclosed, comma-separated list where {@code null} elements
+ * are written as the literal null (e.g., {@code [1.5, null, 3.14, -0.5]}).
  *
  * @see ObjectArrayType
  */
@@ -43,7 +43,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
 
     /**
      * Converts a {@code Double[]} to its canonical string representation.
-     * The output is a bracket-enclosed, comma-separated list; null elements appear as {@code null}.
+     * The output is a bracket-enclosed, comma-separated list; {@code null} elements appear as {@code null}.
      *
      * <p>Examples:
      * <ul>
@@ -122,7 +122,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     /**
      * Appends a {@code Double[]} to an {@link Appendable}.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Null elements are written as {@code null}; non-null values use {@link Double#toString()}.
+     * Null elements are written as {@code null}; {@code non-null} values use {@link Double#toString()}.
      * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
      * <b>appendTo vs. serializeTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
@@ -167,7 +167,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     /**
      * Writes a {@code Double[]} to a {@link CharacterWriter}.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Null elements are written as {@code null}; non-null values use the writer's optimized numeric
+     * Null elements are written as {@code null}; {@code non-null} values use the writer's optimized numeric
      * double-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes numeric literals and {@code null}
@@ -179,7 +179,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      *
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@code Double[]} to write; may be {@code null}
-     * @param config serialization configuration (not used for {@code Double} arrays); may be {@code null}
+     * @param config serialization configuration forwarded to each element; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -194,11 +194,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
                     writer.write(ELEMENT_SEPARATOR);
                 }
 
-                if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    writer.write(x[i]);
-                }
+                elementType.serializeTo(writer, x[i], config);
             }
 
             writer.write(SK._BRACKET_R);

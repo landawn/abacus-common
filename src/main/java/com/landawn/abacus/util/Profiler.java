@@ -29,17 +29,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * A comprehensive, enterprise-grade performance profiling and benchmarking utility providing advanced
- * execution time measurement, multi-threaded performance testing, and detailed statistical analysis
- * capabilities. This class serves as a powerful toolkit for performance optimization, load testing,
- * and systematic performance analysis in enterprise applications requiring precise timing measurements
- * and comprehensive performance metrics for method execution, code blocks, and system operations.
+ * A lightweight execution-time sampling utility for repeatedly invoking a method or command, optionally
+ * from several threads, and reporting aggregate and tail statistics. It is useful for diagnostics and
+ * coarse comparisons, but it does not provide the JVM isolation, warmup control, dead-code protection,
+ * or compiler controls of a dedicated harness such as JMH.
  *
  * <p>The {@code Profiler} class addresses critical challenges in enterprise performance testing by
  * providing sophisticated benchmarking capabilities that enable developers to accurately measure
@@ -49,7 +48,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * monitoring and development-time performance validation.</p>
  *
  * <p><b>⚠️ IMPORTANT - Memory Considerations:</b>
- * When using large loop counts (>100,000 iterations), the profiler stores individual execution times
+ * When using large loop counts (&gt;100,000 iterations), the profiler stores individual execution times
  * which can consume significant memory and potentially impact measurement accuracy. For high-iteration
  * testing, implement internal loops within test methods rather than using high loop parameters to
  * minimize memory overhead while maintaining measurement precision.</p>
@@ -123,7 +122,6 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <ul>
  *   <li><b>Optimal Loop Sizes:</b> Recommend loop counts under 10,000 for memory efficiency</li>
  *   <li><b>Internal Iteration:</b> Use internal loops within test methods for high-iteration testing</li>
- *   <li><b>Result Streaming:</b> Stream results for processing instead of storing all measurements</li>
  *   <li><b>Garbage Collection:</b> Strategic GC calls between test rounds for clean measurements</li>
  *   <li><b>Resource Cleanup:</b> Automatic cleanup of profiling resources and thread pools</li>
  * </ul>
@@ -184,13 +182,10 @@ import com.landawn.abacus.logging.LoggerFactory;
  *   <li><b>Distribution:</b> Percentile analysis across multiple thresholds</li>
  * </ul>
  *
- * <p><b>Thread Safety and Concurrent Usage:</b>
- * <ul>
- *   <li><b>Thread-Safe Operations:</b> All Profiler methods are thread-safe for concurrent usage</li>
- *   <li><b>Isolated Measurements:</b> Each profiling session uses isolated timing measurements</li>
- *   <li><b>Concurrent Testing:</b> Support for running multiple profiling sessions simultaneously</li>
- *   <li><b>Resource Management:</b> Proper cleanup of thread pools and profiling resources</li>
- * </ul>
+ * <p><b>Thread safety:</b> Separate {@code run} invocations keep separate result collections, but they
+ * share the global {@link #suspend()} state and each invocation may request a full JVM garbage collection.
+ * Running benchmarks concurrently therefore affects measurement quality. Returned statistics objects are
+ * mutable and are not thread-safe.</p>
  *
  * <p><b>Comparison with Alternative Profiling Tools:</b>
  * <ul>
@@ -295,7 +290,8 @@ public final class Profiler {
      *         minimum, maximum, average, and percentile execution times for all test executions.
      *         The returned statistics represent the final round of testing
      * @throws IllegalArgumentException if {@code threadNum <= 0} or {@code loopNum <= 0}, as these would
-     *                                  result in invalid test configurations with no actual profiling
+     *                                  result in invalid test configurations with no actual profiling, or
+     *                                  if {@code command} is {@code null}
      * @see #run(int, int, int, String, Throwables.Runnable)
      * @see #run(int, long, int, long, int, String, Throwables.Runnable)
      */
@@ -453,12 +449,12 @@ public final class Profiler {
      *
      * @param threadNum the number of concurrent threads to execute the test, must be greater than 0.
      *                  Each thread runs independently and executes the full loop sequence
-     * @param threadDelay the delay in milliseconds to wait before starting each subsequent thread, must be >= 0.
+     * @param threadDelay the delay in milliseconds to wait before starting each subsequent thread, must be &gt;= 0.
      *                    A value of 0 starts all threads simultaneously. Higher values create gradual ramp-up.
      *                    Example: With 10 threads and 100ms delay, the 10th thread starts 900ms after the first
      * @param loopNum the number of times each thread executes the command, must be greater than 0.
      *                Each execution is measured and contributes to the statistical analysis
-     * @param loopDelay the delay in milliseconds to wait between each loop iteration within a thread, must be >= 0.
+     * @param loopDelay the delay in milliseconds to wait between each loop iteration within a thread, must be &gt;= 0.
      *                  A value of 0 means continuous execution. Use positive values to throttle execution rate.
      *                  This delay is NOT included in the measured execution time of each iteration
      * @param roundNum the number of times to repeat the entire test (all threads and loops). A value
@@ -476,12 +472,15 @@ public final class Profiler {
      *         The statistics represent the final round of testing
      * @throws IllegalArgumentException if {@code threadNum <= 0}, {@code loopNum <= 0},
      *                                  {@code threadDelay < 0}, or {@code loopDelay < 0}.
-     *                                  These conditions indicate invalid test configurations
+     *                                  These conditions indicate invalid test configurations; also thrown
+     *                                  if {@code command} is {@code null}
      * @see #run(int, int, int, Throwables.Runnable)
      * @see #run(int, int, int, String, Throwables.Runnable)
      */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
             final String label, final Throwables.Runnable<? extends Exception> command) {
+        N.checkArgNotNull(command, "command");
+
         // A null label is normalized to the string "null" so that statistics queries and report
         // rendering (which use the label as the method name) won't fail with NullPointerException.
         return run(command, String.valueOf(label), getMethod(command, "run"), null, null, null, null, null, threadNum, threadDelay, loopNum, loopDelay,
@@ -665,41 +664,46 @@ public final class Profiler {
 
         gc();
 
-        final ExecutorService asyncExecutor = Executors.newFixedThreadPool(threadNum);
+        // Suspension is a minimal-execution mode. Record and allocate the number of threads
+        // actually used so the returned statistics and rendered loop count remain accurate.
+        final int actualThreadNum = suspended ? 1 : threadNum;
+        final ExecutorService asyncExecutor = Executors.newFixedThreadPool(actualThreadNum);
+        boolean completed = false;
 
         try {
-            final AtomicInteger threadCounter = new AtomicInteger();
             // MXBean mxBean = new MXBean();
             final List<LoopStatistics> loopStatisticsList = Collections.synchronizedList(new ArrayList<>());
             final PrintStream ps = System.out; //NOSONAR
             final long startTimeInMillis = System.currentTimeMillis();
             final long startTimeInNano = System.nanoTime();
 
-            for (int threadIndex = 0; threadIndex < (suspended ? 1 : threadNum); threadIndex++) {
+            for (int threadIndex = 0; threadIndex < actualThreadNum; threadIndex++) {
                 final Object arg = (N.isEmpty(args)) ? null : ((args.size() == 1) ? args.get(0) : args.get(threadIndex));
-                threadCounter.incrementAndGet();
-
-                asyncExecutor.execute(() -> {
-                    try {
-                        runLoops(instance, methodName, method, arg, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, loopNum, loopDelay,
-                                loopStatisticsList, ps);
-                    } finally {
-                        threadCounter.decrementAndGet();
-                    }
-                });
+                asyncExecutor.execute(() -> runLoops(instance, methodName, method, arg, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop,
+                        loopNum, loopDelay, loopStatisticsList, ps));
 
                 sleep(threadDelay);
             }
 
-            while (threadCounter.get() > 0) {
-                N.sleep(1);
+            asyncExecutor.shutdown();
+
+            try {
+                while (!asyncExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                    // Keep waiting; the practically unbounded timeout is permitted to return spuriously.
+                }
+            } catch (final InterruptedException e) {
+                asyncExecutor.shutdownNow();
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
 
             final long endTimeInNano = System.nanoTime();
             final long endTimeInMillis = System.currentTimeMillis();
-            return new MultiLoopsStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, threadNum, loopStatisticsList);
+            completed = true;
+            return new MultiLoopsStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, actualThreadNum, loopStatisticsList);
         } finally {
-            asyncExecutor.shutdown();
+            if (!completed) {
+                asyncExecutor.shutdownNow();
+            }
         }
     }
 
@@ -957,7 +961,7 @@ public final class Profiler {
         /**
          * Returns the result of the execution.
          * {@code null} indicates a successful execution.
-         * For failed executions, the result is the thrown {@link Exception} (or, when invoking via
+         * For failed executions, the result is the thrown {@link Throwable} (or, when invoking via
          * reflection, the {@link java.lang.reflect.InvocationTargetException#getTargetException() target exception}
          * unwrapped from an {@code InvocationTargetException}).
          *
@@ -969,7 +973,7 @@ public final class Profiler {
          * Sets the execution result.
          *
          * @param result the result to set; {@code null} represents a successful execution,
-         *               an {@link Exception} represents a failed execution
+         *               and a {@link Throwable} represents a failed execution
          */
         void setResult(Object result);
 
@@ -1336,7 +1340,7 @@ public final class Profiler {
          * @param endTimeInMillis the end time in milliseconds since epoch
          * @param startTimeInNano the start time in nanoseconds (from {@link System#nanoTime()})
          * @param endTimeInNano the end time in nanoseconds (from {@link System#nanoTime()})
-         * @param result the execution result ({@code null} for success, an {@link Exception} instance for failure)
+         * @param result the execution result ({@code null} for success, a {@link Throwable} instance for failure)
          */
         public MethodStatistics(final String methodName, final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano,
                 final long endTimeInNano, final Object result) {
@@ -1364,7 +1368,7 @@ public final class Profiler {
 
         /**
          * Returns the execution result for this method invocation.
-         * {@code null} indicates a successful execution; an {@link Exception} instance indicates failure.
+         * {@code null} indicates a successful execution; a {@link Throwable} instance indicates failure.
          *
          * <p>This field shadows the {@code result} field in {@code AbstractStatistics} so that
          * {@link MethodStatistics} can maintain its own independent result state.</p>
@@ -1397,8 +1401,8 @@ public final class Profiler {
          * System.out.println("Failed: " + stats.isFailed());
          * }</pre>
          *
-         * @param result the result to set; use {@code null} to indicate success, or an
-         *               {@link Exception} to indicate failure
+         * @param result the result to set; use {@code null} to indicate success, or a
+         *               {@link Throwable} to indicate failure
          */
         @Override
         public void setResult(final Object result) {
@@ -1409,8 +1413,8 @@ public final class Profiler {
          * Returns {@code true} if the method execution failed.
          *
          * <p>An execution is considered failed when its {@link #getResult() result} is an
-         * instance of {@link Exception} (i.e., an exception was thrown and captured during
-         * profiling). Successful executions have a {@code null} result.</p>
+         * instance of {@link Throwable} (i.e., an exception or error was thrown and captured
+         * during profiling). Successful executions have a {@code null} result.</p>
          *
          * <p><b>Usage Example:</b></p>
          * <pre>{@code
@@ -1424,10 +1428,10 @@ public final class Profiler {
          * }
          * }</pre>
          *
-         * @return {@code true} if the result is an {@code Exception} instance, {@code false} otherwise
+         * @return {@code true} if the result is a {@code Throwable}, {@code false} otherwise
          */
         public boolean isFailed() {
-            return result instanceof Exception;
+            return result instanceof Throwable;
         }
 
         /**
@@ -1447,7 +1451,7 @@ public final class Profiler {
         @Override
         public String toString() {
             if (isFailed()) {
-                final Exception e = (Exception) result;
+                final Throwable e = (Throwable) result;
                 return "method=" + methodName + ", startTime=" + timeToString(getStartTimeInMillis()) + ", endTime=" + timeToString(getEndTimeInMillis())
                         + ", result=" + ClassUtil.getSimpleClassName(e.getClass()) + ": " + e.getMessage() + ".";
             } else {
@@ -1517,7 +1521,7 @@ public final class Profiler {
          * Returns the list of all {@link MethodStatistics} recorded in this loop iteration.
          * Lazily initializes the list if it has not been set.
          *
-         * @return a non-null (possibly empty) list of method statistics in this loop
+         * @return a {@code non-null} (possibly empty) list of method statistics in this loop
          */
         public List<MethodStatistics> getMethodStatisticsList() {
             if (methodStatisticsList == null) {
@@ -1782,14 +1786,16 @@ public final class Profiler {
          * @param endTimeInMillis the overall end time in milliseconds since epoch
          * @param startTimeInNano the overall start time in nanoseconds (from {@link System#nanoTime()})
          * @param endTimeInNano the overall end time in nanoseconds (from {@link System#nanoTime()})
-         * @param threadNum the number of threads used in the test
-         * @param loopStatisticsList the list of loop statistics from all threads
+         * @param threadNum the positive number of threads used in the test
+         * @param loopStatisticsList the list of loop statistics from all threads; {@code null} is treated as empty
+         * @throws IllegalArgumentException if {@code threadNum} is not positive
          */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final int threadNum, final List<LoopStatistics> loopStatisticsList) {
             super(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano);
+            N.checkArgPositive(threadNum, "threadNum");
             this.threadNum = threadNum;
-            this.loopStatisticsList = loopStatisticsList;
+            this.loopStatisticsList = loopStatisticsList == null ? new ArrayList<>() : loopStatisticsList;
         }
 
         /**
@@ -1809,12 +1815,18 @@ public final class Profiler {
 
         @Override
         public List<String> getMethodNameList() {
-            List<String> result = null;
-            if (loopStatisticsList == null || loopStatisticsList.isEmpty()) {
-                result = new ArrayList<>();
-            } else {
-                result = (loopStatisticsList.get(0)).getMethodNameList();
+            final List<String> result = new ArrayList<>();
+
+            if (loopStatisticsList != null) {
+                for (final LoopStatistics loopStatistics : loopStatisticsList) {
+                    for (final String methodName : loopStatistics.getMethodNameList()) {
+                        if (!result.contains(methodName)) {
+                            result.add(methodName);
+                        }
+                    }
+                }
             }
+
             return result;
         }
 
@@ -1974,10 +1986,13 @@ public final class Profiler {
             boolean found = false;
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
-                    final double loopMethodMinTime = loopStatistics.getMethodMinElapsedTimeInMillis(methodName);
-                    if (loopMethodMinTime > 0 && loopMethodMinTime < result) {
-                        result = loopMethodMinTime;
-                        found = true;
+                    if (loopStatistics.getMethodInvocationCount(methodName) > 0) {
+                        final double loopMethodMinTime = loopStatistics.getMethodMinElapsedTimeInMillis(methodName);
+
+                        if (loopMethodMinTime < result) {
+                            result = loopMethodMinTime;
+                            found = true;
+                        }
                     }
                 }
             }
@@ -2068,16 +2083,17 @@ public final class Profiler {
         }
 
         /**
-         * Gets the total number of distinct method names summed across all loops
-         * (i.e., the sum of {@code getMethodNameList().size()} for every loop).
+         * Gets the total number of recorded method invocations across all loops.
          *
-         * @return the total count of method-name entries across all loops
+         * @return the total invocation count
          */
         private int getTotalCall() {
             int res = 0;
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
-                    res += loopStatistics.getMethodNameList().size();
+                    for (final String methodName : loopStatistics.getMethodNameList()) {
+                        res += loopStatistics.getMethodInvocationCount(methodName);
+                    }
                 }
             }
             return res;
@@ -2543,7 +2559,7 @@ public final class Profiler {
                 final double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 final double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
                 output.println("<tr>");
-                output.println("<td>" + methodName + "</td>"); //NOSONAR
+                output.println("<td>" + EscapeUtil.escapeHtml4(methodName) + "</td>"); //NOSONAR
                 output.println("<td>" + elapsedTimeFormat.get().format(avgTime) + "</td>");
                 output.println("<td>" + elapsedTimeFormat.get().format(minTime) + "</td>");
                 output.println("<td>" + elapsedTimeFormat.get().format(maxTime) + "</td>");
@@ -2579,7 +2595,7 @@ public final class Profiler {
                 for (final Object element : failedMethodList) {
                     output.println("<br/>" + "--------------------------------------------------------------------------------");
                     methodStatistics = (MethodStatistics) element;
-                    output.println("<br/>" + methodStatistics.toString());
+                    output.println("<br/>" + EscapeUtil.escapeHtml4(methodStatistics.toString()));
                 }
             }
         }
@@ -2772,7 +2788,7 @@ public final class Profiler {
                 final double avgTime = getMethodAverageElapsedTimeInMillis(methodName);
                 final double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 final double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
-                output.println("<method name=\"" + methodName + "\">");
+                output.println("<method name=\"" + EscapeUtil.escapeXml10(methodName) + "\">");
                 output.println("<avgTime>" + elapsedTimeFormat.get().format(avgTime) + "</avgTime>");
                 output.println("<minTime>" + elapsedTimeFormat.get().format(minTime) + "</minTime>");
                 output.println("<maxTime>" + elapsedTimeFormat.get().format(maxTime) + "</maxTime>");
@@ -2797,7 +2813,7 @@ public final class Profiler {
             if (failedMethodList.size() > 0) {
                 output.println("<errors>" + failedMethodList.size() + " (" + (failedMethodList.size() * 100D) / getTotalCall() + "%)</errors>"); //NOSONAR
                 for (final MethodStatistics methodStatistics : failedMethodList) {
-                    output.println("<error>" + methodStatistics.toString() + "</error>");
+                    output.println("<error>" + EscapeUtil.escapeXml10(methodStatistics.toString()) + "</error>");
                 }
             }
             output.println("</result>");

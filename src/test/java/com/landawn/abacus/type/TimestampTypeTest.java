@@ -51,7 +51,7 @@ public class TimestampTypeTest extends TestBase {
     }
 
     @Test
-    public void test_stringOf_PreservesNanosForRoundTrip() {
+    public void test_stringOf_TruncatesToMillisecondsButValueOfAcceptsNanoseconds() {
         {
             Timestamp timestamp = Timestamp.valueOf("2020-01-01 00:00:00.123456789");
             String text = type.stringOf(timestamp);

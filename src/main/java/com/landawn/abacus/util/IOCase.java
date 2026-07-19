@@ -20,8 +20,9 @@ package com.landawn.abacus.util;
  * Enumeration for controlling case sensitivity in I/O operations.
  *
  * <p>This enum provides a consistent way to handle case sensitivity across different
- * file systems. Windows is typically case-insensitive while Unix/Linux is case-sensitive.
- * This class provides methods to perform case-aware string comparisons.</p>
+ * file-system-oriented code. {@link #SYSTEM} is an operating-system-name heuristic rather than a
+ * probe of a particular volume: it is insensitive on Windows and sensitive elsewhere. This class
+ * provides methods to perform case-aware string comparisons.</p>
  *
  * <p>Note: This class is adapted from Apache Commons IO, licensed under Apache License 2.0.</p>
  *
@@ -126,8 +127,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = IOCase.SENSITIVE.getName();    // "Sensitive"
-     * String systemName = IOCase.SYSTEM.getName(); // "System"
+     * String name = IOCase.SENSITIVE.getName();      // "Sensitive"
+     * String systemName = IOCase.SYSTEM.getName();   // "System"
      * }</pre>
      *
      * @return the name of the constant ("Sensitive", "Insensitive", or "System")

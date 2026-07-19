@@ -27,7 +27,9 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>This class provides utilities for creating executor services that automatically shut down
  * when the JVM exits, preventing threads from keeping the JVM alive unnecessarily. The executors
- * created by this class use daemon threads and register shutdown hooks for graceful termination.</p>
+ * created by this class use daemon threads and register shutdown hooks for graceful termination.
+ * Only threads created after conversion use the replacement daemon thread factory; callers should
+ * therefore convert an executor before submitting work.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -76,6 +78,7 @@ public final class MoreExecutors {
      *
      * @param executor the executor to modify
      * @return an unconfigurable ExecutorService that will shut down on JVM exit
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      * @see #getExitingExecutorService(ThreadPoolExecutor, long, TimeUnit)
      */
     public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor) {
@@ -112,9 +115,14 @@ public final class MoreExecutors {
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
      * @return an unconfigurable ExecutorService that will shut down on JVM exit
-     * @throws IllegalArgumentException if {@code timeUnit} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} or {@code timeUnit} is {@code null}, or
+     *         {@code terminationTimeout} is negative
      */
     public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit) {
+        N.checkArgNotNull(executor, cs.executor);
+        N.checkArgNotNull(timeUnit, "timeUnit");
+        N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
+
         useDaemonThreadFactory(executor);
         final ExecutorService service = Executors.unconfigurableExecutorService(executor);
         addDelayedShutdownHook(service, terminationTimeout, timeUnit);
@@ -141,6 +149,7 @@ public final class MoreExecutors {
      *
      * @param executor the scheduled executor to modify
      * @return an unconfigurable ScheduledExecutorService that will shut down on JVM exit
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      * @see #getExitingScheduledExecutorService(ScheduledThreadPoolExecutor, long, TimeUnit)
      */
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor) {
@@ -173,10 +182,15 @@ public final class MoreExecutors {
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
      * @return an unconfigurable ScheduledExecutorService that will shut down on JVM exit
-     * @throws IllegalArgumentException if {@code timeUnit} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} or {@code timeUnit} is {@code null}, or
+     *         {@code terminationTimeout} is negative
      */
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, final long terminationTimeout,
             final TimeUnit timeUnit) {
+        N.checkArgNotNull(executor, cs.executor);
+        N.checkArgNotNull(timeUnit, "timeUnit");
+        N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
+
         useDaemonThreadFactory(executor);
         final ScheduledExecutorService service = Executors.unconfigurableScheduledExecutorService(executor);
         addDelayedShutdownHook(service, terminationTimeout, timeUnit);
@@ -205,12 +219,14 @@ public final class MoreExecutors {
      * @param service the executor service to shut down on JVM exit
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
-     * @throws IllegalArgumentException if {@code service} or {@code timeUnit} is {@code null}
+     * @throws IllegalArgumentException if {@code service} or {@code timeUnit} is {@code null}, or
+     *         {@code terminationTimeout} is negative
      */
     public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit)
             throws IllegalArgumentException {
         N.checkArgNotNull(service);
         N.checkArgNotNull(timeUnit);
+        N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
         addShutdownHook(MoreExecutors.newThread("DelayedShutdownHook-for-" + service, () -> {
             try {
                 // We'd like to log progress and failures that may arise in the
@@ -242,7 +258,7 @@ public final class MoreExecutors {
      * This ensures that threads created by the executor won't prevent JVM shutdown.
      *
      * <p>The method wraps the executor's existing thread factory to set the daemon flag
-     * on all newly created threads.</p>
+     * on all newly created threads. Threads that the executor created previously are unchanged.</p>
      *
      * @param executor the executor to configure with daemon threads
      */

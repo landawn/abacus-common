@@ -17,6 +17,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.sql.rowset.serial.SerialClob;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +33,14 @@ public class ClobTypeTest extends TestBase {
     public void testClazz() {
         Class<Clob> result = type.javaType();
         assertEquals(Clob.class, result);
+    }
+
+    @Test
+    public void testConcreteClobSubclassMetadata() {
+        final ClobType subtype = new ClobType(SerialClob.class);
+
+        assertEquals(SerialClob.class, subtype.javaType());
+        assertEquals("SerialClob", subtype.name());
     }
 
     @Test

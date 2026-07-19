@@ -188,6 +188,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * type.appendTo(sb2, null);
      * // sb2.toString() equals "null"
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -233,6 +234,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * type.serializeTo(writer, null, null);
      * // Writes: null
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization

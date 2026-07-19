@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -172,7 +171,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      *
      * @param str the string to parse
      * @return a Triple object containing the parsed values, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer than 3 elements
+     * @throws IllegalArgumentException if the parsed value is not an array containing exactly three elements
      * @see #valueOf(Object)
      * @see #stringOf(Triple)
      */
@@ -185,8 +184,8 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
-        if (a == null || a.length < 3) {
-            throw new IllegalArgumentException("Invalid Triple format. Expected array with at least 3 elements but got: " + str);
+        if (a == null || a.length != 3) {
+            throw new IllegalArgumentException("Invalid Triple format. Expected an array with exactly 3 elements [left, middle, right] but got: " + str);
         }
 
         // Parameterized slots are re-deserialized with their declared element types (see
@@ -209,7 +208,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      *
      * @param appendable the Appendable to write to
      * @param x the Triple object to append
-     * @throws IOException if an I/O error occurs during the append operation (when the target is a {@code Writer}, the error is rethrown wrapped in an {@code UncheckedIOException})
+     * @throws IOException if an I/O error occurs during the append operation
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -228,6 +227,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                Throwable failure = null;
 
                 try {
                     bw.write(SK._BRACKET_L);
@@ -243,11 +243,12 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
+                } catch (final IOException | RuntimeException | Error e) {
+                    failure = e;
+                    throw e;
                 } finally {
                     if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
+                        Utils.recycle((BufferedWriter) bw, failure);
                     }
                 }
             } else {
@@ -280,27 +281,22 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @param writer the CharacterWriter to write to
      * @param x the Triple object to write
      * @param config the serialization configuration for formatting options
-     * @throws UncheckedIOException if an I/O error occurs during the write operation (the underlying {@code IOException} is wrapped)
+     * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Triple<L, M, R> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            try {
-                writer.write(SK._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
-                leftType.serializeTo(writer, x.left(), config);
-                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                middleType.serializeTo(writer, x.middle(), config);
-                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                rightType.serializeTo(writer, x.right(), config);
+            leftType.serializeTo(writer, x.left(), config);
+            writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+            middleType.serializeTo(writer, x.middle(), config);
+            writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+            rightType.serializeTo(writer, x.right(), config);
 
-                writer.write(SK._BRACKET_R);
-
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            writer.write(SK._BRACKET_R);
         }
     }
 

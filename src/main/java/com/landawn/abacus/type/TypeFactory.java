@@ -17,8 +17,11 @@ package com.landawn.abacus.type;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -552,15 +555,57 @@ public final class TypeFactory {
     /**
      * Returns a human-readable name for the given {@link java.lang.reflect.Type}.
      * For {@link Class} instances this delegates to {@link #getClassName(Class)};
-     * for all other types (e.g., {@link java.lang.reflect.ParameterizedType}) it
-     * uses {@link ClassUtil#getTypeName(java.lang.reflect.Type)}.
+     * Parameterized, array, wildcard, and type-variable names are assembled recursively so
+     * nested classes use canonical {@code '.'} separators instead of reflection's binary
+     * {@code '$'} separators.
      *
      * @param javaType the reflection type to name
      * @return a string representation of the type suitable for use as a type-pool key
      */
     static String getJavaTypeName(final java.lang.reflect.Type javaType) {
+        return getJavaTypeName(javaType, true);
+    }
+
+    private static String getJavaTypeName(final java.lang.reflect.Type javaType, final boolean topLevel) {
         if (javaType instanceof Class) {
-            return getClassName((Class<?>) javaType);
+            final String className = getClassName((Class<?>) javaType);
+            return topLevel ? className : ClassUtil.formatParameterizedTypeName(className);
+        } else if (javaType instanceof ParameterizedType parameterizedType) {
+            final java.lang.reflect.Type rawType = parameterizedType.getRawType();
+            final java.lang.reflect.Type ownerType = parameterizedType.getOwnerType();
+            final String rawTypeName;
+
+            if (ownerType != null && rawType instanceof Class<?> rawClass) {
+                rawTypeName = getJavaTypeName(ownerType, false) + "." + rawClass.getSimpleName();
+            } else {
+                rawTypeName = getJavaTypeName(rawType, false);
+            }
+
+            final StringBuilder name = new StringBuilder(rawTypeName).append('<');
+            final java.lang.reflect.Type[] arguments = parameterizedType.getActualTypeArguments();
+
+            for (int i = 0; i < arguments.length; i++) {
+                if (i > 0) {
+                    name.append(", ");
+                }
+
+                name.append(getJavaTypeName(arguments[i], false));
+            }
+
+            return name.append('>').toString();
+        } else if (javaType instanceof GenericArrayType arrayType) {
+            return getJavaTypeName(arrayType.getGenericComponentType(), false) + "[]";
+        } else if (javaType instanceof WildcardType wildcardType) {
+            final java.lang.reflect.Type[] lowerBounds = wildcardType.getLowerBounds();
+
+            if (lowerBounds.length > 0) {
+                return "? super " + getJavaTypeName(lowerBounds[0], false);
+            }
+
+            final java.lang.reflect.Type[] upperBounds = wildcardType.getUpperBounds();
+            return upperBounds.length == 0 || upperBounds[0] == Object.class ? "?" : "? extends " + getJavaTypeName(upperBounds[0], false);
+        } else if (javaType instanceof TypeVariable<?> typeVariable) {
+            return typeVariable.getName();
         }
 
         return ClassUtil.getTypeName(javaType);
@@ -590,6 +635,13 @@ public final class TypeFactory {
 
                 type = new ClazzType(typeParameters[0]);
             } else if (clsName.equalsIgnoreCase(TypeType.TYPE)) {
+                if (typeParameters.length > 1) {
+                    throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Type can only have zero or one type parameter.");
+                }
+                if (parameters.length > 0) {
+                    throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Type can only have zero parameter.");
+                }
+
                 type = new TypeType(typeName);
             } else if (clsName.equalsIgnoreCase(JSONType.JSON)) {
                 if (typeParameters.length > 1) {
@@ -1201,10 +1253,17 @@ public final class TypeFactory {
                 type = new ObjectArrayType(getType(typeName.substring(0, typeName.length() - 2)));
             }
 
-            typePool.put(typeName, type);
+            // A lookup may have raced with custom registration or another lookup. Preserve and
+            // return the mapping that was published first instead of overwriting it with this
+            // speculative instance.
+            final Type publishedType = typePool.putIfAbsent(typeName, type);
 
-            if (typePool.size() % 100 == 0) {
-                logger.warn("Size of type pool reaches: " + typePool.size() + " with initialized pool size: " + POOL_SIZE);
+            if (publishedType == null) {
+                if (typePool.size() % 100 == 0) {
+                    logger.warn("Size of type pool reaches: " + typePool.size() + " with initialized pool size: " + POOL_SIZE);
+                }
+            } else {
+                type = publishedType;
             }
         }
 
@@ -1216,7 +1275,9 @@ public final class TypeFactory {
      * <p>
      * This method looks up and returns a Type instance that represents the given class.
      * The method first checks a cache of class-to-type mappings. If the type is not found
-     * in the cache, it creates a new Type instance for the class and caches it for future use.
+     * in the cache, it creates a new Type instance and atomically publishes it for future use.
+     * If a custom registration or another lookup publishes a mapping concurrently, that existing
+     * mapping wins and is returned.
      * </p>
      * <p>
      * The method supports built-in types, primitive types, collections, maps, optional types,
@@ -1262,7 +1323,11 @@ public final class TypeFactory {
             type = getType(getClassName(cls), cls, cls);
 
             if (type != null) {
-                javaType2TypeCache.put(cls, type);
+                final Type publishedType = javaType2TypeCache.putIfAbsent(cls, type);
+
+                if (publishedType != null) {
+                    type = publishedType;
+                }
             }
         }
 
@@ -1275,7 +1340,9 @@ public final class TypeFactory {
      * This method handles both regular Class objects and ParameterizedType instances.
      * For ParameterizedType instances (e.g., List&lt;String&gt;, Map&lt;String, Integer&gt;),
      * it extracts the type information including type parameters and creates the appropriate
-     * Type object. Results are cached for performance.
+     * Type object. Results are cached for performance. Cache publication is atomic: when another
+     * lookup has already published a result for the same reflection type, that result is retained
+     * and returned.
      * </p>
      *
      * <p>This method never returns {@code null}: for an unrecognized type it fabricates and caches an
@@ -1312,12 +1379,16 @@ public final class TypeFactory {
                 final Class cls = javaType instanceof Class ? (Class) javaType
                         : javaType instanceof ParameterizedType pt && pt.getRawType() instanceof Class ? (Class) pt.getRawType() : null;
 
-                result = getType(ClassUtil.getTypeName(javaType), cls, javaType);
+                result = getType(getJavaTypeName(javaType), cls, javaType);
             } else {
                 result = getType((Class) javaType);
             }
 
-            javaType2TypeCache.put(javaType, result);
+            final Type publishedType = javaType2TypeCache.putIfAbsent(javaType, result);
+
+            if (publishedType != null) {
+                result = publishedType;
+            }
         }
 
         return result;
@@ -1363,11 +1434,11 @@ public final class TypeFactory {
      * t1.javaType();                  // returns String.class
      *
      * Type<List<String>> t2 = TypeFactory.getType("List<String>");
-     * t2.name();                      // returns "List<String>"
-     * t2.javaType();                  // returns List.class
+     * t2.name();       // returns "List<String>"
+     * t2.javaType();   // returns List.class
      *
      * Type<?> t3 = TypeFactory.getType("CompletelyUnknownName");
-     * t3.isObject();                  // returns true (ObjectType fallback, not an exception)
+     * t3.isObject();                        // returns true (ObjectType fallback, not an exception)
      *
      * TypeFactory.getType((String) null);   // throws IllegalArgumentException
      * }</pre>
@@ -1496,6 +1567,8 @@ public final class TypeFactory {
      * Note: A type cannot be registered for a class that already has a registered type.
      * Attempting to do so will throw an IllegalArgumentException.
      * </p>
+     * <p>A successfully registered mapping is retained if a concurrent lookup was already
+     * constructing a default type for the same class.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1520,11 +1593,16 @@ public final class TypeFactory {
             throw new IllegalArgumentException("A type has already registered with class: " + cls);
         }
 
+        final String registeredTypeName = type.name();
         registerType(type);
 
         // Atomic check-then-put closes the check-then-act race: a concurrent registration for the
         // same class cannot silently overwrite an existing mapping.
         if (javaType2TypeCache.putIfAbsent(cls, type) != null) {
+            // The intrinsic name was installed before the class mapping so it must be rolled back
+            // when a concurrent registration wins the class slot. Otherwise this method throws
+            // while the rejected type remains globally retrievable by name.
+            typePool.remove(registeredTypeName, type);
             throw new IllegalArgumentException("A type has already registered with class: " + cls);
         }
     }

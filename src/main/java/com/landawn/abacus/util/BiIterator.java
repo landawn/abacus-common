@@ -34,7 +34,9 @@ import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * An abstract, immutable iterator over pairs of values of types {@code A} and {@code B}.
+ * An abstract, single-use iterator over pairs of values of types {@code A} and {@code B}.
+ * Its position advances as elements are consumed; "immutable" in the name of its
+ * {@link ImmutableIterator} base type means that removal is unsupported, not that iteration state is immutable.
  *
  * <p>Each call to {@link #next()} returns a {@link Pair}{@code <A, B>} holding the two values
  * together. The more efficient {@link #forEachRemaining(java.util.function.BiConsumer)} and
@@ -67,7 +69,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
     /**
      * A singleton empty BiIterator instance that contains no elements.
-     * This iterator's hasNext() always returns false, and any attempt to retrieve elements throws NoSuchElementException.
+     * This iterator's hasNext() always returns {@code false}, and any attempt to retrieve elements throws NoSuchElementException.
      *
      * @see #empty()
      */
@@ -94,19 +96,21 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         }
 
         @Override
-        public void forEachRemaining(final BiConsumer action) {
+        public void forEachRemaining(final BiConsumer action) throws IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             // It's empty. Nothing to do.
         }
 
         @Override
-        public void foreachRemaining(final Throwables.BiConsumer action) {
+        public void foreachRemaining(final Throwables.BiConsumer action) throws IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             // It's empty. Nothing to do.
         }
 
         @Override
         public ObjIterator map(final BiFunction mapper) {
+            N.checkArgNotNull(mapper, cs.mapper);
+
             return ObjIterator.empty();
         }
     };
@@ -212,6 +216,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super K, ? super V> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 Map.Entry<K, V> entry = null;
 
                 while (iter.hasNext()) {
@@ -222,6 +228,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 Map.Entry<K, V> entry = null;
 
                 while (iter.hasNext()) {
@@ -232,6 +240,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super K, ? super V, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 return new ObjIterator<>() {
                     private Map.Entry<K, V> entry = null;
 
@@ -355,6 +365,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNextFlag || hasNext.getAsBoolean()) {
                     hasNextFlag = false; // Reset for the next call
 
@@ -366,6 +378,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
 
                 while (hasNextFlag || hasNext.getAsBoolean()) {
                     hasNextFlag = false; // Reset for the next call
@@ -378,6 +391,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
@@ -472,6 +487,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 while (cursor.value() < toIndex) {
                     output.accept(cursor.getAndIncrement(), tmp);
 
@@ -481,6 +498,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 while (cursor.value() < toIndex) {
                     output.accept(cursor.getAndIncrement(), tmp);
 
@@ -490,6 +509,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
@@ -679,6 +700,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNextFlag || (iterA.hasNext() && iterB.hasNext())) {
                     hasNextFlag = false; // Reset for the next call
 
@@ -688,6 +711,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNextFlag || (iterA.hasNext() && iterB.hasNext())) {
                     hasNextFlag = false; // Reset for the next call
 
@@ -698,6 +723,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
@@ -784,6 +811,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNextFlag || (iter1.hasNext() || iter2.hasNext())) {
                     hasNextFlag = false; // Reset for the next call
 
@@ -793,6 +822,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNextFlag || (iter1.hasNext() || iter2.hasNext())) {
                     hasNextFlag = false; // Reset for the next call
 
@@ -802,6 +833,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
@@ -853,7 +886,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iter} is {@code null}
      * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(unzipFunction, cs.function);
 
         if (iter == null) {
@@ -889,7 +923,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iter} is {@code null}
      * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(unzipFunction, cs.function);
 
         if (iter == null) {
@@ -931,8 +966,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @throws IllegalArgumentException if {@code unzipFunction}, {@code leftSupplier}, {@code rightSupplier}, or any supplied collection is {@code null}
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iter,
-            final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
-            final IntFunction<? extends RC> rightSupplier) {
+            final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(leftSupplier, cs.supplier);
         N.checkArgNotNull(rightSupplier, cs.supplier);
 
@@ -965,8 +1000,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @throws IllegalArgumentException if {@code unzipFunction}, {@code leftSupplier}, {@code rightSupplier}, or any supplied collection is {@code null}
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> iter,
-            final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
-            final IntFunction<? extends RC> rightSupplier) {
+            final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(leftSupplier, cs.supplier);
         N.checkArgNotNull(rightSupplier, cs.supplier);
 
@@ -1000,7 +1035,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final Consumer<? super Pair<A, B>> action) {
+    public void forEachRemaining(final Consumer<? super Pair<A, B>> action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
         super.forEachRemaining(action);
@@ -1017,6 +1052,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * }</pre>
      *
      * @param action the action to be performed for each pair of elements, must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public abstract void forEachRemaining(final BiConsumer<? super A, ? super B> action);
 
@@ -1034,6 +1070,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each remaining pair of elements, must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     public abstract <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E; // NOSONAR
@@ -1094,6 +1131,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 if (!skipped) {
                     skip();
                 }
@@ -1103,6 +1142,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 if (!skipped) {
                     skip();
                 }
@@ -1111,7 +1152,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) throws IllegalArgumentException {
                 N.checkArgNotNull(mapper, cs.mapper);
 
                 if (!skipped) {
@@ -1190,6 +1231,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 final Throwables.BiConsumer<? super A, ? super B, RuntimeException> actionE = Fnn.from(action);
 
                 while (hasNext()) {
@@ -1200,6 +1243,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNext()) {
                     cnt--;
                     iter.next(action);
@@ -1208,6 +1253,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 if (cnt > 0) {
                     return iter.<R> map(mapper).limit(cnt);
                 } else {
@@ -1232,7 +1279,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return a new BiIterator containing only pairs that satisfy the predicate
      * @throws IllegalArgumentException if predicate is {@code null}
      */
-    public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) {
+    public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         final BiIterator<A, B> iter = this;
@@ -1283,6 +1330,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNextFlag || hasNext()) {
                     hasNextFlag = false;
 
@@ -1292,6 +1341,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                N.checkArgNotNull(action, cs.action);
+
                 while (hasNextFlag || hasNext()) {
                     hasNextFlag = false;
 
@@ -1301,6 +1352,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
@@ -1347,6 +1400,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <R> the type of elements in the resulting iterator
      * @param mapper the function to apply to each pair of elements, must not be {@code null}
      * @return an ObjIterator containing the results of applying the mapper to each pair
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
 
@@ -1381,6 +1435,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <R> the type of elements in the resulting {@code Stream}
      * @param mapper the function to apply to each pair of elements, must not be {@code null}
      * @return a {@code Stream} containing the elements produced by applying {@code mapper} to each pair
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #stream()
      * @see #map(BiFunction)
      */
@@ -1402,12 +1457,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * // lists.left() is ["a", "b"], lists.right() is [1, 2]
      * }</pre>
      *
-     * @param supplier a supplier invoked twice to create the left and right lists; each call must return a non-null {@code List}
+     * @param supplier a supplier invoked twice to create the left and right lists; each call must return a {@code non-null} {@code List}
      * @return a {@code Pair} whose left list contains all first components and whose right list contains all second components
      * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call returns {@code null}
      * @see #unzipToCollections(Supplier, Supplier)
      */
-    public Pair<List<A>, List<B>> unzipToLists(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
+    public Pair<List<A>, List<B>> unzipToLists(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final List<A> listA = N.checkArgNotNull(supplier.get(), cs.supplier);
@@ -1447,7 +1502,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @see #unzipToSets(Supplier)
      */
     public <LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzipToCollections(final Supplier<? extends LC> leftSupplier,
-            final Supplier<? extends RC> rightSupplier) {
+            final Supplier<? extends RC> rightSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(leftSupplier, cs.supplier);
         N.checkArgNotNull(rightSupplier, cs.supplier);
 
@@ -1474,12 +1529,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Pair<Set<String>, Set<Integer>> sets = iter.unzipToSets(LinkedHashSet::new);
      * }</pre>
      *
-     * @param supplier a supplier invoked twice to create the left and right sets; each call must return a non-null {@code Set}
+     * @param supplier a supplier invoked twice to create the left and right sets; each call must return a {@code non-null} {@code Set}
      * @return a {@code Pair} whose left set contains the distinct first components and whose right set contains the distinct second components
      * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call returns {@code null}
      * @see #unzipToCollections(Supplier, Supplier)
      */
-    public Pair<Set<A>, Set<B>> unzipToSets(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
+    public Pair<Set<A>, Set<B>> unzipToSets(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Set<A> setA = N.checkArgNotNull(supplier.get(), cs.supplier);

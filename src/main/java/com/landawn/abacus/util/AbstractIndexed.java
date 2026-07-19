@@ -23,30 +23,43 @@ package com.landawn.abacus.util;
  * can be retrieved as either an {@code int} (via {@link #index()}, which throws
  * {@link ArithmeticException} on overflow) or as a {@code long} (via {@link #longIndex()}).</p>
  *
+ * <p>This base class stores the value supplied by a subclass without imposing a sign constraint.
+ * Public indexed-value factories may enforce a non-negative index as part of their own contract.</p>
+ *
  * @see Indexed
  */
 @com.landawn.abacus.annotation.Immutable
 abstract class AbstractIndexed implements Immutable {
 
-    /** The non-negative index position associated with this object, stored as a {@code long}. */
+    /** The index value associated with this object, stored as a {@code long}. */
     protected final long index;
 
     /**
      * Constructs an {@code AbstractIndexed} instance with the specified index value.
      *
-     * @param index the index position to associate with this object (must be non-negative)
+     * @param index the index value to associate with this object
      */
     protected AbstractIndexed(final long index) {
         this.index = index;
     }
 
     /**
+     * Mixes both halves of a long while preserving the historical hash value for values that fit
+     * in an int.
+     */
+    protected static int hashLong(final long value) {
+        final int lowBits = (int) value;
+
+        return value == lowBits ? lowBits : lowBits + 31 * (int) (value >>> 32);
+    }
+
+    /**
      * Returns the index value as an {@code int}.
      *
      * <p>This method converts the internal {@code long} index to an {@code int}.
-     * If the index exceeds {@link Integer#MAX_VALUE}, an {@link ArithmeticException}
-     * is thrown to prevent silent data loss. Use {@link #longIndex()} when the index
-     * may exceed the {@code int} range.</p>
+     * If the index is outside the range from {@link Integer#MIN_VALUE} through
+     * {@link Integer#MAX_VALUE}, an {@link ArithmeticException} is thrown to prevent silent data
+     * loss. Use {@link #longIndex()} when the index may be outside the {@code int} range.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

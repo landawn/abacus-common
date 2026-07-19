@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -21,6 +26,29 @@ import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.util.N;
 
 public class TypeFactoryTest extends TestBase {
+
+    public static class NestedGenericBean<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(final T value) {
+            this.value = value;
+        }
+    }
+
+    public static class GenericOwner<T> {
+        public class Member<U> {
+            // Type declaration used only to exercise owner-type name formatting.
+        }
+    }
+
+    private static class GenericNameHolder {
+        NestedGenericBean<String> bean;
+        GenericOwner<String>.Member<Integer> member;
+    }
 
     // ---- NEW TESTS targeting uncovered lines ----
 
@@ -68,6 +96,207 @@ public class TypeFactoryTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType("String", customType));
         assertNotSame(customType, TypeFactory.getType(intrinsicName));
+    }
+
+    @Test
+    public void testConcurrentClassRegistrationRollsBackRejectedTypeName() throws Exception {
+        final String blockedName = "TypeFactoryRejectedConcurrent_" + System.nanoTime();
+        final String winnerName = "TypeFactoryConcurrentWinner_" + System.nanoTime();
+        final CountDownLatch blockedAtNameRegistration = new CountDownLatch(1);
+        final CountDownLatch releaseBlockedRegistration = new CountDownLatch(1);
+        final AtomicBoolean blockFirstNameCall = new AtomicBoolean(true);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        final Type<ConcurrentRegistrationClass> rejectedType = new AbstractType<ConcurrentRegistrationClass>(blockedName) {
+            @Override
+            public String name() {
+                if (blockFirstNameCall.compareAndSet(true, false)) {
+                    blockedAtNameRegistration.countDown();
+
+                    try {
+                        releaseBlockedRegistration.await();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new AssertionError(e);
+                    }
+                }
+
+                return super.name();
+            }
+
+            @Override
+            public Class<ConcurrentRegistrationClass> javaType() {
+                return ConcurrentRegistrationClass.class;
+            }
+
+            @Override
+            public String stringOf(final ConcurrentRegistrationClass x) {
+                return x == null ? null : x.value;
+            }
+
+            @Override
+            public ConcurrentRegistrationClass valueOf(final String str) {
+                return new ConcurrentRegistrationClass(str);
+            }
+        };
+
+        final Type<ConcurrentRegistrationClass> winningType = new AbstractType<ConcurrentRegistrationClass>(winnerName) {
+            @Override
+            public Class<ConcurrentRegistrationClass> javaType() {
+                return ConcurrentRegistrationClass.class;
+            }
+
+            @Override
+            public String stringOf(final ConcurrentRegistrationClass x) {
+                return x == null ? null : x.value;
+            }
+
+            @Override
+            public ConcurrentRegistrationClass valueOf(final String str) {
+                return new ConcurrentRegistrationClass(str);
+            }
+        };
+
+        final Thread blocked = new Thread(() -> {
+            try {
+                TypeFactory.registerType(ConcurrentRegistrationClass.class, rejectedType);
+            } catch (final Throwable e) {
+                failure.set(e);
+            }
+        });
+
+        blocked.setDaemon(true);
+        blocked.start();
+        assertTrue(blockedAtNameRegistration.await(5, TimeUnit.SECONDS));
+
+        try {
+            TypeFactory.registerType(ConcurrentRegistrationClass.class, winningType);
+        } finally {
+            releaseBlockedRegistration.countDown();
+        }
+
+        blocked.join(TimeUnit.SECONDS.toMillis(5));
+        assertTrue(!blocked.isAlive());
+
+        assertTrue(failure.get() instanceof IllegalArgumentException);
+        assertSame(winningType, TypeFactory.getType(ConcurrentRegistrationClass.class));
+        assertNotSame(rejectedType, TypeFactory.getType(blockedName));
+    }
+
+    private static final class ConcurrentRegistrationClass {
+        final String value;
+
+        ConcurrentRegistrationClass(final String value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void testLookupPublicationDoesNotOverwriteConcurrentCustomRegistration() throws Exception {
+        final String typeName = TypeFactory.getClassName(LookupPublicationRaceClass.class);
+        final AtomicReference<Type<?>> lookupResult = new AtomicReference<>();
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        TypeFactory.registerType(new BlockingLookupType("LookupPublicationRaceBase_" + System.nanoTime()));
+
+        final Type<LookupPublicationRaceClass> customType = new AbstractType<LookupPublicationRaceClass>("LookupPublicationRaceAlias") {
+            @Override
+            public String name() {
+                return typeName;
+            }
+
+            @Override
+            public Class<LookupPublicationRaceClass> javaType() {
+                return LookupPublicationRaceClass.class;
+            }
+
+            @Override
+            public String stringOf(final LookupPublicationRaceClass x) {
+                return x == null ? null : x.value;
+            }
+
+            @Override
+            public LookupPublicationRaceClass valueOf(final String str) {
+                return new LookupPublicationRaceClass(str);
+            }
+        };
+
+        final Thread lookup = new Thread(() -> {
+            try {
+                lookupResult.set(TypeFactory.getType(LookupPublicationRaceClass.class));
+            } catch (final Throwable e) {
+                failure.set(e);
+            }
+        });
+        lookup.setDaemon(true);
+        lookup.start();
+        assertTrue(BlockingLookupType.lookupBlocked.await(5, TimeUnit.SECONDS));
+
+        try {
+            TypeFactory.registerType(LookupPublicationRaceClass.class, customType);
+        } finally {
+            BlockingLookupType.releaseLookup.countDown();
+        }
+
+        lookup.join(TimeUnit.SECONDS.toMillis(5));
+        assertTrue(!lookup.isAlive());
+        assertNull(failure.get());
+        assertSame(customType, lookupResult.get());
+        assertSame(customType, TypeFactory.getType(typeName));
+        assertSame(customType, TypeFactory.getType(LookupPublicationRaceClass.class));
+    }
+
+    private interface LookupPublicationRaceMarker {
+        // Marker used to make the blocking Type the only assignable registered candidate.
+    }
+
+    private static final class LookupPublicationRaceClass implements LookupPublicationRaceMarker {
+        final String value;
+
+        LookupPublicationRaceClass(final String value) {
+            this.value = value;
+        }
+    }
+
+    private static final class BlockingLookupType extends AbstractType<Object> {
+        static final CountDownLatch lookupBlocked = new CountDownLatch(1);
+        static final CountDownLatch releaseLookup = new CountDownLatch(1);
+
+        private final Class<Object> javaType;
+
+        @SuppressWarnings("unchecked")
+        BlockingLookupType(final String name) {
+            super(name);
+            javaType = (Class<Object>) (Class<?>) LookupPublicationRaceMarker.class;
+        }
+
+        @SuppressWarnings("unchecked")
+        private BlockingLookupType(final Class<?> javaType) {
+            super("LookupPublicationRaceSpeculative");
+            this.javaType = (Class<Object>) javaType;
+            lookupBlocked.countDown();
+
+            try {
+                releaseLookup.await();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError(e);
+            }
+        }
+
+        @Override
+        public Class<Object> javaType() {
+            return javaType;
+        }
+
+        @Override
+        public String stringOf(final Object x) {
+            return x == null ? null : x.toString();
+        }
+
+        @Override
+        public Object valueOf(final String str) {
+            return str;
+        }
     }
 
     @Test
@@ -245,6 +474,12 @@ public class TypeFactoryTest extends TestBase {
     public void testGetType_TypeType() {
         Type<?> typeType = TypeFactory.getType("Type<String>");
         assertNotNull(typeType);
+    }
+
+    @Test
+    public void testGetType_TypeRejectsMalformedAttributes() {
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Type<String, Integer>"));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Type(extra)"));
     }
 
     @Test
@@ -471,6 +706,26 @@ public class TypeFactoryTest extends TestBase {
         java.lang.reflect.Type paramType = TypeHolder.class.getDeclaredField("list").getGenericType();
         Type<?> type = TypeFactory.getType(paramType);
         assertNotNull(type);
+    }
+
+    @Test
+    public void testParameterizedNestedClassUsesCanonicalName() throws NoSuchFieldException {
+        final java.lang.reflect.Type reflectType = GenericNameHolder.class.getDeclaredField("bean").getGenericType();
+        final String expectedName = NestedGenericBean.class.getCanonicalName() + "<String>";
+
+        final Type<?> type = TypeFactory.getType(reflectType);
+
+        assertEquals(expectedName, TypeFactory.getJavaTypeName(reflectType));
+        assertEquals(expectedName, type.name());
+        assertSame(type, TypeFactory.getType(expectedName));
+    }
+
+    @Test
+    public void testParameterizedMemberClassIncludesGenericOwnerName() throws NoSuchFieldException {
+        final java.lang.reflect.Type reflectType = GenericNameHolder.class.getDeclaredField("member").getGenericType();
+        final String expectedName = GenericOwner.class.getCanonicalName() + "<String>.Member<Integer>";
+
+        assertEquals(expectedName, TypeFactory.getJavaTypeName(reflectType));
     }
 
     @Test

@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.ToIntFunction
  */
 @FunctionalInterface
-public interface FloatToIntFunction extends Throwables.FloatToIntFunction<RuntimeException> {
+public interface FloatToIntFunction extends Throwables.FloatToIntFunction<RuntimeException> { //NOSONAR
     /**
      * A default function that converts a float value to int through narrowing primitive conversion (casting).
      * This truncates the decimal portion; float values outside the int range are clamped rather than overflowing (see note below).

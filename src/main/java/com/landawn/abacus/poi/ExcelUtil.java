@@ -29,9 +29,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -108,7 +110,8 @@ import lombok.Data;
  *
  * <p><b>Header-handling divergence between read families:</b> the {@code readDatasetFromSheet}
  * family always consumes row 0 as the header row and uses those cell values as the {@link Dataset}
- * column names (synthesizing {@code "Column_i"} for blank/empty header cells), and therefore has no
+ * column names (synthesizing a unique {@code "Column_i"}, with a numeric suffix if needed, for
+ * blank/empty header cells), and therefore has no
  * {@code skipFirstRow} parameter. In contrast, the {@code readRowsFromSheet} and
  * {@code streamRowsFromSheet} families never interpret row 0 as headers; they expose a raw
  * {@code skipFirstRow} boolean and simply discard the first row when it is {@code true}. Choose
@@ -254,8 +257,9 @@ public final class ExcelUtil {
      * The resulting Dataset provides column-based access to the data with type preservation.</p>
      *
      * <p><b>Header handling:</b> the {@code readDatasetFromSheet} family always consumes row 0 as the
-     * header row and uses those cell values as column names (synthesizing {@code "Column_i"} for
-     * blank/empty header cells); it has no {@code skipFirstRow} parameter. This differs from the
+     * header row and uses those cell values as column names (synthesizing a unique {@code "Column_i"},
+     * with a numeric suffix if needed, for blank/empty header cells); it has no {@code skipFirstRow}
+     * parameter. This differs from the
      * {@link #readRowsFromSheet(File, int, boolean, Function)} and
      * {@link #streamRowsFromSheet(File, int, boolean)} families, which never interpret row 0 as
      * headers and instead expose a raw {@code skipFirstRow} boolean. See the class-level
@@ -459,11 +463,30 @@ public final class ExcelUtil {
         final Row headerRow = rowIter.next();
         final int columnCount = Math.max(headerRow.getLastCellNum(), 0);
         final String[] headers = new String[columnCount];
+        final Set<String> usedHeaderNames = new HashSet<>(columnCount);
 
         for (int i = 0; i < columnCount; i++) {
             final Cell cell = headerRow.getCell(i);
             final String name = cell == null ? "" : CELL_TO_STRING.apply(cell);
-            headers[i] = name.isEmpty() ? "Column_" + i : name;
+
+            if (!name.isEmpty()) {
+                headers[i] = name;
+                usedHeaderNames.add(name);
+            }
+        }
+
+        for (int i = 0; i < columnCount; i++) {
+            if (headers[i] == null) {
+                final String baseName = "Column_" + i;
+                String generatedName = baseName;
+                int suffix = 1;
+
+                while (!usedHeaderNames.add(generatedName)) {
+                    generatedName = baseName + "_" + suffix++;
+                }
+
+                headers[i] = generatedName;
+            }
         }
 
         final List<List<Object>> columnList = new ArrayList<>(columnCount);
@@ -1091,9 +1114,9 @@ public final class ExcelUtil {
      * @param rows the data rows, where each row is a collection of cell values.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written (null to skip).
      * @param outputStream the stream to write the Excel data to; it is not closed by this method.
-     * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be null.
+     * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be {@code null}.
      * @throws UncheckedException if an I/O error occurs while writing.
-     * @throws IllegalArgumentException if {@code format} is null.
+     * @throws IllegalArgumentException if {@code format} is {@code null}.
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final OutputStream outputStream, final ExcelFormat format) {
@@ -1163,7 +1186,7 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param sheetName the name of the sheet to create in the workbook.
-     * @param dataset the Dataset containing the data to write, must not be null.
+     * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
      */
@@ -1193,7 +1216,7 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param sheetName the name of the sheet to create in the workbook.
-     * @param dataset the Dataset containing the data to write, must not be null.
+     * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetCreateOptions configuration options for sheet formatting (null to apply no formatting).
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
@@ -1231,7 +1254,7 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param sheetName the name of the sheet to create in the workbook.
-     * @param dataset the Dataset containing the data to write, must not be null.
+     * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written (null to skip).
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
@@ -1263,12 +1286,12 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param sheetName the name of the sheet to create in the workbook.
-     * @param dataset the Dataset containing the data to write, must not be null.
+     * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written (null to skip).
      * @param outputStream the stream to write the Excel data to; it is not closed by this method.
-     * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be null.
+     * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be {@code null}.
      * @throws UncheckedException if an I/O error occurs while writing.
-     * @throws IllegalArgumentException if {@code format} is null.
+     * @throws IllegalArgumentException if {@code format} is {@code null}.
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter,
             final OutputStream outputStream, final ExcelFormat format) {
@@ -1309,7 +1332,7 @@ public final class ExcelUtil {
      * the workbook format is inferred from the path's filename extension.
      *
      * @param sheetName the name of the sheet to create in the workbook.
-     * @param dataset the Dataset containing the data to write, must not be null.
+     * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written (null to skip).
      * @param outputExcelPath the path to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
@@ -1757,7 +1780,7 @@ public final class ExcelUtil {
          * and a custom cell-to-string conversion function. Use this when you need special formatting,
          * value transformations, or custom handling of specific cell types.
          *
-         * <p>The cellMapper function is applied to each non-null cell, giving you control over
+         * <p>The cellMapper function is applied to each {@code non-null} cell, giving you control over
          * formatting numbers, dates, or applying business logic during the conversion process.
          * Missing cells are emitted as empty fields without invoking the mapper.</p>
          *
@@ -1803,7 +1826,7 @@ public final class ExcelUtil {
          * cell mapper to each cell. Particularly useful when you need to extract specific data
          * types, perform validation, or apply transformations during the read process.
          *
-         * <p>The cellMapper function is applied to each non-null cell in the row, and the results are
+         * <p>The cellMapper function is applied to each {@code non-null} cell in the row, and the results are
          * collected into a List. Missing cells are represented as {@code null}, preserving sparse row
          * structure while still allowing strongly typed extraction.</p>
          *
@@ -1928,10 +1951,10 @@ public final class ExcelUtil {
          * transformed values. This is used with readDatasetFromSheet methods to control how Excel
          * cell data is extracted and converted for Dataset creation.
          *
-         * <p>The cell mapper function receives each non-null {@link Cell} from the row and returns
+         * <p>The cell mapper function receives each {@code non-null} {@link Cell} from the row and returns
          * the value to store in the output array. The extractor itself short-circuits for
          * {@code null} cells (writing {@code null} to the output array) — the mapper is therefore
-         * only invoked for non-null cells and does not need to handle {@code null} input.
+         * only invoked for {@code non-null} cells and does not need to handle {@code null} input.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2027,13 +2050,13 @@ public final class ExcelUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ExcelUtil.SheetCreateOptions options = new ExcelUtil.SheetCreateOptions();
-         * options.isAutoSizeColumn();       // returns false (boolean flags default to false)
-         * options.isFreezeFirstRow();       // returns false
-         * options.getFreezePane();          // returns null (object references default to null)
-         * options.getAutoFilter();          // returns null
+         * options.isAutoSizeColumn();        // returns false (boolean flags default to false)
+         * options.isFreezeFirstRow();        // returns false
+         * options.getFreezePane();           // returns null (object references default to null)
+         * options.getAutoFilter();           // returns null
          *
-         * options.setAutoSizeColumn(true);  // @Data generates setters
-         * options.isAutoSizeColumn();       // returns true
+         * options.setAutoSizeColumn(true);   // @Data generates setters
+         * options.isAutoSizeColumn();        // returns true
          * }</pre>
          *
          */
@@ -2169,7 +2192,12 @@ public final class ExcelUtil {
      *                 after this many columns, so {@code colSplit=1} freezes column A (index 0).
      * @param rowSplit the number of rows to freeze from the top (0 for none). The freeze occurs
      *                 after this many rows, so {@code rowSplit=1} freezes row 1 (index 0).
+     * @throws IllegalArgumentException if either split is negative
      */
     public record FreezePane(int colSplit, int rowSplit) {
+        public FreezePane {
+            N.checkArgNotNegative(colSplit, "colSplit");
+            N.checkArgNotNegative(rowSplit, "rowSplit");
+        }
     }
 }

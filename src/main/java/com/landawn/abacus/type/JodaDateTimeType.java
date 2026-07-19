@@ -150,7 +150,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
      * @param len    the number of characters to use
-     * @return a Joda {@link DateTime} parsed from the specified character region,
+     * @return the parsed Joda date-time value
      *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      */
     @Override

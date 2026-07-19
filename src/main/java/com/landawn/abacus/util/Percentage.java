@@ -35,6 +35,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._99);
  * }</pre>
  *
+ * <p>Range results are cached atomically. Concurrent calls with the same arguments return the
+ * same immutable set instance.</p>
+ *
  * @see #range(Percentage, Percentage)
  * @see #rangeClosed(Percentage, Percentage)
  */
@@ -155,9 +158,7 @@ public enum Percentage {
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ")";
-        ImmutableSet<Percentage> result = rangePool.get(key);
-
-        if (result == null) {
+        return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
 
             for (final Percentage e : Percentage.values()) {
@@ -166,11 +167,8 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.wrap(set);
-            rangePool.put(key, result);
-        }
-
-        return result;
+            return ImmutableSet.wrap(set);
+        });
     }
 
     /**
@@ -192,9 +190,7 @@ public enum Percentage {
      */
     public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ", " + by.str + ")";
-        ImmutableSet<Percentage> result = rangePool.get(key);
-
-        if (result == null) {
+        return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
             final int startVal = intValue(startInclusive);
             final int endVal = intValue(endExclusive);
@@ -208,11 +204,8 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.wrap(set);
-            rangePool.put(key, result);
-        }
-
-        return result;
+            return ImmutableSet.wrap(set);
+        });
     }
 
     /**
@@ -232,9 +225,7 @@ public enum Percentage {
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + "]";
-        ImmutableSet<Percentage> result = rangePool.get(key);
-
-        if (result == null) {
+        return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
 
             for (final Percentage e : Percentage.values()) {
@@ -243,11 +234,8 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.wrap(set);
-            rangePool.put(key, result);
-        }
-
-        return result;
+            return ImmutableSet.wrap(set);
+        });
     }
 
     /**
@@ -269,9 +257,7 @@ public enum Percentage {
      */
     public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + ", " + by.str + "]";
-        ImmutableSet<Percentage> result = rangePool.get(key);
-
-        if (result == null) {
+        return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
             final int startVal = intValue(startInclusive);
             final int endVal = intValue(endInclusive);
@@ -285,11 +271,8 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.wrap(set);
-            rangePool.put(key, result);
-        }
-
-        return result;
+            return ImmutableSet.wrap(set);
+        });
     }
 
     /**

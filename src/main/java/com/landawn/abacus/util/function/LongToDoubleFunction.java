@@ -39,8 +39,8 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      *
      * <p>This is the default conversion function that preserves the numeric value
      * as closely as possible when converting from long to double. Note that for
-     * very large long values, there may be some loss of precision due to the
-     * limitations of double representation.
+     * values outside the exact-integer range -2<sup>53</sup> to 2<sup>53</sup>,
+     * the result may be rounded to the nearest representable {@code double}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

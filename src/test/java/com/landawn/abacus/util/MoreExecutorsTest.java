@@ -1,6 +1,8 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -11,6 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,6 +24,23 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class MoreExecutorsTest extends TestBase {
+
+    @Test
+    public void testNegativeTerminationTimeoutRejectedBeforeExecutorMutation() {
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+        ThreadFactory originalFactory = executor.getThreadFactory();
+        ScheduledThreadPoolExecutor scheduled = new ScheduledThreadPoolExecutor(1);
+        ThreadFactory originalScheduledFactory = scheduled.getThreadFactory();
+        try {
+            assertThrows(IllegalArgumentException.class, () -> MoreExecutors.getExitingExecutorService(executor, -1, TimeUnit.MILLISECONDS));
+            assertSame(originalFactory, executor.getThreadFactory());
+            assertThrows(IllegalArgumentException.class, () -> MoreExecutors.getExitingScheduledExecutorService(scheduled, -1, TimeUnit.MILLISECONDS));
+            assertSame(originalScheduledFactory, scheduled.getThreadFactory());
+        } finally {
+            executor.shutdownNow();
+            scheduled.shutdownNow();
+        }
+    }
 
     @Test
     public void testGetExitingExecutorService() throws Exception {
@@ -230,5 +250,30 @@ public class MoreExecutorsTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             MoreExecutors.newThread("test", null);
         });
+    }
+
+    @Test
+    public void testInvalidExitingArgumentsDoNotMutateExecutors() {
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        final java.util.concurrent.ThreadFactory originalFactory = executor.getThreadFactory();
+
+        try {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> MoreExecutors.getExitingExecutorService(executor, 1, null));
+            Assertions.assertSame(originalFactory, executor.getThreadFactory());
+            Assertions.assertThrows(IllegalArgumentException.class, () -> MoreExecutors.getExitingExecutorService(null, 1, TimeUnit.SECONDS));
+        } finally {
+            executor.shutdownNow();
+        }
+
+        final ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(1);
+        final java.util.concurrent.ThreadFactory originalScheduledFactory = scheduledExecutor.getThreadFactory();
+
+        try {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> MoreExecutors.getExitingScheduledExecutorService(scheduledExecutor, 1, null));
+            Assertions.assertSame(originalScheduledFactory, scheduledExecutor.getThreadFactory());
+            Assertions.assertThrows(IllegalArgumentException.class, () -> MoreExecutors.getExitingScheduledExecutorService(null, 1, TimeUnit.SECONDS));
+        } finally {
+            scheduledExecutor.shutdownNow();
+        }
     }
 }

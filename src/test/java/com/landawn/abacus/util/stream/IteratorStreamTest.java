@@ -33,12 +33,23 @@ import com.landawn.abacus.util.u.Optional;
 
 public class IteratorStreamTest extends TestBase {
 
+    @Test
+    public void testToJdkStreamCloseRunsSourceHandlersOnce() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(Arrays.asList(1, 2, 3).iterator()).onClose(closeCount::incrementAndGet);
+
+        source.toJdkStream().close();
+        source.close();
+
+        assertEquals(1, closeCount.get());
+    }
+
     private Stream<Integer> emptyStream;
     private Stream<Integer> singleElementStream;
     private Stream<Integer> multiElementStream;
     private Stream<String> stringStream;
 
-    private static final class DistinctItem {
+    private static final class DistinctItem implements Comparable<DistinctItem> {
         private final int id;
         private final int rank;
 
@@ -55,6 +66,11 @@ public class IteratorStreamTest extends TestBase {
         @Override
         public int hashCode() {
             return id;
+        }
+
+        @Override
+        public int compareTo(final DistinctItem other) {
+            return Integer.compare(rank, other.rank);
         }
     }
 
@@ -467,6 +483,17 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testSplit_AdvanceWithNonPositiveDistanceDoesNotConsumeSource() {
+        ObjIteratorEx<List<Integer>> collectionIter = createStream(Arrays.asList(1, 2, 3, 4)).split(2, IntFunctions.ofList()).iteratorEx();
+        collectionIter.advance(-Long.MAX_VALUE); // Multiplying by chunkSize used to overflow to a positive distance.
+        assertEquals(Arrays.asList(1, 2), collectionIter.next());
+
+        ObjIteratorEx<Integer> collectorIter = createStream(Arrays.asList(1, 2, 3, 4)).split(2, Collectors.summingInt(Integer::intValue)).iteratorEx();
+        collectorIter.advance(-Long.MAX_VALUE);
+        assertEquals(3, collectorIter.next());
+    }
+
+    @Test
     public void testSplitWithChunkSizeAndCollector() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
         List<Integer> result = stream.split(2, Collectors.summingInt(Integer::intValue)).toList();
@@ -543,9 +570,89 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testSlidingCountAfterNextConsumesPendingGap() {
+        final List<List<Integer>> sources = Arrays.asList(Arrays.asList(1), Arrays.asList(1, 2), Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3, 4, 5, 6));
+        final long[] expectedRemainingCounts = { 0, 0, 0, 1 };
+
+        for (int i = 0; i < sources.size(); i++) {
+            final List<Integer> source = sources.get(i);
+            final long expectedRemainingCount = expectedRemainingCounts[i];
+
+            assertSlidingRemainingCount(createStream(source).sliding(2, 3, ArrayList::new), source, expectedRemainingCount);
+            assertSlidingRemainingCount(createStream(source).sliding(2, 3, Collectors.toList()), source, expectedRemainingCount);
+        }
+    }
+
+    @Test
+    public void testSlidingCountSaturatesPrefixPlusRemainingAtLongMaxValue() {
+        assertSlidingCountSaturates(createVirtuallyHugeIteratorStream().sliding(2, 1, ArrayList::new));
+        assertSlidingCountSaturates(createVirtuallyHugeIteratorStream().sliding(2, 1, com.landawn.abacus.util.stream.Collectors.toList()));
+    }
+
+    private static Stream<Integer> createVirtuallyHugeIteratorStream() {
+        return Stream.of(new ObjIteratorEx<>() {
+            private int cursor;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < 2;
+            }
+
+            @Override
+            public Integer next() {
+                return ++cursor;
+            }
+
+            @Override
+            public long count() {
+                cursor = 2;
+                return Long.MAX_VALUE;
+            }
+        });
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static void assertSlidingCountSaturates(final Stream<? extends List<Integer>> stream) {
+        try {
+            final ObjIteratorEx<? extends List<Integer>> iter = (ObjIteratorEx) stream.iteratorEx();
+
+            assertEquals(Arrays.asList(1, 2), iter.next());
+            assertEquals(Long.MAX_VALUE - 1, iter.count());
+        } finally {
+            stream.close();
+        }
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static void assertSlidingRemainingCount(final Stream<? extends List<Integer>> stream, final List<Integer> source,
+            final long expectedRemainingCount) {
+        try {
+            final ObjIteratorEx<? extends List<Integer>> iter = (ObjIteratorEx) stream.iteratorEx();
+
+            assertEquals(source.subList(0, Math.min(2, source.size())), iter.next());
+            assertEquals(expectedRemainingCount, iter.count());
+            assertFalse(iter.hasNext());
+        } finally {
+            stream.close();
+        }
+    }
+
+    @Test
     public void test_distinct_sort() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 2, 3, 3, 4, 5));
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), stream.sorted().distinct().toList());
+    }
+
+    @Test
+    public void testDistinctAfterNaturalSortUsesEqualityForNonAdjacentDuplicates() {
+        DistinctItem first = new DistinctItem(1, 1);
+        DistinctItem second = new DistinctItem(2, 2);
+        DistinctItem duplicateOfFirst = new DistinctItem(1, 3);
+
+        Stream<DistinctItem> naturallySorted = new IteratorStream<>(Arrays.asList(first, second, duplicateOfFirst).iterator(), true, null, null);
+        List<DistinctItem> result = naturallySorted.distinct().toList();
+
+        assertEquals(Arrays.asList(first, second), result);
     }
 
     @Test
@@ -635,6 +742,13 @@ public class IteratorStreamTest extends TestBase {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
         List<Integer> result = stream.top(0, Comparator.naturalOrder()).toList();
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testTopHugeLimitDoesNotPreallocateFromLimit() {
+        List<Integer> result = createStream(Arrays.asList(3, 1, 2)).top(Integer.MAX_VALUE, Comparator.naturalOrder()).toList();
+        assertEquals(3, result.size());
+        assertTrue(result.containsAll(Arrays.asList(1, 2, 3)));
     }
 
     @Test
@@ -1065,6 +1179,11 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testSkipLastRejectsNegativeCount() {
+        assertThrows(IllegalArgumentException.class, () -> createStream(Arrays.asList(1, 2, 3)).skipLast(-1));
+    }
+
+    @Test
     public void testMin() {
         Stream<Integer> stream = createStream(Arrays.asList(3, 1, 4, 1, 5));
         Optional<Integer> min = stream.min(Comparator.naturalOrder());
@@ -1134,6 +1253,11 @@ public class IteratorStreamTest extends TestBase {
 
         Stream<Integer> stream2 = createStream(Arrays.asList(1, 2));
         assertFalse(stream2.kthLargest(3, Comparator.naturalOrder()).isPresent());
+    }
+
+    @Test
+    public void testKthLargestHugeRankDoesNotPreallocateFromRank() {
+        assertFalse(createStream(Arrays.asList(3, 1, 2)).kthLargest(Integer.MAX_VALUE, Comparator.naturalOrder()).isPresent());
     }
 
     @Test

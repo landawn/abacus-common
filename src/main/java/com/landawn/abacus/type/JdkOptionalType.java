@@ -21,11 +21,11 @@ import com.landawn.abacus.util.SK;
  * Type handler for {@link java.util.Optional} with a generic type parameter.
  * This class provides serialization, deserialization, and database access capabilities for
  * {@code Optional} instances. An {@code Optional} is a container that may or may not contain
- * a non-null value. Empty optionals are serialized as {@code null}; a non-null string is parsed
+ * a {@code non-null} value. Empty optionals are serialized as {@code null}; a {@code non-null} string is parsed
  * by the element type and the result wrapped in {@code Optional.ofNullable}.
  *
- * <p>Serialization uses the runtime type of the contained value for accuracy, rather than
- * the declared element type.</p>
+ * <p>{@link #stringOf(Optional)} and {@link #valueOf(String)} use the declared element type so they remain
+ * symmetric. Streaming append/serialization methods use the contained value's runtime type.</p>
  *
  * @param <T> the type of value that may be present in the Optional
  */
@@ -122,8 +122,9 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Converts an Optional to its string representation.
      * If the optional is empty or {@code null}, returns {@code null}.
-     * Otherwise, returns the string representation of the contained value.
-     * Uses the runtime type of the value for accurate serialization.
+     * Otherwise, delegates to the declared {@linkplain #elementType() element type}.
+     * This keeps the output symmetric with {@link #valueOf(String)}, which parses it
+     * with that same type handler.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
@@ -137,7 +138,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public String stringOf(final Optional<T> x) {
-        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());   //NOSONAR
+        return (x == null || x.isEmpty()) ? null : elementType.stringOf(x.get());
     }
 
     /**

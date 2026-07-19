@@ -241,10 +241,9 @@ public interface Paginated<T> extends Iterable<T> {
      * Creates a Stream of all pages in the paginated data.
      * This allows for functional-style processing of pages using the Stream API.
      *
-     * <p>The returned stream is sequential by default and provides lazy evaluation of pages.
-     * Pages are retrieved as needed when stream operations are performed. This is particularly
-     * useful for large data sets where you want to process pages without loading all of them
-     * into memory at once.</p>
+     * <p>Whether page retrieval is lazy and whether the returned stream is initially sequential
+     * are implementation-specific. Callers requiring sequential traversal can invoke
+     * {@link Stream#sequential()} on the result.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

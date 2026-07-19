@@ -38,7 +38,9 @@ import com.landawn.abacus.util.IOUtil;
  * Type handler for InputStream and its subclasses.
  * This class provides serialization, deserialization, and database access capabilities for InputStream instances.
  * InputStreams are serialized by reading all their bytes and decoding them as a string using UTF-8.
- * Note that the InputStream content is consumed during serialization.
+ * The stream content is consumed during serialization, but the stream is not closed.
+ * Arbitrary binary input is not guaranteed to survive UTF-8 decoding and re-encoding; use a
+ * {@code byte[]} type when a lossless binary string conversion is required.
  */
 @SuppressWarnings("java:S2160")
 public class InputStreamType extends AbstractType<InputStream> {
@@ -118,13 +120,11 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Reads the entire contents of an {@link InputStream} and returns them as a string.
-     * Note that this operation consumes the stream.
+     * Reads the entire contents of an {@link InputStream}, decodes them as UTF-8, and returns the result.
+     * This operation consumes the stream but does not close it.
      *
-     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * <p>For well-formed UTF-8 content, {@link #valueOf(String)} re-encodes the same bytes. Malformed or
+     * non-text binary input may be replaced during decoding and therefore does not round-trip losslessly.</p>
      *
      * @param x the {@link InputStream} to read; may be {@code null}
      * @return the stream contents as a string, or {@code null} if {@code x} is {@code null}
@@ -143,9 +143,8 @@ public class InputStreamType extends AbstractType<InputStream> {
      * Creates the appropriate subclass based on the constructors discovered at construction time;
      * falls back to {@link ByteArrayInputStream} if no suitable constructor is available.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method round-trips the output of {@link #stringOf(InputStream)} only when the original stream
+     * contained well-formed UTF-8 bytes.</p>
      *
      * @param str the string to convert; may be {@code null}
      * @return a new {@link InputStream} containing the encoded bytes, or {@code null} if {@code str} is {@code null}
@@ -172,11 +171,14 @@ public class InputStreamType extends AbstractType<InputStream> {
 
     /**
      * Converts an arbitrary object to an {@link InputStream}.
-     * {@link Blob} instances are converted via {@link Blob#getBinaryStream()};
-     * all other objects are first converted to a string and then to a stream via {@link #valueOf(String)}.
+     * {@link Blob} instances are converted via {@link Blob#getBinaryStream()}; ownership of a supplied
+     * locator is transferred to the returned stream, whose {@link InputStream#close()} method also calls
+     * {@link Blob#free()}.
+     * All other objects are first converted to a string and then to a stream via {@link #valueOf(String)}.
      *
      * @param obj the object to convert; may be {@code null}
-     * @return an {@link InputStream} representation of the object, or {@code null} if {@code obj} is {@code null}
+     * @return an {@link InputStream} representation of the object, or {@code null} if {@code obj} is {@code null};
+     *         when {@code obj} is a {@code Blob}, closing the returned stream also releases the locator
      * @throws com.landawn.abacus.exception.UncheckedSQLException if a {@link java.sql.SQLException} occurs while reading from a {@link Blob}
      */
     @SuppressFBWarnings
@@ -186,7 +188,7 @@ public class InputStreamType extends AbstractType<InputStream> {
             return null; // NOSONAR
         } else if (obj instanceof Blob blob) {
             try {
-                return blob.getBinaryStream();
+                return Utils.openBinaryStream(blob);
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }

@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,6 +45,10 @@ import com.landawn.abacus.util.stream.Stream;
  * whitespace, stripping Unicode whitespace, omitting empty results, and limiting the number of splits.
  * The class integrates seamlessly with the Stream API and Collections Framework for functional
  * programming patterns and efficient data processing pipelines.</p>
+ *
+ * <p>Configuration methods mutate this splitter and return {@code this}; instances are not
+ * thread-safe while being configured. Complete configuration before sharing an instance, and do
+ * not mutate a source {@link CharSequence} while consuming an iterator or stream derived from it.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -204,8 +209,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li>Throws {@link IllegalArgumentException} for invalid configuration parameters</li>
- *   <li>Throws {@link IllegalArgumentException} for null required parameters</li>
- *   <li>Handles null input strings gracefully (returns empty results)</li>
+ *   <li>Throws {@link IllegalArgumentException} for {@code null} required parameters</li>
+ *   <li>Handles {@code null} input strings gracefully (returns empty results)</li>
  *   <li>Type conversion errors propagate with descriptive messages</li>
  * </ul>
  *
@@ -435,6 +440,8 @@ public final class Splitter {
     /**
      * Returns a new Splitter instance that uses the specified character sequence as a delimiter.
      * The delimiter is treated as a literal string, not as a pattern.
+     * Its contents are captured when this method is called, so subsequent mutations to a mutable
+     * {@link CharSequence} do not change the configured delimiter.
      * If the delimiter is a single character, this method delegates to the more
      * efficient single-character version.
      *
@@ -456,11 +463,12 @@ public final class Splitter {
      */
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter);
+        final String delimiterStr = delimiter.toString();
 
-        if (Strings.isEmpty(delimiter)) {
+        if (Strings.isEmpty(delimiterStr)) {
             return with(WHITE_SPACE_PATTERN);
-        } else if (delimiter.length() == 1) {
-            return with(delimiter.charAt(0));
+        } else if (delimiterStr.length() == 1) {
+            return with(delimiterStr.charAt(0));
         } else {
             return new Splitter((source, omitEmptyStrings, trim, strip, limit) -> {
                 if (source == null) {
@@ -470,7 +478,7 @@ public final class Splitter {
                 return new ObjIterator<>() {
                     private final SubstringFunc substringFunc = strip ? stripSubstringFunc : (trim ? trimSubstringFunc : defaultSubstringFunc);
                     @SuppressWarnings("deprecation")
-                    private final char[] delimiterChars = InternalUtil.getCharsForReadOnly(delimiter.toString());
+                    private final char[] delimiterChars = InternalUtil.getCharsForReadOnly(delimiterStr);
                     private final int sourceLen = source.length();
                     private final int delimiterLen = delimiterChars.length;
                     private String next = null;
@@ -496,7 +504,7 @@ public final class Splitter {
                                             start = (cursor = sourceLen + 1);
                                         } else {
                                             next = substringFunc.substring(source, start, cursor);
-                                            start = (cursor += delimiter.length());
+                                            start = (cursor += delimiterLen);
                                         }
 
                                         if (omitEmptyStrings && next.isEmpty()) {
@@ -682,8 +690,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").omitEmptyStrings(true).split("a,,b,");   // returns ["a", "b"]
-     * Splitter.with(",").omitEmptyStrings(false).split("a,,b,");  // returns ["a", "", "b", ""]
+     * Splitter.with(",").omitEmptyStrings(true).split("a,,b,");    // returns ["a", "b"]
+     * Splitter.with(",").omitEmptyStrings(false).split("a,,b,");   // returns ["a", "", "b", ""]
      * }</pre>
      *
      * @param omitEmptyStrings {@code true} to omit empty strings from results, {@code false} to include them.
@@ -727,8 +735,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").trim(true).split("a , b , c");   // returns ["a", "b", "c"]
-     * Splitter.with(",").trim(false).split("a , b , c");  // returns ["a ", " b ", " c"]
+     * Splitter.with(",").trim(true).split("a , b , c");    // returns ["a", "b", "c"]
+     * Splitter.with(",").trim(false).split("a , b , c");   // returns ["a ", " b ", " c"]
      * }</pre>
      *
      * @param trim {@code true} to trim spaces from results, {@code false} to leave them as-is.
@@ -773,8 +781,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").strip(true).split("a\t,\nb ,\tc");  // returns ["a", "b", "c"]
-     * Splitter.with(",").strip(false).split("a\t, b ,c");    // returns ["a\t", " b ", "c"]
+     * Splitter.with(",").strip(true).split("a\t,\nb ,\tc");   // returns ["a", "b", "c"]
+     * Splitter.with(",").strip(false).split("a\t, b ,c");     // returns ["a\t", " b ", "c"]
      * }</pre>
      *
      * @param strip {@code true} to strip whitespace from results, {@code false} to leave them as-is.
@@ -886,12 +894,12 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}.
      * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the split results.
-     * @throws NullPointerException if the specified supplier is {@code null}
+     * @throws NullPointerException if the specified supplier is {@code null} or returns {@code null}
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class, Supplier)
      */
     public <C extends Collection<String>> C split(final CharSequence source, final Supplier<? extends C> supplier) {
-        final C result = supplier.get();
+        final C result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
 
         split(source, result);
 
@@ -920,6 +928,7 @@ public final class Splitter {
      * @see #splitThenApply(CharSequence, Function)
      */
     public <T> List<T> split(final CharSequence source, final Function<? super String, ? extends T> mapper) {
+        Objects.requireNonNull(mapper, "mapper");
         final List<String> tmp = new ArrayList<>();
         split(source, tmp);
 
@@ -985,10 +994,11 @@ public final class Splitter {
      * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the converted results.
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @throws NullPointerException if the specified supplier is {@code null}
+     * @throws NullPointerException if the specified supplier is {@code null} or returns {@code null}
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Class<? extends T> targetType, final Supplier<? extends C> supplier) {
-        final C result = supplier.get();
+        N.checkArgNotNull(targetType, cs.targetType);
+        final C result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
 
         split(source, targetType, result);
 
@@ -1052,10 +1062,11 @@ public final class Splitter {
      * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the converted results.
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @throws NullPointerException if the specified supplier is {@code null}
+     * @throws NullPointerException if the specified supplier is {@code null} or returns {@code null}
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Type<? extends T> targetType, final Supplier<? extends C> supplier) {
-        final C result = supplier.get();
+        N.checkArgNotNull(targetType, cs.targetType);
+        final C result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
 
         split(source, targetType, result);
 
@@ -1112,7 +1123,7 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}.
      * @param targetType the Class representing the type to convert each substring to.
      * @param output the Collection to add the converted results to.
-     * @throws IllegalArgumentException if targetType or output is null.
+     * @throws IllegalArgumentException if targetType or output is {@code null}.
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Class<? extends T> targetType, final C output)
             throws IllegalArgumentException {
@@ -1144,7 +1155,7 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}.
      * @param targetType the Type instance used for converting strings to the target type.
      * @param output the Collection to add the converted results to.
-     * @throws IllegalArgumentException if targetType or output is null.
+     * @throws IllegalArgumentException if targetType or output is {@code null}.
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Type<? extends T> targetType, final C output)
             throws IllegalArgumentException {
@@ -1780,7 +1791,9 @@ public final class Splitter {
          *
          * // Combined with other options
          * splitter.limit(2).trimResults().omitEmptyStrings().split(" a = 1 , , b = 2 , c = 3 ")
-         * // Returns: {a=1, , b=2 , c = 3} - 2 entries; limit applies before trim/omit, so the last entry absorbs the rest
+         * // Returns: {a=1, ", b"="2 , c = 3"} - once the limit is reached, the second entry
+         * // absorbs the remaining input (including the empty entry and its delimiter), so its
+         * // key keeps the leading ", "; trimming strips only spaces, not delimiters
          * }</pre>
          *
          * <p><b>Common Mistakes:</b></p>
@@ -1860,9 +1873,10 @@ public final class Splitter {
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the parsed key-value pairs
+         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
          */
         public <M extends Map<String, String>> M split(final CharSequence source, final Supplier<? extends M> supplier) {
-            final M result = supplier.get();
+            final M result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
 
             split(source, result);
 
@@ -1958,10 +1972,14 @@ public final class Splitter {
          * @param valueType the Class representing the type to convert values to
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
+         * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}
+         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
          */
         public <K, V, M extends Map<K, V>> M split(final CharSequence source, final Class<K> keyType, final Class<V> valueType,
                 final Supplier<? extends M> supplier) {
-            final M result = supplier.get();
+            N.checkArgNotNull(keyType, cs.keyType);
+            N.checkArgNotNull(valueType, cs.valueType);
+            final M result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
 
             split(source, keyType, valueType, result);
 
@@ -1991,10 +2009,14 @@ public final class Splitter {
          * @param valueType the Type instance used for converting strings to values
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
+         * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}
+         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
          */
         public <K, V, M extends Map<K, V>> M split(final CharSequence source, final Type<K> keyType, final Type<V> valueType,
                 final Supplier<? extends M> supplier) {
-            final M result = supplier.get();
+            N.checkArgNotNull(keyType, cs.keyType);
+            N.checkArgNotNull(valueType, cs.valueType);
+            final M result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
 
             split(source, keyType, valueType, result);
 

@@ -61,7 +61,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Type Safety:</b> Strongly typed generic wrapper with compile-time type checking</li>
  *   <li><b>Specialized Builders:</b> Optimized builders for collections, maps, primitive lists, and datasets</li>
  *   <li><b>Automatic Detection:</b> Smart factory method that automatically selects appropriate builder type</li>
- *   <li><b>Null Safety:</b> Built-in null checking to prevent null pointer exceptions</li>
+ *   <li><b>Null Safety:</b> Built-in {@code null} checking to prevent {@code null} pointer exceptions</li>
  *   <li><b>Functional Integration:</b> Support for lambda expressions and functional programming patterns</li>
  *   <li><b>Comparison Utilities:</b> Built-in comparison and equality builders for complex comparisons</li>
  * </ul>
@@ -197,7 +197,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li>Constructor throws {@link IllegalArgumentException} for null inputs</li>
+ *   <li>Constructor throws {@link IllegalArgumentException} for {@code null} inputs</li>
  *   <li>Individual operations may throw exceptions based on underlying object behavior</li>
  *   <li>Null safety is enforced at builder creation time</li>
  *   <li>Type safety is enforced at compile time through generics</li>
@@ -632,11 +632,11 @@ public class Builder<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = Builder.of("hello").val();    // returns "hello"
-     * 
+     *
      * List<String> list = Builder.of(new ArrayList<String>())
      *     .add("a").add("b")
      *     .val();                                     // returns [a, b]
-     * 
+     *
      * try {
      *     Builder.of(null);
      * } catch (IllegalArgumentException e) {
@@ -692,10 +692,10 @@ public class Builder<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String str = Builder.of("hello").val();        // returns "hello"
-     * 
-     * IntList list = Builder.of(IntList.of(1, 2, 3)).val();  // returns [1, 2, 3]
-     * 
+     * String str = Builder.of("hello").val();                 // returns "hello"
+     *
+     * IntList list = Builder.of(IntList.of(1, 2, 3)).val();   // returns [1, 2, 3]
+     *
      * Map<String, Integer> map = Builder.of(new HashMap<String, Integer>())
      *     .put("a", 1).put("b", 2).val();            // returns {a=1, b=2}
      * }</pre>
@@ -705,34 +705,6 @@ public class Builder<T> {
     public T val() {
         return val;
     }
-
-    //    /**
-    //     * Transforms the wrapped value using the provided mapping function and returns a new Builder
-    //     * containing the transformed value.
-    //     *
-    //     * @param <R> the type of the result of the mapping function
-    //     * @param mapper the function to transform the wrapped value
-    //     * @return a new Builder containing the transformed value
-    //     * @deprecated This method is deprecated and may be removed in future versions
-    //     */
-    //    @Deprecated
-    //    public <R> Builder<R> map(final Function<? super T, ? extends R> mapper) {
-    //        return of(mapper.apply(val));
-    //    }
-    //
-    //    /**
-    //     * Tests the wrapped value with the given predicate and returns an Optional containing the value
-    //     * if the predicate returns {@code true}, otherwise returns an empty Optional.
-    //     *
-    //     * @param predicate the predicate to test the wrapped value
-    //     * @return {@code Optional} with the value if {@code predicate} returns {@code true},
-    //     * otherwise, return an empty {@code Optional}
-    //     * @deprecated This method is deprecated and may be removed in future versions
-    //     */
-    //    @Deprecated
-    //    public Optional<T> filter(final Predicate<? super T> predicate) {
-    //        return predicate.test(val) ? Optional.of(val) : Optional.empty();
-    //    }
 
     /**
      * Performs the given action on the wrapped value and returns this builder for method chaining.
@@ -831,8 +803,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false));
-         * BooleanList result = lb.add(true).val();                          // returns [true, false, true]
-         * BooleanList empty = Builder.of(BooleanList.of()).add(true).val(); // returns [true]
+         * BooleanList result = lb.add(true).val();                            // returns [true, false, true]
+         * BooleanList empty = Builder.of(BooleanList.of()).add(true).val();   // returns [true]
          * }</pre>
          *
          * @param e the boolean value to append
@@ -877,8 +849,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false));
-         * BooleanList result = lb.addAll(BooleanList.of(true, false)).val(); // returns [true,false,true,false]
-         * lb.addAll(BooleanList.of()).val();                                 // unchanged (empty argument)
+         * BooleanList result = lb.addAll(BooleanList.of(true, false)).val();   // returns [true,false,true,false]
+         * lb.addAll(BooleanList.of()).val();                                   // unchanged (empty argument)
          * }</pre>
          *
          * @param c the BooleanList containing elements to be added to this list
@@ -921,8 +893,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false, true));
-         * BooleanList result = lb.remove(false).val();           // returns [true, true]
-         * lb.remove(true); lb.remove(true);                      // removes both true elements; list is now []
+         * BooleanList result = lb.remove(false).val();   // returns [true, true]
+         * lb.remove(true); lb.remove(true);              // removes both true elements; list is now []
          * }</pre>
          *
          * @param e the boolean value to be removed from this list, if present
@@ -940,8 +912,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false, true, false));
-         * BooleanList result = lb.removeAll(BooleanList.of(true, true)).val(); // returns [false,false]
-         * lb.removeAll(BooleanList.of()).val();                                // unchanged (empty argument)
+         * BooleanList result = lb.removeAll(BooleanList.of(true, true)).val();   // returns [false,false]
+         * lb.removeAll(BooleanList.of()).val();                                  // unchanged (empty argument)
          * }</pre>
          *
          * @param c the BooleanList containing elements to be removed from this list
@@ -998,8 +970,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b'));
-         * CharList result = lb.add('c').val();                       // returns ['a', 'b', 'c']
-         * CharList empty = Builder.of(CharList.of()).add('a').val(); // returns ['a']
+         * CharList result = lb.add('c').val();                         // returns ['a', 'b', 'c']
+         * CharList empty = Builder.of(CharList.of()).add('a').val();   // returns ['a']
          * }</pre>
          *
          * @param e the char value to append
@@ -1044,8 +1016,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b'));
-         * CharList result = lb.addAll(CharList.of('c', 'd')).val(); // returns ['a','b','c','d']
-         * lb.addAll(CharList.of()).val();                           // unchanged (empty argument)
+         * CharList result = lb.addAll(CharList.of('c', 'd')).val();   // returns ['a','b','c','d']
+         * lb.addAll(CharList.of()).val();                             // unchanged (empty argument)
          * }</pre>
          *
          * @param c the CharList containing elements to be added to this list
@@ -1088,8 +1060,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c'));
-         * CharList result = lb.remove('b').val();           // returns ['a', 'c']
-         * lb.remove('a'); lb.remove('a');                   // second remove is no-op
+         * CharList result = lb.remove('b').val();   // returns ['a', 'c']
+         * lb.remove('a'); lb.remove('a');           // second remove is no-op
          * }</pre>
          *
          * @param e the char value to be removed from this list, if present
@@ -1107,8 +1079,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c', 'd'));
-         * CharList result = lb.removeAll(CharList.of('a', 'c')).val(); // returns ['b','d']
-         * lb.removeAll(CharList.of()).val();                           // unchanged (empty argument)
+         * CharList result = lb.removeAll(CharList.of('a', 'c')).val();   // returns ['b','d']
+         * lb.removeAll(CharList.of()).val();                             // unchanged (empty argument)
          * }</pre>
          *
          * @param c the CharList containing elements to be removed from this list
@@ -1165,8 +1137,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2));
-         * ByteList result = lb.add((byte)3).val();                       // returns [(byte)1, (byte)2, (byte)3]
-         * ByteList empty = Builder.of(ByteList.of()).add((byte)1).val(); // returns [(byte)1]
+         * ByteList result = lb.add((byte)3).val();                         // returns [(byte)1, (byte)2, (byte)3]
+         * ByteList empty = Builder.of(ByteList.of()).add((byte)1).val();   // returns [(byte)1]
          * }</pre>
          *
          * @param e the byte value to append
@@ -1211,8 +1183,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2));
-         * ByteList result = lb.addAll(ByteList.of((byte)3, (byte)4)).val(); // returns [(byte)1,(byte)2,(byte)3,(byte)4]
-         * lb.addAll(ByteList.of()).val();                                   // unchanged (empty argument)
+         * ByteList result = lb.addAll(ByteList.of((byte)3, (byte)4)).val();   // returns [(byte)1,(byte)2,(byte)3,(byte)4]
+         * lb.addAll(ByteList.of()).val();                                     // unchanged (empty argument)
          * }</pre>
          *
          * @param c the ByteList containing elements to be added to this list
@@ -1255,8 +1227,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3));
-         * ByteList result = lb.remove((byte)2).val();           // returns [(byte)1, (byte)3]
-         * lb.remove((byte)1); lb.remove((byte)1);               // second remove is no-op
+         * ByteList result = lb.remove((byte)2).val();   // returns [(byte)1, (byte)3]
+         * lb.remove((byte)1); lb.remove((byte)1);       // second remove is no-op
          * }</pre>
          *
          * @param e the byte value to be removed from this list, if present
@@ -1274,8 +1246,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3, (byte)4));
-         * ByteList result = lb.removeAll(ByteList.of((byte)1, (byte)3)).val(); // returns [(byte)2,(byte)4]
-         * lb.removeAll(ByteList.of()).val();                                   // unchanged (empty argument)
+         * ByteList result = lb.removeAll(ByteList.of((byte)1, (byte)3)).val();   // returns [(byte)2,(byte)4]
+         * lb.removeAll(ByteList.of()).val();                                     // unchanged (empty argument)
          * }</pre>
          *
          * @param c the ByteList containing elements to be removed from this list
@@ -1332,8 +1304,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20));
-         * ShortList result = lb.add((short)30).val();                        // returns [(short)10, (short)20, (short)30]
-         * ShortList empty = Builder.of(ShortList.of()).add((short)10).val(); // returns [(short)10]
+         * ShortList result = lb.add((short)30).val();                          // returns [(short)10, (short)20, (short)30]
+         * ShortList empty = Builder.of(ShortList.of()).add((short)10).val();   // returns [(short)10]
          * }</pre>
          *
          * @param e the short value to append
@@ -1378,8 +1350,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20));
-         * ShortList result = lb.addAll(ShortList.of((short)30, (short)40)).val(); // returns [(short)10,(short)20,(short)30,(short)40]
-         * lb.addAll(ShortList.of()).val();                                        // unchanged (empty argument)
+         * ShortList result = lb.addAll(ShortList.of((short)30, (short)40)).val();   // returns [(short)10,(short)20,(short)30,(short)40]
+         * lb.addAll(ShortList.of()).val();                                          // unchanged (empty argument)
          * }</pre>
          *
          * @param c the ShortList containing elements to be added to this list
@@ -1422,8 +1394,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30));
-         * ShortList result = lb.remove((short)20).val();           // returns [(short)10, (short)30]
-         * lb.remove((short)10); lb.remove((short)10);              // second remove is no-op
+         * ShortList result = lb.remove((short)20).val();   // returns [(short)10, (short)30]
+         * lb.remove((short)10); lb.remove((short)10);      // second remove is no-op
          * }</pre>
          *
          * @param e the short value to be removed from this list, if present
@@ -1441,8 +1413,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30, (short)40));
-         * ShortList result = lb.removeAll(ShortList.of((short)10, (short)30)).val(); // returns [(short)20,(short)40]
-         * lb.removeAll(ShortList.of()).val();                                        // unchanged (empty argument)
+         * ShortList result = lb.removeAll(ShortList.of((short)10, (short)30)).val();   // returns [(short)20,(short)40]
+         * lb.removeAll(ShortList.of()).val();                                          // unchanged (empty argument)
          * }</pre>
          *
          * @param c the ShortList containing elements to be removed from this list
@@ -1499,8 +1471,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * IntListBuilder lb = Builder.of(IntList.of(1, 2));
-         * IntList result = lb.add(3).val();                      // returns [1, 2, 3]
-         * IntList empty = Builder.of(IntList.of()).add(1).val(); // returns [1]
+         * IntList result = lb.add(3).val();                        // returns [1, 2, 3]
+         * IntList empty = Builder.of(IntList.of()).add(1).val();   // returns [1]
          * }</pre>
          *
          * @param e the int value to append
@@ -1545,8 +1517,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * IntListBuilder lb = Builder.of(IntList.of(1, 2));
-         * IntList result = lb.addAll(IntList.of(3, 4)).val(); // returns [1,2,3,4]
-         * lb.addAll(IntList.of()).val();                      // unchanged (empty argument)
+         * IntList result = lb.addAll(IntList.of(3, 4)).val();   // returns [1,2,3,4]
+         * lb.addAll(IntList.of()).val();                        // unchanged (empty argument)
          * }</pre>
          *
          * @param c the IntList containing elements to be added to this list
@@ -1589,8 +1561,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * IntListBuilder lb = Builder.of(IntList.of(1, 2, 3));
-         * IntList result = lb.remove(2).val();           // returns [1, 3]
-         * lb.remove(1); lb.remove(1);                    // second remove is no-op
+         * IntList result = lb.remove(2).val();   // returns [1, 3]
+         * lb.remove(1); lb.remove(1);            // second remove is no-op
          * }</pre>
          *
          * @param e the int value to be removed from this list, if present
@@ -1608,8 +1580,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * IntListBuilder lb = Builder.of(IntList.of(1, 2, 3, 4));
-         * IntList result = lb.removeAll(IntList.of(1, 3)).val(); // returns [2,4]
-         * lb.removeAll(IntList.of()).val();                      // unchanged (empty argument)
+         * IntList result = lb.removeAll(IntList.of(1, 3)).val();   // returns [2,4]
+         * lb.removeAll(IntList.of()).val();                        // unchanged (empty argument)
          * }</pre>
          *
          * @param c the IntList containing elements to be removed from this list
@@ -1666,8 +1638,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L));
-         * LongList result = lb.add(300L).val();                       // returns [100L, 200L, 300L]
-         * LongList empty = Builder.of(LongList.of()).add(100L).val(); // returns [100L]
+         * LongList result = lb.add(300L).val();                         // returns [100L, 200L, 300L]
+         * LongList empty = Builder.of(LongList.of()).add(100L).val();   // returns [100L]
          * }</pre>
          *
          * @param e the long value to append
@@ -1712,8 +1684,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L));
-         * LongList result = lb.addAll(LongList.of(300L, 400L)).val(); // returns [100L,200L,300L,400L]
-         * lb.addAll(LongList.of()).val();                             // unchanged (empty argument)
+         * LongList result = lb.addAll(LongList.of(300L, 400L)).val();   // returns [100L,200L,300L,400L]
+         * lb.addAll(LongList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
          * @param c the LongList containing elements to be added to this list
@@ -1756,8 +1728,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L));
-         * LongList result = lb.remove(200L).val();           // returns [100L, 300L]
-         * lb.remove(100L); lb.remove(100L);                  // second remove is no-op
+         * LongList result = lb.remove(200L).val();   // returns [100L, 300L]
+         * lb.remove(100L); lb.remove(100L);          // second remove is no-op
          * }</pre>
          *
          * @param e the long value to be removed from this list, if present
@@ -1775,8 +1747,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L, 400L));
-         * LongList result = lb.removeAll(LongList.of(100L, 300L)).val(); // returns [200L,400L]
-         * lb.removeAll(LongList.of()).val();                             // unchanged (empty argument)
+         * LongList result = lb.removeAll(LongList.of(100L, 300L)).val();   // returns [200L,400L]
+         * lb.removeAll(LongList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
          * @param c the LongList containing elements to be removed from this list
@@ -1833,8 +1805,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f));
-         * FloatList result = lb.add(3.5f).val();                        // returns [1.5f, 2.5f, 3.5f]
-         * FloatList empty = Builder.of(FloatList.of()).add(1.5f).val(); // returns [1.5f]
+         * FloatList result = lb.add(3.5f).val();                          // returns [1.5f, 2.5f, 3.5f]
+         * FloatList empty = Builder.of(FloatList.of()).add(1.5f).val();   // returns [1.5f]
          * }</pre>
          *
          * @param e the float value to append
@@ -1879,8 +1851,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f));
-         * FloatList result = lb.addAll(FloatList.of(3.5f, 4.5f)).val(); // returns [1.5f,2.5f,3.5f,4.5f]
-         * lb.addAll(FloatList.of()).val();                              // unchanged (empty argument)
+         * FloatList result = lb.addAll(FloatList.of(3.5f, 4.5f)).val();   // returns [1.5f,2.5f,3.5f,4.5f]
+         * lb.addAll(FloatList.of()).val();                                // unchanged (empty argument)
          * }</pre>
          *
          * @param c the FloatList containing elements to be added to this list
@@ -1923,8 +1895,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f));
-         * FloatList result = lb.remove(2.5f).val();           // returns [1.5f, 3.5f]
-         * lb.remove(1.5f); lb.remove(1.5f);                   // second remove is no-op
+         * FloatList result = lb.remove(2.5f).val();   // returns [1.5f, 3.5f]
+         * lb.remove(1.5f); lb.remove(1.5f);           // second remove is no-op
          * }</pre>
          *
          * @param e the float value to be removed from this list, if present
@@ -1942,8 +1914,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f, 4.5f));
-         * FloatList result = lb.removeAll(FloatList.of(1.5f, 3.5f)).val(); // returns [2.5f,4.5f]
-         * lb.removeAll(FloatList.of()).val();                              // unchanged (empty argument)
+         * FloatList result = lb.removeAll(FloatList.of(1.5f, 3.5f)).val();   // returns [2.5f,4.5f]
+         * lb.removeAll(FloatList.of()).val();                                // unchanged (empty argument)
          * }</pre>
          *
          * @param c the FloatList containing elements to be removed from this list
@@ -2000,8 +1972,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0));
-         * DoubleList result = lb.add(3.0).val();                         // returns [1.0, 2.0, 3.0]
-         * DoubleList empty = Builder.of(DoubleList.of()).add(1.0).val(); // returns [1.0]
+         * DoubleList result = lb.add(3.0).val();                           // returns [1.0, 2.0, 3.0]
+         * DoubleList empty = Builder.of(DoubleList.of()).add(1.0).val();   // returns [1.0]
          * }</pre>
          *
          * @param e the double value to append
@@ -2046,8 +2018,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0));
-         * DoubleList result = lb.addAll(DoubleList.of(3.0, 4.0)).val(); // returns [1.0,2.0,3.0,4.0]
-         * lb.addAll(DoubleList.of()).val();                             // unchanged (empty argument)
+         * DoubleList result = lb.addAll(DoubleList.of(3.0, 4.0)).val();   // returns [1.0,2.0,3.0,4.0]
+         * lb.addAll(DoubleList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
          * @param c the DoubleList containing elements to be added to this list
@@ -2090,8 +2062,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0, 3.0));
-         * DoubleList result = lb.remove(2.0).val();           // returns [1.0, 3.0]
-         * lb.remove(1.0); lb.remove(1.0);                     // second remove is no-op
+         * DoubleList result = lb.remove(2.0).val();   // returns [1.0, 3.0]
+         * lb.remove(1.0); lb.remove(1.0);             // second remove is no-op
          * }</pre>
          *
          * @param e the double value to be removed from this list, if present
@@ -2109,8 +2081,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0, 3.0, 4.0));
-         * DoubleList result = lb.removeAll(DoubleList.of(1.0, 3.0)).val(); // returns [2.0,4.0]
-         * lb.removeAll(DoubleList.of()).val();                             // unchanged (empty argument)
+         * DoubleList result = lb.removeAll(DoubleList.of(1.0, 3.0)).val();   // returns [2.0,4.0]
+         * lb.removeAll(DoubleList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
          * @param c the DoubleList containing elements to be removed from this list
@@ -2167,8 +2139,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<String>());
-         * List<String> result = lb.add("Alice").add("Bob").val();  // returns [Alice, Bob]
-         * lb.add(null);                                            // null allowed if list permits
+         * List<String> result = lb.add("Alice").add("Bob").val();   // returns [Alice, Bob]
+         * lb.add(null);                                             // null allowed if list permits
          * }</pre>
          *
          * @param e the element to append; may be {@code null} if the underlying list permits {@code null} elements
@@ -2189,8 +2161,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<String>());
-         * lb.addAll(Arrays.asList("Alice", "Bob")).val();  // returns [Alice, Bob]
-         * lb.addAll(null).val();                           // returns no change - null is ignored
+         * lb.addAll(Arrays.asList("Alice", "Bob")).val();   // returns [Alice, Bob]
+         * lb.addAll(null).val();                            // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be added to the list
@@ -2213,8 +2185,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<String>());
-         * lb.addAll("Alice", "Bob").val();                 // returns [Alice, Bob]
-         * lb.addAll((String[]) null).val();                // returns no change - null is ignored
+         * lb.addAll("Alice", "Bob").val();    // returns [Alice, Bob]
+         * lb.addAll((String[]) null).val();   // returns no change - null is ignored
          * }</pre>
          *
          * @param a the array containing elements to be added to the list
@@ -2238,8 +2210,8 @@ public class Builder<T> {
          * <pre>{@code
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
          * lb.add("Alice").add("Bob");
-         * lb.remove("Alice").val();                         // returns [Bob]
-         * lb.remove("Zed").val();                           // returns no change - not present
+         * lb.remove("Alice").val();   // returns [Bob]
+         * lb.remove("Zed").val();     // returns no change - not present
          * }</pre>
          *
          * @param e the element to be removed from the list, if present
@@ -2261,8 +2233,8 @@ public class Builder<T> {
          * <pre>{@code
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
          * lb.addAll("Alice", "Bob", "Charlie");
-         * lb.removeAll(Arrays.asList("Alice", "Charlie")).val(); // returns [Bob]
-         * lb.removeAll(null).val();                              // returns no change - null is ignored
+         * lb.removeAll(Arrays.asList("Alice", "Charlie")).val();   // returns [Bob]
+         * lb.removeAll(null).val();                                // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be removed from the list
@@ -2286,8 +2258,8 @@ public class Builder<T> {
          * <pre>{@code
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
          * lb.addAll("Alice", "Bob", "Charlie");
-         * lb.removeAll("Alice", "Charlie").val();          // returns [Bob]
-         * lb.removeAll((String[]) null).val();             // returns no change - null is ignored
+         * lb.removeAll("Alice", "Charlie").val();   // returns [Bob]
+         * lb.removeAll((String[]) null).val();      // returns no change - null is ignored
          * }</pre>
          *
          * @param a the array containing elements to be removed from the list
@@ -2430,8 +2402,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
-         * cb.addAll(Arrays.asList("apple", "banana")).val();  // returns [apple, banana]
-         * cb.addAll(null).val();                              // returns no change - null is ignored
+         * cb.addAll(Arrays.asList("apple", "banana")).val();   // returns [apple, banana]
+         * cb.addAll(null).val();                               // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be added to this collection
@@ -2452,8 +2424,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
-         * cb.addAll("apple", "banana").val();                 // returns [apple, banana]
-         * cb.addAll((String[]) null).val();                   // returns no change - null is ignored
+         * cb.addAll("apple", "banana").val();   // returns [apple, banana]
+         * cb.addAll((String[]) null).val();     // returns no change - null is ignored
          * }</pre>
          *
          * @param a the array containing elements to be added to this collection
@@ -2475,8 +2447,8 @@ public class Builder<T> {
          * <pre>{@code
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.add("apple").add("banana");
-         * cb.remove("apple").val();                           // returns [banana]
-         * cb.remove("nope").val();                            // returns no change - not present
+         * cb.remove("apple").val();   // returns [banana]
+         * cb.remove("nope").val();    // returns no change - not present
          * }</pre>
          *
          * @param e the element to be removed from this collection, if present
@@ -2499,8 +2471,8 @@ public class Builder<T> {
          * <pre>{@code
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.add("apple").add("banana").add("cherry");
-         * cb.removeAll(Arrays.asList("apple", "cherry")).val(); // returns [banana]
-         * cb.removeAll(null).val();                             // returns no change - null is ignored
+         * cb.removeAll(Arrays.asList("apple", "cherry")).val();   // returns [banana]
+         * cb.removeAll(null).val();                               // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be removed from this collection
@@ -2523,8 +2495,8 @@ public class Builder<T> {
          * <pre>{@code
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.add("apple").add("banana").add("cherry");
-         * cb.removeAll("apple", "cherry").val();             // returns [banana]
-         * cb.removeAll((String[]) null).val();               // returns no change - null is ignored
+         * cb.removeAll("apple", "cherry").val();   // returns [banana]
+         * cb.removeAll((String[]) null).val();     // returns no change - null is ignored
          * }</pre>
          *
          * @param a the array containing elements to be removed from this collection
@@ -2561,9 +2533,9 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
-         * Multiset<String> result = mb.setCount("apple", 3).val(); // returns count of apple = 3
-         * mb.setCount("banana", 0).val();                          // removes banana entirely
-         * mb.setCount("banana", 1).val();                          // adds banana
+         * Multiset<String> result = mb.setCount("apple", 3).val();   // returns count of apple = 3
+         * mb.setCount("banana", 0).val();                            // removes banana entirely
+         * mb.setCount("banana", 1).val();                            // adds banana
          * try {
          *     mb.setCount("apple", -1);
          * } catch (IllegalArgumentException e) {
@@ -2589,8 +2561,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
-         * mb.add("apple").add("apple").add("banana").val();  // returns apple count=2, banana count=1
-         * mb.add(null).val();                                // null may not be allowed
+         * mb.add("apple").add("apple").add("banana").val();   // returns apple count=2, banana count=1
+         * mb.add(null).val();                                 // null may not be allowed
          * }</pre>
          *
          * @param e the element to add
@@ -2609,8 +2581,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
-         * mb.add("apple", 3).val();                          // returns apple count = 3
-         * mb.add("apple", 0).val();                          // returns no change - zero occurrences
+         * mb.add("apple", 3).val();   // returns apple count = 3
+         * mb.add("apple", 0).val();   // returns no change - zero occurrences
          * try {
          *     mb.add("apple", -1);
          * } catch (IllegalArgumentException e) {
@@ -2638,8 +2610,8 @@ public class Builder<T> {
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple", 3);
-         * mb.remove("apple").val();                           // returns apple count = 2
-         * mb.remove("banana").val();                          // returns no change - not present
+         * mb.remove("apple").val();    // returns apple count = 2
+         * mb.remove("banana").val();   // returns no change - not present
          * }</pre>
          *
          * @param e the element to remove one occurrence of
@@ -2661,8 +2633,8 @@ public class Builder<T> {
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple", 5);
-         * mb.remove("apple", 2).val();                       // returns apple count = 3
-         * mb.remove("apple", 10).val();                      // returns apple removed entirely
+         * mb.remove("apple", 2).val();    // returns apple count = 3
+         * mb.remove("apple", 10).val();   // returns apple removed entirely
          * try {
          *     mb.remove("apple", -1);
          * } catch (IllegalArgumentException e) {
@@ -2689,8 +2661,8 @@ public class Builder<T> {
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple", 2).add("banana", 3).add("cherry", 1);
-         * mb.removeAll(Arrays.asList("apple", "banana")).val(); // returns all apple+banana removed
-         * mb.removeAll(Arrays.asList()).val();                  // returns no change - empty collection
+         * mb.removeAll(Arrays.asList("apple", "banana")).val();   // returns all apple+banana removed
+         * mb.removeAll(Arrays.asList()).val();                    // returns no change - empty collection
          * }</pre>
          *
          * @param c the collection of elements to remove all occurrences of
@@ -2710,8 +2682,8 @@ public class Builder<T> {
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple", 3).add("banana", 2);
-         * mb.removeAllOccurrences("apple").val();            // returns apple removed entirely
-         * mb.removeAllOccurrences("nope").val();             // returns no change - not present
+         * mb.removeAllOccurrences("apple").val();   // returns apple removed entirely
+         * mb.removeAllOccurrences("nope").val();    // returns no change - not present
          * }</pre>
          *
          * @param e the element to remove all occurrences of
@@ -2730,8 +2702,8 @@ public class Builder<T> {
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple", 2).add("banana", 3).add("cherry", 1);
-         * mb.removeAllOccurrences(Arrays.asList("apple", "banana")).val(); // returns both removed
-         * mb.removeAllOccurrences(Arrays.asList()).val();                  // returns no change - empty collection
+         * mb.removeAllOccurrences(Arrays.asList("apple", "banana")).val();   // returns both removed
+         * mb.removeAllOccurrences(Arrays.asList()).val();                    // returns no change - empty collection
          * }</pre>
          *
          * @param c the collection of elements to remove all occurrences of
@@ -2768,8 +2740,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
-         * mb.put("Alice", 95).put("Bob", 87).val();          // returns {Alice=95, Bob=87}
-         * mb.put("Alice", 100).val();                        // replaces Alice -> 100
+         * mb.put("Alice", 95).put("Bob", 87).val();   // returns {Alice=95, Bob=87}
+         * mb.put("Alice", 100).val();                 // replaces Alice -> 100
          * }</pre>
          *
          * @param k the key with which the specified value is to be associated
@@ -2794,8 +2766,8 @@ public class Builder<T> {
          * Map<String, Integer> data = new LinkedHashMap<>();
          * data.put("Alice", 95);
          * data.put("Bob", 87);
-         * mb.putAll(data).val();                             // returns {Alice=95, Bob=87}
-         * mb.putAll(null).val();                             // returns no change - null is ignored
+         * mb.putAll(data).val();   // returns {Alice=95, Bob=87}
+         * mb.putAll(null).val();   // returns no change - null is ignored
          * }</pre>
          *
          * @param m the mappings to be stored in this map
@@ -2820,8 +2792,8 @@ public class Builder<T> {
          * <pre>{@code
          * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95);
-         * mb.putIfAbsent("Alice", 100).val();                // returns {Alice=95} - already present
-         * mb.putIfAbsent("Bob", 87).val();                   // returns {Alice=95, Bob=87} - absent
+         * mb.putIfAbsent("Alice", 100).val();   // returns {Alice=95} - already present
+         * mb.putIfAbsent("Bob", 87).val();      // returns {Alice=95, Bob=87} - absent
          * mb.putIfAbsent("Charlie", null).val();             // null stored if absent
          * }</pre>
          *
@@ -2848,8 +2820,8 @@ public class Builder<T> {
          * <pre>{@code
          * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95);
-         * mb.putIfAbsent("Alice", () -> 100).val();          // returns {Alice=95} - supplier not invoked
-         * mb.putIfAbsent("Bob", () -> 87).val();             // returns {Alice=95, Bob=87}
+         * mb.putIfAbsent("Alice", () -> 100).val();   // returns {Alice=95} - supplier not invoked
+         * mb.putIfAbsent("Bob", () -> 87).val();      // returns {Alice=95, Bob=87}
          * }</pre>
          *
          * @param key the key with which the specified value is to be associated
@@ -2874,8 +2846,8 @@ public class Builder<T> {
          * <pre>{@code
          * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95).put("Bob", 87);
-         * mb.remove("Alice").val();                          // returns {Bob=87}
-         * mb.remove("Charlie").val();                        // returns no change - not present
+         * mb.remove("Alice").val();     // returns {Bob=87}
+         * mb.remove("Charlie").val();   // returns no change - not present
          * }</pre>
          *
          * @param k the key whose mapping is to be removed from the map
@@ -2903,8 +2875,8 @@ public class Builder<T> {
          * <pre>{@code
          * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95).put("Bob", 87).put("Charlie", 92);
-         * mb.removeAll(Arrays.asList("Alice", "Charlie")).val(); // returns {Bob=87}
-         * mb.removeAll(null).val();                              // returns no change - null is ignored
+         * mb.removeAll(Arrays.asList("Alice", "Charlie")).val();   // returns {Bob=87}
+         * mb.removeAll(null).val();                                // returns no change - null is ignored
          * }</pre>
          *
          * @param keysToRemove the collection containing keys to be removed from the map

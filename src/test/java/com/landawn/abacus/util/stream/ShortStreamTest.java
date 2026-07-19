@@ -3240,6 +3240,21 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testConcatCollectionSnapshotsSources() {
+        List<ShortStream> sources = new ArrayList<>(Arrays.asList(ShortStream.of((short) 1, (short) 2), ShortStream.of((short) 3, (short) 4)));
+        ShortStream concatenated = ShortStream.concat(sources);
+
+        sources.clear();
+
+        assertArrayEquals(new short[] { 1, 2, 3, 4 }, concatenated.toArray());
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        assertEquals(0, ShortStream.merge(Arrays.asList((ShortStream) null), (a, b) -> MergeResult.TAKE_FIRST).count());
+    }
+
+    @Test
     public void testConcatIteratorCollection() {
         Collection<ShortIterator> iterators = Arrays.asList(ShortIterator.of((short) 1, (short) 2), ShortIterator.of((short) 3, (short) 4));
 
@@ -4207,5 +4222,24 @@ public class ShortStreamTest extends TestBase {
                 () -> ShortStream.of((short) 1, (short) 2, (short) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> ShortStream.of((short) 1, (short) 2, (short) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        ShortIterator iter = ShortStream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> (short) 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = ShortStream.iterate((short) 1, () -> conditionCalls.getAndIncrement() > 0, value -> (short) (value + 1)).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+        assertEquals(1, conditionCalls.get());
     }
 }

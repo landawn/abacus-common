@@ -63,7 +63,7 @@ import com.landawn.abacus.util.function.TriPredicate;
  *   <li><b>Type Safety:</b> Strongly typed with separate left and right collection types</li>
  *   <li><b>Flexible Comparison:</b> Supports arrays, collections, maps, and Java beans</li>
  *   <li><b>Occurrence-Aware:</b> Considers element frequency in collections for accurate differences</li>
- *   <li><b>Null Handling:</b> Proper handling of null inputs and null elements</li>
+ *   <li><b>Null Handling:</b> Proper handling of {@code null} inputs and {@code null} elements</li>
  *   <li><b>Equality Testing:</b> Built-in equality comparison based on difference results</li>
  *   <li><b>Rich Factory Methods:</b> Multiple factory methods for different data structure types</li>
  * </ul>
@@ -181,7 +181,7 @@ import com.landawn.abacus.util.function.TriPredicate;
  * <ul>
  *   <li>Null inputs are treated as empty collections</li>
  *   <li>Null elements within collections are handled according to element type</li>
- *   <li>Results maintain null safety with proper type checking</li>
+ *   <li>Results maintain {@code null} safety with proper type checking</li>
  * </ul>
  *
  * @param <L> the type of the collection containing elements from the left (first) structure.
@@ -2028,7 +2028,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         @SuppressWarnings("unlikely-arg-type")
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2, final Collection<CK> keysToCompare,
-                final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) {
+                final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             final boolean isOrderedMap = (map1 instanceof LinkedHashMap || map1 instanceof SortedMap)
@@ -2366,7 +2366,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2, K> MapDifference<List<Map<K1, V1>>, List<Map<K2, V2>>, Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>>> of(
                 final Collection<? extends Map<K1, V1>> a, final Collection<? extends Map<K2, V2>> b, final Collection<CK> keysToCompare,
-                final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2) {
+                final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2)
+                throws IllegalArgumentException {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
             N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
@@ -2669,7 +2670,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see com.landawn.abacus.annotation.DiffIgnore
          */
         public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
-                final BiPredicate<?, ?> valueEquivalence) {
+                final BiPredicate<?, ?> valueEquivalence) throws IllegalArgumentException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             final BiPredicate<Object, Object> valueEquivalenceToUse = (BiPredicate<Object, Object>) valueEquivalence;
@@ -2824,7 +2825,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          */
         @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
         public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
-                final Collection<String> propNamesToCompare, final TriPredicate<String, ?, ?> valueEquivalence) {
+                final Collection<String> propNamesToCompare, final TriPredicate<String, ?, ?> valueEquivalence) throws IllegalArgumentException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             if (bean1 != null && !Beans.isBeanClass(bean1.getClass())) {
@@ -3234,7 +3235,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          */
         public static <T1, T2, L extends List<T1>, R extends List<T2>, K> BeanDifference<L, R, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,
-                final Function<? super T1, ? extends K> idExtractor1, final Function<? super T2, ? extends K> idExtractor2) {
+                final Function<? super T1, ? extends K> idExtractor1, final Function<? super T2, ? extends K> idExtractor2) throws IllegalArgumentException {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
             N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 

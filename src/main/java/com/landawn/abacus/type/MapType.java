@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,12 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     private final Class<T> typeClass;
 
+    @SuppressWarnings("rawtypes")
+    private final Class<? extends Map> mapImplClass;
+
     private final List<Type<?>> parameterTypes;
+
+    private final Type<?> mapValueType;
 
     private final JsonDeserConfig jdc;
 
@@ -56,6 +62,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
      */
+    @SuppressWarnings("rawtypes")
     MapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 
@@ -71,13 +78,27 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
             // ignore
         }
 
+        Class<? extends Map> deserializationClass = typeClass;
+
         if (isSpringMultiValueMap) {
-            parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType("List<" + valueTypeName + ">"));
+            parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName));
+            mapValueType = TypeFactory.getType("List<" + valueTypeName + ">");
+
+            if (typeClass.isInterface() || Modifier.isAbstract(typeClass.getModifiers())) {
+                final Class<? extends Map> linkedMultiValueMapClass = ClassUtil.forName("org.springframework.util.LinkedMultiValueMap");
+
+                if (typeClass.isAssignableFrom(linkedMultiValueMapClass)) {
+                    deserializationClass = linkedMultiValueMapClass;
+                }
+            }
         } else {
             parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName));
+            mapValueType = parameterTypes.get(1);
         }
 
-        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0)).setMapValueType(parameterTypes.get(1));
+        mapImplClass = deserializationClass;
+
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0)).setMapValueType(mapValueType);
     }
 
     /**
@@ -106,8 +127,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Returns the parameter types for this generic {@code Map} type.
-     * The list always contains exactly two elements: the key type at index 0 and the value type at index 1.
-     * For Spring's {@code MultiValueMap}, the value type is {@code List<V>} rather than {@code V} directly.
+     * The list always contains exactly two elements: the declared key type at index 0 and the declared value type at index 1.
+     * For Spring's {@code MultiValueMap<K, V>}, the second parameter is {@code V}; its internal
+     * {@code Map<K, List<V>>} storage is a deserialization detail, not a declared type argument.
      *
      * @return an immutable two-element list containing the key type and the value type
      */
@@ -171,7 +193,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * into the original value.</p>
      *
      * @param x the {@code Map} object to convert, may be {@code null}
-     * @return the JSON string representation of the map ({@code "{}"} for an empty map),
+     * @return the map's JSON representation
      *         or {@code null} if the input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
@@ -189,6 +211,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Parses a JSON string to create a {@link java.util.Map} object of the appropriate implementation type.
+     * The Spring {@code MultiValueMap} interface is materialized as a {@code LinkedMultiValueMap}.
      * Handles the following cases:
      * <ul>
      *   <li>{@code null} or blank string — returns {@code null}</li>
@@ -210,9 +233,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if ("{}".equals(str)) {
-            return (T) N.newMap(typeClass);
+            return (T) N.newMap(mapImplClass);
         } else {
-            return Utils.jsonParser.deserialize(str, jdc, typeClass);
+            return (T) Utils.jsonParser.deserialize(str, jdc, mapImplClass);
         }
     }
 
@@ -246,7 +269,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
             appendable.append(NULL_STRING);
         } else {
             final Type keyType = parameterTypes.get(0);
-            final Type valueType = parameterTypes.get(1);
+            final Type valueType = mapValueType;
 
             appendable.append(SK._BRACE_L);
 

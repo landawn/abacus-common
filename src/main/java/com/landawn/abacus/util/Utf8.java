@@ -23,8 +23,9 @@ import static java.lang.Character.MIN_SURROGATE;
  * that are more efficient than using {@code String.getBytes(UTF_8)}.
  *
  * <p>The implementation follows the restricted definition of UTF-8 introduced in Unicode 3.1,
- * which means it rejects "non-shortest form" byte sequences. This is stricter than some
- * JDK decoders which may accept such sequences.</p>
+ * which means it rejects "non-shortest form" byte sequences. In contrast, convenience
+ * decoding APIs such as {@code new String(bytes, UTF_8)} replace malformed input by default
+ * instead of reporting whether the original bytes were valid.</p>
  *
  * <p>Key features:</p>
  * <ul>
@@ -50,7 +51,7 @@ import static java.lang.Character.MIN_SURROGATE;
  * @author Martin Buchholz
  * @author Clément Roux
  */
-public class Utf8 {
+public final class Utf8 {
 
     /**
      * Returns the number of bytes in the UTF-8-encoded form of the given character sequence.

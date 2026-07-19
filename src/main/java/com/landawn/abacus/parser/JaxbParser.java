@@ -124,6 +124,8 @@ final class JaxbParser extends AbstractXmlParser {
      */
     @Override
     public String serialize(final Object obj, final XmlSerConfig config) {
+        checkSerializationConfig(config);
+
         if (obj == null) {
             return Strings.EMPTY;
         }
@@ -161,20 +163,20 @@ final class JaxbParser extends AbstractXmlParser {
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final File output) {
-        Writer writer = null;
+        // Validate before opening the destination: FileOutputStream truncates an existing file.
+        checkSerializationConfig(config);
+
+        OutputStream os = null;
 
         try {
             createNewFileIfNotExists(output);
 
-            writer = IOUtil.newFileWriter(output);
-
-            serialize(obj, config, writer);
-
-            writer.flush();
+            os = IOUtil.newFileOutputStream(output);
+            serialize(obj, config, os);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(writer);
+            IOUtil.close(os);
         }
     }
 
@@ -182,8 +184,8 @@ final class JaxbParser extends AbstractXmlParser {
      * Serializes an object to an output stream.
      *
      * <p>The stream is not closed after writing, allowing the caller to manage stream
-     * lifecycle. The stream will be flushed after serialization. The stream is buffered
-     * internally for better performance.</p>
+     * lifecycle. The stream will be flushed after serialization. JAXB writes bytes directly
+     * to the stream, so the byte encoding matches the encoding declared in the XML prolog.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -201,17 +203,7 @@ final class JaxbParser extends AbstractXmlParser {
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) {
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
-
-        try {
-            write(obj, config, bw);
-
-            bw.flush();
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            Objectory.recycle(bw);
-        }
+        write(obj, config, output);
     }
 
     /**
@@ -267,9 +259,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws UncheckedIOException if an I/O error occurs
      */
     void write(final Object obj, final XmlSerConfig config, final Writer output) {
-        if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
-            throw new ParsingException("'ignoredPropNames' is not supported");
-        }
+        checkSerializationConfig(config);
 
         if (obj == null) {
             try {
@@ -285,6 +275,34 @@ final class JaxbParser extends AbstractXmlParser {
 
         try {
             marshaller.marshal(obj, output);
+
+            output.flush();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (final JAXBException e) {
+            throw new ParsingException(e);
+        }
+    }
+
+    /**
+     * Writes an object directly to a byte stream. Passing the stream to JAXB is important:
+     * adapting it through a platform-default {@link Writer} can produce bytes in one encoding
+     * while the XML declaration names another.
+     *
+     * @param obj the object to serialize
+     * @param config the XML serialization configuration (optional)
+     * @param output the stream to write to; it is flushed but not closed
+     * @throws ParsingException if {@code ignoredPropNames} is specified or JAXB marshalling fails
+     * @throws UncheckedIOException if flushing the stream fails
+     */
+    void write(final Object obj, final XmlSerConfig config, final OutputStream output) {
+        checkSerializationConfig(config);
+
+        try {
+            if (obj != null) {
+                final Marshaller marshaller = XmlUtil.createMarshaller(obj.getClass());
+                marshaller.marshal(obj, output);
+            }
 
             output.flush();
         } catch (final IOException e) {
@@ -494,7 +512,6 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
-    @SuppressWarnings("unchecked")
     <T> T read(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParsingException("'ignoredPropNames' is not supported");
@@ -502,15 +519,10 @@ final class JaxbParser extends AbstractXmlParser {
 
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
-        try {
-            // Wrap in a SAXSource backed by the hardened SAXParser so JAXB doesn't fall back to
-            // its OWN internal SAX factory (which has DTDs and external entities ENABLED by
-            // default). Without this wrap, attacker-controlled XML can read local files, do SSRF,
-            // or trigger billion-laughs DoS via JAXB's default unmarshal path.
-            return (T) unmarshaller.unmarshal(toHardenedSAXSource(new InputSource(source)));
-        } catch (final JAXBException e) {
-            throw new ParsingException(e);
-        }
+        // Wrap in a SAXSource backed by the hardened SAXParser so JAXB doesn't fall back to
+        // its own internal SAX factory. Without this wrap, attacker-controlled XML can read
+        // local files, do SSRF, or trigger entity-expansion denial of service.
+        return unmarshal(unmarshaller, new InputSource(source));
     }
 
     /**
@@ -530,7 +542,6 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
-    @SuppressWarnings("unchecked")
     <T> T read(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
         if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
             throw new ParsingException("'ignoredPropNames' is not supported");
@@ -538,35 +549,49 @@ final class JaxbParser extends AbstractXmlParser {
 
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
+        // See InputStream overload above for XXE rationale.
+        return unmarshal(unmarshaller, new InputSource(source));
+    }
+
+    /**
+     * Unmarshals the given input with an XMLReader obtained from the
+     * already-hardened {@code SAXParserFactory} held by {@link XmlUtil} (FEATURE_SECURE_PROCESSING,
+     * disallow-doctype-decl, external-general/parameter-entities=false, no-load-external-dtd).
+     * The parser is returned to {@link XmlUtil}'s pool after the synchronous JAXB call, including
+     * when unmarshalling fails.
+     *
+     * @param <T> the target type
+     * @param unmarshaller the JAXB unmarshaller
+     * @param is the input source containing the XML payload
+     * @return the unmarshalled value
+     * @throws ParsingException if a hardened XMLReader cannot be obtained or JAXB unmarshalling fails
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T unmarshal(final Unmarshaller unmarshaller, final InputSource is) {
+        SAXParser sp = null;
+
         try {
-            // See InputStream overload above for XXE rationale.
-            return (T) unmarshaller.unmarshal(toHardenedSAXSource(new InputSource(source)));
+            sp = XmlUtil.createSAXParser();
+            return (T) unmarshaller.unmarshal(new SAXSource(sp.getXMLReader(), is));
+        } catch (final SAXException e) {
+            throw new ParsingException("Failed to obtain hardened XMLReader for JAXB unmarshalling", e);
         } catch (final JAXBException e) {
             throw new ParsingException(e);
+        } finally {
+            XmlUtil.recycleSAXParser(sp);
         }
     }
 
     /**
-     * Wraps the given InputSource in a SAXSource whose XMLReader is obtained from the
-     * already-hardened {@code SAXParserFactory} held by {@link XmlUtil} (FEATURE_SECURE_PROCESSING,
-     * disallow-doctype-decl, external-general/parameter-entities=false, no-load-external-dtd).
-     * JAXB unmarshal(SAXSource) will use this XMLReader instead of constructing its own
-     * unhardened parser, closing the XXE hole.
+     * Rejects the serialization option that JAXB cannot honor. This check intentionally runs
+     * before null short-circuits and before file destinations are opened.
      *
-     * @param is the input source containing the XML payload
-     * @return a SAXSource backed by a hardened {@code XMLReader}
-     * @throws ParsingException if a hardened XMLReader cannot be obtained
+     * @param config the serialization configuration, or {@code null}
+     * @throws ParsingException if ignored property names are configured
      */
-    private static SAXSource toHardenedSAXSource(final InputSource is) {
-        try {
-            // NOTE: do NOT recycle this SAXParser back to XmlUtil's pool. JAXB will use the
-            // XMLReader synchronously inside unmarshal(), but we'd have to thread a try/finally
-            // around the unmarshal call to recycle safely; for now we trade the ~one-allocation
-            // overhead per unmarshal for code that's obviously correct.
-            final SAXParser sp = XmlUtil.createSAXParser();
-            return new SAXSource(sp.getXMLReader(), is);
-        } catch (final SAXException e) {
-            throw new ParsingException("Failed to obtain hardened XMLReader for JAXB unmarshalling", e);
+    private static void checkSerializationConfig(final XmlSerConfig config) {
+        if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
+            throw new ParsingException("'ignoredPropNames' is not supported");
         }
     }
 }

@@ -92,7 +92,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * with underutilization, then we want stored permits to be given out /faster/ than fresh ones,
      * because underutilization = free resources for the taking. If we are primarily interested to
      * deal with overflow, then stored permits could be given out /slower/ than fresh ones. Thus, we
-     * require a (different in each case) function that translates storedPermits to throtting time.
+     * require a (different in each case) function that translates storedPermits to throttling time.
      *
      * This role is played by storedPermitsToWaitTime(double storedPermits, double permitsToTake). The
      * underlying model is a continuous function mapping storedPermits (from 0.0 to maxStoredPermits)
@@ -284,7 +284,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
                 permitsToTake -= permitsAboveThresholdToTake;
             }
             // measuring the integral on the left part of the function (the horizontal line)
-            micros += (long) (stableIntervalMicros * permitsToTake);
+            micros = Numbers.saturatedAdd(micros, (long) (stableIntervalMicros * permitsToTake));
             return micros;
         }
 
@@ -471,7 +471,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
         final long returnValue = nextFreeTicketMicros;
         final double storedPermitsToSpend = min(requiredPermits, storedPermits);
         final double freshPermits = requiredPermits - storedPermitsToSpend;
-        final long waitMicros = storedPermitsToWaitTime(storedPermits, storedPermitsToSpend) + (long) (freshPermits * stableIntervalMicros);
+        final long waitMicros = Numbers.saturatedAdd(storedPermitsToWaitTime(storedPermits, storedPermitsToSpend),
+                (long) (freshPermits * stableIntervalMicros));
 
         nextFreeTicketMicros = Numbers.saturatedAdd(nextFreeTicketMicros, waitMicros);
         storedPermits -= storedPermitsToSpend;

@@ -422,6 +422,11 @@ public class FnnTest extends TestBase {
     }
 
     @Test
+    public void testThrowException_withNullSupplier() {
+        assertThrows(IllegalArgumentException.class, () -> Fnn.throwException((java.util.function.Supplier<Exception>) null));
+    }
+
+    @Test
     public void testSleep_shortDuration() throws Exception {
         Throwables.Consumer<String, Exception> sleeper = Fnn.sleep(1);
         assertNotNull(sleeper);

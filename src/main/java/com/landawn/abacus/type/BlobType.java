@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.util.ClassUtil;
+
 /**
  * Type handler for SQL {@link java.sql.Blob} (Binary Large Object) values.
  * Provides direct JDBC read/write operations for {@code Blob} objects.
@@ -57,12 +59,14 @@ public class BlobType extends AbstractType<Blob> {
 
     /**
      * Package-private constructor for {@code BlobType} with a specific {@link java.sql.Blob} implementation class.
-     * Instances are created by {@link TypeFactory}; do not instantiate directly.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly. The handler name is
+     * derived from {@code clazz}, so a driver-specific implementation remains distinguishable from
+     * the standard {@code Blob} interface in type metadata.
      *
      * @param clazz the specific {@code Blob} implementation class to use as the Java type
      */
     BlobType(final Class<? extends Blob> clazz) {
-        super(BLOB);
+        super(ClassUtil.getSimpleClassName(clazz));
         this.clazz = (Class<Blob>) clazz;
     }
 

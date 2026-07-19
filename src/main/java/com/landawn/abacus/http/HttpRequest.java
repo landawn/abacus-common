@@ -93,7 +93,7 @@ public final class HttpRequest {
     private boolean closeHttpClientAfterExecution = false;
 
     HttpRequest(final HttpClient httpClient) {
-        this.httpClient = httpClient;
+        this.httpClient = N.checkArgNotNull(httpClient, "httpClient");
     }
 
     /**
@@ -109,6 +109,7 @@ public final class HttpRequest {
      *
      * @param httpClient The HttpClient to use for the request. Must not be {@code null}.
      * @return a new HttpRequest instance
+     * @throws IllegalArgumentException if {@code httpClient} is {@code null}
      */
     public static HttpRequest create(final HttpClient httpClient) {
         return new HttpRequest(httpClient);

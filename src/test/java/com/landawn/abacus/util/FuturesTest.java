@@ -1034,6 +1034,30 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
+    public void testAllOfCapturesInputMembership() throws Exception {
+        final List<Future<Integer>> inputs = new ArrayList<>();
+        inputs.add(CompletableFuture.completedFuture(1));
+
+        final ContinuableFuture<List<Integer>> result = Futures.allOf(inputs);
+        inputs.add(new CompletableFuture<>());
+
+        assertTrue(result.isDone());
+        assertEquals(Arrays.asList(1), result.get(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testAnyOfCapturesInputMembership() throws Exception {
+        final List<Future<String>> inputs = new ArrayList<>();
+        inputs.add(CompletableFuture.completedFuture("first"));
+
+        final ContinuableFuture<String> result = Futures.anyOf(inputs);
+        inputs.clear();
+
+        assertTrue(result.isDone());
+        assertEquals("first", result.get(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
     public void testAnyOfCollectionEmpty() {
         Collection<Future<Integer>> cfs = new ArrayList<>();
 
@@ -1056,6 +1080,7 @@ public class FuturesTest extends TestBase {
         ContinuableFuture<String> completed = Futures.anyOf(CompletableFuture.completedFuture("ok"));
         assertEquals("ok", completed.get(0, TimeUnit.NANOSECONDS));
         assertEquals("ok", completed.get(-1, TimeUnit.NANOSECONDS));
+        assertThrows(NullPointerException.class, () -> completed.get(0, null));
 
         java.util.concurrent.FutureTask<String> completedTask = new java.util.concurrent.FutureTask<>(() -> "plain");
         completedTask.run();
@@ -1613,6 +1638,78 @@ public class FuturesTest extends TestBase {
 
         ExecutionException e3 = new ExecutionException(new Error("error"));
         Assertions.assertEquals(e3, Futures.convertException(e3));
+    }
+
+    @Test
+    public void testCancelDoesNotSuppressExceptionOnItselfForDuplicateFuture() {
+        final IllegalStateException sharedFailure = new IllegalStateException("shared cancel failure");
+        final Future<Integer> future = new Future<>() {
+            @Override
+            public boolean cancel(final boolean mayInterruptIfRunning) {
+                throw sharedFailure;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+
+            @Override
+            public Integer get() {
+                return 1;
+            }
+
+            @Override
+            public Integer get(final long timeout, final TimeUnit unit) {
+                return 1;
+            }
+        };
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> Futures.allOf(future, future).cancel(true));
+        Assertions.assertSame(sharedFailure, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+    }
+
+    @Test
+    public void testIterateReportsErrorThrownDirectlyByCustomFuture() {
+        Future<String> brokenFuture = new Future<>() {
+            @Override
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public String get() {
+                throw new AssertionError("boom");
+            }
+
+            @Override
+            public String get(long timeout, TimeUnit unit) {
+                throw new AssertionError("boom");
+            }
+        };
+
+        ObjIterator<Result<String, Exception>> iter = Futures.iterate(Collections.singletonList(brokenFuture), 1, TimeUnit.SECONDS, result -> result);
+        Result<String, Exception> result = iter.next();
+
+        assertTrue(result.getException() instanceof ExecutionException);
+        assertTrue(result.getException().getCause() instanceof AssertionError);
+        assertFalse(iter.hasNext());
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---

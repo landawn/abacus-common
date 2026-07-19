@@ -16,6 +16,8 @@ package com.landawn.abacus.type;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 
 import com.landawn.abacus.util.Dates;
@@ -42,31 +44,37 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     /**
      * {@link DateTimeFormatter} for the ISO 8601 date-time format with UTC offset.
      * <p>
-     * Backed by {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}, which formats and parses
-     * date-times with an offset such as {@code 2011-12-03T10:15:30+01:00}.
+     * Emits whole-second precision and an offset, such as
+     * {@code 2011-12-03T10:15:30+01:00}; UTC is emitted as {@code Z}.
      * Used by subclasses when the {@link com.landawn.abacus.util.DateTimeFormat#ISO_8601_DATE_TIME}
      * serialization option is selected.
      * </p>
      *
-     * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601TimestampDTF
      */
-    protected static final DateTimeFormatter iso8601DateTimeDTF = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    protected static final DateTimeFormatter iso8601DateTimeDTF = new DateTimeFormatterBuilder().append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendLiteral('T')
+            .appendPattern("HH:mm:ss")
+            .appendOffsetId()
+            .toFormatter();
 
     /**
      * {@link DateTimeFormatter} for the ISO 8601 timestamp format with UTC offset.
      * <p>
-     * Backed by {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}, which formats and parses
-     * date-times with an offset such as {@code 2011-12-03T10:15:30+01:00}.
+     * Emits exactly millisecond precision and an offset, such as
+     * {@code 2011-12-03T10:15:30.123+01:00}; UTC is emitted as {@code Z}.
      * Used by subclasses when the {@link com.landawn.abacus.util.DateTimeFormat#ISO_8601_TIMESTAMP}
-     * serialization option is selected. Kept separate from {@link #iso8601DateTimeDTF} to
-     * allow independent customization if finer granularity is needed in the future.
+     * serialization option is selected.
      * </p>
      *
-     * @see DateTimeFormatter#ISO_OFFSET_DATE_TIME
      * @see #iso8601DateTimeDTF
      */
-    protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    protected static final DateTimeFormatter iso8601TimestampDTF = new DateTimeFormatterBuilder().append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendLiteral('T')
+            .appendPattern("HH:mm:ss")
+            .appendFraction(ChronoField.NANO_OF_SECOND, 3, 3, true)
+            .appendOffsetId()
+            .toFormatter();
 
     /**
      * Constructs an {@code AbstractTemporalType} with the specified type name.

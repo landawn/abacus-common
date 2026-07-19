@@ -187,7 +187,8 @@ final class GuavaHasher implements Hasher {
     /**
      * {@inheritDoc}
      *
-     * <p>Adds a float value by delegating to the wrapped Guava hasher's {@code putFloat()} method.
+     * <p>Adds a float value by delegating to the wrapped Guava hasher's {@code putFloat()} method,
+     * which uses {@link Float#floatToRawIntBits(float)} and therefore preserves NaN payload bits.
      *
      * @param f the float value to add
      * @return this hasher instance
@@ -201,7 +202,8 @@ final class GuavaHasher implements Hasher {
     /**
      * {@inheritDoc}
      *
-     * <p>Adds a double value by delegating to the wrapped Guava hasher's {@code putDouble()} method.
+     * <p>Adds a double value by delegating to the wrapped Guava hasher's {@code putDouble()} method,
+     * which uses {@link Double#doubleToRawLongBits(double)} and therefore preserves NaN payload bits.
      *
      * @param d the double value to add
      * @return this hasher instance

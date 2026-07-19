@@ -83,16 +83,18 @@ public class LongToFloatFunctionTest extends TestBase {
 
     @Test
     public void testApplyAsFloat_withMaxValue() {
-        final LongToFloatFunction function = value -> (float) value;
-        final float result = function.applyAsFloat(Long.MAX_VALUE);
-        assertNotNull(result); // Will have precision loss
+        assertEquals((float) Long.MAX_VALUE, LongToFloatFunction.DEFAULT.applyAsFloat(Long.MAX_VALUE));
     }
 
     @Test
     public void testApplyAsFloat_withMinValue() {
-        final LongToFloatFunction function = value -> (float) value;
-        final float result = function.applyAsFloat(Long.MIN_VALUE);
-        assertNotNull(result); // Will have precision loss
+        assertEquals((float) Long.MIN_VALUE, LongToFloatFunction.DEFAULT.applyAsFloat(Long.MIN_VALUE));
+    }
+
+    @Test
+    public void testDEFAULT_roundsBeyondExactIntegerRange() {
+        assertEquals(16_777_216f, LongToFloatFunction.DEFAULT.applyAsFloat(16_777_217L));
+        assertEquals(16_777_218f, LongToFloatFunction.DEFAULT.applyAsFloat(16_777_218L));
     }
 
     @Test

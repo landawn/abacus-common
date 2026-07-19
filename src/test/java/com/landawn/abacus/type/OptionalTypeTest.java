@@ -326,4 +326,33 @@ public class OptionalTypeTest extends TestBase {
         assertNull(type.stringOf(Optional.empty()));
     }
 
+    @Test
+    public void testStringOf_usesDeclaredElementTypeForSubtype() {
+        TypeFactory.registerType(OptionalBaseValue.class, value -> "base:" + value.value, str -> new OptionalBaseValue(str.substring(5)));
+        TypeFactory.registerType(OptionalDerivedValue.class, value -> "derived:" + value.value, str -> new OptionalDerivedValue(str.substring(8)));
+
+        final OptionalType<OptionalBaseValue> type = new OptionalType<>(TypeFactory.getType(OptionalBaseValue.class).name());
+        final OptionalBaseValue value = new OptionalDerivedValue("test");
+
+        final String str = type.stringOf(Optional.of(value));
+        final Optional<OptionalBaseValue> roundTripped = type.valueOf(str);
+
+        assertEquals("base:test", str);
+        assertEquals("test", roundTripped.get().value);
+    }
+
+    public static class OptionalBaseValue {
+        final String value;
+
+        OptionalBaseValue(final String value) {
+            this.value = value;
+        }
+    }
+
+    public static final class OptionalDerivedValue extends OptionalBaseValue {
+        OptionalDerivedValue(final String value) {
+            super(value);
+        }
+    }
+
 }

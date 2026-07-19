@@ -127,7 +127,7 @@ public final class IndexedChar extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) index + value * 31;
+        return 31 * Character.hashCode(value) + hashLong(index);
     }
 
     /**

@@ -14,13 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
@@ -67,6 +70,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
@@ -9147,6 +9151,50 @@ public class CommonUtilTest extends TestBase {
     }
 
     @Test
+    public void testConvertInputStreamReadFailureRetainsFailedCloseAsSuppressed() {
+        final InputStream input = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw new IOException("read failed");
+            }
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException("close failed");
+            }
+        };
+
+        final UncheckedIOException exception = assertThrows(UncheckedIOException.class, () -> N.convert(input, byte[].class));
+
+        assertEquals("read failed", exception.getCause().getMessage());
+        assertEquals(1, exception.getSuppressed().length);
+        assertTrue(exception.getSuppressed()[0] instanceof UncheckedIOException);
+        assertEquals("close failed", exception.getSuppressed()[0].getCause().getMessage());
+    }
+
+    @Test
+    public void testConvertReaderToStringFailureRetainsFailedCloseAsSuppressed() {
+        final Reader reader = new Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("read failed");
+            }
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException("close failed");
+            }
+        };
+
+        final UncheckedIOException exception = assertThrows(UncheckedIOException.class, () -> N.convert(reader, String.class));
+
+        assertEquals("read failed", exception.getCause().getMessage());
+        assertEquals(1, exception.getSuppressed().length);
+        assertTrue(exception.getSuppressed()[0] instanceof UncheckedIOException);
+        assertEquals("close failed", exception.getSuppressed()[0].getCause().getMessage());
+    }
+
+    @Test
     public void testConvertSameType() {
         String str = "test";
         assertSame(str, N.convert(str, String.class));
@@ -9284,6 +9332,65 @@ public class CommonUtilTest extends TestBase {
 
         byte[] result = N.convert(blob, byte[].class);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result);
+    }
+
+    @Test
+    public void testConvertBlobSizeFailureRetainsFailedCleanupAsSuppressed() {
+        final Blob blob = (Blob) Proxy.newProxyInstance(CommonUtilTest.class.getClassLoader(), new Class<?>[] { Blob.class }, (proxy, method, args) -> {
+            if (method.getName().equals("length")) {
+                return (long) Integer.MAX_VALUE + 1;
+            } else if (method.getName().equals("free")) {
+                throw new SQLException("free failed");
+            }
+
+            throw new UnsupportedOperationException(method.getName());
+        });
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> N.convert(blob, byte[].class));
+
+        assertTrue(exception.getMessage().contains("exceeds maximum array size"));
+        assertEquals(1, exception.getSuppressed().length);
+        assertTrue(exception.getSuppressed()[0] instanceof UncheckedSQLException);
+        assertEquals("free failed", exception.getSuppressed()[0].getCause().getMessage());
+    }
+
+    @Test
+    public void testConvertBlobDoesNotSelfSuppressSharedConversionAndCleanupFailure() {
+        final IllegalStateException sharedFailure = new IllegalStateException("shared failure");
+        final Blob blob = (Blob) Proxy.newProxyInstance(CommonUtilTest.class.getClassLoader(), new Class<?>[] { Blob.class }, (proxy, method, args) -> {
+            if (method.getName().equals("length")) {
+                return 1L;
+            } else if (method.getName().equals("getBytes") || method.getName().equals("free")) {
+                throw sharedFailure;
+            }
+
+            throw new UnsupportedOperationException(method.getName());
+        });
+
+        final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> N.convert(blob, byte[].class));
+
+        assertSame(sharedFailure, exception);
+        assertEquals(0, exception.getSuppressed().length);
+    }
+
+    @Test
+    public void testConvertClobSizeFailureRetainsFailedCleanupAsSuppressed() {
+        final Clob clob = (Clob) Proxy.newProxyInstance(CommonUtilTest.class.getClassLoader(), new Class<?>[] { Clob.class }, (proxy, method, args) -> {
+            if (method.getName().equals("length")) {
+                return (long) Integer.MAX_VALUE + 1;
+            } else if (method.getName().equals("free")) {
+                throw new SQLException("free failed");
+            }
+
+            throw new UnsupportedOperationException(method.getName());
+        });
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> N.convert(clob, char[].class));
+
+        assertTrue(exception.getMessage().contains("exceeds maximum array size"));
+        assertEquals(1, exception.getSuppressed().length);
+        assertTrue(exception.getSuppressed()[0] instanceof UncheckedSQLException);
+        assertEquals("free failed", exception.getSuppressed()[0].getCause().getMessage());
     }
 
     @Test
@@ -21466,6 +21573,19 @@ public class CommonUtilTest extends TestBase {
     }
 
     @Test
+    public void testIndexOf_withTolerance_rejectsInvalidToleranceBeforeEarlyReturn() {
+        float[] floatArray = { 1.0f };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indexOf((float[]) null, 1.0f, 0, -0.01f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indexOf(new float[0], 1.0f, 0, Float.NaN));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indexOf(floatArray, 1.0f, floatArray.length, -0.01f));
+
+        double[] doubleArray = { 1.0 };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indexOf((double[]) null, 1.0, 0, -0.01));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indexOf(new double[0], 1.0, 0, Double.NaN));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indexOf(doubleArray, 1.0, doubleArray.length, -0.01));
+    }
+
+    @Test
     public void testIndexOf_objectArray() {
         String[] arr = { "a", "b", "c", "d", "e" };
         Assertions.assertEquals(2, N.indexOf(arr, "c"));
@@ -21889,6 +22009,19 @@ public class CommonUtilTest extends TestBase {
         Assertions.assertEquals(-1, N.lastIndexOf(empty, 3.0, empty.length - 1, 0.01));
 
         Assertions.assertEquals(-1, N.lastIndexOf((double[]) null, 3.0, 0, 0.01));
+    }
+
+    @Test
+    public void testLastIndexOf_withTolerance_rejectsInvalidToleranceBeforeEarlyReturn() {
+        float[] floatArray = { 1.0f };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lastIndexOf((float[]) null, 1.0f, 0, -0.01f));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lastIndexOf(new float[0], 1.0f, -1, Float.NaN));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lastIndexOf(floatArray, 1.0f, -1, -0.01f));
+
+        double[] doubleArray = { 1.0 };
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lastIndexOf((double[]) null, 1.0, 0, -0.01));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lastIndexOf(new double[0], 1.0, -1, Double.NaN));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lastIndexOf(doubleArray, 1.0, -1, -0.01));
     }
 
     @Test

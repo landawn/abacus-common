@@ -526,6 +526,61 @@ public class RetryTest extends TestBase {
     }
 
     @Test
+    public void testCall_EvaluatesResultPredicateOncePerAttempt() {
+        final AtomicInteger predicateCalls = new AtomicInteger();
+        final Retry<String> retry = Retry.withFixedDelay(2, 0, (result, ex) -> predicateCalls.incrementAndGet() <= 3);
+
+        final RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> retry.call(() -> "rejected"));
+
+        Assertions.assertTrue(exception.getMessage().contains("Still failed after retried 2 times"));
+        Assertions.assertEquals(3, predicateCalls.get());
+    }
+
+    @Test
+    public void testCall_FinalRejectedResultDoesNotRethrowStaleException() {
+        final AtomicInteger calls = new AtomicInteger();
+        final IOException firstFailure = new IOException("first attempt");
+        final Retry<String> retry = Retry.withFixedDelay(1, 0, (result, ex) -> ex != null || "rejected".equals(result));
+
+        final RuntimeException failure = Assertions.assertThrows(RuntimeException.class, () -> retry.call(() -> {
+            if (calls.getAndIncrement() == 0) {
+                throw firstFailure;
+            }
+
+            return "rejected";
+        }));
+
+        Assertions.assertTrue(failure.getMessage().contains("rejected"));
+        Assertions.assertSame(firstFailure, failure.getCause());
+        Assertions.assertEquals(2, calls.get());
+    }
+
+    @Test
+    public void testCall_DoesNotRetryWhenResultPredicateThrows() {
+        final AtomicInteger callableCalls = new AtomicInteger();
+        final AtomicInteger predicateCalls = new AtomicInteger();
+        final IllegalStateException predicateFailure = new IllegalStateException("predicate failure");
+        final Retry<String> retry = Retry.withFixedDelay(2, 0, (result, ex) -> {
+            predicateCalls.incrementAndGet();
+
+            if (ex == null) {
+                throw predicateFailure;
+            }
+
+            return true;
+        });
+
+        final IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class, () -> retry.call(() -> {
+            callableCalls.incrementAndGet();
+            return "result";
+        }));
+
+        Assertions.assertSame(predicateFailure, thrown);
+        Assertions.assertEquals(1, callableCalls.get());
+        Assertions.assertEquals(1, predicateCalls.get());
+    }
+
+    @Test
     public void testCall_WithZeroRetryTimes() throws Exception {
         Retry<String> retry = Retry.withFixedDelay(0, 50, (result, ex) -> result == null);
         AtomicInteger counter = new AtomicInteger(0);

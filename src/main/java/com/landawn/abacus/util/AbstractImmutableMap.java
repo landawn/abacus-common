@@ -23,10 +23,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * An abstract, package-private base class for immutable {@link Map} implementations.
- * Once created, the contents of an instance cannot be modified.
+ * An abstract, package-private base class for read-only {@link Map} implementations.
  * All mutating operations ({@code put}, {@code remove}, {@code clear}, etc.) throw
- * {@link UnsupportedOperationException}. Because instances are immutable, they are inherently thread-safe.
+ * {@link UnsupportedOperationException}. Concrete factories that defensively copy their input produce
+ * immutable, thread-safe instances. Factories that wrap an externally owned backing map produce a read-only
+ * view instead; external changes are reflected by the view and require the backing map's synchronization.
  *
  * <p>This class provides the shared infrastructure used by concrete subclasses such as
  * {@link ImmutableMap}, {@link ImmutableSortedMap}, {@link ImmutableNavigableMap} and
@@ -53,7 +54,9 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     final Map<K, V> valueMap;
 
     AbstractImmutableMap(final Map<? extends K, ? extends V> map) {
-        this(map, ClassUtil.isPossibleImmutable(map.getClass())); // to create immutable keySet(), values(), entrySet()
+        // A class name is not a reliable immutability contract. Always create an unmodifiable
+        // view here so that entrySet() entries and all collection views are read-only.
+        this(map, false);
     }
 
     AbstractImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
@@ -381,7 +384,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
 
     /**
      * Returns an unmodifiable {@link Set} view of the keys contained in this map.
-     * Since this map is immutable, the returned view is constant.
+     * Changes made directly to an externally owned backing map are reflected in the returned view.
      * Attempts to modify the returned set will result in an {@link UnsupportedOperationException}.
      * The iteration order of the set matches the iteration order of the underlying map.
      *
@@ -403,7 +406,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
 
     /**
      * Returns an unmodifiable {@link Collection} view of the values contained in this map.
-     * Since this map is immutable, the returned view is constant.
+     * Changes made directly to an externally owned backing map are reflected in the returned view.
      * Attempts to modify the returned collection will result in an {@link UnsupportedOperationException}.
      * The iteration order of the collection matches the iteration order of the underlying map.
      *
@@ -425,7 +428,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
 
     /**
      * Returns an unmodifiable {@link Set} view of the mappings contained in this map.
-     * Since this map is immutable, the returned view is constant.
+     * Changes made directly to an externally owned backing map are reflected in the returned view.
      * Each element in the returned set is an immutable {@link Map.Entry}.
      * Attempts to modify the returned set or its entries will result in an {@link UnsupportedOperationException}.
      * The iteration order of the set matches the iteration order of the underlying map.

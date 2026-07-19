@@ -32,6 +32,15 @@ public class TypeTypeTest extends TestBase {
     }
 
     @Test
+    public void testParameterizedTypeMetadata() {
+        TypeType parameterized = (TypeType) createType("Type<String>");
+
+        assertTrue(parameterized.isParameterizedType());
+        assertEquals(1, parameterized.parameterTypes().size());
+        assertEquals(String.class, parameterized.parameterTypes().get(0).javaType());
+    }
+
+    @Test
     public void testStringOf() {
         Type<?> testType = createType("String");
         String result = typeType.stringOf(testType);

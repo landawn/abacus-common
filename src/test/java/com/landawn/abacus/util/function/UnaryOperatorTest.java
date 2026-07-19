@@ -105,4 +105,12 @@ public class UnaryOperatorTest extends TestBase {
         assertNotNull(lambda);
         assertDoesNotThrow(() -> lambda.apply("test"));
     }
+
+    @Test
+    public void testSpecializedCompositionRejectsNullImmediately() {
+        UnaryOperator<String> operator = s -> s;
+
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> operator.compose((java.util.function.UnaryOperator<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> operator.andThen((java.util.function.UnaryOperator<String>) null));
+    }
 }

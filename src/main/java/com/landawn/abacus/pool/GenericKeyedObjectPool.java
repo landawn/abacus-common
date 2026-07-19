@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -86,6 +87,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     @Serial
     private static final long serialVersionUID = 4137548490922758243L;
 
+    /** A detached entry whose accounting is complete and whose user callback awaits lock release. */
+    private static final class DestroyTask<K, E extends Poolable> {
+        @SuppressWarnings("unused")
+        final K key;
+        final E value;
+        final Caller caller;
+
+        DestroyTask(final K key, final E value, final Caller caller) {
+            this.key = key;
+            this.value = value;
+            this.caller = caller;
+        }
+    }
+
     /**
      * Optional memory measure for tracking memory usage of key-value pairs.
      */
@@ -126,7 +141,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
-     * @param memoryMeasure the function to calculate entry memory size, or {@code null} if not using memory limits
+     * @param memoryMeasure the function to calculate entry memory size; required when {@code maxMemorySize > 0}
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -157,11 +173,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
-     * @param memoryMeasure the function to calculate entry memory size, or {@code null} if not using memory limits
+     * @param memoryMeasure the function to calculate entry memory size; required when {@code maxMemorySize > 0}
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
+
+        if (maxMemorySize > 0 && memoryMeasure == null) {
+            throw new IllegalArgumentException("A memory measure is required when maxMemorySize is positive: " + maxMemorySize);
+        }
 
         this.memoryMeasure = memoryMeasure;
         pool = new LinkedHashMap<>(Math.min(capacity, 1000));
@@ -209,8 +230,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             // Periodically remove expired entries from the pool
             try {
                 removeExpired();
-            } catch (final Exception e) {
-                // ignore
+            } catch (final Throwable e) { // NOSONAR - an unchecked nonfatal failure must not cancel all future eviction runs
+                rethrowIfFatal(e);
+
                 if (logger.isWarnEnabled()) {
                     logger.warn("Error removing expired pooled entries", e);
                 }
@@ -222,10 +244,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Associates the specified element with the specified key in this pool.
-     * If the pool previously contained a mapping for the key, the old element is removed and
-     * destroyed with {@link Caller#REMOVE_REPLACE_CLEAR} <em>before</em> the new value is
-     * inserted; this happens even when the subsequent in-lock insertion fails (capacity/memory
-     * rejection, so a failing {@code put} can still evict the previous mapping for {@code key}).
+     * If the pool previously contained a mapping for the key, the old element is detached and
+     * accounted with {@link Caller#REMOVE_REPLACE_CLEAR} before the new value is inserted. Its
+     * destruction callback runs after the pool lock is released, so on a successful replacement
+     * the callback can already observe the new mapping. Detachment still happens when the later
+     * insertion fails (capacity/memory rejection), so a failing {@code put} can remove the
+     * previous mapping for {@code key}.
      * The one exception is an already-expired {@code value}, which is rejected up front (before the
      * lock) without removing or destroying any existing mapping for {@code key}. The old element is
      * <em>not</em> destroyed when it is the same instance as {@code value} (re-pooling the same
@@ -272,13 +296,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         boolean valueStored = false;
         E removedValue = null;
+        List<DestroyTask<K, E>> pendingDestroys = null;
 
         try {
             // Re-check inside the lock; a concurrent close() between an unlocked check and lock
             // acquisition would otherwise leak this entry.
             assertNotClosed();
-            // Make sure the old value is removed regardless if the new value will put successfully or not.
-            // Use pool.remove() directly to avoid double memory subtraction (remove() subtracts memory, and destroy() also subtracts).
+            // Remove the old value even if the new value is later rejected. Use the backing map
+            // directly: the public remove(K) performs ownership-transfer memory accounting, while
+            // this replacement path accounts the detached value as a destruction.
             E oldValue = pool.remove(key);
             removedValue = oldValue;
 
@@ -288,10 +314,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             final boolean rePoolingSameInstance = oldValue != null && oldValue == value;
 
             if (oldValue != null && oldValue != value) {
-                destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
+                pendingDestroys = appendPendingDestroy(pendingDestroys, key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
             } else if (rePoolingSameInstance && memoryMeasure != null) {
                 // The old mapping's memory is still counted in totalDataSize (pool.remove() above
-                // does not adjust it, and destroy() was skipped for the same instance). The success
+                // does not adjust it, and destruction accounting was skipped for the same instance). The success
                 // path below re-adds the freshly-measured size, so subtract the previously-counted
                 // size here to avoid double-counting when re-pooling the same instance.
                 try {
@@ -311,7 +337,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             if (pool.size() >= capacity) {
                 if (autoBalance) {
-                    evict();
+                    pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
 
                     if (pool.size() >= capacity) {
                         return false;
@@ -338,7 +364,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                     if (autoBalance) {
-                        evict();
+                        pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
 
                         if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                             // ignore.
@@ -350,7 +376,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     }
                 }
 
-                // Re-check expiry inside the lock: time spent in sizeOf()/evict() above may have
+                // Re-check expiry inside the lock: time spent in sizeOf()/victim selection above may have
                 // expired the value; pooling it would corrupt hit/miss accounting and expose a
                 // doomed entry to the next get()er (mirrors the timed put variant).
                 if (value.activityPrint().isExpired()) {
@@ -360,13 +386,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 oldValue = pool.put(key, value);
 
                 if (oldValue != null && oldValue != value) {
-                    destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
+                    pendingDestroys = appendPendingDestroy(pendingDestroys, key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
 
                 totalDataSize.addAndGet(keyValueMemorySize);
             } else {
-                // Re-check expiry inside the lock (the in-lock evict() above may run slow destroy
-                // callbacks), mirroring the timed put variant.
+                // Re-check expiry inside the lock after any balancing work, mirroring the timed
+                // put variant.
                 if (value.activityPrint().isExpired()) {
                     return false;
                 }
@@ -374,7 +400,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 oldValue = pool.put(key, value);
 
                 if (oldValue != null && oldValue != value) {
-                    destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
+                    pendingDestroys = appendPendingDestroy(pendingDestroys, key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
             }
 
@@ -396,6 +422,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 notFull.signalAll();
             }
             lock.unlock();
+            invokeDestroyCallbacks(pendingDestroys);
         }
     }
 
@@ -432,15 +459,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Attempts to associate the value with the key, waiting up to the given timeout for a capacity
      * slot when the pool is full. Mirrors {@link GenericObjectPool#add(Poolable, long, TimeUnit)}:
-     * a maxSpins (10,000) safety limit guards against pathological wakeup loops; under normal
-     * operation the timeout triggers first.
+     * the remaining timeout is rechecked after every wakeup, including spurious wakeups.
+     * Auto-balance and replacement victims are detached and accounted while locked; their
+     * destruction callbacks run after this invocation releases the pool lock.
      *
      * @param key the key, must not be {@code null}
      * @param value the value, must not be {@code null}
      * @param timeout the maximum time to wait for a slot
-     * @param unit the time unit of the timeout
+     * @param unit the time unit of the timeout, must not be {@code null}
      * @return {@code true} if the value was added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key, value, or unit is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -450,6 +478,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         if (key == null || value == null) {
             throw new IllegalArgumentException("Key and value cannot be null");
+        }
+
+        if (unit == null) {
+            throw new IllegalArgumentException("Time unit cannot be null");
         }
 
         if (value.activityPrint().isExpired()) {
@@ -463,6 +495,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         // must be woken (see the finally block).
         E oldValue = null;
         boolean valueStored = false;
+        List<DestroyTask<K, E>> pendingDestroys = null;
 
         lock.lock();
 
@@ -472,8 +505,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             assertNotClosed();
 
             // Make sure the old value is removed regardless of whether the new value will be put
-            // successfully or not (mirrors the non-timed put). Use pool.remove() directly to avoid
-            // double memory subtraction (remove() subtracts memory, and destroy() also subtracts).
+            // successfully or not (mirrors the non-timed put). Use the backing map directly so the
+            // public remove(K) ownership-transfer accounting is not combined with destruction accounting.
             oldValue = pool.remove(key);
 
             // Identity guard: get() does not remove the mapping, so the documented "put it back"
@@ -481,7 +514,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             final boolean rePoolingSameInstance = oldValue != null && oldValue == value;
 
             if (oldValue != null && oldValue != value) {
-                destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
+                pendingDestroys = appendPendingDestroy(pendingDestroys, key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
             } else if (rePoolingSameInstance && memoryMeasure != null) {
                 // The old mapping's memory is still counted in totalDataSize; the success path below
                 // re-adds the freshly-measured size, so subtract the previously-counted size here to
@@ -502,12 +535,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             if ((pool.size() >= capacity) && autoBalance) {
-                evict();
+                pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
             }
 
-            int maxSpins = 10000;
-
-            while (maxSpins-- > 0) {
+            while (true) {
                 // Re-check inside the loop: a concurrent close()/removeAll() (which signals
                 // notFull) emptied the pool; without this check the awakened thread would push
                 // the value into the newly-closed pool, leaking it.
@@ -536,7 +567,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                         if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                             if (autoBalance) {
-                                evict();
+                                pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
 
                                 if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
                                     // ignore.
@@ -552,11 +583,19 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                             return false;
                         }
 
-                        pool.put(key, value);
+                        final E displacedValue = pool.put(key, value);
+
+                        if (displacedValue != null && displacedValue != value) {
+                            pendingDestroys = appendPendingDestroy(pendingDestroys, key, displacedValue, Caller.REMOVE_REPLACE_CLEAR);
+                        }
 
                         totalDataSize.addAndGet(keyValueMemorySize); //NOSONAR
                     } else {
-                        pool.put(key, value);
+                        final E displacedValue = pool.put(key, value);
+
+                        if (displacedValue != null && displacedValue != value) {
+                            pendingDestroys = appendPendingDestroy(pendingDestroys, key, displacedValue, Caller.REMOVE_REPLACE_CLEAR);
+                        }
                     }
 
                     putCount.incrementAndGet();
@@ -575,8 +614,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 nanos = notFull.awaitNanos(nanos);
             }
-
-            return false; // Safety timeout after max spins
         } finally {
             // If an existing same-key mapping was removed up-front (freeing a slot) but the new value
             // was never stored (early bail, timeout, or exception), the net effect is a freed slot.
@@ -588,6 +625,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             lock.unlock();
+            invokeDestroyCallbacks(pendingDestroys);
         }
     }
 
@@ -598,7 +636,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param key the key, must not be {@code null}
      * @param value the value, must not be {@code null}
      * @param timeout the maximum time to wait for a slot
-     * @param unit the time unit of the timeout
+     * @param unit the time unit of the timeout, must not be {@code null}
      * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the value was added, {@code false} otherwise
      * @throws InterruptedException if interrupted while waiting
@@ -632,6 +670,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *   <li>If valid: updates last access time and access count, returns the element</li>
      * </ol>
      *
+     * <p>An expired mapping is detached and accounted while locked. Its destruction callback
+     * runs after the pool lock is released.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * E cached = pool.get("myKey");
@@ -647,6 +688,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param key the key whose associated element is to be returned
      * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the unit is null
      */
     @MayReturnNull
     @Override
@@ -654,6 +696,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         assertNotClosed();
 
         E element = null;
+        List<DestroyTask<K, E>> pendingDestroys = null;
 
         lock.lock();
 
@@ -671,8 +714,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 if (activityPrint.isExpired()) {
                     pool.remove(key);
-                    destroy(key, element, Caller.EVICT);
+                    pendingDestroys = appendPendingDestroy(pendingDestroys, key, element, Caller.EVICT);
                     element = null;
+                    notFull.signal();
                 } else {
                     activityPrint.updateLastAccessTime();
                     activityPrint.updateAccessCount();
@@ -681,6 +725,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         } finally {
             lock.unlock();
+            invokeDestroyCallbacks(pendingDestroys);
         }
 
         // Only account hit/miss on a normal completion. If the body threw (e.g. a
@@ -702,12 +747,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * the specific {@code key} is populated (by another thread's put), an expired mapping for the key
      * is skipped (removed+destroyed), or the timeout expires. On success the element stays in the
      * pool (it is not removed) and its activity print is updated.
+     * Destruction callbacks for expired mappings run after this invocation releases the pool lock.
      *
      * @param key the key whose associated element is to be returned
      * @param timeout the maximum time to wait for a valid mapping for the key
-     * @param unit the time unit of the timeout
+     * @param unit the time unit of the timeout, must not be {@code null}
      * @return the element associated with the key, or {@code null} if the timeout elapsed
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the unit is null
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull
@@ -715,7 +762,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public E get(final K key, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
+        if (unit == null) {
+            throw new IllegalArgumentException("Time unit cannot be null");
+        }
+
         E element = null;
+        List<DestroyTask<K, E>> pendingDestroys = null;
         long nanos = unit.toNanos(timeout);
 
         lock.lock();
@@ -736,7 +788,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                         // Expired mapping for the key: remove+destroy and keep waiting for a
                         // fresh one until the timeout.
                         pool.remove(key);
-                        destroy(key, element, Caller.EVICT);
+                        pendingDestroys = appendPendingDestroy(pendingDestroys, key, element, Caller.EVICT);
                         element = null;
                         notFull.signal();
                     } else {
@@ -754,6 +806,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
         } finally {
             lock.unlock();
+            invokeDestroyCallbacks(pendingDestroys);
         }
 
         // Only account hit/miss on a normal completion (see get(K)).
@@ -857,6 +910,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *       for future requests</li>
      * </ul>
      *
+     * <p>An expired mapping is detached and accounted while locked. Its destruction callback
+     * runs after the pool lock is released.</p>
+     *
      * <p>Use this method when you need to inspect pool contents for monitoring, debugging, or
      * administrative purposes without affecting the element's eviction priority. If you need to
      * use the element for regular operations, use {@link #get(Object)} instead.</p>
@@ -880,29 +936,33 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public E peek(final K key) throws IllegalStateException {
         assertNotClosed();
 
+        E element = null;
+        List<DestroyTask<K, E>> pendingDestroys = null;
+
         lock.lock();
 
         try {
             // Re-check inside the lock: see get() for rationale.
             assertNotClosed();
 
-            final E element = pool.get(key);
+            element = pool.get(key);
 
             if (element != null) {
                 final ActivityPrint activityPrint = element.activityPrint();
 
                 if (activityPrint.isExpired()) {
                     pool.remove(key);
-                    destroy(key, element, Caller.EVICT);
-
-                    return null;
+                    pendingDestroys = appendPendingDestroy(pendingDestroys, key, element, Caller.EVICT);
+                    element = null;
+                    notFull.signal();
                 }
             }
-
-            return element;
         } finally {
             lock.unlock();
+            invokeDestroyCallbacks(pendingDestroys);
         }
+
+        return element;
     }
 
     /**
@@ -930,6 +990,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            assertNotClosed();
             return pool.containsKey(key);
         } finally {
             lock.unlock();
@@ -959,6 +1020,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            assertNotClosed();
             return N.newHashSet(pool.keySet());
         } finally {
             lock.unlock();
@@ -988,6 +1050,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
+            assertNotClosed();
             return new ArrayList<>(pool.values());
         } finally {
             lock.unlock();
@@ -997,6 +1060,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Removes all mappings from this pool.
      * All removed entries are destroyed with the REMOVE_REPLACE_CLEAR reason.
+     * Pool state and accounting are cleared atomically; user destruction callbacks run after the
+     * lock is released.
      *
      * @throws IllegalStateException if the pool has been closed
      */
@@ -1004,16 +1069,18 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public void clear() throws IllegalStateException {
         assertNotClosed();
 
-        removeAll(Caller.REMOVE_REPLACE_CLEAR);
+        removeAll(Caller.REMOVE_REPLACE_CLEAR, true);
     }
 
     /**
      * Closes this pool and releases all resources.
      * Cancels the eviction task if scheduled and destroys all pooled entries.
-     * This method is idempotent.
+     * This method is idempotent. Concurrent calls are serialized, so when any invocation returns,
+     * the invocation that initiated closure has finished all destruction callbacks. Removal and
+     * accounting complete under lock before user destruction callbacks are invoked.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         lock.lock();
 
         try {
@@ -1040,6 +1107,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Removes a portion of mappings from the pool based on the configured balance factor.
      * Entries are selected for removal according to the eviction policy.
+     * The victim count, selection, detachment, accounting, and waiter signaling are atomic with
+     * respect to other pool operations. User destruction callbacks run after the lock is released.
      *
      * @throws IllegalStateException if the pool has been closed
      */
@@ -1047,15 +1116,18 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public void evict() throws IllegalStateException {
         assertNotClosed();
 
+        final Map<K, E> removingObjects;
         lock.lock();
-
         try {
-            vacate(numberToAutoBalance()); // NOSONAR
-
-            notFull.signalAll();
+            assertNotClosed();
+            // Count and detach in one critical section. Computing the count and then calling
+            // vacate(int) after an unlock allowed an intervening mutation to make the count stale.
+            removingObjects = prepareVacateUnderLock(numberToAutoBalance());
         } finally {
             lock.unlock();
         }
+
+        invokeDestroyCallbacks(removingObjects, Caller.VACATE);
     }
 
     /**
@@ -1070,6 +1142,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         lock.lock();
         try {
+            assertNotClosed();
             return pool.size();
         } finally {
             lock.unlock();
@@ -1147,19 +1220,52 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * This is the sized counterpart to the public no-arg {@link #evict()} (which removes a
      * balance-factor fraction); it removes <em>exactly</em> {@code numberToEvict} entries, choosing
      * victims via the configured {@link EvictionPolicy}. Destroyed entries use {@link Caller#VACATE}.
-     * This method is called internally during eviction operations.
+     * Victims are detached atomically under the pool lock, but user destruction callbacks run
+     * after the lock is released. This sized operation is available to subclasses; public
+     * {@link #evict()} performs its balance-factor count and detachment in one critical section.
      *
      * @param numberToEvict the number of entries to remove
      */
     protected void vacate(final int numberToEvict) {
+        Map<K, E> removingObjects = null;
+
+        lock.lock();
+        try {
+            assertNotClosed();
+            removingObjects = prepareVacateUnderLock(numberToEvict);
+        } finally {
+            lock.unlock();
+        }
+
+        invokeDestroyCallbacks(removingObjects, Caller.VACATE);
+    }
+
+    /** Detaches and accounts vacate victims, and signals capacity waiters. The caller must hold {@link #lock}. */
+    private Map<K, E> prepareVacateUnderLock(final int numberToEvict) {
+        final Map<K, E> removingObjects = detachForVacateUnderLock(numberToEvict);
+        accountDestroyAll(removingObjects, Caller.VACATE);
+
+        if (N.notEmpty(removingObjects)) {
+            notFull.signalAll();
+        }
+
+        return removingObjects;
+    }
+
+    /**
+     * Selects and detaches vacate victims. The caller must hold {@link #lock}; this method never
+     * invokes user code and does not update destruction statistics or memory accounting.
+     */
+    private Map<K, E> detachForVacateUnderLock(final int numberToEvict) {
         final int size = pool.size();
+        Map<K, E> removingObjects = null;
 
         if (numberToEvict >= size) {
-            destroyAll(new HashMap<>(pool), Caller.VACATE);
+            removingObjects = new HashMap<>(pool);
             pool.clear();
         } else if (numberToEvict > 0) {
             if (evictionPolicy == EvictionPolicy.FIFO) {
-                final Map<K, E> removingObjects = new LinkedHashMap<>(numberToEvict);
+                removingObjects = new LinkedHashMap<>(numberToEvict);
                 final Iterator<Map.Entry<K, E>> it = pool.entrySet().iterator();
 
                 while (it.hasNext() && removingObjects.size() < numberToEvict) {
@@ -1167,34 +1273,31 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     removingObjects.put(entry.getKey(), entry.getValue());
                     it.remove();
                 }
+            } else {
+                final Comparator<Map.Entry<K, E>> reversedCmp = cmp.reversed();
+                final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(numberToEvict, reversedCmp);
 
-                destroyAll(removingObjects, Caller.VACATE);
-                return;
-            }
+                for (final Map.Entry<K, E> entry : pool.entrySet()) {
+                    if (heap.size() < numberToEvict) {
+                        heap.offer(entry);
+                    } else if (cmp.compare(entry, heap.peek()) < 0) {
+                        heap.poll();
+                        heap.offer(entry);
+                    }
+                }
 
-            final Comparator<Map.Entry<K, E>> reversedCmp = cmp.reversed();
-            final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(numberToEvict, reversedCmp);
+                removingObjects = N.newHashMap(heap.size());
 
-            for (final Map.Entry<K, E> entry : pool.entrySet()) {
-                if (heap.size() < numberToEvict) {
-                    heap.offer(entry);
-                } else if (cmp.compare(entry, heap.peek()) < 0) {
-                    heap.poll();
-                    heap.offer(entry);
+                for (final Map.Entry<K, E> entry : heap) {
+                    final K key = entry.getKey();
+                    final E value = entry.getValue();
+                    pool.remove(key);
+                    removingObjects.put(key, value);
                 }
             }
-
-            final Map<K, E> removingObjects = N.newHashMap(heap.size());
-
-            for (final Map.Entry<K, E> entry : heap) {
-                final K key = entry.getKey();
-                final E value = entry.getValue();
-                pool.remove(key);
-                removingObjects.put(key, value);
-            }
-
-            destroyAll(removingObjects, Caller.VACATE);
         }
+
+        return removingObjects;
     }
 
     private int numberToAutoBalance() {
@@ -1207,7 +1310,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Scans the pool for expired entries and removes them.
-     * This method is called periodically by the scheduled eviction task.
+     * This method is called periodically by the scheduled eviction task. Detachment and pool
+     * accounting are completed under lock; user destruction callbacks run after unlock.
      */
     @SuppressWarnings({ "null", "deprecation" })
     protected void removeExpired() {
@@ -1229,17 +1333,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 for (final K key : removingObjects.keySet()) {
                     pool.remove(key);
                 }
+                accountDestroyAll(removingObjects, Caller.EVICT);
                 notFull.signalAll();
             }
         } finally {
             lock.unlock();
         }
 
-        // Phase 2: destroy outside the lock so user destroy() doesn't stall the whole pool.
+        // Phase 2: only user callbacks remain; detachment and accounting are already complete.
         try {
-            if (N.notEmpty(removingObjects)) {
-                destroyAll(removingObjects, Caller.EVICT);
-            }
+            invokeDestroyCallbacks(removingObjects, Caller.EVICT);
         } finally {
             Objectory.recycle(removingObjects);
         }
@@ -1254,15 +1357,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param caller the reason for destruction (determines whether eviction count is incremented)
      */
     protected void destroy(final K key, final E value, final Caller caller) {
+        accountDestroy(key, value, caller);
+        invokeDestroyCallback(value, caller);
+    }
+
+    /** Updates pool-owned accounting without invoking the pooled object's destruction callback. */
+    private void accountDestroy(final K key, final E value, final Caller caller) {
         if (caller == Caller.EVICT || caller == Caller.VACATE) {
             evictionCount.incrementAndGet();
         }
 
         if (value != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
-            }
-
             if (memoryMeasure != null) {
                 try {
                     final long keyValueMemorySize = memoryMeasure.sizeOf(key, value);
@@ -1278,13 +1383,86 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     }
                 }
             }
+        }
+    }
+
+    /** Invokes the pooled object's destruction callback. Callers must not hold {@link #lock}. */
+    private void invokeDestroyCallback(final E value, final Caller caller) {
+        if (value != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
+            }
 
             try {
                 value.destroy(caller);
-            } catch (final Exception exception) {
+            } catch (final Throwable exception) { // NOSONAR - isolate a broken user callback so remaining resources are still released
+                rethrowIfFatal(exception);
+
                 if (logger.isWarnEnabled()) {
                     logger.warn(ExceptionUtil.getErrorMessage(exception, true));
                 }
+            }
+        }
+    }
+
+    private void accountDestroyAll(final Map<K, E> map, final Caller caller) {
+        if (N.notEmpty(map)) {
+            for (final Map.Entry<K, E> entry : map.entrySet()) {
+                accountDestroy(entry.getKey(), entry.getValue(), caller);
+            }
+        }
+    }
+
+    private void invokeDestroyCallbacks(final Map<K, E> map, final Caller caller) {
+        if (N.notEmpty(map)) {
+            for (final Map.Entry<K, E> entry : map.entrySet()) {
+                invokeDestroyCallback(entry.getValue(), caller);
+            }
+        }
+    }
+
+    private List<DestroyTask<K, E>> appendPendingDestroy(List<DestroyTask<K, E>> pendingDestroys, final K key, final E value, final Caller caller) {
+        accountDestroy(key, value, caller);
+
+        if (value != null) {
+            if (pendingDestroys == null) {
+                pendingDestroys = new ArrayList<>();
+            }
+
+            pendingDestroys.add(new DestroyTask<>(key, value, caller));
+        }
+
+        return pendingDestroys;
+    }
+
+    private List<DestroyTask<K, E>> appendPendingDestroy(List<DestroyTask<K, E>> pendingDestroys, final Map<K, E> values, final Caller caller) {
+        if (N.notEmpty(values)) {
+            if (pendingDestroys == null) {
+                pendingDestroys = new ArrayList<>(values.size());
+            }
+
+            for (final Map.Entry<K, E> entry : values.entrySet()) {
+                accountDestroy(entry.getKey(), entry.getValue(), caller);
+
+                if (entry.getValue() != null) {
+                    pendingDestroys.add(new DestroyTask<>(entry.getKey(), entry.getValue(), caller));
+                }
+            }
+
+            notFull.signalAll();
+        }
+
+        return pendingDestroys;
+    }
+
+    private List<DestroyTask<K, E>> appendAutoBalanceVictimsUnderLock(final List<DestroyTask<K, E>> pendingDestroys) {
+        return appendPendingDestroy(pendingDestroys, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
+    }
+
+    private void invokeDestroyCallbacks(final List<DestroyTask<K, E>> pendingDestroys) {
+        if (N.notEmpty(pendingDestroys)) {
+            for (final DestroyTask<K, E> task : pendingDestroys) {
+                invokeDestroyCallback(task.value, task.caller);
             }
         }
     }
@@ -1304,12 +1482,24 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     private void removeAll(final Caller caller) {
-        // Snapshot under lock; destroy outside. See GenericObjectPool.removeAll for rationale.
+        removeAll(caller, false);
+    }
+
+    private void removeAll(final Caller caller, final boolean requireOpen) {
+        // Snapshot, clear, and account under lock; invoke only user callbacks outside. See
+        // GenericObjectPool.removeAll for the concurrency rationale.
         final Map<K, E> doomed;
         lock.lock();
         try {
+            if (requireOpen) {
+                assertNotClosed();
+            }
+
             doomed = new HashMap<>(pool);
             pool.clear();
+            // Complete accounting before exposing the newly-empty pool to another put(). If this
+            // were deferred with the callbacks, maxMemorySize checks could observe stale usage.
+            accountDestroyAll(doomed, caller);
             // Wake BOTH condition queues: notFull for parked put(...) waiters AND notEmpty for
             // parked timed get(key, timeout) waiters. The timed-get loop re-checks assertNotClosed()
             // only when woken, so without notEmpty.signalAll() a get(key, longTimeout) thread would
@@ -1320,7 +1510,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         } finally {
             lock.unlock();
         }
-        destroyAll(doomed, caller);
+        invokeDestroyCallbacks(doomed, caller);
     }
 
     /**

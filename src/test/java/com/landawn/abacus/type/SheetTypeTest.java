@@ -61,8 +61,8 @@ public class SheetTypeTest extends TestBase {
     public void testStringOf() {
         assertNull(sheetType.stringOf(null));
 
-        Sheet<String, String, Object> sheet = Sheet.rows(N.toList("r1", "r2", "r3"), N.toList("c1", "c2"),
-                new Object[][] { { 1, "a" }, { null, "b" }, { 5, "c" } });
+        Sheet<String, String, Integer> sheet = Sheet.rows(N.toList("r1", "r2", "r3"), N.toList("c1", "c2"),
+                new Integer[][] { { 1, 2 }, { null, 4 }, { 5, 6 } });
 
         String result = sheetType.stringOf(sheet);
         assertNotNull(result);
@@ -73,6 +73,19 @@ public class SheetTypeTest extends TestBase {
         assertNull(sheetType.valueOf(null));
         assertNull(sheetType.valueOf(""));
         assertNull(sheetType.valueOf(" "));
+    }
+
+    @Test
+    public void testRoundTripPreservesDeclaredKeyAndValueTypes() {
+        SheetType<String, Integer, Long> typedSheetType = new SheetType<>("String", "Integer", "Long");
+        Sheet<String, Integer, Long> source = Sheet.rows(List.of("row"), List.of(7), new Long[][] { { 9L } });
+
+        Sheet<String, Integer, Long> parsed = typedSheetType.valueOf(typedSheetType.stringOf(source));
+
+        assertEquals(String.class, parsed.rowKeySet().iterator().next().getClass());
+        assertEquals(Integer.class, parsed.columnKeySet().iterator().next().getClass());
+        assertEquals(Long.class, parsed.get("row", 7).getClass());
+        assertEquals(9L, parsed.get("row", 7));
     }
 
     @Test

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -212,6 +213,17 @@ public class BooleanArrayTypeTest extends TestBase {
         verify(mockWriter).write("null".toCharArray());
         verify(mockWriter).write("true".toCharArray());
         verify(mockWriter).write(']');
+    }
+
+    @Test
+    public void testSerializeTo_NullElementHonorsWriteNullBooleanAsFalse() throws IOException {
+        CharacterWriter mockWriter = createCharacterWriter();
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+        when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
+
+        type.serializeTo(mockWriter, new Boolean[] { null }, config);
+
+        verify(mockWriter).write(FALSE_CHAR_ARRAY);
     }
 
     @Test

@@ -12,10 +12,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Assertions;
@@ -53,6 +56,47 @@ public class StreamBaseTest extends TestBase {
 
     private <T> Stream<T> createStream(Collection<T> elements) {
         return Stream.of(elements);
+    }
+
+    @Test
+    public void testStreamTypesAreNotAdvertisedAsImmutable() {
+        Assertions.assertFalse(com.landawn.abacus.util.Immutable.class.isAssignableFrom(BaseStream.class));
+        Assertions.assertFalse(com.landawn.abacus.util.Immutable.class.isAssignableFrom(Stream.class));
+        Assertions.assertFalse(com.landawn.abacus.util.Immutable.class.isAssignableFrom(EntryStream.class));
+        Assertions.assertFalse(com.landawn.abacus.util.Immutable.class.isAssignableFrom(IntStream.class));
+        Assertions.assertFalse(com.landawn.abacus.util.Immutable.class.isAssignableFrom(LongStream.class));
+        Assertions.assertFalse(com.landawn.abacus.util.Immutable.class.isAssignableFrom(FloatStream.class));
+        Assertions.assertFalse(com.landawn.abacus.util.Immutable.class.isAssignableFrom(ShortStream.class));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testClosedStateCheckPrecedesValidationAndDelegation() {
+        Stream<Integer> stream = Stream.of(1);
+        stream.close();
+
+        Assertions.assertThrows(IllegalStateException.class, () -> stream.rateLimited(0));
+        Assertions.assertThrows(IllegalStateException.class, () -> stream.delay((java.time.Duration) null));
+        Assertions.assertThrows(IllegalStateException.class, () -> stream.parallel(0));
+        Assertions.assertThrows(IllegalStateException.class, () -> stream.mapIfNotNull(null));
+
+        ByteStream byteStream = ByteStream.of((byte) 1);
+        byteStream.close();
+        Assertions.assertThrows(IllegalStateException.class, () -> byteStream.rateLimited((com.landawn.abacus.util.RateLimiter) null));
+
+        IntStream intStream = IntStream.of(1);
+        intStream.close();
+        Assertions.assertThrows(IllegalStateException.class, () -> intStream.flattmap(null));
+
+        EntryStream<String, Integer> entryStream = EntryStream.of("one", 1);
+        entryStream.close();
+        Assertions.assertThrows(IllegalStateException.class, () -> entryStream.filterByKey(null));
+        Assertions.assertThrows(IllegalStateException.class, () -> entryStream.rateLimited(0));
+        Assertions.assertThrows(IllegalStateException.class, () -> entryStream.delay((java.time.Duration) null));
+
+        Stream<Integer> iteratorStream = Stream.of(Arrays.asList(1).iterator());
+        iteratorStream.close();
+        Assertions.assertThrows(IllegalStateException.class, () -> iteratorStream.foldRight(null));
     }
 
     // Covers StreamBase.toArray(Collection) via splitAt on iterator-backed stream
@@ -253,8 +297,10 @@ public class StreamBaseTest extends TestBase {
     public void testApplyIfNotEmptyRejectsNullFunction() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> this.<Integer> createStream().applyIfNotEmpty((Throwables.Function<Stream<Integer>, List<Integer>, RuntimeException>) null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> createStream(1).applyIfNotEmpty((Throwables.Function<Stream<Integer>, List<Integer>, RuntimeException>) null));
+        final AtomicBoolean closed = new AtomicBoolean(false);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1).onClose(() -> closed.set(true))
+                .applyIfNotEmpty((Throwables.Function<Stream<Integer>, List<Integer>, RuntimeException>) null));
+        Assertions.assertTrue(closed.get());
     }
 
     @Test
@@ -279,8 +325,10 @@ public class StreamBaseTest extends TestBase {
     public void testAcceptIfNotEmptyRejectsNullAction() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> this.<Integer> createStream().acceptIfNotEmpty((Throwables.Consumer<Stream<Integer>, RuntimeException>) null));
+        final AtomicBoolean closed = new AtomicBoolean(false);
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> createStream(1).acceptIfNotEmpty((Throwables.Consumer<Stream<Integer>, RuntimeException>) null));
+                () -> createStream(1).onClose(() -> closed.set(true)).acceptIfNotEmpty((Throwables.Consumer<Stream<Integer>, RuntimeException>) null));
+        Assertions.assertTrue(closed.get());
     }
 
     @Test
@@ -441,6 +489,25 @@ public class StreamBaseTest extends TestBase {
     }
 
     @Test
+    public void testSpsAndPspRejectNullOperationsBeforeChangingStreamMode() {
+        final java.util.function.Function<Stream<Integer>, Stream<Integer>> nullOps = null;
+        final AtomicBoolean closed = new AtomicBoolean(false);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).onClose(() -> closed.set(true)).sps(nullOps));
+        Assertions.assertTrue(closed.get());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).sps(2, nullOps));
+
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).sps(2, executor, nullOps));
+        } finally {
+            executor.shutdown();
+        }
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).parallel().psp(nullOps));
+    }
+
+    @Test
     public void testSpsWithMaxThreadNum() {
         Stream<Integer> stream = createStream(1, 2, 3);
         Stream<Integer> result = stream.sps(4, s -> s.map(x -> x * 2));
@@ -554,6 +621,25 @@ public class StreamBaseTest extends TestBase {
     }
 
     @Test
+    public void testRepeatedCloseFailureIsNotSelfSuppressedAndHandlersAreReleased() {
+        RuntimeException failure = new RuntimeException("same failure");
+        AtomicInteger laterHandlerCalls = new AtomicInteger();
+
+        Stream<Integer> stream = createStream(1, 2, 3).onClose(() -> {
+            throw failure;
+        }).onClose(() -> {
+            throw failure;
+        }).onClose(laterHandlerCalls::incrementAndGet);
+
+        RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, stream::close);
+
+        Assertions.assertSame(failure, thrown);
+        Assertions.assertEquals(0, thrown.getSuppressed().length);
+        Assertions.assertEquals(1, laterHandlerCalls.get());
+        Assertions.assertTrue(stream.closeHandlers().isEmpty(), "one-shot close handlers must be released even when closing fails");
+    }
+
+    @Test
     public void testCloseWithHandlers() {
         List<String> closeOrder = new ArrayList<>();
 
@@ -564,6 +650,23 @@ public class StreamBaseTest extends TestBase {
         Assertions.assertEquals(2, closeOrder.size());
         Assertions.assertTrue(closeOrder.contains("handler1"));
         Assertions.assertTrue(closeOrder.contains("handler2"));
+    }
+
+    @Test
+    public void testClosingDerivedStreamReleasesParentCloseHandlers() {
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final Stream<Integer> parent = createStream(1, 2, 3).onClose(closeCalls::incrementAndGet);
+        final IntStream derived = parent.newStream(new int[] { 4, 5, 6 });
+
+        derived.close();
+
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertThrows(IllegalStateException.class, parent::count);
+        Assertions.assertTrue(parent.closeHandlers().isEmpty(), "closing a derived stream must release the parent's handler deque and its captured references");
+
+        derived.close();
+        parent.close();
+        Assertions.assertEquals(1, closeCalls.get(), "the propagated close handler must remain one-shot");
     }
 
     @Test
@@ -737,6 +840,29 @@ public class StreamBaseTest extends TestBase {
     }
 
     @Test
+    public void testDeferredCloseClosesSuppliedStreamWithoutCloseHandlers() {
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final ArrayStream<Integer> supplied = new ArrayStream<>(new Integer[] { 1 }) {
+            @Override
+            public synchronized void close() {
+                if (!isClosed()) {
+                    closeCalls.incrementAndGet();
+                }
+
+                super.close();
+            }
+        };
+
+        Assertions.assertTrue(StreamBase.isEmptyCloseHandlers(supplied.closeHandlers()));
+
+        final Stream<Integer> deferred = Stream.defer(() -> supplied);
+        deferred.close();
+
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertThrows(IllegalStateException.class, supplied::count);
+    }
+
+    @Test
     public void testMergeCloseHandlers() {
         Deque<LocalRunnable> handlers = new ArrayDeque<>();
         handlers.add(LocalRunnable.wrap(Fn.jr(() -> {
@@ -821,6 +947,13 @@ public class StreamBaseTest extends TestBase {
         Assertions.assertSame(error1, errorHolder.value());
         Assertions.assertEquals(1, errorHolder.value().getSuppressed().length);
         Assertions.assertSame(error2, errorHolder.value().getSuppressed()[0]);
+
+        final AssertionError repeatedError = new AssertionError("repeated");
+        Holder<Throwable> repeatedErrorHolder = Holder.of(null);
+        StreamBase.setError(repeatedErrorHolder, repeatedError);
+        Assertions.assertDoesNotThrow(() -> StreamBase.setError(repeatedErrorHolder, repeatedError));
+        Assertions.assertSame(repeatedError, repeatedErrorHolder.value());
+        Assertions.assertEquals(0, repeatedErrorHolder.value().getSuppressed().length);
     }
 
     @Test
@@ -1156,6 +1289,123 @@ public class StreamBaseTest extends TestBase {
 
         errorHolder.setValue(new RuntimeException("Test error"));
         Assertions.assertThrows(RuntimeException.class, () -> StreamBase.complete(futures, errorHolder));
+    }
+
+    @Test
+    public void testCompleteWaitsForEveryFutureBeforePropagatingWorkerError() throws Exception {
+        final ExecutorService service = Executors.newFixedThreadPool(1);
+        final AsyncExecutor executor = new AsyncExecutor(service);
+        final RuntimeException primary = new RuntimeException("primary");
+        final IllegalStateException secondary = new IllegalStateException("secondary");
+        final Holder<Throwable> errorHolder = Holder.<Throwable> of(primary);
+        final CountDownLatch siblingStarted = new CountDownLatch(1);
+        final CountDownLatch releaseSibling = new CountDownLatch(1);
+        final CountDownLatch completionReturned = new CountDownLatch(1);
+        final AtomicBoolean siblingFinished = new AtomicBoolean();
+        final AtomicReference<Throwable> thrown = new AtomicReference<>();
+        final List<ContinuableFuture<Void>> futures = new ArrayList<>();
+
+        final ContinuableFuture<Void> sibling = executor.execute(() -> {
+            siblingStarted.countDown();
+
+            try {
+                releaseSibling.await();
+                siblingFinished.set(true);
+                throw secondary;
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
+        });
+
+        Assertions.assertTrue(siblingStarted.await(5, TimeUnit.SECONDS));
+
+        final ContinuableFuture<Void> cancelled = executor.execute(() -> {
+            // Queued behind sibling so cancellation is deterministic.
+        });
+        Assertions.assertTrue(cancelled.cancel(true));
+        futures.add(cancelled);
+        futures.add(sibling);
+
+        final Thread completingThread = new Thread(() -> {
+            try {
+                StreamBase.complete(futures, errorHolder);
+            } catch (final Throwable e) { // NOSONAR
+                thrown.set(e);
+            } finally {
+                completionReturned.countDown();
+            }
+        });
+
+        try {
+            completingThread.start();
+
+            Assertions.assertFalse(completionReturned.await(200, TimeUnit.MILLISECONDS));
+            releaseSibling.countDown();
+            Assertions.assertTrue(completionReturned.await(5, TimeUnit.SECONDS));
+            Assertions.assertTrue(siblingFinished.get());
+            Assertions.assertSame(primary, thrown.get());
+            Assertions.assertEquals(1, primary.getSuppressed().length);
+            Assertions.assertInstanceOf(java.util.concurrent.CancellationException.class, primary.getSuppressed()[0]);
+            Assertions.assertEquals(1, primary.getSuppressed()[0].getSuppressed().length);
+            Assertions.assertInstanceOf(java.util.concurrent.ExecutionException.class, primary.getSuppressed()[0].getSuppressed()[0]);
+            Assertions.assertSame(secondary, primary.getSuppressed()[0].getSuppressed()[0].getCause());
+        } finally {
+            releaseSibling.countDown();
+            completingThread.join(5000);
+            service.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testCompleteAndCollectResultWaitsBeforeClosingAndThrowing() throws Exception {
+        final ExecutorService service = Executors.newFixedThreadPool(1);
+        final AsyncExecutor executor = new AsyncExecutor(service);
+        final CountDownLatch futureStarted = new CountDownLatch(1);
+        final CountDownLatch releaseFuture = new CountDownLatch(1);
+        final CountDownLatch completionReturned = new CountDownLatch(1);
+        final AtomicReference<Throwable> thrown = new AtomicReference<>();
+        final List<ContinuableFuture<List<Integer>>> futures = new ArrayList<>();
+        final RuntimeException primary = new RuntimeException("primary");
+        final Stream<Integer> stream = createStream(1, 2, 3);
+
+        futures.add(executor.execute(() -> {
+            futureStarted.countDown();
+            releaseFuture.await();
+            return new ArrayList<>(Arrays.asList(1, 2));
+        }));
+
+        final Thread completingThread = new Thread(() -> {
+            try {
+                StreamBase.completeAndCollectResult(futures, Holder.<Throwable> of(primary), ArrayList::new, List::addAll, stream, executor, executor);
+            } catch (final Throwable e) { // NOSONAR
+                thrown.set(e);
+            } finally {
+                completionReturned.countDown();
+            }
+        });
+
+        try {
+            Assertions.assertTrue(futureStarted.await(5, TimeUnit.SECONDS));
+
+            final ContinuableFuture<List<Integer>> cancelled = executor.execute((java.util.concurrent.Callable<List<Integer>>) ArrayList::new);
+            Assertions.assertTrue(cancelled.cancel(true));
+            futures.add(0, cancelled);
+            completingThread.start();
+
+            Assertions.assertFalse(completionReturned.await(200, TimeUnit.MILLISECONDS));
+            Assertions.assertFalse(stream.isClosed());
+            releaseFuture.countDown();
+            Assertions.assertTrue(completionReturned.await(5, TimeUnit.SECONDS));
+            Assertions.assertSame(primary, thrown.get());
+            Assertions.assertEquals(1, primary.getSuppressed().length);
+            Assertions.assertInstanceOf(java.util.concurrent.CancellationException.class, primary.getSuppressed()[0]);
+            Assertions.assertTrue(stream.isClosed());
+        } finally {
+            releaseFuture.countDown();
+            completingThread.join(5000);
+            service.shutdownNow();
+        }
     }
 
     @Test
@@ -1591,10 +1841,12 @@ public class StreamBaseTest extends TestBase {
     @Test
     public void testCloseRunsRemainingHandlersAfterError() {
         final AtomicInteger closed = new AtomicInteger();
+        final AssertionError failure = new AssertionError("first");
 
-        Assertions.assertThrows(Throwable.class, () -> Stream.of(1).onClose(() -> {
-            throw new AssertionError("first");
+        final AssertionError thrown = Assertions.assertThrows(AssertionError.class, () -> Stream.of(1).onClose(() -> {
+            throw failure;
         }).onClose(closed::incrementAndGet).close());
+        Assertions.assertSame(failure, thrown);
         Assertions.assertEquals(1, closed.get());
     }
 

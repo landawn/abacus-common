@@ -128,11 +128,14 @@ import com.landawn.abacus.annotation.Internal;
  * </ul>
  *
  * <p><b>Thread Safety:</b>
- * ListMultimap is <b>not thread-safe</b> by default. For concurrent access:
+ * ListMultimap is <b>not thread-safe</b>. A concurrent backing map and thread-safe value lists
+ * do not make compound operations such as {@link #put(Object, Object)} atomic; two writers can
+ * still create competing lists for the same absent key. If any thread mutates an instance, use
+ * external synchronization around all accesses to that instance. Thread-safe list implementations
+ * can still be useful when callers intentionally expose and access individual value lists.
  * <ul>
- *   <li>Use {@code N.newListMultimap(ConcurrentHashMap::new, ArrayList::new)} for concurrent maps</li>
- *   <li>Wrap individual lists with {@code Collections.synchronizedList()}</li>
- *   <li>Use external synchronization for write operations</li>
+ *   <li>Use external synchronization for multimap operations</li>
+ *   <li>If value lists escape, apply the list implementation's own synchronization rules as well</li>
  *   <li>Consider using copy-on-write patterns for read-heavy scenarios</li>
  * </ul>
  *
@@ -150,14 +153,14 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>Consider using {@link #toImmutableMap()} for read-only snapshots</li>
  *   <li>Stream-based filtering creates new instances - chain operations efficiently</li>
  *   <li>Use {@link #wrap(Map)} when you already have a suitable Map structure</li>
- *   <li>For large datasets, consider using {@code LinkedList} if insertion performance is critical</li>
+ *   <li>Prefer {@link ArrayList} for append-heavy workloads; choose another list type only when its specific operations justify the trade-off</li>
  * </ul>
  *
  * <p><b>Memory Considerations:</b>
  * <ul>
  *   <li>Empty keys don't consume memory for value collections</li>
  *   <li>ArrayList backing provides good memory locality for small lists</li>
- *   <li>Use {@code trimToSize()} on value lists if they become large and stable</li>
+ *   <li>If actual value lists are {@link ArrayList} instances and become large and stable, {@link ArrayList#trimToSize()} can release spare capacity</li>
  *   <li>Consider using primitive collections for numeric values to reduce boxing overhead</li>
  * </ul>
  *
@@ -239,9 +242,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("key", 100);
-     * mm.get("key");        // returns [100]
-     * mm.get("x");          // returns null (absent key)
-     * mm.size();            // returns 1 (number of keys)
+     * mm.get("key");   // returns [100]
+     * mm.get("x");     // returns null (absent key)
+     * mm.size();       // returns 1 (number of keys)
      * }</pre>
      *
      * @param <K> the type of the key
@@ -271,13 +274,13 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "b", 2);
-     * mm.get("a");          // returns [1]
-     * mm.get("b");          // returns [2]
+     * mm.get("a");   // returns [1]
+     * mm.get("b");   // returns [2]
      *
      * // With duplicate keys, both values are kept in order
      * ListMultimap<String, Integer> mm2 = ListMultimap.of("a", 1, "a", 2);
-     * mm2.get("a");         // returns [1, 2] (duplicates preserved, ordered)
-     * mm2.get("x");         // returns null (absent key)
+     * mm2.get("a");   // returns [1, 2] (duplicates preserved, ordered)
+     * mm2.get("x");   // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -310,13 +313,13 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "b", 2, "c", 3);
-     * mm.get("a");          // returns [1]
-     * mm.get("c");          // returns [3]
+     * mm.get("a");   // returns [1]
+     * mm.get("c");   // returns [3]
      *
      * // Repeated keys accumulate values in insertion order
      * ListMultimap<String, Integer> mm2 = ListMultimap.of("a", 1, "a", 2, "b", 3);
-     * mm2.get("a");         // returns [1, 2]
-     * mm2.get("x");         // returns null (absent key)
+     * mm2.get("a");   // returns [1, 2]
+     * mm2.get("x");   // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -352,14 +355,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4);
-     * mm.get("a");          // returns [1]
-     * mm.get("d");          // returns [4]
-     * mm.size();            // returns 4 (number of keys)
+     * mm.get("a");   // returns [1]
+     * mm.get("d");   // returns [4]
+     * mm.size();     // returns 4 (number of keys)
      *
      * // Repeated keys accumulate values; duplicates are kept
      * ListMultimap<String, Integer> mm2 = ListMultimap.of("a", 1, "a", 1, "b", 2, "c", 3);
-     * mm2.get("a");         // returns [1, 1] (duplicates preserved)
-     * mm2.get("x");         // returns null (absent key)
+     * mm2.get("a");   // returns [1, 1] (duplicates preserved)
+     * mm2.get("x");   // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -398,14 +401,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
-     * mm.get("a");          // returns [1]
-     * mm.get("e");          // returns [5]
-     * mm.size();            // returns 5 (number of keys)
+     * mm.get("a");   // returns [1]
+     * mm.get("e");   // returns [5]
+     * mm.size();     // returns 5 (number of keys)
      *
      * // Repeated keys accumulate values in insertion order
      * ListMultimap<String, Integer> mm2 = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "a", 5);
-     * mm2.get("a");         // returns [1, 5]
-     * mm2.get("x");         // returns null (absent key)
+     * mm2.get("a");   // returns [1, 5]
+     * mm2.get("x");   // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -448,14 +451,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6);
-     * mm.get("a");          // returns [1]
-     * mm.get("f");          // returns [6]
-     * mm.size();            // returns 6 (number of keys)
+     * mm.get("a");   // returns [1]
+     * mm.get("f");   // returns [6]
+     * mm.size();     // returns 6 (number of keys)
      *
      * // Repeated keys accumulate values in insertion order
      * ListMultimap<String, Integer> mm2 = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "a", 6);
-     * mm2.get("a");         // returns [1, 6]
-     * mm2.get("x");         // returns null (absent key)
+     * mm2.get("a");   // returns [1, 6]
+     * mm2.get("x");   // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -501,14 +504,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7);
-     * mm.get("a");          // returns [1]
-     * mm.get("g");          // returns [7]
-     * mm.size();            // returns 7 (number of keys)
+     * mm.get("a");   // returns [1]
+     * mm.get("g");   // returns [7]
+     * mm.size();     // returns 7 (number of keys)
      *
      * // Repeated keys accumulate values in insertion order
      * ListMultimap<String, Integer> mm2 = ListMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "a", 7);
-     * mm2.get("a");         // returns [1, 7]
-     * mm2.get("x");         // returns null (absent key)
+     * mm2.get("a");   // returns [1, 7]
+     * mm2.get("x");   // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -550,8 +553,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Creates a new instance of ListMultimap with the key-value pairs from the specified map.
      *
      * <p>This method converts a regular Map into a ListMultimap where each key is associated with a list containing a single value.
-     * The returned ListMultimap uses the same backing map implementation as the source map (e.g., if the source is a LinkedHashMap,
-     * the returned ListMultimap will maintain insertion order).
+     * The returned ListMultimap uses a compatible independent backing map. Common concrete map types are preserved
+     * (for example, a LinkedHashMap source retains insertion order), sorted-map comparators are preserved, and an
+     * uninstantiable runtime wrapper type falls back to HashMap.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -559,9 +563,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * map.put("one", 1);
      * map.put("two", 2);
      * ListMultimap<String, Integer> mm = ListMultimap.fromMap(map);
-     * mm.get("one");        // returns [1] (each value wrapped in a single-element list)
-     * mm.get("two");        // returns [2]
-     * mm.get("x");          // returns null (absent key)
+     * mm.get("one");                                     // returns [1] (each value wrapped in a single-element list)
+     * mm.get("two");                                     // returns [2]
+     * mm.get("x");                                       // returns null (absent key)
      *
      * // null or empty source yields an empty multimap
      * ListMultimap.fromMap(null).isEmpty();              // returns true
@@ -596,15 +600,15 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "banana", "apricot", "blueberry");
      * ListMultimap<Character, String> mm = ListMultimap.fromCollection(words, s -> s.charAt(0));
-     * mm.get('a');          // returns ["apple", "apricot"] (grouped by first letter, ordered)
-     * mm.get('b');          // returns ["banana", "blueberry"]
-     * mm.get('z');          // returns null (absent key)
+     * mm.get('a');                                                                    // returns ["apple", "apricot"] (grouped by first letter, ordered)
+     * mm.get('b');                                                                    // returns ["banana", "blueberry"]
+     * mm.get('z');                                                                    // returns null (absent key)
      *
      * // null collection yields an empty multimap
      * ListMultimap.fromCollection((List<String>) null, s -> s.charAt(0)).isEmpty();   // returns true
      *
      * // null keyExtractor throws
-     * ListMultimap.fromCollection(words, null);   // throws IllegalArgumentException
+     * ListMultimap.fromCollection(words, null);                                       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -643,15 +647,15 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * // group by first letter, mapping each word to its length
      * ListMultimap<Character, Integer> mm =
      *     ListMultimap.fromCollection(words, s -> s.charAt(0), String::length);
-     * mm.get('a');          // returns [5, 7] (lengths of "apple" and "avocado", ordered)
-     * mm.get('b');          // returns [6] (length of "banana")
-     * mm.get('z');          // returns null (absent key)
+     * mm.get('a');                                                                                    // returns [5, 7] (lengths of "apple" and "avocado", ordered)
+     * mm.get('b');                                                                                    // returns [6] (length of "banana")
+     * mm.get('z');                                                                                    // returns null (absent key)
      *
      * // null collection yields an empty multimap
      * ListMultimap.fromCollection((List<String>) null, s -> s.charAt(0), String::length).isEmpty();   // returns true
      *
      * // null valueExtractor throws
-     * ListMultimap.fromCollection(words, s -> s.charAt(0), null);   // throws IllegalArgumentException
+     * ListMultimap.fromCollection(words, s -> s.charAt(0), null);                                     // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -693,14 +697,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
      * Map<String, Integer> map2 = Map.of("b", 3, "c", 4);
      * ListMultimap<String, Integer> mm = ListMultimap.merge(map1, map2);
-     * mm.get("a");          // returns [1]
-     * mm.get("b");          // returns [2, 3] (shared key: value from a then b)
-     * mm.get("c");          // returns [4]
+     * mm.get("a");   // returns [1]
+     * mm.get("b");   // returns [2, 3] (shared key: value from a then b)
+     * mm.get("c");   // returns [4]
      *
      * // a null map is treated as empty
      * ListMultimap<String, Integer> r = ListMultimap.merge(null, map2);
-     * r.get("b");           // returns [3] (only entries from map2)
-     * r.get("a");           // returns null (absent key)
+     * r.get("b");                                                                               // returns [3] (only entries from map2)
+     * r.get("a");                                                                               // returns null (absent key)
      *
      * // both null yields an empty multimap
      * ListMultimap.merge((Map<String, Integer>) null, (Map<String, Integer>) null).isEmpty();   // returns true
@@ -737,9 +741,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Map<String, Integer> map2 = Map.of("b", 2);
      * Map<String, Integer> map3 = Map.of("a", 3);
      * ListMultimap<String, Integer> mm = ListMultimap.merge(map1, map2, map3);
-     * mm.get("a");          // returns [1, 3] (shared key: value from a then c, in order)
-     * mm.get("b");          // returns [2]
-     * mm.get("x");          // returns null (absent key)
+     * mm.get("a");   // returns [1, 3] (shared key: value from a then c, in order)
+     * mm.get("b");   // returns [2]
+     * mm.get("x");   // returns null (absent key)
      *
      * // null maps are treated as empty (cast needed to disambiguate the bare nulls)
      * ListMultimap<String, Integer> r =
@@ -788,10 +792,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *     Map.of("a", 3, "c", 4)
      * );
      * ListMultimap<String, Integer> mm = ListMultimap.merge(maps);
-     * mm.get("a");          // returns [1, 3] (shared key: values in encounter order)
-     * mm.get("b");          // returns [2]
-     * mm.get("c");          // returns [4]
-     * mm.get("x");          // returns null (absent key)
+     * mm.get("a");                                                       // returns [1, 3] (shared key: values in encounter order)
+     * mm.get("b");                                                       // returns [2]
+     * mm.get("c");                                                       // returns [4]
+     * mm.get("x");                                                       // returns null (absent key)
      *
      * // null or empty collection yields an empty multimap
      * ListMultimap.merge((List<Map<String, Integer>>) null).isEmpty();   // returns true
@@ -827,6 +831,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method creates a view of the provided map as a ListMultimap. The map must contain {@code non-null}, non-empty list values.
      * Any modifications made to the returned ListMultimap will be reflected in the underlying map and vice versa.
      * The value type is automatically detected from the first list in the map, or defaults to ArrayList if the map is empty.
+     * If that runtime list type cannot create empty instances (for example the fixed-size list returned by
+     * {@link java.util.Arrays#asList(Object...)}), new keys use {@link ArrayList}; existing keys remain backed by their
+     * original lists and therefore retain those lists' mutation restrictions.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -834,9 +841,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * map.put("a", new ArrayList<>(Arrays.asList(1, 2)));
      * map.put("b", new ArrayList<>(Arrays.asList(3, 4)));
      * ListMultimap<String, Integer> mm = ListMultimap.wrap(map);
-     * mm.put("a", 5);       // writes through to the backing map
-     * mm.get("a");          // returns [1, 2, 5]
-     * map.get("a");         // returns [1, 2, 5] (same backing list)
+     * mm.put("a", 5);                                         // writes through to the backing map
+     * mm.get("a");                                            // returns [1, 2, 5]
+     * map.get("a");                                           // returns [1, 2, 5] (same backing list)
      *
      * // null map throws
      * ListMultimap.wrap((Map<String, List<Integer>>) null);   // throws IllegalArgumentException
@@ -854,15 +861,25 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @throws IllegalArgumentException if {@code map} is {@code null}, or if any value in the map is {@code null} or an empty list
      * @see #wrap(Map, Supplier)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Beta
     public static <K, E> ListMultimap<K, E> wrap(final Map<K, ? extends List<E>> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
         N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
 
         final Class<? extends List> valueType = map.isEmpty() ? ArrayList.class : map.values().iterator().next().getClass();
+        Supplier<? extends List<E>> valueSupplier;
 
-        return new ListMultimap<>((Map<K, List<E>>) map, valueType);
+        try {
+            valueSupplier = valueTypeToSupplier(valueType);
+        } catch (final IllegalArgumentException ex) {
+            // Some legitimate List implementations (Arrays.asList/subList/wrapper views) cannot
+            // create empty instances. They are still valid existing values in a wrapped map; use
+            // ArrayList only for value collections created for subsequently added keys.
+            valueSupplier = ArrayList::new;
+        }
+
+        return new ListMultimap<>((Map<K, List<E>>) map, valueSupplier);
     }
 
     /**
@@ -878,9 +895,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * Map<String, List<Integer>> map = new HashMap<>();
      * map.put("a", new LinkedList<>(Arrays.asList(1, 2)));
      * ListMultimap<String, Integer> mm = ListMultimap.wrap(map, LinkedList::new);
-     * mm.put("b", 3);       // new keys use the supplier-created LinkedList
-     * mm.get("b");          // returns [3]
-     * map.get("b");         // returns [3] (a LinkedList, written through)
+     * mm.put("b", 3);   // new keys use the supplier-created LinkedList
+     * mm.get("b");      // returns [3]
+     * map.get("b");     // returns [3] (a LinkedList, written through)
      *
      * // an empty map (no entries) is allowed
      * ListMultimap<String, Integer> mm2 =
@@ -967,15 +984,17 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method creates a new ListMultimap where each value from the original multimap becomes a key,
      * and the associated original key becomes a value in the new multimap. If multiple keys in the original
      * multimap share the same value, that value will be associated with multiple keys in the inverted multimap.
-     * The order of values in the original multimap is preserved in the inverted multimap.
+     * The order of values in the original multimap is preserved in the inverted multimap. The inverted value
+     * lists are new {@link ArrayList} instances; a custom value-list supplier from this multimap is not reused,
+     * because it may enforce the original value type rather than the inverted value type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "a", 2, "b", 1);
      * ListMultimap<Integer, String> inverted = mm.invert();
-     * inverted.get(1);      // returns ["a", "b"] (keys that mapped to 1)
-     * inverted.get(2);      // returns ["a"]
-     * inverted.get(9);      // returns null (absent key)
+     * inverted.get(1);   // returns ["a", "b"] (keys that mapped to 1)
+     * inverted.get(2);   // returns ["a"]
+     * inverted.get(9);   // returns null (absent key)
      *
      * // inverting an empty multimap yields an empty multimap
      * ListMultimap<String, Integer> empty = N.newListMultimap();
@@ -989,7 +1008,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     public ListMultimap<E, K> invert() {
         final ListMultimap<K, E> multimap = this;
         //noinspection rawtypes
-        final ListMultimap<E, K> result = new ListMultimap<>(Maps.newOrderingMap(backingMap), valueSupplier);
+        final ListMultimap<E, K> result = new ListMultimap<>(Maps.newOrderingMap(backingMap), ArrayList::new);
 
         if (N.notEmpty(multimap)) {
             for (final Map.Entry<K, List<E>> entry : multimap.backingMap.entrySet()) {
@@ -1018,10 +1037,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <pre>{@code
      * ListMultimap<String, Integer> original = ListMultimap.of("a", 1, "b", 2);
      * ListMultimap<String, Integer> copy = original.copy();
-     * copy.get("a");        // returns [1]
-     * copy.put("c", 3);     // mutating the copy does not affect the original
-     * copy.get("c");        // returns [3]
-     * original.get("c");    // returns null (absent key; original unchanged)
+     * copy.get("a");       // returns [1]
+     * copy.put("c", 3);    // mutating the copy does not affect the original
+     * copy.get("c");       // returns [3]
+     * original.get("c");   // returns null (absent key; original unchanged)
      * }</pre>
      *
      * @return a new ListMultimap containing all the key-value pairs of this ListMultimap
@@ -1036,100 +1055,6 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
         return copy;
     }
-
-    //    /**
-    //     * Filters the ListMultimap based on the provided key-value pair filter.
-    //     *
-    //     * <p>This method creates a new ListMultimap and adds all key-value pairs from the current ListMultimap
-    //     * that satisfy the provided predicate. The predicate is applied to each key and its entire associated list.
-    //     * The new ListMultimap has the same structural and hash characteristics as the current one.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
-    //     * ListMultimap<String, Integer> filtered = multimap.filter((k, v) -> v.size() > 1);
-    //     * // filtered contains only: {"a": [1, 2]}
-    //     * }</pre>
-    //     *
-    //     * @param filter the predicate to be applied to each key-value pair in the ListMultimap. If the predicate returns {@code true}, the key-value pair is included in the new ListMultimap
-    //     * @return a new ListMultimap containing all the key-value pairs of the current ListMultimap that satisfy the provided key-value pair filter
-    //     */
-    //    @Override
-    //    public ListMultimap<K, E> filter(final BiPredicate<? super K, ? super List<E>> filter) {
-    //        final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
-    //
-    //        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
-    //            if (filter.test(entry.getKey(), entry.getValue())) {
-    //                result.putValues(entry.getKey(), entry.getValue());
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-
-    //    /**
-    //     * Filters the ListMultimap based on the provided key filter.
-    //     *
-    //     * <p>This method creates a new ListMultimap and adds all key-value pairs from the current ListMultimap
-    //     * where the key satisfies the provided predicate. The new ListMultimap has the same structural and
-    //     * hash characteristics as the current one.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ListMultimap<String, Integer> multimap = ListMultimap.of("apple", 1, "apricot", 2, "banana", 3);
-    //     * ListMultimap<String, Integer> filtered = multimap.filterByKey(k -> k.startsWith("a"));
-    //     * // filtered contains: {"apple": [1], "apricot": [2]}
-    //     * }</pre>
-    //     *
-    //     * @param keyPredicate the predicate to be applied to each key in the ListMultimap. If the predicate returns {@code true}, the key-value pair is included in the new ListMultimap
-    //     * @return a new ListMultimap containing all the key-value pairs of the current ListMultimap that satisfy the provided key filter
-    //     * @see #filter(BiPredicate)
-    //     * @see #filterByValues(Predicate)
-    //     */
-    //    @Override
-    //    public ListMultimap<K, E> filterByKey(final Predicate<? super K> keyPredicate) {
-    //        final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
-    //
-    //        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
-    //            if (keyPredicate.test(entry.getKey())) {
-    //                result.putValues(entry.getKey(), entry.getValue());
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * Filters the ListMultimap based on the provided value filter.
-    //     *
-    //     * <p>This method creates a new ListMultimap and adds all key-value pairs from the current ListMultimap
-    //     * where the entire list of values associated with a key satisfies the provided predicate.
-    //     * The new ListMultimap has the same structural and hash characteristics as the current one.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
-    //     * ListMultimap<String, Integer> filtered = multimap.filterByValues(list -> list.size() >= 2);
-    //     * // filtered contains: {"a": [1, 2]}
-    //     * }</pre>
-    //     *
-    //     * @param filter the predicate to be applied to each value list in the ListMultimap. If the predicate returns {@code true}, the key-value pair is included in the new ListMultimap
-    //     * @return a new ListMultimap containing all the key-value pairs of the current ListMultimap that satisfy the provided value filter
-    //     * @see #filter(BiPredicate)
-    //     * @see #filterByKey(Predicate)
-    //     */
-    //    @Override
-    //    public ListMultimap<K, E> filterByValues(final Predicate<? super List<E>> filter) {
-    //        final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
-    //
-    //        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
-    //            if (filter.test(entry.getValue())) {
-    //                result.putValues(entry.getKey(), entry.getValue());
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
 
     /**
      * Converts the current ListMultimap into an ImmutableMap.
@@ -1178,9 +1103,9 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * // use LinkedHashMap to preserve insertion order in the result
      * ImmutableMap<String, ImmutableList<Integer>> immutable =
      *     mm.toImmutableMap(LinkedHashMap::new);
-     * immutable.get("a");           // returns ImmutableList [1, 2]
-     * immutable.get("b");           // returns ImmutableList [3]
-     * immutable.get("x");           // returns null (absent key)
+     * immutable.get("a");   // returns ImmutableList [1, 2]
+     * immutable.get("b");   // returns ImmutableList [3]
+     * immutable.get("x");   // returns null (absent key)
      *
      * // the supplier receives the number of keys; build a sized HashMap
      * ImmutableMap<String, ImmutableList<Integer>> sized =
@@ -1202,6 +1127,4 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
         return ImmutableMap.wrap(map);
     }
-
-    //    public ListMultimap<E, K> invert() {
 }

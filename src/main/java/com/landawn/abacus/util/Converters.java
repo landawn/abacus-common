@@ -53,8 +53,8 @@ final class Converters {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Converters.register(MyType.class, (value, targetType) -> value.toString()); // returns true (MyType is a non-built-in class, not already registered)
-     * Converters.register(String.class, (value, targetType) -> value);            // throws IllegalArgumentException (built-in java.* class)
+     * Converters.register(MyType.class, (value, targetType) -> value.toString());   // returns true (MyType is a non-built-in class, not already registered)
+     * Converters.register(String.class, (value, targetType) -> value);              // throws IllegalArgumentException (built-in java.* class)
      * }</pre>
      *
      * @param srcClass the source class that the converter can convert from. This must not be a built-in class.

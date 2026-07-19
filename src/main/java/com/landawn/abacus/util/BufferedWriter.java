@@ -124,7 +124,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Creates a BufferedWriter that writes to the specified OutputStream.
-     * Characters are encoded using the default character encoding.
+     * Characters are encoded as UTF-8 ({@link IOUtil#DEFAULT_CHARSET}), independent of the
+     * JVM's platform-default charset.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -292,8 +293,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(new Date());   // "2024-06-15T10:30:00Z" is written (example value)
-     * writer.write((Date) null);  // "null" is written
+     * writer.write(new Date());    // "2024-06-15T10:30:00Z" is written (example value)
+     * writer.write((Date) null);   // "null" is written
      * }</pre>
      *
      * @param date the date to write; if {@code null}, {@code "null"} is written
@@ -311,8 +312,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Calendar cal = Calendar.getInstance();
-     * writer.write(cal);             // "2024-06-15T10:30:00Z" is written (example value)
-     * writer.write((Calendar) null); // "null" is written
+     * writer.write(cal);               // "2024-06-15T10:30:00Z" is written (example value)
+     * writer.write((Calendar) null);   // "null" is written
      * }</pre>
      *
      * @param c the calendar to write; if {@code null}, {@code "null"} is written
@@ -330,8 +331,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance().newXMLGregorianCalendar();
-     * writer.write(xmlCal);                          // "2024-06-15T10:30:00Z" is written (example value)
-     * writer.write((XMLGregorianCalendar) null);     // "null" is written
+     * writer.write(xmlCal);                        // "2024-06-15T10:30:00Z" is written (example value)
+     * writer.write((XMLGregorianCalendar) null);   // "null" is written
      * }</pre>
      *
      * @param c the XMLGregorianCalendar to write; if {@code null}, {@code "null"} is written
@@ -763,7 +764,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
             } catch (final Throwable e) {
                 if (exception == null) {
                     exception = e;
-                } else {
+                } else if (exception != e) {
+                    // Avoid masking the original failure if the delegate rethrows the same
+                    // Throwable instance from flush() and close().
                     exception.addSuppressed(e);
                 }
             }
@@ -852,7 +855,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Reinitializes this writer to write to the specified {@link OutputStream},
-     * replacing any previous state. The stream is wrapped in a default-charset
+     * replacing any previous state. The stream is wrapped in a UTF-8
      * {@link java.io.OutputStreamWriter}. Any previously held buffers are recycled.
      * This allows reusing the same writer instance with a different output stream.
      *

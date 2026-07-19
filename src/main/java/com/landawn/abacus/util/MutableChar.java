@@ -220,6 +220,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * @param predicate the predicate to test against the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
+     * @throws NullPointerException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception during evaluation
      */
     public <E extends Exception> boolean setIf(final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
@@ -507,8 +508,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * MutableChar a = MutableChar.of('A');
      * MutableChar b = MutableChar.of('A');
      *
-     * int hash1 = a.hashCode();  // returns 65 (Unicode value of 'A')
-     * int hash2 = b.hashCode();  // returns 65
+     * int hash1 = a.hashCode();   // returns 65 (Unicode value of 'A')
+     * int hash2 = b.hashCode();   // returns 65
      * assert hash1 == hash2;     // passes — hash codes are equal
      * }</pre>
      *

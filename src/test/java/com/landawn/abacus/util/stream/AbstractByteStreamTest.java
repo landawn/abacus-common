@@ -1050,7 +1050,7 @@ public class AbstractByteStreamTest extends TestBase {
     public void testPrepend1() {
         byte[] result = stream.prepend(OptionalByte.of((byte) 9)).toArray();
         assertArrayEquals(new byte[] { 9, 1, 2, 3, 4, 5 }, result);
-        byte[] result2 = stream.prepend(OptionalByte.empty()).toArray();
+        byte[] result2 = createByteStream(new byte[] { 1, 2, 3, 4, 5 }).prepend(OptionalByte.empty()).toArray();
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result2);
     }
 
@@ -1651,6 +1651,11 @@ public class AbstractByteStreamTest extends TestBase {
     }
 
     @Test
+    public void testJoinToRejectsNullForEmptyStream() {
+        assertThrows(IllegalArgumentException.class, () -> createAbstractStream().joinTo(null));
+    }
+
+    @Test
     public void collect() {
         List<Byte> result = stream.collect(ArrayList::new, List::add);
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
@@ -1912,6 +1917,27 @@ public class AbstractByteStreamTest extends TestBase {
         revIter2.nextByte();
         assertEquals(3L, revIter2.count());
         assertFalse(revIter2.hasNext());
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
+        ByteIteratorEx reversed = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
+        assertEquals(5, reversed.toArray().length);
+        assertFalse(reversed.hasNext());
+        assertEquals(0, reversed.toArray().length);
+
+        ByteIteratorEx rotated = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).iteratorEx();
+        rotated.nextByte();
+        assertEquals(4, rotated.toArray().length);
+        assertFalse(rotated.hasNext());
+        assertEquals(0, rotated.toArray().length);
+
+        ByteIteratorEx reverseSorted = (ByteIteratorEx) createAbstractStream((byte) 3, (byte) 1, (byte) 4, (byte) 1, (byte) 5).reverseSorted().iteratorEx();
+        reverseSorted.nextByte();
+        reverseSorted.nextByte();
+        assertEquals(3, reverseSorted.toArray().length);
+        assertFalse(reverseSorted.hasNext());
+        assertEquals(0, reverseSorted.toArray().length);
     }
 
     @Test

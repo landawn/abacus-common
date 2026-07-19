@@ -15,11 +15,11 @@
 package com.landawn.abacus.util;
 
 /**
- * A utility class reserved for security-related operations.
+ * An empty compatibility shell that exposes no security operations.
  *
- * <p>This class is intentionally empty and serves as a placeholder for security
- * functionality that may be added in future releases. It follows the utility class
- * pattern (non-instantiable, all static members).
+ * <p>This class provides no validation, cryptography, access control, or other security
+ * guarantees and must not be used as a security boundary. It is retained as a
+ * non-instantiable public type for compatibility.
  */
 public final class SecurityUtil {//NOSONAR
 

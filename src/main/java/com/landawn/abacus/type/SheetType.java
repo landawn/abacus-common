@@ -24,8 +24,9 @@ import com.landawn.abacus.util.Strings;
 /**
  * Type handler for {@link Sheet}, which represents a two-dimensional table structure with row keys,
  * column keys, and cell values. This class handles JSON-based serialization and deserialization of
- * Sheet instances; it does not support a flat string round-trip and reports
- * {@link #isSerializable()} as {@code false}, delegating to {@link SerializationType#SHEET}.
+ * Sheet instances. Although {@link #stringOf(Sheet)} and {@link #valueOf(String)} provide an explicit JSON
+ * round-trip, {@link #isSerializable()} returns {@code false} so general serializers use the structured
+ * {@link SerializationType#SHEET} path instead of treating a sheet as a scalar string value.
  *
  * @param <R> the row key type
  * @param <C> the column key type
@@ -199,9 +200,8 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
-    @SuppressWarnings("rawtypes")
     @Override
-    public String stringOf(final Sheet x) {
+    public String stringOf(final Sheet<R, C, E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -225,14 +225,14 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON string to parse
-     * @return the parsed Sheet object, or {@code null} if the input string is {@code null} or empty
+     * @return the parsed Sheet object with its declared row, column, and element types preserved,
+     *         or {@code null} if the input string is {@code null} or blank
      * @see #valueOf(Object)
      * @see #stringOf(Sheet)
      */
-    @SuppressWarnings("rawtypes")
     @Override
-    public Sheet valueOf(final String str) {
-        return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
+    public Sheet<R, C, E> valueOf(final String str) {
+        return Strings.isBlank(str) ? null : Utils.jsonParser.deserialize(str, this);
     }
 
     /**

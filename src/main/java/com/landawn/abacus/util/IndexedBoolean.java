@@ -124,7 +124,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) index + (value ? 0 : 31);
+        return 31 * (value ? 0 : 1) + hashLong(index);
     }
 
     /**

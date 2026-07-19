@@ -3,6 +3,7 @@ package com.landawn.abacus.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,18 +15,27 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +49,22 @@ public class HttpClientTest extends TestBase {
 
     private MockWebServer server;
     private String baseUrl;
+
+    @Test
+    public void testRequestCharsetFallsBackToClientContentTypeWhenRequestHasUnrelatedHeaders() {
+        final HttpSettings defaults = HttpSettings.create().setContentType("text/plain; charset=ISO-8859-1");
+        final HttpClient client = HttpClient.create(baseUrl, 1, 1_000, 1_000, defaults);
+
+        try {
+            final HttpSettings requestSettings = HttpSettings.create().header("X-Trace-Id", "123");
+            assertEquals(StandardCharsets.ISO_8859_1, client.getRequestCharset(requestSettings));
+
+            requestSettings.setContentType("text/plain; charset=UTF-16");
+            assertEquals(StandardCharsets.UTF_16, client.getRequestCharset(requestSettings));
+        } finally {
+            client.close();
+        }
+    }
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -55,8 +81,11 @@ public class HttpClientTest extends TestBase {
     private static class MockWebServer {
         private ServerSocket serverSocket;
         private Thread serverThread;
-        private final Queue<MockResponse> responses = new LinkedList<>();
-        private final Queue<RecordedRequest> requests = new LinkedList<>();
+        // The test thread enqueues responses while the server thread polls them. LinkedList has
+        // no cross-thread visibility guarantees and occasionally made an enqueued response look
+        // absent, yielding the fixture's fallback 404.
+        private final Queue<MockResponse> responses = new ConcurrentLinkedQueue<>();
+        private final Queue<RecordedRequest> requests = new ConcurrentLinkedQueue<>();
 
         public void start() throws IOException {
             serverSocket = new ServerSocket(0);
@@ -341,6 +370,42 @@ public class HttpClientTest extends TestBase {
         assertEquals("request", connection.getRequestProperty("X-Request"));
         assertEquals("request", connection.getRequestProperty("X-Override"));
         connection.disconnect();
+    }
+
+    @Test
+    public void testOpenConnectionInheritsClientProxyWhenRequestProxyIsUnspecified() throws IOException {
+        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 18080));
+        final HttpSettings baseSettings = HttpSettings.create().setProxy(proxy);
+        final HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, baseSettings);
+        final HttpSettings requestSettings = HttpSettings.create().header("X-Trace-Id", "123");
+
+        try {
+            final HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+
+            assertTrue(connection.usingProxy());
+            connection.disconnect();
+        } finally {
+            client.close();
+        }
+    }
+
+    @Test
+    public void testOpenConnectionInheritsClientSslFactoryWhenRequestFactoryIsUnspecified() throws GeneralSecurityException {
+        final SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, null, null);
+        final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+        final HttpSettings baseSettings = HttpSettings.create().setSSLSocketFactory(sslSocketFactory);
+        final HttpClient client = HttpClient.create("https://example.com", 16, 5000L, 10000L, baseSettings);
+        final HttpSettings requestSettings = HttpSettings.create().header("X-Trace-Id", "123");
+
+        try {
+            final HttpsURLConnection connection = (HttpsURLConnection) client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+
+            assertSame(sslSocketFactory, connection.getSSLSocketFactory());
+            connection.disconnect();
+        } finally {
+            client.close();
+        }
     }
 
     @Test
@@ -821,6 +886,22 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testOpenConnectionSaturatesLongRequestTimeouts() throws IOException {
+        final HttpClient client = HttpClient.create(baseUrl);
+        final HttpSettings requestSettings = HttpSettings.create().setConnectTimeout(Long.MAX_VALUE).setReadTimeout(Long.MAX_VALUE);
+
+        try {
+            final HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+
+            assertEquals(Integer.MAX_VALUE, connection.getConnectTimeout());
+            assertEquals(Integer.MAX_VALUE, connection.getReadTimeout());
+            connection.disconnect();
+        } finally {
+            client.close();
+        }
+    }
+
+    @Test
     public void testOpenConnectionWithQueryParameters() throws IOException {
         HttpClient client = HttpClient.create(baseUrl);
         HttpURLConnection connection = client.openConnection(HttpMethod.GET, "param=value", null, false, String.class);
@@ -850,6 +931,21 @@ public class HttpClientTest extends TestBase {
         HttpClient client = HttpClient.create("https://api.example.com");
         client.close();
         assertNotNull(client);
+    }
+
+    @Test
+    public void testCloseDoesNotShutDownCallerOwnedExecutor() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final HttpClient client = HttpClient.create("https://api.example.com", 1, 1_000L, 1_000L, executor);
+
+        try {
+            client.close();
+
+            assertFalse(executor.isShutdown());
+            assertEquals(42, executor.submit(() -> 42).get());
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     // M13: HttpClient implements AutoCloseable (usable in try-with-resources).

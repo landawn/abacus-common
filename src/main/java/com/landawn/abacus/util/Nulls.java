@@ -43,10 +43,10 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * <p><b>Relationship to {@link N}:</b> the {@link N} facade exposes same-named {@code firstNonNull} /
  * {@code lastNonNull} methods that return an {@link com.landawn.abacus.util.u.Optional Optional&lt;T&gt;},
- * which cleanly distinguishes "no {@code non-null} element was found" from "a present element whose value
- * is {@code null}". The methods here deliberately trade that distinction away for a terser, wrapper-free
- * direct return; prefer them when {@code null} simply means "absent" in your domain and an {@code Optional}
- * would only add noise. Each method links to its {@code N} counterpart via {@code @see}.</p>
+ * which represents "no {@code non-null} element was found" explicitly as an empty optional. The methods
+ * here use {@code null} as that absence sentinel for a terser, wrapper-free direct return; prefer them when
+ * {@code null} simply means "absent" in your domain and an {@code Optional} would only add noise. Each
+ * method links to its {@code N} counterpart via {@code @see}.</p>
  *
  * <p><b>Null-safety, exceptions, and thread-safety:</b> every method is {@code null}-safe &mdash; a
  * {@code null} array, {@link Iterable}, or {@link Iterator} yields {@code null} rather than throwing &mdash;
@@ -441,10 +441,10 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.firstElement(new String[] {"a", "b"});   // returns "a"
-     * Nulls.firstElement(new String[] {null, "b"});  // returns null (index 0 holds null)
-     * Nulls.firstElement(new String[0]);             // returns null (empty)
-     * Nulls.firstElement((String[]) null);           // returns null
+     * Nulls.firstElement(new String[] {"a", "b"});    // returns "a"
+     * Nulls.firstElement(new String[] {null, "b"});   // returns null (index 0 holds null)
+     * Nulls.firstElement(new String[0]);              // returns null (empty)
+     * Nulls.firstElement((String[]) null);            // returns null
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -476,9 +476,9 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.firstElement(Arrays.asList("a", "b"));   // returns "a"
-     * Nulls.firstElement(Arrays.asList(null, "b"));  // returns null (first element is null)
-     * Nulls.firstElement(Collections.emptyList());   // returns null (empty)
+     * Nulls.firstElement(Arrays.asList("a", "b"));    // returns "a"
+     * Nulls.firstElement(Arrays.asList(null, "b"));   // returns null (first element is null)
+     * Nulls.firstElement(Collections.emptyList());    // returns null (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -516,9 +516,9 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.firstElement(Arrays.asList("a", "b").iterator());   // returns "a"
-     * Nulls.firstElement(Arrays.asList(null, "b").iterator());  // returns null (first element is null)
-     * Nulls.firstElement(Collections.emptyIterator());          // returns null (empty)
+     * Nulls.firstElement(Arrays.asList("a", "b").iterator());    // returns "a"
+     * Nulls.firstElement(Arrays.asList(null, "b").iterator());   // returns null (first element is null)
+     * Nulls.firstElement(Collections.emptyIterator());           // returns null (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.

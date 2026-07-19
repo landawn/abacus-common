@@ -50,11 +50,9 @@ public class InstantTypeTest extends TestBase {
 
     @Test
     public void testStringOf_ValidInstant() {
-        Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
+        Instant instant = Instant.parse("2023-12-25T10:30:45.123456789Z");
         String result = instantType.stringOf(instant);
-        assertNotNull(result);
-        assertTrue(result.contains("2023-12-25"));
-        assertTrue(result.contains("10:30:45"));
+        assertEquals("2023-12-25T10:30:45.123Z", result);
     }
 
     @Test
@@ -305,18 +303,18 @@ public class InstantTypeTest extends TestBase {
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         instantType.serializeTo(characterWriter, instant, config);
-        verify(characterWriter).write(anyString());
+        verify(characterWriter).write("2023-12-25T10:30:45Z");
     }
 
     @Test
     public void testSerializeTo_ISO8601Timestamp() throws IOException {
-        Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
+        Instant instant = Instant.parse("2023-12-25T10:30:45Z");
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         instantType.serializeTo(characterWriter, instant, config);
-        verify(characterWriter).write(anyString());
+        verify(characterWriter).write("2023-12-25T10:30:45.000Z");
     }
 
     @Test

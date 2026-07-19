@@ -87,9 +87,9 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null}, empty, or blank
-     * @return the parsed {@code Byte[]} array, an empty array for {@code "[]"},
+     * @return the parsed {@code Byte[]} array
      *         or {@code null} if {@code str} is {@code null}, empty, or blank
-     * @throws NumberFormatException if any non-null element cannot be parsed as a valid {@code byte}
+     * @throws NumberFormatException if any {@code non-null} element cannot be parsed as a valid {@code byte}
      * @see #valueOf(Object)
      * @see #stringOf(Byte[])
      */
@@ -210,7 +210,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Appends a {@code Byte[]} array to an {@link Appendable} in bracket-enclosed format.
      * Appends the literal {@code "null"} string if {@code x} is {@code null}.
      * Each {@code null} element is written as {@code "null"};
-     * non-null elements are written as their decimal string values.
+     * {@code non-null} elements are written as their decimal string values.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -255,7 +255,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
 
     /**
      * Writes a {@code Byte[]} array to a {@link CharacterWriter} in bracket-enclosed format.
-     * Uses the writer's optimized byte-write method for non-null elements.
+     * Uses the writer's optimized byte-write method for {@code non-null} elements.
      * The format is identical to {@link #appendTo(Appendable, Byte[])}.
      * {@code config} is not used.
      * <p>
@@ -270,7 +270,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Byte[]} array to write; may be {@code null}
-     * @param config the serialization configuration (unused for byte arrays); may be {@code null}
+     * @param config the serialization configuration forwarded to each element; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -285,11 +285,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
                     writer.write(ELEMENT_SEPARATOR);
                 }
 
-                if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    writer.write(x[i]);
-                }
+                elementType.serializeTo(writer, x[i], config);
             }
 
             writer.write(SK._BRACKET_R);

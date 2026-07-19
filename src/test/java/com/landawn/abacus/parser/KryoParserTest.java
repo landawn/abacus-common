@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -545,6 +546,12 @@ public class KryoParserTest extends TestBase {
     }
 
     @Test
+    public void testRegisterClassRejectsNegativeIdImmediately() {
+        assertThrows(IllegalArgumentException.class, () -> parser.register(TestObject.class, -1));
+        assertThrows(IllegalArgumentException.class, () -> parser.register(TestObject.class, new CustomSerializer(), -1));
+    }
+
+    @Test
     public void testRegisterClassWithSerializer() {
         assertDoesNotThrow(() -> parser.register(TestObject.class, new CustomSerializer()));
     }
@@ -552,6 +559,22 @@ public class KryoParserTest extends TestBase {
     @Test
     public void testRegisterClassWithSerializerAndId() {
         assertDoesNotThrow(() -> parser.register(TestObject.class, new CustomSerializer(), 200));
+    }
+
+    @Test
+    public void testLatestRegistrationOverloadReplacesEarlierVariant() {
+        final Serializer<TestObject> staleSerializer = new CustomSerializer();
+        parser.register(TestObject.class, staleSerializer, 500);
+        parser.register(TestObject.class, 501);
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(501, kryo.getRegistration(TestObject.class).getId());
+            assertNotSame(staleSerializer, kryo.getRegistration(TestObject.class).getSerializer());
+        } finally {
+            parser.recycle(kryo);
+        }
     }
 
     @Test
@@ -583,5 +606,28 @@ public class KryoParserTest extends TestBase {
         final String encoded = parser.serialize(null, (KryoSerConfig) null);
 
         assertNull(parser.deserialize(encoded, null, String.class));
+    }
+
+    @Test
+    public void testDeserializeTypedDoesNotSelfSuppressReusedSerializerFailure() {
+        final RuntimeException serializerFailure = new RuntimeException("serializer failure");
+
+        parser.register(TestObject.class, new Serializer<TestObject>() {
+            @Override
+            public void write(final Kryo kryo, final Output output, final TestObject object) {
+                // The class header alone is sufficient to exercise both typed-read strategies.
+            }
+
+            @Override
+            public TestObject read(final Kryo kryo, final Input input, final Class<? extends TestObject> type) {
+                throw serializerFailure;
+            }
+        }, 501);
+
+        final String encoded = parser.serialize(new TestObject("ignored", 1), KryoSerConfig.create().setWriteClass(true));
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> parser.deserialize(encoded, null, TestObject.class));
+
+        assertSame(serializerFailure, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
     }
 }

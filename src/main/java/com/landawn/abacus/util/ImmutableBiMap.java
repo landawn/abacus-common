@@ -503,9 +503,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p>If the provided {@code BiMap} is {@code null}, this method returns
      * {@link #empty()}.</p>
      *
-     * <p><b>Warning:</b> the immutability guarantee of the returned instance relies
-     * on external code not mutating the wrapped {@code BiMap}. This method is
-     * therefore marked as {@link Beta}.</p>
+     * <p>The returned object is a read-only view, not a deeply immutable snapshot. Use
+     * {@link #copyOf(Map)} when subsequent changes to the source must not be visible.</p>
      *
      * <p><b>Usage example:</b></p>
      * <pre>{@code
@@ -569,7 +568,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p>The returned map is also an {@code ImmutableBiMap} and is backed by the
      * inverse view of the same underlying {@code BiMap} as this instance, so it
      * shares the same storage and requires no copying. Calling {@code inverse()}
-     * multiple times returns the same cached instance.</p>
+     * multiple times returns the same cached instance, and calling {@code inverse()} on
+     * that result returns this instance.</p>
      *
      * <p><b>Usage example:</b></p>
      * <pre>{@code
@@ -581,7 +581,21 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @return an {@code ImmutableBiMap} view where keys and values are swapped
      */
     public ImmutableBiMap<V, K> inverse() {
-        return invertedView == null ? (invertedView = ImmutableBiMap.wrap(biMap.inverse())) : invertedView;
+        ImmutableBiMap<V, K> result = invertedView;
+
+        if (result == null) {
+            synchronized (this) {
+                result = invertedView;
+
+                if (result == null) {
+                    result = ImmutableBiMap.wrap(biMap.inverse());
+                    result.invertedView = this;
+                    invertedView = result;
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

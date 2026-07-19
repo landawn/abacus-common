@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -1494,6 +1495,13 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testOccurrencesOfObjectArrayUsesContentEqualityForNestedArrays() {
+        Object[] values = { new int[] { 1, 2 }, new int[] { 3 }, new int[] { 1, 2 } };
+
+        assertEquals(2, N.frequency(values, new int[] { 1, 2 }));
+    }
+
+    @Test
     public void testOccurrencesOfIterableSet() {
         Set<Integer> numbers = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5));
         assertEquals(1, N.frequency(numbers, 3));
@@ -1917,6 +1925,49 @@ public class NTest extends AbstractParserTest {
 
             N.println(map);
         });
+    }
+
+    @Test
+    public void testFrequencyMapWritesEachDistinctKeyOnce() {
+        final class CountingMap<K, V> extends HashMap<K, V> {
+            private int putCount;
+
+            @Override
+            public V put(final K key, final V value) {
+                putCount++;
+                return super.put(key, value);
+            }
+        }
+
+        final CountingMap<String, Integer> iterableMap = new CountingMap<>();
+        final Map<String, Integer> iterableResult = N.frequencyMap(Arrays.asList("a", "a", "a", "b", "b", "c"), () -> iterableMap);
+        assertSame(iterableMap, iterableResult);
+        assertEquals(3, iterableMap.putCount);
+        assertEquals(Map.of("a", 3, "b", 2, "c", 1), iterableResult);
+
+        final CountingMap<String, Integer> iteratorMap = new CountingMap<>();
+        final Map<String, Integer> iteratorResult = N.frequencyMap(Arrays.asList("a", "a", "a", "b", "b", "c").iterator(), () -> iteratorMap);
+        assertSame(iteratorMap, iteratorResult);
+        assertEquals(3, iteratorMap.putCount);
+        assertEquals(Map.of("a", 3, "b", 2, "c", 1), iteratorResult);
+    }
+
+    @Test
+    public void testFrequencyMapPreservesEncounterOrderWithOrderedSupplier() {
+        // All three overloads must agree: with an order-preserving supplier, distinct keys
+        // appear in first-encounter order (the array overload has always behaved this way).
+        final List<String> words = Arrays.asList("c", "a", "b", "a", "c");
+
+        final Map<String, Integer> fromArray = N.frequencyMap(new String[] { "c", "a", "b", "a", "c" }, LinkedHashMap::new);
+        assertEquals(Arrays.asList("c", "a", "b"), new ArrayList<>(fromArray.keySet()));
+
+        final Map<String, Integer> fromIterable = N.frequencyMap(words, LinkedHashMap::new);
+        assertEquals(Arrays.asList("c", "a", "b"), new ArrayList<>(fromIterable.keySet()));
+        assertEquals(Map.of("c", 2, "a", 2, "b", 1), fromIterable);
+
+        final Map<String, Integer> fromIterator = N.frequencyMap(words.iterator(), LinkedHashMap::new);
+        assertEquals(Arrays.asList("c", "a", "b"), new ArrayList<>(fromIterator.keySet()));
+        assertEquals(Map.of("c", 2, "a", 2, "b", 1), fromIterator);
     }
 
     @Test
@@ -5686,6 +5737,34 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testFlattenIterables_TraversesOneShotOuterIterableOnce() {
+        AtomicBoolean iteratorCreated = new AtomicBoolean();
+        Iterable<Iterable<String>> oneShot = () -> iteratorCreated.compareAndSet(false, true)
+                ? Arrays.<Iterable<String>> asList(Arrays.asList("a", "b"), Arrays.asList("c")).iterator()
+                : Collections.emptyIterator();
+
+        assertEquals(Arrays.asList("a", "b", "c"), N.flatten(oneShot, ArrayList::new));
+    }
+
+    @Test
+    public void testFlattenIterables_RejectsOverflowingSizeEstimate() {
+        Collection<String> hugeEmptyCollection = new java.util.AbstractCollection<>() {
+            @Override
+            public Iterator<String> iterator() {
+                return Collections.emptyIterator();
+            }
+
+            @Override
+            public int size() {
+                return Integer.MAX_VALUE;
+            }
+        };
+
+        assertThrows(ArithmeticException.class,
+                () -> N.flatten(Arrays.<Iterable<String>> asList(hugeEmptyCollection, hugeEmptyCollection), ignored -> new ArrayList<>()));
+    }
+
+    @Test
     public void testFlattenBooleanArrayNull() {
         boolean[][] array = null;
         boolean[] result = N.flatten(array);
@@ -9200,6 +9279,10 @@ public class NTest extends AbstractParserTest {
         boolean changed = N.addAll(list, toAdd);
         assertTrue(changed);
         assertEquals(Arrays.asList("a", "b", "c", "d"), list);
+
+        List<String> viewBacked = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        assertTrue(N.addAll(viewBacked, (Iterable<String>) viewBacked.subList(0, 2)));
+        assertEquals(Arrays.asList("a", "b", "c", "a", "b"), viewBacked);
     }
 
     @Test
@@ -9209,6 +9292,10 @@ public class NTest extends AbstractParserTest {
         boolean changed = N.addAll(list, toAdd);
         assertTrue(changed);
         assertEquals(Arrays.asList("a", "b", "c", "d"), list);
+
+        List<String> selfIterated = new ArrayList<>(Arrays.asList("a", "b"));
+        assertTrue(N.addAll(selfIterated, selfIterated.iterator()));
+        assertEquals(Arrays.asList("a", "b", "a", "b"), selfIterated);
     }
 
     @Test
@@ -9719,6 +9806,33 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testInsertAllTreatsNullVarargsAsEmpty() {
+        assertArrayEquals(new boolean[0], N.insertAll((boolean[]) null, 0, (boolean[]) null));
+        assertArrayEquals(new char[0], N.insertAll((char[]) null, 0, (char[]) null));
+        assertArrayEquals(new byte[0], N.insertAll((byte[]) null, 0, (byte[]) null));
+        assertArrayEquals(new short[0], N.insertAll((short[]) null, 0, (short[]) null));
+        assertArrayEquals(new int[0], N.insertAll((int[]) null, 0, (int[]) null));
+        assertArrayEquals(new long[0], N.insertAll((long[]) null, 0, (long[]) null));
+        assertEquals(0, N.insertAll((float[]) null, 0, (float[]) null).length);
+        assertEquals(0, N.insertAll((double[]) null, 0, (double[]) null).length);
+        assertArrayEquals(new String[0], N.insertAll((String[]) null, 0, (String[]) null));
+    }
+
+    @Test
+    public void testInsertAllGenericArrayPreservesSourceComponentType() {
+        final Number[] source = new Number[0];
+        final Number[] result = N.insertAll(source, 0, new Integer[] { 1, 2 });
+
+        assertSame(Number[].class, result.getClass());
+        assertArrayEquals(new Number[] { 1, 2 }, result);
+
+        final Number[] unchanged = N.insertAll(source, 0, (Number[]) null);
+        assertSame(Number[].class, unchanged.getClass());
+        assertNotSame(source, unchanged);
+        assertArrayEquals(source, unchanged);
+    }
+
+    @Test
     public void testInsertAllListVarArgs() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "d"));
         assertTrue(N.insertAll(list, 1, "b", "c"));
@@ -9733,6 +9847,15 @@ public class NTest extends AbstractParserTest {
         List<String> list = new ArrayList<>(Arrays.asList("a", "d"));
         assertTrue(N.insertAll(list, 1, Arrays.asList("b", "c")));
         assertEquals(Arrays.asList("a", "b", "c", "d"), list);
+
+        List<String> selfInsertion = new ArrayList<>(Arrays.asList("a", "b"));
+        assertTrue(N.insertAll(selfInsertion, 1, selfInsertion));
+        assertEquals(Arrays.asList("a", "a", "b", "b"), selfInsertion);
+
+        List<String> viewInsertion = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        assertTrue(N.insertAll(viewInsertion, 0, viewInsertion.subList(1, 3)));
+        assertEquals(Arrays.asList("b", "c", "a", "b", "c"), viewInsertion);
+
         assertFalse(N.insertAll(list, 1, Collections.emptyList()));
         assertThrows(IllegalArgumentException.class, () -> N.insertAll((List<String>) null, 0, Arrays.asList("a")));
         assertThrows(IndexOutOfBoundsException.class, () -> N.insertAll(list, 10, Arrays.asList("x")));
@@ -10452,6 +10575,15 @@ public class NTest extends AbstractParserTest {
         Collection<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
         assertTrue(N.removeAll(set, Arrays.asList("a", "x")));
         assertEquals(new HashSet<>(Arrays.asList("b", "c")), set);
+
+        Set<String> selfIteratedSet = new HashSet<>(Arrays.asList("a", "b", "c"));
+        Iterable<String> selfIterable = selfIteratedSet::iterator;
+        assertTrue(N.removeAll(selfIteratedSet, selfIterable));
+        assertTrue(selfIteratedSet.isEmpty());
+
+        List<String> viewBacked = new LinkedList<>(Arrays.asList("a", "b", "c", "d"));
+        assertTrue(N.removeAll(viewBacked, viewBacked.subList(0, 2)));
+        assertEquals(Arrays.asList("c", "d"), viewBacked);
     }
 
     @Test
@@ -10465,6 +10597,10 @@ public class NTest extends AbstractParserTest {
         Collection<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
         assertTrue(N.removeAll(set, Arrays.asList("a", "x").iterator()));
         assertEquals(new HashSet<>(Arrays.asList("b", "c")), set);
+
+        Set<String> selfIteratedSet = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
+        assertTrue(N.removeAll(selfIteratedSet, selfIteratedSet.iterator()));
+        assertTrue(selfIteratedSet.isEmpty());
     }
 
     // ========== removeAll with empty a -> return EMPTY_ARRAY ==========
@@ -11520,6 +11656,22 @@ public class NTest extends AbstractParserTest {
         List<String> listNullRep = toMutableList("a", "b");
         assertTrue(N.replaceRange(listNullRep, 0, 1, null));
         assertEquals(toMutableList("b"), listNullRep);
+
+        List<String> selfReplacement = toMutableList("a", "b", "c", "d");
+        assertTrue(N.replaceRange(selfReplacement, 1, 3, selfReplacement));
+        assertEquals(Arrays.asList("a", "a", "b", "c", "d", "d"), selfReplacement);
+
+        List<String> viewReplacement = toMutableList("a", "b", "c", "d");
+        assertTrue(N.replaceRange(viewReplacement, 1, 3, viewReplacement.subList(0, 2)));
+        assertEquals(Arrays.asList("a", "a", "b", "d"), viewReplacement);
+
+        List<String> fixedSize = Arrays.asList("a", "b", "c");
+        assertTrue(N.replaceRange(fixedSize, 1, 2, Collections.singletonList("X")));
+        assertEquals(Arrays.asList("a", "X", "c"), fixedSize);
+
+        List<String> copyOnWrite = new CopyOnWriteArrayList<>(Arrays.asList("a", "b", "c"));
+        assertTrue(N.replaceRange(copyOnWrite, 1, 2, Collections.singletonList("X")));
+        assertEquals(Arrays.asList("a", "X", "c"), copyOnWrite);
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.replaceRange(toMutableList("a"), -1, 0, replacement));
         assertThrows(IllegalArgumentException.class, () -> N.replaceRange((List<String>) null, 0, 0, replacement));
@@ -12703,6 +12855,24 @@ public class NTest extends AbstractParserTest {
         assertEquals(2.0, N.averageLong(Arrays.asList(1L, 2L, 3L)), 0.001);
         assertEquals(4.0, N.averageLong(Arrays.asList(1L, 2L, 3L), x -> x * 2), 0.001);
         assertEquals(0.0, N.averageLong(Collections.emptyList()), 0.001);
+    }
+
+    @Test
+    public void testAverageLong_DoesNotOverflowRunningSum() {
+        final double expectedMax = (double) Long.MAX_VALUE;
+        final double expectedMin = (double) Long.MIN_VALUE;
+        final long[] primitiveValues = { Long.MAX_VALUE, Long.MAX_VALUE };
+        final Long[] values = { Long.MAX_VALUE, Long.MAX_VALUE };
+
+        assertEquals(expectedMax, N.average(primitiveValues), 0D);
+        assertEquals(expectedMax, N.averageLong(values), 0D);
+        assertEquals(expectedMax, N.averageLong(values, value -> value), 0D);
+        assertEquals(expectedMax, N.averageLong(Arrays.asList(values), 0, values.length), 0D);
+        assertEquals(expectedMax, N.averageLong(new LinkedList<>(Arrays.asList(values)), 0, values.length, value -> value), 0D);
+
+        Iterable<Long> iterable = () -> Arrays.asList(values).iterator();
+        assertEquals(expectedMax, N.averageLong(iterable), 0D);
+        assertEquals(expectedMin, N.average(new long[] { Long.MIN_VALUE, Long.MIN_VALUE }), 0D);
     }
 
     @Test
@@ -16521,6 +16691,14 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testIsMatchCountBetweenIteratorStopsAfterUpperBoundIsExceeded() {
+        final Iterator<Integer> iterator = Arrays.asList(2, 4, 99).iterator();
+
+        assertFalse(N.isMatchCountBetween(iterator, 0, 1, (Predicate<Integer>) x -> x % 2 == 0));
+        assertEquals(99, iterator.next());
+    }
+
+    @Test
     public void testIsMatchCountBetween_EmptyArray() {
         Integer[] arr = {};
         assertTrue(N.isMatchCountBetween(arr, 0, 5, (Predicate<Integer>) x -> true));
@@ -16595,12 +16773,28 @@ public class NTest extends AbstractParserTest {
             largeArray[i] = i;
         }
 
-        long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        int count = N.count(largeArray, i -> i % 1000 == 0);
-        long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        final IntPredicate everyThousandth = i -> i % 1000 == 0;
+        N.count(largeArray, everyThousandth); // Warm up the lambda and count implementation before measuring allocations.
+
+        final java.lang.management.ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
+        final com.sun.management.ThreadMXBean allocationBean = threadBean instanceof com.sun.management.ThreadMXBean
+                ? (com.sun.management.ThreadMXBean) threadBean
+                : null;
+
+        if (allocationBean != null && allocationBean.isThreadAllocatedMemorySupported() && !allocationBean.isThreadAllocatedMemoryEnabled()) {
+            allocationBean.setThreadAllocatedMemoryEnabled(true);
+        }
+
+        final long threadId = Thread.currentThread().getId();
+        final long startMemory = allocationBean == null ? -1 : allocationBean.getThreadAllocatedBytes(threadId);
+        final int count = N.count(largeArray, everyThousandth);
+        final long endMemory = allocationBean == null ? -1 : allocationBean.getThreadAllocatedBytes(threadId);
 
         assertEquals(1000, count);
-        assertTrue((endMemory - startMemory) < 1000000, "Memory usage increased significantly");
+
+        if (startMemory >= 0 && endMemory >= 0) {
+            assertTrue((endMemory - startMemory) < 1000000, "Count allocated too much memory on the current thread");
+        }
     }
 
     @Test
@@ -17005,6 +17199,50 @@ public class NTest extends AbstractParserTest {
         List<Integer> result = N.merge(a, b, selector);
 
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
+    }
+
+    @Test
+    public void testMergeRejectsNullSelectorEvenWhenNoComparisonIsNeeded() {
+        BiFunction<Integer, Integer, MergeResult> nullSelector = null;
+
+        assertThrows(IllegalArgumentException.class, () -> N.merge(new Integer[0], new Integer[0], nullSelector));
+        assertThrows(IllegalArgumentException.class, () -> N.merge(Collections.<Integer> emptyList(), Collections.<Integer> emptyList(), nullSelector));
+        assertThrows(IllegalArgumentException.class, () -> N.merge(Collections.<Iterable<Integer>> emptyList(), nullSelector));
+        assertThrows(IllegalArgumentException.class, () -> N.merge(Collections.<Iterable<Integer>> emptyList(), nullSelector, IntFunctions.ofList()));
+    }
+
+    @Test
+    public void testMergeRejectsOverflowingCombinedSizeEstimate() {
+        Collection<Integer> hugeEmptyCollection = new java.util.AbstractCollection<>() {
+            @Override
+            public Iterator<Integer> iterator() {
+                return Collections.emptyIterator();
+            }
+
+            @Override
+            public int size() {
+                return Integer.MAX_VALUE;
+            }
+        };
+
+        assertThrows(ArithmeticException.class, () -> N.merge(Arrays.<Iterable<Integer>> asList(hugeEmptyCollection, hugeEmptyCollection),
+                (a, b) -> MergeResult.TAKE_FIRST, IntFunctions.<Integer> ofList()));
+
+        Collection<Integer> hugeSingletonCollection = new java.util.AbstractCollection<>() {
+            @Override
+            public Iterator<Integer> iterator() {
+                return Collections.singleton(1).iterator();
+            }
+
+            @Override
+            public int size() {
+                return Integer.MAX_VALUE;
+            }
+        };
+
+        assertThrows(ArithmeticException.class,
+                () -> N.merge(Arrays.<Iterable<Integer>> asList(hugeSingletonCollection, hugeSingletonCollection, Collections.emptyList()),
+                        (a, b) -> MergeResult.TAKE_FIRST, IntFunctions.<Integer> ofList()));
     }
 
     @Test
@@ -21431,6 +21669,26 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testPairAndTripleIncrementMustBePositive() {
+        final Integer[] array = { 1, 2, 3 };
+        final List<Integer> list = Arrays.asList(array);
+
+        assertThrows(IllegalArgumentException.class, () -> N.forEachPair(array, 0, (a, b) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> N.forEachPair(list, -1, (a, b) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> N.forEachPair(list.iterator(), 0, (a, b) -> {
+        }));
+
+        assertThrows(IllegalArgumentException.class, () -> N.forEachTriple(array, 0, (a, b, c) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> N.forEachTriple(list, -1, (a, b, c) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> N.forEachTriple(list.iterator(), 0, (a, b, c) -> {
+        }));
+    }
+
+    @Test
     public void forEachPair_array_biConsumer() throws Exception {
         String[] array = { "a", "b", "c", "d", "e" };
         List<String> result = new ArrayList<>();
@@ -22689,6 +22947,53 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testIteratorBatchesAreIndependentSnapshots() {
+        List<Integer> values = Arrays.asList(1, 2, 3, 4, 5, 6);
+        List<List<Integer>> observed = new ArrayList<>();
+
+        N.runByBatch(values.iterator(), 2, observed::add);
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)), observed);
+
+        List<List<Integer>> returned = N.callByBatch(values.iterator(), 2, batch -> batch);
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)), returned);
+    }
+
+    @Test
+    public void testIteratorBatchingDoesNotPreallocateTheRequestedBatchSize() {
+        final List<List<Integer>> observed = new ArrayList<>();
+        N.runByBatch(Arrays.asList(1, 2, 3).iterator(), Integer.MAX_VALUE, observed::add);
+
+        assertEquals(Collections.singletonList(Arrays.asList(1, 2, 3)), observed);
+        assertThrows(UnsupportedOperationException.class, () -> observed.get(0).add(4));
+        assertEquals(Collections.singletonList(3), N.callByBatch(Arrays.asList(1, 2, 3).iterator(), Integer.MAX_VALUE, List::size));
+    }
+
+    @Test
+    public void testListBatchingAvoidsIndexOverflow() {
+        final List<Integer> virtualList = new java.util.AbstractList<>() {
+            @Override
+            public Integer get(final int index) {
+                if (index < 0 || index >= size()) {
+                    throw new IndexOutOfBoundsException();
+                }
+
+                return index;
+            }
+
+            @Override
+            public int size() {
+                return Integer.MAX_VALUE;
+            }
+        };
+
+        final List<Integer> observedSizes = new ArrayList<>();
+        N.runByBatch(virtualList, 1_500_000_000, batch -> observedSizes.add(batch.size()));
+        assertEquals(Arrays.asList(1_500_000_000, 647_483_647), observedSizes);
+
+        assertEquals(Arrays.asList(1_500_000_000, 647_483_647), N.callByBatch(virtualList, 1_500_000_000, List::size));
+    }
+
+    @Test
     public void testRunByBatchWithElementConsumerTracking() {
         List<String> items = Arrays.asList("a", "b", "c", "d", "e", "f", "g");
         List<String> processedItems = new ArrayList<>();
@@ -23215,6 +23520,42 @@ public class NTest extends AbstractParserTest {
             Thread.sleep(10);
         }, 100);
         assertEquals(1, counter.get());
+    }
+
+    @Test
+    public void testUninterruptibleMillisTimeoutUsesElapsedTimeNotWallClockDeadline() {
+        List<Long> runBudgets = new ArrayList<>();
+        try {
+            N.runUninterruptibly(remainingMillis -> {
+                runBudgets.add(remainingMillis);
+                if (runBudgets.size() == 1) {
+                    throw new InterruptedException();
+                }
+            }, Long.MAX_VALUE);
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        assertEquals(Long.MAX_VALUE, runBudgets.get(0));
+        assertTrue(runBudgets.get(1) > Long.MAX_VALUE - 60_000);
+
+        List<Long> callBudgets = new ArrayList<>();
+        try {
+            assertEquals("done", N.callUninterruptibly(remainingMillis -> {
+                callBudgets.add(remainingMillis);
+                if (callBudgets.size() == 1) {
+                    throw new InterruptedException();
+                }
+                return "done";
+            }, Long.MAX_VALUE));
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        assertEquals(Long.MAX_VALUE, callBudgets.get(0));
+        assertTrue(callBudgets.get(1) > Long.MAX_VALUE - 60_000);
     }
 
     @Test

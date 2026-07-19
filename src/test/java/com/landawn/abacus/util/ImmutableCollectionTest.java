@@ -1,10 +1,12 @@
 package com.landawn.abacus.util;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -654,7 +656,8 @@ public class ImmutableCollectionTest extends TestBase {
         ImmutableCollection<String> collection1 = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
         Collection<String> collection2 = Arrays.asList("a", "b", "c");
 
-        Assertions.assertTrue(collection1.equals(collection2));
+        Assertions.assertFalse(collection1.equals(collection2));
+        Assertions.assertFalse(collection2.equals(collection1));
     }
 
     @Test
@@ -700,7 +703,8 @@ public class ImmutableCollectionTest extends TestBase {
         ImmutableCollection<String> collection1 = ImmutableCollection.wrap(Collections.emptyList());
         Collection<String> collection2 = Collections.emptyList();
 
-        Assertions.assertTrue(collection1.equals(collection2));
+        Assertions.assertFalse(collection1.equals(collection2));
+        Assertions.assertFalse(collection2.equals(collection1));
     }
 
     @Test
@@ -722,8 +726,9 @@ public class ImmutableCollectionTest extends TestBase {
         ImmutableCollection<String> immutable2 = ImmutableCollection.wrap(list2);
         ImmutableCollection<String> immutable3 = ImmutableCollection.wrap(list3);
 
-        Assertions.assertEquals(immutable1, immutable2);
-        Assertions.assertEquals(immutable1, list2);
+        Assertions.assertNotEquals(immutable1, immutable2);
+        Assertions.assertNotEquals(immutable1, list2);
+        Assertions.assertNotEquals(list2, immutable1);
 
         Assertions.assertNotEquals(immutable1, immutable3);
         Assertions.assertNotEquals(immutable1, list3);
@@ -747,7 +752,8 @@ public class ImmutableCollectionTest extends TestBase {
         ImmutableCollection<String> collection1 = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
         ImmutableCollection<String> collection2 = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
 
-        Assertions.assertEquals(collection1.hashCode(), collection2.hashCode());
+        Assertions.assertEquals(System.identityHashCode(collection1), collection1.hashCode());
+        Assertions.assertEquals(System.identityHashCode(collection2), collection2.hashCode());
     }
 
     @Test
@@ -755,7 +761,46 @@ public class ImmutableCollectionTest extends TestBase {
         List<String> list = Arrays.asList("a", "b", "c");
         ImmutableCollection<String> immutable = ImmutableCollection.wrap(list);
 
-        Assertions.assertEquals(list.hashCode(), immutable.hashCode());
+        Assertions.assertEquals(System.identityHashCode(immutable), immutable.hashCode());
+        Assertions.assertNotEquals(list, immutable);
+    }
+
+    @Test
+    public void testIteratorDoesNotExposeMutableObjIterator() {
+        List<String> backing = new ArrayList<>(Arrays.asList("a", "b"));
+        Collection<String> collectionWithMutableObjIterator = new AbstractCollection<>() {
+            @Override
+            public ObjIterator<String> iterator() {
+                Iterator<String> delegate = backing.iterator();
+
+                return new ObjIterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        return delegate.hasNext();
+                    }
+
+                    @Override
+                    public String next() {
+                        return delegate.next();
+                    }
+
+                    @Override
+                    public void remove() {
+                        delegate.remove();
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return backing.size();
+            }
+        };
+
+        ObjIterator<String> iter = ImmutableCollection.wrap(collectionWithMutableObjIterator).iterator();
+        Assertions.assertEquals("a", iter.next());
+        Assertions.assertThrows(UnsupportedOperationException.class, iter::remove);
+        Assertions.assertEquals(Arrays.asList("a", "b"), backing);
     }
 
     @Test

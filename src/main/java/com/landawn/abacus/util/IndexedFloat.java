@@ -122,14 +122,13 @@ public final class IndexedFloat extends AbstractIndexed {
      * Returns a hash code value for this object. The hash code is computed
      * using both the index and the value.
      *
-     * <p>Note: The float value is multiplied by 31 and then truncated to {@code int},
-     * so values that differ only in their fractional parts may produce the same hash code.</p>
+     * <p>All bits of the index and the floating-point value contribute to the result.</p>
      *
      * @return a hash code value for this object
      */
     @Override
     public int hashCode() {
-        return (int) index + (int) (value * 31); // NOSONAR
+        return 31 * Float.hashCode(value) + hashLong(index);
     }
 
     /**

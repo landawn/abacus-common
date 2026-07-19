@@ -42,6 +42,7 @@ public class IntToLongFunctionTest extends TestBase {
         assertEquals(100L, IntToLongFunction.DEFAULT.applyAsLong(100));
         assertEquals(0L, IntToLongFunction.DEFAULT.applyAsLong(0));
         assertEquals(-50L, IntToLongFunction.DEFAULT.applyAsLong(-50));
-        assertEquals(Integer.MAX_VALUE, IntToLongFunction.DEFAULT.applyAsLong(Integer.MAX_VALUE));
+        assertEquals((long) Integer.MAX_VALUE, IntToLongFunction.DEFAULT.applyAsLong(Integer.MAX_VALUE));
+        assertEquals((long) Integer.MIN_VALUE, IntToLongFunction.DEFAULT.applyAsLong(Integer.MIN_VALUE));
     }
 }

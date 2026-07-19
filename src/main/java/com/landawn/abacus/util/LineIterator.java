@@ -34,6 +34,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * to free internal resources. This can be done by closing the reader directly,
  * or by calling the {@link #close()} or {@link IOUtil#closeQuietly(AutoCloseable)}
  * method on the iterator.
+ * The iterator is stateful and is not safe for concurrent traversal without external synchronization.
  *
  * <p>The recommended usage pattern is:</p>
  * <pre>{@code
@@ -92,10 +93,10 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in a {@code File} using the default encoding for the VM.
+     * Returns an Iterator for the lines in a {@code File} using the library default UTF-8 encoding.
      * <p>
      * This method opens an {@code InputStream} for the file and wraps it in a {@code Reader}
-     * using the platform's default character encoding. When you have finished with the iterator,
+     * using UTF-8. When you have finished with the iterator,
      * you should close it to free internal resources. This can be done by calling the
      * {@link #close()} method or by using try-with-resources.
      *
@@ -149,7 +150,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @throws UncheckedIOException in case of an I/O error (e.g., file not found or cannot be read)
      * @see #of(File)
      */
-    public static LineIterator of(final File file, final Charset encoding) {
+    public static LineIterator of(final File file, final Charset encoding) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
         N.checkArgNotNull(encoding, cs.encoding);
 
@@ -172,8 +173,8 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in an {@code InputStream}, using the platform's
-     * default character encoding.
+     * Returns an Iterator for the lines in an {@code InputStream}, using the library default
+     * UTF-8 encoding.
      * <p>
      * {@code LineIterator} holds a reference to the open {@code InputStream} specified here.
      * When you have finished with the iterator, you should close it to free internal resources.
@@ -222,7 +223,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @throws UncheckedIOException if an I/O error occurs while reading from the input stream
      * @see #of(InputStream)
      */
-    public static LineIterator of(final InputStream input, final Charset encoding) throws UncheckedIOException {
+    public static LineIterator of(final InputStream input, final Charset encoding) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(input, cs.inputStream);
         N.checkArgNotNull(encoding, cs.encoding);
 

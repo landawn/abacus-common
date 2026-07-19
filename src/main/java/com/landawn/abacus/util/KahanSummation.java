@@ -25,6 +25,7 @@ import com.landawn.abacus.util.u.OptionalDouble;
  * <p>
  * This is particularly useful when summing many numbers where intermediate results may
  * lose precision due to floating-point arithmetic limitations.
+ * Instances are mutable and are not safe for concurrent updates without external synchronization.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -74,8 +75,9 @@ public final class KahanSummation { // NOSONAR
      * System.out.println(sum.sum());   // prints 6.0
      * }</pre>
      *
-     * @param a the array of double values to sum; may be empty
+     * @param a the array of double values to sum; may be empty but not {@code null}
      * @return a new KahanSummation instance containing the sum of the provided values
+     * @throws NullPointerException if {@code a} is {@code null}
      * @see #addAll(double[])
      */
     public static KahanSummation of(final double... a) {
@@ -121,7 +123,8 @@ public final class KahanSummation { // NOSONAR
      * sum.addAll(values);
      * }</pre>
      *
-     * @param values the array of values to add to the summation
+     * @param values the array of values to add to the summation; must not be {@code null}
+     * @throws NullPointerException if {@code values} is {@code null}
      */
     public void addAll(final double[] values) {
         for (final double value : values) {
@@ -147,7 +150,7 @@ public final class KahanSummation { // NOSONAR
      * @param sumA the pre-computed sum of those values
      * @throws IllegalArgumentException if {@code countA} is negative
      */
-    public void combine(final long countA, final double sumA) {
+    public void combine(final long countA, final double sumA) throws IllegalArgumentException {
         N.checkArgNotNegative(countA, "countA");
 
         count += countA;
@@ -160,6 +163,8 @@ public final class KahanSummation { // NOSONAR
      * Combines this summation with another KahanSummation instance.
      * <p>
      * This method properly combines both the sum and the correction term from the other instance.
+     * The operation is alias-safe: passing {@code this} doubles the represented observations in
+     * the same way as combining two independently accumulated instances with identical state.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -169,17 +174,25 @@ public final class KahanSummation { // NOSONAR
      * // sum1 now contains the combined sum with proper error compensation
      * }</pre>
      *
-     * @param other the other KahanSummation to combine with this one
+     * @param other the other KahanSummation to combine with this one; may be this instance
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     public void combine(final KahanSummation other) {
-        count += other.count;
-        simpleSum += other.simpleSum;
-        kahanSum(other.sum);
+        // Snapshot all source fields before mutating this instance. This is required when
+        // other == this because kahanSum changes both sum and correction.
+        final long otherCount = other.count;
+        final double otherSimpleSum = other.simpleSum;
+        final double otherSum = other.sum;
+        final double otherCorrection = other.correction;
+
+        count += otherCount;
+        simpleSum += otherSimpleSum;
+        kahanSum(otherSum);
         // Subtract the compensation bits: the running invariant is
         // (true sum) ~= sum - correction, so the other's correction must be
         // incorporated with a negated sign (see JDK-8214761 for the identical
         // fix in java.util.DoubleSummaryStatistics).
-        kahanSum(-other.correction);
+        kahanSum(-otherCorrection);
     }
 
     /**

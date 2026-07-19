@@ -27,9 +27,9 @@ import java.io.Writer;
  * subclass defines its own character replacement table that determines which characters
  * should be escaped and how.</p>
  *
- * <p>The class provides efficient character-by-character and bulk writing operations
- * with automatic escaping. Characters that need escaping are replaced with their
- * corresponding escape sequences as defined in the replacement table.</p>
+ * <p>The class provides efficient character-by-character and bulk writing operations.
+ * Escaping is performed only by the {@code writeCharacter(...)} methods; inherited
+ * and overridden plain {@code write(...)} methods write their input verbatim.</p>
  *
  * <p>This class is designed for high-performance output generation and is not thread-safe.
  * If multiple threads need to write concurrently, external synchronization is required.</p>
@@ -116,7 +116,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * }</pre>
      *
      * @param ch the character to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed or an I/O error occurs
      */
     public void writeCharacter(final char ch) throws IOException {
         if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
@@ -140,10 +140,12 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * }</pre>
      *
      * @param cbuf the character array to write; must not be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed or an I/O error occurs
      * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     public void writeCharacter(final char[] cbuf) throws IOException {
+        ensureOpen();
+
         final int len = cbuf.length;
 
         char ch = 0;
@@ -189,7 +191,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * @param cbuf the character array containing data to write; must not be {@code null}
      * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
      * @param len the number of characters to write; must be non-negative and {@code off + len} must not exceed {@code cbuf.length}
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed or an I/O error occurs
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len} exceeds {@code cbuf.length}
      * @throws NullPointerException if {@code cbuf} is {@code null}
      */
@@ -242,7 +244,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * }</pre>
      *
      * @param str the string to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed or an I/O error occurs
      */
     @SuppressWarnings("deprecation")
     public void writeCharacter(final String str) throws IOException {
@@ -272,7 +274,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *            must be non-negative and not greater than the effective string length
      * @param len the number of characters to write; must be non-negative and {@code off + len} must
      *            not exceed the effective string length
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed or an I/O error occurs
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
      *         exceeds the effective string length
      */
@@ -294,8 +296,8 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hex = getHexString(0x1F);   // returns "&#x1f;"
-     * String hex2 = getHexString(0xA9);  // returns "&#xa9;"
+     * String hex = getHexString(0x1F);    // returns "&#x1f;"
+     * String hex2 = getHexString(0xA9);   // returns "&#xa9;"
      * }</pre>
      *
      * @param ch the character code to convert
@@ -306,7 +308,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     }
 
     /**
-     * Converts a character to its JSON Unicode escape sequence of the form <code>&#92;uXXXX</code>.
+     * Converts a character to its JSON Unicode escape sequence of the form {@code &#92;uXXXX}.
      *
      * <p>The result is always a six-character {@code String}: a backslash, the letter
      * {@code u}, and four lowercase hexadecimal digits zero-padded to a width of four.
@@ -315,11 +317,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p><b>Usage Examples:</b></p>
      * <pre><code>
      * String unicode = getCharNum((char) 0x2028);   // returns "&#92;u2028"
-     * String ctrl    = getCharNum((char) 0x01);     // returns "&#92;u0001"
+     * String ctrl = getCharNum((char) 0x01);        // returns "&#92;u0001"
      * </code></pre>
      *
      * @param ch the character to convert
-     * @return the JSON Unicode escape sequence (e.g., <code>&#92;u2028</code>)
+     * @return the JSON Unicode escape sequence (e.g., {@code &#92;u2028})
      */
     static String getCharNum(final char ch) {
         return String.format("\\u%04x", (int) ch);

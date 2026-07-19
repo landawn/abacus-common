@@ -147,6 +147,13 @@ public class StringWriterTest extends AbstractTest {
     }
 
     @Test
+    public void testWrite_nullStringSubsetUsesNullSequence() {
+        StringWriter writer = new StringWriter();
+        writer.write((String) null, 1, 2);
+        assertEquals("ul", writer.toString());
+    }
+
+    @Test
     public void testFlush() throws Exception {
         StringWriter writer = new StringWriter();
         writer.write("Test");

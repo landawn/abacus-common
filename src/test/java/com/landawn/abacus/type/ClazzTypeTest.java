@@ -30,6 +30,13 @@ public class ClazzTypeTest extends TestBase {
     }
 
     @Test
+    public void testParameterizedTypeMetadata() {
+        Assertions.assertTrue(type.isParameterizedType());
+        assertEquals(1, type.parameterTypes().size());
+        assertEquals(String.class, type.parameterTypes().get(0).javaType());
+    }
+
+    @Test
     public void testStringOf_SimpleClass() {
         String result = type.stringOf(String.class);
         assertEquals("java.lang.String", result);

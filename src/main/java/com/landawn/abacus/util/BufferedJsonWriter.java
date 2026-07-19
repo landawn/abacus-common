@@ -18,7 +18,8 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 /**
- * A specialized writer for efficient JSON output with automatic character escaping.
+ * A specialized writer for efficient JSON output with character escaping through the
+ * {@code writeCharacter(...)} methods.
  * This class extends {@link CharacterWriter} and provides optimized writing of JSON content
  * with proper escaping of special JSON characters according to RFC 4627.
  *
@@ -31,9 +32,9 @@ import java.io.Writer;
  *       carriage return ({@code \r}), and form feed ({@code \f}) use their
  *       standard JSON escape sequences</li>
  *   <li>Control characters (U+0000 through U+001F) and U+007F are escaped
- *       as <code>&#92;uXXXX</code> sequences</li>
+ *       as {@code &#92;uXXXX} sequences</li>
  *   <li>Line separator (U+2028) and paragraph separator (U+2029) are escaped
- *       as <code>&#92;u2028</code> and <code>&#92;u2029</code> to prevent JavaScript syntax errors</li>
+ *       as {@code &#92;u2028} and {@code &#92;u2029} to prevent JavaScript syntax errors</li>
  * </ul>
  *
  * <p>An HTML-safe replacement table (with additional escaping for {@code <}, {@code >},
@@ -164,11 +165,12 @@ public final class BufferedJsonWriter extends CharacterWriter {
 
     /**
      * Creates a new BufferedJsonWriter that writes to the specified OutputStream.
-     * Characters are encoded using the default character encoding.
+     * Characters are encoded as UTF-8 ({@link IOUtil#DEFAULT_CHARSET}), independent of the
+     * JVM's platform-default charset.
      *
-     * <p>The writer will automatically escape JSON special characters as they
-     * are written to the output stream. Closing this writer will also close
-     * the underlying {@code OutputStream}.</p>
+     * <p>The {@code writeCharacter(...)} methods escape JSON special characters; the ordinary
+     * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
+     * {@code OutputStream}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -187,8 +189,9 @@ public final class BufferedJsonWriter extends CharacterWriter {
     /**
      * Creates a new BufferedJsonWriter that writes to the specified Writer.
      *
-     * <p>The writer will automatically escape JSON special characters as they
-     * are written. Closing this writer will also close the underlying {@code Writer}.</p>
+     * <p>The {@code writeCharacter(...)} methods escape JSON special characters; the ordinary
+     * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
+     * {@code Writer}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableFloat;
 
@@ -141,6 +142,16 @@ public class MutableFloatTypeTest extends TestBase {
         assertDoesNotThrow(() -> {
             mutableFloatType.serializeTo(characterWriter, null, null);
         });
+    }
+
+    @Test
+    public void testSerializeToWithNullHonorsWriteNullNumberAsZero() throws IOException {
+        JsonXmlSerConfig<?> config = Mockito.mock(JsonXmlSerConfig.class);
+        Mockito.when(config.isWriteNullNumberAsZero()).thenReturn(true);
+
+        mutableFloatType.serializeTo(characterWriter, null, config);
+
+        Mockito.verify(characterWriter).write(0.0f);
     }
 
     @Test

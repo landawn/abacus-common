@@ -81,7 +81,7 @@ class CurlInterceptor implements Interceptor {
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command. Must not be {@code null}.
      */
-    public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) {
+    public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) throws IllegalArgumentException {
         this.logHandler = N.checkArgNotNull(logHandler, "logHandler");
         this.quoteChar = quoteChar;
     }
@@ -159,7 +159,7 @@ class CurlInterceptor implements Interceptor {
             }
         }
 
-        final String curl = WebUtil.buildCurl(HttpMethod.valueOf(httpMethod), url, httpHeaders, bodyString, bodyContentType, quoteChar);
+        final String curl = WebUtil.buildCurlByMethodName(httpMethod, url, httpHeaders, bodyString, bodyContentType, quoteChar);
 
         logHandler.accept(curl);
     }

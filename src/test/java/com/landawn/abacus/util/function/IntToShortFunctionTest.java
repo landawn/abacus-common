@@ -27,6 +27,10 @@ public class IntToShortFunctionTest extends TestBase {
         assertEquals((short) 100, IntToShortFunction.DEFAULT.applyAsShort(100));
         assertEquals((short) 0, IntToShortFunction.DEFAULT.applyAsShort(0));
         assertEquals((short) -50, IntToShortFunction.DEFAULT.applyAsShort(-50));
+        assertEquals(Short.MIN_VALUE, IntToShortFunction.DEFAULT.applyAsShort(0x8000));
+        assertEquals((short) 0, IntToShortFunction.DEFAULT.applyAsShort(0x10000));
+        assertEquals((short) -1, IntToShortFunction.DEFAULT.applyAsShort(Integer.MAX_VALUE));
+        assertEquals((short) 0, IntToShortFunction.DEFAULT.applyAsShort(Integer.MIN_VALUE));
     }
 
     @Test

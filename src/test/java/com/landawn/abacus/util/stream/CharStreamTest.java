@@ -1463,6 +1463,14 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
+    public void testOf_CharSequenceIteratorRejectsAccessAfterExhaustion() {
+        CharIteratorEx iter = CharStream.of("abc", 1, 2).iteratorEx();
+
+        assertEquals('b', iter.nextChar());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+    }
+
+    @Test
     public void testOf_CharacterArray() {
         CharStream stream = CharStream.of(new Character[] { 'a', 'b', 'c' });
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, stream.toArray());
@@ -4224,6 +4232,21 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
+    public void testConcatCollectionSnapshotsSources() {
+        List<CharStream> sources = new ArrayList<>(Arrays.asList(CharStream.of('a', 'b'), CharStream.of('c', 'd')));
+        CharStream concatenated = CharStream.concat(sources);
+
+        sources.clear();
+
+        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, concatenated.toArray());
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        assertEquals(0, CharStream.merge(Arrays.asList((CharStream) null), (a, b) -> MergeResult.TAKE_FIRST).count());
+    }
+
+    @Test
     public void testConcatCharStreams() {
         CharStream stream1 = createCharStream(new char[] { 'x', 'y' });
         CharStream stream2 = createCharStream(new char[] { 'z' });
@@ -5426,5 +5449,37 @@ public class CharStreamTest extends TestBase {
         final CharIteratorEx iter = ((IteratorCharStream) CharStream.of("Hello", 1, 4)).iteratorEx();
         org.junit.jupiter.api.Assertions.assertEquals(3, iter.count());
         org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFiniteFactoryIteratorsRemainExhaustedAfterFailedNext() {
+        final CharIteratorEx[] iterators = { CharStream.range('a', 'c').iteratorEx(), CharStream.range('a', 'e', 2).iteratorEx(),
+                CharStream.rangeClosed('a', 'c').iteratorEx(), CharStream.rangeClosed('a', 'e', 2).iteratorEx(), CharStream.repeat('x', 10).iteratorEx() };
+
+        for (final CharIteratorEx iter : iterators) {
+            iter.advance(Long.MAX_VALUE);
+            assertThrows(NoSuchElementException.class, iter::nextChar);
+            assertEquals(0, iter.count());
+            assertArrayEquals(new char[0], iter.toArray());
+        }
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        CharIterator iter = CharStream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 'a').iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = CharStream.iterate('a', () -> conditionCalls.getAndIncrement() > 0, value -> (char) (value + 1)).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+        assertEquals(1, conditionCalls.get());
     }
 }

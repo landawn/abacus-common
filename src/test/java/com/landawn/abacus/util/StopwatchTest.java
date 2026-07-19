@@ -39,6 +39,80 @@ public class StopwatchTest extends TestBase {
     }
 
     @Test
+    public void test_start_tickerFailureLeavesStopwatchStopped() {
+        RuntimeException failure = new RuntimeException("ticker failure");
+        Ticker ticker = new Ticker() {
+            @Override
+            public long read() {
+                throw failure;
+            }
+        };
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+
+        assertSame(failure, assertThrows(RuntimeException.class, stopwatch::start));
+        assertFalse(stopwatch.isRunning());
+        assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+    }
+
+    @Test
+    public void test_stop_invalidStateDoesNotReadTicker() {
+        int[] reads = { 0 };
+        Ticker ticker = new Ticker() {
+            @Override
+            public long read() {
+                reads[0]++;
+                return 0;
+            }
+        };
+        Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
+
+        assertThrows(IllegalStateException.class, stopwatch::stop);
+        assertEquals(0, reads[0]);
+        assertFalse(stopwatch.isRunning());
+    }
+
+    @Test
+    public void test_stop_tickerFailureLeavesStopwatchRunning() {
+        RuntimeException failure = new RuntimeException("ticker failure");
+        int[] reads = { 0 };
+        Ticker ticker = new Ticker() {
+            @Override
+            public long read() {
+                if (reads[0]++ == 0) {
+                    return 10;
+                }
+
+                throw failure;
+            }
+        };
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        assertSame(failure, assertThrows(RuntimeException.class, stopwatch::stop));
+        assertTrue(stopwatch.isRunning());
+    }
+
+    @Test
+    public void test_elapsedOverflowThrowsWithoutCorruptingState() {
+        MockTicker ticker = new MockTicker();
+        Stopwatch stopwatch = Stopwatch.createStarted(ticker);
+
+        ticker.advance(Long.MAX_VALUE);
+        stopwatch.stop();
+        assertEquals(Long.MAX_VALUE, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+
+        stopwatch.start();
+        ticker.advance(1); // The ticker wraps, but the new interval is still one nanosecond.
+
+        assertThrows(ArithmeticException.class, () -> stopwatch.elapsed(TimeUnit.NANOSECONDS));
+        assertThrows(ArithmeticException.class, stopwatch::stop);
+        assertTrue(stopwatch.isRunning(), "A failed stop must not leave a partially updated state");
+
+        stopwatch.reset();
+        assertFalse(stopwatch.isRunning());
+        assertEquals(0, stopwatch.elapsed(TimeUnit.NANOSECONDS));
+    }
+
+    @Test
     public void test_createUnstarted_withTicker_usesTicker() {
         MockTicker ticker = new MockTicker();
         Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);

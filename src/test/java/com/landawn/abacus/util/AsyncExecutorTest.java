@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,6 +67,11 @@ public class AsyncExecutorTest extends TestBase {
         AsyncExecutor executor = new AsyncExecutor(javaExecutor);
         Assertions.assertNotNull(executor);
         executor.shutdown();
+    }
+
+    @Test
+    public void testConstructorRejectsNullExecutor() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new AsyncExecutor((Executor) null));
     }
 
     @Test
@@ -546,6 +552,52 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
+    public void testGetExecutorNeverReturnsNullAcrossShutdownFieldTransition() throws Exception {
+        final Executor directExecutor = Runnable::run;
+        final AsyncExecutor executor = new AsyncExecutor(directExecutor);
+        final Field executorField = AsyncExecutor.class.getDeclaredField("executor");
+        final Field shutdownField = AsyncExecutor.class.getDeclaredField("isShutdown");
+        executorField.setAccessible(true);
+        shutdownField.setAccessible(true);
+        shutdownField.setBoolean(executor, true);
+
+        final AtomicBoolean stop = new AtomicBoolean();
+        final AtomicReference<Throwable> writerFailure = new AtomicReference<>();
+        final CountDownLatch started = new CountDownLatch(1);
+        final Thread transitionWriter = new Thread(() -> {
+            started.countDown();
+
+            try {
+                while (!stop.get()) {
+                    executorField.set(executor, null);
+                    executorField.set(executor, directExecutor);
+                }
+            } catch (final Throwable e) {
+                writerFailure.set(e);
+            }
+        });
+
+        transitionWriter.start();
+        Assertions.assertTrue(started.await(1, TimeUnit.SECONDS));
+
+        try {
+            for (int i = 0; i < 100_000; i++) {
+                try {
+                    Assertions.assertSame(directExecutor, executor.getExecutor());
+                } catch (final IllegalStateException e) {
+                    // The null side of the transition is the already-shut-down state.
+                }
+            }
+        } finally {
+            stop.set(true);
+            transitionWriter.join(TimeUnit.SECONDS.toMillis(2));
+        }
+
+        Assertions.assertFalse(transitionWriter.isAlive());
+        Assertions.assertNull(writerFailure.get());
+    }
+
+    @Test
     public void testGetExecutor_afterShutdownThrowsException() {
         AsyncExecutor executor = new AsyncExecutor();
         executor.getExecutor(); // initialize it
@@ -596,6 +648,19 @@ public class AsyncExecutorTest extends TestBase {
         });
         executor.shutdownAndAwait(0, TimeUnit.SECONDS);
         assertNotNull(executor);
+    }
+
+    @Test
+    public void testShutdownAndAwaitRejectsNullTimeUnitBeforeShutdown() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        AsyncExecutor executor = new AsyncExecutor(executorService);
+
+        try {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> executor.shutdownAndAwait(1, null));
+            Assertions.assertFalse(executorService.isShutdown());
+        } finally {
+            executor.shutdown();
+        }
     }
 
     @Test

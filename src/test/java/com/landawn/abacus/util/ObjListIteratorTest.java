@@ -345,8 +345,67 @@ public class ObjListIteratorTest extends TestBase {
     public void testOfListIterator_WrapsObjListIterator() {
         ObjListIterator<String> original = ObjListIterator.of(Arrays.asList("a", "b"));
         ObjListIterator<String> wrapped = ObjListIterator.of(original);
-        // Should return the same instance
-        Assertions.assertSame(original, wrapped);
+        Assertions.assertNotSame(original, wrapped);
+        Assertions.assertEquals(Arrays.asList("a", "b"), wrapped.toList());
+    }
+
+    @Test
+    public void testOfListIteratorBlocksMutatingObjListIteratorSubclass() {
+        List<String> source = new ArrayList<>(Arrays.asList("a", "b"));
+        ListIterator<String> delegate = source.listIterator();
+        ObjListIterator<String> mutable = new ObjListIterator<>() {
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return delegate.next();
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return delegate.hasPrevious();
+            }
+
+            @Override
+            public String previous() {
+                return delegate.previous();
+            }
+
+            @Override
+            public int nextIndex() {
+                return delegate.nextIndex();
+            }
+
+            @Override
+            public int previousIndex() {
+                return delegate.previousIndex();
+            }
+
+            @Override
+            public void remove() {
+                delegate.remove();
+            }
+
+            @Override
+            public void set(final String value) {
+                delegate.set(value);
+            }
+
+            @Override
+            public void add(final String value) {
+                delegate.add(value);
+            }
+        };
+
+        ObjListIterator<String> wrapped = ObjListIterator.of(mutable);
+        Assertions.assertEquals("a", wrapped.next());
+        Assertions.assertThrows(UnsupportedOperationException.class, wrapped::remove);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.set("changed"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.add("added"));
+        Assertions.assertEquals(Arrays.asList("a", "b"), source);
     }
 
     @Test
@@ -446,7 +505,6 @@ public class ObjListIteratorTest extends TestBase {
     public void testSkip_NextIndex() {
         ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
         ObjListIterator<Integer> skipped = iter.skip(2);
-        skipped.hasNext(); // trigger skip
         Assertions.assertEquals(2, skipped.nextIndex());
     }
 
@@ -454,8 +512,17 @@ public class ObjListIteratorTest extends TestBase {
     public void testSkip_PreviousIndex() {
         ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
         ObjListIterator<Integer> skipped = iter.skip(2);
-        skipped.hasNext(); // trigger skip
         Assertions.assertEquals(1, skipped.previousIndex());
+    }
+
+    @Test
+    public void testSkipBackwardObservationUsesPostSkipCursor() {
+        ObjListIterator<Integer> skipped = ObjListIterator.of(Arrays.asList(1, 2, 3, 4)).skip(2);
+
+        Assertions.assertTrue(skipped.hasPrevious());
+        Assertions.assertEquals(2, skipped.previous());
+        Assertions.assertEquals(2, skipped.next());
+        Assertions.assertEquals(3, skipped.next());
     }
 
     @Test
@@ -839,5 +906,19 @@ public class ObjListIteratorTest extends TestBase {
         Assertions.assertEquals("c", values.get(0));
         Assertions.assertEquals("d", values.get(1));
         Assertions.assertEquals("e", values.get(2));
+    }
+
+    @Test
+    public void testLimitRestoresForwardCapacityAfterPrevious() {
+        final ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList("a", "b", "c", "d")).limit(3);
+
+        Assertions.assertEquals("a", iter.next());
+        Assertions.assertEquals("b", iter.next());
+        Assertions.assertEquals("c", iter.next());
+        Assertions.assertFalse(iter.hasNext());
+        Assertions.assertEquals("c", iter.previous());
+        Assertions.assertTrue(iter.hasNext());
+        Assertions.assertEquals("c", iter.next());
+        Assertions.assertFalse(iter.hasNext());
     }
 }

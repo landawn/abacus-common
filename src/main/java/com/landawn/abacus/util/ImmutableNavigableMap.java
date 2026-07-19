@@ -61,8 +61,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
 
     /**
      * Constructs an {@code ImmutableNavigableMap} backed by the given navigable map.
-     * The provided map must not be modified externally after this constructor is called;
-     * use {@link #copyOf(Map)} to ensure a defensive copy is made.
+     * The provided map is retained as live backing storage; external changes to it are
+     * reflected in this read-only view. Use {@link #copyOf(Map)} for independent storage.
      *
      * @param navigableMap the navigable map to back this immutable map
      */
@@ -225,9 +225,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(1, "a", 2, "b", 3, "c", 4, "d", 5, "e");
-     * map.lowerKey(3);     // returns 2
-     * map.lastEntry();     // returns 5=e
-     * map.lowerKey(1);     // returns null
+     * map.lowerKey(3);   // returns 2
+     * map.lastEntry();   // returns 5=e
+     * map.lowerKey(1);   // returns null
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
@@ -267,9 +267,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "a", 2, "b", 3, "c", 4, "d", 5, "e", 6, "f");
-     * map.floorKey(4);       // returns 4
-     * map.higherEntry(5);    // returns 6=f
-     * map.ceilingKey(7);     // returns null
+     * map.floorKey(4);      // returns 4
+     * map.higherEntry(5);   // returns 6=f
+     * map.ceilingKey(7);    // returns null
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
@@ -312,9 +312,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "a", 2, "b", 3, "c", 4, "d", 5, "e", 6, "f", 7, "g");
-     * map.firstKey();        // returns 1
-     * map.lowerEntry(7);     // returns 6=f
-     * map.higherKey(7);      // returns null
+     * map.firstKey();      // returns 1
+     * map.lowerEntry(7);   // returns 6=f
+     * map.higherKey(7);    // returns null
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
@@ -360,9 +360,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "a", 2, "b", 3, "c", 4, "d", 5, "e", 6, "f", 7, "g", 8, "h");
-     * map.size();            // returns 8
-     * map.floorEntry(8);     // returns 8=h
-     * map.ceilingKey(9);     // returns null
+     * map.size();          // returns 8
+     * map.floorEntry(8);   // returns 8=h
+     * map.ceilingKey(9);   // returns null
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
@@ -411,9 +411,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "a", 2, "b", 3, "c", 4, "d", 5, "e", 6, "f", 7, "g", 8, "h", 9, "i");
-     * map.lastKey();         // returns 9
-     * map.lowerKey(5);       // returns 4
-     * map.higherKey(9);      // returns null
+     * map.lastKey();      // returns 9
+     * map.lowerKey(5);    // returns 4
+     * map.higherKey(9);   // returns null
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
@@ -465,9 +465,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <pre>{@code
      * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
      *     1, "a", 2, "b", 3, "c", 4, "d", 5, "e", 6, "f", 7, "g", 8, "h", 9, "i", 10, "j");
-     * map.size();            // returns 10
-     * map.ceilingKey(10);    // returns 10
-     * map.higherKey(10);     // returns null
+     * map.size();           // returns 10
+     * map.ceilingKey(10);   // returns 10
+     * map.higherKey(10);    // returns null
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
@@ -532,7 +532,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param map the Map whose mappings are to be placed in the {@code ImmutableNavigableMap}
-     * @return an {@code ImmutableNavigableMap} containing the same mappings as the provided Map, or the same instance if it is already an {@code ImmutableNavigableMap}, or an empty instance if {@code map} is {@code null} or empty
+     * @return an {@code ImmutableNavigableMap} containing the same mappings as the provided map, or the same instance if it is already an
+     *         {@code ImmutableNavigableMap}. The comparator of a {@code SortedMap} source is retained even when the source is empty; a {@code null}
+     *         or empty non-sorted source returns the shared empty instance.
      * @throws ClassCastException if the keys are not mutually comparable (when the source map is not a {@code SortedMap})
      * @throws NullPointerException if the map contains a {@code null} key and natural ordering is used
      * @see #wrap(NavigableMap)
@@ -540,10 +542,10 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     public static <K, V> ImmutableNavigableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableNavigableMap) {
             return (ImmutableNavigableMap<K, V>) map;
-        } else if (N.isEmpty(map)) {
-            return empty();
         } else if (map instanceof SortedMap sortedMap) {
             return new ImmutableNavigableMap<>(new TreeMap<>(sortedMap));
+        } else if (N.isEmpty(map)) {
+            return empty();
         } else {
             return new ImmutableNavigableMap<>(new TreeMap<>(map));
         }

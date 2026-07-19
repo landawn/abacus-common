@@ -32,6 +32,18 @@ import com.landawn.abacus.util.function.BiFunction;
 public class ContinuableFutureTest extends AbstractTest {
 
     @Test
+    @Timeout(2)
+    public void testDelayedWrapperNegativeExtremeTimeoutDoesNotOverflow() throws Exception {
+        final java.util.concurrent.FutureTask<String> pending = new java.util.concurrent.FutureTask<>(() -> "never run");
+        final ContinuableFuture<String> future = new ContinuableFuture<>(pending).thenUse(Runnable::run);
+
+        assertThrows(TimeoutException.class, () -> future.get(Long.MIN_VALUE, TimeUnit.NANOSECONDS));
+
+        final ContinuableFuture<String> completed = ContinuableFuture.wrap(CompletableFuture.completedFuture("done")).thenUse(Runnable::run);
+        assertEquals("done", completed.get(Long.MIN_VALUE, TimeUnit.NANOSECONDS));
+    }
+
+    @Test
     public void testRun_basic() throws Exception {
         AtomicBoolean executed = new AtomicBoolean(false);
         ContinuableFuture<Void> future = ContinuableFuture.run(() -> {
@@ -646,6 +658,30 @@ public class ContinuableFutureTest extends AbstractTest {
         Result<String, Exception> result = future.getAsResult(1, TimeUnit.SECONDS);
         assertTrue(result.isFailure());
         assertNotNull(result.getException());
+    }
+
+    @Test
+    public void testGetAsResult_restoresInterruptStatus() {
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        final ContinuableFuture<String> future = ContinuableFuture.wrap(pending);
+
+        try {
+            Thread.currentThread().interrupt();
+            final Result<String, Exception> untimedResult = future.getAsResult();
+
+            assertTrue(untimedResult.getException() instanceof InterruptedException);
+            assertTrue(Thread.currentThread().isInterrupted());
+
+            Thread.interrupted();
+            Thread.currentThread().interrupt();
+            final Result<String, Exception> timedResult = future.getAsResult(1, TimeUnit.SECONDS);
+
+            assertTrue(timedResult.getException() instanceof InterruptedException);
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+            pending.cancel(true);
+        }
     }
 
     @Test
@@ -1654,6 +1690,11 @@ public class ContinuableFutureTest extends AbstractTest {
     }
 
     @Test
+    public void testWrapRejectsNullFuture() {
+        assertThrows(IllegalArgumentException.class, () -> ContinuableFuture.wrap(null));
+    }
+
+    @Test
     public void testCancel_withMayInterruptIfRunning() {
         CountDownLatch latch = new CountDownLatch(1);
         ContinuableFuture<String> future = ContinuableFuture.call(() -> {
@@ -2458,6 +2499,67 @@ public class ContinuableFutureTest extends AbstractTest {
     }
 
     @Test
+    @Timeout(value = 3, unit = TimeUnit.SECONDS)
+    public void testThenDelay_startsAfterSlowUpstreamCompletes() throws Exception {
+        final long startNanos = System.nanoTime();
+        final ContinuableFuture<String> delayed = ContinuableFuture.call(() -> {
+            Thread.sleep(180);
+            return "done";
+        }).thenDelay(180, TimeUnit.MILLISECONDS);
+
+        assertEquals("done", delayed.get());
+
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+        assertTrue(elapsedMillis >= 300, "Upstream work and post-completion delay must not overlap; elapsedMillis=" + elapsedMillis);
+    }
+
+    @Test
+    @Timeout(value = 3, unit = TimeUnit.SECONDS)
+    public void testThenDelay_timedGetSharesBudgetBetweenUpstreamAndDelay() throws Exception {
+        final ContinuableFuture<String> delayed = ContinuableFuture.call(() -> {
+            Thread.sleep(180);
+            return "done";
+        }).thenDelay(180, TimeUnit.MILLISECONDS);
+
+        assertThrows(TimeoutException.class, () -> delayed.get(260, TimeUnit.MILLISECONDS));
+        assertEquals("done", delayed.get());
+    }
+
+    @Test
+    @Timeout(value = 3, unit = TimeUnit.SECONDS)
+    public void testThenDelay_appliesAfterExceptionalCompletion() {
+        final long startNanos = System.nanoTime();
+        final ContinuableFuture<String> delayed = ContinuableFuture.<String> call(() -> {
+            Thread.sleep(120);
+            throw new IllegalStateException("failed");
+        }).thenDelay(140, TimeUnit.MILLISECONDS);
+
+        final ExecutionException exception = assertThrows(ExecutionException.class, delayed::get);
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+
+        assertEquals("failed", exception.getCause().getMessage());
+        assertTrue(elapsedMillis >= 220, "Failure should be exposed after the post-completion delay; elapsedMillis=" + elapsedMillis);
+    }
+
+    @Test
+    @Timeout(value = 2, unit = TimeUnit.SECONDS)
+    public void testThenDelay_appliesAfterCancellation() throws InterruptedException {
+        final java.util.concurrent.FutureTask<String> pending = new java.util.concurrent.FutureTask<>(() -> "never run");
+        final ContinuableFuture<String> delayed = new ContinuableFuture<>(pending).thenDelay(100, TimeUnit.MILLISECONDS);
+
+        // If the delay incorrectly starts when the wrapper is created, it will have fully elapsed
+        // before cancellation and get() will return immediately.
+        Thread.sleep(150);
+        assertTrue(delayed.cancel(false));
+
+        final long startNanos = System.nanoTime();
+        assertThrows(CancellationException.class, delayed::get);
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+
+        assertTrue(elapsedMillis >= 70, "Cancellation should be exposed after the post-completion delay; elapsedMillis=" + elapsedMillis);
+    }
+
+    @Test
     public void testThenDelay_withZeroDelay() throws Exception {
         ContinuableFuture<String> original = ContinuableFuture.completed("test");
         ContinuableFuture<String> delayed = original.thenDelay(0, TimeUnit.MILLISECONDS);
@@ -2506,6 +2608,59 @@ public class ContinuableFutureTest extends AbstractTest {
         Thread.sleep(100);
         ExecutionException ex = assertThrows(ExecutionException.class, () -> future.get());
         assertEquals("error", ex.getCause().getMessage());
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    public void testThenDelay_concurrentTimedGetHonorsItsOwnTimeout() throws Exception {
+        final ContinuableFuture<String> delayed = ContinuableFuture.completed("done").thenDelay(700, TimeUnit.MILLISECONDS);
+        final CountDownLatch monitorHeld = new CountDownLatch(1);
+        final CountDownLatch releaseMonitor = new CountDownLatch(1);
+        final CountDownLatch timedGetReturned = new CountDownLatch(1);
+        final AtomicBoolean timedOut = new AtomicBoolean();
+        final AtomicReference<Throwable> timedGetFailure = new AtomicReference<>();
+        final Thread monitorBlocker = new Thread(() -> {
+            synchronized (delayed.future) {
+                monitorHeld.countDown();
+
+                try {
+                    releaseMonitor.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        final Thread timedGetter = new Thread(() -> {
+            try {
+                delayed.get(40, TimeUnit.MILLISECONDS);
+                timedGetFailure.set(new AssertionError("Expected TimeoutException"));
+            } catch (final TimeoutException e) {
+                timedOut.set(true);
+            } catch (final Throwable e) {
+                timedGetFailure.set(e);
+            } finally {
+                timedGetReturned.countDown();
+            }
+        });
+
+        try {
+            monitorBlocker.start();
+            assertTrue(monitorHeld.await(1, TimeUnit.SECONDS));
+            timedGetter.start();
+
+            // The timeout must be honored while another thread holds the wrapper monitor.
+            // The old implementation slept while synchronized on that monitor and remained blocked.
+            assertTrue(timedGetReturned.await(2, TimeUnit.SECONDS));
+            assertTrue(timedOut.get());
+            assertNull(timedGetFailure.get());
+        } finally {
+            releaseMonitor.countDown();
+            monitorBlocker.join(2000);
+            timedGetter.join(2000);
+        }
+
+        assertFalse(monitorBlocker.isAlive());
+        assertFalse(timedGetter.isAlive());
     }
 
     @Test
@@ -2744,6 +2899,13 @@ public class ContinuableFutureTest extends AbstractTest {
         final ContinuableFuture<String> delayed = ContinuableFuture.completed("x").thenDelay(10, TimeUnit.SECONDS);
 
         assertThrows(java.util.concurrent.TimeoutException.class, () -> delayed.get(900, TimeUnit.MICROSECONDS));
+    }
+
+    @Test
+    public void testNegativeTimedGetOnDelayedFutureTimesOut() {
+        final ContinuableFuture<String> delayed = ContinuableFuture.completed("x").thenDelay(10, TimeUnit.SECONDS);
+
+        assertThrows(TimeoutException.class, () -> delayed.get(-1, TimeUnit.MILLISECONDS));
     }
 
 }

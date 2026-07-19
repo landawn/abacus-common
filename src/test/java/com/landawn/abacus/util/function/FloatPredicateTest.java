@@ -195,4 +195,13 @@ public class FloatPredicateTest extends TestBase {
         assertFalse(FloatPredicate.lessThan(0f).test(Float.NaN));
         assertFalse(FloatPredicate.lessThanOrEqual(0f).test(Float.NaN));
     }
+
+    @Test
+    public void testEqualityPredicatesUseTotalOrdering() {
+        assertTrue(FloatPredicate.equal(Float.NaN).test(Float.NaN));
+        assertFalse(FloatPredicate.equal(0.0f).test(-0.0f));
+        assertTrue(FloatPredicate.notEqual(0.0f).test(-0.0f));
+        assertFalse(FloatPredicate.IS_ZERO.test(-0.0f));
+        assertTrue(FloatPredicate.NOT_ZERO.test(-0.0f));
+    }
 }

@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -880,6 +881,20 @@ public class SetMultimapTest extends TestBase {
 
         assertEquals(1, inverted.get(3).size());
         assertTrue(inverted.get(3).contains("c"));
+    }
+
+    @Test
+    public void test_invert_doesNotReuseTypeSpecificValueSupplier() {
+        final Comparator<Integer> integerComparator = Integer::compare;
+        final SetMultimap<String, Integer> original = new SetMultimap<>(LinkedHashMap::new, () -> new TreeSet<>(integerComparator));
+
+        original.put("first", 1);
+        original.put("second", 1);
+
+        final SetMultimap<Integer, String> inverted = assertDoesNotThrow(
+                (org.junit.jupiter.api.function.ThrowingSupplier<SetMultimap<Integer, String>>) original::invert);
+
+        assertEquals(Arrays.asList("first", "second"), new ArrayList<>(inverted.get(1)));
     }
 
     // ==================== invert with supplier ====================

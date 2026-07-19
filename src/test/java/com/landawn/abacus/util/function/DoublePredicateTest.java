@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -240,7 +241,8 @@ public class DoublePredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         DoublePredicate instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.DoublePredicate) null));
+        assertThrows(NullPointerException.class, () -> instance.and((java.util.function.DoublePredicate) null));
+        assertThrows(NullPointerException.class, () -> instance.or((java.util.function.DoublePredicate) null));
     }
 
     @Test
@@ -253,5 +255,14 @@ public class DoublePredicateTest extends TestBase {
         assertFalse(DoublePredicate.greaterThanOrEqual(0d).test(Double.NaN));
         assertFalse(DoublePredicate.lessThan(0d).test(Double.NaN));
         assertFalse(DoublePredicate.lessThanOrEqual(0d).test(Double.NaN));
+    }
+
+    @Test
+    public void testEqualityPredicatesUseTotalOrdering() {
+        assertTrue(DoublePredicate.equal(Double.NaN).test(Double.NaN));
+        assertFalse(DoublePredicate.equal(0.0d).test(-0.0d));
+        assertTrue(DoublePredicate.notEqual(0.0d).test(-0.0d));
+        assertFalse(DoublePredicate.IS_ZERO.test(-0.0d));
+        assertTrue(DoublePredicate.NOT_ZERO.test(-0.0d));
     }
 }

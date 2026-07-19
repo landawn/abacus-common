@@ -21,15 +21,14 @@ import java.util.Random;
  * This class is used by functional interfaces and suppliers to generate random values in a
  * cryptographically secure manner.
  *
- * <p>Each primitive type has its own dedicated {@link SecureRandom} instance to ensure
- * thread-safe random value generation without contention. Using separate instances also
- * allows for better performance in multi-threaded environments.</p>
+ * <p>Each primitive type has its own dedicated {@link SecureRandom} instance. {@code SecureRandom}
+ * is thread-safe; using separate instances avoids sharing a single generator across all primitive
+ * supplier categories, although calls through the same supplier may still contend.</p>
  *
  * <p>The random generators in this class are used by:</p>
  * <ul>
  *   <li>Default supplier implementations for primitive types</li>
  *   <li>Random value generators in functional interfaces</li>
- *   <li>Test data generation utilities</li>
  * </ul>
  *
  * <p><strong>Note:</strong> This class uses {@link SecureRandom} rather than {@link Random}

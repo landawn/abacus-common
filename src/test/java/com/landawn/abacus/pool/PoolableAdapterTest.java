@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.pool.Poolable.Caller;
-import com.landawn.abacus.util.Immutable;
 
 public class PoolableAdapterTest extends TestBase {
 
@@ -36,10 +35,10 @@ public class PoolableAdapterTest extends TestBase {
     }
 
     @Test
-    public void testImplementsImmutableInterface() {
+    public void testIsNotMarkedImmutableBecauseActivityPrintIsMutable() {
         PoolableAdapter<String> wrapper = PoolableAdapter.of("test");
 
-        assertTrue(wrapper instanceof Immutable);
+        assertFalse((Object) wrapper instanceof com.landawn.abacus.util.Immutable);
     }
 
     @Test

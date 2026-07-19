@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -277,7 +279,35 @@ public class ObjIteratorTest extends TestBase {
     public void testOf_iterator_alreadyObjIterator() {
         ObjIterator<String> original = ObjIterator.of("a", "b");
         ObjIterator<String> wrapped = ObjIterator.of(original);
-        assertSame(original, wrapped);
+        assertNotSame(original, wrapped);
+        assertEquals(Arrays.asList("a", "b"), wrapped.toList());
+    }
+
+    @Test
+    public void testOfIteratorBlocksMutatingObjIteratorSubclass() {
+        List<String> source = new ArrayList<>(Arrays.asList("a", "b"));
+        Iterator<String> delegate = source.iterator();
+        ObjIterator<String> mutable = new ObjIterator<>() {
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return delegate.next();
+            }
+
+            @Override
+            public void remove() {
+                delegate.remove();
+            }
+        };
+
+        ObjIterator<String> wrapped = ObjIterator.of(mutable);
+        assertEquals("a", wrapped.next());
+        assertThrows(UnsupportedOperationException.class, wrapped::remove);
+        assertEquals(Arrays.asList("a", "b"), source);
     }
 
     @Test
@@ -388,6 +418,37 @@ public class ObjIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> ObjIterator.defer(null));
     }
 
+    @Test
+    public void testDefer_supplierFailureIsStable() {
+        AtomicInteger callCount = new AtomicInteger();
+        IllegalStateException failure = new IllegalStateException("boom");
+        ObjIterator<String> iter = ObjIterator.defer(() -> {
+            callCount.incrementAndGet();
+            throw failure;
+        });
+
+        assertSame(failure, assertThrows(IllegalStateException.class, iter::hasNext));
+        assertSame(failure, assertThrows(IllegalStateException.class, iter::next));
+        assertEquals(1, callCount.get());
+    }
+
+    @Test
+    public void testDefer_recursiveInitializationFailureIsStable() {
+        AtomicInteger callCount = new AtomicInteger();
+        AtomicReference<ObjIterator<String>> iteratorRef = new AtomicReference<>();
+        ObjIterator<String> iter = ObjIterator.defer(() -> {
+            callCount.incrementAndGet();
+            iteratorRef.get().hasNext();
+            return ObjIterator.empty();
+        });
+        iteratorRef.set(iter);
+
+        IllegalStateException failure = assertThrows(IllegalStateException.class, iter::hasNext);
+
+        assertSame(failure, assertThrows(IllegalStateException.class, iter::next));
+        assertEquals(1, callCount.get());
+    }
+
     // ==================== generate(Supplier) ====================
 
     @Test
@@ -438,6 +499,21 @@ public class ObjIteratorTest extends TestBase {
     }
 
     @Test
+    public void testGenerateWithStateCachesHasNextUntilElementConsumed() {
+        AtomicInteger predicateCalls = new AtomicInteger();
+        AtomicInteger generated = new AtomicInteger();
+        ObjIterator<Integer> iter = ObjIterator.generate(2, remaining -> predicateCalls.incrementAndGet() <= remaining, ignored -> generated.getAndIncrement());
+
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+        assertEquals(0, iter.next());
+        assertTrue(iter.hasNext());
+        assertEquals(1, iter.next());
+        assertFalse(iter.hasNext());
+        assertEquals(3, predicateCalls.get());
+    }
+
+    @Test
     public void testGenerate_withState_nullInit() {
         ObjIterator<String> iter = ObjIterator.generate(null, s -> s == null, s -> "value");
         assertTrue(iter.hasNext());
@@ -454,6 +530,21 @@ public class ObjIteratorTest extends TestBase {
         assertEquals(2, iter.next());
         assertEquals(3, iter.next());
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testGenerateWithBiPredicateCachesHasNextUntilElementConsumed() {
+        AtomicInteger predicateCalls = new AtomicInteger();
+        ObjIterator<Integer> iter = ObjIterator.generate(2, (limit, prev) -> predicateCalls.incrementAndGet() <= limit,
+                (limit, prev) -> prev == null ? 1 : prev + 1);
+
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+        assertEquals(1, iter.next());
+        assertTrue(iter.hasNext());
+        assertEquals(2, iter.next());
+        assertFalse(iter.hasNext());
+        assertEquals(3, predicateCalls.get());
     }
 
     @Test
@@ -1276,6 +1367,25 @@ public class ObjIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
     }
 
+    @Test
+    public void testIndexed_indexOverflowDoesNotConsumeSource() {
+        ObjIterator<String> source = ObjIterator.of("a", "b");
+        ObjIterator<Indexed<String>> indexed = source.indexed(Long.MAX_VALUE);
+
+        assertEquals(Long.MAX_VALUE, indexed.next().longIndex());
+        assertThrows(ArithmeticException.class, indexed::next);
+        assertEquals("b", source.next());
+    }
+
+    @Test
+    public void testIndexed_maxIndexExhaustionThrowsNoSuchElementException() {
+        ObjIterator<Indexed<String>> indexed = ObjIterator.just("a").indexed(Long.MAX_VALUE);
+
+        assertEquals(Long.MAX_VALUE, indexed.next().longIndex());
+        assertFalse(indexed.hasNext());
+        assertThrows(NoSuchElementException.class, indexed::next);
+    }
+
     // ==================== foreachRemaining(Consumer) ====================
 
     @Test
@@ -1401,6 +1511,11 @@ public class ObjIteratorTest extends TestBase {
     public void testForeachIndexed_nullAction() {
         ObjIterator<String> iter = ObjIterator.of("a");
         assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
+    }
+
+    @Test
+    public void testDistinctByRejectsNullExtractorEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> ObjIterator.empty().distinctBy(null));
     }
 
 }

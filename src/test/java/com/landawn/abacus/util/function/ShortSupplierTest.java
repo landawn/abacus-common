@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
 
@@ -98,19 +98,10 @@ public class ShortSupplierTest extends TestBase {
 
     @Test
     public void test_RANDOM() {
-        // RANDOM should return short values
-        short value1 = ShortSupplier.RANDOM.getAsShort();
-        short value2 = ShortSupplier.RANDOM.getAsShort();
-        short value3 = ShortSupplier.RANDOM.getAsShort();
-
-        // Verify they are valid short values
-        assertTrue(value1 >= Short.MIN_VALUE && value1 <= Short.MAX_VALUE);
-        assertTrue(value2 >= Short.MIN_VALUE && value2 <= Short.MAX_VALUE);
-        assertTrue(value3 >= Short.MIN_VALUE && value3 <= Short.MAX_VALUE);
-
-        // Very unlikely all three random values are the same
-        // (though technically possible, probability is extremely low)
-        boolean allDifferent = (value1 != value2 || value2 != value3 || value1 != value3);
-        assertTrue(allDifferent || value1 == value2); // Just verify it doesn't throw
+        assertDoesNotThrow(() -> {
+            ShortSupplier.RANDOM.getAsShort();
+            ShortSupplier.RANDOM.getAsShort();
+            ShortSupplier.RANDOM.getAsShort();
+        });
     }
 }

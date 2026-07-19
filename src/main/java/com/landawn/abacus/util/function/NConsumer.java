@@ -26,6 +26,9 @@ import com.landawn.abacus.util.cs;
  * <p>The 'N' in NConsumer stands for <i>N-ary</i>, indicating that this consumer can accept
  * any number of arguments of the same type.
  *
+ * <p>Composition does not copy the varargs array: each composed consumer receives the same
+ * array reference, so mutations performed by an earlier consumer are visible to later consumers.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NConsumer<String> printAll = args -> {
@@ -90,6 +93,7 @@ public interface NConsumer<T> {
      *
      * <p>This method is useful for chaining multiple operations that need to process
      * the same variable number of arguments in sequence.
+     * Both operations receive the same varargs array reference.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

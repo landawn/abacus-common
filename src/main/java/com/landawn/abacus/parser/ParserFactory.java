@@ -202,6 +202,9 @@ public final class ParserFactory {
     /** Incremented after each global Kryo registration so existing parser pools can refresh. */
     static final AtomicLong _kryoRegistrationVersion = new AtomicLong();
 
+    /** Guards replacement of a class's registration across the four representation maps. */
+    static final Object _kryoRegistrationLock = new Object();
+
     /**
      * Private constructor to prevent instantiation of this utility class.
      */
@@ -546,6 +549,8 @@ public final class ParserFactory {
     /**
      * Registers a class with Kryo for serialization.
      * Registration can improve performance and reduce serialized size.
+     * If this class was registered previously through another overload, this call replaces that
+     * registration; the most recent call is authoritative.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -560,13 +565,17 @@ public final class ParserFactory {
     public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
 
-        _kryoClassSet.add(type);
-        _kryoRegistrationVersion.incrementAndGet();
+        synchronized (_kryoRegistrationLock) {
+            clearKryoRegistration(type);
+            _kryoClassSet.add(type);
+            _kryoRegistrationVersion.incrementAndGet();
+        }
     }
 
     /**
      * Registers a class with Kryo using a specific ID.
      * Using fixed IDs ensures compatibility across different JVM instances.
+     * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -577,19 +586,24 @@ public final class ParserFactory {
      * }</pre>
      *
      * @param type the class to register (must not be {@code null})
-     * @param id the unique ID for this class
-     * @throws IllegalArgumentException if {@code type} is {@code null}
+     * @param id the non-negative unique ID for this class
+     * @throws IllegalArgumentException if {@code type} is {@code null} or {@code id} is negative
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
+        N.checkArgNotNegative(id, "id");
 
-        _kryoClassIdMap.put(type, id);
-        _kryoRegistrationVersion.incrementAndGet();
+        synchronized (_kryoRegistrationLock) {
+            clearKryoRegistration(type);
+            _kryoClassIdMap.put(type, id);
+            _kryoRegistrationVersion.incrementAndGet();
+        }
     }
 
     /**
      * Registers a class with Kryo using a custom serializer.
      * Custom serializers can handle special serialization requirements.
+     * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -606,13 +620,17 @@ public final class ParserFactory {
         N.checkArgNotNull(type, cs.type);
         N.checkArgNotNull(serializer, cs.serializer);
 
-        _kryoClassSerializerMap.put(type, serializer);
-        _kryoRegistrationVersion.incrementAndGet();
+        synchronized (_kryoRegistrationLock) {
+            clearKryoRegistration(type);
+            _kryoClassSerializerMap.put(type, serializer);
+            _kryoRegistrationVersion.incrementAndGet();
+        }
     }
 
     /**
      * Registers a class with Kryo using a custom serializer and specific ID.
      * Combines the benefits of custom serialization and fixed IDs.
+     * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -623,14 +641,30 @@ public final class ParserFactory {
      *
      * @param type the class to register (must not be {@code null})
      * @param serializer the custom serializer for this class (must not be {@code null})
-     * @param id the unique ID for this class
-     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}
+     * @param id the non-negative unique ID for this class
+     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}, or {@code id} is negative
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
         N.checkArgNotNull(serializer, cs.serializer);
+        N.checkArgNotNegative(id, "id");
 
-        _kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
-        _kryoRegistrationVersion.incrementAndGet();
+        synchronized (_kryoRegistrationLock) {
+            clearKryoRegistration(type);
+            _kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
+            _kryoRegistrationVersion.incrementAndGet();
+        }
+    }
+
+    /**
+     * Removes every previous registration form for {@code type}. A class can have exactly one
+     * effective global Kryo registration; consequently, a later overload call replaces an earlier
+     * one instead of leaving stale entries that are replayed in a fixed map order.
+     */
+    private static void clearKryoRegistration(final Class<?> type) {
+        _kryoClassSet.remove(type);
+        _kryoClassIdMap.remove(type);
+        _kryoClassSerializerMap.remove(type);
+        _kryoClassSerializerIdMap.remove(type);
     }
 }

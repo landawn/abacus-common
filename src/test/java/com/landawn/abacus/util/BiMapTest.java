@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -418,6 +420,17 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testPutIfAbsentRejectsNullValueForExistingKey() {
+        BiMap<String, Integer> biMap = BiMap.of("one", 1);
+
+        assertThrows(IllegalArgumentException.class, () -> biMap.putIfAbsent("one", null));
+        assertEquals(1, biMap.size());
+        assertEquals(1, biMap.get("one"));
+        assertEquals("one", biMap.getByValue(1));
+        assertFalse(biMap.containsValue(null));
+    }
+
+    @Test
     public void testForcePutReplaceValue() {
         BiMap<String, Integer> biMap = BiMap.of("one", 1);
         Integer oldValue = biMap.forcePut("one", 2);
@@ -730,6 +743,24 @@ public class BiMapTest extends AbstractTest {
     }
 
     @Test
+    public void testConstructorRejectsNullSuppliersAndNullResults() {
+        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>((Supplier<Map<String, Integer>>) null, HashMap::new));
+        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(HashMap::new, (Supplier<Map<Integer, String>>) null));
+        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(() -> null, HashMap::new));
+        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(HashMap::new, () -> null));
+    }
+
+    @Test
+    public void testConstructorRejectsNonemptyAndAliasedSupplierResults() {
+        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(() -> new HashMap<>(Map.of("one", 1)), HashMap::new));
+        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(HashMap::new, () -> new HashMap<>(Map.of(1, "one"))));
+
+        final Map<String, String> sharedMap = new HashMap<>();
+        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, String>(() -> sharedMap, () -> sharedMap));
+        assertTrue(sharedMap.isEmpty());
+    }
+
+    @Test
     public void testIsEmpty() {
         BiMap<String, Integer> biMap = new BiMap<>();
         assertTrue(biMap.isEmpty());
@@ -978,6 +1009,28 @@ public class BiMapTest extends AbstractTest {
 
         // the copied inverse keeps the case-insensitive value map, so a value differing only by case is a duplicate
         assertThrows(IllegalArgumentException.class, () -> copyOfInverse.put(2, "APPLE"));
+    }
+
+    @Test
+    public void testPutSameMappingUsesBackingMapKeyEquivalence() {
+        final BiMap<String, Integer> map = new BiMap<>(() -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER), HashMap::new);
+        map.put("Alpha", 1);
+
+        assertDoesNotThrow(() -> map.put("ALPHA", 1));
+        assertEquals(1, map.size());
+        assertEquals(Integer.valueOf(1), map.get("alpha"));
+        assertEquals("Alpha", map.getByValue(1));
+    }
+
+    @Test
+    public void testPutSameMappingUsesBackingMapValueEquivalence() {
+        final BiMap<Integer, String> map = new BiMap<>(HashMap::new, () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+        map.put(1, "Alpha");
+
+        assertDoesNotThrow(() -> map.put(1, "ALPHA"));
+        assertEquals(1, map.size());
+        assertEquals("Alpha", map.get(1));
+        assertEquals(Integer.valueOf(1), map.getByValue("alpha"));
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---

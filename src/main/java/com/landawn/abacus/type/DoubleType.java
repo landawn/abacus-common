@@ -75,7 +75,7 @@ public final class DoubleType extends AbstractDoubleType {
      *
      * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnIndex the 1-based column index
-     * @return the {@link Double} value at the specified column,
+     * @return the converted {@code Double} value
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      * @throws NumberFormatException if a non-numeric value cannot be converted to {@code double}
@@ -101,7 +101,7 @@ public final class DoubleType extends AbstractDoubleType {
      *
      * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnName the label of the column to retrieve
-     * @return the {@link Double} value in the specified column,
+     * @return the converted {@code Double} value
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      * @throws NumberFormatException if a non-numeric value cannot be converted to {@code double}

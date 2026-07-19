@@ -186,7 +186,7 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Holder<Integer>> type = TypeFactory.getType("Holder<Integer>");
-     * Holder<Integer> opt = type.valueOf("42");   // Returns Holder.of(42)
+     * Holder<Integer> opt = type.valueOf("42");          // Returns Holder.of(42)
      *
      * Holder<Integer> nullHolder = type.valueOf(null);   // Returns a new Holder holding null
      * }</pre>

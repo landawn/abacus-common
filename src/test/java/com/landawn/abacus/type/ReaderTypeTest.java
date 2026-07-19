@@ -5,8 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +27,7 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -77,18 +82,65 @@ public class ReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOfObject() throws SQLException {
+    public void testValueOfObject() throws SQLException, IOException {
         Clob clob = mock(Clob.class);
-        Reader clobReader = new StringReader("clob content");
+        Reader clobReader = mock(Reader.class);
         when(clob.getCharacterStream()).thenReturn(clobReader);
 
         Reader result = readerType.valueOf(clob);
-        assertEquals(clobReader, result);
+        assertNotNull(result);
+        result.close();
+        result.close();
+        verify(clobReader).close();
+        verify(clob, times(1)).free();
 
         assertNull(readerType.valueOf((Object) null));
 
         result = readerType.valueOf("test");
         assertNotNull(result);
+    }
+
+    @Test
+    public void testValueOfClobFreesLocatorWhenOpeningFails() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        final SQLException openFailure = new SQLException("open");
+        final SQLException freeFailure = new SQLException("free");
+        when(clob.getCharacterStream()).thenThrow(openFailure);
+        doThrow(freeFailure).when(clob).free();
+
+        final UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> readerType.valueOf(clob));
+
+        assertSame(openFailure, thrown.getCause());
+        assertSame(freeFailure, openFailure.getSuppressed()[0]);
+        verify(clob).free();
+    }
+
+    @Test
+    public void testValueOfClobFreesLocatorWhenDriverReturnsNullReader() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        when(clob.getCharacterStream()).thenReturn(null);
+
+        assertNull(readerType.valueOf(clob));
+
+        verify(clob).free();
+    }
+
+    @Test
+    public void testValueOfClobFreesLocatorWhenDelegateCloseFails() throws SQLException, IOException {
+        final Clob clob = mock(Clob.class);
+        final Reader delegate = mock(Reader.class);
+        final IOException closeFailure = new IOException("close");
+        final SQLException freeFailure = new SQLException("free");
+        when(clob.getCharacterStream()).thenReturn(delegate);
+        doThrow(closeFailure).when(delegate).close();
+        doThrow(freeFailure).when(clob).free();
+
+        final Reader result = readerType.valueOf(clob);
+        final IOException thrown = assertThrows(IOException.class, result::close);
+
+        assertSame(closeFailure, thrown);
+        assertSame(freeFailure, thrown.getSuppressed()[0]);
+        verify(clob).free();
     }
 
     @Test
@@ -211,6 +263,24 @@ public class ReaderTypeTest extends TestBase {
         reader = new StringReader("test");
         readerType.serializeTo(writer, reader, config);
         assertNotNull(reader);
+    }
+
+    @Test
+    public void testSerializeToPropagatesReaderIOException() {
+        final IOException failure = new IOException("read failure");
+        final Reader reader = new Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                throw failure;
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+
+        assertSame(failure, assertThrows(IOException.class, () -> readerType.serializeTo(createCharacterWriter(), reader, null)));
     }
 
     @Test

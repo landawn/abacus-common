@@ -26,7 +26,8 @@ import java.lang.annotation.Target;
  * {@code @Transient} annotation and the Java {@code transient} field modifier are treated as
  * equivalent by the framework's reflection layer ({@code com.landawn.abacus.parser.ParserUtil}),
  * which sets {@code PropInfo.isTransient = true} for either signal. The property is then dropped
- * from the {@code nonTransientSeriPropInfos} array used to drive serialization and persistence.
+ * from the {@code nonTransientSeriPropInfos} array used by the JSON/XML serializers. Persistence
+ * integrations can inspect the same {@code isTransient} metadata when selecting mapped fields.
  *
  * <p><b>Common use cases:</b></p>
  * <ul>

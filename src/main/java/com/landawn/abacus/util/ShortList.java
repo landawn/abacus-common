@@ -363,7 +363,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public ShortList(final int initialCapacity) {
+    public ShortList(final int initialCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
@@ -399,9 +399,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * short[] a = { (short) 1, (short) 2, (short) 3, (short) 4 };
      * ShortList list = new ShortList(a, 2);
-     * list.size();                  // returns 2
-     * list.toArray();               // returns [1, 2] (only first 2 elements)
-     * new ShortList(a, 5);          // throws IndexOutOfBoundsException (5 > a.length)
+     * list.size();           // returns 2
+     * list.toArray();        // returns [1, 2] (only first 2 elements)
+     * new ShortList(a, 5);   // throws IndexOutOfBoundsException (5 > a.length)
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
@@ -424,9 +424,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
-     * list.size();                   // returns 3
-     * ShortList.of().size();         // returns 0 (no arguments -> empty list)
-     * ShortList.of((short[]) null);  // returns an empty list (null is treated as empty)
+     * list.size();                    // returns 3
+     * ShortList.of().size();          // returns 0 (no arguments -> empty list)
+     * ShortList.of((short[]) null);   // returns an empty list (null is treated as empty)
      * }</pre>
      *
      * @param a the array of short values to be used as the backing array. May be {@code null}.
@@ -446,9 +446,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * short[] a = { (short) 1, (short) 2, (short) 3, (short) 4 };
      * ShortList list = ShortList.of(a, 3);
-     * list.toArray();                // returns [1, 2, 3] (only first 3 elements)
-     * ShortList.of(a, 0).size();     // returns 0
-     * ShortList.of(a, 5);            // throws IndexOutOfBoundsException (5 > a.length)
+     * list.toArray();              // returns [1, 2, 3] (only first 3 elements)
+     * ShortList.of(a, 0).size();   // returns 0
+     * ShortList.of(a, 5);          // throws IndexOutOfBoundsException (5 > a.length)
      * }</pre>
      *
      * @param a the array of short values to be used as the backing array. May be {@code null}.
@@ -500,9 +500,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * short[] a = { (short) 1, (short) 2, (short) 3, (short) 4, (short) 5 };
      * ShortList list = ShortList.copyOf(a, 1, 4);
-     * list.toArray();                   // returns [2, 3, 4]
-     * ShortList.copyOf(a, 2, 2).size(); // returns 0 (empty range)
-     * ShortList.copyOf(a, 0, 6);        // throws IndexOutOfBoundsException (6 > a.length)
+     * list.toArray();                     // returns [2, 3, 4]
+     * ShortList.copyOf(a, 2, 2).size();   // returns 0 (empty range)
+     * ShortList.copyOf(a, 0, 6);          // throws IndexOutOfBoundsException (6 > a.length)
      * }</pre>
      *
      * @param a the array from which a range is to be copied. Must not be {@code null}.
@@ -543,10 +543,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortList.range((short) 0, (short) 10, (short) 2).toArray();   // returns [0, 2, 4, 6, 8]
-     * ShortList.range((short) 10, (short) 0, (short) -3).toArray();  // returns [10, 7, 4, 1]
-     * ShortList.range((short) 5, (short) 5, (short) 1).size();       // returns 0 (start == end)
-     * ShortList.range((short) 0, (short) 5, (short) 0);              // throws IllegalArgumentException (by == 0)
+     * ShortList.range((short) 0, (short) 10, (short) 2).toArray();    // returns [0, 2, 4, 6, 8]
+     * ShortList.range((short) 10, (short) 0, (short) -3).toArray();   // returns [10, 7, 4, 1]
+     * ShortList.range((short) 5, (short) 5, (short) 1).size();        // returns 0 (start == end)
+     * ShortList.range((short) 0, (short) 5, (short) 0);               // throws IllegalArgumentException (by == 0)
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -584,10 +584,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortList.rangeClosed((short) 0, (short) 10, (short) 2).toArray();   // returns [0, 2, 4, 6, 8, 10]
-     * ShortList.rangeClosed((short) 10, (short) 0, (short) -5).toArray();  // returns [10, 5, 0]
-     * ShortList.rangeClosed((short) 3, (short) 3, (short) 1).toArray();    // returns [3] (single element)
-     * ShortList.rangeClosed((short) 0, (short) 5, (short) 0);              // throws IllegalArgumentException (by == 0)
+     * ShortList.rangeClosed((short) 0, (short) 10, (short) 2).toArray();    // returns [0, 2, 4, 6, 8, 10]
+     * ShortList.rangeClosed((short) 10, (short) 0, (short) -5).toArray();   // returns [10, 5, 0]
+     * ShortList.rangeClosed((short) 3, (short) 3, (short) 1).toArray();     // returns [3] (single element)
+     * ShortList.rangeClosed((short) 0, (short) 5, (short) 0);               // throws IllegalArgumentException (by == 0)
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -726,9 +726,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short) 1, (short) 2);
-     * list.add((short) 3);    // list is now [1, 2, 3]
-     * list.add((short) 4);    // list is now [1, 2, 3, 4]
-     * list.size();            // returns 4
+     * list.add((short) 3);   // list is now [1, 2, 3]
+     * list.add((short) 4);   // list is now [1, 2, 3, 4]
+     * list.size();           // returns 4
      * }</pre>
      *
      * @param e the element to be appended to this list
@@ -1173,20 +1173,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return numRemoved;
     }
 
-    //    /**
-    //     * Removes the element at the specified position in this list. Shifts any subsequent elements
-    //     * to the left (subtracts one from their indices).
-    //     *
-    //     * @param index the index of the element to be removed
-    //     * @return the element that was removed from the list
-    //     * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= size())
-    //     * @deprecated replaced by {@link #removeAt(int)}.
-    //     */
-    //    @Deprecated
-    //    public short delete(final int index) {
-    //        return removeAt(index);
-    //    }
-
     /**
      * Removes and returns the element at the specified index.
      *
@@ -1236,20 +1222,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             return;
         }
 
-        for (final int index : indices) {
-            N.checkElementIndex(index, size);
-        }
-
-        final short[] tmp = N.removeAt(elementData, indices);
-
-        N.copy(tmp, 0, elementData, 0, tmp.length);
-
-        if (size > tmp.length) {
-            N.fill(elementData, tmp.length, size, (short) 0);
-        }
-
-        // size = tmp.length; // incorrect. the array returned N.removeAt(elementData, indices) contains empty elements after size.
-        size = size - (elementData.length - tmp.length);
+        final int newSize = compactAfterRemovingIndices(elementData, size, indices);
+        N.fill(elementData, newSize, size, (short) 0);
+        size = newSize;
     }
 
     /**
@@ -2234,7 +2209,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final ShortConsumer action) {
+    public void forEach(final ShortConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
@@ -2266,7 +2241,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *         considering the supported forward and backward iteration semantics
      * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2528,7 +2503,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
-    public void shuffle(final Random rnd) {
+    public void shuffle(final Random rnd) throws IllegalArgumentException {
         N.checkArgNotNull(rnd, cs.rnd);
 
         if (size() > 1) {
@@ -2746,8 +2721,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list = ShortList.of((short) 1, (short) -2, (short) 300);
      * IntList ints = list.toIntList();
-     * ints.toArray();                     // returns [1, -2, 300]
-     * new ShortList().toIntList().size(); // returns 0 (empty list)
+     * ints.toArray();                       // returns [1, -2, 300]
+     * new ShortList().toIntList().size();   // returns 0 (empty list)
      * }</pre>
      *
      * @return a new {@link IntList} containing all elements of this list widened to {@code int} values
@@ -2779,7 +2754,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final C collection = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final C collection = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             collection.add(elementData[i]);
@@ -2802,7 +2778,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final Multiset<Short> multiset = supplier.apply(toIndex - fromIndex);
+        N.requireNonNull(supplier, cs.supplier);
+        final Multiset<Short> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

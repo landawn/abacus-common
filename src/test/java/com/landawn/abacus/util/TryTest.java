@@ -1,8 +1,10 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -14,6 +16,7 @@ import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +44,28 @@ public class TryTest extends TestBase {
             assertTrue(!c.isClosed());
         });
         assertTrue(closeable.isClosed());
+    }
+
+    @Test
+    public void test_instance_methods_validateCallbacksBeforeClosingResource() {
+        TestCloseable closeable = new TestCloseable();
+        Try<TestCloseable> tryInstance = Try.with(closeable);
+        Throwables.Function<TestCloseable, String, Exception> command = resource -> "result";
+        Predicate<Exception> predicate = error -> true;
+
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.run((Throwables.Consumer<TestCloseable, Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.run(resource -> {
+        }, (java.util.function.Consumer<Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Function<Exception, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null, "default"));
+        assertThrows(IllegalArgumentException.class,
+                () -> tryInstance.call(command, (Predicate<Exception>) null, (java.util.function.Supplier<String>) () -> "default"));
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, predicate, (java.util.function.Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (Predicate<Exception>) null, "default"));
+
+        assertTrue(!closeable.isClosed(), "invalid arguments must not consume the managed resource");
     }
 
     @Test
@@ -667,6 +692,44 @@ public class TryTest extends TestBase {
     }
 
     @Test
+    public void test_run_actionOnErrorRestoresInterruptedStatus() {
+        Thread.interrupted();
+
+        try {
+            AtomicBoolean handlerSawInterruptedStatus = new AtomicBoolean();
+            Try.run(() -> {
+                throw new InterruptedException("stop");
+            }, ex -> handlerSawInterruptedStatus.set(Thread.currentThread().isInterrupted()));
+
+            assertTrue(handlerSawInterruptedStatus.get());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void test_resourceErrorHandlerRestoresInterruptedStatus() {
+        Thread.interrupted();
+
+        try {
+            AtomicBoolean handlerSawInterruptedStatus = new AtomicBoolean();
+            String result = Try.with(new TestCloseable()).call(closeable -> {
+                throw new InterruptedException("stop");
+            }, (java.util.function.Function<Exception, String>) ex -> {
+                handlerSawInterruptedStatus.set(Thread.currentThread().isInterrupted());
+                return "fallback";
+            });
+
+            assertEquals("fallback", result);
+            assertTrue(handlerSawInterruptedStatus.get());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
     public void test_run_cmd_actionOnError_null_cmd() {
         assertThrows(IllegalArgumentException.class, () -> {
             Try.run((Throwables.Runnable<Exception>) null, ex -> {
@@ -987,11 +1050,38 @@ public class TryTest extends TestBase {
     }
 
     @Test
+    public void test_with_run_preservesBodyFailureWhenFinalActionAlsoFails() {
+        final RuntimeException bodyFailure = new RuntimeException("body");
+        final RuntimeException finalActionFailure = new RuntimeException("final-action");
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> Try.with(new TestCloseable(), () -> {
+            throw finalActionFailure;
+        }).run(resource -> {
+            throw bodyFailure;
+        }));
+
+        assertSame(bodyFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(finalActionFailure, thrown.getSuppressed()[0]);
+    }
+
+    @Test
     public void test_with_supplier_run_supplierExceptionPropagates() {
         // If the supplier throws, the failure must be propagated as a RuntimeException.
         Throwables.Supplier<AutoCloseable, Exception> supplier = () -> {
             throw new java.io.IOException("supplier-fail");
         };
         assertThrows(RuntimeException.class, () -> Try.with(supplier).run(c -> fail("must not reach body")));
+    }
+
+    @Test
+    public void test_with_supplier_rejectsNullResourceBeforeRunningBody() {
+        final AtomicBoolean bodyRan = new AtomicBoolean(false);
+        final AtomicBoolean finalActionRan = new AtomicBoolean(false);
+        final Throwables.Supplier<AutoCloseable, Exception> supplier = () -> null;
+
+        assertThrows(IllegalArgumentException.class, () -> Try.with(supplier, () -> finalActionRan.set(true)).run(c -> bodyRan.set(true)));
+        assertFalse(bodyRan.get());
+        assertTrue(finalActionRan.get(), "the final action must still run when acquisition returns null");
     }
 }

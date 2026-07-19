@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -21,6 +22,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -2751,6 +2754,16 @@ public class DatesTest extends TestBase {
         assertEquals(500, date.getTime() - result.getTime());
     }
 
+    @Test
+    public void testDateAdditionRejectsEpochOverflow() {
+        java.util.Date max = new java.util.Date(Long.MAX_VALUE);
+        java.util.Date min = new java.util.Date(Long.MIN_VALUE);
+
+        assertThrows(ArithmeticException.class, () -> Dates.addMilliseconds(max, 1));
+        assertThrows(ArithmeticException.class, () -> Dates.addSeconds(max, 1));
+        assertThrows(ArithmeticException.class, () -> Dates.addMilliseconds(min, -1L));
+    }
+
     // ===== addMilliseconds(Calendar) =====
 
     @Test
@@ -4564,8 +4577,25 @@ public class DatesTest extends TestBase {
 
     @Test
     public void test_DTF_parseToX_nullLiteral_returnsNull() {
-        // Regression: the literal "null" must parse to null (like every other Dates parse method),
-        // not throw NPE, in the default (custom-format) branch of DTF.parseToX (#26-31).
+        // Regression: every optimized and generic DTF parser must apply the same null-literal policy.
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE.parseToLocalDate(new StringBuilder("NuLl")));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_TIME.parseToLocalTime("NULL"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToLocalDateTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_OFFSET_DATE_TIME.parseToInstant("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToJUDate("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToJUDate("null", Dates.UTC_TIME_ZONE));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToDate("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToDate("null", Dates.UTC_TIME_ZONE));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToTime("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToTime("null", Dates.UTC_TIME_ZONE));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToTimestamp("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToTimestamp("null", Dates.UTC_TIME_ZONE));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToCalendar("null"));
+        org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.ISO_ZONED_DATE_TIME.parseToCalendar("null", Dates.UTC_TIME_ZONE));
+
+        // Keep generic cross-format branches covered as well.
         org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToLocalDate("null"));
         org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToLocalTime("null"));
         org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE.parseToLocalDateTime("null"));
@@ -4628,6 +4658,43 @@ public class DatesTest extends TestBase {
 
         assertEquals("2023-03-15T07:50:30.123Z", Dates.format(timestamp, Dates.ISO_8601_TIMESTAMP_FORMAT, Dates.UTC_TIME_ZONE));
         assertEquals(123000000, timestamp.getNanos());
+    }
+
+    @Test
+    public void testMutatingPublicUtcTimeZoneDoesNotCorruptInternalUtcOperations() {
+        // TimeZone is mutable even through a public final reference. Dates must not use that exposed
+        // object as the state of its internal UTC formatter/parser pools.
+        synchronized (Dates.UTC_TIME_ZONE) {
+            final int originalRawOffset = Dates.UTC_TIME_ZONE.getRawOffset();
+
+            try {
+                Dates.UTC_TIME_ZONE.setRawOffset((int) TimeUnit.HOURS.toMillis(5));
+
+                assertEquals("1970-01-01T00:00:00Z", Dates.format(new java.util.Date(0L)));
+                assertEquals(0L, Dates.parseJUDate("1970-01-01T00:00:00Z").getTime());
+            } finally {
+                Dates.UTC_TIME_ZONE.setRawOffset(originalRawOffset);
+            }
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testCallerOwnedTimeZoneIsNotRetainedByCalendarPool() throws Exception {
+        final TimeZone callerOwned = new SimpleTimeZone((int) TimeUnit.HOURS.toMillis(2), "DatesTest-caller-owned-zone");
+        final Field poolField = Dates.class.getDeclaredField("calendarPool");
+        poolField.setAccessible(true);
+        final Map<TimeZone, ?> pool = (Map<TimeZone, ?>) poolField.get(null);
+
+        pool.remove(callerOwned);
+
+        try {
+            Dates.parseJUDate("2024-01-02 03:04:05", "yyyy-MM-dd HH:mm:ss", callerOwned);
+
+            assertFalse(pool.keySet().stream().anyMatch(timeZone -> timeZone == callerOwned));
+        } finally {
+            pool.remove(callerOwned);
+        }
     }
 
 }

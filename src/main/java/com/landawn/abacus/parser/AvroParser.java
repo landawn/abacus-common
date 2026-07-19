@@ -129,7 +129,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (must contain schema if obj is not SpecificRecord)
      * @return the Base64 encoded string representation of the serialized object
-     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
+     *         or a {@code SpecificRecord} collection contains nulls or more than one record class
      */
     @Override
     public String serialize(final Object obj, final AvroSerConfig config) {
@@ -160,14 +161,20 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * parser.serialize(users, config, new File("users.avro"));
      * }</pre>
      *
+     * <p><b>Implementation note:</b> The source type and required schema are validated before the
+     * destination is opened, so these validation failures do not truncate an existing file.</p>
+     *
      * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
-     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
+     *         or a {@code SpecificRecord} collection contains nulls or more than one record class
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     @Override
     public void serialize(final Object obj, final AvroSerConfig config, final File output) {
+        validateSerialization(obj, config);
+
         OutputStream os = null;
 
         try {
@@ -218,12 +225,15 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
-     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord objects
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
+     *         or a {@code SpecificRecord} collection contains nulls or more than one record class
      * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     @SuppressFBWarnings
     @Override
     public void serialize(final Object obj, final AvroSerConfig config, final OutputStream output) {
+        validateSerialization(obj, config);
+
         if (obj == null) {
             return;
         }
@@ -252,10 +262,6 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 throw new UncheckedIOException(e);
             }
         } else {
-            if (config == null || config.getSchema() == null) {
-                throw new IllegalArgumentException("Schema is not specified");
-            }
-
             final Schema schema = config.getSchema();
             final DatumWriter<Object> datumWriter = new GenericDatumWriter<>(schema);
 
@@ -288,6 +294,41 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
+        }
+    }
+
+    /**
+     * Validates failures that can be detected without writing an Avro container header. Keeping
+     * this check separate allows file overloads to preserve an existing destination on invalid input.
+     *
+     * @param obj the source object, or {@code null}
+     * @param config the serialization configuration, or {@code null}
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
+     *         or a {@code SpecificRecord} collection is heterogeneous
+     */
+    private static void validateSerialization(final Object obj, final AvroSerConfig config) {
+        if (obj == null || obj instanceof SpecificRecord) {
+            return;
+        }
+
+        final Type<Object> type = Type.of(obj.getClass());
+
+        if (type.isCollection() && !((Collection<?>) obj).isEmpty() && ((Collection<?>) obj).iterator().next() instanceof SpecificRecord first) {
+            for (final Object element : (Collection<?>) obj) {
+                if (!(element instanceof SpecificRecord) || element.getClass() != first.getClass()) {
+                    throw new IllegalArgumentException("A SpecificRecord collection must contain only one record type");
+                }
+            }
+
+            return;
+        }
+
+        if (config == null || config.getSchema() == null) {
+            throw new IllegalArgumentException("Schema is not specified");
+        }
+
+        if (!(obj instanceof GenericRecord) && !type.isBean() && !type.isMap() && !type.isCollection()) {
+            throw new IllegalArgumentException("Unsupported type: " + type.name());
         }
     }
 

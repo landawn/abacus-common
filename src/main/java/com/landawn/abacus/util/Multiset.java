@@ -72,9 +72,11 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>IMPORTANT - Count Limitations:</b>
  * <ul>
  *   <li>Element counts are limited to {@code Integer.MAX_VALUE}</li>
- *   <li>Negative counts are not allowed and will throw IllegalArgumentException</li>
+ *   <li>Negative count arguments to count-setting and occurrence add/remove methods throw IllegalArgumentException;
+ *       non-positive results from remapping callbacks remove the element as documented by those methods</li>
  *   <li>Setting count to 0 effectively removes the element from the multiset</li>
- *   <li>{@link #size()} throws {@link ArithmeticException} if the total occurrence count exceeds {@code Integer.MAX_VALUE}</li>
+ *   <li>{@link #size()} returns {@link Integer#MAX_VALUE} if the total occurrence count exceeds that value,
+ *       as required by the {@link Collection} contract; use {@link #sumOfOccurrences()} for the exact {@code long} total</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -208,8 +210,6 @@ public final class Multiset<E> implements Collection<E> {
 
     private static final Comparator<Map.Entry<?, MutableInt>> cmpByCount = (a, b) -> N.compare(a.getValue().value(), b.getValue().value());
 
-    private final Supplier<Map<E, MutableInt>> backingMapSupplier;
-
     private final Map<E, MutableInt> backingMap;
 
     /**
@@ -241,7 +241,6 @@ public final class Multiset<E> implements Collection<E> {
      * @throws IllegalArgumentException if the initial capacity is negative.
      */
     public Multiset(final int initialCapacity) {
-        backingMapSupplier = Suppliers.ofMap();
         backingMap = N.newHashMap(initialCapacity);
     }
 
@@ -317,17 +316,15 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param mapSupplier the supplier that provides the map to be used as the backing map.
+     * @throws NullPointerException if {@code mapSupplier} or the map it supplies is {@code null}
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings("unchecked")
     public Multiset(final Supplier<? extends Map<? extends E, ?>> mapSupplier) {
-        backingMapSupplier = (Supplier) N.requireNonNull(mapSupplier);
-        backingMap = backingMapSupplier.get();
+        backingMap = (Map<E, MutableInt>) N.requireNonNull(N.requireNonNull(mapSupplier).get());
     }
 
-    @SuppressWarnings("rawtypes")
     Multiset(final Map<E, MutableInt> valueMap) {
-        backingMapSupplier = (Supplier) Suppliers.ofMap(valueMap.getClass());
-        backingMap = valueMap;
+        backingMap = N.requireNonNull(valueMap);
     }
 
     /**
@@ -577,7 +574,6 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @return the total count of all elements.
-     * @throws ArithmeticException if the sum exceeds {@link Long#MAX_VALUE}.
      * @see #size()
      */
     public long sumOfOccurrences() {
@@ -1068,6 +1064,11 @@ public final class Multiset<E> implements Collection<E> {
             return false;
         }
 
+        if (c == this) {
+            clear();
+            return true;
+        }
+
         boolean result = false;
 
         for (final Object e : c) {
@@ -1188,7 +1189,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param predicate the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed.
-     * @throws IllegalArgumentException if the predicate is null.
+     * @throws IllegalArgumentException if the predicate is {@code null}.
      */
     public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -1230,7 +1231,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param predicate the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed.
-     * @throws IllegalArgumentException if the predicate is null.
+     * @throws IllegalArgumentException if the predicate is {@code null}.
      */
     public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
@@ -1274,7 +1275,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param function the function to compute new counts; returning {@code null} or a non-positive
      *                 value causes the element to be removed from the multiset.
-     * @throws IllegalArgumentException if the function is null.
+     * @throws IllegalArgumentException if the function is {@code null}.
      */
     public void updateAllOccurrences(final ObjIntFunction<? super E, Integer> function) throws IllegalArgumentException {
         N.checkArgNotNull(function);
@@ -1729,14 +1730,20 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.countOfDistinctElements());   // prints 2
      * }</pre>
      *
-     * @return the total number of element occurrences
-     * @throws ArithmeticException if the total count exceeds {@link Integer#MAX_VALUE}
+     * <p>As required by {@link Collection#size()}, this method returns {@link Integer#MAX_VALUE}
+     * when the exact total is larger. Use {@link #sumOfOccurrences()} when the exact total is needed.</p>
+     *
+     * @return the total number of element occurrences, saturated at {@link Integer#MAX_VALUE}
      * @see #countOfDistinctElements()
      * @see #sumOfOccurrences()
      */
     @Override
-    public int size() throws ArithmeticException {
-        return backingMap.isEmpty() ? 0 : Numbers.toIntExact(sumOfOccurrences());
+    public int size() {
+        if (backingMap.isEmpty()) {
+            return 0;
+        }
+
+        return (int) Math.min(sumOfOccurrences(), Integer.MAX_VALUE);
     }
 
     /**
@@ -1793,10 +1800,6 @@ public final class Multiset<E> implements Collection<E> {
     public void clear() {
         backingMap.clear();
     }
-
-    //    public Set<Map.Entry<E, MutableInt>> entrySet() {
-    //        return valueMap.entrySet();
-    //    }
 
     /**
      * Converts the multiset to an array.
@@ -1952,10 +1955,13 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: c=3, b=2, a=1 (descending by count)
      * }</pre>
      *
-     * @param cmp the comparator to be used for sorting the counts of the elements.
+     * @param cmp the comparator to be used for sorting the counts of the elements; must not be {@code null}
      * @return a map with the elements of this multiset as keys and their counts as values, sorted by the counts using the provided comparator
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) {
+        N.checkArgNotNull(cmp, cs.comparator);
+
         return toMapSortedBy((o1, o2) -> cmp.compare(o1.getValue().value(), o2.getValue().value()));
     }
 
@@ -2379,7 +2385,6 @@ public final class Multiset<E> implements Collection<E> {
          * @return {@code true} if the specified object is equal to this entry
          */
         @Override
-        // TODO(kevinb): check this wrt TreeMultiset?
         boolean equals(Object o);
 
         /**

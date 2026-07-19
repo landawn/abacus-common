@@ -27,9 +27,11 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * An immutable, thread-safe implementation of the {@link List} interface.
- * Once created, the contents of an ImmutableList cannot be modified.
+ * A read-only implementation of the {@link List} interface.
+ * Its contents cannot be modified through the {@code ImmutableList} API.
  * All mutating operations (add, remove, set, sort, etc.) will throw {@link UnsupportedOperationException}.
+ * Instances created by copying are immutable and thread-safe. An instance created by {@link #wrap(List)}
+ * reflects external changes to its backing list and has the backing list's thread-safety characteristics.
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -86,12 +88,13 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
     /**
      * Constructs an ImmutableList backed by the provided list.
-     * Whether the list is already unmodifiable is detected automatically.
+     * The backing list is always exposed through an unmodifiable view; its concrete class name
+     * is not treated as evidence that it is immutable.
      *
      * @param list the list of elements to be included in this ImmutableList.
      */
     ImmutableList(final List<? extends E> list) {
-        this(list, ClassUtil.isPossibleImmutable(list.getClass()));
+        this(list, false);
     }
 
     /**
@@ -124,26 +127,6 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     public static <E> ImmutableList<E> empty() {
         return EMPTY;
     }
-
-    //    /**
-    //     * Returns an ImmutableList containing a single element.
-    //     * This is a convenience method equivalent to {@link #of(Object)}.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ImmutableList<String> single = ImmutableList.just("hello");
-    //     * System.out.println(single.get(0));   // prints: hello
-    //     * }</pre>
-    //     *
-    //     * @param <E> the type of the element.
-    //     * @param e the single element to be contained in the ImmutableList.
-    //     * @return an ImmutableList containing only the specified element.
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public static <E> ImmutableList<E> just(final E e) {
-    //        return new ImmutableList<>(Array.asList(e), false);
-    //    }
 
     /**
      * Returns an ImmutableList containing a single element.
@@ -362,36 +345,6 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
     }
 
-    //    /**
-    //     * Returns an ImmutableList containing all elements from the provided array in the same order.
-    //     * The returned list is independent of the input array; changes to the array after this call
-    //     * will not affect the returned list. If the array is {@code null} or empty, an empty ImmutableList is returned.
-    //     * Unlike some collection frameworks, this method supports {@code null} elements in the array.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * String[] array = {"one", "two", "three"};
-    //     * ImmutableList<String> list = ImmutableList.of(array);
-    //     * array[0] = "modified";  // Does not affect list
-    //     * }</pre>
-    //     *
-    //     * @param <E> the type of the elements.
-    //     * @param a the array of elements to include in the ImmutableList, may be {@code null} or empty.
-    //     * @return an ImmutableList containing all elements from the array, or empty list if array is null/empty.
-    //     * @see List#of(Object...)
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @SafeVarargs
-    //    public static <E> ImmutableList<E> of(final E... a) {
-    //        if (N.isEmpty(a)) {
-    //            return empty();
-    //        } else {
-    //            // return new ImmutableList<>(List.of(a), true);   // Doesn't support null element
-    //            return new ImmutableList<>(Array.asList(a), false);
-    //        }
-    //    }
-
     /**
      * Returns an {@code ImmutableList} containing the elements of the specified array.
      * If the array is {@code null} or empty, an empty {@code ImmutableList} is returned.
@@ -550,7 +503,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * int notFound = list.indexOf("d");   // returns -1
      * }</pre>
      *
-     * @param valueToFind the element to search for, may be null.
+     * @param valueToFind the element to search for, may be {@code null}.
      * @return the index of the first occurrence of the specified element in this list,
      *         or -1 if this list does not contain the element.
      * @see List#indexOf(Object)
@@ -572,7 +525,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * int lastIndex = list.lastIndexOf("b");   // returns 3
      * }</pre>
      *
-     * @param valueToFind the element to search for, may be null.
+     * @param valueToFind the element to search for, may be {@code null}.
      * @return the index of the last occurrence of the specified element in this list,
      *         or -1 if this list does not contain the element.
      * @see List#lastIndexOf(Object)
@@ -866,7 +819,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex}
          */
         @Override
-        public ImmutableList<E> subList(final int fromIndex, final int toIndex) {
+        public ImmutableList<E> subList(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
             N.checkFromToIndex(fromIndex, toIndex, size());
 
             return forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)).reversed();
@@ -940,7 +893,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * @throws IndexOutOfBoundsException if {@code index < 0 || index > size()}
          */
         @Override
-        public ImmutableListIterator<E> listIterator(final int index) {
+        public ImmutableListIterator<E> listIterator(final int index) throws IndexOutOfBoundsException {
             N.checkFromIndexSize(index, 0, size);
 
             return ImmutableListIterator.of(new java.util.ListIterator<>() {
@@ -1170,7 +1123,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @param <E> the type of elements to be maintained by the list.
      * @param holder the list to be used as the backing storage for the Builder; must not be {@code null}.
      * @return a new Builder instance that will use the provided list.
-     * @throws IllegalArgumentException if holder is null.
+     * @throws IllegalArgumentException if holder is {@code null}.
      */
     public static <E> Builder<E> builder(final List<E> holder) throws IllegalArgumentException {
         N.checkArgNotNull(holder);
@@ -1216,7 +1169,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.add("hello").add("world");
          * }</pre>
          *
-         * @param element the element to add, may be null.
+         * @param element the element to add, may be {@code null}.
          * @return this builder instance for method chaining.
          */
         public Builder<E> add(final E element) {
@@ -1281,7 +1234,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.addAll(iter);
          * }</pre>
          *
-         * @param iter the iterator over elements to add, may be null.
+         * @param iter the iterator over elements to add, may be {@code null}.
          * @return this builder instance for method chaining.
          */
         public Builder<E> addAll(final Iterator<? extends E> iter) {

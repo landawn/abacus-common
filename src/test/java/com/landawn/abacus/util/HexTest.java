@@ -305,6 +305,14 @@ public class HexTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Hex.decode("12!@");
         });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Hex.decode("\uFF11\uFF12"); // full-width Unicode digits are not ASCII hexadecimal
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Hex.decode("\u0661\u0662"); // Arabic-Indic digits are not ASCII hexadecimal
+        });
     }
 
     @Test

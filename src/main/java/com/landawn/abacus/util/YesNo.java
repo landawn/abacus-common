@@ -108,7 +108,7 @@ public enum YesNo {
                 return YES;
 
             default:
-                throw new IllegalArgumentException("No mapping instance found by int value: " + intValue);
+                throw new IllegalArgumentException("No YesNo for int value: " + intValue + ". Expected 0 or 1");
         }
     }
 }

@@ -101,11 +101,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ActivityPrint activity = new ActivityPrint(3600000, 600000); // 1 hour live, 10 min idle
-     * activity.getMaxLiveTime();                                      // returns 3600000
-     * activity.getMaxIdleTime();                                   // returns 600000
-     * new ActivityPrint(0, 600000);                                // throws IllegalArgumentException (liveTime not positive)
-     * new ActivityPrint(3600000, -1);                              // throws IllegalArgumentException (maxIdleTime not positive)
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000);   // 1 hour live, 10 min idle
+     * activity.getMaxLiveTime();                                     // returns 3600000
+     * activity.getMaxIdleTime();                                     // returns 600000
+     * new ActivityPrint(0, 600000);                                  // throws IllegalArgumentException (liveTime not positive)
+     * new ActivityPrint(3600000, -1);                                // throws IllegalArgumentException (maxIdleTime not positive)
      * }</pre>
      *
      * @param liveTime maximum lifetime in milliseconds (must be positive)
@@ -300,7 +300,9 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * Increments the access count by one.
+     * Increments the access count by one, saturating at {@link Integer#MAX_VALUE}. Saturation keeps
+     * long-lived objects from wrapping to a negative count and being misclassified by
+     * {@link EvictionPolicy#ACCESS_COUNT}.
      * This method should be called whenever the associated object is accessed from the pool.
      *
      * <p><b>Usage Examples:</b></p>
@@ -310,7 +312,15 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      */
     public void updateAccessCount() {
-        ACCESS_COUNT_UPDATER.incrementAndGet(this);
+        int current;
+
+        do {
+            current = ACCESS_COUNT_UPDATER.get(this);
+
+            if (current == Integer.MAX_VALUE) {
+                return;
+            }
+        } while (!ACCESS_COUNT_UPDATER.compareAndSet(this, current, current + 1));
     }
 
     /**
@@ -326,7 +336,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @return the expiration time in milliseconds since epoch, or {@code Long.MAX_VALUE} if {@code createdTime + liveTime} would overflow
      */
     public long getExpirationTime() {
-        return ((Long.MAX_VALUE - createdTime) < liveTime) ? Long.MAX_VALUE : (createdTime + liveTime);
+        return createdTime > Long.MAX_VALUE - liveTime ? Long.MAX_VALUE : createdTime + liveTime;
     }
 
     /**
@@ -350,7 +360,20 @@ public final class ActivityPrint implements Cloneable, Serializable {
     public boolean isExpired() {
         final long now = System.currentTimeMillis();
 
-        return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createdTime));
+        return elapsedTimeExceeds(now, lastAccessTime, maxIdleTime) || elapsedTimeExceeds(now, createdTime, liveTime);
+    }
+
+    private static boolean elapsedTimeExceeds(final long now, final long then, final long limit) {
+        if (now <= then) {
+            return false;
+        }
+
+        final long elapsed = now - then;
+
+        // A negative result with now > then means the subtraction overflowed, so the actual
+        // positive elapsed time is greater than Long.MAX_VALUE and therefore greater than any
+        // valid (positive long) lifetime or idle-time limit.
+        return elapsed < 0 || elapsed > limit;
     }
 
     /**

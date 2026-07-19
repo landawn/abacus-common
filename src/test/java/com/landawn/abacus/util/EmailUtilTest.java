@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -65,6 +66,31 @@ public class EmailUtilTest extends TestBase {
             EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Empty Content Test", "", "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
+    }
+
+    @Test
+    public void test_createMessage_nullContentIsSerializedAsEmptyBody() throws Exception {
+        final ByteArrayOutputStream plainOutput = new ByteArrayOutputStream();
+        EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com", "Null body", null, null, false, "username", "password", props)
+                .writeTo(plainOutput);
+
+        final String plainMessage = plainOutput.toString("UTF-8");
+        assertTrue(plainMessage.contains("text/plain"));
+
+        final ByteArrayOutputStream htmlOutput = new ByteArrayOutputStream();
+        EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com", "Null HTML body", null, null, true, "username", "password", props)
+                .writeTo(htmlOutput);
+
+        final String htmlMessage = htmlOutput.toString("UTF-8");
+        assertTrue(htmlMessage.contains("text/html"));
+    }
+
+    @Test
+    public void test_createMessage_validatesRequiredEnvelopeArguments() {
+        assertThrows(IllegalArgumentException.class,
+                () -> EmailUtil.createMessage(new String[] { "test@example.com" }, "", "subject", "body", null, false, null, null, props));
+        assertThrows(IllegalArgumentException.class,
+                () -> EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com", "subject", "body", null, false, null, null, null));
     }
 
     @Test

@@ -997,7 +997,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_deserialize_substringWithConfig() {
         String json = "start{\"x\":100,\"y\":200}end";
         int fromIndex = 5;
-        int toIndex = 23;
+        int toIndex = 22;
         JsonDeserConfig config = new JsonDeserConfig();
 
         Map<?, ?> result = parser.deserialize(json, fromIndex, toIndex, config, Map.class);

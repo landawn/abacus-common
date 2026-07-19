@@ -128,9 +128,8 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
     /**
      * Deserializes a JSON array string to a typed tuple.
      * <p>
-     * The string is expected to be a JSON array with at least the arity of this tuple type.
-     * Each tuple element is type-converted using the corresponding entry in {@link #parameterTypes()};
-     * additional array elements are ignored.
+     * The string is expected to be a JSON array whose length is exactly the arity of this tuple type.
+     * Each tuple element is type-converted using the corresponding entry in {@link #parameterTypes()}.
      * </p>
      *
      * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
@@ -139,7 +138,7 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      *
      * @param str the JSON array string to deserialize, may be {@code null} or empty
      * @return a new tuple instance, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer elements than the tuple arity
+     * @throws IllegalArgumentException if the parsed value is not an array whose length exactly matches the tuple arity
      * @see #valueOf(Object)
      * @see #stringOf(Tuple)
      */
@@ -154,9 +153,9 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
 
         final int arity = parameterTypes.size();
 
-        if (a == null || a.length < arity) {
+        if (a == null || a.length != arity) {
             throw new IllegalArgumentException(
-                    "Invalid " + typeClass.getSimpleName() + " format. Expected array with at least " + arity + " element(s) but got: " + str);
+                    "Invalid " + typeClass.getSimpleName() + " format. Expected an array with exactly " + arity + " element(s) but got: " + str);
         }
 
         final Object[] converted = new Object[arity];
@@ -217,6 +216,7 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
         if (appendable instanceof Writer writer) {
             final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
             final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+            Throwable failure = null;
 
             try {
                 bw.write(SK._BRACKET_L);
@@ -233,9 +233,12 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
                 if (!isBufferedWriter) {
                     bw.flush();
                 }
+            } catch (final IOException | RuntimeException | Error e) {
+                failure = e;
+                throw e;
             } finally {
                 if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
+                    Utils.recycle((BufferedWriter) bw, failure);
                 }
             }
         } else {

@@ -213,6 +213,19 @@ public class MedianTest extends TestBase {
     }
 
     @Test
+    public void testMedianOfGenericArrayWithNullUpperMedian() {
+        Comparator<Integer> comparator = Comparator.nullsFirst(Integer::compareTo);
+
+        Pair<Integer, Optional<Integer>> twoElements = Median.of(new Integer[] { null, null }, comparator);
+        Assertions.assertNull(twoElements.left());
+        Assertions.assertTrue(twoElements.right().isEmpty());
+
+        Pair<Integer, Optional<Integer>> sortedFallback = Median.of(new Integer[] { null, null, null, 1 }, comparator);
+        Assertions.assertNull(sortedFallback.left());
+        Assertions.assertTrue(sortedFallback.right().isEmpty());
+    }
+
+    @Test
     public void testMedianOfGenericArrayWithRangeAndComparator() {
         String[] arr = { "apple", "banana", "cherry", "date", "elderberry", "fig" };
 
@@ -260,6 +273,19 @@ public class MedianTest extends TestBase {
         assertEquals(1, result.left());
         Assertions.assertTrue(result.right().isPresent());
         assertEquals(2, result.right().get());
+    }
+
+    @Test
+    public void testMedianOfCollectionWithNullUpperMedian() {
+        Comparator<Integer> comparator = Comparator.nullsFirst(Integer::compareTo);
+
+        Pair<Integer, Optional<Integer>> twoElements = Median.of(Arrays.asList(null, null), comparator);
+        Assertions.assertNull(twoElements.left());
+        Assertions.assertTrue(twoElements.right().isEmpty());
+
+        Pair<Integer, Optional<Integer>> sortedFallback = Median.of(Arrays.asList(null, null, null, 1), comparator);
+        Assertions.assertNull(sortedFallback.left());
+        Assertions.assertTrue(sortedFallback.right().isEmpty());
     }
 
     @Test
@@ -1870,6 +1896,7 @@ public class MedianTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Median.of(chars, 2, 2);
         });
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> Median.of(chars, Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -2012,6 +2039,7 @@ public class MedianTest extends TestBase {
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
             Median.of(numbers, 0, 5);
         });
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> Median.of(numbers, Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test

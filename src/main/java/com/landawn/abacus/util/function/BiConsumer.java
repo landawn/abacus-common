@@ -15,7 +15,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -72,11 +71,11 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default BiConsumer<T, U> andThen(final java.util.function.BiConsumer<? super T, ? super U> after) {
-        N.checkArgNotNull(after, cs.after);
+        java.util.Objects.requireNonNull(after, cs.after);
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);
@@ -84,18 +83,22 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
     }
 
     /**
-     * Converts this {@code BiConsumer} to a {@code Throwables.BiConsumer} that can throw a checked exception.
-     * This method provides a way to use this consumer in contexts that require explicit exception handling.
+     * Returns this consumer as a {@link Throwables.BiConsumer} view.
+     *
+     * <p>The returned consumer has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.BiConsumer}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiConsumer<String, String> concatenator = (s1, s2) -> System.out.println(s1 + s2);
      * var throwableConsumer = concatenator.toThrowable();
-     * // Can now be used in contexts that handle exceptions
+     * // Can now be used in a context whose callback declares an exception type
      * }</pre>
      *
-     * @param <E> the type of exception that the returned consumer can throw
-     * @return a {@code Throwables.BiConsumer} view of this consumer that can throw exceptions of type {@code E}
+     * @param <E> the target exception type for compatibility with {@code Throwables.BiConsumer}
+     * @return a {@code Throwables.BiConsumer} view of this consumer
      */
     default <E extends Throwable> Throwables.BiConsumer<T, U, E> toThrowable() {
         return (Throwables.BiConsumer<T, U, E>) this;

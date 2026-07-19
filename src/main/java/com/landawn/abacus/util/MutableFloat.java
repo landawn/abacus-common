@@ -246,6 +246,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
+     * @throws NullPointerException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
@@ -352,7 +353,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Subtracts the specified delta from the current value.
      *
-     * <p>Note: Float subtraction may result in precision loss or underflow to negative infinity.
+     * <p>Note: Float subtraction may result in precision loss, overflow to an infinity, or
+     * underflow toward a signed zero.
      * This operation follows standard IEEE 754 floating-point arithmetic rules.</p>
      *
      * <p><b>Usage Examples:</b></p>

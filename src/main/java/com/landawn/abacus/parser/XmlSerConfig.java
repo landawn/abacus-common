@@ -188,11 +188,11 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlSerConfig config = new XmlSerConfig();
-     * config.setTagByPropertyName(false);            // returns this (config)
-     * boolean byProp = config.isTagByPropertyName(); // returns false
+     * config.setTagByPropertyName(false);                // returns this (config)
+     * boolean byProp = config.isTagByPropertyName();     // returns false
      *
-     * config.setTagByPropertyName(true);               // returns this (config)
-     * boolean restored = config.isTagByPropertyName(); // returns true (default)
+     * config.setTagByPropertyName(true);                 // returns this (config)
+     * boolean restored = config.isTagByPropertyName();   // returns true (default)
      * }</pre>
      *
      * @param tagByPropertyName {@code true} to use property names as tags
@@ -228,11 +228,11 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlSerConfig config = new XmlSerConfig();
-     * config.setWriteTypeInfo(true);              // returns this (config)
-     * boolean enabled = config.isWriteTypeInfo(); // returns true
+     * config.setWriteTypeInfo(true);                 // returns this (config)
+     * boolean enabled = config.isWriteTypeInfo();    // returns true
      *
-     * config.setWriteTypeInfo(false);              // returns this (config)
-     * boolean disabled = config.isWriteTypeInfo(); // returns false (default)
+     * config.setWriteTypeInfo(false);                // returns this (config)
+     * boolean disabled = config.isWriteTypeInfo();   // returns false (default)
      * }</pre>
      *
      * @param writeTypeInfo {@code true} to include type information, {@code false} to omit it

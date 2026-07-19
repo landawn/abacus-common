@@ -536,6 +536,16 @@ public class FractionTest extends TestBase {
         } catch (final ArithmeticException ex) {
         }
 
+        assertThrows(ArithmeticException.class, () -> Fraction.of(Math.nextDown((double) Integer.MIN_VALUE)));
+
+        f = Fraction.of((double) Integer.MIN_VALUE);
+        assertEquals(Integer.MIN_VALUE, f.getNumerator());
+        assertEquals(1, f.getDenominator());
+
+        f = Fraction.of((double) Integer.MAX_VALUE);
+        assertEquals(Integer.MAX_VALUE, f.getNumerator());
+        assertEquals(1, f.getDenominator());
+
         f = Fraction.of(0.0d);
         assertEquals(0, f.getNumerator());
         assertEquals(1, f.getDenominator());

@@ -372,8 +372,8 @@ public abstract class FloatIteratorEx extends FloatIterator implements IteratorE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIteratorEx iter = FloatIteratorEx.of(1.0f, 2.0f);
-     * iter.closeResource(); // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext()); // closeResource() does not consume elements
+     * iter.closeResource();         // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * FloatIteratorEx iter2 = FloatIteratorEx.of(3.0f, 4.0f);

@@ -22,10 +22,15 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Password;
 
 /**
- * Type handler for password fields that automatically hashes passwords before storing them in a database.
+ * Legacy type handler that applies a message digest before binding a string to a database statement.
  * This type extends {@link AbstractStringType} and uses SHA-256 as the default digest algorithm,
- * delegating to {@link Password} which performs a one-way hash via {@link java.security.MessageDigest}
- * and returns a Base64-encoded digest.
+ * delegating to {@link Password} which performs a one-way digest via {@link java.security.MessageDigest}
+ * and returns the digest as Base64 text.
+ *
+ * <p><strong>Security warning:</strong> a single deterministic, unsalted SHA-256 digest is not a
+ * password-storage hash. New authentication systems should use a dedicated password hashing or
+ * key-derivation algorithm with a unique salt and configurable work factor, and should not use this
+ * type for stored credentials. The name is retained for API compatibility.</p>
  *
  * <p>When setting password values via {@link #set(PreparedStatement, int, String)} or
  * {@link #set(CallableStatement, String, String)}, the input plain-text password is hashed before

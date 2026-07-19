@@ -31,6 +31,10 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * double values where performance is critical. It provides various utility methods for
  * transforming, filtering, and processing double values.</p>
  *
+ * <p>The iterator does not support element removal, but it is stateful and is consumed as values
+ * are read. Transformation methods return wrappers over this same source iterator; consuming a
+ * wrapper also advances the source.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create iterator from array
@@ -346,8 +350,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.of(1.0, 2.0);
-     * Double boxed = iter.next();           // returns 1.0 (boxed) — avoid this
-     * double primitive = iter.nextDouble(); // returns 2.0 — prefer this
+     * Double boxed = iter.next();             // returns 1.0 (boxed) — avoid this
+     * double primitive = iter.nextDouble();   // returns 2.0 — prefer this
      * }</pre>
      *
      * @return the next double value as a {@code Double} object
@@ -641,15 +645,17 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedDouble} objects with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
-    public ObjIterator<IndexedDouble> indexed(final long startIndex) {
+    public ObjIterator<IndexedDouble> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final DoubleIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -658,7 +664,24 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
             @Override
             public IndexedDouble next() {
-                return IndexedDouble.of(iter.nextDouble(), idx++);
+                if (indexOverflow) {
+                    if (iter.hasNext()) {
+                        throw new ArithmeticException("long overflow");
+                    }
+
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final double value = iter.nextDouble();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedDouble.of(value, currentIndex);
             }
         };
     }
@@ -679,7 +702,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 

@@ -544,6 +544,12 @@ public class EnumerationsTest extends TestBase {
         Assertions.assertTrue(list.isEmpty());
     }
 
+    @Test
+    public void testToCollection_rejectsNullSupplierAndResult() {
+        Assertions.assertThrows(NullPointerException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, null));
+        Assertions.assertThrows(NullPointerException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, () -> null));
+    }
+
     /** Direct nextElement() without prior hasMoreElements() must still work and not skip elements. */
     @Test
     public void testConcatCollection_NextWithoutHasMore() {

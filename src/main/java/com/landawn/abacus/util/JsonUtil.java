@@ -416,9 +416,11 @@ public final class JsonUtil {
      * @param targetType the class of the object to create
      * @return an instance of {@code targetType} populated with data from the {@link JSONObject}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code targetType} is not a {@link Map} or bean type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a {@link Map} or bean type
      */
     public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         return unwrap(jsonObject, Type.of(targetType));
     }
 
@@ -439,8 +441,9 @@ public final class JsonUtil {
      *       {@code Object}), the {@code jsonObject} argument is returned as-is.</li>
      * </ul>
      *
-     * <p>Conversion is recursive: nested {@link JSONObject} and {@link JSONArray} values are
-     * converted according to the value type or property type declared in {@code targetType}.
+     * <p>Conversion is recursive: map keys and scalar values are converted to their declared
+     * types, and nested {@link JSONObject} and {@link JSONArray} values are converted according
+     * to the value type or property type declared in {@code targetType}.
      *
      * <p><b>Usage example:</b>
      * <pre>{@code
@@ -456,10 +459,13 @@ public final class JsonUtil {
      * @return an instance of the type described by {@code targetType}, populated with data
      *         from the {@link JSONObject}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code targetType} is not a {@link Map} or bean type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a {@link Map} or bean type
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
+        N.checkArgNotNull(jsonObject, "jsonObject");
+        N.checkArgNotNull(targetType, cs.targetType);
+
         if (!targetType.javaType().equals(Object.class) && targetType.javaType().isAssignableFrom(JSONObject.class)) {
             return (T) jsonObject;
         }
@@ -469,14 +475,17 @@ public final class JsonUtil {
 
         if (targetType.isMap()) {
             @SuppressWarnings("rawtypes")
-            final Map<String, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
+            final Map<Object, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
             final Iterator<String> iter = jsonObject.keys();
+            final Type<?> keyType = targetType.parameterTypes().get(0);
             final Type<?> valueType = targetType.parameterTypes().get(1);
             String key = null;
+            Object convertedKey = null;
             Object value = null;
 
             while (iter.hasNext()) {
                 key = iter.next();
+                convertedKey = keyType.javaType().isAssignableFrom(String.class) ? key : keyType.valueOf(key);
                 value = jsonObject.get(key);
 
                 if (value == JSONObject.NULL) {
@@ -491,7 +500,7 @@ public final class JsonUtil {
                     }
                 }
 
-                map.put(key, value);
+                map.put(convertedKey, value);
             }
 
             return (T) map;
@@ -582,9 +591,11 @@ public final class JsonUtil {
      * @param targetType the class of the object to create
      * @return an instance of {@code targetType} populated with data from the {@link JSONArray}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code targetType} is not a collection or array type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a collection or array type
      */
     public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         return unwrap(jsonArray, Type.of(targetType));
     }
 
@@ -623,10 +634,13 @@ public final class JsonUtil {
      * @return an instance of the type described by {@code targetType}, populated with data
      *         from the {@link JSONArray}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code targetType} is not an array or collection type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not an array or collection type
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
+        N.checkArgNotNull(jsonArray, "jsonArray");
+        N.checkArgNotNull(targetType, cs.targetType);
+
         if (!targetType.javaType().equals(Object.class) && targetType.javaType().isAssignableFrom(JSONArray.class)) {
             return (T) jsonArray;
         }
@@ -731,8 +745,11 @@ public final class JsonUtil {
      * @param elementClass the class of elements in the list
      * @return a {@link java.util.List} containing elements converted to {@code elementClass}
      * @throws JSONException if an error occurs during conversion
+     * @throws IllegalArgumentException if either argument is {@code null}
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
+        N.checkArgNotNull(elementClass, "elementClass");
+
         return toList(jsonArray, Type.of(elementClass));
     }
 
@@ -756,8 +773,12 @@ public final class JsonUtil {
      * @param elementType the {@link Type} of each element
      * @return a {@link java.util.List} containing elements converted to the specified type
      * @throws JSONException if an error occurs during conversion
+     * @throws IllegalArgumentException if either argument is {@code null}
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Type<T> elementType) throws JSONException {
+        N.checkArgNotNull(jsonArray, "jsonArray");
+        N.checkArgNotNull(elementType, "elementType");
+
         final int len = jsonArray.length();
         final List<Object> coll = new ArrayList<>(len);
 

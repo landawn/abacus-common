@@ -2021,6 +2021,46 @@ public class IteratorsTest extends TestBase {
     }
 
     @Test
+    public void testConcatIterableVarargsObtainsIteratorsLazily() {
+        final AtomicInteger firstIteratorCalls = new AtomicInteger();
+        final AtomicInteger secondIteratorCalls = new AtomicInteger();
+        final Iterable<Integer> first = () -> {
+            firstIteratorCalls.incrementAndGet();
+            return Collections.singleton(1).iterator();
+        };
+        final Iterable<Integer> second = () -> {
+            secondIteratorCalls.incrementAndGet();
+            return Collections.singleton(2).iterator();
+        };
+
+        final ObjIterator<Integer> concatenated = Iterators.concat(first, second);
+        assertEquals(0, firstIteratorCalls.get());
+        assertEquals(0, secondIteratorCalls.get());
+
+        assertTrue(concatenated.hasNext());
+        assertEquals(1, firstIteratorCalls.get());
+        assertEquals(0, secondIteratorCalls.get());
+        assertEquals(Integer.valueOf(1), concatenated.next());
+
+        assertTrue(concatenated.hasNext());
+        assertEquals(1, secondIteratorCalls.get());
+        assertEquals(Integer.valueOf(2), concatenated.next());
+    }
+
+    @Test
+    public void testConcatBiAndTriIteratorsValidateCallbacksUpFront() {
+        final BiIterator<String, Integer> bi = Iterators.concat(BiIterator.empty());
+        assertThrows(IllegalArgumentException.class, () -> bi.map(null));
+        assertThrows(IllegalArgumentException.class, () -> bi.forEachRemaining((BiConsumer<String, Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> bi.foreachRemaining((Throwables.BiConsumer<String, Integer, RuntimeException>) null));
+
+        final TriIterator<String, Integer, Double> tri = Iterators.concat(TriIterator.empty());
+        assertThrows(IllegalArgumentException.class, () -> tri.map(null));
+        assertThrows(IllegalArgumentException.class, () -> tri.forEachRemaining((TriConsumer<String, Integer, Double>) null));
+        assertThrows(IllegalArgumentException.class, () -> tri.foreachRemaining((Throwables.TriConsumer<String, Integer, Double, RuntimeException>) null));
+    }
+
+    @Test
     public void testMergeIterators() {
         Iterator<Integer> a = list(1, 3, 5).iterator();
         Iterator<Integer> b = list(2, 4, 6).iterator();
@@ -2725,6 +2765,31 @@ public class IteratorsTest extends TestBase {
     public void testZipTwoIterators_BothEmpty() {
         ObjIterator<String> result = Iterators.zip(Collections.<Integer> emptyIterator(), Collections.<String> emptyIterator(), (a, b) -> a + b);
         assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testZipTwoIterators_ExhaustedNextDoesNotConsumeLongerInput() {
+        final Iterator<Integer> longer = Arrays.asList(1, 2).iterator();
+        final Iterator<String> shorter = Arrays.asList("a").iterator();
+        final ObjIterator<String> result = Iterators.zip(longer, shorter, (a, b) -> a + b);
+
+        assertEquals("1a", result.next());
+        assertFalse(result.hasNext());
+        assertThrows(NoSuchElementException.class, result::next);
+        assertEquals(2, longer.next());
+    }
+
+    @Test
+    public void testZipThreeIterators_ExhaustedNextDoesNotConsumeOtherInputs() {
+        final Iterator<Integer> first = Arrays.asList(1).iterator();
+        final Iterator<String> second = Arrays.asList("a").iterator();
+        final Iterator<Boolean> exhausted = Collections.emptyIterator();
+        final ObjIterator<String> result = Iterators.zip(first, second, exhausted, (a, b, c) -> a + b + c);
+
+        assertFalse(result.hasNext());
+        assertThrows(NoSuchElementException.class, result::next);
+        assertEquals(1, first.next());
+        assertEquals("a", second.next());
     }
 
     @Test
@@ -5685,6 +5750,20 @@ public class IteratorsTest extends TestBase {
     // --- regression tests for 2026-06-10 deep-review fixes ---
 
     @Test
+    @SuppressWarnings("deprecation")
+    public void testParallelForEachPropagatesConsumerErrors() {
+        final java.util.concurrent.atomic.AtomicBoolean completed = new java.util.concurrent.atomic.AtomicBoolean();
+
+        final AssertionError error = assertThrows(AssertionError.class,
+                () -> Iterators.forEach(Arrays.asList(1, 2, 3).iterator(), 0, Long.MAX_VALUE, 2, 4, value -> {
+                    throw new AssertionError("consumer failed");
+                }, () -> completed.set(true)));
+
+        assertEquals("consumer failed", error.getMessage());
+        assertFalse(completed.get());
+    }
+
+    @Test
     public void testForEachEmptyIteratorCollectionRunsOnComplete() throws Exception {
         // regression: an EMPTY collection of iterators returned before running onComplete, while a
         // collection of empty iterators (zero elements either way) did run it
@@ -5767,6 +5846,19 @@ public class IteratorsTest extends TestBase {
         final List<Integer> result = new ArrayList<>();
         Iterators.forEach(iters, opts, result::add);
         assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testIterateOptions_rejectNegativeConcurrencySettings() {
+        final Collection<Iterator<Integer>> empty = Collections.emptyList();
+
+        assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(empty, Iterators.IterateOptions.builder().readThreads(-1).build(), value -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(empty, Iterators.IterateOptions.builder().processThreads(-1).build(), value -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(empty, Iterators.IterateOptions.builder().queueSize(-1).build(), value -> {
+        }));
+        assertEquals(1024, Iterators.calculateBufferedSize(Integer.MAX_VALUE));
     }
 
     @Test

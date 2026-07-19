@@ -14,9 +14,9 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -393,27 +393,18 @@ class IteratorLongStream extends AbstractLongStream {
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
             private LongStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextLong());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -436,8 +427,15 @@ class IteratorLongStream extends AbstractLongStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -522,27 +520,18 @@ class IteratorLongStream extends AbstractLongStream {
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextLong());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -565,8 +554,15 @@ class IteratorLongStream extends AbstractLongStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -581,27 +577,18 @@ class IteratorLongStream extends AbstractLongStream {
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
             private FloatStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextLong());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -624,8 +611,15 @@ class IteratorLongStream extends AbstractLongStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -640,27 +634,18 @@ class IteratorLongStream extends AbstractLongStream {
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
             private DoubleStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextLong());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -683,8 +668,15 @@ class IteratorLongStream extends AbstractLongStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -699,27 +691,18 @@ class IteratorLongStream extends AbstractLongStream {
         final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextLong());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -742,8 +725,15 @@ class IteratorLongStream extends AbstractLongStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -915,6 +905,10 @@ class IteratorLongStream extends AbstractLongStream {
 
             @Override
             public void advance(final long n2) {
+                if (n2 <= 0) {
+                    return;
+                }
+
                 if (!skipped) {
                     skipped = true;
                     elements.advance(n);
@@ -1038,7 +1032,7 @@ class IteratorLongStream extends AbstractLongStream {
                         aar = Array.unbox(queue.toArray(N.EMPTY_LONG_OBJ_ARRAY));
                     } else {
                         final Comparator<? super Long> cmp = comparator == null ? LONG_COMPARATOR : comparator;
-                        final Queue<Long> heap = new PriorityQueue<>(n, cmp);
+                        final Queue<Long> heap = new PriorityQueue<>(Math.min(n, 16), cmp);
 
                         Long next = null;
                         while (elements.hasNext()) {
@@ -1367,9 +1361,13 @@ class IteratorLongStream extends AbstractLongStream {
                 while (elements.hasNext()) {
                     final long v = elements.nextLong();
                     if (window == null) {
-                        window = new long[k];
+                        window = new long[Math.min(k, 16)];
                     }
                     if (size < k) {
+                        if (size == window.length) {
+                            window = java.util.Arrays.copyOf(window, (int) Math.min(k, (long) window.length * 2));
+                        }
+
                         window[size++] = v;
                     } else {
                         window[idx] = v;
@@ -1412,6 +1410,13 @@ class IteratorLongStream extends AbstractLongStream {
         }
     }
 
+    /**
+     * Returns the arithmetic mean without allowing the running integral sum to overflow.
+     * A {@link BigInteger} accumulator is allocated only if addition overflows a {@code long}.
+     *
+     * @return an {@code OptionalDouble} containing the arithmetic mean, or an empty optional if this stream is empty
+     * @throws IllegalStateException if this stream is already closed
+     */
     @Override
     public OptionalDouble average() throws IllegalStateException {
         assertNotClosed();
@@ -1423,13 +1428,25 @@ class IteratorLongStream extends AbstractLongStream {
 
             long sum = 0;
             long count = 0;
+            BigInteger overflowSafeSum = null;
 
             do {
-                sum += elements.nextLong();
+                final long value = elements.nextLong();
+
+                if (overflowSafeSum == null) {
+                    try {
+                        sum = Math.addExact(sum, value);
+                    } catch (final ArithmeticException e) {
+                        overflowSafeSum = BigInteger.valueOf(sum).add(BigInteger.valueOf(value));
+                    }
+                } else {
+                    overflowSafeSum = overflowSafeSum.add(BigInteger.valueOf(value));
+                }
+
                 count++;
             } while (elements.hasNext());
 
-            return OptionalDouble.of(((double) sum) / count);
+            return OptionalDouble.of((overflowSafeSum == null ? (double) sum : overflowSafeSum.doubleValue()) / count);
         } finally {
             close();
         }
@@ -1637,7 +1654,7 @@ class IteratorLongStream extends AbstractLongStream {
         } else {
             //noinspection MagicConstant
             return StreamSupport.longStream(Spliterators.spliteratorUnknownSize(spliterator, DEFAULT_CHARACTERISTICS_PRIMITIVE_JDK_STREAM), isParallel())
-                    .onClose(() -> close(closeHandlers()));
+                    .onClose(this::close);
         }
     }
 

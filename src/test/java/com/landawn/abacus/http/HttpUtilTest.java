@@ -150,8 +150,8 @@ public class HttpUtilTest extends TestBase {
 
     @Test
     public void testIsValidHttpHeaderWithCarriageReturn() {
-        assertTrue(HttpUtil.isValidHttpHeader("key", "value\r\n continuation"));
-        assertTrue(HttpUtil.isValidHttpHeader("key", "value\r\n\tcontinuation"));
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\r\n continuation"));
+        assertFalse(HttpUtil.isValidHttpHeader("key", "value\r\n\tcontinuation"));
         assertFalse(HttpUtil.isValidHttpHeader("key", "value\r"));
         assertFalse(HttpUtil.isValidHttpHeader("key", "value\rnext"));
     }
@@ -170,10 +170,10 @@ public class HttpUtilTest extends TestBase {
     }
 
     @Test
-    public void testIsValidHttpHeader_crlfObsFoldAccepted() {
-        // CRLF obs-fold (CRLF followed by SP or HT) is still accepted.
-        assertTrue(HttpUtil.isValidHttpHeader("key", "long value\r\n continuation"));
-        assertTrue(HttpUtil.isValidHttpHeader("key", "long value\r\n\tcontinuation"));
+    public void testIsValidHttpHeader_crlfObsFoldRejectedForSending() {
+        // Recipients may interpret legacy obs-fold, but RFC 7230 forbids senders from generating it.
+        assertFalse(HttpUtil.isValidHttpHeader("key", "long value\r\n continuation"));
+        assertFalse(HttpUtil.isValidHttpHeader("key", "long value\r\n\tcontinuation"));
     }
 
     @Test
@@ -183,6 +183,16 @@ public class HttpUtilTest extends TestBase {
         // A bare CR is also rejected.
         assertFalse(HttpUtil.isValidHttpHeader("key", "value\r"));
         assertFalse(HttpUtil.isValidHttpHeader("key", "value\rX"));
+    }
+
+    @Test
+    public void testIsValidHttpHeaderRejectsInvalidNameAndValueControls() {
+        assertTrue(HttpUtil.isValidHttpHeader("X-Custom_123", "value\twith-tab"));
+        assertFalse(HttpUtil.isValidHttpHeader("Bad Header", "value"));
+        assertFalse(HttpUtil.isValidHttpHeader("Bad,Header", "value"));
+        assertFalse(HttpUtil.isValidHttpHeader("Bad(Header)", "value"));
+        assertFalse(HttpUtil.isValidHttpHeader("X-Control", "before\u0000after"));
+        assertFalse(HttpUtil.isValidHttpHeader("X-Control", "before\u007fafter"));
     }
 
     @Test
@@ -559,6 +569,15 @@ public class HttpUtilTest extends TestBase {
         assertEquals(ContentFormat.LZ4, HttpUtil.getContentFormat("unknown/type", "lz4"));
         assertEquals(ContentFormat.SNAPPY, HttpUtil.getContentFormat("unknown/type", "snappy"));
 
+        // Content codings are tokens, not substrings. In particular, "zebra" must not
+        // accidentally select Brotli merely because it contains the letters "br".
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("unknown/type", "zebra"));
+        assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("application/json", "zebra"));
+        assertEquals(ContentFormat.JSON_GZIP, HttpUtil.getContentFormat("application/json", "x-gzip"));
+        assertEquals(ContentFormat.JSON_BR, HttpUtil.getContentFormat("application/json", "unknown, BR"));
+        assertEquals(ContentFormat.JSON_GZIP, HttpUtil.getContentFormat("application/json", "br, gzip"));
+        assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("application/json", "zebra, unknown"));
+
         // Case insensitive matching
         assertEquals(ContentFormat.JSON_GZIP, HttpUtil.getContentFormat("application/JSON", "GZIP"));
     }
@@ -917,6 +936,19 @@ public class HttpUtilTest extends TestBase {
 
         // Real charset parameter still resolved when preceded by an unrelated token.
         assertEquals(StandardCharsets.UTF_8, HttpUtil.getCharset("multipart/form-data; mycharsetparam=1; charset=UTF-8"));
+
+        // '+' and the other RFC tchar punctuation are valid inside a parameter name. The old
+        // partial token predicate treated the embedded suffix as a real charset parameter.
+        assertEquals(Charsets.UTF_8, HttpUtil.getCharset("text/plain; vendor+charset=ISO-8859-1", Charsets.UTF_8));
+
+        // A media-type component is not a parameter merely because '/' precedes "charset".
+        assertEquals(Charsets.UTF_8, HttpUtil.getCharset("text/charset=UTF-16", Charsets.UTF_8));
+        assertEquals(Charsets.UTF_8, HttpUtil.getCharset("application/charset=UTF-16", Charsets.UTF_8));
+
+        // Text inside a quoted value is data, not another parameter declaration.
+        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; note=\"charset=UTF-16\"; charset=ISO-8859-1", Charsets.UTF_8));
+        assertEquals(Charset.forName("ISO-8859-1"),
+                HttpUtil.getCharset("text/plain; note=\"escaped\\\"; charset=UTF-16\"; charset=ISO-8859-1", Charsets.UTF_8));
     }
 
     @Test

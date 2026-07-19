@@ -43,8 +43,8 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p><b>Retention:</b> {@link java.lang.annotation.RetentionPolicy#RUNTIME} — the marker is
- * available via reflection, allowing IDEs and runtime validators to surface a warning when the
- * return value is dereferenced without a null check.</p>
+ * available via reflection to frameworks and other tools. The annotation does not itself detect
+ * unsafe dereferences or enforce a {@code null} check.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

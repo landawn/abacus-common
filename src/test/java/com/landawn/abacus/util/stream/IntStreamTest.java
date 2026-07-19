@@ -5813,6 +5813,21 @@ public class IntStreamTest extends TestBase {
     }
 
     @Test
+    public void testConcatCollectionSnapshotsSources() {
+        List<IntStream> sources = new ArrayList<>(Arrays.asList(IntStream.of(1, 2), IntStream.of(3, 4)));
+        stream = IntStream.concat(sources);
+
+        sources.clear();
+
+        assertArrayEquals(new int[] { 1, 2, 3, 4 }, stream.toArray());
+    }
+
+    @Test
+    public void testMergeCollectionTreatsNullStreamAsEmpty() {
+        assertEquals(0, IntStream.merge(Arrays.asList((IntStream) null), (a, b) -> MergeResult.TAKE_FIRST).count());
+    }
+
+    @Test
     public void concat_shouldConcatenateStreams() {
         IntStream a = IntStream.of(1, 2);
         IntStream b = IntStream.of(3, 4);
@@ -6720,5 +6735,37 @@ public class IntStreamTest extends TestBase {
                 () -> IntStream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> IntStream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
+
+    @Test
+    public void testFiniteFactoryIteratorsRemainExhaustedAfterFailedNext() {
+        final IntIteratorEx[] iterators = { IntStream.range(1, 3).iteratorEx(), IntStream.range(1, 5, 2).iteratorEx(), IntStream.rangeClosed(1, 3).iteratorEx(),
+                IntStream.rangeClosed(1, 5, 2).iteratorEx(), IntStream.repeat(7, 10).iteratorEx() };
+
+        for (final IntIteratorEx iter : iterators) {
+            iter.advance(Long.MAX_VALUE);
+            assertThrows(NoSuchElementException.class, iter::nextInt);
+            assertEquals(0, iter.count());
+            assertArrayEquals(new int[0], iter.toArray());
+        }
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        IntIterator iter = IntStream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextInt);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = IntStream.iterate(1, () -> conditionCalls.getAndIncrement() > 0, value -> value + 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextInt);
+        assertEquals(1, conditionCalls.get());
     }
 }

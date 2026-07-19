@@ -218,6 +218,11 @@ public class PropertiesUtilTest extends TestBase {
         assertThrows(RuntimeException.class, () -> PropertiesUtil.findDir(""));
     }
 
+    @Test
+    public void testFindDir_DoesNotReturnExistingRegularFile() {
+        assertNull(PropertiesUtil.findDir(testPropertiesFile.getAbsolutePath()));
+    }
+
     // ==================== findFile(String) ====================
 
     @Test
@@ -236,6 +241,11 @@ public class PropertiesUtilTest extends TestBase {
     @Test
     public void testFindFile_Empty() {
         assertThrows(RuntimeException.class, () -> PropertiesUtil.findFile(""));
+    }
+
+    @Test
+    public void testFindFile_DoesNotReturnExistingDirectory() {
+        assertNull(PropertiesUtil.findFile(tempDir.toFile().getAbsolutePath()));
     }
 
     @Test
@@ -268,6 +278,11 @@ public class PropertiesUtilTest extends TestBase {
     public void testFindFileRelativeTo_NullSrcFile() {
         File result = PropertiesUtil.findFileRelativeTo(null, "nonexistent_file_xyz123.txt");
         assertTrue(result == null || !result.exists());
+    }
+
+    @Test
+    public void testFindFileRelativeTo_DoesNotReturnDirectory() {
+        assertNull(PropertiesUtil.findFileRelativeTo(null, tempDir.toFile().getAbsolutePath()));
     }
 
     @Test
@@ -366,6 +381,28 @@ public class PropertiesUtilTest extends TestBase {
         File result = PropertiesUtil.findFileInDir("config/app.conf", tempDir.toFile(), false);
         assertNotNull(result);
         assertTrue(result.exists());
+    }
+
+    @Test
+    public void testFindFileInDir_RelativePathRequiresFolderBoundary() throws IOException {
+        File similarlyNamedDir = new File(tempDir.toFile(), "myconfig");
+        assertTrue(similarlyNamedDir.mkdirs());
+        File targetFile = new File(similarlyNamedDir, "app.conf");
+        assertTrue(targetFile.createNewFile());
+
+        assertNull(PropertiesUtil.findFileInDir("config/app.conf", tempDir.toFile(), false));
+    }
+
+    @Test
+    public void testFindFileInDir_PreservesHiddenFolderName() throws IOException {
+        File hiddenConfigDir = new File(tempDir.toFile(), ".config");
+        assertTrue(hiddenConfigDir.mkdirs());
+        File targetFile = new File(hiddenConfigDir, "app.conf");
+        assertTrue(targetFile.createNewFile());
+
+        File result = PropertiesUtil.findFileInDir(".config/app.conf", tempDir.toFile(), false);
+        assertNotNull(result);
+        assertEquals(targetFile.getCanonicalFile(), result.getCanonicalFile());
     }
 
     @Test
@@ -474,6 +511,17 @@ public class PropertiesUtilTest extends TestBase {
     public void testLoad_FileAutoRefreshSameInstance() throws IOException {
         Properties<String, String> props1 = PropertiesUtil.load(testPropertiesFile, true);
         Properties<String, String> props2 = PropertiesUtil.load(testPropertiesFile, true);
+
+        Assertions.assertSame(props1, props2);
+    }
+
+    @Test
+    public void testLoad_FileAutoRefreshNormalizesPathAliases() throws IOException {
+        Path aliasDirectory = Files.createDirectory(tempDir.resolve("alias"));
+        File alias = aliasDirectory.resolve("..").resolve(testPropertiesFile.getName()).toFile();
+
+        Properties<String, String> props1 = PropertiesUtil.load(testPropertiesFile, true);
+        Properties<String, String> props2 = PropertiesUtil.load(alias, true);
 
         Assertions.assertSame(props1, props2);
     }
@@ -1557,22 +1605,20 @@ public class PropertiesUtilTest extends TestBase {
     }
 
     @Test
-    public void testStoreToXml_Writer_ListProperty_isSerialized() throws IOException {
-        // Regression: a "<name>List" property holding a non-empty List, paired with a scalar
-        // sibling "<name>", must be serialized as repeated <name> elements. Previously the
-        // 'fooList' entry itself was skipped by the duplicate-scalar guard and the whole list
-        // was silently dropped.
+    public void testStoreToXml_Writer_ListProperty_isSerializedWithoutDiscardingScalar() throws IOException {
+        // A paired "name"/"nameList" mapping must remain two distinct mappings. Emitting the list
+        // as repeated <name> elements both discarded the scalar and produced XML loadFromXml rejects.
         Properties<String, Object> props = new Properties<>();
-        props.put("server", "last"); // scalar sibling/marker
+        props.put("server", "last");
         props.put("serverList", new java.util.ArrayList<>(java.util.Arrays.asList("alpha", "beta")));
 
         StringWriter sw = new StringWriter();
-        PropertiesUtil.storeToXml(props, "root", false, sw);
+        PropertiesUtil.storeToXml(props, "root", true, sw);
         String xml = sw.toString();
 
-        // Both list elements must appear under the <server> tag.
-        assertTrue(xml.contains("<server>alpha</server>"), "Missing first list element in: " + xml);
-        assertTrue(xml.contains("<server>beta</server>"), "Missing second list element in: " + xml);
+        Properties<String, Object> reloaded = PropertiesUtil.loadFromXml(new java.io.StringReader(xml));
+        assertEquals("last", reloaded.get("server"));
+        assertEquals(java.util.Arrays.asList("alpha", "beta"), reloaded.get("serverList"));
     }
 
     @Test

@@ -169,6 +169,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * type.appendTo(sb, list);
      * // sb now contains: "[1.5, 2.7, 3.14]"
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -210,6 +211,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * type.serializeTo(writer, list, null);
      * // Writer contains: "[1.5, 2.7, 3.14]"
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization

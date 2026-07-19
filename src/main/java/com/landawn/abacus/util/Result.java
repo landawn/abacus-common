@@ -25,35 +25,31 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * A type-safe container for operation results that can either hold a successful value of type {@code T}
- * or an exception of type {@code E}, providing a functional programming approach to error handling
- * without throwing exceptions. This class serves as an alternative to traditional try-catch blocks
- * by encapsulating both success and failure states in a single immutable object, enabling more
- * explicit and composable error handling patterns.
+ * A structurally immutable container for an operation value and an optional failure. A result is a
+ * success exactly when its exception is {@code null}; consequently {@code null} is a valid success
+ * value. Callback and unwrapping methods can still throw, as documented by those methods.
  *
- * <p>The {@code Result} class follows the Railway-Oriented Programming pattern, where operations
- * can be chained together and failures are propagated through the chain without interrupting
- * the execution flow. This approach makes error handling more predictable and reduces the risk
- * of unhandled exceptions while maintaining type safety through generic constraints.</p>
+ * <p>This class provides conditional consumers and fallback/unwrapping operations. It does not
+ * provide value-transforming {@code map}/{@code flatMap} operations, so failure propagation across
+ * transformations must be implemented by the caller.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Type Safety:</b> Generic constraints ensure exception type {@code E} extends {@code Throwable}</li>
- *   <li><b>Immutable Design:</b> All instances are immutable, ensuring thread safety and preventing side effects</li>
- *   <li><b>Explicit Error Handling:</b> Forces developers to handle both success and failure cases explicitly</li>
+ *   <li><b>Structurally Immutable:</b> The stored references cannot be reassigned after construction</li>
+ *   <li><b>Explicit Error State:</b> Carries the failure alongside the value for callers to inspect</li>
  *   <li><b>Functional API:</b> Provides functional-style methods for conditional execution and transformation</li>
- *   <li><b>No Exception Throwing:</b> Encapsulates exceptions rather than throwing them immediately</li>
- *   <li><b>Railway Pattern:</b> Enables chaining operations with automatic failure propagation</li>
- *   <li><b>Memory Efficient:</b> Minimal overhead with only two instance fields</li>
+ *   <li><b>Deferred Exception Throwing:</b> Encapsulates failures until callers explicitly unwrap them</li>
+ *   <li><b>Small State:</b> Stores two object references</li>
  *   <li><b>Integration Ready:</b> Seamless conversion to other container types like Pair and Tuple</li>
  * </ul>
  *
  * <p><b>IMPORTANT - Immutable Design:</b>
  * <ul>
- *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
+ *   <li>This class implements {@link Immutable}; its own fields cannot be modified after creation</li>
  *   <li>Both {@code value} and {@code exception} fields are final and set only during construction</li>
- *   <li>Thread-safe by design due to immutability and lack of mutable state</li>
- *   <li>All methods return new instances or extracted values without modifying the original object</li>
+ *   <li>Mutability and thread safety of the referenced value and exception are the caller's responsibility</li>
+ *   <li>Methods inspect or expose the stored references without reassigning the container's fields</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -70,7 +66,9 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Success State:</b> {@code value != null, exception == null} - Operation completed successfully</li>
  *   <li><b>Success with Null:</b> {@code value == null, exception == null} - Operation succeeded but returned null</li>
  *   <li><b>Failure State:</b> {@code exception != null} - Operation failed with an exception (value ignored)</li>
- *   <li><b>Undefined State:</b> {@code value != null, exception != null} - Both present, exception takes precedence</li>
+ *   <li><b>Both Present:</b> {@code value != null, exception != null} - The exception determines
+ *       success/failure operations, while conversion, equality, and string methods still retain
+ *       and expose both references</li>
  * </ul>
  *
  * <p><b>Generic Type Parameters:</b>
@@ -154,7 +152,7 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>RR Nested Class - RuntimeException Specialization:</b>
  * <ul>
  *   <li><b>Convenience Subclass:</b> Specialized for {@code RuntimeException} to reduce generic verbosity</li>
- *   <li><b>Common Use Case:</b> Most application-level errors are RuntimeExceptions</li>
+ *   <li><b>Use Case:</b> Avoids repeating the {@code RuntimeException} type argument</li>
  *   <li><b>Simplified API:</b> {@code Result.RR<T>} instead of {@code Result<T, RuntimeException>}</li>
  *   <li><b>Beta Feature:</b> Subject to API refinement based on usage feedback</li>
  * </ul>
@@ -164,21 +162,20 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Creation Cost:</b> O(1) - Simple object allocation with two field assignments</li>
  *   <li><b>Memory Overhead:</b> Minimal - Only two object references plus standard object header</li>
  *   <li><b>Method Calls:</b> O(1) - All operations are simple field access or condition checks</li>
- *   <li><b>GC Impact:</b> Low - Immutable objects are GC-friendly and eligible for early collection</li>
- *   <li><b>Thread Contention:</b> None - Immutable design eliminates synchronization needs</li>
+ *   <li><b>Thread Contention:</b> Container reads do not synchronize; callbacks may have their own
+ *       synchronization or side effects</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
  * <ul>
  *   <li><b>Immutable State:</b> All fields are final and set only during construction</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent read access from multiple threads</li>
+ *   <li><b>Concurrent Access:</b> The container state is safe for concurrent read access</li>
  *   <li><b>No Synchronization:</b> No locks or synchronization needed due to immutability</li>
- *   <li><b>Safe Publication:</b> Can be safely published between threads without additional synchronization</li>
+ *   <li><b>Contained Objects:</b> Mutable values or exceptions may still require synchronization</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
  * <ul>
- *   <li><b>No Memory Leaks:</b> Immutable design prevents accidental reference retention</li>
  *   <li><b>Efficient Allocation:</b> Small object size minimizes allocation overhead</li>
  *   <li><b>GC Optimization:</b> Immutable objects can be allocated in young generation for faster collection</li>
  *   <li><b>Reference Cleanup:</b> No circular references or complex cleanup required</li>
@@ -187,15 +184,16 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Error Handling Philosophy:</b>
  * <ul>
  *   <li><b>Explicit Failures:</b> All potential failures are represented explicitly in the type system</li>
- *   <li><b>No Hidden Exceptions:</b> Methods that can fail return Result instead of throwing</li>
+ *   <li><b>Explicit Stored Failures:</b> The stored failure is visible in the result type; supplied
+ *       callbacks and exception factories may themselves throw</li>
  *   <li><b>Composable Errors:</b> Error handling can be composed and chained functionally</li>
  *   <li><b>Type-Safe Recovery:</b> Recovery strategies are enforced by the type system</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
  * <ul>
- *   <li>Always check {@code isSuccess()} or {@code isFailure()} before extracting values</li>
- *   <li>Use {@code orElseThrow()} only when you're certain the Result contains a success value</li>
+ *   <li>Use {@code isSuccess()} or {@code isFailure()} when branching explicitly</li>
+ *   <li>Use {@code orElseThrow()} when propagating the stored failure is the desired policy</li>
  *   <li>Prefer {@code ifSuccess()} and {@code ifFailure()} for conditional execution</li>
  *   <li>Use {@code orElseIfFailure()} with meaningful default values</li>
  *   <li>Leverage functional composition to build error-handling pipelines</li>
@@ -205,7 +203,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Common Anti-Patterns to Avoid:</b>
  * <ul>
- *   <li>Creating Results with both value and exception non-null (ambiguous state)</li>
+ *   <li>Creating Results with both value and exception {@code non-null} (ambiguous state)</li>
  *   <li>Calling {@code orElseThrow()} without checking {@code isSuccess()} first</li>
  *   <li>Ignoring failure cases and only handling success scenarios</li>
  *   <li>Using Result for control flow instead of genuine error scenarios</li>
@@ -219,7 +217,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>vs. Try-Catch:</b> Result makes error handling explicit and composable vs. imperative</li>
  *   <li><b>vs. Checked Exceptions:</b> Result provides functional composition without method signature pollution</li>
  *   <li><b>vs. Either Type:</b> Result is specialized for success/failure scenarios with exception semantics</li>
- *   <li><b>vs. Nullable Returns:</b> Result distinguishes between null success values and actual failures</li>
+ *   <li><b>vs. {@code Nullable} Returns:</b> Result distinguishes between {@code null} success values and actual failures</li>
  * </ul>
  *
  * <p><b>Integration Ecosystem:</b>
@@ -330,8 +328,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <pre>{@code
      * // Creating a success result with a non-null value
      * Result<String, IOException> result = Result.success("Hello World");
-     * assert result.isSuccess();                          // returns true
-     * assert result.orElseThrow().equals("Hello World");  // returns "Hello World"
+     * assert result.isSuccess();                           // returns true
+     * assert result.orElseThrow().equals("Hello World");   // returns "Hello World"
      *
      * // Creating a success result with a null value (valid use case)
      * Result<User, SQLException> nullResult = Result.success(null);
@@ -381,14 +379,14 @@ public class Result<T, E extends Throwable> implements Immutable {
      *   <li><b>vs. {@code Result.of(value, null)}:</b> Semantically identical, but {@code success()} is more expressive</li>
      *   <li><b>vs. {@code Optional.of(value)}:</b> Result distinguishes success-with-null from failure; Optional cannot</li>
      *   <li><b>vs. returning value directly:</b> Result provides explicit error handling without exceptions</li>
-     *   <li><b>vs. returning null for errors:</b> Result distinguishes null success values from error conditions</li>
+     *   <li><b>vs. returning {@code null} for errors:</b> Result distinguishes {@code null} success values from error conditions</li>
      * </ul>
      *
      * <p><b>Best Practices:</b></p>
      * <ul>
      *   <li>Prefer {@code Result.success()} over {@code Result.of(value, null)} for clarity</li>
-     *   <li>Document whether null values are valid success cases in your API</li>
-     *   <li>Consider using {@code Optional<T>} as the value type if null has special meaning</li>
+     *   <li>Document whether {@code null} values are valid success cases in your API</li>
+     *   <li>Consider using {@code Optional<T>} as the value type if {@code null} has special meaning</li>
      *   <li>Use meaningful exception types in the generic parameter for better type safety</li>
      * </ul>
      *
@@ -429,13 +427,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      *   <li>{@code orElseIfFailure(defaultValue)} will return the default value</li>
      * </ul>
      *
-     * <p><b>Null Exception Handling:</b></p>
-     * <ul>
-     *   <li>Passing a {@code null} exception is technically permitted but <b>strongly discouraged</b></li>
-     *   <li>A {@code null} exception creates an ambiguous state: {@code isFailure()} returns {@code false}</li>
-     *   <li>If you need to represent "no error", use {@code Result.success(null)} instead</li>
-     *   <li>Consider using {@code Objects.requireNonNull(exception)} before calling this method if null is unexpected</li>
-     * </ul>
+     * <p>The exception must not be {@code null}. Use {@link #success(Object)} to represent a
+     * successful operation, including one whose result value is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -537,7 +530,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      *   <li>Include meaningful error messages in the exception for debugging</li>
      *   <li>Preserve the original exception as the cause when wrapping exceptions</li>
      *   <li>Document which exception types your methods can return in their Result</li>
-     *   <li>Avoid passing {@code null} as the exception parameter</li>
+     *   <li>Never pass {@code null} as the exception parameter</li>
      * </ul>
      *
      * <p><b>Common Patterns:</b></p>
@@ -583,11 +576,10 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @param <E> the type of exception contained in this failure Result; must extend {@code Throwable}.
      *            Using specific exception types (e.g., {@code IOException}, {@code SQLException})
      *            rather than generic {@code Exception} provides better type safety and documentation.
-     * @param exception the exception representing the failure cause; should not be {@code null}
-     *                  (passing {@code null} creates a Result where {@code isFailure()} returns {@code false},
-     *                  which is likely not the intended behavior)
+     * @param exception the non-{@code null} exception representing the failure cause
      * @return a new {@code Result} instance representing a failed operation containing the specified exception;
      *         never returns {@code null}
+     * @throws IllegalArgumentException if {@code exception} is {@code null}
      * @see #success(Object)
      * @see #of(Object, Throwable)
      * @see #isFailure()
@@ -596,7 +588,9 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @see #orElseIfFailure(Object)
      * @see #orElseGetIfFailure(Supplier)
      */
-    public static <T, E extends Throwable> Result<T, E> failure(final E exception) {
+    public static <T, E extends Throwable> Result<T, E> failure(final E exception) throws IllegalArgumentException {
+        N.checkArgNotNull(exception, cs.exception);
+
         return of(null, exception);
     }
 

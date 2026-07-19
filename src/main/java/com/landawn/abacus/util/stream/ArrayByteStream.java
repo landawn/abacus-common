@@ -16,7 +16,6 @@ package com.landawn.abacus.util.stream;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -204,7 +203,7 @@ class ArrayByteStream extends AbstractByteStream {
 
     /**
      * Returns a stream of elements taken from this stream as long as the given predicate
-     * holds true. Once an element fails the predicate, the stream terminates immediately,
+     * holds {@code true}. Once an element fails the predicate, the stream terminates immediately,
      * even if subsequent elements would match.
      *
      * @param predicate the non-interfering, stateless predicate applied to each element
@@ -247,7 +246,7 @@ class ArrayByteStream extends AbstractByteStream {
     }
 
     /**
-     * Returns a stream that skips elements as long as the given predicate is true,
+     * Returns a stream that skips elements as long as the given predicate is {@code true},
      * then includes all remaining elements. The predicate is evaluated only during the
      * initial drop phase; once it returns {@code false} for the first time, all subsequent
      * elements are included regardless of the predicate.
@@ -526,27 +525,18 @@ class ArrayByteStream extends AbstractByteStream {
             private int cursor = fromIndex;
             private ByteIterator cur = null;
             private ByteStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (cursor < toIndex) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (cursor < toIndex) {
                         s = mapper.apply(elements[cursor++]);
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -569,8 +559,15 @@ class ArrayByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -687,27 +684,18 @@ class ArrayByteStream extends AbstractByteStream {
             private int cursor = fromIndex;
             private IntIterator cur = null;
             private IntStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (cursor < toIndex) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (cursor < toIndex) {
                         s = mapper.apply(elements[cursor++]);
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -730,8 +718,15 @@ class ArrayByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -757,27 +752,18 @@ class ArrayByteStream extends AbstractByteStream {
             private int cursor = fromIndex;
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (cursor < toIndex) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (cursor < toIndex) {
                         s = mapper.apply(elements[cursor++]);
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -800,8 +786,15 @@ class ArrayByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };

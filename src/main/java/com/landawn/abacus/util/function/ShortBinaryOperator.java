@@ -41,7 +41,8 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      * Applies this operator to the given short operands.
      *
      * <p>This method takes two short values as operands and produces a short result.
-     * The operator should be associative and stateless for use in parallel operations.
+     * When an operator is supplied to a parallel reduction that requires associativity,
+     * callers must choose an associative implementation; associativity is not required by this interface itself.
      * Common implementations include arithmetic operations (add, multiply, min, max),
      * bitwise operations (and, or, xor), and other binary operations on short values.
      *

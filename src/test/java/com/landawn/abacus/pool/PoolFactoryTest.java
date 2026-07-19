@@ -3,6 +3,7 @@ package com.landawn.abacus.pool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -180,6 +181,11 @@ public class PoolFactoryTest extends TestBase {
 
         assertNotNull(pool);
         pool.close();
+    }
+
+    @Test
+    public void testObjectPoolRejectsPositiveMemoryLimitWithoutMeasure() {
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.<TestPoolable> createObjectPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 1, null));
     }
 
     @Test
@@ -389,6 +395,12 @@ public class PoolFactoryTest extends TestBase {
 
         assertNotNull(pool);
         pool.close();
+    }
+
+    @Test
+    public void testKeyedObjectPoolRejectsPositiveMemoryLimitWithoutMeasure() {
+        assertThrows(IllegalArgumentException.class,
+                () -> PoolFactory.<String, TestPoolable> createKeyedObjectPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 1, null));
     }
 
     @Test

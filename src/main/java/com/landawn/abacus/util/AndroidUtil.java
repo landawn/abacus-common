@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Internal;
@@ -29,7 +30,9 @@ import com.landawn.abacus.annotation.Internal;
  * access to Android's {@code AsyncTask} executors if available. On non-Android platforms,
  * it provides equivalent fallback executors using standard Java concurrency utilities:
  * a single-threaded executor for serial execution and a fixed-size thread pool
- * (sized to {@link IOUtil#CPU_CORES CPU_CORES}) for parallel execution.</p>
+ * (sized to {@link IOUtil#CPU_CORES CPU_CORES}) for parallel execution. The fallback
+ * executors use daemon worker threads so that idle framework executors do not keep an
+ * otherwise-finished JVM alive.</p>
  *
  * <p>On non-Android platforms a JVM shutdown hook is registered to gracefully
  * terminate the created executors on JVM exit.</p>
@@ -44,6 +47,12 @@ public final class AndroidUtil {
 
     private static final Executor TP_EXECUTOR;
 
+    private static final ThreadFactory DAEMON_THREAD_FACTORY = runnable -> {
+        final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+        thread.setDaemon(true);
+        return thread;
+    };
+
     static {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             Class<?> asyncTaskClass;
@@ -55,8 +64,8 @@ public final class AndroidUtil {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else {
-            final ExecutorService serialExecutor = Executors.newSingleThreadExecutor();
-            final ExecutorService tpExecutor = Executors.newFixedThreadPool(IOUtil.CPU_CORES);
+            final ExecutorService serialExecutor = Executors.newSingleThreadExecutor(DAEMON_THREAD_FACTORY);
+            final ExecutorService tpExecutor = Executors.newFixedThreadPool(IOUtil.CPU_CORES, DAEMON_THREAD_FACTORY);
 
             SERIAL_EXECUTOR = serialExecutor;
             TP_EXECUTOR = tpExecutor;
@@ -101,7 +110,7 @@ public final class AndroidUtil {
      * Returns a serial executor that executes tasks one at a time in serial order.
      *
      * <p>On Android platforms, this returns {@code AsyncTask.SERIAL_EXECUTOR}.
-     * On non-Android platforms, this returns a single-threaded executor.</p>
+     * On non-Android platforms, this returns a single-threaded executor whose worker is a daemon thread.</p>
      *
      * <p>This executor is useful when tasks must be executed sequentially and
      * thread safety is a concern.</p>
@@ -126,7 +135,7 @@ public final class AndroidUtil {
      *
      * <p>On Android platforms, this returns {@code AsyncTask.THREAD_POOL_EXECUTOR}.
      * On non-Android platforms, this returns a fixed thread pool with size equal
-     * to the number of available CPU cores.</p>
+     * to the number of available CPU cores and whose workers are daemon threads.</p>
      *
      * <p>This executor is suitable for CPU-bound parallel tasks that can benefit
      * from multi-core execution.</p>

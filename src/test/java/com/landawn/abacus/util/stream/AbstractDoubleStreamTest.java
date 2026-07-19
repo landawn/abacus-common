@@ -825,6 +825,11 @@ public class AbstractDoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testJoinToRejectsNullForEmptyStream() {
+        assertThrows(IllegalArgumentException.class, () -> createDoubleStream().joinTo(null));
+    }
+
+    @Test
     public void testCollect() {
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0 });
 
@@ -859,6 +864,27 @@ public class AbstractDoubleStreamTest extends TestBase {
         assertEquals(4, stats.getCount());
         assertTrue(Double.isNaN(stats.getMin()), "min should be NaN when input contains NaN");
         assertTrue(Double.isNaN(stats.getMax()), "max should be NaN when input contains NaN");
+    }
+
+    @Test
+    public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
+        DoubleIteratorEx reversed = (DoubleIteratorEx) createDoubleStream(new double[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        assertEquals(5, reversed.toArray().length);
+        assertFalse(reversed.hasNext());
+        assertEquals(0, reversed.toArray().length);
+
+        DoubleIteratorEx rotated = (DoubleIteratorEx) createDoubleStream(new double[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        rotated.nextDouble();
+        assertEquals(4, rotated.toArray().length);
+        assertFalse(rotated.hasNext());
+        assertEquals(0, rotated.toArray().length);
+
+        DoubleIteratorEx reverseSorted = (DoubleIteratorEx) createDoubleStream(new double[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        reverseSorted.nextDouble();
+        reverseSorted.nextDouble();
+        assertEquals(3, reverseSorted.toArray().length);
+        assertFalse(reverseSorted.hasNext());
+        assertEquals(0, reverseSorted.toArray().length);
     }
 
     @Test

@@ -3,6 +3,8 @@ package com.landawn.abacus.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import java.io.Serializable;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +12,13 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.IntStream;
 
 public class ReflectionTest extends TestBase {
+
+    @Test
+    public void testMetadataCachesDoNotUseStrongClassKeyMaps() {
+        Assertions.assertInstanceOf(ClassValue.class, Reflection.clsFieldPool);
+        Assertions.assertInstanceOf(ClassValue.class, Reflection.clsConstructorPool);
+        Assertions.assertInstanceOf(ClassValue.class, Reflection.clsMethodPool);
+    }
 
     public static class X {
 
@@ -122,6 +131,48 @@ public class ReflectionTest extends TestBase {
         }
     }
 
+    public static class SpecificConstructorTarget {
+        private final String selected;
+
+        public SpecificConstructorTarget(final Object value) {
+            selected = "object";
+        }
+
+        public SpecificConstructorTarget(final CharSequence value) {
+            selected = "charSequence";
+        }
+    }
+
+    public static class SpecificMethodParent {
+        public String select(final CharSequence value) {
+            return "charSequence";
+        }
+    }
+
+    public static class SpecificMethodTarget extends SpecificMethodParent {
+        public String select(final Object value) {
+            return "object";
+        }
+    }
+
+    public static class AmbiguousConstructorTarget {
+        public AmbiguousConstructorTarget(final CharSequence value) {
+        }
+
+        public AmbiguousConstructorTarget(final Serializable value) {
+        }
+    }
+
+    public static class AmbiguousMethodTarget {
+        public String select(final CharSequence value) {
+            return "charSequence";
+        }
+
+        public String select(final Serializable value) {
+            return "serializable";
+        }
+    }
+
     public interface Greeter {
         default String greet(String name) {
             return "Hello " + name;
@@ -149,6 +200,40 @@ public class ReflectionTest extends TestBase {
 
         public boolean isPositive(int value) {
             return value > 0;
+        }
+    }
+
+    public static class PrimitiveWideningTarget {
+        private final long constructedValue;
+
+        public PrimitiveWideningTarget(final long value) {
+            constructedValue = value;
+        }
+
+        public long constructedValue() {
+            return constructedValue;
+        }
+
+        public String select(final int value) {
+            return "int:" + value;
+        }
+
+        public String select(final long value) {
+            return "long:" + value;
+        }
+
+        public long longOnly(final long value) {
+            return value;
+        }
+    }
+
+    public static class InvocationPhaseTarget {
+        public String select(final Number value) {
+            return "number";
+        }
+
+        public String select(final long value) {
+            return "long";
         }
     }
 
@@ -331,6 +416,20 @@ public class ReflectionTest extends TestBase {
     }
 
     @Test
+    public void testNewInstanceSelectsMostSpecificCompatibleConstructor() {
+        SpecificConstructorTarget target = Reflection.on(SpecificConstructorTarget.class).newInstance(new StringBuilder("value")).instance();
+
+        Assertions.assertEquals("charSequence", target.selected);
+    }
+
+    @Test
+    public void testNewInstanceRejectsUnrelatedEquallyApplicableConstructors() {
+        RuntimeException ex = Assertions.assertThrows(RuntimeException.class, () -> Reflection.on(AmbiguousConstructorTarget.class).newInstance("value"));
+
+        Assertions.assertTrue(ex.getMessage().contains("Ambiguous constructor"));
+    }
+
+    @Test
     public void testWithPrimitiveTypes() {
         PrimitiveTestClass target = new PrimitiveTestClass();
         Reflection<PrimitiveTestClass> reflection = Reflection.on(target);
@@ -360,6 +459,26 @@ public class ReflectionTest extends TestBase {
         Reflection<PrimitiveTestClass> newReflection = reflection.newInstance(42);
         Assertions.assertNotNull(newReflection);
         Assertions.assertEquals(42, newReflection.instance().intValue);
+    }
+
+    @Test
+    public void testPrimitiveWideningForConstructorAndMethodInvocation() {
+        PrimitiveWideningTarget target = Reflection.on(PrimitiveWideningTarget.class).newInstance(42).instance();
+
+        Assertions.assertEquals(42L, target.constructedValue());
+        final Long widened = Reflection.on(target).invoke("longOnly", 7);
+        Assertions.assertEquals(7L, widened.longValue());
+    }
+
+    @Test
+    public void testPrimitiveWideningOverloadResolution() {
+        PrimitiveWideningTarget target = new PrimitiveWideningTarget(0);
+
+        // int is more specific than long for an Integer argument.
+        Assertions.assertEquals("int:7", Reflection.on(target).invoke("select", 7));
+
+        // Reference widening is resolved before unboxing plus primitive widening.
+        Assertions.assertEquals("number", Reflection.on(new InvocationPhaseTarget()).invoke("select", 7));
     }
 
     @Test
@@ -598,6 +717,20 @@ public class ReflectionTest extends TestBase {
 
         String intResult = reflection.invoke("typed", 5);
         Assertions.assertEquals("int:5", intResult);
+    }
+
+    @Test
+    public void testInvokeSelectsMostSpecificCompatibleInheritedOverload() {
+        String result = Reflection.on(new SpecificMethodTarget()).invoke("select", new StringBuilder("value"));
+
+        Assertions.assertEquals("charSequence", result);
+    }
+
+    @Test
+    public void testInvokeRejectsUnrelatedEquallyApplicableMethods() {
+        RuntimeException ex = Assertions.assertThrows(RuntimeException.class, () -> Reflection.on(new AmbiguousMethodTarget()).invoke("select", "value"));
+
+        Assertions.assertTrue(ex.getMessage().contains("Ambiguous method"));
     }
 
     @Test

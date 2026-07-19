@@ -7,8 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
@@ -25,8 +28,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.GZIPOutputStream;
 
 import org.junit.jupiter.api.Test;
 
@@ -434,6 +443,23 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testConnectTimeoutOwnsReplacementClient() throws Exception {
+        final HttpRequest request = HttpRequest.create(testUrl, HttpClient.newHttpClient()).connectTimeout(Duration.ofSeconds(1));
+
+        assertEquals(true, booleanField(request, "requireNewClient"));
+        assertEquals(true, booleanField(request, "closeHttpClientAfterExecution"));
+    }
+
+    @Test
+    public void testEmptyConnectTimeoutDoesNotReplaceSharedClient() throws Exception {
+        final HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ZERO).connectTimeout((Duration) null);
+
+        assertEquals(false, booleanField(request, "requireNewClient"));
+        assertEquals(false, booleanField(request, "closeHttpClientAfterExecution"));
+        assertEquals(null, field(request, "clientBuilder"));
+    }
+
+    @Test
     public void testConnectTimeoutWithSmallDuration() {
         HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofMillis(1));
         assertNotNull(request);
@@ -525,6 +551,14 @@ public class HttpRequestTest extends TestBase {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.create(testUrl, client).authenticator(auth);
         assertNotNull(request);
+    }
+
+    @Test
+    public void testAuthenticatorOwnsReplacementClient() throws Exception {
+        final HttpRequest request = HttpRequest.create(testUrl, HttpClient.newHttpClient()).authenticator(mock(Authenticator.class));
+
+        assertEquals(true, booleanField(request, "requireNewClient"));
+        assertEquals(true, booleanField(request, "closeHttpClientAfterExecution"));
     }
 
     @Test
@@ -2159,6 +2193,64 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testCleanupInputStreamRunsCleanupOnceWhenClosedConcurrently() throws Exception {
+        final int threadCount = 32;
+        final CountDownLatch allClosing = new CountDownLatch(threadCount);
+        final CountDownLatch releaseClose = new CountDownLatch(1);
+        final AtomicInteger cleanupCount = new AtomicInteger();
+        final InputStream delegate = new InputStream() {
+            @Override
+            public int read() {
+                return -1;
+            }
+
+            @Override
+            public void close() throws IOException {
+                allClosing.countDown();
+
+                try {
+                    releaseClose.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException(e);
+                }
+            }
+        };
+
+        final Class<?> cleanupStreamClass = Class.forName(HttpRequest.class.getName() + "$CleanupInputStream");
+        final Constructor<?> constructor = cleanupStreamClass.getDeclaredConstructor(InputStream.class, Runnable.class);
+        constructor.setAccessible(true);
+        final InputStream stream = (InputStream) constructor.newInstance(delegate, (Runnable) cleanupCount::incrementAndGet);
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        try {
+            final Future<?>[] closes = new Future<?>[threadCount];
+
+            for (int i = 0; i < threadCount; i++) {
+                closes[i] = executor.submit(() -> {
+                    try {
+                        stream.close();
+                    } catch (final IOException e) {
+                        throw new AssertionError(e);
+                    }
+                });
+            }
+
+            assertEquals(true, allClosing.await(5, TimeUnit.SECONDS), "all close calls should reach the delegate");
+            releaseClose.countDown();
+
+            for (final Future<?> close : closes) {
+                close.get(5, TimeUnit.SECONDS);
+            }
+
+            assertEquals(1, cleanupCount.get(), "per-request client cleanup must run exactly once");
+        } finally {
+            releaseClose.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     public void testGetInputStreamResultOnErrorStatusDoesNotLeakBodyStream() throws Exception {
         // On a non-2xx response, get(InputStream.class) must read AND close the deferred-cleanup body
         // stream (releasing the per-request HttpClient/connection) before throwing, rather than
@@ -2176,6 +2268,100 @@ public class HttpRequestTest extends TestBase {
             assertEquals(true, msg.contains("not found"), "the error response body content should be read out and surfaced: " + msg);
             assertEquals(false, msg.contains("CleanupInputStream"),
                     "the raw response body stream must be read & closed, not rendered into the message: " + msg);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testGetInputStreamErrorBodyHonorsCompressionAndCharset() throws Exception {
+        final ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+
+        try (GZIPOutputStream gzip = new GZIPOutputStream(compressed)) {
+            gzip.write("café".getBytes(StandardCharsets.ISO_8859_1));
+        }
+
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=ISO-8859-1");
+            exchange.getResponseHeaders().set("Content-Encoding", "gzip");
+            exchange.sendResponseHeaders(422, compressed.size());
+
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                compressed.writeTo(outputStream);
+            }
+        });
+        server.start();
+
+        try {
+            final com.landawn.abacus.exception.UncheckedIOException ex = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                    () -> HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(InputStream.class));
+            final String message = ex.getCause() == null ? ex.getMessage() : ex.getCause().getMessage();
+
+            assertEquals(true, message.contains("422"));
+            assertEquals(true, message.contains("café"), "compressed error body should be decompressed and decoded using its declared charset: " + message);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testStringConvenienceMethodsHonorResponseCharsetAndCompression() throws Exception {
+        final ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+
+        try (GZIPOutputStream gzip = new GZIPOutputStream(compressed)) {
+            gzip.write("café".getBytes(StandardCharsets.ISO_8859_1));
+        }
+
+        final HttpServer server = startResponseServer(compressed.toByteArray(), "text/plain; charset=ISO-8859-1", "gzip");
+
+        try {
+            assertEquals("café", HttpRequest.url(localUrl(server), 1_000L, 5_000L).get().body());
+            assertEquals("café", HttpRequest.url(localUrl(server), 1_000L, 5_000L).asyncGet().join().body());
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testTypedStringUsesDeclaredResponseCharset() throws Exception {
+        final byte[] body = "café".getBytes(StandardCharsets.ISO_8859_1);
+        final HttpServer server = startResponseServer(body, "text/plain; charset=ISO-8859-1", null);
+
+        try {
+            assertEquals("café", HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(String.class));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testTypedFormResponseUsesDeclaredCharsetForPercentEscapes() throws Exception {
+        final byte[] body = "name=caf%E9".getBytes(StandardCharsets.ISO_8859_1);
+        final HttpServer server = startResponseServer(body, "application/x-www-form-urlencoded; charset=ISO-8859-1", null);
+
+        try {
+            final Map<String, String> result = HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(Map.class);
+            assertEquals("café", result.get("name"));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testTypedResponseIsDecompressedBeforeParsing() throws Exception {
+        final ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+
+        try (GZIPOutputStream gzip = new GZIPOutputStream(compressed)) {
+            gzip.write("{\"name\":\"compressed\",\"value\":7}".getBytes(StandardCharsets.UTF_8));
+        }
+
+        final HttpServer server = startResponseServer(compressed.toByteArray(), "application/json; charset=UTF-8", "gzip");
+
+        try {
+            final TestBean result = HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(TestBean.class);
+            assertEquals("compressed", result.getName());
+            assertEquals(7, result.getValue());
         } finally {
             server.stop(0);
         }
@@ -2213,6 +2399,29 @@ public class HttpRequestTest extends TestBase {
         return server;
     }
 
+    private static HttpServer startResponseServer(final byte[] body, final String contentType, final String contentEncoding) throws Exception {
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+
+        server.createContext("/", exchange -> {
+            if (contentType != null) {
+                exchange.getResponseHeaders().set("Content-Type", contentType);
+            }
+
+            if (contentEncoding != null) {
+                exchange.getResponseHeaders().set("Content-Encoding", contentEncoding);
+            }
+
+            exchange.sendResponseHeaders(200, body.length);
+
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(body);
+            }
+        });
+
+        server.start();
+        return server;
+    }
+
     private static HttpServer startRedirectServer(final String body) throws Exception {
         final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
 
@@ -2237,6 +2446,16 @@ public class HttpRequestTest extends TestBase {
 
     private static String localUrl(final HttpServer server) {
         return "http://127.0.0.1:" + server.getAddress().getPort() + "/";
+    }
+
+    private static boolean booleanField(final HttpRequest request, final String fieldName) throws Exception {
+        return (boolean) field(request, fieldName);
+    }
+
+    private static Object field(final HttpRequest request, final String fieldName) throws Exception {
+        final java.lang.reflect.Field field = HttpRequest.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(request);
     }
 
 }

@@ -14,7 +14,10 @@
 
 package com.landawn.abacus.type;
 
+import java.util.List;
+
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.TypeAttrParser;
 
 /**
  * Type handler for {@link Type} objects themselves, allowing Type instances to be serialized,
@@ -64,12 +67,15 @@ public class TypeType extends AbstractType<Type> {
      */
     public static final String TYPE = "Type";
 
+    private final List<Type<?>> parameterTypes;
+
     /**
      * Constructs a TypeType instance with the default type name.
      * This constructor is package-private and should only be called by TypeFactory.
      */
     TypeType() {
         super(TYPE);
+        parameterTypes = EMPTY_TYPE_LIST;
     }
 
     /**
@@ -80,6 +86,9 @@ public class TypeType extends AbstractType<Type> {
      */
     TypeType(final String typeName) {
         super(typeName);
+
+        final String[] typeParameterNames = TypeAttrParser.parse(typeName).getTypeParameters();
+        parameterTypes = typeParameterNames.length == 0 ? EMPTY_TYPE_LIST : List.of(TypeFactory.getType(typeParameterNames[0]));
     }
 
     /**
@@ -90,6 +99,16 @@ public class TypeType extends AbstractType<Type> {
     @Override
     public Class<Type> javaType() {
         return Type.class;
+    }
+
+    /**
+     * Returns the value type declared by {@code Type<T>}, if present.
+     *
+     * @return an empty list for raw {@code Type}, or a one-element list for {@code Type<T>}
+     */
+    @Override
+    public List<Type<?>> parameterTypes() {
+        return parameterTypes;
     }
 
     /**

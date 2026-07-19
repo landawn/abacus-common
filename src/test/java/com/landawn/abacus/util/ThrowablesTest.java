@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -158,6 +159,51 @@ public class ThrowablesTest extends TestBase {
         });
 
         assertTrue(errorActionExecuted.get(), "Error action should have been executed.");
+    }
+
+    @Test
+    public void testRecoveryOverloadsRestoreInterruptedStatusBeforeRecovery() {
+        final Throwables.Callable<String, InterruptedException> interruptedCall = () -> {
+            throw new InterruptedException("stop");
+        };
+
+        try {
+            Thread.interrupted();
+            Throwables.run(() -> {
+                throw new InterruptedException("stop");
+            }, e -> assertTrue(Thread.currentThread().isInterrupted()));
+            assertTrue(Thread.currentThread().isInterrupted());
+
+            Thread.interrupted();
+            assertEquals("function", Throwables.call(interruptedCall, (java.util.function.Function<Throwable, String>) e -> {
+                assertTrue(Thread.currentThread().isInterrupted());
+                return "function";
+            }));
+
+            Thread.interrupted();
+            assertEquals("supplier", Throwables.call(interruptedCall, (java.util.function.Supplier<String>) () -> {
+                assertTrue(Thread.currentThread().isInterrupted());
+                return "supplier";
+            }));
+
+            Thread.interrupted();
+            assertEquals("default", Throwables.call(interruptedCall, "default"));
+            assertTrue(Thread.currentThread().isInterrupted());
+
+            Thread.interrupted();
+            assertEquals("conditional supplier", Throwables.call(interruptedCall, (java.util.function.Predicate<Throwable>) e -> {
+                assertTrue(Thread.currentThread().isInterrupted());
+                return true;
+            }, (java.util.function.Supplier<String>) () -> "conditional supplier"));
+
+            Thread.interrupted();
+            assertEquals("conditional default", Throwables.call(interruptedCall, (java.util.function.Predicate<Throwable>) e -> {
+                assertTrue(Thread.currentThread().isInterrupted());
+                return true;
+            }, "conditional default"));
+        } finally {
+            Thread.interrupted();
+        }
     }
 
     @Test
@@ -581,6 +627,11 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
+    public void testIteratorIsNotAdvertisedAsImmutable() {
+        assertFalse(Iterator.just("value") instanceof Immutable);
+    }
+
+    @Test
     public void testIterator_Empty_Next() {
         Iterator<String, Exception> iter = Iterator.empty();
         assertThrows(NoSuchElementException.class, () -> iter.next());
@@ -852,6 +903,8 @@ public class ThrowablesTest extends TestBase {
         iter.close();
         assertFalse(initialized.get(), "Should not initialize on close");
         assertFalse(closed.get(), "Underlying iterator should not be closed if not initialized");
+        assertThrows(IllegalStateException.class, iter::hasNext, "a closed deferred iterator must not acquire a resource after its one-shot close");
+        assertFalse(initialized.get());
     }
 
     @Test
@@ -878,6 +931,7 @@ public class ThrowablesTest extends TestBase {
         iter.hasNext();
         iter.close();
         assertTrue(closed.get(), "Underlying iterator should be closed if initialized");
+        assertThrows(IllegalStateException.class, iter::hasNext);
     }
 
     @Test
@@ -895,6 +949,32 @@ public class ThrowablesTest extends TestBase {
 
         iter.advance(0);
         assertFalse(initialized.get(), "Should not initialize on advance(0)");
+    }
+
+    @Test
+    public void testIterator_Defer_RetriesAfterSupplierFailure() throws Exception {
+        AtomicInteger attempts = new AtomicInteger();
+        Iterator<String, Exception> iter = Iterator.defer(() -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw new IllegalStateException("first attempt");
+            }
+
+            return Iterator.just("value");
+        });
+
+        IllegalStateException failure = assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals("first attempt", failure.getMessage());
+        assertTrue(iter.hasNext());
+        assertEquals("value", iter.next());
+        assertEquals(2, attempts.get());
+    }
+
+    @Test
+    public void testIterator_Defer_RejectsNullIterator() {
+        Iterator<String, Exception> iter = Iterator.defer(() -> null);
+
+        IllegalStateException failure = assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals("Iterator supplier returned null", failure.getMessage());
     }
 
     @Test
@@ -960,6 +1040,15 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
+    public void testIterator_Concat_SkipsNullEntries() throws Exception {
+        Iterator<String, Exception> varargs = Iterator.concat(null, Iterator.of("one"), null);
+        Iterator<String, Exception> collection = Iterator.concat(Arrays.asList(null, Iterator.of("two"), null));
+
+        assertEquals(Arrays.asList("one"), varargs.toList());
+        assertEquals(Arrays.asList("two"), collection.toList());
+    }
+
+    @Test
     public void testIterator_ConcatCollection_HasNextMultipleCalls() throws Exception {
         List<Iterator<String, Exception>> iterators = Arrays.asList(Iterator.of("one"), Iterator.of("two"));
         Iterator<String, Exception> iter = Iterator.concat(iterators);
@@ -967,6 +1056,36 @@ public class ThrowablesTest extends TestBase {
         assertTrue(iter.hasNext());
         assertTrue(iter.hasNext());
         assertEquals("one", iter.next());
+    }
+
+    @Test
+    public void testIterator_ConcatCloseClosesAllSources() throws Exception {
+        AtomicInteger closeCount = new AtomicInteger();
+        Iterator<String, Exception> first = closeTrackingIterator(closeCount);
+        Iterator<String, Exception> second = closeTrackingIterator(closeCount);
+        Iterator<String, Exception> concatenated = Iterator.concat(first, second);
+
+        assertTrue(concatenated.hasNext());
+        concatenated.close();
+
+        assertEquals(2, closeCount.get());
+        assertFalse(concatenated.hasNext());
+        assertThrows(NoSuchElementException.class, concatenated::next);
+    }
+
+    @Test
+    public void testIterator_ConcatCloseAggregatesFailuresAndContinuesClosing() {
+        AtomicInteger closeCount = new AtomicInteger();
+        RuntimeException primary = new RuntimeException("primary");
+        RuntimeException secondary = new RuntimeException("secondary");
+
+        Iterator<String, Exception> concatenated = Iterator.concat(closeFailingIterator(closeCount, primary), closeFailingIterator(closeCount, primary),
+                closeFailingIterator(closeCount, secondary), closeTrackingIterator(closeCount));
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, concatenated::close);
+        assertSame(primary, thrown);
+        assertEquals(4, closeCount.get());
+        assertArrayEquals(new Throwable[] { secondary }, thrown.getSuppressed());
     }
 
     @Test
@@ -1034,6 +1153,25 @@ public class ThrowablesTest extends TestBase {
         iter.close();
         iter.close();
         assertNotNull(iter);
+    }
+
+    @Test
+    public void testIterator_OfLines_PropagatesCloseFailure() {
+        final IOException closeFailure = new IOException("close");
+        final Reader reader = new Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) {
+                return -1;
+            }
+
+            @Override
+            public void close() throws IOException {
+                throw closeFailure;
+            }
+        };
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> Iterator.ofLines(reader).close());
+        assertSame(closeFailure, thrown.getCause());
     }
 
     @Test
@@ -1207,6 +1345,14 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
+    public void testIteratorTransformationsValidateCallbacksEagerly() {
+        final Iterator<Integer, Exception> iter = Iterator.empty();
+
+        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        assertThrows(IllegalArgumentException.class, () -> iter.map(null));
+    }
+
+    @Test
     public void testIterator_Filter_HasNextMultipleCalls() throws Exception {
         Iterator<Integer, Exception> iter = Iterator.of(1, 2, 3);
         Iterator<Integer, Exception> filtered = iter.filter(n -> n == 2);
@@ -1214,6 +1360,29 @@ public class ThrowablesTest extends TestBase {
         assertTrue(filtered.hasNext());
         assertTrue(filtered.hasNext());
         assertEquals(2, filtered.next());
+    }
+
+    @Test
+    public void testIterator_Filter_DoesNotConfuseInternalSentinelWithNoValue() throws Exception {
+        final Object sentinel = N.NULL_SENTINEL;
+        final Iterator<Object, Exception> filtered = Iterator.of(sentinel).filter(value -> true);
+
+        assertTrue(filtered.hasNext());
+        assertSame(sentinel, filtered.next());
+        assertFalse(filtered.hasNext());
+    }
+
+    @Test
+    public void testIterator_FilterCloseClosesSource() throws Exception {
+        AtomicInteger closeCount = new AtomicInteger();
+        Iterator<String, Exception> filtered = closeTrackingIterator(closeCount).filter(value -> true);
+
+        assertTrue(filtered.hasNext()); // buffer an element before close
+        filtered.close();
+
+        assertEquals(1, closeCount.get());
+        assertFalse(filtered.hasNext());
+        assertThrows(NoSuchElementException.class, filtered::next);
     }
 
     @Test
@@ -1254,6 +1423,73 @@ public class ThrowablesTest extends TestBase {
         assertEquals(2, mapped.next());
         assertEquals(3, mapped.next());
         assertFalse(mapped.hasNext());
+    }
+
+    @Test
+    public void testIterator_MapCloseClosesSource() throws Exception {
+        AtomicInteger closeCount = new AtomicInteger();
+        Iterator<Integer, Exception> mapped = closeTrackingIterator(closeCount).map(String::length);
+
+        mapped.close();
+
+        assertEquals(1, closeCount.get());
+        assertFalse(mapped.hasNext());
+        assertThrows(NoSuchElementException.class, mapped::next);
+    }
+
+    @Test
+    public void testIteratorTerminalCallbacksAreValidatedEvenWhenEmpty() {
+        final Iterator<String, Exception> iter = Iterator.empty();
+
+        assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining(null));
+        assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining(null));
+        assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
+    }
+
+    private static Iterator<String, Exception> closeTrackingIterator(final AtomicInteger closeCount) {
+        return new Iterator<>() {
+            private boolean consumed;
+
+            @Override
+            public boolean hasNext() {
+                return !consumed;
+            }
+
+            @Override
+            public String next() {
+                if (consumed) {
+                    throw new NoSuchElementException();
+                }
+
+                consumed = true;
+                return "value";
+            }
+
+            @Override
+            protected void closeResource() {
+                closeCount.incrementAndGet();
+            }
+        };
+    }
+
+    private static Iterator<String, Exception> closeFailingIterator(final AtomicInteger closeCount, final RuntimeException failure) {
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public String next() {
+                throw new NoSuchElementException();
+            }
+
+            @Override
+            protected void closeResource() {
+                closeCount.incrementAndGet();
+                throw failure;
+            }
+        };
     }
 
     @Test
@@ -1398,6 +1634,14 @@ public class ThrowablesTest extends TestBase {
         assertEquals("one", array[0]);
         assertEquals("two", array[1]);
         assertNull(array[2]);
+    }
+
+    @Test
+    public void testIterator_ToArray_ValidatesTargetBeforeConsuming() throws Exception {
+        Iterator<String, Exception> iter = Iterator.of("one", "two");
+
+        assertThrows(IllegalArgumentException.class, () -> iter.toArray(null));
+        assertEquals("one", iter.next(), "Invalid output array must not consume the iterator");
     }
 
     @Test
@@ -1546,6 +1790,31 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
+    public void testRunnable_Unchecked_PreservesRuntimeIdentity() {
+        final TestRuntimeException failure = new TestRuntimeException("same instance");
+        final Throwables.Runnable<Exception> throwableRunnable = () -> {
+            throw failure;
+        };
+
+        assertSame(failure, assertThrows(TestRuntimeException.class, throwableRunnable.unchecked()::run));
+    }
+
+    @Test
+    public void testRunnable_Unchecked_RestoresInterruptedStatus() {
+        final Throwables.Runnable<InterruptedException> throwableRunnable = () -> {
+            throw new InterruptedException("interrupted");
+        };
+
+        try {
+            final RuntimeException failure = assertThrows(RuntimeException.class, throwableRunnable.unchecked()::run);
+            assertTrue(Thread.currentThread().isInterrupted());
+            assertTrue(failure.getCause() instanceof InterruptedException);
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
     public void testCallable_Unchecked_ThrowsRuntimeException() {
         Throwables.Callable<String, Exception> throwableCallable = () -> {
             throw new TestException("Test exception");
@@ -1648,6 +1917,18 @@ public class ThrowablesTest extends TestBase {
         Object second = lazy.get();
 
         assertSame(first, second, "Should return the same instance");
+    }
+
+    @Test
+    public void testLazyInitializer_Get_ReleasesSupplierAfterSuccess() throws Exception {
+        LazyInitializer<Object, Exception> lazy = LazyInitializer.of(Object::new);
+        java.lang.reflect.Field supplierField = LazyInitializer.class.getDeclaredField("supplier");
+        supplierField.setAccessible(true);
+        assertNotNull(supplierField.get(lazy));
+
+        lazy.get();
+
+        assertNull(supplierField.get(lazy), "Successful initialization must not retain the supplier or its captured state");
     }
 
     @Test
@@ -1898,6 +2179,19 @@ public class ThrowablesTest extends TestBase {
 
         String result = composed.apply("a", "b", "c");
         assertEquals("Count: 3", result);
+    }
+
+    @Test
+    public void testNFunctions_AndThen_ValidateAfterEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.BooleanNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.CharNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.ByteNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.ShortNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.IntNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.LongNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.FloatNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.DoubleNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> ((Throwables.NFunction<String, Integer, Exception>) args -> args.length).andThen(null));
     }
 
     @Test
@@ -3038,21 +3332,33 @@ public class ThrowablesTest extends TestBase {
         Throwables.Iterator<String, Exception> deferred = Throwables.Iterator.defer(() -> innerIter);
         deferred.close();
 
-        assertFalse(closeCalled.get(), "Inner iterator should be closed");
+        assertFalse(closeCalled.get(), "Closing before initialization must not invoke the supplier or close an iterator it never acquired");
     }
 
     @Test
     public void testStaticFactoryMethods() throws Exception {
-        Throwables.IntObjConsumer<String, Exception> consumer = Throwables.IntObjConsumer.of((i, s) -> {
-        });
-        assertNotNull(consumer);
+        Throwables.IntObjConsumer<String, Exception> originalConsumer = (i, s) -> {
+        };
+        Throwables.IntObjConsumer<String, Exception> consumer = Throwables.IntObjConsumer.of(originalConsumer);
+        assertSame(originalConsumer, consumer);
 
-        Throwables.IntObjFunction<String, String, Exception> function = Throwables.IntObjFunction.of((i, s) -> s + i);
+        Throwables.IntObjFunction<String, String, Exception> originalFunction = (i, s) -> s + i;
+        Throwables.IntObjFunction<String, String, Exception> function = Throwables.IntObjFunction.of(originalFunction);
+        assertSame(originalFunction, function);
         assertEquals("Test1", function.apply(1, "Test"));
 
-        Throwables.IntObjPredicate<String, Exception> predicate = Throwables.IntObjPredicate.of((i, s) -> s.length() > i);
+        Throwables.IntObjPredicate<String, Exception> originalPredicate = (i, s) -> s.length() > i;
+        Throwables.IntObjPredicate<String, Exception> predicate = Throwables.IntObjPredicate.of(originalPredicate);
+        assertSame(originalPredicate, predicate);
         assertTrue(predicate.test(2, "Hello"));
         assertFalse(predicate.test(10, "Hi"));
+    }
+
+    @Test
+    public void testStaticFactoryMethods_RejectNull() {
+        assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjConsumer.of(null));
+        assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjFunction.of(null));
+        assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjPredicate.of(null));
     }
 
     @Test

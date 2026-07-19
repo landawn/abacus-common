@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Throwables;
  * @see java.util.function.ToLongFunction
  */
 @FunctionalInterface
-public interface FloatToLongFunction extends Throwables.FloatToLongFunction<RuntimeException> {
+public interface FloatToLongFunction extends Throwables.FloatToLongFunction<RuntimeException> { //NOSONAR
     /**
      * A default function that converts a float value to long through narrowing primitive conversion (casting).
      * This truncates the decimal portion and may result in precision loss for large float values.

@@ -372,8 +372,8 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIteratorEx iter = IntIteratorEx.of(1, 2);
-     * iter.closeResource(); // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext()); // closeResource() does not consume elements
+     * iter.closeResource();         // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * IntIteratorEx iter2 = IntIteratorEx.of(3, 4);

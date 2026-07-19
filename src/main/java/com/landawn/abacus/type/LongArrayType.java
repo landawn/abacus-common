@@ -68,7 +68,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * into the original value.</p>
      *
      * @param x The Long array to convert
-     * @return the string representation of the array in the format {@code "[value1, value2, ...]"},
+     * @return the serialized array representation
      *         or {@code null} if the input array is {@code null}, or {@code "[]"} if the array is empty
      * @see #valueOf(String)
      * @see #valueOf(Object)
@@ -174,6 +174,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * type.appendTo(sb, null);
      * // sb contains: "null"
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -238,6 +239,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * String result2 = writer2.toString();
      * // result2: "null"
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -250,7 +252,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * @param writer The CharacterWriter to write to
      * @param x The Long array to write
-     * @param config The serialization configuration (currently unused for Long arrays)
+     * @param config The serialization configuration forwarded to each element; may be {@code null}
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
@@ -265,11 +267,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
                     writer.write(ELEMENT_SEPARATOR);
                 }
 
-                if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    elementType.serializeTo(writer, x[i], config);
-                }
+                elementType.serializeTo(writer, x[i], config);
             }
 
             writer.write(SK._BRACKET_R);

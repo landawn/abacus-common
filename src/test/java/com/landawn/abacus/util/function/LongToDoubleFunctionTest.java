@@ -99,16 +99,18 @@ public class LongToDoubleFunctionTest extends TestBase {
 
     @Test
     public void testApplyAsDouble_withMaxValue() {
-        final LongToDoubleFunction function = value -> (double) value;
-        final double result = function.applyAsDouble(Long.MAX_VALUE);
-        assertNotNull(result);
+        assertEquals((double) Long.MAX_VALUE, LongToDoubleFunction.DEFAULT.applyAsDouble(Long.MAX_VALUE));
     }
 
     @Test
     public void testApplyAsDouble_withMinValue() {
-        final LongToDoubleFunction function = value -> (double) value;
-        final double result = function.applyAsDouble(Long.MIN_VALUE);
-        assertNotNull(result);
+        assertEquals((double) Long.MIN_VALUE, LongToDoubleFunction.DEFAULT.applyAsDouble(Long.MIN_VALUE));
+    }
+
+    @Test
+    public void testDEFAULT_roundsBeyondExactIntegerRange() {
+        assertEquals(9_007_199_254_740_992d, LongToDoubleFunction.DEFAULT.applyAsDouble(9_007_199_254_740_993L));
+        assertEquals(9_007_199_254_740_994d, LongToDoubleFunction.DEFAULT.applyAsDouble(9_007_199_254_740_994L));
     }
 
     @Test

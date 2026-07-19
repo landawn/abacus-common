@@ -1930,6 +1930,46 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,2}", null, List.class));
     }
 
+    @Test
+    public void testDeserializeRejectsWhitespaceInsideUnquotedValue() {
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1 2]", null, List.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader("[fal se]"), null, List.class));
+        assertEquals(Arrays.asList(1, 2), parser.deserialize("[ 1 , 2 ]", null, List.class));
+    }
+
+    @Test
+    public void testDeserializeRejectsContentAfterStructuredRoot() {
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"a\":1} trailing", null, Map.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1][2]", null, List.class));
+        assertEquals(1, parser.deserialize("{\"a\":1}   ", null, Map.class).size());
+    }
+
+    @Test
+    public void testDeserializeRejectsMissingArraySeparators() {
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[{} {}]", null, List.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[[] []]", null, List.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[{} 1]", null, List.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[\"a\" \"b\"]", null, List.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[{} {}]", null, Object[].class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.parse("[{} {}]", null, new Object[2]));
+
+        assertEquals(2, parser.deserialize("[{}, {}]", null, List.class).size());
+        assertArrayEquals(new Object[] { "a", "b" }, parser.deserialize("[\"a\", \"b\"]", null, Object[].class));
+    }
+
+    @Test
+    public void testDeserializeRejectsMalformedObjectSeparators() {
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"a\":{} \"b\"}", null, Map.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"a\" \"b\":1}", null, Map.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{:1}", null, Map.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"a\":1,}", null, Map.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"unknown\":{} \"junk\"}", null, TestBean.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"unknown\":{},}", null, TestBean.class));
+
+        assertEquals(2, parser.deserialize("{\"a\":{}, \"b\":1}", null, Map.class).size());
+        assertEquals(1, parser.deserialize("{\"\":1}", null, Map.class).size());
+    }
+
     // ----- readNullToEmpty for collection/array/map/charSequence target types -----
 
     @Test
@@ -1966,6 +2006,14 @@ public class JsonParserImplTest extends TestBase {
     }
 
     @Test
+    public void testStreamRequiresSeparatorsClosingBracketAndEndOfInput() {
+        Assertions.assertThrows(ParsingException.class, () -> parser.stream("garbage", null, Type.of(java.util.List.class)).toList());
+        Assertions.assertThrows(ParsingException.class, () -> parser.stream("[[1]] trailing", null, Type.of(java.util.List.class)).toList());
+        Assertions.assertThrows(ParsingException.class, () -> parser.stream("[[1]", null, Type.of(java.util.List.class)).toList());
+        Assertions.assertThrows(ParsingException.class, () -> parser.stream("[[1] [2]]", null, Type.of(java.util.List.class)).toList());
+    }
+
+    @Test
     public void testReadNumber_17DigitDoubleRoundTripAndNegativeZero() {
         // regression: the decimal fast path divided an inexact (double) long, mis-parsing ~15% of
         // 17-significant-digit doubles by 1 ulp; "-0.0" lost its sign; bare "-" parsed as 0
@@ -1995,6 +2043,21 @@ public class JsonParserImplTest extends TestBase {
         final com.landawn.abacus.util.Dataset ds2 = parser.deserialize("[{\"a\":1},{},{\"a\":2}]", com.landawn.abacus.util.Dataset.class);
         Assertions.assertEquals(3, ds2.size());
         Assertions.assertEquals(java.util.Arrays.asList(1, null, 2), ds2.getColumn("a"));
+    }
+
+    @Test
+    public void testReadSheet_UsesDeclaredGenericTypesWithoutSerializedTypeMetadata() {
+        final Type<Sheet<String, Integer, Long>> sheetType = Type.of(new TypeReference<Sheet<String, Integer, Long>>() {
+        });
+        final Sheet<String, Integer, Long> source = Sheet.rows(List.of("row"), List.of(7), new Long[][] { { 9L } });
+        final String json = parser.serialize(source);
+
+        final Sheet<String, Integer, Long> parsed = parser.deserialize(json, null, sheetType);
+
+        assertEquals(String.class, parsed.rowKeySet().iterator().next().getClass());
+        assertEquals(Integer.class, parsed.columnKeySet().iterator().next().getClass());
+        assertEquals(Long.class, parsed.get("row", 7).getClass());
+        assertEquals(9L, parsed.get("row", 7));
     }
 
     @Test

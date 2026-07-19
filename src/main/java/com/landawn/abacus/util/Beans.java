@@ -201,7 +201,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Error Handling Strategy:</b>
  * <ul>
  *   <li><b>Graceful Degradation:</b> Methods handle edge cases without throwing exceptions</li>
- *   <li><b>Null Tolerance:</b> Comprehensive null input handling throughout the API</li>
+ *   <li><b>Null Tolerance:</b> Comprehensive {@code null} input handling throughout the API</li>
  *   <li><b>Type Safety:</b> Runtime type validation with clear error messages</li>
  *   <li><b>Exception Wrapping:</b> Reflection exceptions wrapped in clear, actionable messages</li>
  * </ul>
@@ -939,7 +939,7 @@ public final class Beans {
      * Beans.registerXmlBindingClass(JaxbBean.class);
      * Beans.isRegisteredXmlBindingClass(JaxbBean.class);   // returns true
      *
-     * Beans.registerXmlBindingClass(JaxbBean.class);   // no exception thrown
+     * Beans.registerXmlBindingClass(JaxbBean.class);       // no exception thrown
      * }</pre>
      *
      * @param cls the class to be registered for XML binding.
@@ -1003,10 +1003,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Beans.getPropNameByMethod(User.class.getMethod("getName"));           // returns "name"
-     * Beans.getPropNameByMethod(User.class.getMethod("setAge", int.class)); // returns "age"
-     * Beans.getPropNameByMethod(User.class.getMethod("getActive"));         // returns "active"
-     * Beans.getPropNameByMethod(null);                                      // throws NullPointerException
+     * Beans.getPropNameByMethod(User.class.getMethod("getName"));             // returns "name"
+     * Beans.getPropNameByMethod(User.class.getMethod("setAge", int.class));   // returns "age"
+     * Beans.getPropNameByMethod(User.class.getMethod("getActive"));           // returns "active"
+     * Beans.getPropNameByMethod(null);                                        // throws NullPointerException
      * }</pre>
      *
      * @param getSetMethod the method whose property name is to be retrieved.
@@ -1102,7 +1102,7 @@ public final class Beans {
      * @return an immutable list of property names for the specified class.
      * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
-    public static ImmutableList<String> getPropNameList(final Class<?> cls) {
+    public static ImmutableList<String> getPropNameList(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
         ImmutableList<String> propNameList = beanDeclaredPropNameListPool.get(cls);
@@ -1121,10 +1121,10 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // class User { String name; int age; Boolean active; ... }
-     * Beans.getPropNames(User.class, Arrays.asList("age"));           // returns ["name", "active"]
-     * Beans.getPropNames(User.class, Arrays.asList("age", "active")); // returns ["name"]
-     * Beans.getPropNames(User.class, (Collection<String>) null);      // returns ["name", "age", "active"]
-     * Beans.getPropNames((Class<?>) null, Arrays.asList("age"));      // throws IllegalArgumentException
+     * Beans.getPropNames(User.class, Arrays.asList("age"));             // returns ["name", "active"]
+     * Beans.getPropNames(User.class, Arrays.asList("age", "active"));   // returns ["name"]
+     * Beans.getPropNames(User.class, (Collection<String>) null);        // returns ["name", "age", "active"]
+     * Beans.getPropNames((Class<?>) null, Arrays.asList("age"));        // throws IllegalArgumentException
      * }</pre>
      *
      * @param cls the class whose property names are to be retrieved; must not be {@code null}.
@@ -1136,7 +1136,7 @@ public final class Beans {
      */
     @Deprecated
     @SuppressWarnings("rawtypes")
-    public static List<String> getPropNames(final Class<?> cls, final Collection<String> propNameToExclude) {
+    public static List<String> getPropNames(final Class<?> cls, final Collection<String> propNameToExclude) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
         if (N.isEmpty(propNameToExclude)) {
@@ -1170,7 +1170,7 @@ public final class Beans {
      * @return a list of property names for the specified class, excluding the specified property names.
      * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
-    public static List<String> getPropNames(final Class<?> cls, final Set<String> propNameToExclude) {
+    public static List<String> getPropNames(final Class<?> cls, final Set<String> propNameToExclude) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
         final ImmutableList<String> propNameList = getPropNameList(cls);
@@ -1303,8 +1303,8 @@ public final class Beans {
      *     private Date lastModified;
      * }
      *
-     * Beans.getIgnoredPropNamesForDiff(User.class);    // returns ["lastModified"]
-     * Beans.getIgnoredPropNamesForDiff(Address.class); // returns [] (no @DiffIgnore properties)
+     * Beans.getIgnoredPropNamesForDiff(User.class);      // returns ["lastModified"]
+     * Beans.getIgnoredPropNamesForDiff(Address.class);   // returns [] (no @DiffIgnore properties)
      * }</pre>
      *
      * @param cls the class for which the diff-ignored property names are to be retrieved.
@@ -1903,9 +1903,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Field> fields = Beans.getPropFields(User.class);
-     * fields.containsKey("name");          // returns true
-     * fields.get("name").getType();        // returns class java.lang.String
-     * fields.get("nonExistent");           // returns null
+     * fields.containsKey("name");     // returns true
+     * fields.get("name").getType();   // returns class java.lang.String
+     * fields.get("nonExistent");      // returns null
      * }</pre>
      *
      * @param cls the class whose property fields are to be retrieved.
@@ -2153,9 +2153,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25);
-     * String name = Beans.getPropValue(user, "name");    // returns "John"
-     * Integer age = Beans.getPropValue(user, "age");     // returns 25
-     * Beans.getPropValue(user, "nonExistent");           // throws IllegalArgumentException
+     * String name = Beans.getPropValue(user, "name");   // returns "John"
+     * Integer age = Beans.getPropValue(user, "age");    // returns 25
+     * Beans.getPropValue(user, "nonExistent");          // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the property value.
@@ -2194,8 +2194,8 @@ public final class Beans {
      * Beans.getPropValue(order, "address.city", false);  // returns "NYC"
      *
      * // Non-existent property with ignore flag
-     * Beans.getPropValue(order, "unknown", true);        // returns null
-     * Beans.getPropValue(order, "unknown", false);       // throws IllegalArgumentException
+     * Beans.getPropValue(order, "unknown", true);    // returns null
+     * Beans.getPropValue(order, "unknown", false);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the property value.
@@ -2208,7 +2208,7 @@ public final class Beans {
      * @throws IllegalArgumentException if the specified property cannot be found and {@code ignoreUnmatchedProperty} is {@code false}.
      */
     @MayReturnNull
-    public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
+    public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) throws IllegalArgumentException {
         // N.checkArgNotNull(bean, cs.bean);
 
         final Class<?> cls = bean.getClass();
@@ -2301,11 +2301,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Order order = new Order();   // id == null, address == null
+     * Order order = new Order();                            // id == null, address == null
      *
-     * Beans.getPropValueIfPresent(order, "id");           // Nullable.of(null)  -> present, value null
-     * Beans.getPropValueIfPresent(order, "unknown");      // Nullable.empty()   -> no such property
-     * Beans.getPropValueIfPresent(order, "address.city"); // Nullable.empty()   -> address is null (unreachable)
+     * Beans.getPropValueIfPresent(order, "id");             // Nullable.of(null)  -> present, value null
+     * Beans.getPropValueIfPresent(order, "unknown");        // Nullable.empty()   -> no such property
+     * Beans.getPropValueIfPresent(order, "address.city");   // Nullable.empty()   -> address is null (unreachable)
      *
      * order.setAddress(new Address("NYC"));
      * Beans.getPropValueIfPresent(order, "address.city"); // Nullable.of("NYC")
@@ -2471,9 +2471,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
-     * Beans.setPropValue(user, "name", "John");   // user is updated with name "John"
-     * Beans.setPropValue(user, "age", 25);        // user is updated with age 25
-     * Beans.setPropValue(user, "nonExistent", 1); // throws IllegalArgumentException
+     * Beans.setPropValue(user, "name", "John");     // user is updated with name "John"
+     * Beans.setPropValue(user, "age", 25);          // user is updated with age 25
+     * Beans.setPropValue(user, "nonExistent", 1);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
@@ -2501,8 +2501,8 @@ public final class Beans {
      * Beans.setPropValue(user, "name", "John", false);            // returns true
      *
      * // Ignore unmatched property
-     * Beans.setPropValue(user, "unknown", "value", true);         // returns false (not found, ignored)
-     * Beans.setPropValue(user, "unknown", "value", false);        // throws IllegalArgumentException
+     * Beans.setPropValue(user, "unknown", "value", true);    // returns false (not found, ignored)
+     * Beans.setPropValue(user, "unknown", "value", false);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
@@ -2586,10 +2586,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Beans.normalizePropName("user_name");       // returns "userName"
-     * Beans.normalizePropName("class");           // returns "clazz" (reserved keyword)
-     * Beans.normalizePropName("ID");              // returns "id"
-     * Beans.normalizePropName("address_line_1");  // returns "addressLine1"
+     * Beans.normalizePropName("user_name");        // returns "userName"
+     * Beans.normalizePropName("class");            // returns "clazz" (reserved keyword)
+     * Beans.normalizePropName("ID");               // returns "id"
+     * Beans.normalizePropName("address_line_1");   // returns "addressLine1"
      * }</pre>
      *
      * @param str the property name to be normalized; returned as-is if {@code null} or empty.
@@ -2815,7 +2815,7 @@ public final class Beans {
      *        (and cannot be resolved as a dotted nested-property path) are silently ignored; if {@code false},
      *        an {@link IllegalArgumentException} is thrown.
      * @param targetType the class of the bean to create; must be a valid bean class.
-     * @return a new bean of the specified type with properties populated from the map,
+     * @return
      *         or {@code null} if {@code map} is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if
      *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched key is encountered.
@@ -2885,7 +2885,7 @@ public final class Beans {
      *        all properties are considered. If empty, no properties are set. Properties not in this
      *        collection are left at their default values.
      * @param targetType the class of the bean to create; must be a valid bean class.
-     * @return a new bean of the specified type with the selected properties populated from the map,
+     * @return
      *         or {@code null} if {@code map} is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class,
      *         or if a selected property does not exist in the target bean class.
@@ -3078,7 +3078,7 @@ public final class Beans {
      * Beans.beanToMap(user);   // returns {name=John, age=25, active=true}
      *
      * user.setActive(null);
-     * Beans.beanToMap(user);   // returns {name=John, age=25} (null "active" omitted)
+     * Beans.beanToMap(user);            // returns {name=John, age=25} (null "active" omitted)
      *
      * Beans.beanToMap((Object) null);   // returns {} (empty map)
      * }</pre>
@@ -3133,7 +3133,7 @@ public final class Beans {
      * // Only include "name" and "age"
      * Beans.beanToMap(user, Arrays.asList("name", "age"));   // returns {name=John, age=25}
      *
-     * Beans.beanToMap(user, (Collection<String>) null);     // returns all non-null props
+     * Beans.beanToMap(user, (Collection<String>) null);      // returns all non-null props
      * }</pre>
      *
      * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
@@ -5109,7 +5109,7 @@ public final class Beans {
          * @throws IllegalArgumentException if {@code output} is {@code null}, or if a {@code select}ed property is
          *         not found in the bean class.
          */
-        public <M extends Map<String, Object>> M into(final M output) {
+        public <M extends Map<String, Object>> M into(final M output) throws IllegalArgumentException {
             N.checkArgNotNull(output, cs.output);
 
             fill(effectivePropNames(), output);
@@ -5267,9 +5267,9 @@ public final class Beans {
      * User copy = Beans.deepCopyAs(user, User.class);   // returns a populated User copy
      *
      * // Null source produces a new empty (non-null) instance
-     * User empty = Beans.deepCopyAs(null, User.class);  // returns a new empty User
+     * User empty = Beans.deepCopyAs(null, User.class);   // returns a new empty User
      *
-     * Beans.deepCopyAs(user, null);   // throws IllegalArgumentException
+     * Beans.deepCopyAs(user, null);                      // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the target object.
@@ -5333,7 +5333,7 @@ public final class Beans {
      *
      * @param <T> the type of the source bean.
      * @param sourceBean the source bean to copy; may be {@code null}.
-     * @return a new instance of the same type with all properties shallow-copied from {@code sourceBean},
+     * @return
      *         or {@code null} if {@code sourceBean} is {@code null}.
      */
     @MayReturnNull
@@ -5368,7 +5368,7 @@ public final class Beans {
      * @param sourceBean the source bean to copy; may be {@code null}.
      * @param selectPropNames the property names to copy; unselected properties retain their default values.
      *        If {@code null}, all properties are copied; an empty collection copies no properties.
-     * @return a new instance of the same type with the selected properties copied from {@code sourceBean},
+     * @return
      *         or {@code null} if {@code sourceBean} is {@code null}.
      * @throws IllegalArgumentException if a selected property is not found in the bean class.
      */
@@ -5402,7 +5402,7 @@ public final class Beans {
      * @param sourceBean the source bean to copy; may be {@code null}.
      * @param propFilter a predicate receiving the property name and value; returns {@code true} to include
      *        the property in the copy.
-     * @return a new instance of the same type with matching properties copied from {@code sourceBean},
+     * @return
      *         or {@code null} if {@code sourceBean} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
@@ -5430,8 +5430,8 @@ public final class Beans {
      * // Convert/copy to another bean type that shares property names
      * UserDTO dto = Beans.copyAs(user, UserDTO.class);   // returns UserDTO with matching properties
      *
-     * Beans.copyAs(null, User.class);          // returns a new empty (non-null) instance
-     * Beans.copyAs(user, (Class<User>) null);  // throws IllegalArgumentException
+     * Beans.copyAs(null, User.class);                    // returns a new empty (non-null) instance
+     * Beans.copyAs(user, (Class<User>) null);            // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -6606,7 +6606,7 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code bean} is {@code null} or not a valid bean class,
      *         or if a property name is not found in the bean.
      */
-    public static void randomize(final Object bean, final Collection<String> propNamesToFill) {
+    public static void randomize(final Object bean, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
         N.checkBeanClass(bean.getClass());
 
@@ -6842,7 +6842,7 @@ public final class Beans {
      *         and each value is the corresponding property value (which may be {@code null}).
      * @throws IllegalArgumentException if {@code bean} is {@code null}.
      */
-    public static Stream<Map.Entry<String, Object>> stream(final Object bean) {
+    public static Stream<Map.Entry<String, Object>> stream(final Object bean) throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
@@ -6876,7 +6876,8 @@ public final class Beans {
      *         containing only those properties for which {@code propFilter} returned {@code true}.
      * @throws IllegalArgumentException if {@code bean} is {@code null}.
      */
-    public static Stream<Map.Entry<String, Object>> stream(final Object bean, final BiPredicate<? super String, Object> propFilter) {
+    public static Stream<Map.Entry<String, Object>> stream(final Object bean, final BiPredicate<? super String, Object> propFilter)
+            throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());

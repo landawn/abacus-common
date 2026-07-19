@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -60,7 +60,6 @@ public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, 
      * @param u the object second argument of type {@code T}
      * @return the function result of type {@code R}
      */
-    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     R apply(long t, T u);
 

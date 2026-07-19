@@ -940,6 +940,25 @@ public class EntryStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapClosesMappedEntryStream() {
+        final EntryStream<String, Integer> mappedStream = EntryStream.of("mapped", 1);
+
+        assertEquals(1, EntryStream.of("source", 1).flatMap(entry -> mappedStream).count());
+        assertThrows(IllegalStateException.class, () -> mappedStream.count());
+    }
+
+    @Test
+    public void testFlatMapKeyAndValueCloseMappedStreams() {
+        final Stream<String> mappedKeys = Stream.of("mapped-key");
+        final Stream<Integer> mappedValues = Stream.of(2);
+
+        assertEquals(1, EntryStream.of("source", 1).flatMapKey(key -> mappedKeys).count());
+        assertEquals(1, EntryStream.of("source", 1).flatMapValue(value -> mappedValues).count());
+        assertThrows(IllegalStateException.class, () -> mappedKeys.count());
+        assertThrows(IllegalStateException.class, () -> mappedValues.count());
+    }
+
+    @Test
     public void testFlatMap_BiFunction() {
         List<Entry<String, Integer>> result = EntryStream.of("a", 2)
                 .flatMap((k, v) -> EntryStream.of(Stream.range(0, v).map(i -> new AbstractMap.SimpleEntry<>(k + i, i))))
@@ -5842,6 +5861,15 @@ public class EntryStreamTest extends TestBase {
                 () -> EntryStream.of(m).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toList());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> EntryStream.of(m).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
+    }
+
+    @Test
+    public void testReusableEntryHashCodeDoesNotMarkEntryAsConsumed() {
+        EntryStream.ReusableEntry<String, String> entry = new EntryStream.ReusableEntry<>();
+        entry.set("key1", "value1");
+
+        assertEquals("key1".hashCode() ^ "value1".hashCode(), entry.hashCode());
+        assertThrows(IllegalStateException.class, () -> entry.set("key2", "value2"));
     }
 
 }

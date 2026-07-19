@@ -22,8 +22,8 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated element must not be {@code null}.
- * This annotation documents and enforces null-safety contracts, helping prevent
- * {@code NullPointerException}s and making code more robust and self-documenting.
+ * This is a declarative contract: the annotation itself does not inject a runtime check.
+ * Implementations must still validate inputs or otherwise ensure non-{@code null} results.
  *
  * <p><b>When applied to parameters:</b></p>
  * <ul>
@@ -41,28 +41,27 @@ import java.lang.annotation.Target;
  *
  * <p><b>When applied to constructors:</b></p>
  * <ul>
- *   <li>Documents null-safety requirements for constructor parameters.</li>
- *   <li>Indicates that the constructor validates against {@code null} inputs.</li>
+ *   <li>Documents a constructor-wide non-null contract.</li>
+ *   <li>Annotate individual parameters as well when their precise contracts need to be exposed.</li>
  * </ul>
  *
  * <p><b>Tool support:</b></p>
  * <ul>
- *   <li>IDEs can warn about potential null pointer issues.</li>
+ *   <li>IDEs can warn about potential {@code null} pointer issues.</li>
  *   <li>Static analysis tools can verify null-safety contracts.</li>
- *   <li>Some frameworks may perform runtime {@code null} checks based on this annotation.</li>
+ *   <li>Frameworks may choose to perform runtime checks, but this library does not do so merely
+ *       because the annotation is present.</li>
  * </ul>
  *
  * <p><b>Framework usage:</b> abacus uses this marker on parameters of widely-used utilities such
- * as {@code com.landawn.abacus.util.N}, {@code Beans}, and {@code CommonUtil}, and on the
- * {@code requireNonNull}-style precondition methods in {@code com.landawn.abacus.parser.ParserUtil}.
+ * as {@code com.landawn.abacus.util.N}, {@code Beans}, {@code CommonUtil}, and {@code Converters}.
  * It pairs naturally with {@link MayReturnNull} on the return side of an API.</p>
  *
  * <p><b>Name collision:</b> the simple name {@code NotNull} collides with the widely used
  * {@code javax.annotation.Nonnull}, {@code jakarta.annotation.Nonnull},
  * {@code org.jetbrains.annotations.NotNull}, and {@code jakarta.validation.constraints.NotNull}.
- * abacus reflects only on <i>its own</i> {@code com.landawn.abacus.annotation.NotNull}; an
- * accidentally imported third-party {@code NotNull} is invisible to the framework. When relying on
- * framework-side handling, ensure the import resolves to this annotation.</p>
+ * These declarations are not interchangeable; when documenting an abacus API contract, ensure the
+ * import resolves to this annotation.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

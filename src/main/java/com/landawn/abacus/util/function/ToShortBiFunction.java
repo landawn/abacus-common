@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Throwables;
  * @param <U> the type of the second argument to the function
  */
 @FunctionalInterface
-public interface ToShortBiFunction<T, U> extends Throwables.ToShortBiFunction<T, U, RuntimeException> {
+public interface ToShortBiFunction<T, U> extends Throwables.ToShortBiFunction<T, U, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments and returns a short result.
      *

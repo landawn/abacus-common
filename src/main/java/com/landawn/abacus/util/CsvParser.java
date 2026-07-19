@@ -194,7 +194,7 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements
+     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
      */
     public CsvParser(final char separator, final char quoteChar) {
         this(separator, quoteChar, DEFAULT_ESCAPE_CHARACTER);
@@ -211,8 +211,8 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements
-     * @param escape the character to use for escaping a separator or quote
+     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
      */
     public CsvParser(final char separator, final char quoteChar, final char escape) {
         this(separator, quoteChar, escape, DEFAULT_STRICT_QUOTES);
@@ -230,8 +230,8 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements
-     * @param escape the character to use for escaping a separator or quote
+     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      */
     public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes) {
@@ -250,8 +250,8 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements
-     * @param escape the character to use for escaping a separator or quote
+     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
@@ -274,8 +274,8 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements
-     * @param escape the character to use for escaping a separator or quote
+     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
@@ -482,7 +482,7 @@ public class CsvParser {
      * @throws ParsingException if the line contains an unterminated quoted field
      * @throws ArrayIndexOutOfBoundsException if {@code output} is too small to hold all parsed fields
      */
-    public void parseLineToArray(final String nextLine, final String[] output) throws ParsingException {
+    public void parseLineToArray(final String nextLine, final String[] output) throws IllegalArgumentException, ParsingException {
         N.checkArgNotNull(output, "output");
 
         parseLine(nextLine, output);
@@ -532,26 +532,30 @@ public class CsvParser {
             for (; i < len; i++) {
                 final char c = nextLine.charAt(i);
 
-                if (c == escape) {
+                if (escape != NULL_CHARACTER && c == escape) {
                     if (isNextCharacterEscapable(nextLine, inQuotes(inQuotes), i)) {
                         sb.append(nextLine.charAt(++i));
                     } else {
                         sb.append(c); // escape character is not followed by a quote or escape, so append it.
                     }
-                } else if (c == quoteChar) {
-                    if (isNextCharacterEscapedQuote(nextLine, inQuotes(inQuotes), i)) {
+                } else if (quoteChar != NULL_CHARACTER && c == quoteChar) {
+                    if (ignoreQuotations) {
+                        // In this mode quote characters do not create quoted regions. Preserve only
+                        // embedded quotes in unquoted text, matching the normal unquoted-field behavior.
+                        if (!strictQuotes && !sb.isEmpty() && i > 0 && nextLine.charAt(i - 1) != separator && i < len - 1
+                                && nextLine.charAt(i + 1) != separator) {
+                            sb.append(c);
+                        }
+                    } else if (isNextCharacterEscapedQuote(nextLine, inQuotes, i)) {
                         sb.append(nextLine.charAt(++i));
-                    } else {
-                        // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
-                        boolean isEmbedded = !strictQuotes && !sb.isEmpty() //
-                                && i > 0 //not on the beginning of the line //NOSONAR
-                                && nextLine.charAt(i - 1) != separator //not at the beginning of an escape sequence
-                                && i < len - 1 && nextLine.charAt(i + 1) != separator; //not at the end of an escape sequence
+                    } else if (inQuotes) {
+                        // A non-escaped quote always closes a quoted region. The old neighbor-based
+                        // heuristic misclassified a closing quote followed by unquoted suffix text
+                        // (for example, "clean"dirty) as an embedded quote and left the field open.
+                        quoted = true;
+                        inQuotes = false;
 
-                        // A quote inside a quoted field followed by only whitespace up to the next
-                        // separator (or end of line) is the CLOSING quote, not an embedded one:
-                        // a,"b" ,c must parse like its end-of-line twin a,b,"c" (see the repair below).
-                        if (isEmbedded && inQuotes(inQuotes) && ignoreLeadingWhitespace) {
+                        if (ignoreLeadingWhitespace) {
                             int j = i + 1;
 
                             while (j < len && nextLine.charAt(j) != separator && Character.isWhitespace(nextLine.charAt(j))) {
@@ -559,17 +563,16 @@ public class CsvParser {
                             }
 
                             if (j >= len || nextLine.charAt(j) == separator) {
-                                isEmbedded = false;
-                                i = j - 1; // consume the whitespace between the closing quote and the separator
+                                i = j - 1; // consume whitespace between the closing quote and separator/end
                             }
                         }
-
-                        if (isEmbedded) {
-                            sb.append(c);
-                        } else {
-                            quoted = true;
-                            inQuotes = !inQuotes;
-                        }
+                    } else if (!strictQuotes && !sb.isEmpty() && i > 0 && nextLine.charAt(i - 1) != separator) {
+                        // Quotes in an unquoted field are data, not the start of a quoted region:
+                        // a,bc"d"ef,g -> [a, bc"d"ef, g]. This also keeps a terminal quote literal.
+                        sb.append(c);
+                    } else {
+                        quoted = true;
+                        inQuotes = true;
                     }
                 } else if (c == separator && !inQuotes(inQuotes)) {
                     if (!quoted && ignoreLeadingWhitespace) {
@@ -605,14 +608,7 @@ public class CsvParser {
 
             // line is done - check status
             if (inQuotes(inQuotes)) {
-                int lastQuoteIndex = sb.lastIndexOf(String.valueOf(quoteChar));
-
-                if (lastQuoteIndex >= 0 && Strings.isBlank(sb.substring(lastQuoteIndex + 1))) {
-                    // Tested with: new CsvParser().parseLine("a,  b  ,  \"c\" ");
-                    sb.setLength(lastQuoteIndex); // remove the last quote character
-                } else {
-                    throw new ParsingException("Un-terminated quoted field at end of CSV line: " + nextLine);
-                }
+                throw new ParsingException("Un-terminated quoted field at end of CSV line: " + nextLine);
             }
 
             if (!quoted && ignoreLeadingWhitespace) {

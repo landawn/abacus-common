@@ -17,6 +17,23 @@ import com.landawn.abacus.type.Type;
 
 public class TypeReferenceTest extends TestBase {
 
+    private abstract static class SecondTypeReference<A, B> extends TypeReference<B> {
+        // Used to verify that TypeReference follows the declared mapping to B rather than
+        // blindly selecting the first type argument (A) from the immediate superclass.
+    }
+
+    private abstract static class NestedTypeReference<T> extends SecondTypeReference<String, List<T>> {
+        // Exercises substitution inside a nested ParameterizedType across two named levels.
+    }
+
+    private abstract static class GenericArrayTypeReference<T> extends TypeReference<T[]> {
+        // Exercises a type variable used as a generic-array component.
+    }
+
+    private abstract static class WildcardTypeReference<T> extends TypeReference<List<? extends T>> {
+        // Exercises a type variable used as a wildcard bound.
+    }
+
     public static class TestBean {
         private String value;
 
@@ -100,6 +117,51 @@ public class TypeReferenceTest extends TestBase {
 
         Assertions.assertNotNull(type);
         Assertions.assertEquals(GenericBean.class, type.javaType());
+    }
+
+    @Test
+    public void testTypeReferenceResolvesReorderedIntermediateTypeParameters() {
+        final TypeReference<Integer> ref = new SecondTypeReference<String, Integer>() {
+        };
+
+        Assertions.assertEquals(Integer.class, ref.javaType());
+        Assertions.assertEquals(Integer.class, ref.type().javaType());
+    }
+
+    @Test
+    public void testTypeReferenceResolvesNestedIntermediateTypeParameters() {
+        final TypeReference<List<Integer>> ref = new NestedTypeReference<Integer>() {
+        };
+
+        Assertions.assertTrue(ref.javaType() instanceof ParameterizedType);
+        final ParameterizedType parameterizedType = (ParameterizedType) ref.javaType();
+        Assertions.assertEquals(List.class, parameterizedType.getRawType());
+        Assertions.assertArrayEquals(new java.lang.reflect.Type[] { Integer.class }, parameterizedType.getActualTypeArguments());
+        Assertions.assertEquals(List.class, ref.type().javaType());
+    }
+
+    @Test
+    public void testTypeReferenceResolvesIntermediateGenericArrayAndWildcardBounds() {
+        final TypeReference<String[]> arrayRef = new GenericArrayTypeReference<String>() {
+        };
+        final TypeReference<List<? extends Number>> wildcardRef = new WildcardTypeReference<Number>() {
+        };
+
+        Assertions.assertEquals(String[].class, arrayRef.javaType());
+        final ParameterizedType listType = (ParameterizedType) wildcardRef.javaType();
+        final java.lang.reflect.WildcardType wildcard = (java.lang.reflect.WildcardType) listType.getActualTypeArguments()[0];
+        Assertions.assertArrayEquals(new java.lang.reflect.Type[] { Number.class }, wildcard.getUpperBounds());
+        Assertions.assertEquals(List.class, wildcardRef.type().javaType());
+    }
+
+    @Test
+    public void testTypeReferenceRejectsUnresolvedTypeVariableWithIllegalArgumentException() {
+        Assertions.assertThrows(IllegalArgumentException.class, TypeReferenceTest::createUnresolvedTypeReference);
+    }
+
+    private static <T> void createUnresolvedTypeReference() {
+        new TypeReference<T>() {
+        };
     }
 
     @Test

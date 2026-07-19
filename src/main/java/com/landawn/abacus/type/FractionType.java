@@ -14,6 +14,10 @@
 
 package com.landawn.abacus.type;
 
+import java.io.IOException;
+
+import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Fraction;
 import com.landawn.abacus.util.Strings;
 
@@ -140,5 +144,23 @@ public class FractionType extends AbstractType<Fraction> {
     @Override
     public Fraction valueOf(final String str) {
         return Strings.isEmpty(str) ? null : Fraction.of(str);
+    }
+
+    /**
+     * Serializes a fraction using its string form. A {@code null} fraction is written as {@code 0} when
+     * {@code writeNullNumberAsZero} is enabled; otherwise it is written as {@code null}.
+     *
+     * @param writer the destination writer
+     * @param x the fraction to serialize; may be {@code null}
+     * @param config the serialization configuration; may be {@code null}
+     * @throws IOException if writing fails
+     */
+    @Override
+    public void serializeTo(final CharacterWriter writer, final Fraction x, final JsonXmlSerConfig<?> config) throws IOException {
+        if (x == null && config != null && config.isWriteNullNumberAsZero()) {
+            writer.write('0');
+        } else {
+            super.serializeTo(writer, x, config);
+        }
     }
 }

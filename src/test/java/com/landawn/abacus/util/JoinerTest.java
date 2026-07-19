@@ -3743,6 +3743,24 @@ public class JoinerTest extends AbstractTest {
     // --- regression tests for 2026-06-10 deep-review fixes ---
 
     @Test
+    public void testAppendStringBuilderUsesConfiguredFormatting() {
+        final StringBuilder value = new StringBuilder("  value  ");
+
+        assertEquals("value", Joiner.with(",").trimBeforeAppend().append(value).toString());
+        assertEquals("value", Joiner.with(",").stripBeforeAppend().append(value).toString());
+        assertEquals(Joiner.with(",").trimBeforeAppend().append((CharSequence) value).toString(), Joiner.with(",").trimBeforeAppend().append(value).toString());
+    }
+
+    @Test
+    public void testAppendMapEntryDoesNotFormatConfiguredNullTextAsElementText() {
+        final String nullText = "  NIL  ";
+        final Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleImmutableEntry<>(null, null);
+
+        assertEquals("  NIL  =  NIL  ", Joiner.with(",", "=").trimBeforeAppend().useForNull(nullText).appendEntry(entry).toString());
+        assertEquals("  NIL  ", Joiner.with(",", "=").trimBeforeAppend().useForNull(nullText).appendEntry((Map.Entry<?, ?>) null).toString());
+    }
+
+    @Test
     public void testReuseBufferObserversAfterToString() {
         // regression: after a reuse-mode toString() recycled the buffer, the observers reported
         // empty/zero even though appending continued correctly from the retained content
@@ -3793,5 +3811,25 @@ public class JoinerTest extends AbstractTest {
 
         // normal repeats unchanged
         assertEquals("x,x,x,x,x,x,x,x,x,x", Joiner.with(",").repeat("x", 10).toString());
+    }
+
+    @Test
+    public void testRepeatUsesSameLiteralNullTextAtEveryCount() {
+        final String nullText = "  NIL  ";
+
+        assertEquals("  NIL  |  NIL  ", Joiner.with("|").trimBeforeAppend().useForNull(nullText).repeat((String) null, 2).toString());
+        assertEquals(Strings.repeat(nullText, 10, "|"), Joiner.with("|").trimBeforeAppend().useForNull(nullText).repeat((String) null, 10).toString());
+    }
+
+    @Test
+    public void testRepeatZeroDoesNotEvaluateObject() {
+        final Object value = new Object() {
+            @Override
+            public String toString() {
+                throw new AssertionError("zero repetitions must not evaluate the value");
+            }
+        };
+
+        assertEquals("", Joiner.with(",").repeat(value, 0).toString());
     }
 }

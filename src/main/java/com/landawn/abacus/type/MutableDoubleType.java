@@ -195,8 +195,8 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
 
     /**
      * Writes the double value of a {@link MutableDouble} to a {@link CharacterWriter}.
-     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
-     * The {@code config} parameter is not used for double values.
+     * Writes {@code null} when {@code x} is {@code null}, or zero when
+     * {@link JsonXmlSerConfig#isWriteNullNumberAsZero()} is enabled.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
@@ -207,7 +207,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableDouble} to write, may be {@code null}
-     * @param config the serialization configuration (unused for double values)
+     * @param config the serialization configuration controlling null-number output; may be {@code null}
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

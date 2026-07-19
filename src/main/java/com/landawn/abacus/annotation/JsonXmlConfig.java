@@ -168,7 +168,7 @@ public @interface JsonXmlConfig {
      * <p><b>Common exclusion policies:</b></p>
      * <ul>
      *   <li>{@link Exclusion#NULL} (default): Excludes fields with {@code null} values</li>
-     *   <li>{@link Exclusion#DEFAULT}: Excludes {@code null} values and primitive type default values (0, {@code false}, etc.)</li>
+     *   <li>{@link Exclusion#DEFAULT}: Excludes {@code null} values and primitive type default values (0, false, etc.)</li>
      *   <li>{@link Exclusion#NONE}: Includes all fields</li>
      * </ul>
      *

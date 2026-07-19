@@ -136,7 +136,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code ShortIterator} over the specified range, or an empty iterator if the validated range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -335,8 +335,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of((short)1, (short)2);
-     * Short boxed = iter.next();          // returns Short.valueOf(1) — avoid this
-     * short primitive = iter.nextShort(); // returns 2 — prefer this
+     * Short boxed = iter.next();            // returns Short.valueOf(1) — avoid this
+     * short primitive = iter.nextShort();   // returns 2 — prefer this
      * }</pre>
      *
      * @return the next {@code short} element as a boxed {@link Short} object
@@ -622,16 +622,18 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedShort} objects with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if the source has another element after the index reaches {@link Long#MAX_VALUE}
      * @see #indexed()
      */
     @Beta
-    public ObjIterator<IndexedShort> indexed(final long startIndex) {
+    public ObjIterator<IndexedShort> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final ShortIterator iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -640,7 +642,24 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
             @Override
             public IndexedShort next() {
-                return IndexedShort.of(iter.nextShort(), idx++);
+                if (indexOverflow) {
+                    if (!iter.hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    throw new ArithmeticException("long overflow");
+                }
+
+                final short value = iter.nextShort();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return IndexedShort.of(value, currentIndex);
             }
         };
     }
@@ -660,7 +679,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) throws IllegalArgumentException {
         super.forEachRemaining(action);
     }
 
@@ -704,8 +723,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each (index, value) pair; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
-     *         causing the index to overflow
+     * @throws IllegalStateException if the source has another element after index
+     *         {@link Integer#MAX_VALUE} has already been emitted
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {

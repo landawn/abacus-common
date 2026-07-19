@@ -14,7 +14,6 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -99,11 +98,11 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default Predicate<T> and(final java.util.function.Predicate<? super T> other) {
-        N.checkArgNotNull(other, cs.other);
+        java.util.Objects.requireNonNull(other, cs.other);
         return t -> test(t) && other.test(t);
     }
 
@@ -130,11 +129,11 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default Predicate<T> or(final java.util.function.Predicate<? super T> other) {
-        N.checkArgNotNull(other, cs.other);
+        java.util.Objects.requireNonNull(other, cs.other);
         return t -> test(t) || other.test(t);
     }
 

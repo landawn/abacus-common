@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -161,6 +162,111 @@ public class SingleValueTypeTest extends TestBase {
         }
     }
 
+    public static class BoxedCreatorValue {
+        private final int value;
+
+        private BoxedCreatorValue(final int value) {
+            this.value = value;
+        }
+
+        @JsonXmlValue
+        public int value() {
+            return value;
+        }
+
+        @JsonXmlCreator
+        public static BoxedCreatorValue of(final Integer value) {
+            return new BoxedCreatorValue(value);
+        }
+    }
+
+    public static class InvalidValueMethod {
+        @JsonXmlValue
+        public String value(final String suffix) {
+            return suffix;
+        }
+
+        @JsonXmlCreator
+        public static InvalidValueMethod of(final String value) {
+            return new InvalidValueMethod();
+        }
+    }
+
+    public static class DuplicateValueMembers {
+        @JsonXmlValue
+        public String first;
+
+        @JsonXmlValue
+        public String second;
+
+        @JsonXmlCreator
+        public static DuplicateValueMembers of(final String value) {
+            return new DuplicateValueMembers();
+        }
+    }
+
+    public static class DuplicateCreatorMethods {
+        @JsonXmlValue
+        public String value() {
+            return "value";
+        }
+
+        @JsonXmlCreator
+        public static DuplicateCreatorMethods first(final String value) {
+            return new DuplicateCreatorMethods();
+        }
+
+        @JsonXmlCreator
+        public static DuplicateCreatorMethods second(final String value) {
+            return new DuplicateCreatorMethods();
+        }
+    }
+
+    public static class StaticValueField {
+        @JsonXmlValue
+        public static String value;
+
+        @JsonXmlCreator
+        public static StaticValueField of(final String value) {
+            return new StaticValueField();
+        }
+    }
+
+    public static class InstanceCreatorMethod {
+        @JsonXmlValue
+        public String value() {
+            return "value";
+        }
+
+        @JsonXmlCreator
+        public InstanceCreatorMethod create(final String value) {
+            return new InstanceCreatorMethod();
+        }
+    }
+
+    public static class JacksonDisabledCreatorMethod {
+        private final String value;
+
+        private JacksonDisabledCreatorMethod(final String value) {
+            this.value = value;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String value() {
+            return value;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public static JacksonDisabledCreatorMethod of(final String value) {
+            return new JacksonDisabledCreatorMethod(value);
+        }
+
+        @com.fasterxml.jackson.annotation.JsonCreator(mode = com.fasterxml.jackson.annotation.JsonCreator.Mode.DISABLED)
+        public static JacksonDisabledCreatorMethod disabled(final String value) {
+            throw new AssertionError("Disabled creator must not be selected");
+        }
+    }
+
     // Enum-backed type (not object type, but an enum itself)
     public enum TestEnum {
         A, B, C
@@ -243,6 +349,7 @@ public class SingleValueTypeTest extends TestBase {
     @Test
     public void testValueOf() {
         assertEquals(new TestValue("test"), singleValueType.valueOf("test"));
+        assertNull(singleValueType.valueOf(null));
     }
 
     @Test
@@ -251,6 +358,7 @@ public class SingleValueTypeTest extends TestBase {
         AnnotatedValue result = type.valueOf("world");
         assertNotNull(result);
         assertEquals("world", result.getValue());
+        assertNull(type.valueOf(null));
     }
 
     @Test
@@ -312,6 +420,20 @@ public class SingleValueTypeTest extends TestBase {
         AnnotatedValue result = type.get(rs, "col");
         assertNotNull(result);
         assertEquals("world", result.getValue());
+    }
+
+    @Test
+    public void testGet_SQLNullDoesNotInvokeCreators() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn(null);
+        when(rs.getString("col")).thenReturn(null);
+
+        assertNull(singleValueType.get(rs, 1));
+        assertNull(singleValueType.get(rs, "col"));
+
+        AnnotatedSingleValueType annotatedType = new AnnotatedSingleValueType();
+        assertNull(annotatedType.get(rs, 1));
+        assertNull(annotatedType.get(rs, "col"));
     }
 
     @Test
@@ -497,5 +619,52 @@ public class SingleValueTypeTest extends TestBase {
         assertNull(tuple._1);
         assertNull(tuple._2);
         assertNull(tuple._3);
+    }
+
+    @Test
+    public void testAnnotatedCreatorAcceptsBoxedValueType() {
+        final SingleValueType<BoxedCreatorValue> type = new SingleValueType<>(BoxedCreatorValue.class) {
+        };
+
+        assertEquals("42", type.stringOf(BoxedCreatorValue.of(42)));
+        assertEquals(42, type.valueOf("42").value());
+    }
+
+    @Test
+    public void testInvalidJsonValueMethodRejectedAtConstruction() {
+        assertThrows(IllegalArgumentException.class, () -> new SingleValueType<>(InvalidValueMethod.class) {
+        });
+    }
+
+    @Test
+    public void testDuplicateJsonValueMembersRejectedAtConstruction() {
+        assertThrows(IllegalArgumentException.class, () -> new SingleValueType<>(DuplicateValueMembers.class) {
+        });
+    }
+
+    @Test
+    public void testDuplicateJsonCreatorMethodsRejectedAtConstruction() {
+        assertThrows(IllegalArgumentException.class, () -> new SingleValueType<>(DuplicateCreatorMethods.class) {
+        });
+    }
+
+    @Test
+    public void testStaticJsonValueFieldRejectedAtConstruction() {
+        assertThrows(IllegalArgumentException.class, () -> new SingleValueType<>(StaticValueField.class) {
+        });
+    }
+
+    @Test
+    public void testInstanceJsonCreatorMethodRejectedAtConstruction() {
+        assertThrows(IllegalArgumentException.class, () -> new SingleValueType<>(InstanceCreatorMethod.class) {
+        });
+    }
+
+    @Test
+    public void testDisabledJacksonCreatorIsIgnored() {
+        final SingleValueType<JacksonDisabledCreatorMethod> type = new SingleValueType<>(JacksonDisabledCreatorMethod.class) {
+        };
+
+        assertEquals("value", type.valueOf("value").value());
     }
 }

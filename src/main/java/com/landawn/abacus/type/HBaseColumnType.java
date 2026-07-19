@@ -35,6 +35,19 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private static final char _SEPARATOR = ':';
 
+    /**
+     * Prefix for the versioned extension to the legacy {@code version:value} format.
+     * It is deliberately specific so ordinary legacy values, including {@code null}
+     * and values beginning with a backslash, continue through the element type unchanged.
+     */
+    private static final String ENCODING_PREFIX = "\\~abacus-hbase-column:v1~";
+
+    private static final String NULL_VALUE = ENCODING_PREFIX + "N";
+
+    private static final String NULL_REPRESENTATION = ENCODING_PREFIX + "R";
+
+    private static final String ESCAPED_VALUE_PREFIX = ENCODING_PREFIX + "V";
+
     /** The type name constant for HBaseColumn type identification. */
     public static final String HBASE_COLUMN = "HBaseColumn";
 
@@ -120,7 +133,17 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
     /**
      * Serializes an {@link HBaseColumn} to the {@code "version:value"} string format,
      * where {@code version} is the column's timestamp/version number and {@code value}
-     * is the element type's string representation of the stored value.
+     * is the element type's string representation of the stored value. For compatibility,
+     * ordinary values retain the legacy format without escaping. Nulls and otherwise
+     * ambiguous representations use a reserved, versioned extension beginning with
+     * {@code \~abacus-hbase-column:v1~}. A non-null representation beginning with that
+     * prefix is escaped by the extension so it can still round-trip.
+     *
+     * <p>Legacy payloads are otherwise preserved. The unavoidable compatibility exception
+     * is a pre-existing payload equal to {@code \~abacus-hbase-column:v1~N} or
+     * {@code \~abacus-hbase-column:v1~R}, or beginning with
+     * {@code \~abacus-hbase-column:v1~V}; those forms collide with the reserved extension.
+     * Newly emitted values beginning with the reserved prefix are escaped automatically.</p>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
@@ -134,22 +157,41 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      */
     @Override
     public String stringOf(final HBaseColumn<T> x) {
-        return x == null ? null : x.version() + SEPARATOR + elementType.stringOf(x.value());
+        if (x == null) {
+            return null;
+        }
+
+        if (x.value() == null) {
+            return x.version() + SEPARATOR + NULL_VALUE;
+        }
+
+        final String value = elementType.stringOf(x.value());
+
+        if (value == null) {
+            return x.version() + SEPARATOR + NULL_REPRESENTATION;
+        }
+
+        return x.version() + SEPARATOR + (value.startsWith(ENCODING_PREFIX) ? ESCAPED_VALUE_PREFIX + value : value);
     }
 
     /**
      * Deserializes a {@code "version:value"} string into an {@link HBaseColumn} instance.
      * The part before the first {@code ':'} is parsed as the {@code long} version/timestamp,
      * and the remainder is parsed by the element type handler.
+     * Legacy payloads are passed unchanged to the element type handler, including the
+     * literal {@code null} and backslash-prefixed values. Only the reserved, versioned
+     * extension emitted by {@link #stringOf(HBaseColumn)} is interpreted by this class.
+     * Pre-existing payloads matching one of the reserved extension forms documented on
+     * {@code stringOf} are the sole compatibility exception.
      *
      * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
      * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse in {@code "version:value"} format; may be {@code null} or empty
-     * @return a new {@link HBaseColumn} with the parsed version and value,
+     * @return the deserialized column value
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the string does not contain a {@code ':'} separator
+     * @throws IllegalArgumentException if the string has no {@code ':'} separator or its version prefix is not a valid {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(HBaseColumn)
      */
@@ -166,7 +208,18 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
         }
 
         final long version = Long.parseLong(str.substring(0, index));
-        final T value = elementType.valueOf(str.substring(index + 1));
+        final String valueText = str.substring(index + 1);
+        final T value;
+
+        if (NULL_VALUE.equals(valueText)) {
+            value = null;
+        } else if (NULL_REPRESENTATION.equals(valueText)) {
+            value = elementType.valueOf((String) null);
+        } else if (valueText.startsWith(ESCAPED_VALUE_PREFIX)) {
+            value = elementType.valueOf(valueText.substring(ESCAPED_VALUE_PREFIX.length()));
+        } else {
+            value = elementType.valueOf(valueText);
+        }
 
         return new HBaseColumn<>(value, version);
     }

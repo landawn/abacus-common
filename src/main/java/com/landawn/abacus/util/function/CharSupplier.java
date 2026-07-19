@@ -41,9 +41,11 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      */
     CharSupplier ZERO = () -> 0;
     /**
-     * A supplier that returns random char values.
-     * Each invocation returns a new random char value that is a defined Unicode code point
-     * (i.e., {@link Character#isDefined(char)} returns {@code true} for the returned char).
+     * A supplier that returns random {@code char} values.
+     * Each invocation draws a UTF-16 code unit for which {@link Character#isDefined(char)} returns
+     * {@code true}. Because a {@code char} is a single UTF-16 code unit, the result is not necessarily
+     * a complete Unicode code point (for example, it may be a surrogate).
+     * Successive values are not guaranteed to be distinct.
      * This supplier is useful for generating random characters for testing, simulation, or data generation purposes.
      *
      * <p><b>Usage Examples:</b></p>

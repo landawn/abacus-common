@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableShort;
 
@@ -141,6 +142,16 @@ public class MutableShortTypeTest extends TestBase {
         assertDoesNotThrow(() -> {
             mutableShortType.serializeTo(characterWriter, null, null);
         });
+    }
+
+    @Test
+    public void testSerializeToWithNullHonorsWriteNullNumberAsZero() throws IOException {
+        JsonXmlSerConfig<?> config = Mockito.mock(JsonXmlSerConfig.class);
+        Mockito.when(config.isWriteNullNumberAsZero()).thenReturn(true);
+
+        mutableShortType.serializeTo(characterWriter, null, config);
+
+        Mockito.verify(characterWriter).write((short) 0);
     }
 
     @Test

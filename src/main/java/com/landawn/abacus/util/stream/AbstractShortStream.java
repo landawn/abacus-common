@@ -97,6 +97,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         final ShortConsumer action = it -> rateLimiter.acquire();
@@ -111,6 +113,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream delay(final Duration delay) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(delay, cs.delay);
 
         final long millis = delay.toMillis();
@@ -137,7 +141,9 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream debounce(Duration duration) {
+    public ShortStream debounce(Duration duration) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
@@ -147,7 +153,7 @@ abstract class AbstractShortStream extends ShortStream {
 
         final ShortIteratorEx iter = iteratorEx();
 
-        return newStream(new ShortIteratorEx() {
+        return newStream(new ShortIteratorEx() { //NOSONAR
             private final long durationMillis = duration.toMillis();
             private short prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
@@ -246,6 +252,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream mapPartial(final ShortFunction<OptionalShort> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_SHORT).mapToShort(Fn.GET_AS_SHORT));
@@ -589,7 +597,7 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream top(final int n) throws IllegalStateException {
+    public ShortStream top(final int n) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 
@@ -703,6 +711,8 @@ abstract class AbstractShortStream extends ShortStream {
                     a[i] = elements[cursor - i - 1];
                 }
 
+                cursor = fromIndex;
+
                 return a;
             }
 
@@ -790,6 +800,8 @@ abstract class AbstractShortStream extends ShortStream {
                 for (int i = cnt; i < len; i++) {
                     a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
+
+                cnt = len;
 
                 return a;
             }
@@ -917,6 +929,8 @@ abstract class AbstractShortStream extends ShortStream {
                 for (int i = 0; i < cursor; i++) {
                     a[i] = sortedArray[cursor - i - 1];
                 }
+
+                cursor = 0;
 
                 return a;
             }
@@ -1243,7 +1257,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream) throws E {
+            final Collector<? super Short, ?, D> downstream) throws IllegalStateException, E {
         assertNotClosed();
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
@@ -1395,9 +1409,15 @@ abstract class AbstractShortStream extends ShortStream {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}
+     */
     @Override
-    public Joiner joinTo(final Joiner joiner) throws IllegalStateException {
+    public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(joiner, cs.joiner);
 
         try {
             @SuppressWarnings("resource")

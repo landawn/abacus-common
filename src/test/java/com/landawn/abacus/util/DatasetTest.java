@@ -3566,13 +3566,16 @@ public class DatasetTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Should throw exception for mixed collection types")
+    @DisplayName("Should add rows with mixed supported representations")
     public void testAddRowsWithMixedTypes() {
         Collection<Object> mixedRows = Arrays.asList(new Object[] { 6, "Array", 45, 90000.0 }, Arrays.asList(7, "List", 32, 75000.0));
 
-        @SuppressWarnings("unchecked")
-        Collection<?> rows = mixedRows;
-        assertThrows(ClassCastException.class, () -> dataset.addRows(rows));
+        final int originalSize = dataset.size();
+        dataset.addRows(mixedRows);
+
+        assertEquals(originalSize + 2, dataset.size());
+        assertEquals("Array", dataset.get(originalSize, 1));
+        assertEquals("List", dataset.get(originalSize + 1, 1));
     }
 
     @Test

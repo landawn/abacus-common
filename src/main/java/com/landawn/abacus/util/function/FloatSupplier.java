@@ -36,7 +36,8 @@ public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException
     FloatSupplier ZERO = () -> 0;
     /**
      * A supplier that returns random float values between 0.0 (inclusive) and 1.0 (exclusive).
-     * The random values are generated using {@code Util.RAND_FLOAT.nextFloat()}.
+     * The random values are generated using {@code Util.RAND_FLOAT.nextFloat()}; successive
+     * values are not guaranteed to be distinct.
      */
     FloatSupplier RANDOM = Util.RAND_FLOAT::nextFloat;
 

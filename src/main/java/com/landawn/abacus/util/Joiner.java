@@ -37,7 +37,7 @@ import com.landawn.abacus.util.u.Optional;
  * maps, and Java beans with extensive customization options for output formatting.
  *
  * <p>Joiner excels at creating formatted strings for logging, output generation, CSV creation, and
- * any scenario requiring controlled string concatenation. It supports automatic null handling,
+ * any scenario requiring controlled string concatenation. It supports automatic {@code null} handling,
  * whitespace trimming, conditional appending, and efficient buffer management for high-performance
  * string building operations with minimal memory allocation overhead.</p>
  *
@@ -133,8 +133,8 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>{@link #setEmptyValue(CharSequence)} - Value returned when no elements are appended</li>
  *   <li>{@link #trimBeforeAppend()} - Remove leading and trailing characters handled by {@link String#trim()}</li>
  *   <li>{@link #stripBeforeAppend()} - Remove leading and trailing Unicode whitespace</li>
- *   <li>{@link #skipNulls()} - Skip null elements instead of converting to text</li>
- *   <li>{@link #useForNull(String)} - Custom text for null values (default: "null")</li>
+ *   <li>{@link #skipNulls()} - Skip {@code null} elements instead of converting to text</li>
+ *   <li>{@link #useForNull(String)} - Custom text for {@code null} values (default: "null")</li>
  *   <li>{@link #reuseBuffer()} - Enable buffer reuse for performance optimization</li>
  * </ul>
  *
@@ -175,7 +175,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs Java 8 Collectors.joining():</b> More flexible with prefix/suffix and null handling</li>
+ *   <li><b>vs Java 8 Collectors.joining():</b> More flexible with prefix/suffix and {@code null} handling</li>
  *   <li><b>vs StringBuilder:</b> Higher-level API with automatic separator management</li>
  *   <li><b>vs String.join():</b> More configuration options and type support</li>
  *   <li><b>vs Google Guava Joiner:</b> Similar API with additional bean and map support</li>
@@ -192,10 +192,10 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Best Practices:</b>
  * <ul>
  *   <li>Use try-with-resources when enabling buffer reuse for automatic cleanup</li>
- *   <li>Configure null handling and trimming before appending elements</li>
+ *   <li>Configure {@code null} handling and trimming before appending elements</li>
  *   <li>Use appropriate factory methods to minimize configuration code</li>
  *   <li>Consider using {@link #mapIfNotEmpty(Function)} for conditional processing</li>
- *   <li>Cache Joiner configurations for repeated use patterns</li>
+ *   <li>Create a fresh instance for each result; a Joiner is a mutable accumulator, not a reusable configuration template</li>
  * </ul>
  *
  * <p><b>Advanced Features:</b>
@@ -209,10 +209,10 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li>Throws {@link IllegalArgumentException} for null factory method parameters</li>
- *   <li>Throws {@link IllegalStateException} when using closed joiner instances</li>
+ *   <li>Throws {@link IllegalArgumentException} for {@code null} factory method parameters</li>
+ *   <li>Throws {@link IllegalStateException} when an append operation needs a builder after the Joiner is closed</li>
  *   <li>Throws {@link IndexOutOfBoundsException} for invalid range operations</li>
- *   <li>Handles {@link IOException} in {@link #appendTo(Appendable)} operations</li>
+ *   <li>Propagates {@link IOException} from {@link #appendTo(Appendable)} operations</li>
  * </ul>
  *
  * <p><b>Constants:</b>
@@ -360,9 +360,9 @@ public final class Joiner implements Closeable {
      * Joiner.with("-").appendAll(new int[]{1, 2, 3}).toString();             // returns: "1-2-3"
      * }</pre>
      *
-     * @param separator the delimiter to use between joined elements, must not be null.
+     * @param separator the delimiter to use between joined elements, must not be {@code null}.
      * @return a new Joiner instance with the specified separator.
-     * @throws IllegalArgumentException if separator is null.
+     * @throws IllegalArgumentException if separator is {@code null}.
      */
     public static Joiner with(final CharSequence separator) {
         return new Joiner(separator);
@@ -378,10 +378,10 @@ public final class Joiner implements Closeable {
      * Joiner.with("; ", ": ").appendEntries(map).toString();           // returns: "a: 1; b: 2"
      * }</pre>
      *
-     * @param separator the delimiter to use between joined elements, must not be null.
-     * @param keyValueDelimiter the delimiter to use between keys and values, must not be null.
+     * @param separator the delimiter to use between joined elements, must not be {@code null}.
+     * @param keyValueDelimiter the delimiter to use between keys and values, must not be {@code null}.
      * @return a new Joiner instance with the specified separators.
-     * @throws IllegalArgumentException if separator or keyValueDelimiter is null.
+     * @throws IllegalArgumentException if separator or keyValueDelimiter is {@code null}.
      */
     public static Joiner with(final CharSequence separator, final CharSequence keyValueDelimiter) {
         return new Joiner(separator, keyValueDelimiter);
@@ -402,11 +402,11 @@ public final class Joiner implements Closeable {
      * Joiner.with(" | ", "{", "}").appendAll(new int[]{1, 2, 3}).toString();           // returns: "{1 | 2 | 3}"
      * }</pre>
      *
-     * @param separator the delimiter to use between joined elements, must not be null.
-     * @param prefix the string to prepend to the result, must not be null.
-     * @param suffix the string to append to the result, must not be null.
+     * @param separator the delimiter to use between joined elements, must not be {@code null}.
+     * @param prefix the string to prepend to the result, must not be {@code null}.
+     * @param suffix the string to append to the result, must not be {@code null}.
      * @return a new Joiner instance with the specified separator, prefix, and suffix.
-     * @throws IllegalArgumentException if any parameter is null.
+     * @throws IllegalArgumentException if any parameter is {@code null}.
      */
     public static Joiner with(final CharSequence separator, final CharSequence prefix, final CharSequence suffix) {
         return new Joiner(separator, prefix, suffix);
@@ -422,12 +422,12 @@ public final class Joiner implements Closeable {
      * // Returns: "{a=1, b=2}"
      * }</pre>
      *
-     * @param separator the delimiter to use between joined elements, must not be null.
-     * @param keyValueDelimiter the delimiter to use between keys and values, must not be null.
-     * @param prefix the string to prepend to the result, must not be null.
-     * @param suffix the string to append to the result, must not be null.
+     * @param separator the delimiter to use between joined elements, must not be {@code null}.
+     * @param keyValueDelimiter the delimiter to use between keys and values, must not be {@code null}.
+     * @param prefix the string to prepend to the result, must not be {@code null}.
+     * @param suffix the string to append to the result, must not be {@code null}.
      * @return a new Joiner instance with all specified formatting options.
-     * @throws IllegalArgumentException if any parameter is null.
+     * @throws IllegalArgumentException if any parameter is {@code null}.
      */
     public static Joiner with(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix) {
         return new Joiner(separator, keyValueDelimiter, prefix, suffix);
@@ -444,9 +444,9 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").setEmptyValue("[]").appendAll(new int[0]).toString();   // returns: "[]"
      * }</pre>
      *
-     * @param emptyValue the value to return when no elements have been added, must not be null.
+     * @param emptyValue the value to return when no elements have been added, must not be {@code null}.
      * @return this Joiner instance for method chaining.
-     * @throws IllegalArgumentException if emptyValue is null.
+     * @throws IllegalArgumentException if emptyValue is {@code null}.
      */
     public Joiner setEmptyValue(final CharSequence emptyValue) throws IllegalArgumentException {
         this.emptyValue = N.checkArgNotNull(emptyValue, "The empty value must not be null").toString();
@@ -748,8 +748,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a StringBuilder to the joiner.
      * If the StringBuilder is {@code null}, it will be handled according to the skipNulls and useForNull settings.
-     * Note: The contents of the StringBuilder are appended directly without trimming or stripping even if
-     * trimBeforeAppend or stripBeforeAppend is enabled.
+     * If trimBeforeAppend or stripBeforeAppend is enabled, the contents are processed in the same way as
+     * any other {@link CharSequence}; overload selection does not change formatting behavior.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -764,6 +764,8 @@ public final class Joiner implements Closeable {
         if (element != null || !skipNulls) {
             if (element == null) {
                 prepareBuilder().append(nullText);
+            } else if (trimBeforeAppend || stripBeforeAppend) {
+                prepareBuilder().append(format(element));
             } else {
                 prepareBuilder().append(element);
             }
@@ -2287,7 +2289,7 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param key the key to append
-     * @param value the Object value to append; {@code null} is rendered using the configured null text
+     * @param value the Object value to append; {@code null} is rendered using the configured {@code null} text
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final Object value) {
@@ -2303,8 +2305,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a {@code Map.Entry} to the joiner.
      * The entry's key and value are separated by the configured key-value separator.
-     * A {@code null} entry is appended as the configured null text. A {@code null} key or
-     * value is rendered using the configured null text.
+     * A {@code null} entry is appended as the configured {@code null} text. A {@code null} key or
+     * value is rendered using the configured {@code null} text.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2318,11 +2320,15 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final Map.Entry<?, ?> entry) {
         if (entry == null) {
-            //noinspection resource
-            append(nullText);
+            prepareBuilder().append(nullText);
         } else {
-            //noinspection resource
-            appendEntry(toString(entry.getKey()), toString(entry.getValue()));
+            final StringBuilder sb = prepareBuilder().append(toString(entry.getKey()));
+
+            if (!isEmptyKeyValueDelimiter) {
+                sb.append(keyValueDelimiter);
+            }
+
+            sb.append(toString(entry.getValue()));
         }
 
         return this;
@@ -2771,7 +2777,7 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged (after the {@code filter}
-     * non-null check).</p>
+     * {@code non-null} check).</p>
      *
      * @param bean the bean object whose properties to append; may be {@code null}
      * @param filter the bi-predicate to test property names and values; only properties that pass are appended; must not be {@code null}
@@ -2833,7 +2839,7 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").repeat("Hello", 3).toString();   // returns: "Hello, Hello, Hello"
      * }</pre>
      *
-     * @param str the string to repeat; {@code null} is rendered as the configured null text
+     * @param str the string to repeat; {@code null} is rendered as the configured {@code null} text
      * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
      * @throws IllegalArgumentException if {@code n} is negative
@@ -2841,17 +2847,11 @@ public final class Joiner implements Closeable {
     public Joiner repeat(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        final String newString = toString(str);
-
-        if (n < 10) {
-            for (int i = 0; i < n; i++) {
-                //noinspection resource
-                append(newString);
-            }
-        } else {
-            // Bypass append(): newString is already formatted element-wise, and re-formatting the
-            // whole joined block would let trimBeforeAppend/stripBeforeAppend eat whitespace separators.
-            prepareBuilder().append(Strings.repeat(newString, n, separator));
+        if (n > 0) {
+            // Format exactly once, as append(String) would. In particular, a configured null token
+            // is literal text and must not be trimmed on one repeat path but preserved on another.
+            final String formatted = str == null ? nullText : format(str);
+            prepareBuilder().append(Strings.repeat(formatted, n, separator));
         }
 
         return this;
@@ -2868,13 +2868,19 @@ public final class Joiner implements Closeable {
      * Joiner.with("-").repeat(num, 3).toString();   // returns: "42-42-42"
      * }</pre>
      *
-     * @param obj the object to repeat; {@code null} is rendered as the configured null text
+     * @param obj the object to repeat; {@code null} is rendered as the configured {@code null} text
      * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
      * @throws IllegalArgumentException if {@code n} is negative
      */
     public Joiner repeat(final Object obj, final int n) {
-        return repeat(toString(obj), n);
+        N.checkArgNotNegative(n, cs.n);
+
+        if (n > 0) {
+            prepareBuilder().append(Strings.repeat(toString(obj), n, separator));
+        }
+
+        return this;
     }
 
     /**
@@ -2944,9 +2950,10 @@ public final class Joiner implements Closeable {
      * unless no elements have been added in which case, the
      * {@code prefix + suffix} or the {@code emptyValue} characters are returned.
      *
-     * <p>The underlying {@code StringBuilder} will be recycled after this method is called
-     * if {@code reuseBuffer} is set to {@code true}, and should not continue
-     * to be used with this instance.
+     * <p>The underlying {@code StringBuilder} is recycled after this method is called when
+     * {@code reuseBuffer} is enabled. The materialized content is retained, so later calls remain
+     * stable and additional elements can still be appended. Buffer reuse is one-shot; call
+     * {@link #reuseBuffer()} again before a later append to pool that later builder as well.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3082,7 +3089,8 @@ public final class Joiner implements Closeable {
     /**
      * Closes this Joiner and releases any system resources associated with it.
      * If the Joiner is already closed then invoking this method has no effect.
-     * After closing, the Joiner should not be used for further operations.
+     * After closing, no more content may be appended. Materialize the result before closing: when
+     * buffer reuse is enabled, closing releases any pooled builder and its unmaterialized content.
      * This method is synchronized to ensure thread safety.
      *
      * <p><b>Usage Examples:</b></p>

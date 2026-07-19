@@ -25,14 +25,14 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * Internal utility class for the abacus-common library.
+ * Internal utility class for abacus-core.
  *
  * <p><strong>WARNING:</strong> This class is for internal use only. Do not use any methods
  * in this class directly. The API is subject to change without notice and may break
  * your code in future versions.</p>
  *
  * <p>This class contains various internal constants and helper methods used throughout
- * the abacus-common library for performance optimization and internal operations.</p>
+ * abacus-core for performance optimization and internal operations.</p>
  *
  * @see Internal
  */
@@ -103,7 +103,9 @@ public final class InternalUtil {
      *
      * <p>This method uses reflection to access the internal {@code elementData} field of {@link ArrayList}
      * for performance optimization. It returns {@code null} if {@code c} is {@code null}, is not an
-     * {@code ArrayList} instance (subclasses are not accepted), or if the reflective access fails.</p>
+     * {@code ArrayList} instance (subclasses are not accepted), or if the reflective access fails.
+     * The returned array may be larger than the list's logical size and must not be modified or
+     * retained by callers.</p>
      *
      * @param c the collection to get the internal array from; may be {@code null}
      * @return the internal backing array if accessible, {@code null} otherwise

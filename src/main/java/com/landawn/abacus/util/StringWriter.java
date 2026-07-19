@@ -267,18 +267,20 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Writes a portion of a string to this writer.
      * Characters are written starting at offset {@code off} and
-     * writing {@code len} characters.
+     * writing {@code len} characters. If {@code str} is {@code null}, it is treated as the
+     * four-character sequence {@code "null"}, matching {@link StringBuilder#append(CharSequence, int, int)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.write("Hello, World!", 7, 5);   // Writes "World"
      * }</pre>
      *
-     * @param str the string containing data to write
+     * @param str the string containing data to write; may be {@code null}
      * @param off the index of the first character to write
      * @param len the number of characters to write
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
-     *         or {@code off + len} is greater than {@code str.length()}
+     *         or {@code off + len} is greater than the effective sequence length (four when
+     *         {@code str} is {@code null})
      */
     @Override
     public void write(final String str, final int off, final int len) {

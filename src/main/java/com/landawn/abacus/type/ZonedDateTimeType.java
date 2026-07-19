@@ -112,21 +112,21 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
     /**
      * Converts a ZonedDateTime instance to its string representation.
      * <p>
-     * This method formats the ZonedDateTime using a format equivalent to
-     * {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}, including the UTC offset
-     * (for example {@code "2023-10-15T10:30:00+01:00"}, or with a {@code 'Z'} suffix when the offset is UTC).
-     * If the input is {@code null}, this method returns {@code null}.
+     * This method uses the standard {@link ZonedDateTime#toString()} representation, including both
+     * the UTC offset and the region zone ID when one is present (for example,
+     * {@code "2023-10-15T10:30:00+01:00[Europe/Paris]"}). If the input is {@code null}, this method
+     * returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
-     * String str = type.stringOf(zdt);   // e.g. "2023-10-15T10:30:00+01:00"
+     * String str = type.stringOf(zdt);   // e.g. "2023-10-15T10:30:00+01:00[Europe/Paris]"
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed by {@link #valueOf(String)}.
-     * It preserves the local date-time, offset, and instant, but not a region {@link java.time.ZoneId}; parsing
-     * this form may produce a {@link java.time.ZoneOffset} zone.</p>
+     * It preserves the local date-time, offset, instant, and region {@link java.time.ZoneId}, so the parsed value
+     * remains subject to the same regional time-zone rules.</p>
      *
      * @param x the ZonedDateTime instance to convert to string
      * @return the ISO 8601 string representation, or {@code null} if the input is null
@@ -135,7 +135,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @Override
     public String stringOf(final ZonedDateTime x) {
-        return (x == null) ? null : iso8601TimestampDTF.format(x);
+        return (x == null) ? null : x.toString();
     }
 
     /**
@@ -202,10 +202,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * }</pre>
      *
      * <p>This method parses the string produced by {@code stringOf} back into the same local date-time, offset,
-     * and instant, though the original region {@link java.time.ZoneId} is not preserved by the {@code stringOf}
-     * representation. It additionally accepts the output of {@link ZonedDateTime#toString()} — including the
-     * region-zone suffix shown above, which {@code stringOf} itself does not emit — so values written with
-     * {@code toString()} round-trip as well.</p>
+     * instant, and region {@link java.time.ZoneId}. Because {@code stringOf} delegates to
+     * {@link ZonedDateTime#toString()}, values written with {@code toString()} round-trip as well.</p>
      *
      * @param str the string to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or {@code null} if the string is {@code null}, empty, or the literal "null"
@@ -394,6 +392,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, ZonedDateTime.now());   // Appends formatted date/time
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes the configured JSON/XML
@@ -428,9 +427,9 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      * <ul>
      *   <li>LONG format: writes the epoch milliseconds as a number</li>
-     *   <li>ISO_8601_DATE_TIME: writes in ISO 8601 date-time format</li>
-     *   <li>ISO_8601_TIMESTAMP: writes in ISO 8601 timestamp format</li>
-     *   <li>Default: uses the ISO 8601 timestamp format</li>
+     *   <li>ISO_8601_DATE_TIME: writes an offset date-time at whole-second precision</li>
+     *   <li>ISO_8601_TIMESTAMP: writes an offset date-time at exactly millisecond precision</li>
+     *   <li>Default: delegates to {@link #stringOf(ZonedDateTime)}, preserving the region zone and available precision</li>
      * </ul>
      * <p>
      * The output may be quoted based on the configuration settings, except for LONG format.
@@ -442,6 +441,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * JsonSerConfig config = JsonSerConfig.create();
      * type.serializeTo(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the configured serialized form of
      * {@code x} to the {@code CharacterWriter}. {@link DateTimeFormat#LONG} writes epoch milliseconds without quotes;

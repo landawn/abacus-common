@@ -19,11 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -89,6 +92,12 @@ public class Tuple2TypeTest extends TestBase {
     }
 
     @Test
+    public void test_valueOf_RejectsWrongArity() {
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"only-one\"]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"one\",\"two\",\"unexpected\"]"));
+    }
+
+    @Test
     public void test_valueOf_ValidJson() {
         Tuple2<String, String> t = Tuple.of("hello", "world");
         String json = type.stringOf(t);
@@ -138,6 +147,29 @@ public class Tuple2TypeTest extends TestBase {
         assertNotNull(result);
         assertTrue(result.startsWith("["));
         assertTrue(result.contains("x"));
+    }
+
+    @Test
+    public void test_appendTo_PropagatesWriterIOException() {
+        final IOException failure = new IOException("write failure");
+        final Writer writer = new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw failure;
+            }
+
+            @Override
+            public void flush() {
+                // no-op
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+
+        assertSame(failure, assertThrows(IOException.class, () -> type.appendTo(writer, Tuple.of("x", "y"))));
     }
 
     @Test

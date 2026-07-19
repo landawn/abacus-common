@@ -33,7 +33,7 @@ import java.security.SecureRandom;
  *
  * <p>Key features:</p>
  * <ul>
- *   <li>Cryptographically secure nonce generation using SHA1PRNG</li>
+ *   <li>Cryptographically secure nonce generation using the active JCA provider</li>
  *   <li>SHA-1 digest computation (default) and configurable algorithms via overloads (e.g. SHA-256)</li>
  *   <li>WS-Security compliant password digest creation</li>
  *   <li>Thread-safe implementation for concurrent environments</li>
@@ -64,23 +64,13 @@ import java.security.SecureRandom;
  */
 public final class WSSecurityUtil {
 
-    private static final String RNG_ALGORITHM = "SHA1PRNG";
-
     private static final String HASH_ALGORITHM = "SHA-1";
 
     /**
      * A cached pseudo-random number generator NB. On some JVMs, caching this random number generator is required to
      * overcome punitive overhead.
      */
-    private static final SecureRandom random;
-
-    static {
-        try {
-            random = SecureRandom.getInstance(RNG_ALGORITHM);
-        } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException("Failed to initialize SecureRandom with algorithm: " + RNG_ALGORITHM, e);
-        }
-    }
+    private static final SecureRandom random = new SecureRandom();
 
     private WSSecurityUtil() {
         // Complete
@@ -91,7 +81,7 @@ public final class WSSecurityUtil {
 
     /**
      * Generates a cryptographically secure nonce (number used once) of the specified length
-     * using the SHA1PRNG algorithm. The nonce is suitable for use in security protocols where
+     * using the platform's provider-default {@link SecureRandom} algorithm. The nonce is suitable for use in security protocols where
      * unpredictable random values are required, such as WS-Security authentication headers.
      *
      * <p>This method relies on the thread-safety of the cached {@link SecureRandom} instance
@@ -214,6 +204,20 @@ public final class WSSecurityUtil {
     }
 
     /**
+     * Digests three logical chunks in order without first combining them into another byte array.
+     * Besides avoiding a second in-memory copy of password material, incremental updates avoid an
+     * integer overflow when the combined input length is greater than {@link Integer#MAX_VALUE}.
+     */
+    private static byte[] generateDigest(final String algorithm, final byte[] first, final byte[] second, final byte[] third) throws NoSuchAlgorithmException {
+        final MessageDigest md = MessageDigest.getInstance(algorithm);
+        md.update(first);
+        md.update(second);
+        md.update(third);
+
+        return md.digest();
+    }
+
+    /**
      * Creates a WS-Security compliant password digest by computing the SHA-1 hash of
      * the concatenated nonce, created timestamp, and password, then encoding the result
      * in Base64 format. This implements the password digest mechanism defined in the
@@ -226,7 +230,8 @@ public final class WSSecurityUtil {
      *
      * <p>The three components are concatenated in the specific order: nonce, then created,
      * then password. This order is defined by the WS-Security specification and must be
-     * strictly followed for interoperability.</p>
+     * strictly followed for interoperability. The implementation feeds the three arrays to the
+     * digest incrementally, so it does not retain an additional combined copy of the password.</p>
      *
      * <p><b>Security Note:</b> This method uses SHA-1, which is cryptographically broken for
      * collision resistance. For new applications or when the WS-Security peer supports it,
@@ -268,18 +273,11 @@ public final class WSSecurityUtil {
             throw new IllegalArgumentException("Password cannot be null");
         }
 
-        final byte[] b4 = new byte[nonce.length + created.length + password.length];
-        int offset = 0;
-        N.copy(nonce, 0, b4, offset, nonce.length);
-        offset += nonce.length;
-
-        N.copy(created, 0, b4, offset, created.length);
-        offset += created.length;
-
-        N.copy(password, 0, b4, offset, password.length);
-
-        final byte[] digestBytes = generateDigest(b4);
-        return Strings.base64Encode(digestBytes);
+        try {
+            return Strings.base64Encode(generateDigest(HASH_ALGORITHM, nonce, created, password));
+        } catch (final NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error in generating digest", e);
+        }
     }
 
     /**
@@ -291,6 +289,9 @@ public final class WSSecurityUtil {
      * <pre>{@code
      * PasswordDigest = Base64(Hash(nonce + created + password))
      * }</pre>
+     *
+     * <p>The arrays are supplied to the digest incrementally in that order; no combined array
+     * containing a second copy of the password is allocated.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -326,18 +327,11 @@ public final class WSSecurityUtil {
             throw new IllegalArgumentException("Algorithm cannot be null");
         }
 
-        final byte[] b4 = new byte[nonce.length + created.length + password.length];
-        int offset = 0;
-        N.copy(nonce, 0, b4, offset, nonce.length);
-        offset += nonce.length;
-
-        N.copy(created, 0, b4, offset, created.length);
-        offset += created.length;
-
-        N.copy(password, 0, b4, offset, password.length);
-
-        final byte[] digestBytes = generateDigest(b4, algorithm);
-        return Strings.base64Encode(digestBytes);
+        try {
+            return Strings.base64Encode(generateDigest(algorithm, nonce, created, password));
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException("Unsupported algorithm: " + algorithm, e);
+        }
     }
 
     /**
@@ -410,7 +404,7 @@ public final class WSSecurityUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String nonce = Base64.getEncoder().encodeToString(WSSecurityUtil.generateNonce(16));
+     * String nonce = "text-nonce"; // This overload hashes the nonce text verbatim.
      * String created = Instant.now().toString();
      * String password = "secretPassword";
      *

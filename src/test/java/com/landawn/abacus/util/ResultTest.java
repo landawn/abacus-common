@@ -38,6 +38,7 @@ public class ResultTest extends TestBase {
         Assertions.assertEquals("default", result.orElseIfFailure("default"));
 
         Assertions.assertThrows(IOException.class, () -> result.orElseThrow());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Result.failure(null));
     }
 
     @Test

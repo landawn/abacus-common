@@ -272,6 +272,7 @@ public class LongPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         LongPredicate instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.LongPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.LongPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.or((java.util.function.LongPredicate) null));
     }
 }

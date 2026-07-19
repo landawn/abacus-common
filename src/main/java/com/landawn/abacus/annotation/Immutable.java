@@ -20,8 +20,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated type or method is immutable, meaning its state cannot be modified
- * after creation (for types) or that it does not modify any state (for methods).
+ * Indicates that the annotated type is immutable or that the annotated method returns an immutable
+ * value. It does not, by itself, claim that a method is pure or that it has no other side effects.
  *
  * <p><b>Name collision:</b> this annotation is {@code com.landawn.abacus.annotation.Immutable}.
  * It is distinct from {@code com.landawn.abacus.util.Immutable}, which is a utility namespace,
@@ -32,27 +32,30 @@ import java.lang.annotation.Target;
  *
  * <p><b>When applied to types (classes/interfaces):</b></p>
  * <ul>
- *   <li>All fields should be final and initialized during construction.</li>
+ *   <li>The object's own value structure cannot be changed through its public API.</li>
  *   <li>No setter methods or other mutator methods should exist.</li>
  *   <li>Methods should return new instances rather than modifying the current instance.</li>
- *   <li>Any mutable fields should be properly encapsulated (defensive copying).</li>
- *   <li>The class should be final to prevent subclassing that could add mutability.</li>
+ *   <li>Mutable implementation state that is part of the annotated value should be encapsulated.</li>
+ *   <li>Implementations should prevent subclasses from exposing mutability; making a concrete
+ *       implementation final is one common approach.</li>
  * </ul>
+ *
+ * <p>This is a shallow structural contract. An annotated value may contain mutable elements or be
+ * an unmodifiable view backed by mutable storage when that behavior is documented. The annotation
+ * therefore does not by itself promise deep immutability, thread safety, safe publication, or a
+ * stable hash code.</p>
  *
  * <p><b>When applied to methods:</b></p>
  * <ul>
- *   <li>The method does not modify any instance fields.</li>
- *   <li>The method does not call any mutating methods.</li>
- *   <li>The method is essentially a pure function with no side effects.</li>
+ *   <li>The returned value is immutable (or an immutable view, as documented by the method).</li>
+ *   <li>Callers must not infer that the method is side-effect-free solely from this annotation.</li>
  * </ul>
  *
  * <p><b>Benefits of immutability:</b></p>
  * <ul>
- *   <li>Thread-safety without synchronization.</li>
- *   <li>Safe to share between multiple contexts.</li>
+ *   <li>Structurally immutable APIs reduce accidental mutation.</li>
  *   <li>Easier to reason about and debug.</li>
- *   <li>Can be cached and reused safely.</li>
- *   <li>Ideal for use as Map keys or Set elements.</li>
+ *   <li>Values whose elements and backing storage are also immutable can be safely cached and shared.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -74,11 +77,9 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <p>This annotation has {@link RetentionPolicy#CLASS} retention: it serves as documentation
- * and is consumed by static analysis tools (e.g., SpotBugs's {@code @ThreadSafe}/{@code Immutable}
- * checks) to verify immutability constraints. The abacus framework itself applies it on many
- * value-style classes — for example {@code com.landawn.abacus.util.Seid} and various stream
- * support types — to signal "shareable across threads without external synchronization".</p>
+ * <p>This annotation has {@link RetentionPolicy#CLASS} retention and serves as API documentation.
+ * A static-analysis tool may consume it if explicitly configured to understand this annotation,
+ * but it is not the same declaration as a tool-specific {@code @Immutable} annotation.</p>
  *
  * @see Mutable
  */

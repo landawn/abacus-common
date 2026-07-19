@@ -44,18 +44,10 @@ public class CharSupplierTest extends TestBase {
     }
 
     @Test
-    public void testRandomProducesDifferentValues() {
-        boolean foundDifferent = false;
-        char first = CharSupplier.RANDOM.getAsChar();
-
+    public void testRandomProducesDefinedValues() {
         for (int i = 0; i < 100; i++) {
-            if (CharSupplier.RANDOM.getAsChar() != first) {
-                foundDifferent = true;
-                break;
-            }
+            assertTrue(Character.isDefined(CharSupplier.RANDOM.getAsChar()));
         }
-
-        assertTrue(foundDifferent);
     }
 
     @Test
@@ -87,8 +79,8 @@ public class CharSupplierTest extends TestBase {
         char first = CharSupplier.RANDOM.getAsChar();
         char second = CharSupplier.RANDOM.getAsChar();
 
-        assertTrue(first >= Character.MIN_VALUE && first <= Character.MAX_VALUE);
-        assertTrue(second >= Character.MIN_VALUE && second <= Character.MAX_VALUE);
+        assertTrue(Character.isDefined(first));
+        assertTrue(Character.isDefined(second));
     }
 
     @Test

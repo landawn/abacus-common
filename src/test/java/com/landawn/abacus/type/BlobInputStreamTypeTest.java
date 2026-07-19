@@ -1,13 +1,19 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -32,7 +38,7 @@ public class BlobInputStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testGet_ResultSet_Int() throws SQLException {
+    public void testGet_ResultSet_Int() throws SQLException, IOException {
         ResultSet rs = mock(ResultSet.class);
         Blob blob = mock(Blob.class);
         InputStream expectedStream = new ByteArrayInputStream(new byte[] { 1, 2, 3 });
@@ -42,9 +48,11 @@ public class BlobInputStreamTypeTest extends TestBase {
 
         InputStream result = type.get(rs, 1);
 
-        assertEquals(expectedStream, result);
+        assertArrayEquals(new byte[] { 1, 2, 3 }, result.readAllBytes());
+        result.close();
         verify(rs).getBlob(1);
         verify(blob).getBinaryStream();
+        verify(blob).free();
     }
 
     @Test
@@ -59,7 +67,7 @@ public class BlobInputStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testGet_ResultSet_String() throws SQLException {
+    public void testGet_ResultSet_String() throws SQLException, IOException {
         ResultSet rs = mock(ResultSet.class);
         Blob blob = mock(Blob.class);
         InputStream expectedStream = new ByteArrayInputStream(new byte[] { 1, 2, 3 });
@@ -69,9 +77,11 @@ public class BlobInputStreamTypeTest extends TestBase {
 
         InputStream result = type.get(rs, "columnName");
 
-        assertEquals(expectedStream, result);
+        assertArrayEquals(new byte[] { 1, 2, 3 }, result.readAllBytes());
+        result.close();
         verify(rs).getBlob("columnName");
         verify(blob).getBinaryStream();
+        verify(blob).free();
     }
 
     @Test
@@ -169,15 +179,18 @@ public class BlobInputStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testBlob2InputStream() throws SQLException {
+    public void testBlob2InputStream() throws SQLException, IOException {
         Blob blob = mock(Blob.class);
         InputStream expectedStream = new ByteArrayInputStream(new byte[] { 1, 2, 3 });
         when(blob.getBinaryStream()).thenReturn(expectedStream);
 
         InputStream result = BlobInputStreamType.blobToInputStream(blob);
 
-        assertEquals(expectedStream, result);
+        assertArrayEquals(new byte[] { 1, 2, 3 }, result.readAllBytes());
+        result.close();
+        result.close();
         verify(blob).getBinaryStream();
+        verify(blob, times(1)).free();
     }
 
     @Test
@@ -185,6 +198,39 @@ public class BlobInputStreamTypeTest extends TestBase {
         InputStream result = BlobInputStreamType.blobToInputStream(null);
 
         Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testBlob2InputStream_FreesBlobWhenOpeningFails() throws SQLException {
+        final Blob blob = mock(Blob.class);
+        final SQLException openFailure = new SQLException("open");
+        final SQLException freeFailure = new SQLException("free");
+        when(blob.getBinaryStream()).thenThrow(openFailure);
+        doThrow(freeFailure).when(blob).free();
+
+        final SQLException thrown = assertThrows(SQLException.class, () -> BlobInputStreamType.blobToInputStream(blob));
+
+        assertSame(openFailure, thrown);
+        assertSame(freeFailure, thrown.getSuppressed()[0]);
+        verify(blob).free();
+    }
+
+    @Test
+    public void testBlob2InputStream_FreesBlobWhenDelegateCloseFails() throws SQLException, IOException {
+        final Blob blob = mock(Blob.class);
+        final InputStream delegate = mock(InputStream.class);
+        final IOException closeFailure = new IOException("close");
+        final SQLException freeFailure = new SQLException("free");
+        when(blob.getBinaryStream()).thenReturn(delegate);
+        doThrow(closeFailure).when(delegate).close();
+        doThrow(freeFailure).when(blob).free();
+
+        final InputStream result = BlobInputStreamType.blobToInputStream(blob);
+        final IOException thrown = assertThrows(IOException.class, result::close);
+
+        assertSame(closeFailure, thrown);
+        assertSame(freeFailure, thrown.getSuppressed()[0]);
+        verify(blob).free();
     }
 
 }

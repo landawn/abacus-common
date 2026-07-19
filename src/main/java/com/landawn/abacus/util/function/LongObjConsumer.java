@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -73,7 +73,6 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * @param t the first {@code long} input argument
      * @param u the second input argument of type {@code T}
      */
-    // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
     void accept(long t, T u);
 

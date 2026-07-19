@@ -504,6 +504,14 @@ public class ImmutableSortedMapTest extends TestBase {
     }
 
     @Test
+    public void testCopyOf_emptySortedMapRetainsComparator() {
+        Comparator<String> comparator = Comparator.reverseOrder();
+        SortedMap<String, Integer> sortedMap = new TreeMap<>(comparator);
+
+        assertSame(comparator, ImmutableSortedMap.copyOf(sortedMap).comparator());
+    }
+
+    @Test
     public void testCopyOf_Empty() {
         ImmutableSortedMap<String, Integer> map = ImmutableSortedMap.copyOf(new TreeMap<>());
         Assertions.assertTrue(map.isEmpty());

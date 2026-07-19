@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.HBaseColumn;
+import com.landawn.abacus.util.u.Optional;
 
 public class HBaseColumnTypeTest extends TestBase {
 
@@ -73,6 +74,39 @@ public class HBaseColumnTypeTest extends TestBase {
         HBaseColumn<String> result = hbaseColumnType.valueOf(input);
         assertNotNull(result);
         assertEquals(12345L, result.version());
+    }
+
+    @Test
+    public void testRoundTripNullAndReservedStringValues() {
+        assertRoundTrip(null, 1L);
+        assertRoundTrip("null", 2L);
+        assertRoundTrip("\\null", 3L);
+        assertRoundTrip("\\value", 4L);
+        assertRoundTrip("\\~abacus-hbase-column:v1~N", 5L);
+    }
+
+    @Test
+    public void testLegacyNullAndBackslashPayloadsRemainUnchanged() {
+        assertEquals("null", hbaseColumnType.valueOf("6:null").value());
+        assertEquals("\\value", hbaseColumnType.valueOf("7:\\value").value());
+    }
+
+    @Test
+    public void testRoundTripNonNullValueWithNullStringRepresentation() {
+        final HBaseColumnType<Optional<String>> type = (HBaseColumnType<Optional<String>>) createType("HBaseColumn<Optional<String>>");
+        final HBaseColumn<Optional<String>> column = new HBaseColumn<>(Optional.empty(), 8L);
+
+        final HBaseColumn<Optional<String>> roundTripped = type.valueOf(type.stringOf(column));
+
+        assertNotNull(roundTripped.value());
+        assertTrue(roundTripped.value().isEmpty());
+    }
+
+    private void assertRoundTrip(final String value, final long version) {
+        final HBaseColumn<String> roundTripped = hbaseColumnType.valueOf(hbaseColumnType.stringOf(new HBaseColumn<>(value, version)));
+
+        assertEquals(version, roundTripped.version());
+        assertEquals(value, roundTripped.value());
     }
 
     @Test

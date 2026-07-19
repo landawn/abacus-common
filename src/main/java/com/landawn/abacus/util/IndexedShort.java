@@ -123,7 +123,7 @@ public final class IndexedShort extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) index + value * 31;
+        return 31 * Short.hashCode(value) + hashLong(index);
     }
 
     /**

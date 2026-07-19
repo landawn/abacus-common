@@ -153,6 +153,14 @@ public class ImmutableNavigableMapTest extends TestBase {
     }
 
     @Test
+    public void testCopyOf_EmptySortedMapRetainsComparator() {
+        Comparator<String> comparator = Comparator.reverseOrder();
+        SortedMap<String, Integer> source = new TreeMap<>(comparator);
+
+        Assertions.assertSame(comparator, ImmutableNavigableMap.copyOf(source).comparator());
+    }
+
+    @Test
     public void testCopyOf_AlreadyImmutable() {
         ImmutableNavigableMap<String, Integer> original = ImmutableNavigableMap.of("a", 1);
         ImmutableNavigableMap<String, Integer> copy = ImmutableNavigableMap.copyOf(original);

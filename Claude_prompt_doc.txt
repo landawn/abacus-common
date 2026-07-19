@@ -1,0 +1,676 @@
+
+
+==============================================================================================================================================
+
+------
+Use multiple agents to perform a thorough deep line by line review for javadocs in all the classes under folder: ./src/main/java to improve/correct existing javadocs
+
+------
+Use multiple agents to perform a thorough deep line by line review for javadocs in all the classes in packages: com.landawn.abacus.util under: ./src/main/java to improve/correct existing javadocs
+
+
+------
+TASK: Start multiple agents to generate comprehensive Javadoc for all public methods, including public static methods but skip the methods annotated with @Override, in all classes and interfaces under folder: ./src/main/java/. The Javadoc should be detailed and precise, thoroughly explaining the method’s purpose, behavior, parameters, return value, and exceptions. Document the CONTRACT, not the implementation: what it does, not how. Where applicable, include a concise usage example (a couple of lines). The example block should always be placed before any @param, @return, or other annotation tags. If Javadoc already exists, review it against the actual implementation and update it for accuracy and clarity. Finally, merge the new or revised Javadoc directly into source file, replacing any existing documentation. DON'T skip any class. For methods annotated with @Override, just review, improve and verify existing javadoc for them. Don't add or generate new javadoc for methods annotated with @Override. Use below template for usage example in Javadoc:
+
+       * Description of what the method does.
+       *
+       * <p><b>Usage Examples:</b></p>
+       * <pre>{@code
+       * ClassName.method("x");      // returns ...
+       * ClassName.method(null);     // throws NullPointerException
+       * }</pre>
+       *
+       * @param ...
+
+
+------
+Task: Use multiple agents to perform a thorough deep line by line review for javadocs in all the classes under folder: ./src/main/java
+
+	-- Use multiple parallel agents to review the existing Javadoc comments in all classes under ./src/main/java. This is a review of what's already written — do not add Javadoc to undocumented members, and do not change any executable code.
+
+	-- Partition the work across agents by directory/package (or by class-family groups) so the entire tree under ./src/main/java is covered with no overlap and no gaps. Each agent reviews its assigned files line by line.
+
+	-- Evaluate every Javadoc comment (class, method, constructor, field) against three criteria:
+	    1. Document the CONTRACT, not the implementation: what it does, not how
+		2. Accuracy — Does the prose correctly describe the actual behavior? Do @param, @return, @throws tags match the real method signature, parameter names, return type, and thrown exceptions? Flag stale, copy-paste, contradictory, or wrong descriptions; missing/extra/misnamed @param; @return on void (or missing on non-void); undocumented or incorrectly documented thrown exceptions; broken or wrong {@link} / @see references.
+		3. Clarity — Is the wording unambiguous, grammatically correct, and complete? Flag confusing phrasing, typos, incomplete sentences, and descriptions that restate the method name without adding information.
+		4. Consistency — Is terminology, phrasing, tag ordering, and formatting consistent across the codebase? Pay special attention to cross-variant consistency: this code is largely template-generated, so analogous members across sibling classes (e.g. CharTuple vs. LongTuple, the primitive-type variants, the arity variants) should document the same concept with the same wording. Flag any variant whose Javadoc diverges from its siblings.
+
+	-- Output: Each agent reports its findings as a structured list — grouped by file, citing file_path:line_number, with: (a) the criterion violated, (b) the exact problem, and (c) a suggested correction. Then consolidate all agents' findings into a single deduplicated report, ordered by file, and summarize the most common/systemic issues at the top.
+
+	-- Then go ahead to fix all the found issues.
+
+
+
+==============================================================================================================================================
+
+
+------
+
+Begin the task below by leveraging the existing Python scripts under ./scripts/. If completing the task requires modifying any script, include a complete account of every change (which script, what changed, and why) in your final summary.
+
+  TASK: Start multiple agents to audit and complete the Javadoc “Usage Examples” for public methods in public classes under ./src/main/java/.
+
+  This is a COMMENTS-ONLY task.
+  Do not change method logic, signatures, imports, annotations, formatting outside comments, or any non-comment code.
+
+  Scope:
+  - Include public methods in public top-level classes and nested public classes.
+  - Only modify methods that already have a Javadoc comment.
+  - Ignore public methods annotated with @Override
+  - Do not add Javadocs to undocumented methods.
+  - Do not modify Javadoc or code that is commented out with //.
+  - Do not remove sample-code comments that start with //.
+
+  =======================================================================
+  1. GOAL PER PUBLIC METHOD
+  =======================================================================
+
+  For each in-scope public method with existing Javadoc:
+
+  1. If it has no Usage Examples block:
+     Add one with at least:
+     - 2 basic or typical examples
+     - 2 edge, negative, or boundary examples, as applicable:
+       null, empty, blank, min/max boundary, overflow, exception, NaN, Infinity, etc.
+
+  2. If it already has examples:
+     Audit every example line against actual library behavior.
+     Fix incorrect return values, exception comments, mutation descriptions, or misleading explanations.
+
+  3. Make examples meaningful:
+     Existing examples that are technically correct but redundant, shallow, or missing common usage should be improved or supplemented.
+
+  4. Checked exceptions:
+     Document checked exceptions with a trailing comment:
+     // throws IOException
+
+  5. Library behavior is the ground truth:
+     Never guess expected values. Verify with tests.
+
+  =======================================================================
+  2. REQUIRED JAVADOC STYLE
+  =======================================================================
+
+  Place the Usage Examples block after the method description and before all Javadoc tags.
+
+  Required order:
+
+  description
+  blank Javadoc line
+  Usage Examples block
+  blank Javadoc line
+  @param / @return / @throws / @see / @since / @deprecated tags
+
+  Example:
+
+       * Description of what the method does.
+       *
+       * <p><b>Usage Examples:</b></p>
+       * <pre>{@code
+       * ClassName.method("x");      // returns ...
+       * ClassName.method(null);     // throws NullPointerException
+       * }</pre>
+       *
+       * @param ...
+
+  Rules:
+  - Use exactly one blank Javadoc line before and after the Usage Examples block.
+  - A blank Javadoc line must contain only the standard prefix, for example:
+        *
+  - Every example line must be a real, compilable call or setup statement.
+  - Every behavior example must include a // returns, // throws, or equivalent post-state comment.
+  - Declare helper variables inside the <pre>{@code} block so examples are self-contained.
+  - If an existing examples header has custom wording, keep that wording but bold it:
+    <p><b>Example usage with a mutable counter:</b></p>
+  - Do not replace meaningful custom headers with “Usage Examples”.
+  - In CommonUtil.java keep `N.` (do NOT rewrite to `CommonUtil.`).
+
+  =======================================================================
+  3. COMMON PITFALLS
+  =======================================================================
+
+  Overload ambiguity:
+  - Cast null, empty arrays, or ambiguous literals when needed:
+    (String) null
+    (Object) null
+    (int[]) null
+
+  Abacus optionals:
+  - Use Abacus optional APIs:
+    isPresent()
+    get()
+    getAsInt()
+    getAsLong()
+    getAsFloat()
+    getAsDouble()
+  - Do not use java.util.Optional accessors unless the method actually returns java.util.Optional.
+
+  Floating-point values:
+  - For NaN, verify with Double.isNaN(...) or Float.isNaN(...).
+  - For infinity, compare to POSITIVE_INFINITY or NEGATIVE_INFINITY.
+
+  Numeric and parsing behavior:
+  - Verify hex, octal, NaN/Infinity rejection, result types, and index boundaries.
+  - Do not infer behavior from method names.
+
+  Mutation methods:
+  - Document both the return value and the post-state mutation in the same example line where practical.
+
+  Formatting:
+  - Never produce this malformed line:
+        *          * <p><b>Usage Examples:</b></p>
+  - Correct:
+        * <p><b>Usage Examples:</b></p>
+  - Every @param, @return, and @throws line must keep the normal Javadoc prefix:
+        * @param value description
+  - Inner class Javadocs must use the same indentation as their surrounding tags.
+
+  =======================================================================
+  4. PROCESS
+  =======================================================================
+
+  Process classes in the order listed below. If multiple-agent tooling is available, agents may work in parallel, but each agent must handle only one class at a time.
+
+  For each class:
+
+  Step A: Build the public method list
+
+  Use:
+
+  grep -nE "^\s+public (static )?[A-Za-z].*\(" <Class.java>
+
+  Then manually exclude out-of-scope items.
+
+  Step B: Create a throwaway verification test
+
+  Path:
+  src/test/java/.../<ClassName>JavadocVerifyTest.java
+
+  Guidelines:
+  - Mirror imports and style from the existing <ClassName>Test.java when available.
+  - If no existing test exists, mirror the package structure and imports needed by the source class.
+  - Write one @Test per public method covered.
+  - Every documented example must have a corresponding assertion.
+  - Use real assertions:
+    assertEquals
+    assertArrayEquals
+    assertThrows
+    assertNull
+    assertTrue
+
+  Step C: Write or audit examples, then run the test
+
+  Use:
+
+  mvn -o test -Dtest=<ClassName>JavadocVerifyTest -Dmaven.main.skip=true
+
+  Do not run mvn clean during this loop.
+
+  Step D: Fix and repeat
+
+  - If assertions fail, fix the Javadoc example and test expectation to match actual library behavior.
+  - If examples do not compile, fix both the Javadoc and test.
+  - Add casts where overload ambiguity occurs.
+  - Repeat until the class verification test is green.
+
+  Step E: Align Javadoc examples
+
+  After the class verification test is green, run:
+
+  python ./scripts/align_jdoc_examples.py --apply <RELATIVE/PATH/TO/Class.java>
+
+  If the script is unavailable, manually align // comments consistently throughout the class.
+
+  Step F: Delete the throwaway test
+
+  After the class is green and alignment is complete, delete:
+
+  src/test/java/.../<ClassName>JavadocVerifyTest.java
+
+  =======================================================================
+  5. CLASS ORDER
+  =======================================================================
+
+  Group 1:
+  - CommonUtil.java
+
+  Group 2:
+  - All remaining in-scope classes
+
+  =======================================================================
+  6. PAUSE POINT
+  =======================================================================
+
+  After completing CommonUtil.java:
+  - Stop.
+  - Report the results.
+  - Wait for review before proceeding to Group 2.
+
+  =======================================================================
+  7. FINAL VERIFICATION
+  =======================================================================
+
+  After all classes are complete, run:
+
+  mvn -o compile
+
+  The build must finish with BUILD SUCCESS.
+
+  =======================================================================
+  8. FINAL REPORT
+  =======================================================================
+
+  Report:
+  - Classes processed: <count>
+  - Public methods covered: <count>
+  - Examples added: <count>
+  - Examples fixed: <count>
+  - Notable behavior corrections:
+    method -> documented/wrong value -> actual/correct value
+  - Confirm:
+    - all throwaway tests deleted
+    - alignment applied
+    - final build green
+    - only comments were edited
+
+
+
+==============================================================================================================================================
+
+
+------
+Rewritten by Claude code:
+
+TASK: Run agents to audit, format, and improve EXISTING Javadoc “Usage Examples”
+blocks for public methods of public classes under ./src/main/java/.
+
+This is a COMMENTS-ONLY task. Reuse the existing toolkit in ./scripts/codex/ —
+do not re-implement scope detection, validation, or formatting that already exists
+there. Read a script's header for its exact usage before running it.
+
+=======================================================================
+0. EXECUTION MODEL (phases)
+=======================================================================
+Phase 1 — Stream.java ONLY, handled by a SINGLE agent (it is one large file;
+  parallel agents on one file collide on a comments-only diff). After Stream.java
+  is green and validated, STOP and produce the change report (Section 6) for review.
+Phase 2+ — only after approval: fan out with ONE FILE PER AGENT (never two agents
+  in the same file). Each agent runs the full pipeline below on its file.
+
+=======================================================================
+1. SCOPE  (already encoded in scripts/codex/inventory_jdoc_usage_files.js)
+=======================================================================
+Process public methods in every public top-level class and every public nested class.
+
+Use the inventory script to get the authoritative in-scope list (Stream.java is
+opt-in by design — pass it explicitly):
+  node scripts/codex/inventory_jdoc_usage_files.js src/main/java Stream.java
+
+Only classes that ALREADY contain an example block are in scope. Do not add new
+Javadoc and do not add a Usage Examples block where none exists.
+
+=======================================================================
+2. WHAT TO CHANGE (and what not to)
+=======================================================================
+Only edit existing Javadoc example/sample blocks. Do NOT change: method logic,
+signatures, imports, annotations, non-comment code, or non-example Javadoc prose
+— except the minimum needed to position/format an existing examples block.
+
+For each existing examples block:
+  a) AUDIT CORRECTNESS. Verify calls, comments, return values, side effects, and
+     thrown exceptions against actual behavior. Inspect the implementation and
+     nearby tests when unclear. Do not guess — if you cannot confirm, leave it and
+     report it as an uncertainty.
+  b) IMPROVE CONSERVATIVELY. Prefer minimal correctness fixes. Only restructure or
+     replace an example when it is clearly redundant, shallow, or misleading.
+     Replace `(...)` placeholders with concrete arguments when practical; if a
+     placeholder cannot be replaced without guessing, leave it and report it.
+  c) PRESERVE INTENT.
+     - In CommonUtil.java keep `N.` (do NOT rewrite to `CommonUtil.`).
+     - Keep meaningful custom headers; bold them, e.g.
+       * <p><b>Example usage with a mutable counter:</b></p>
+       Only replace a header with “Usage Examples:” if it is generic or malformed.
+     - Do not touch Javadoc that is commented out with `//`.
+     - Preserve standalone section-heading comments that organize a multi-part
+Only classes that ALREADY contain an example block are in scope. Do not add new
+Javadoc and do not add a Usage Examples block where none exists.
+
+=======================================================================
+2. WHAT TO CHANGE (and what not to)
+=======================================================================
+Only edit existing Javadoc example/sample blocks. Do NOT change: method logic,
+signatures, imports, annotations, non-comment code, or non-example Javadoc prose
+— except the minimum needed to position/format an existing examples block.
+
+For each existing examples block:
+  a) AUDIT CORRECTNESS. Verify calls, comments, return values, side effects, and
+     thrown exceptions against actual behavior. Inspect the implementation and
+     nearby tests when unclear. Do not guess — if you cannot confirm, leave it and
+     report it as an uncertainty.
+  b) IMPROVE CONSERVATIVELY. Prefer minimal correctness fixes. Only restructure or
+     replace an example when it is clearly redundant, shallow, or misleading.
+     Replace `(...)` placeholders with concrete arguments when practical; if a
+     placeholder cannot be replaced without guessing, leave it and report it.
+  c) PRESERVE INTENT.
+     - In CommonUtil.java keep `N.` (do NOT rewrite to `CommonUtil.`).
+     - Keep meaningful custom headers; bold them, e.g.
+       * <p><b>Example usage with a mutable counter:</b></p>
+       Only replace a header with “Usage Examples:” if it is generic or malformed.
+     - Do not touch Javadoc that is commented out with `//`.
+     - Preserve standalone section-heading comments that organize a multi-part
+       example (title-case is fine here), e.g.  `* // Mathematical operations`.
+       The lowercase/trailing-comment style rule applies to comments AFTER an
+       executable sample line, not to section headings.
+
+=======================================================================
+3. REQUIRED STRUCTURE & FORMATTING
+=======================================================================
+Place the examples block AFTER the method description and BEFORE all tags
+(@param, @return, @throws, @see, @since, @deprecated):
+
+     * Description of what the method does.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ClassName.method("x");      // common case
+     * ClassName.method(null);     // throws NullPointerException
+     * }</pre>
+     *
+     * @param value ...
+
+Rules:
+  - Exactly one blank Javadoc line before and after the block (blank = prefix + `*`).
+  - Inner-class methods keep their existing deeper indentation; every line in the
+    block matches the surrounding tag indentation.
+  - No double blank lines, no `}</pre>` directly followed by `@param`, no duplicate
+    `*` prefixes.
+  - `<pre>{@code ... }` is the target form. If converting a plain `<pre>...</pre>`
+    block, UNESCAPE HTML entities (&lt; → <, &gt; → >, &amp; → &) since `{@code}`
+    is literal. If unsure, leave the existing form.
+  - Do NOT introduce raw `\uXXXX` sequences inside `{@code}` — the Java compiler
+    decodes them even in comments and will break the build. Write the literal
+    character, or split the backslash.
+
+=======================================================================
+4. EXAMPLE CONTENT & COMMENT STYLE
+=======================================================================
+Each line is a real, compilable Java statement or declaration. Declare helper
+vars (arrays, lists, maps, predicates, comparators, inputs) inside the block so it
+is self-contained — but do not pad; keep it concise. No hidden external state.
+
+Comments: add a trailing comment only when the result/effect/exception is not
+obvious. Prefer exact observable results over vague descriptions; use
+lowercase/sentence style.
+  GOOD:
+     * int[] a = {3, 1, 2};
+     * N.sort(a);                       // a is [1, 2, 3]
+     * N.requireNonNull(null);          // throws NullPointerException
+     * List<Boolean> list = flags.boxed(); // converts to List<Boolean>
+  AVOID:
+     * list.clear();                    // returns void
+     * boolean[] a = flags.toArray();   // To primitive array  (title-case / restates code)
+
+Helper declarations need no trailing comment. Do not mechanically add
+`// returns ...`. Use section comments inside the block only when they aid
+readability of a long, multi-part example; remove them from short, self-evident
+blocks.
+
+=======================================================================
+5. VALIDATION (per file, before reporting it complete)
+=======================================================================
+Run scripts with `node scripts/codex/<name>.js`; run the root aligner with python3.
+1) Full validation battery (usage/placeholder/example-comment/member-misuse +
+   align --check + comment-only diff):
+     node scripts/codex/validate_jdoc_usage_slice.js src/main/java Stream.java
+   Use the targeted fixers when it flags formatting, e.g.:
+     node scripts/codex/move_jdoc_usage_before_tags.js <file>
+     node scripts/codex/fix_jdoc_double_blank_lines.js <file>
+     node scripts/codex/fix_jdoc_usage_spacing.js <file>
+2) Comments-only proof. verify_comment_only_diff.js uses `svn diff` against the
+   svn baseline; also sanity-check the git diff shows only comment/`*`/`//` lines:
+     node scripts/codex/verify_comment_only_diff.js <file>
+3) BUILD MUST STILL COMPILE (catches \uXXXX / `{@code}` breakage):
+     mvn -o clean compile
+4) Align the examples once green:
+     ./scripts/align_jdoc_examples.py --apply <file>
+   (or: node scripts/codex/align_jdoc_examples.js --apply <file>)
+5) Re-run step 1 after aligning to confirm still green.
+
+Leave all changes UNSTAGED/uncommitted for review. Read each file before editing
+so the task is safely re-runnable (skip blocks already correct). New helper scripts,
+if genuinely needed, go under ./scripts/codex/ — but check for an existing one first.
+
+=======================================================================
+6. REPORT (after Stream.java; then stop for review)
+=======================================================================
+  - files changed
+  - notable correctness fixes (with method names)
+  - useful example improvements
+  - placeholders / uncertainties left unchanged (and why)
+  - validation commands run + their results (incl. `mvn -o clean compile`)
+  - confirmation that the diff is comments-only
+
+
+
+
+
+==============================================================================================================================================
+
+------
+
+
+TASK: Document Major Classes in a Markdown Table
+==================================================
+
+OBJECTIVE
+---------
+Scan all .java files under ./src/main/java and produce a markdown table that documents the major classes.
+
+
+SELECTION RULES
+---------------
+A class qualifies for inclusion only if ALL of the following are true:
+
+  1. It has more than 9 public methods.
+  2. It is NOT in the package com.landawn.abacus.util.function.
+  3. It is NOT a non-public inner class (skip these entirely).
+
+
+OUTPUT FORMAT
+-------------
+A two-column markdown table with the headers: Classes | Description
+
+Column 1 - "Classes":
+  - The parent class name on the first line.
+  - Each public inner class name listed below it, one per line.
+  - Use <br> for line breaks within the cell.
+
+Column 2 - "Description":
+  - A single paragraph describing the combined major functionality
+    of the parent class and its inner classes.
+
+Row structure:
+  - One row per parent class. All of its public inner classes share
+    that same row.
+
+
+SPECIAL HANDLING
+----------------
+  1. For CommonUtil.java and N.java, display the class name as "N" only.
+     Never show "CommonUtil".
+
+  2. If a parent class has more than 10 public inner classes, list only
+     the top 10 most widely used (ranked by reference count across the
+     codebase) and append "..." on a new line to indicate omitted ones.
+
+
+DELIVERABLES (in order)
+-----------------------
+Step 1 - Sample for Review:
+  Generate a sample table containing ONLY the rows for Numbers and
+  Strings. Print it in the chat. Stop and wait for my approval before
+  proceeding.
+
+Step 2 - Full Output (after approval):
+  a. Generate the full table covering all qualifying classes.
+  b. Print the full table in the chat.
+  c. Write the same table to ./docs/classes_description.md.
+
+
+==============================================================================================================================================
+
+
+------
+
+  Scan the whole <ClassName>.java (e.g. src/main/java/.../Strings.java) and add a reference
+  table to the CLASS-LEVEL javadoc with three columns:
+    Method(s) | return when the primary input is null | return when the primary input is ""
+
+  REQUIREMENTS
+  1. Scope: include every public static method whose FIRST/primary parameter is a single
+     CharSequence or String (the "input string"). EXCLUDE:
+       - constants;
+       - multi-arg predicates whose subject is a collection (isAllEmpty, isAnyBlank, ...);
+       - methods whose first param is an array/varargs/char/primitive/Object/Map/Iterable/number
+         (join, concat, primitive join, etc. — their "input" is not a single string).
+     State this scope in a one-line intro above the table.
+
+  2. ACCURACY IS MANDATORY — do not guess. For each method, TRACE the actual code (null guards,
+     isEmpty() checks, delegations) to determine the literal return for a null input and for a ""
+     input. Spot-verify the surprising cells against source. Cover the whole file (segment it with
+     parallel agents if large), then personally re-check anything hedged.
+
+  3. Consolidate: collapse overload families and methods that share the same (null, "") contract
+     into ONE row, and organize rows into labeled category sections (predicates, converters,
+     case/transform, remove/replace, pad/center, affix, split, search, substring, encoding/parsing,
+     extraction, ...). Aim for a navigable grouped table, not 1 row per overload.
+
+  4. Cell conventions: use {@code null}, {@code ""}, {@code -1}, {@code 0}, {@code true},
+     {@code false}, empty {@code byte[]}/{@code String[]}/{@code List}/{@code IntStream}/
+     {@code OptionalChar}, etc. For delimiter/index/argument-dependent edges, give the dominant
+     value plus a short qualifier in the cell (e.g. `{@code 0} if the search string is {@code ""},
+     else {@code -1}`). Escape & < > as entities; do not put raw < > in cells.
+
+  5. HTML: use the codebase table convention `<table border="1">` with <caption>, a <thead> header
+     row (<th>), and category header rows as `<tr><td colspan="3"><b>Category</b></td></tr>`.
+     Match the style of the existing class-javadoc table. Insert the new table as a class-javadoc
+     body section (before the @see tags), after any existing comparison table.
+
+  6. Verify: run `javadoc -Xdoclint:all -private` on the file with the full project+dependency
+     classpath; it must report 0 errors / 0 "reference not found" (only pre-existing private
+     "no comment" warnings are acceptable). Confirm the table rendered into the generated HTML.
+     This is a javadoc-only change — no behavioral or test impact.
+
+  A couple of notes for reuse:
+  - If a class also has a public nested helper class (like Strings.StrUtil), tell it to scope to the outer class
+  only (or handle the nested one separately) — those tiers often have different return contracts (Optional/OrElse).
+  - For very large files, the "segment it with parallel agents" instruction is what kept this accurate and fast; for
+  small classes a single pass is fine.
+
+==============================================================================================================================================
+
+
+------
+
+  Scan the whole Strings.java (src/main/java/com/landawn/abacus/util/Strings.java) and add a
+  reference table to the CLASS-LEVEL javadoc with three columns:
+    Method(s) | behavior when the begin index (from/start) < 0 | behavior when the end index (to/end) < 0
+
+  By "behavior" I mean what the method ASSERTS / does for a negative index: e.g. throws
+  IndexOutOfBoundsException, throws IllegalArgumentException, clamps the value to 0, treats it
+  specially (e.g. -1 sentinel), or returns a value (no-op) — state the exact outcome.
+
+  REQUIREMENTS
+  1. Scope: include every public static method that takes at least one int index parameter that
+  1. Scope: include every public static method that takes at least one int index parameter that
+     acts as a BEGIN bound (any of: fromIndex, startIndex, beginIndex, inclusiveBeginIndex,
+     exclusiveBeginIndex, offset, startIndexFromBack) and/or an END bound (toIndex, endIndex,
+     exclusiveEndIndex). Map each parameter to the right column by its role, regardless of its
+     name. EXCLUDE methods with no such index parameter, and constants. If a method has only one
+     of the two bounds, put "—" (not applicable) in the other column. State this scope in a
+     one-line intro above the table.
+
+  2. ACCURACY IS MANDATORY — do not guess. For each method, TRACE the actual code to determine the
+     negative-index outcome: look for N.checkFromToIndex / N.checkPositionIndex /
+     N.checkArgNotNegative (→ which exception type), Math.max(0, idx) or `idx < 0 ? 0 : idx`
+     (→ clamped to 0), `idx < -1` or `idx < 0 ? return ...` guards (→ special/return value), and
+     delegations to JDK String methods. Note the EXACT exception type
+     (IndexOutOfBoundsException vs IllegalArgumentException) — they differ across families. Cover
+     the whole file (segment it with parallel agents if large), then personally re-check anything
+     hedged or surprising. (Strings has a key asymmetry: replace*/substring index families throw,
+     while removeAll(...,fromIndex,...) and lastIndexOf(...,startIndexFromBack) are lenient —
+     verify each, don't assume.)
+
+  3. Consolidate: collapse overload families and methods that share the same begin/end negative-
+     index contract into ONE row, organized into labeled category sections (substring/substringBetween,
+     replace/replaceRange/moveRange/removeRange, indexOf/lastIndexOf + fromIndex, remove*, the
+     *IndexOfAll / *Any families, split, etc.). Aim for a navigable grouped table.
+
+  4. Cell conventions: use {@code throws IndexOutOfBoundsException}, {@code throws IllegalArgumentException},
+     {@code clamped to 0}, {@code returns -1}, {@code returns null}, {@code returns str} (no-op),
+     {@code -1 allowed} (sentinel), or {@code —} for a missing parameter. Where the outcome depends
+     on the other arg/index, give the dominant case plus a short qualifier in the cell. Escape
+     & < > as entities; no raw < > in cells.
+
+  5. HTML: use the codebase table convention `<table border="1">` with <caption>, a <thead> header
+     row (<th>), and category header rows as `<tr><td colspan="3"><b>Category</b></td></tr>`. Match
+     the style of the existing class-javadoc tables. Insert the new table as a class-javadoc body
+     section (before the @see tags), after any existing table.
+
+  6. Verify: run `javadoc -Xdoclint:all -private` on the file with the full project+dependency
+     classpath; it must report 0 errors / 0 "reference not found" (only pre-existing private
+     "no comment" warnings are acceptable). Confirm the table rendered into the generated HTML.
+     This is a javadoc-only change — no behavioral or test impact.
+
+  Key changes I made vs. your draft, for your review:
+  - Reframed the two columns by index role, not exact name — Strings uses many names (fromIndex, startIndexFromBack,
+  inclusiveBeginIndex, exclusiveEndIndex, offset…); the prompt maps each to begin/end so nothing is missed, with —
+  for methods that have only one bound.
+  - Made "assert" concrete — it asks for the exact outcome (which exception type, clamp-to-0, sentinel, or no-op
+  return), since Strings is genuinely inconsistent here (throwing index families vs. lenient removeAll/lastIndexOf).
+  That distinction is the whole value of the table, so I flagged it explicitly to prevent a flat "throws IOOBE
+  everywhere" answer.
+  - Kept the accuracy/trace mandate, family-grouping, <table border="1">, and doclint verification from the
+  template.
+
+
+
+==============================================================================================================================================
+
+
+------
+  ▎ Goal: For the public methods in these classes — CommonUtil, N, Strings, Numbers, Array, Iterables, Iterators, Maps, Beans, Dates — find every method that can return null, and update its javadoc @return tag to state explicitly when
+  ▎ null is returned. This is a javadoc-only change: do not alter any method behavior, signatures, or logic.
+  ▎
+  ▎ Which methods qualify ("may return null"):
+  ▎ - The method body has a reachable return null (directly, or via a ternary/branch).
+  ▎ - It returns a field, parameter, or local that can hold null.
+  ▎ - It delegates to / returns the result of another method that can return null (trace one hop; N frequently delegates to CommonUtil).
+  ▎ - Default-value overloads count only if the supplied default can itself be null.
+  ▎
+  ▎ Explicitly out of scope (never null — do not touch):
+  ▎ - Methods returning a primitive (int, boolean, etc.).
+  ▎ - Methods returning Optional, OptionalInt/OptionalLong/OptionalDouble, Nullable, or other never-null wrappers.
+  ▎ - Methods that return an empty array/collection/string instead of null — unless they can also return null.
+  ▎ - void methods.
+  ▎
+  ▎ What to write in @return:
+  ▎ - Describe the normal return value and append the null condition, e.g.
+  ▎ @return the matched value, or {@code null} if no element matches /
+  ▎ @return the parsed date, or {@code null} if {@code source} is {@code null} or empty.
+  ▎ - Use {@code null} (not bare "null"), and keep wording consistent across the batch.
+  ▎ - If an @return already mentions null, only refine it if the stated condition is wrong or incomplete — don't duplicate or churn correct docs.
+  ▎ - If a method has no @return tag at all but returns a value, add one.
+  ▎
+  ▎ Constraints & verification:
+  ▎ - Do not change code, deprecate anything, or reorder members. Javadoc text only.
+  ▎ - After each class, confirm it still compiles and is doclint-clean for the changed methods (no new javadoc/-Xdoclint warnings).
+  ▎ - Overloaded methods: document each overload on its own (they often differ in null behavior).
+  ▎
+  ▎ Approach (these files are large — N.java alone is ~42K lines):
+  ▎ - Process the classes in parallel batches, but trace each null claim before editing — confirm the actual return null path rather than assuming from the method name.
+  ▎ - Produce a short per-class summary: methods updated, and any method where the null condition was non-obvious or where you chose not to change existing docs.
+
+==============================================================================================================================================
+

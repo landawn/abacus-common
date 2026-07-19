@@ -93,8 +93,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * List<Type<?>> paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.size());        // Output: 1
-     * System.out.println(paramTypes.get(0).name()); // Output: short
+     * System.out.println(paramTypes.size());          // Output: 1
+     * System.out.println(paramTypes.get(0).name());   // Output: short
      * }</pre>
      *
      * @return an immutable list containing the primitive {@code short} Type that describes the elements of this array type
@@ -119,7 +119,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * short[] emptyArray = {};
      * System.out.println(type.stringOf(emptyArray));   // Output: []
      *
-     * System.out.println(type.stringOf(null));   // Output: null
+     * System.out.println(type.stringOf(null));         // Output: null
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -211,6 +211,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * type.appendTo(nullSb, null);
      * System.out.println(nullSb.toString());   // Output: null
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -267,6 +268,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * type.serializeTo(nullWriter, null, config);
      * System.out.println(nullWriter.toString());   // Output: null
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -317,9 +319,9 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * }</pre>
      *
      * @param c the Collection of Short objects to convert
-     * @return a primitive short array containing all elements from the collection,
-     *         or {@code null} if the input collection is null
+     * @return an array containing the unboxed collection elements, or {@code null} if the input collection is null
      * @throws ClassCastException if any element in the collection is not a Short
+     * @throws NullPointerException if any element in the collection is {@code null}
      */
     @Override
     public short[] collectionToArray(final Collection<?> c) {

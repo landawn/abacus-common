@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type.SerializationType;
+import com.landawn.abacus.util.TypeReference;
 
 public class BeanTypeTest extends TestBase {
 
@@ -43,6 +44,18 @@ public class BeanTypeTest extends TestBase {
         }
     }
 
+    public static class GenericBean<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(final T value) {
+            this.value = value;
+        }
+    }
+
     @Test
     public void testClazz() {
         assertEquals(TestBean.class, beanType.javaType());
@@ -61,6 +74,16 @@ public class BeanTypeTest extends TestBase {
     @Test
     public void testGetSerializationType() {
         assertEquals(SerializationType.ENTITY, beanType.serializationType());
+    }
+
+    @Test
+    public void testParameterizedBeanMetadata() {
+        final Type<GenericBean<String>> type = createType(new TypeReference<GenericBean<String>>() {
+        });
+
+        assertTrue(type.isParameterizedType());
+        assertEquals(1, type.parameterTypes().size());
+        assertEquals(String.class, type.parameterTypes().get(0).javaType());
     }
 
     @Test

@@ -113,6 +113,17 @@ public class IdentityHashSetTest extends TestBase {
     }
 
     @Test
+    public void testRemoveAllSelf() {
+        IdentityHashSet<String> set = new IdentityHashSet<>();
+        set.add("a");
+        set.add("b");
+
+        Assertions.assertTrue(set.removeAll(set));
+        Assertions.assertTrue(set.isEmpty());
+        Assertions.assertFalse(set.removeAll(set));
+    }
+
+    @Test
     public void testRetainAll() {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = "a";

@@ -56,7 +56,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
  * </table>
  *
- * <p>Note: {@link ObjectPool#poll()} <em>removes</em> the object from the pool, so its true keyed
+ * <p>Note: {@link ObjectPool#poll()} <em>removes</em> the object from the pool, so its {@code true} keyed
  * mirror is {@link #remove(Object)} (which also removes). {@link #get(Object)} returns the value
  * <em>without</em> removing it and therefore has no unkeyed analog.</p>
  *
@@ -173,10 +173,10 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param key the key with which the specified value is to be associated, must not be {@code null}
      * @param value the value to be associated with the specified key, must not be {@code null}
      * @param timeout the maximum time to wait for a capacity slot to become available
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return {@code true} if the value was successfully added, {@code false} if the timeout elapsed
      *         (or the value was already/became expired, or memory constraints rejected it)
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key, value, or unit is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -196,10 +196,10 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param key the key with which the specified value is to be associated, must not be {@code null}
      * @param value the value to be associated with the specified key, must not be {@code null}
      * @param timeout the maximum time to wait for a capacity slot to become available
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be {@code null}
      * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the value was successfully added, {@code false} if the timeout elapsed or put failed
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key, value, or unit is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -259,10 +259,11 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      *
      * @param key the key whose associated element is to be returned
      * @param timeout the maximum time to wait for a valid mapping for the key to become available
-     * @param unit the time unit of the timeout argument
+     * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return the element associated with the key, or {@code null} if the timeout elapsed before a
      *         valid mapping was available
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the unit is null
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull

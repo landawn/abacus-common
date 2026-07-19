@@ -30,10 +30,11 @@ import com.landawn.abacus.util.Throwables;
  * @see FloatToLongFunction
  */
 @FunctionalInterface
-public interface FloatToDoubleFunction extends Throwables.FloatToDoubleFunction<RuntimeException> {
+public interface FloatToDoubleFunction extends Throwables.FloatToDoubleFunction<RuntimeException> { //NOSONAR
     /**
      * A default function that converts a float value to double through widening primitive conversion.
-     * This is equivalent to a simple cast from float to double.
+     * Every finite {@code float} value is represented exactly as a {@code double}; signed zero,
+     * NaN, and infinities are preserved.
      */
     FloatToDoubleFunction DEFAULT = value -> value;
 
@@ -49,7 +50,7 @@ public interface FloatToDoubleFunction extends Throwables.FloatToDoubleFunction<
      * FloatToDoubleFunction toDouble = value -> value;
      * double result = toDouble.applyAsDouble(3.5f); // Returns 3.5 as double
      *
-     * FloatToDoubleFunction squared = value -> value * value;
+     * FloatToDoubleFunction squared = value -> (double) value * value;
      * double square = squared.applyAsDouble(5.0f); // Returns 25.0
      * }</pre>
      *

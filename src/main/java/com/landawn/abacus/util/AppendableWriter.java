@@ -312,7 +312,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
             } catch (final Throwable e) {
                 if (exception == null) {
                     exception = e;
-                } else {
+                } else if (exception != e) {
+                    // Throwable rejects self-suppression; an underlying implementation may
+                    // reuse the same failure instance for flush() and close().
                     exception.addSuppressed(e);
                 }
             }

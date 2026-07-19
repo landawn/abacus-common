@@ -25,6 +25,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
@@ -58,6 +61,11 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * List<String> list = XmlMappers.fromXml(listXml, new TypeReference<List<String>>() {});
  * }</pre>
  *
+ * <p><b>XML security:</b> Every mapper created and owned by this class rejects DTDs and external
+ * entities. A mapper supplied to {@link #wrap(XmlMapper)} is not modified; the caller remains
+ * responsible for configuring its underlying {@link XMLInputFactory} for the trust level of the
+ * XML it will read.</p>
+ *
  * <p>This class is not instantiable.</p>
  *
  * @see XmlMapper
@@ -69,8 +77,8 @@ public final class XmlMappers {
     private static final int POOL_SIZE = 128;
     private static final List<XmlMapper> mapperPool = new ArrayList<>(POOL_SIZE);
 
-    private static final XmlMapper defaultXmlMapper = new XmlMapper();
-    private static final XmlMapper defaultXmlMapperForPretty = (XmlMapper) new XmlMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private static final XmlMapper defaultXmlMapper = newSecureXmlMapper();
+    private static final XmlMapper defaultXmlMapperForPretty = (XmlMapper) newSecureXmlMapper().enable(SerializationFeature.INDENT_OUTPUT);
     private static final SerializationConfig defaultSerializationConfig = defaultXmlMapper.getSerializationConfig();
     private static final DeserializationConfig defaultDeserializationConfig = defaultXmlMapper.getDeserializationConfig();
 
@@ -117,6 +125,39 @@ public final class XmlMappers {
 
     private XmlMappers() {
         // Utility class - prevent instantiation
+    }
+
+    private static XmlMapper newSecureXmlMapper() {
+        return new XmlMapper(newSecureXmlInputFactory());
+    }
+
+    private static XMLInputFactory newSecureXmlInputFactory() {
+        final XMLInputFactory factory = XMLInputFactory.newFactory();
+
+        setRequiredXmlInputFactoryProperty(factory, XMLInputFactory.SUPPORT_DTD, false);
+        setRequiredXmlInputFactoryProperty(factory, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+
+        try {
+            factory.setXMLResolver((publicId, systemId, baseUri, namespace) -> {
+                throw new XMLStreamException("External XML entity resolution is disabled");
+            });
+        } catch (final RuntimeException e) {
+            throw new IllegalStateException("The XMLInputFactory does not support a rejecting XMLResolver", e);
+        }
+
+        return factory;
+    }
+
+    private static void setRequiredXmlInputFactoryProperty(final XMLInputFactory factory, final String propertyName, final boolean propertyValue) {
+        try {
+            factory.setProperty(propertyName, propertyValue);
+
+            if (!Boolean.valueOf(propertyValue).equals(factory.getProperty(propertyName))) {
+                throw new IllegalStateException("XMLInputFactory ignored required security property: " + propertyName);
+            }
+        } catch (final RuntimeException e) {
+            throw new IllegalStateException("Failed to configure required XMLInputFactory security property: " + propertyName, e);
+        }
     }
 
     /**
@@ -1344,7 +1385,7 @@ public final class XmlMappers {
      * @param config the serialization configuration to apply, or {@code null} to use the default mapper
      * @return an XmlMapper configured with the specified serialization config
      */
-    static XmlMapper getXmlMapper(final SerializationConfig config) {
+    private static XmlMapper getXmlMapper(final SerializationConfig config) {
         if (config == null) {
             return defaultXmlMapper;
         }
@@ -1358,7 +1399,7 @@ public final class XmlMappers {
         }
 
         if (mapper == null) {
-            mapper = new XmlMapper();
+            mapper = newSecureXmlMapper();
         }
 
         mapper.setConfig(config);
@@ -1374,7 +1415,7 @@ public final class XmlMappers {
      * @param config the deserialization configuration to apply, or {@code null} to use the default mapper
      * @return an XmlMapper configured with the specified deserialization config
      */
-    static XmlMapper getXmlMapper(final DeserializationConfig config) {
+    private static XmlMapper getXmlMapper(final DeserializationConfig config) {
         if (config == null) {
             return defaultXmlMapper;
         }
@@ -1388,7 +1429,7 @@ public final class XmlMappers {
         }
 
         if (mapper == null) {
-            mapper = new XmlMapper();
+            mapper = newSecureXmlMapper();
         }
 
         mapper.setConfig(config);
@@ -1403,7 +1444,7 @@ public final class XmlMappers {
      *
      * @param mapper the XmlMapper to return to the pool, or {@code null} (which is ignored)
      */
-    static void recycle(final XmlMapper mapper) {
+    private static void recycle(final XmlMapper mapper) {
         if (mapper == null || mapper == defaultXmlMapper || mapper == defaultXmlMapperForPretty) {
             return;
         }
@@ -1422,6 +1463,9 @@ public final class XmlMappers {
     /**
      * Wraps an XmlMapper instance to provide convenient serialization and deserialization methods.
      * This allows you to use a pre-configured XmlMapper with the same convenient API as the static methods.
+     * The supplied mapper is used as-is and is not security-hardened or otherwise reconfigured by this method.
+     * Before reading untrusted XML, configure its {@link XMLInputFactory} to disable DTD and external-entity
+     * support and install a rejecting XML resolver.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1448,6 +1492,10 @@ public final class XmlMappers {
      * <p>This is useful when you need to use a customized XmlMapper repeatedly without having to
      * pass configuration objects to every method call.</p>
      *
+     * <p>The wrapped mapper and its pretty-print copy retain the caller's XML parser configuration.
+     * Consequently, the caller is responsible for hardening that configuration before parsing
+     * untrusted XML.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlMapper mapper = new XmlMapper();
@@ -1469,6 +1517,7 @@ public final class XmlMappers {
          * Creates a {@code One} instance wrapping the specified {@link XmlMapper}.
          * A copy of the mapper with {@link SerializationFeature#INDENT_OUTPUT} enabled is
          * created internally to support pretty-print serialization.
+         * Neither mapper's XML parser factory is security-hardened by this constructor.
          *
          * @param xmlMapper the XmlMapper to wrap; must not be {@code null}
          */

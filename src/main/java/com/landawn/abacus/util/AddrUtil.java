@@ -216,7 +216,7 @@ public final class AddrUtil {
      * @see #getAddressList(String)
      * @see #getServerList(String)
      */
-    public static List<InetSocketAddress> getAddressList(final Collection<String> servers) {
+    public static List<InetSocketAddress> getAddressList(final Collection<String> servers) throws IllegalArgumentException {
         N.checkArgNotNull(servers, "servers");
 
         final List<InetSocketAddress> addrs = new ArrayList<>(servers.size());

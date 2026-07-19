@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -33,7 +33,8 @@ import com.landawn.abacus.util.cs;
  * String result = substring.apply("Hello World", 0, 5);   // returns "Hello"
  *
  * ObjBiIntFunction<int[][], Integer> getMatrixElement = (matrix, row, col) ->
- *     (row >= 0 && row < matrix.length && col >= 0 && matrix.length > 0 && col < matrix[0].length) ? matrix[row][col] : null;
+ *     (row >= 0 && row < matrix.length && matrix[row] != null &&
+ *         col >= 0 && col < matrix[row].length) ? matrix[row][col] : null;
  * Integer value = getMatrixElement.apply(matrix, 2, 3);
  *
  * ObjBiIntFunction<List<String>, List<String>> subList = (list, from, to) ->

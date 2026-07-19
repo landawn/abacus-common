@@ -19,7 +19,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.function.BiConsumer;
@@ -42,7 +44,8 @@ import com.landawn.abacus.util.cs;
  *
  * <p>Headers can be set individually or in bulk, and the class converts header values to their
  * string representations on demand via {@link #valueOf(Object)}, with special handling for
- * {@link java.util.Collection}, {@link java.util.Date}, and {@link java.time.Instant} values.</p>
+ * {@link java.util.Collection}, {@link java.util.Date}, and {@link java.time.Instant} values.
+ * Header-name lookup, replacement, and removal are case-insensitive, as required by HTTP.</p>
  *
  * <p><b>Thread Safety:</b> Instances are <i>not</i> thread-safe. Configure a {@code HttpHeaders}
  * instance from a single thread before sharing it with concurrent readers, or guard mutations
@@ -1057,10 +1060,11 @@ public final class HttpHeaders {
      * @return This HttpHeaders instance for method chaining
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
-    public HttpHeaders set(final String name, final Object value) {
+    public HttpHeaders set(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, cs.name);
 
-        map.put(name, value);
+        final String storedName = findHeaderName(name);
+        map.put(storedName == null ? name : storedName, value);
 
         return this;
     }
@@ -1086,10 +1090,11 @@ public final class HttpHeaders {
      * @return This HttpHeaders instance for method chaining
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
-    public HttpHeaders setIfAbsent(final String name, final Object value) {
+    public HttpHeaders setIfAbsent(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, cs.name);
 
-        map.putIfAbsent(name, value);
+        final String storedName = findHeaderName(name);
+        map.putIfAbsent(storedName == null ? name : storedName, value);
 
         return this;
     }
@@ -1111,7 +1116,9 @@ public final class HttpHeaders {
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setAll(final Map<String, ?> m) {
-        map.putAll(m);
+        for (final Map.Entry<String, ?> entry : m.entrySet()) {
+            set(entry.getKey(), entry.getValue());
+        }
 
         return this;
     }
@@ -1128,7 +1135,8 @@ public final class HttpHeaders {
      * @return The header value, or {@code null} if not present
      */
     public Object get(final String headerName) {
-        return map.get(headerName);
+        final String storedName = findHeaderName(headerName);
+        return storedName == null ? null : map.get(storedName);
     }
 
     /**
@@ -1148,7 +1156,7 @@ public final class HttpHeaders {
      * @return The coerced header value, or {@code null} if the header is not present
      */
     public String getFirst(final String headerName) {
-        final Object value = map.get(headerName);
+        final Object value = get(headerName);
 
         return value == null ? null : valueOf(value);
     }
@@ -1167,7 +1175,7 @@ public final class HttpHeaders {
      * @return {@code true} if a header with the given name is present; {@code false} otherwise
      */
     public boolean containsHeader(final String headerName) {
-        return map.containsKey(headerName);
+        return findHeaderName(headerName) != null;
     }
 
     /**
@@ -1183,7 +1191,26 @@ public final class HttpHeaders {
      * @return The previous value associated with the header, or {@code null} if there was no mapping
      */
     public Object remove(final String headerName) {
-        return map.remove(headerName);
+        final String storedName = findHeaderName(headerName);
+        return storedName == null ? null : map.remove(storedName);
+    }
+
+    private String findHeaderName(final String headerName) {
+        if (headerName == null) {
+            return null;
+        }
+
+        if (map.containsKey(headerName)) {
+            return headerName;
+        }
+
+        for (final String storedName : map.keySet()) {
+            if (storedName != null && storedName.equalsIgnoreCase(headerName)) {
+                return storedName;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -1292,25 +1319,48 @@ public final class HttpHeaders {
     }
 
     /**
-     * Computes the hash code for this HttpHeaders based on the underlying header map.
+     * Computes the hash code for these headers. Header names are normalized case-insensitively,
+     * consistently with lookup and {@link #equals(Object)}.
      *
      * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
-        return map.hashCode();
+        int hashCode = 0;
+
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
+            final String name = entry.getKey();
+            hashCode += Objects.hashCode(name == null ? null : name.toLowerCase(Locale.ROOT)) ^ Objects.hashCode(entry.getValue());
+        }
+
+        return hashCode;
     }
 
     /**
      * Checks if this HttpHeaders is equal to another object.
-     * Two HttpHeaders instances are equal if they contain the same headers.
+     * Two {@code HttpHeaders} instances are equal if they contain the same header names and
+     * values. Header names are compared case-insensitively, as required by HTTP.
      *
      * @param obj The object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof HttpHeaders && map.equals(((HttpHeaders) obj).map);
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof HttpHeaders other) || map.size() != other.map.size()) {
+            return false;
+        }
+
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
+            if (!other.containsHeader(entry.getKey()) || !Objects.equals(entry.getValue(), other.get(entry.getKey()))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

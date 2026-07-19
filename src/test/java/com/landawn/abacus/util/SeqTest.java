@@ -96,6 +96,16 @@ public class SeqTest extends AbstractTest {
         return seq.toList();
     }
 
+    private <T, E extends Exception> void assertIteratorCountExhausts(final Seq<T, E> seq, final long expectedCount) throws E {
+        final Throwables.Iterator<T, E> iter = seq.iteratorEx();
+
+        assertEquals(expectedCount, iter.count());
+        assertEquals(0, iter.count());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        seq.close();
+    }
+
     @BeforeEach
     public void initTempFixtures() throws IOException {
         tempFile = tempDir.resolve("seq-lines-file.txt").toFile();
@@ -456,6 +466,21 @@ public class SeqTest extends AbstractTest {
         Seq<Integer, RuntimeException> seq = Seq.of(1, 2, 3);
         seq.toList();
         assertThrows(IllegalStateException.class, () -> seq.toList());
+    }
+
+    @Test
+    public void testClosedStateCheckPrecedesValidationAndDelegation() {
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+        seq.close();
+
+        assertThrows(IllegalStateException.class, () -> seq.rateLimited(0));
+        assertThrows(IllegalStateException.class, () -> seq.delay((java.time.Duration) null));
+        assertThrows(IllegalStateException.class, () -> seq.sortedByInt(null));
+        assertThrows(IllegalStateException.class, () -> seq.isMatchCountBetween(-1, -1, null));
+        assertThrows(IllegalStateException.class, () -> seq.skipUntil(null));
+        assertThrows(IllegalStateException.class, () -> seq.throwIfEmpty(null));
+        assertThrows(IllegalStateException.class, () -> seq.transform(null));
+        assertDoesNotThrow(seq::close);
     }
 
     @Test
@@ -864,6 +889,10 @@ public class SeqTest extends AbstractTest {
         assertThrows(IllegalStateException.class, () -> {
             seq.flatMapArray(n -> new Integer[] { n });
         });
+
+        assertThrows(IllegalStateException.class, () -> {
+            seq.flatmap(Arrays::asList);
+        });
     }
 
     @Test
@@ -1144,6 +1173,30 @@ public class SeqTest extends AbstractTest {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.next());
 
         Assertions.assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOptimizedIteratorCountExhaustsRemainingElements() throws Exception {
+        final Throwables.Iterator<String, Exception> partiallyConsumed = Seq.<String, Exception> of("a", "b", "c").iteratorEx();
+        assertEquals("a", partiallyConsumed.next());
+        assertEquals(2, partiallyConsumed.count());
+        assertFalse(partiallyConsumed.hasNext());
+
+        assertIteratorCountExhausts(Seq.<Boolean, Exception> of(true, false), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new boolean[] { true, false }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new char[] { 'a', 'b' }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new byte[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new short[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new int[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new long[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new float[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new double[] { 1, 2 }), 2);
+
+        assertIteratorCountExhausts(Seq.<Pair<Integer, Integer>, Exception> splitByChunkCount(7, 3, true, Pair::of), 3);
+        assertIteratorCountExhausts(Seq.<Pair<Integer, Integer>, Exception> splitByChunkCount(7, 3, false, Pair::of), 3);
+        assertIteratorCountExhausts(Seq.<Integer, Exception> of(1, 2, 3).reversed(), 3);
+        assertIteratorCountExhausts(Seq.<Integer, Exception> of(1, 2, 3).rotated(1), 3);
+        assertIteratorCountExhausts(Seq.<Integer, Exception> of(3, 1, 2).sorted(), 3);
     }
 
     @Test
@@ -2621,6 +2674,40 @@ public class SeqTest extends AbstractTest {
         assertEquals(Arrays.asList("a", "b", "c", "d"), drainWithException(seq));
         assertTrue(s1Closed.get());
         assertTrue(s2Closed.get());
+    }
+
+    @Test
+    public void test_concat_collectionSnapshotPreservesTraversalAndClosing() throws Exception {
+        AtomicInteger closeCount = new AtomicInteger();
+        Seq<Integer, Exception> source = Seq.<Integer, Exception> of(1, 2).onClose(closeCount::incrementAndGet);
+        List<Seq<Integer, Exception>> sources = new ArrayList<>();
+        sources.add(source);
+
+        Seq<Integer, Exception> concatenated = Seq.concat(sources);
+        sources.clear();
+
+        assertEquals(Arrays.asList(1, 2), concatenated.toList());
+        assertEquals(1, closeCount.get());
+    }
+
+    @Test
+    public void test_concat_closeRepeatedFailureDoesNotSkipLaterSources() {
+        RuntimeException repeatedFailure = new RuntimeException("repeated close failure");
+        AtomicInteger laterCloseCalls = new AtomicInteger();
+        Seq<Integer, Exception> first = Seq.<Integer, Exception> of(1).onClose(() -> {
+            throw repeatedFailure;
+        });
+        Seq<Integer, Exception> second = Seq.<Integer, Exception> of(2).onClose(() -> {
+            throw repeatedFailure;
+        });
+        Seq<Integer, Exception> third = Seq.<Integer, Exception> of(3).onClose(laterCloseCalls::incrementAndGet);
+        Seq<Integer, Exception> concatenated = Seq.concat(first, second, third);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, concatenated::close);
+
+        assertSame(repeatedFailure, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, laterCloseCalls.get());
     }
 
     @Test
@@ -6005,6 +6092,53 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
+    public void testSlidingCountAfterPartialIterationAccountsForPendingGap() throws Exception {
+        final Throwables.Iterator<List<Integer>, Exception> collectionWindows = Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6).sliding(2, 3).iteratorEx();
+        assertEquals(Arrays.asList(1, 2), collectionWindows.next());
+        assertEquals(1, collectionWindows.count());
+        assertFalse(collectionWindows.hasNext());
+
+        final Throwables.Iterator<List<Integer>, Exception> collectedWindows = Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6)
+                .sliding(2, 3, Collectors.toList())
+                .iteratorEx();
+        assertEquals(Arrays.asList(1, 2), collectedWindows.next());
+        assertEquals(1, collectedWindows.count());
+        assertFalse(collectedWindows.hasNext());
+    }
+
+    @Test
+    public void testSlidingCountMatchesIterationAcrossWindowStates() throws Exception {
+        for (int sourceSize = 0; sourceSize <= 8; sourceSize++) {
+            final List<Integer> source = new ArrayList<>();
+
+            for (int i = 0; i < sourceSize; i++) {
+                source.add(i);
+            }
+
+            for (int windowSize = 1; windowSize <= 4; windowSize++) {
+                for (int increment = 1; increment <= 5; increment++) {
+                    final List<List<Integer>> expected = Seq.<Integer, Exception> of(source).sliding(windowSize, increment).toList();
+
+                    for (int consumed = 0; consumed <= expected.size(); consumed++) {
+                        final Throwables.Iterator<List<Integer>, Exception> iter = Seq.<Integer, Exception> of(source)
+                                .sliding(windowSize, increment)
+                                .iteratorEx();
+
+                        for (int i = 0; i < consumed; i++) {
+                            assertEquals(expected.get(i), iter.next());
+                        }
+
+                        final String context = "sourceSize=" + sourceSize + ", windowSize=" + windowSize + ", increment=" + increment + ", consumed="
+                                + consumed;
+                        assertEquals(expected.size() - consumed, iter.count(), context);
+                        assertFalse(iter.hasNext(), context);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     public void testSlidingIntWithSkipCountAndToArray() throws Exception {
         assertEquals(4, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2).count());
         assertEquals(2, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").sliding(2).skip(2).count());
@@ -6821,6 +6955,13 @@ public class SeqTest extends AbstractTest {
     public void testTop_Empty() throws Exception {
         List<Integer> result = Seq.<Integer, Exception> empty().top(3).toList();
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testTopHugeLimitDoesNotPreallocateFromLimit() throws Exception {
+        List<Integer> result = Seq.of(3, 1, 2).top(Integer.MAX_VALUE, Comparator.naturalOrder()).toList();
+        assertEquals(3, result.size());
+        assertTrue(result.containsAll(Arrays.asList(1, 2, 3)));
     }
 
     @Test
@@ -8868,6 +9009,11 @@ public class SeqTest extends AbstractTest {
         assertTrue(seq.kthLargest(4, Comparator.naturalOrder()).isEmpty());
 
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1).kthLargest(0, Comparator.naturalOrder()));
+    }
+
+    @Test
+    public void testKthLargestHugeRankDoesNotPreallocateFromRank() throws Exception {
+        assertTrue(Seq.of(3, 1, 2).kthLargest(Integer.MAX_VALUE, Comparator.naturalOrder()).isEmpty());
     }
 
     @Test
@@ -11196,6 +11342,19 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
+    public void test_onClose_withFlatMap_closesActiveInnerAfterOuterIsClosed() throws Exception {
+        final AtomicInteger innerCloseCount = new AtomicInteger();
+        final Seq<Integer, Exception> outer = Seq.of(1);
+        final Seq<Integer, Exception> flatMapped = outer.flatMap(i -> Seq.<Integer, Exception> of(10, 20).onClose(innerCloseCount::incrementAndGet));
+
+        assertEquals(10, flatMapped.iteratorEx().next());
+        outer.close();
+
+        assertDoesNotThrow(flatMapped::close);
+        assertEquals(1, innerCloseCount.get());
+    }
+
+    @Test
     public void test_onClose_withFlatMap_innerSeqIsNull() throws Exception {
         AtomicBoolean outerSeqClosed = new AtomicBoolean(false);
 
@@ -11230,6 +11389,39 @@ public class SeqTest extends AbstractTest {
         assertTrue(firstHandlerCalled.get(), "First close handler should have been called.");
         assertTrue(secondHandlerCalled.get(), "Second close handler should have been called despite previous error.");
         assertEquals(exceptionFromClose, thrown, "The exception from the first handler should be the primary exception.");
+    }
+
+    @Test
+    public void test_onClose_repeatedExceptionIsNotSelfSuppressed() {
+        RuntimeException repeatedFailure = new RuntimeException("repeated close failure");
+        AtomicInteger laterHandlerCalls = new AtomicInteger();
+        Seq<Integer, Exception> seq = Seq.of(1).onClose(() -> {
+            throw repeatedFailure;
+        }).onClose(() -> {
+            throw repeatedFailure;
+        }).onClose(laterHandlerCalls::incrementAndGet);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, seq::close);
+
+        assertSame(repeatedFailure, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, laterHandlerCalls.get());
+        assertDoesNotThrow(seq::close);
+    }
+
+    @Test
+    public void test_onClose_errorDoesNotSkipLaterHandlers() {
+        AssertionError failure = new AssertionError("close failure");
+        AtomicInteger laterHandlerCalls = new AtomicInteger();
+        Seq<Integer, Exception> seq = Seq.of(1).onClose(() -> {
+            throw failure;
+        }).onClose(laterHandlerCalls::incrementAndGet);
+
+        AssertionError thrown = assertThrows(AssertionError.class, seq::close);
+
+        assertSame(failure, thrown);
+        assertEquals(1, laterHandlerCalls.get());
+        assertDoesNotThrow(seq::close);
     }
 
     @Test
@@ -11832,6 +12024,47 @@ public class SeqTest extends AbstractTest {
         });
 
         assertThrows(IOException.class, () -> seq.buffered().toList());
+    }
+
+    @Test
+    public void testBufferedRelaysProducerError() {
+        final Seq<Integer, RuntimeException> seq = Seq.<Integer, RuntimeException> of(1, 2, 3).map(i -> {
+            if (i == 2) {
+                throw new AssertionError("boom");
+            }
+
+            return i;
+        });
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> seq.buffered(1).toList());
+        assertTrue(thrown.getCause() instanceof AssertionError);
+        assertEquals("boom", thrown.getCause().getMessage());
+    }
+
+    @Test
+    public void testAverageLongDoesNotOverflowIntegralSum() throws Exception {
+        assertEquals((double) Long.MAX_VALUE, Seq.of(Long.MAX_VALUE, Long.MAX_VALUE).averageLong(Long::longValue).getAsDouble());
+        assertEquals((double) Long.MIN_VALUE, Seq.of(Long.MIN_VALUE, Long.MIN_VALUE).averageLong(Long::longValue).getAsDouble());
+        assertEquals(-0.5d, Seq.of(Long.MAX_VALUE, Long.MIN_VALUE).averageLong(Long::longValue).getAsDouble());
+    }
+
+    @Test
+    public void testRateLimitedNaNClosesSequenceOnValidationFailure() {
+        final AtomicBoolean closed = new AtomicBoolean(false);
+        final Seq<Integer, RuntimeException> seq = Seq.<Integer, RuntimeException> of(1, 2, 3).onClose(() -> closed.set(true));
+
+        assertThrows(IllegalArgumentException.class, () -> seq.rateLimited(Double.NaN));
+        assertTrue(closed.get());
+    }
+
+    @Test
+    public void testRepeatIteratorOptimizedCountAndExhaustion() throws Exception {
+        final Throwables.Iterator<String, RuntimeException> iter = Seq.<String, RuntimeException> repeat("x", Long.MAX_VALUE).iteratorEx();
+
+        iter.advance(Long.MAX_VALUE - 2);
+        assertEquals("x", iter.next());
+        assertEquals(1L, iter.count());
+        assertThrows(NoSuchElementException.class, iter::next);
     }
 
     @Test

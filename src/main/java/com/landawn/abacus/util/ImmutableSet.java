@@ -79,12 +79,13 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
     /**
      * Constructs an ImmutableSet backed by the provided set.
-     * Whether the set is already unmodifiable is detected automatically.
+     * The backing set is always exposed through an unmodifiable view; its concrete class name
+     * is not treated as evidence that it is immutable.
      *
      * @param set the set of elements to be included in this ImmutableSet.
      */
     ImmutableSet(final Set<? extends E> set) {
-        this(set, ClassUtil.isPossibleImmutable(set.getClass()));
+        this(set, false);
     }
 
     /**
@@ -115,28 +116,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     public static <E> ImmutableSet<E> empty() {
         return EMPTY;
     }
-
-    //    /**
-    //     * Returns an ImmutableSet containing a single element.
-    //     * This is a convenience method equivalent to {@link #of(Object)}.
-    //     * The returned set is immutable and will have a size of 1.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ImmutableSet<String> single = ImmutableSet.just("hello");
-    //     * System.out.println(single.contains("hello"));   // prints: true
-    //     * System.out.println(single.size());              // prints: 1
-    //     * }</pre>
-    //     *
-    //     * @param <E> the type of the element.
-    //     * @param e the single element to be contained in the ImmutableSet.
-    //     * @return an ImmutableSet containing only the specified element.
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public static <E> ImmutableSet<E> just(final E e) {
-    //        return new ImmutableSet<>(N.asLinkedHashSet(e), false);
-    //    }
 
     /**
      * Returns an ImmutableSet containing a single element.
@@ -378,38 +357,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
     }
 
-    //    /**
-    //     * Returns an ImmutableSet containing all distinct elements from the provided array.
-    //     * The returned set is independent of the input array; changes to the array after this call
-    //     * will not affect the returned set. Duplicate elements in the array are included only once.
-    //     * If the array is {@code null} or empty, an empty ImmutableSet is returned.
-    //     * Unlike some collection frameworks, this method supports {@code null} elements in the array.
-    //     * The iteration order is guaranteed to match the order of first occurrence in the array.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * String[] colors = {"red", "green", "blue", "red"};
-    //     * ImmutableSet<String> colorSet = ImmutableSet.of(colors);
-    //     * System.out.println(colorSet.size());   // prints: 3 (duplicates removed)
-    //     * }</pre>
-    //     *
-    //     * @param <E> the type of the elements.
-    //     * @param a the array of elements to include in the ImmutableSet, may be {@code null} or empty.
-    //     * @return an ImmutableSet containing all distinct elements from the array, or empty set if array is null/empty.
-    //     * @see Set#of(Object...)
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    @SafeVarargs
-    //    public static <E> ImmutableSet<E> of(final E... a) {
-    //        if (N.isEmpty(a)) {
-    //            return empty();
-    //        } else {
-    //            // return new ImmutableSet<>(Set.of(a), true);   // Doesn't support null element
-    //            return new ImmutableSet<>(N.asLinkedHashSet(a), false);
-    //        }
-    //    }
-
     /**
      * Returns an {@code ImmutableSet} containing the elements of the specified array.
      * If the array is {@code null} or empty, an empty {@code ImmutableSet} is returned.
@@ -582,7 +529,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @param <E> the type of elements to be maintained by the set.
      * @param holder the set to be used as the backing storage for the Builder; must not be {@code null}.
      * @return a new Builder instance that will use the provided set.
-     * @throws IllegalArgumentException if holder is null.
+     * @throws IllegalArgumentException if holder is {@code null}.
      */
     public static <E> Builder<E> builder(final Set<E> holder) throws IllegalArgumentException {
         N.checkArgNotNull(holder);
@@ -627,7 +574,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          *        .add("hello");
          * }</pre>
          *
-         * @param element the element to add, may be null.
+         * @param element the element to add, may be {@code null}.
          * @return this builder instance for method chaining.
          */
         public Builder<E> add(final E element) {
@@ -696,7 +643,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * builder.addAll(iter);
          * }</pre>
          *
-         * @param iter the iterator over elements to add, may be null.
+         * @param iter the iterator over elements to add, may be {@code null}.
          * @return this builder instance for method chaining.
          */
         public Builder<E> addAll(final Iterator<? extends E> iter) {

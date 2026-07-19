@@ -64,12 +64,14 @@ public enum EnumType {
 
     /**
      * Persists an enumerated type property or field as an integer using a predefined code value,
-     * typically supplied by a public {@code int code()} method on the enum constant.
+     * supplied by a public {@code int code()} method on the enum constant, or by a public
+     * {@code int intValue()} method when {@code code()} is not present.
      *
      * <p>Unlike {@link #ORDINAL}, the code value is explicitly assigned by the enum author
      * and is stable across reordering, making it safer for long-lived persisted data.
-     * The enum must expose a public {@code int code()} method for the framework to read
-     * and write the code value; otherwise type resolution fails with a runtime exception.</p>
+     * The enum must expose one of those public accessors with an exact primitive {@code int}
+     * return type; otherwise type resolution fails with a runtime exception. If both are present,
+     * {@code code()} takes precedence.</p>
      */
     CODE
 }

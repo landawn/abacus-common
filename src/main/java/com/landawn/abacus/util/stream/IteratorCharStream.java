@@ -15,7 +15,6 @@
 package com.landawn.abacus.util.stream;
 
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -365,27 +364,18 @@ class IteratorCharStream extends AbstractCharStream {
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;
             private CharStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextChar());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -408,8 +398,15 @@ class IteratorCharStream extends AbstractCharStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -519,27 +516,18 @@ class IteratorCharStream extends AbstractCharStream {
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextChar());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -562,8 +550,15 @@ class IteratorCharStream extends AbstractCharStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -588,27 +583,18 @@ class IteratorCharStream extends AbstractCharStream {
         final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
-            private Deque<LocalRunnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
                 while (cur == null || !cur.hasNext()) {
-                    if (elements.hasNext()) {
-                        if (closeHandle != null) {
-                            final Deque<LocalRunnable> tmp = closeHandle;
-                            closeHandle = null;
-                            StreamBase.close(tmp);
-                        }
+                    closeMappedStream();
 
+                    if (elements.hasNext()) {
                         s = mapper.apply(elements.nextChar());
 
                         if (s == null) {
                             cur = null;
                         } else {
-                            if (N.notEmpty(s.closeHandlers())) {
-                                closeHandle = s.closeHandlers();
-                            }
-
                             cur = s.iteratorEx();
                         }
                     } else {
@@ -631,8 +617,15 @@ class IteratorCharStream extends AbstractCharStream {
 
             @Override
             public void closeResource() {
-                if (closeHandle != null) {
-                    StreamBase.close(closeHandle);
+                closeMappedStream();
+            }
+
+            private void closeMappedStream() {
+                if (s != null) {
+                    final Runnable closeAction = s::close;
+                    s = null;
+                    cur = null;
+                    closeAction.run();
                 }
             }
         };
@@ -840,6 +833,10 @@ class IteratorCharStream extends AbstractCharStream {
 
             @Override
             public void advance(final long n2) {
+                if (n2 <= 0) {
+                    return;
+                }
+
                 if (!skipped) {
                     skipped = true;
                     elements.advance(n);
@@ -1325,9 +1322,13 @@ class IteratorCharStream extends AbstractCharStream {
                 while (elements.hasNext()) {
                     final char v = elements.nextChar();
                     if (window == null) {
-                        window = new char[k];
+                        window = new char[Math.min(k, 16)];
                     }
                     if (size < k) {
+                        if (size == window.length) {
+                            window = java.util.Arrays.copyOf(window, (int) Math.min(k, (long) window.length * 2));
+                        }
+
                         window[size++] = v;
                     } else {
                         window[idx] = v;

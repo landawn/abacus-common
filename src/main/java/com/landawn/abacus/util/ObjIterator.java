@@ -204,7 +204,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param toIndex the index after the last element to iterate (exclusive)
      * @return an {@code ObjIterator} over the specified range of array elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0},
-     *         {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     *         {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -259,8 +259,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     /**
      * Returns an {@code ObjIterator} that wraps the specified {@code Iterator}.
      * If the iterator is {@code null}, an empty {@code ObjIterator} is returned.
-     * If the iterator is already an {@code ObjIterator}, it is returned as-is
-     * (no wrapping is performed).
+     * An existing {@code ObjIterator} is also wrapped so that an untrusted subclass cannot expose
+     * a mutating {@link #remove()} implementation through the result.
      *
      * <p>This method is useful for converting a standard Java {@code Iterator}
      * to an {@code ObjIterator} to access the additional functional operations.</p>
@@ -269,8 +269,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <pre>{@code
      * Iterator<String> src = Arrays.asList("a", "b", "c").iterator();
      * ObjIterator<String> iter = ObjIterator.of(src);
-     * String first = iter.next();       // returns "a"
-     * boolean has = iter.hasNext();     // returns true
+     * String first = iter.next();     // returns "a"
+     * boolean has = iter.hasNext();   // returns true
      *
      * ObjIterator<String> empty = ObjIterator.of((Iterator<String>) null);
      * boolean none = empty.hasNext();   // returns false (null -> empty iterator)
@@ -283,8 +283,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     public static <T> ObjIterator<T> of(final Iterator<? extends T> iter) {
         if (iter == null) {
             return empty();
-        } else if (iter instanceof ObjIterator) {
-            return (ObjIterator<T>) iter;
         }
 
         return new ObjIterator<>() {
@@ -345,6 +343,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * iterator until the first call to {@code hasNext()} or {@code next()}.
      * This is useful for lazy initialization. If the supplier returns
      * {@code null}, an empty iterator is used.
+     * If initialization throws a runtime exception or error, that failure is cached and
+     * rethrown on every subsequent access; the supplier is never invoked more than once.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -359,40 +359,72 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param iteratorSupplier a {@code Supplier} that produces the {@code Iterator} when needed
      * @return an {@code ObjIterator} that lazily initializes using the supplier
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalStateException if the supplier recursively accesses this deferred iterator while it is being initialized
+     * @throws RuntimeException if the supplier throws a runtime exception when initialized
+     * @throws Error if the supplier throws an error when initialized
      */
     public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new ObjIterator<>() {
             private Iterator<? extends T> iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
+            private boolean isInitializing = false;
+            private Throwable initializationFailure = null;
 
             @Override
             public boolean hasNext() {
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 return iter.hasNext();
             }
 
             @Override
             public T next() {
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 return iter.next();
             }
 
             private void init() {
                 if (!isInitialized) {
-                    isInitialized = true;
-                    iter = iteratorSupplier.get();
+                    synchronized (this) {
+                        if (!isInitialized) {
+                            if (isInitializing) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                                }
 
-                    if (iter == null) {
-                        iter = ObjIterator.empty();
+                                throw (IllegalStateException) initializationFailure;
+                            }
+
+                            isInitializing = true;
+
+                            try {
+                                iter = iteratorSupplier.get();
+
+                                if (iter == null) {
+                                    iter = ObjIterator.empty();
+                                }
+                            } catch (RuntimeException | Error e) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = e;
+                                }
+                            } finally {
+                                isInitializing = false;
+                                isInitialized = true;
+                            }
+                        }
                     }
+
+                    // The volatile publication above makes both the iterator and any failure
+                    // visible to callers that observe initialization as complete.
+                }
+
+                if (initializationFailure instanceof RuntimeException) {
+                    throw (RuntimeException) initializationFailure;
+                } else if (initializationFailure != null) {
+                    throw (Error) initializationFailure;
                 }
             }
         };
@@ -491,6 +523,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * predicate and the {@code supplier} function on each step. Calling
      * {@code next()} when {@code hasNext} returns {@code false} throws
      * {@link NoSuchElementException}.
+     * The predicate result is cached until the corresponding element is consumed, so repeated
+     * {@code hasNext()} calls do not repeat predicate side effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -521,9 +555,17 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         N.checkArgNotNull(supplier);
 
         return new ObjIterator<>() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.test(init);
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.test(init);
+                    hasNextCached = true;
+                }
+
+                return hasNextValue;
             }
 
             @Override
@@ -532,6 +574,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.apply(init);
             }
         };
@@ -541,8 +584,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an {@code ObjIterator} that generates elements using both the
      * state value and the previously generated element. This allows for
      * complex stateful generation patterns. The previous value is {@code null}
-     * before the first element is generated. Calling {@code next()} when
+     * before the first element is generated (and is also {@code null} after an actual
+     * {@code null} element is generated). Calling {@code next()} when
      * {@code hasNext} returns {@code false} throws {@link NoSuchElementException}.
+     * The predicate result is cached until the corresponding element is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -572,10 +617,17 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
         return new ObjIterator<>() {
             private T prev = null;
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
 
             @Override
             public boolean hasNext() {
-                return hasNext.test(init, prev);
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.test(init, prev);
+                    hasNextCached = true;
+                }
+
+                return hasNextValue;
             }
 
             @Override
@@ -584,6 +636,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return (prev = supplier.apply(init, prev));
             }
         };
@@ -812,11 +865,14 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * // Iterates over: Person("Alice", 30), Person("Bob", 25)
      * }</pre>
      *
-     * @param keyExtractor the function to extract the comparison key from each element
+     * @param keyExtractor the function to extract the comparison key from each element; must not be {@code null}
      * @return a new {@code ObjIterator} with elements distinct by the extracted key
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
      * @see #distinct()
      */
     public ObjIterator<T> distinctBy(final Function<? super T, ?> keyExtractor) {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         final Set<Object> elements = new HashSet<>();
         return filter(e -> elements.add(keyExtractor.apply(e)));
     }
@@ -1004,16 +1060,18 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param startIndex the index to assign to the first element
      * @return a new {@code ObjIterator} of {@link Indexed} elements
      * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      * @see #indexed()
      */
     @Beta
-    public ObjIterator<Indexed<T>> indexed(final long startIndex) {
+    public ObjIterator<Indexed<T>> indexed(final long startIndex) throws IllegalArgumentException {
         N.checkArgNotNegative(startIndex, cs.startIndex);
 
         final ObjIterator<T> iter = this;
 
         return new ObjIterator<>() {
             private long idx = startIndex;
+            private boolean indexOverflow;
 
             @Override
             public boolean hasNext() {
@@ -1022,7 +1080,24 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public Indexed<T> next() {
-                return Indexed.of(iter.next(), idx++);
+                if (indexOverflow) {
+                    if (!iter.hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    throw new ArithmeticException("long overflow");
+                }
+
+                final T value = iter.next();
+                final long currentIndex = idx;
+
+                if (idx == Long.MAX_VALUE) {
+                    indexOverflow = true;
+                } else {
+                    idx++;
+                }
+
+                return Indexed.of(value, currentIndex);
             }
         };
     }

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
@@ -83,6 +84,68 @@ public class ParallelIteratorStreamTest extends TestBase {
 
     private <T> Stream<T> createIteratorParallelStream(Collection<T> data) {
         return Stream.of(data.iterator()).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(4));
+    }
+
+    @Test
+    public void testReduceWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch slowWorkerStarted = new CountDownLatch(1);
+        final AtomicBoolean slowWorkerFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedWorker = new AtomicBoolean();
+        final Stream<Integer> testStream = createIteratorParallelStream(Arrays.asList(1, 2))
+                .onClose(() -> closeObservedFinishedWorker.set(slowWorkerFinished.get()));
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> testStream.reduce(0, (left, right) -> {
+            if (right == 2) {
+                slowWorkerStarted.countDown();
+                sleepForWorkerOverlap();
+                slowWorkerFinished.set(true);
+                return left + right;
+            }
+
+            awaitWorkerStart(slowWorkerStarted);
+            throw new IllegalStateException("worker failure");
+        }, Integer::sum));
+
+        assertEquals("worker failure", thrown.getMessage());
+        assertTrue(slowWorkerFinished.get());
+        assertTrue(closeObservedFinishedWorker.get());
+    }
+
+    @Test
+    public void testReduceClosesAfterCombiningPartialResults() {
+        final AtomicBoolean partialResultsCombined = new AtomicBoolean();
+        final AtomicBoolean closeObservedCombinedResults = new AtomicBoolean();
+        final Stream<Integer> testStream = createIteratorParallelStream(Arrays.asList(1, 2))
+                .onClose(() -> closeObservedCombinedResults.set(partialResultsCombined.get()));
+
+        final int result = testStream.reduce(0, Integer::sum, (left, right) -> {
+            partialResultsCombined.set(true);
+            return left + right;
+        });
+
+        assertEquals(3, result);
+        assertTrue(partialResultsCombined.get());
+        assertTrue(closeObservedCombinedResults.get());
+    }
+
+    private static void awaitWorkerStart(final CountDownLatch latch) {
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void sleepForWorkerOverlap() {
+        try {
+            Thread.sleep(200);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
 
     @Test
@@ -1727,6 +1790,18 @@ public class ParallelIteratorStreamTest extends TestBase {
                 .toList();
 
         assertEquals(Arrays.asList("other:1", "other:2", "last:3"), result);
+    }
+
+    @Test
+    public void testCancelUncompletedThreadsIsPreserved() {
+        try (ParallelIteratorStream<Integer> source = new ParallelIteratorStream<>(Arrays.asList(1, 2, 3).iterator(), false, null, 4, Splitor.ITERATOR, null,
+                true, null)) {
+            assertTrue(source.cancelUncompletedThreads());
+
+            try (Stream<Integer> mapped = source.map(Fn.identity())) {
+                assertTrue(mapped.cancelUncompletedThreads());
+            }
+        }
     }
 
 }

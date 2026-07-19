@@ -2776,6 +2776,13 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
+    public void testReplaceWithShrinkingReplacementUsesValidInitialCapacity() {
+        assertEquals("ac", Strings.replace("abc", 0, "b", "", -1));
+        assertEquals("", Strings.replace("abc", 0, "abc", null, -1));
+        assertEquals("AC", Strings.replaceIgnoreCase("AbC", 0, "b", "", -1));
+    }
+
+    @Test
     public void test_replaceByPattern() {
         {
             N.println(Strings.repeat("=", 80));
@@ -12529,6 +12536,65 @@ public class StringsTest extends AbstractTest {
     public void testIndexOfDifference_Varargs() {
         assertEquals(7, Strings.indexOfDifference("i am a machine", "i am a robot", "i am a maniac"));
         assertEquals(1, Strings.indexOfDifference("abc", "abc", "a"));
+    }
+
+    @Test
+    public void testIsValidJavaIdentifier_SupplementaryUnicode() {
+        final String deseretCapital = new String(Character.toChars(0x10400));
+
+        assertTrue(Character.isJavaIdentifierStart(0x10400));
+        assertTrue(Strings.isValidJavaIdentifier(deseretCapital + "Value"));
+        assertTrue(Strings.isValidJavaIdentifier("value" + deseretCapital));
+        assertFalse(Strings.isValidJavaIdentifier("\uD801Value")); // unpaired high surrogate
+        assertFalse(Strings.isValidJavaIdentifier("value\uDC00")); // unpaired low surrogate
+    }
+
+    @Test
+    public void testUnicodePredicates_SupplementaryCodePoints() {
+        final String deseretCapital = new String(Character.toChars(0x10400));
+        final String deseretSmall = new String(Character.toChars(0x10428));
+        final String osmanyaDigit = new String(Character.toChars(0x104A0));
+
+        assertTrue(Strings.isAllUpperCase(deseretCapital));
+        assertTrue(Strings.isAllLowerCase(deseretSmall));
+        assertTrue(Strings.isMixedCase(deseretCapital + deseretSmall));
+        assertTrue(Strings.isAlpha(deseretCapital + deseretSmall));
+        assertTrue(Strings.isAlphaSpace(deseretCapital + " " + deseretSmall));
+        assertTrue(Strings.isAlphanumeric(deseretCapital + osmanyaDigit));
+        assertTrue(Strings.isAlphanumericSpace(deseretCapital + " " + osmanyaDigit));
+        assertTrue(Strings.isNumeric(osmanyaDigit));
+        assertTrue(Strings.isNumericSpace(osmanyaDigit + " " + osmanyaDigit));
+    }
+
+    @Test
+    public void testLongestCommonSubstring_DoesNotSplitSurrogatePairs() {
+        final String grinningFace = new String(Character.toChars(0x1F600));
+        final String beamingFace = new String(Character.toChars(0x1F601));
+
+        assertEquals(grinningFace, Strings.longestCommonSubstring("a" + grinningFace + "b", "x" + grinningFace + "y"));
+        assertEquals("", Strings.longestCommonSubstring(grinningFace, beamingFace));
+    }
+
+    @Test
+    public void testCaseConverters_SupplementaryUnicode() {
+        final String deseretCapital = new String(Character.toChars(0x10400));
+        final String deseretSmall = new String(Character.toChars(0x10428));
+
+        assertEquals(deseretSmall + "Value", Strings.toCamelCase(deseretCapital + "Value"));
+        assertEquals(deseretCapital + "Value", Strings.toUpperCamelCase(deseretSmall + "Value"));
+        assertEquals(deseretSmall + "_value", Strings.toSnakeCase(deseretSmall + "Value"));
+        assertEquals(deseretCapital + "_VALUE", Strings.toScreamingSnakeCase(deseretSmall + "Value"));
+        assertEquals(deseretSmall + "-value", Strings.toKebabCase(deseretSmall + "Value"));
+    }
+
+    @Test
+    public void testSubstringsBetween_EndDelimiterMustFitWithinRange() {
+        final String str = "a<x>>z";
+
+        for (final ExtractStrategy strategy : ExtractStrategy.values()) {
+            assertTrue(Strings.substringsBetween(str, 0, 4, "<", ">>", strategy, Integer.MAX_VALUE).isEmpty());
+            assertEquals(N.asList("x"), Strings.substringsBetween(str, 0, 5, "<", ">>", strategy, Integer.MAX_VALUE));
+        }
     }
 
 }

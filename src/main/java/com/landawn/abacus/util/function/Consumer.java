@@ -15,7 +15,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -76,11 +75,11 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code Consumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default Consumer<T> andThen(final java.util.function.Consumer<? super T> after) {
-        N.checkArgNotNull(after, cs.after);
+        java.util.Objects.requireNonNull(after, cs.after);
         return (final T t) -> {
             accept(t);
             after.accept(t);
@@ -88,16 +87,15 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
     }
 
     /**
-     * Converts this Consumer to a {@link Throwables.Consumer} with a specified exception type.
-     * This method performs an unchecked cast and is useful when you need to adapt this Consumer
-     * to a context that expects a different exception type.
+     * Returns this consumer as a {@link Throwables.Consumer} view with the requested exception type.
      *
-     * <p>Note: Since this is an unchecked cast, ensure that the actual implementation
-     * only throws RuntimeException or its subclasses; the declared checked-exception type
-     * {@code E} will never actually be thrown by the returned consumer.
+     * <p>The returned consumer has the same behavior as this one. This unchecked view does not
+     * translate exceptions or make the original implementation capable of throwing a new checked
+     * exception; {@code E} provides target-type compatibility with APIs that accept
+     * {@code Throwables.Consumer}.
      *
-     * @param <E> the type of exception that the returned Consumer is declared to throw
-     * @return a {@link Throwables.Consumer} that is functionally equivalent to this Consumer
+     * @param <E> the target exception type for compatibility with {@code Throwables.Consumer}
+     * @return a {@code Throwables.Consumer} view of this consumer
      */
     default <E extends Throwable> Throwables.Consumer<T, E> toThrowable() {
         return (Throwables.Consumer<T, E>) this;

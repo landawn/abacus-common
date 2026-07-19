@@ -21,6 +21,7 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.w3c.dom.NamedNodeMap;
@@ -268,6 +269,27 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     protected XMLStreamReader createXMLStreamReader(final InputStream is) {
         return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(is),
                 reader -> !(reader.isWhiteSpace() || reader.getEventType() == XMLStreamConstants.COMMENT));
+    }
+
+    /**
+     * Advances a newly created stream reader to the document element.
+     *
+     * @param xmlReader the stream reader to advance
+     * @throws XMLStreamException if the underlying stream cannot be read
+     * @throws ParsingException if the document ends without a root element
+     */
+    protected static void moveToRootElement(final XMLStreamReader xmlReader) throws XMLStreamException {
+        if (xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT) {
+            return;
+        }
+
+        while (xmlReader.hasNext()) {
+            if (xmlReader.next() == XMLStreamConstants.START_ELEMENT) {
+                return;
+            }
+        }
+
+        throw new ParsingException("No root element found in XML document");
     }
 
     /**
@@ -582,7 +604,8 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
 
     /**
      * Validates and extracts a single child element node from an XML element.
-     * This method ensures that an element contains exactly one meaningful child node, ignoring text nodes.
+     * This method ensures that an element contains exactly one child element, ignoring text,
+     * comments, processing instructions, and other non-element DOM nodes.
      *
      * <p>Usage Examples:</p>
      * <pre>{@code
@@ -599,14 +622,17 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         Node subEleNode = null;
 
         for (int j = 0; j < subEleNodes.getLength(); j++) {
-            //noinspection StatementWithEmptyBody
-            if (subEleNodes.item(j).getNodeType() == Node.TEXT_NODE) {
-                //NOSONAR
-            } else if (subEleNode == null) {
-                subEleNode = subEleNodes.item(j);
-            } else {
-                throw new ParsingException("Only one child node is supported");
+            final Node child = subEleNodes.item(j);
+
+            if (child.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
             }
+
+            if (subEleNode != null) {
+                throw new ParsingException("Only one child element is supported");
+            }
+
+            subEleNode = child;
         }
 
         return subEleNode;

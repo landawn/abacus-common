@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Throwables;
  * @see ToByteFunction
  */
 @FunctionalInterface
-public interface ToByteBiFunction<T, U> extends Throwables.ToByteBiFunction<T, U, RuntimeException> {
+public interface ToByteBiFunction<T, U> extends Throwables.ToByteBiFunction<T, U, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

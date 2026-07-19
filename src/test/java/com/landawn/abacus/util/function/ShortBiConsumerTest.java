@@ -15,8 +15,6 @@
 package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,10 +23,10 @@ import com.landawn.abacus.util.Pair;
 
 public class ShortBiConsumerTest extends TestBase {
 
+    private short acceptedSum;
+
     private void acceptHelper(short t, short u) {
-        // Helper method for method reference test
-        short sum = (short) (t + u);
-        assertTrue(sum > 0 || sum <= 0); // Always true, just using the values
+        acceptedSum = (short) (t + u);
     }
 
     @Test
@@ -106,14 +104,10 @@ public class ShortBiConsumerTest extends TestBase {
 
     @Test
     public void test_accept_methodReference() {
-        final Pair<Short, Short> result = Pair.of((short) 0, (short) 0);
-
         ShortBiConsumer consumer = this::acceptHelper;
 
         consumer.accept((short) 7, (short) 14);
-        // Method reference calls helper, we can't verify result directly
-        // but we can verify it doesn't throw
-        assertNotNull(consumer);
+        assertEquals(21, acceptedSum);
     }
 
     @Test

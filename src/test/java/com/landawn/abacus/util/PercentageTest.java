@@ -5,7 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -108,6 +117,43 @@ public class PercentageTest extends TestBase {
         ImmutableSet<Percentage> range4a = Percentage.rangeClosed(Percentage._20, Percentage._80, Percentage._10);
         ImmutableSet<Percentage> range4b = Percentage.rangeClosed(Percentage._20, Percentage._80, Percentage._10);
         Assertions.assertSame(range4a, range4b, "Same closed ranges with step should return cached instance");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRangeCachingIsAtomicUnderConcurrentFirstAccess() throws Exception {
+        final Field field = Percentage.class.getDeclaredField("rangePool");
+        field.setAccessible(true);
+        final Map<String, ImmutableSet<Percentage>> cache = (Map<String, ImmutableSet<Percentage>>) field.get(null);
+        final String key = "(" + Percentage._0_0001 + ", " + Percentage._99_9999 + ", " + Percentage._0_001 + ")";
+        cache.remove(key);
+
+        final int threadCount = 32;
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        final CountDownLatch ready = new CountDownLatch(threadCount);
+        final CountDownLatch start = new CountDownLatch(1);
+        final List<Future<ImmutableSet<Percentage>>> futures = new ArrayList<>(threadCount);
+
+        try {
+            for (int i = 0; i < threadCount; i++) {
+                futures.add(executor.submit(() -> {
+                    ready.countDown();
+                    start.await();
+                    return Percentage.range(Percentage._0_0001, Percentage._99_9999, Percentage._0_001);
+                }));
+            }
+
+            assertTrue(ready.await(10, TimeUnit.SECONDS));
+            start.countDown();
+            final ImmutableSet<Percentage> expected = futures.get(0).get();
+
+            for (final Future<ImmutableSet<Percentage>> future : futures) {
+                Assertions.assertSame(expected, future.get());
+            }
+        } finally {
+            start.countDown();
+            executor.shutdownNow();
+        }
     }
 
     @Test

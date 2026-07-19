@@ -18,11 +18,12 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 /**
- * A specialized writer for efficient CSV output with automatic character escaping.
+ * A specialized writer for efficient CSV output with character escaping through
+ * {@link #writeCharacter(char)} and the other {@code writeCharacter(...)} overloads.
  * This class extends CharacterWriter and provides optimized writing of CSV content
  * with proper escaping of special CSV characters according to RFC 4180.
  *
- * <p>The writer handles the following CSV escaping rules:</p>
+ * <p>The {@code writeCharacter(...)} methods handle the following CSV escaping rules:</p>
  * <ul>
  *   <li>Double quotes ({@code "}) are escaped as {@code ""} or {@code \"} depending on configuration</li>
  *   <li>Backslashes ({@code \}) are passed through literally in the default (RFC 4180) mode; in
@@ -30,18 +31,24 @@ import java.io.Writer;
  *   <li>Tabs, newlines, carriage returns, backspaces, and form-feeds are passed
  *       through literally (they are part of the quoted field's value per RFC 4180)</li>
  *   <li>Control characters (U+0000 through U+001F, except those listed above, plus U+007F) are escaped as
- *       <code>&#92;uXXXX</code> Unicode escapes (e.g. {@code \u0000})</li>
+ *       {@code &#92;uXXXX} Unicode escapes (e.g. {@code \u0000})</li>
  *   <li>Special Unicode line separators (U+2028, U+2029) are escaped as {@code \u2028} and {@code \u2029}</li>
  * </ul>
  *
  * <p>The escape mode (double-quote vs backslash) is determined by the
  * {@code CsvUtil.isBackSlashEscapeCharForWrite()} setting.</p>
  *
+ * <p>The ordinary {@code write(...)} methods write their arguments verbatim. Use them for CSV
+ * structure such as delimiters and enclosing quotes, and use {@code writeCharacter(...)} for
+ * field content that must be escaped.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (BufferedCsvWriter writer = new BufferedCsvWriter()) {
- *     writer.write("Name,Description\n");
- *     writer.write("Product \"A\",Contains special chars: \t and \n");
+ *     writer.write("Name,Description\r\n");
+ *     writer.write("Product A,\"");
+ *     writer.writeCharacter("Contains a \"quoted\" value");
+ *     writer.write("\"\r\n");
  *     String csv = writer.toString();
  * }
  * }</pre>
@@ -72,7 +79,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * Double quotes are escaped as {@code ""}, while backslashes, tabs, newlines, carriage returns,
      * backspaces, and form-feeds are passed through literally; other control characters (U+0000 through
      * U+001F and U+007F) and the line/paragraph separators (U+2028, U+2029) are escaped as
-     * <code>&#92;uXXXX</code> sequences.
+     * {@code &#92;uXXXX} sequences.
      */
     static final char[][] REPLACEMENT_CHARS;
 
@@ -154,7 +161,8 @@ public final class BufferedCsvWriter extends CharacterWriter {
 
     /**
      * Creates a new BufferedCsvWriter that writes to the specified OutputStream.
-     * Characters are encoded using the default character encoding.
+     * Characters are encoded as UTF-8 ({@link IOUtil#DEFAULT_CHARSET}), independent of the
+     * JVM's platform-default charset.
      * The escape mode is determined by the current CsvUtil configuration.
      *
      * <p><b>Usage Examples:</b></p>

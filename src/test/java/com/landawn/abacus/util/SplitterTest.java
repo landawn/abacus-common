@@ -203,6 +203,22 @@ public class SplitterTest extends AbstractTest {
     }
 
     @Test
+    public void testMapSplitterSupplierValidationIsEager() {
+        Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
+
+        assertThrows(NullPointerException.class, () -> mapSplitter.split(null, (java.util.function.Supplier<Map<String, String>>) null));
+        assertThrows(NullPointerException.class, () -> mapSplitter.split(null, (java.util.function.Supplier<Map<String, String>>) () -> null));
+
+        boolean[] supplierCalled = { false };
+        assertThrows(IllegalArgumentException.class,
+                () -> mapSplitter.split("", (Class<String>) null, Integer.class, (java.util.function.Supplier<Map<String, Integer>>) () -> {
+                    supplierCalled[0] = true;
+                    return new HashMap<>();
+                }));
+        assertFalse(supplierCalled[0]);
+    }
+
+    @Test
     public void testMapSplitterSplitWithClassAndSupplier() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
         TreeMap<Integer, Long> result = mapSplitter.split("1=100,2=200", Integer.class, Long.class, Suppliers.ofTreeMap());
@@ -626,6 +642,16 @@ public class SplitterTest extends AbstractTest {
 
         result = splitter.split("");
         assertEquals(Arrays.asList(""), result);
+    }
+
+    @Test
+    public void testWithCharSequenceSnapshotsMutableDelimiter() {
+        StringBuilder delimiter = new StringBuilder("::");
+        Splitter splitter = Splitter.with(delimiter);
+
+        delimiter.setLength(1);
+
+        assertEquals(Arrays.asList("a", "b", "c"), splitter.split("a::b::c"));
     }
 
     @Test
@@ -1467,6 +1493,22 @@ public class SplitterTest extends AbstractTest {
 
         LinkedList<String> linkedList = splitter.split("a,b,c", Suppliers.ofLinkedList());
         assertEquals(new LinkedList<>(Arrays.asList("a", "b", "c")), linkedList);
+    }
+
+    @Test
+    public void testMapperAndSupplierValidationIsEager() {
+        Splitter splitter = Splitter.with(',');
+
+        assertThrows(NullPointerException.class, () -> splitter.split(null, (Function<String, String>) null));
+        assertThrows(NullPointerException.class, () -> splitter.split(null, (java.util.function.Supplier<List<String>>) null));
+        assertThrows(NullPointerException.class, () -> splitter.split(null, (java.util.function.Supplier<List<String>>) () -> null));
+
+        boolean[] supplierCalled = { false };
+        assertThrows(IllegalArgumentException.class, () -> splitter.split("", (Class<Integer>) null, (java.util.function.Supplier<List<Integer>>) () -> {
+            supplierCalled[0] = true;
+            return new ArrayList<>();
+        }));
+        assertFalse(supplierCalled[0]);
     }
 
     @Test

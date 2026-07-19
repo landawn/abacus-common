@@ -160,28 +160,34 @@ public class CodeGenerationUtilTest extends TestBase {
 
     @Test
     public void test_generatePropNameTableClass_singleParam_nullClass() {
-        assertThrows(Exception.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClass(null);
         });
     }
 
     @Test
     public void test_generatePropNameTableClass_withEmptyClassName() {
-        assertThrows(Exception.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClass(User.class, "");
         });
     }
 
     @Test
     public void test_generatePropNameTableClass_withNullClassName() {
-        assertThrows(Exception.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClass(User.class, null);
         });
     }
 
     @Test
+    public void test_generatePropNameTableClass_rejectsInvalidJavaIdentifier() {
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClass(User.class, "../Injected"));
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClass(User.class, "class"));
+    }
+
+    @Test
     public void test_generatePropNameTableClass_threeParams_nullClass() {
-        assertThrows(Exception.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             CodeGenerationUtil.generatePropNameTableClass(null, "x", null);
         });
     }
@@ -388,13 +394,28 @@ public class CodeGenerationUtilTest extends TestBase {
         final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
                 .entityClasses(classes)
                 .className("s")
-                .packageName("com.custom.package")
+                .packageName("com.custom.generated")
                 .build();
 
         final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
 
         assertNotNull(code);
-        assertTrue(code.contains("package com.custom.package;"));
+        assertTrue(code.contains("package com.custom.generated;"));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_externalInterfacePackageIsNotCorrupted() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("s")
+                .packageName("util")
+                .extendedInterfaces(Arrays.asList(java.util.function.Supplier.class))
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertTrue(code.contains("public interface s extends java.util.function.Supplier"), code);
+        assertFalse(code.contains("extends java.function.Supplier"), code);
     }
 
     @Test
@@ -412,6 +433,32 @@ public class CodeGenerationUtilTest extends TestBase {
         assertNotNull(code);
         assertTrue(code.contains("String id"));
         assertTrue(code.contains("String name"));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_rejectsWhenFilteringRemovesEveryClass() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder().entityClasses(Arrays.asList(Comparable.class)).className("s").build();
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(config));
+
+        assertTrue(exception.getMessage().contains("after filtering"), exception.getMessage());
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_nestedLowerCaseNamesReceiveNosonarIndependently() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("S")
+                .generateSnakeCase(true)
+                .classNameForSnakeCase("sl")
+                .generateScreamingSnakeCase(true)
+                .classNameForScreamingSnakeCase("su")
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertTrue(code.contains("public interface sl { // NOSONAR"), code);
+        assertTrue(code.contains("public interface su { // NOSONAR"), code);
     }
 
     @Test
@@ -616,6 +663,42 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
+    public void test_generatePropNameTableClasses_config_rejectsInvalidGeneratedNames() {
+        final PropNameTableCodeConfig invalidPackage = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("Props")
+                .packageName("com.example/../../outside")
+                .build();
+        final PropNameTableCodeConfig invalidNestedClass = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("Props")
+                .generateSnakeCase(true)
+                .classNameForSnakeCase("snake-case")
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(invalidPackage));
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(invalidNestedClass));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_config_rejectsInvalidConvertedPropertyName() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("Props")
+                .propNameConverter((cls, propName) -> "invalid-name")
+                .build();
+        final PropNameTableCodeConfig invalidFunctionPrefix = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("Props")
+                .generateFunctionPropName(true)
+                .propFunctions(Map.of("invalid-prefix", CodeGenerationUtil.MIN_FUNC))
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(config));
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(invalidFunctionPrefix));
+    }
+
+    @Test
     public void test_generatePropNameTableClasses_config_duplicateSimpleClassNames() {
         @Data
         @NoArgsConstructor
@@ -680,6 +763,11 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
+    public void test_MIN_FUNC_withPrimitiveComparable() {
+        assertEquals("min(age)", CodeGenerationUtil.MIN_FUNC.apply(User.class, int.class, "age"));
+    }
+
+    @Test
     public void test_MIN_FUNC_withNonComparable() {
         final String result = CodeGenerationUtil.MIN_FUNC.apply(User.class, Object.class, "obj");
         assertEquals(null, result);
@@ -689,6 +777,11 @@ public class CodeGenerationUtilTest extends TestBase {
     public void test_MAX_FUNC_withComparable() {
         final String result = CodeGenerationUtil.MAX_FUNC.apply(User.class, String.class, "name");
         assertEquals("max(name)", result);
+    }
+
+    @Test
+    public void test_MAX_FUNC_withPrimitiveComparable() {
+        assertEquals("max(price)", CodeGenerationUtil.MAX_FUNC.apply(Order.class, double.class, "price"));
     }
 
     @Test

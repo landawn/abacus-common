@@ -59,12 +59,12 @@ public enum DateTimeFormat {
     LONG,
 
     /**
-     * ISO 8601 date-time format without milliseconds: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}.
-     * This format represents date and time in the ISO 8601 standard with second precision.
-     * The 'Z' suffix indicates UTC timezone (Zulu time).
+     * ISO 8601 date-time format with second precision.
+     * Legacy {@link java.util.Date} and {@link java.util.Calendar} serializers emit UTC as
+     * {@code yyyy-MM-dd'T'HH:mm:ss'Z'}. Offset- and zone-aware temporal types retain their
+     * offset instead, so the exact representation is determined by the type serializer.
      *
-     * <p>Format pattern: {@code yyyy-MM-dd'T'HH:mm:ss'Z'}</p>
-     * <p>Example value: {@code 2023-12-25T10:30:45Z}</p>
+     * <p>Legacy UTC example: {@code 2023-12-25T10:30:45Z}</p>
      *
      * <p>This format is widely used in:</p>
      * <ul>
@@ -78,12 +78,12 @@ public enum DateTimeFormat {
     ISO_8601_DATE_TIME,
 
     /**
-     * ISO 8601 timestamp format with milliseconds: {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}.
-     * This format represents date and time in the ISO 8601 standard with millisecond precision.
-     * The 'Z' suffix indicates UTC timezone (Zulu time).
+     * ISO 8601 timestamp format with millisecond precision.
+     * Legacy {@link java.util.Date} and {@link java.util.Calendar} serializers emit UTC as
+     * {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}. Offset- and zone-aware temporal types retain their
+     * offset instead, so the exact representation is determined by the type serializer.
      *
-     * <p>Format pattern: {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}</p>
-     * <p>Example value: {@code 2023-12-25T10:30:45.123Z}</p>
+     * <p>Legacy UTC example: {@code 2023-12-25T10:30:45.123Z}</p>
      *
      * <p>This format is preferred when:</p>
      * <ul>

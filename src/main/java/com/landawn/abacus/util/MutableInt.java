@@ -29,6 +29,9 @@ import java.io.Serial;
  * MutableInt instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
  *
+ * <p>Arithmetic methods use ordinary Java {@code int} arithmetic; overflow and underflow
+ * wrap around rather than throwing.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableInt counter = MutableInt.of(0);
@@ -206,6 +209,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
+     * @throws NullPointerException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final Throwables.IntPredicate<E> predicate, final int newValue) throws E {

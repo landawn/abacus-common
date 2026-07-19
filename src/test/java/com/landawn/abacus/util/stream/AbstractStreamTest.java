@@ -2669,6 +2669,13 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
+    public void testCombinationsWithRepeatRejectsNegativeLengthEagerly() {
+        stream = createStream(1, 2);
+
+        assertThrows(IllegalArgumentException.class, () -> stream.combinations(-1, true));
+    }
+
+    @Test
     public void testCombinations_withLength() {
         stream = createStream(1, 2, 3);
         List<List<Integer>> result = stream.combinations(2).toList();
@@ -3551,6 +3558,22 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
+    public void testPersistToConnectionValidatesArgumentsBeforePreparingStatement() throws SQLException {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist((Connection) null, "INSERT INTO test VALUES (?)", 1, 0, (i, ps) -> {
+        }));
+
+        Connection conn = mock(Connection.class);
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist(conn, null, 1, 0, (i, ps) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist(conn, "INSERT INTO test VALUES (?)", -1, 0, (i, ps) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist(conn, "INSERT INTO test VALUES (?)", 1, -1, (i, ps) -> {
+        }));
+
+        verify(conn, times(0)).prepareStatement(anyString());
+    }
+
+    @Test
     public void testPersistToDataSource() throws SQLException {
         javax.sql.DataSource ds = mock(javax.sql.DataSource.class);
         Connection conn = mock(Connection.class);
@@ -3564,6 +3587,22 @@ public class AbstractStreamTest extends TestBase {
         assertEquals(3, count);
         verify(stmt, times(3)).setInt(anyInt(), anyInt());
         verify(stmt, times(3)).execute();
+    }
+
+    @Test
+    public void testPersistToDataSourceValidatesArgumentsBeforeAcquiringConnection() throws SQLException {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist((javax.sql.DataSource) null, "INSERT INTO test VALUES (?)", 1, 0, (i, ps) -> {
+        }));
+
+        javax.sql.DataSource ds = mock(javax.sql.DataSource.class);
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist(ds, null, 1, 0, (i, ps) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist(ds, "INSERT INTO test VALUES (?)", -1, 0, (i, ps) -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist(ds, "INSERT INTO test VALUES (?)", 1, -1, (i, ps) -> {
+        }));
+
+        verify(ds, times(0)).getConnection();
     }
 
     @Test
@@ -3662,7 +3701,16 @@ public class AbstractStreamTest extends TestBase {
         // regression: an unsupported row type threw a bare RuntimeException while the sibling
         // unmatched-header check in the same method throws IllegalArgumentException.
         StringWriter writer = new StringWriter();
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).persistToCsv(List.of("col1"), writer));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).persistToCsv(List.of("col1"), writer));
+        assertTrue(exception.getMessage().contains("Collection/Object[] rows with explicit headers"));
+    }
+
+    @Test
+    public void testPersistToCsvNullFirstRowThrowsIllegalArgumentException() {
+        StringWriter writer = new StringWriter();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> Stream.<Object> of((Object) null).persistToCsv(List.of("col1"), writer));
+        assertTrue(exception.getMessage().startsWith("null is not supported for CSV format"));
     }
 
     @Test
@@ -4433,6 +4481,51 @@ public class AbstractStreamTest extends TestBase {
         assertEquals(1, closeCount.get());
         assertEquals(2L, result.get(0).right().longValue());
         assertEquals(1L, result.get(1).right().longValue());
+    }
+
+    @Test
+    public void testJoinByRangeClosesStreamWithoutCloseHandlersExactlyOnce() {
+        final AtomicInteger closeCount = new AtomicInteger();
+
+        final Stream<Integer> rightForList = newCloseTrackingArrayStream(closeCount);
+        final Stream<Pair<Integer, List<Integer>>> listJoin = Stream.of(1).joinByRange(rightForList, (left, right) -> true);
+        listJoin.close();
+        listJoin.close();
+        assertEquals(1, closeCount.get());
+        assertThrows(IllegalStateException.class, rightForList::count);
+
+        final Stream<Integer> rightForCollector = newCloseTrackingArrayStream(closeCount);
+        final Stream<Integer> collectorJoin = Stream.of(1)
+                .joinByRange(rightForCollector, (left, right) -> true, Collectors.toList(), (left, matches) -> matches.size());
+        collectorJoin.close();
+        collectorJoin.close();
+        assertEquals(2, closeCount.get());
+        assertThrows(IllegalStateException.class, rightForCollector::count);
+
+        final Stream<Integer> rightForUnjoined = newCloseTrackingArrayStream(closeCount);
+        final Stream<Integer> unjoinedJoin = Stream.of(1)
+                .joinByRange(rightForUnjoined, (left, right) -> true, Collectors.toList(), (left, matches) -> matches.size(),
+                        iter -> Stream.of(iter).map(value -> -value));
+        unjoinedJoin.close();
+        unjoinedJoin.close();
+        assertEquals(3, closeCount.get());
+        assertThrows(IllegalStateException.class, rightForUnjoined::count);
+    }
+
+    private static Stream<Integer> newCloseTrackingArrayStream(final AtomicInteger closeCount) {
+        final ArrayStream<Integer> stream = new ArrayStream<>(new Integer[] { 1, 2 }) {
+            @Override
+            public synchronized void close() {
+                if (!isClosed()) {
+                    closeCount.incrementAndGet();
+                }
+
+                super.close();
+            }
+        };
+
+        assertTrue(StreamBase.isEmptyCloseHandlers(stream.closeHandlers()));
+        return stream;
     }
 
     @Test

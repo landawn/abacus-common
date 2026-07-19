@@ -48,6 +48,12 @@ public class AbacusXmlParserImplTest extends TestBase {
     Path tempDir;
 
     private XmlParser staxParser;
+
+    @Test
+    public void testStaxDocumentWithoutRootElementReportsParsingException() {
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> staxParser.deserialize("<?xml version=\"1.0\"?>", Map.class));
+    }
+
     private XmlParser domParser;
 
     public static class Person {
@@ -556,6 +562,19 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertNotNull(person);
         assertEquals("premidpost", person.getName());
         assertEquals(9, person.getAge());
+    }
+
+    @Test
+    public void testDeserializeBeanWithStrayText_staxPath() {
+        // Regression: mixed content is reported as a CHARACTERS event while no property is active.
+        // Consuming the following event from that branch skips the next START_ELEMENT entirely.
+        // The DOM path ignores text outside properties, so StAX must do the same.
+        final String xml = "<bean>ignored<name>Pretty</name>also ignored<age>27</age></bean>";
+
+        final Person person = staxParser.deserialize(xml, Person.class);
+        assertNotNull(person);
+        assertEquals("Pretty", person.getName());
+        assertEquals(27, person.getAge());
     }
 
     @Test

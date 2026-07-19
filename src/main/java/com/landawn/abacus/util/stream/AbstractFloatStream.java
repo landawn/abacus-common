@@ -99,6 +99,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         final FloatConsumer action = it -> rateLimiter.acquire();
@@ -113,6 +115,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream delay(final Duration delay) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(delay, cs.delay);
 
         final long millis = delay.toMillis();
@@ -139,7 +143,9 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public FloatStream debounce(Duration duration) {
+    public FloatStream debounce(Duration duration) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
@@ -149,7 +155,7 @@ abstract class AbstractFloatStream extends FloatStream {
 
         final FloatIteratorEx iter = iteratorEx();
 
-        return newStream(new FloatIteratorEx() {
+        return newStream(new FloatIteratorEx() { //NOSONAR
             private final long durationMillis = duration.toMillis();
             private float prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
@@ -248,6 +254,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream mapPartial(final FloatFunction<OptionalFloat> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_FLOAT).mapToFloat(Fn.GET_AS_FLOAT));
@@ -591,7 +599,7 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public FloatStream top(final int n) throws IllegalStateException {
+    public FloatStream top(final int n) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 
@@ -705,6 +713,8 @@ abstract class AbstractFloatStream extends FloatStream {
                     a[i] = elements[cursor - i - 1];
                 }
 
+                cursor = fromIndex;
+
                 return a;
             }
 
@@ -792,6 +802,8 @@ abstract class AbstractFloatStream extends FloatStream {
                 for (int i = cnt; i < len; i++) {
                     a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
+
+                cnt = len;
 
                 return a;
             }
@@ -919,6 +931,8 @@ abstract class AbstractFloatStream extends FloatStream {
                 for (int i = 0; i < cursor; i++) {
                     a[i] = aar[cursor - i - 1];
                 }
+
+                cursor = 0;
 
                 return a;
             }
@@ -1240,7 +1254,7 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<? super Float, ?, D> downstream) throws E {
+            final Collector<? super Float, ?, D> downstream) throws IllegalStateException, E {
         assertNotClosed();
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
@@ -1441,9 +1455,15 @@ abstract class AbstractFloatStream extends FloatStream {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}
+     */
     @Override
-    public Joiner joinTo(final Joiner joiner) throws IllegalStateException {
+    public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(joiner, cs.joiner);
 
         try {
             @SuppressWarnings("resource")

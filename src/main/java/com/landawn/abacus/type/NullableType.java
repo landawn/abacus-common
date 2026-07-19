@@ -20,7 +20,7 @@ import com.landawn.abacus.util.u.Nullable;
 /**
  * Generic type handler for {@link Nullable} wrapper objects from the {@code com.landawn.abacus.util.u}
  * package, providing serialization, deserialization, and database interaction capabilities for
- * nullable values of any type.
+ * {@code nullable} values of any type.
  * <p>
  * Unlike {@link com.landawn.abacus.util.u.Optional Optional} (handled by {@link OptionalType}),
  * a {@code Nullable} can carry {@code null} as a valid present value:
@@ -28,8 +28,9 @@ import com.landawn.abacus.util.u.Nullable;
  * distinct states. SQL {@code NULL} columns are mapped here to a present {@code Nullable}
  * holding {@code null}, not to {@link Nullable#empty()}.
  * <p>
- * This type handler supports generic type parameters of the form {@code Nullable<T>}
- * and delegates element serialization/deserialization to the appropriate element type handler.
+ * This type handler supports generic type parameters of the form {@code Nullable<T>}.
+ * {@link #stringOf(Nullable)} and {@link #valueOf(String)} use the declared element type so they remain
+ * symmetric; streaming append/serialization methods use the contained value's runtime type.
  *
  * @param <T> the type of value wrapped by the {@code Nullable}
  */
@@ -47,7 +48,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     /**
      * Constructs a NullableType for the specified parameter type.
-     * This constructor initializes the type handler for Nullable wrapper objects with a specific element type.
+     * This constructor initializes the type handler for {@code Nullable} wrapper objects with a specific element type.
      *
      * @param parameterTypeName the fully qualified or simple name of the element type contained in the Nullable
      */
@@ -126,10 +127,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * Converts a {@link Nullable} object to its string representation.
      * If the {@code Nullable} is {@code null} or holds a {@code null}/empty value
      * (as reported by {@link Nullable#isNull()}), returns {@code null}. Otherwise,
-     * delegates to {@link com.landawn.abacus.util.N#stringOf(Object)}, which selects
-     * a converter based on the runtime class of the contained value.
+     * delegates to the declared {@linkplain #elementType() element type}. Using the
+     * declared type keeps this method symmetric with {@link #valueOf(String)}, which
+     * parses the result with that same type handler.
      *
-     * <p>For non-null contained values, the returned string is a serializable representation designed to be parsed
+     * <p>For {@code non-null} contained values, the returned string is a serializable representation designed to be parsed
      * back into an equivalent value via {@link #valueOf(String)}. This is the key distinction from
      * {@link Object#toString()}, whose result is not guaranteed to be convertible back into the original value.</p>
      * <p><b>&#9888;&#65039;</b> Serializing {@code Nullable.of(null)} and {@code Nullable.empty()} both returns {@code null};
@@ -143,7 +145,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public String stringOf(final Nullable<T> x) {
-        return (x == null || x.isNull()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());   //NOSONAR
+        return (x == null || x.isNull()) ? null : elementType.stringOf(x.get());
     }
 
     /**
@@ -151,7 +153,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * If the string is {@code null}, returns an empty {@code Nullable}. Otherwise,
      * delegates to the element type's valueOf method and wraps the result.
      *
-     * <p>This method round-trips non-null values written by {@code stringOf}. Strings produced by
+     * <p>This method round-trips {@code non-null} values written by {@code stringOf}. Strings produced by
      * {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to convert
@@ -264,7 +266,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * otherwise delegates to the runtime type handler of the contained value.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes {@code null} for an empty or null-valued
-     * nullable, or delegates the contained value to its runtime type handler with the supplied serialization config.
+     * {@code nullable}, or delegates the contained value to its runtime type handler with the supplied serialization config.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the contained
      * value's serializer, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering.

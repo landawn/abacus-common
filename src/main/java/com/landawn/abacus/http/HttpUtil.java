@@ -62,7 +62,6 @@ import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
-import com.landawn.abacus.util.RegExUtil;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -240,8 +239,10 @@ public final class HttpUtil {
 
     /**
      * Validates an HTTP header key-value pair.
-     * Checks that the key is not empty, doesn't contain line separators or colons,
-     * and that the value doesn't contain unescaped line separators.
+     * Checks that the name consists only of HTTP {@code token} characters and that the value
+     * contains no prohibited control characters. Obsolete line folding ({@code CRLF SP/HTAB}) is
+     * rejected: RFC 7230 allows recipients to interpret legacy folded fields, but senders must not
+     * generate them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -261,37 +262,31 @@ public final class HttpUtil {
      * @return {@code true} if the header is valid, {@code false} otherwise
      */
     public static boolean isValidHttpHeader(final String key, final String value) {
-        if (Strings.isEmpty(key) || RegExUtil.LINE_SEPARATOR.matcher(key).find() || key.indexOf(':') >= 0) {
+        if (Strings.isEmpty(key)) {
             return false;
         }
 
-        if (Strings.isNotEmpty(value)) {
-            final int len = value.length();
-            char c = 0;
+        for (int i = 0, len = key.length(); i < len; i++) {
+            if (!isHttpTokenChar(key.charAt(i))) {
+                return false;
+            }
+        }
 
-            for (int i = 0; i < len; i++) {
-                c = value.charAt(i);
+        if (value != null) {
+            for (int i = 0, len = value.length(); i < len; i++) {
+                final char ch = value.charAt(i);
 
-                if (c == '\r' || c == HttpHeaders.LF) {
-                    // RFC 7230: only CRLF is valid for obs-fold (header field folding).
-                    // A bare LF (\n) must be rejected to prevent header injection.
-
-                    // c == '\r': expect LF next
-                    // After CRLF, expect at least one SP or HTAB (obs-fold continuation)
-                    if ((c == HttpHeaders.LF) || ++i >= len || value.charAt(i) != HttpHeaders.LF || (++i >= len)) {
-                        return false;
-                    }
-
-                    c = value.charAt(i);
-
-                    if (c != ' ' && c != '\t') {
-                        return false;
-                    }
+                if ((ch < 0x20 && ch != '\t') || ch == 0x7f) {
+                    return false;
                 }
             }
         }
 
         return true;
+    }
+
+    private static boolean isHttpTokenChar(final char ch) {
+        return ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'Z' || ch >= 'a' && ch <= 'z' || "!#$%&'*+-.^_`|~".indexOf(ch) >= 0;
     }
 
     /**
@@ -827,6 +822,12 @@ public final class HttpUtil {
     /**
      * Determines the ContentFormat from content type and encoding strings.
      * This method matches the content type and encoding to find the appropriate ContentFormat.
+     * A comma-separated {@code Content-Encoding} value is parsed as coding tokens; known codings
+     * are matched case-insensitively as complete tokens (with {@code x-gzip} accepted as a legacy
+     * alias), so an unrelated coding that merely contains a known name is not misclassified. Since
+     * {@link ContentFormat} represents only one coding, a value containing several recognized
+     * codings selects one by this method's fixed priority: gzip, Brotli, Snappy, LZ4, then Kryo.
+     * This method does not represent or decode a stack of content codings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -878,15 +879,15 @@ public final class HttpUtil {
         ContentFormat contentFormat = contentEncoding2Format.get(contentEncoding);
 
         if (contentFormat == null) {
-            if (Strings.containsIgnoreCase(contentEncoding, GZIP)) {
+            if (containsContentEncoding(contentEncoding, GZIP)) {
                 contentFormat = contentEncoding2Format.get(GZIP);
-            } else if (Strings.containsIgnoreCase(contentEncoding, BR)) {
+            } else if (containsContentEncoding(contentEncoding, BR)) {
                 contentFormat = contentEncoding2Format.get(BR);
-            } else if (Strings.containsIgnoreCase(contentEncoding, SNAPPY)) {
+            } else if (containsContentEncoding(contentEncoding, SNAPPY)) {
                 contentFormat = contentEncoding2Format.get(SNAPPY);
-            } else if (Strings.containsIgnoreCase(contentEncoding, LZ4)) {
+            } else if (containsContentEncoding(contentEncoding, LZ4)) {
                 contentFormat = contentEncoding2Format.get(LZ4);
-            } else if (Strings.containsIgnoreCase(contentEncoding, KRYO)) {
+            } else if (containsContentEncoding(contentEncoding, KRYO)) {
                 contentFormat = contentEncoding2Format.get(KRYO);
             } else {
                 contentFormat = contentEncoding2Format.get(Strings.EMPTY);
@@ -894,6 +895,38 @@ public final class HttpUtil {
         }
 
         return contentFormat == null ? ContentFormat.NONE : contentFormat;
+    }
+
+    /**
+     * Tests a comma-separated {@code Content-Encoding} field for an exact coding token.
+     * Substring matching is deliberately avoided: for example, the unknown coding
+     * {@code zebra} must not be interpreted as Brotli merely because it contains
+     * {@code br}. The historical {@code x-gzip} alias is accepted for gzip.
+     */
+    private static boolean containsContentEncoding(final String contentEncoding, final String expectedEncoding) {
+        if (Strings.isEmpty(contentEncoding)) {
+            return false;
+        }
+
+        int fromIndex = 0;
+
+        while (fromIndex <= contentEncoding.length()) {
+            final int commaIndex = contentEncoding.indexOf(',', fromIndex);
+            final int toIndex = commaIndex < 0 ? contentEncoding.length() : commaIndex;
+            final String token = contentEncoding.substring(fromIndex, toIndex).trim();
+
+            if (token.equalsIgnoreCase(expectedEncoding) || (GZIP.equals(expectedEncoding) && token.equalsIgnoreCase("x-gzip"))) {
+                return true;
+            }
+
+            if (commaIndex < 0) {
+                break;
+            }
+
+            fromIndex = commaIndex + 1;
+        }
+
+        return false;
     }
 
     /**
@@ -1217,9 +1250,9 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Charset charset = HttpUtil.getCharset("text/html; charset=ISO-8859-1");  // returns ISO-8859-1
-     * Charset dft = HttpUtil.getCharset("application/json");                   // returns UTF-8 (no charset)
-     * Charset blank = HttpUtil.getCharset(null);                               // returns UTF-8 (default)
+     * Charset charset = HttpUtil.getCharset("text/html; charset=ISO-8859-1");   // returns ISO-8859-1
+     * Charset dft = HttpUtil.getCharset("application/json");                    // returns UTF-8 (no charset)
+     * Charset blank = HttpUtil.getCharset(null);                                // returns UTF-8 (default)
      * }</pre>
      *
      * @param contentType The Content-Type header value
@@ -1231,7 +1264,9 @@ public final class HttpUtil {
 
     /**
      * Extracts the charset from a Content-Type header value with a specified default.
-     * Parses strings like "text/html; charset=UTF-8" to extract the charset.
+     * Parses strings like "text/html; charset=UTF-8" to extract the charset. Parameter-name
+     * matching is case-insensitive and requires a semicolon-delimited parameter position, and
+     * text inside another parameter's quoted value is ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1252,27 +1287,64 @@ public final class HttpUtil {
         int fromIndex = -1;
 
         // Find an occurrence of "charset" that is an actual parameter name (i.e. not a
-        // substring of some other token like "x-charset-hint"). A parameter name is
-        // delimited on the left by start-of-string or a non-token char (e.g. ';' or space)
-        // and is followed (optionally after whitespace) by '='.
+        // substring of some other token like "x-charset-hint" or part of a media type such
+        // as "text/charset"). A parameter name starts at the beginning of the value or after
+        // a semicolon and optional whitespace, and is followed (optionally after whitespace)
+        // by '='.
         int searchFrom = 0;
+        char quotedValueDelimiter = 0;
 
-        while ((searchFrom = contentTypeLowerCase.indexOf("charset", searchFrom)) >= 0) {
-            final boolean leftBoundaryOk = searchFrom == 0 || !isContentTypeTokenChar(contentTypeLowerCase.charAt(searchFrom - 1));
+        while (searchFrom < contentTypeLowerCase.length()) {
+            final char ch = contentTypeLowerCase.charAt(searchFrom);
 
-            int afterToken = searchFrom + "charset".length();
+            if (quotedValueDelimiter != 0) {
+                if (ch == '\\' && searchFrom + 1 < contentTypeLowerCase.length()) {
+                    searchFrom += 2;
+                    continue;
+                }
 
-            while (afterToken < contentTypeLowerCase.length()
-                    && (contentTypeLowerCase.charAt(afterToken) == ' ' || contentTypeLowerCase.charAt(afterToken) == '\t')) {
-                afterToken++;
+                if (ch == quotedValueDelimiter) {
+                    quotedValueDelimiter = 0;
+                }
+
+                searchFrom++;
+                continue;
             }
 
-            if (leftBoundaryOk && afterToken < contentTypeLowerCase.length() && contentTypeLowerCase.charAt(afterToken) == '=') {
-                fromIndex = searchFrom;
-                break;
+            if (ch == '=') {
+                int valueStart = searchFrom + 1;
+
+                while (valueStart < contentTypeLowerCase.length()
+                        && (contentTypeLowerCase.charAt(valueStart) == ' ' || contentTypeLowerCase.charAt(valueStart) == '\t')) {
+                    valueStart++;
+                }
+
+                if (valueStart < contentTypeLowerCase.length()
+                        && (contentTypeLowerCase.charAt(valueStart) == '"' || contentTypeLowerCase.charAt(valueStart) == '\'')) {
+                    quotedValueDelimiter = contentTypeLowerCase.charAt(valueStart);
+                    searchFrom = valueStart + 1;
+                    continue;
+                }
             }
 
-            searchFrom += "charset".length();
+            if (contentTypeLowerCase.regionMatches(searchFrom, "charset", 0, "charset".length())) {
+                final boolean parameterStart = isContentTypeParameterStart(contentTypeLowerCase, searchFrom);
+                int afterToken = searchFrom + "charset".length();
+
+                while (afterToken < contentTypeLowerCase.length()
+                        && (contentTypeLowerCase.charAt(afterToken) == ' ' || contentTypeLowerCase.charAt(afterToken) == '\t')) {
+                    afterToken++;
+                }
+
+                if (parameterStart && afterToken < contentTypeLowerCase.length() && contentTypeLowerCase.charAt(afterToken) == '=') {
+                    fromIndex = searchFrom;
+                    break;
+                }
+
+                searchFrom = afterToken;
+            } else {
+                searchFrom++;
+            }
         }
 
         if (fromIndex >= 0) {
@@ -1307,15 +1379,22 @@ public final class HttpUtil {
     }
 
     /**
-     * Returns whether {@code c} can be part of an HTTP token (RFC 7230) so that the
-     * "charset" parameter detection in {@link #getCharset(String, Charset)} does not
-     * match "charset" appearing inside a larger token (e.g. {@code x-charset-hint}).
+     * Returns whether {@code index} is a valid parameter-name position in a Content-Type
+     * field value. A parameter starts at the beginning of the value or after a semicolon
+     * and optional HTTP whitespace.
      *
-     * @param c the character to test
-     * @return {@code true} if {@code c} is a letter, digit, or one of {@code - _ .}
+     * @param contentType the Content-Type field value
+     * @param index the candidate parameter-name index
+     * @return {@code true} if a parameter name may start at {@code index}
      */
-    private static boolean isContentTypeTokenChar(final char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.';
+    private static boolean isContentTypeParameterStart(final String contentType, final int index) {
+        int previousIndex = index - 1;
+
+        while (previousIndex >= 0 && (contentType.charAt(previousIndex) == ' ' || contentType.charAt(previousIndex) == '\t')) {
+            previousIndex--;
+        }
+
+        return previousIndex < 0 || contentType.charAt(previousIndex) == ';';
     }
 
     /**

@@ -35,7 +35,6 @@ import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.Difference;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Immutable;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.Iterables;
@@ -112,6 +111,7 @@ import lombok.experimental.Accessors;
  * <ul>
  *   <li>Streams are not data structures; they don't store elements but process them on-demand</li>
  *   <li>Streams should not be reused after a terminal operation has been performed</li>
+ *   <li>Stream instances are stateful, single-use lifecycle objects. They are neither immutable nor generally thread-safe.</li>
  *   <li>Most stream operations accept functional interfaces as parameters, enabling lambda expressions</li>
  *   <li>Operations should be non-interfering and stateless for predictable behavior</li>
  * </ul>
@@ -169,10 +169,9 @@ import lombok.experimental.Accessors;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
-@com.landawn.abacus.annotation.Immutable
 @LazyEvaluation
-public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extends BaseStream<T, A, P, C, OT, IT, ITER, S>> extends AutoCloseable, Immutable {
-    // extends java.util.stream.BaseStream<T, BaseStream<T, A, P, C, PL, OT, IT, ITER, S>>, Immutable {
+public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extends BaseStream<T, A, P, C, OT, IT, ITER, S>> extends AutoCloseable {
+    // extends java.util.stream.BaseStream<T, BaseStream<T, A, P, C, PL, OT, IT, ITER, S>> {
 
     /**
      * Returns a new stream consisting of the elements of this stream that match the given predicate.
@@ -196,7 +195,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -207,6 +206,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #filter(Object, Object)
      * @see #takeWhile(Object)
      * @see #dropWhile(Object)
@@ -240,7 +240,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -254,6 +254,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *        this action is applied to each element that fails the predicate test and is
      *        therefore excluded from the resulting stream
      * @return a new stream consisting of the elements that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #filter(Object)
      * @see #takeWhile(Object)
      * @see #dropWhile(Object)
@@ -315,7 +316,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -327,6 +328,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element
      *         is encountered that doesn't match the predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #dropWhile(Object)
      * @see #filter(Object)
      * @see #skipUntil(Object)
@@ -389,7 +391,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -401,6 +403,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
+     * @throws IllegalStateException if the stream is already closed
      * @see #dropWhile(Object, Object)
      * @see #takeWhile(Object)
      * @see #filter(Object)
@@ -464,7 +467,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -479,6 +482,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *        of the stream while the predicate returns {@code true}
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
+     * @throws IllegalStateException if the stream is already closed
      * @see #dropWhile(Object)
      * @see #filter(Object, Object)
      * @see #takeWhile(Object)
@@ -539,7 +543,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -551,6 +555,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to start including elements
      * @return a new stream consisting of the elements starting from the first element
      *         that matches the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #dropWhile(Object)
      * @see #takeWhile(Object)
      * @see #filter(Object)
@@ -595,7 +600,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -605,6 +610,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream consisting of the distinct elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #filter(Object)
      * @see #sorted()
      */
@@ -632,7 +638,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -644,6 +650,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param c the collection to find common elements with this stream
      * @return a new stream containing elements present in both this stream and the specified collection,
      *         considering the minimum number of occurrences in either source
+     * @throws IllegalStateException if the stream is already closed
      * @see #difference(Collection)
      * @see #symmetricDifference(Collection)
      * @see N#intersection(Collection, Collection)
@@ -674,7 +681,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -686,6 +693,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param c the collection to compare against this stream
      * @return a new stream containing the elements that are present in this stream but not in the specified collection,
      *         considering the number of occurrences.
+     * @throws IllegalStateException if the stream is already closed
      * @see #intersection(Collection)
      * @see #symmetricDifference(Collection)
      * @see N#difference(Collection, Collection)
@@ -729,7 +737,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -741,6 +749,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param c the collection to compare with this stream for symmetric difference
      * @return a new stream containing elements that are present in either this stream or the collection,
      *         but not in both, considering the number of occurrences
+     * @throws IllegalStateException if the stream is already closed
      * @see #intersection(Collection)
      * @see #difference(Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -780,7 +789,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -790,6 +799,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream consisting of the elements of this stream in reverse order
+     * @throws IllegalStateException if the stream is already closed
      * @see #sorted()
      * @see #shuffled()
      * @see #rotated(int)
@@ -833,7 +843,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -845,6 +855,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param distance the number of positions to rotate the elements; positive values rotate
      *                 elements to the right, negative values rotate elements to the left
      * @return a new stream consisting of the elements of this stream rotated by the specified distance
+     * @throws IllegalStateException if the stream is already closed
      * @see #reversed()
      * @see #shuffled()
      * @see #sorted()
@@ -883,7 +894,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -893,6 +904,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream consisting of the elements of this stream in a random order
+     * @throws IllegalStateException if the stream is already closed
      * @see #shuffled(Random)
      * @see #reversed()
      * @see #sorted()
@@ -934,7 +946,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -945,6 +957,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param rnd the Random instance to use for shuffling elements
      * @return a new stream consisting of the elements of this stream in a random order determined by the provided Random
+     * @throws IllegalStateException if the stream is already closed
      * @see #shuffled()
      * @see #reversed()
      * @see #sorted()
@@ -984,7 +997,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -994,6 +1007,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream consisting of the elements of this stream in sorted order
+     * @throws IllegalStateException if the stream is already closed
      * @see #reverseSorted()
      * @see #reversed()
      * @see #shuffled()
@@ -1032,7 +1046,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1042,6 +1056,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream consisting of the elements of this stream in reverse sorted order
+     * @throws IllegalStateException if the stream is already closed
      * @see #sorted()
      * @see #reversed()
      * @see #shuffled()
@@ -1081,7 +1096,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1091,6 +1106,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream consisting of the elements of this stream repeated indefinitely
+     * @throws IllegalStateException if the stream is already closed
      * @see #cycled(long)
      * @see #sorted()
      * @see #reversed()
@@ -1129,7 +1145,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1141,6 +1157,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param rounds the number of times to repeat the elements of this stream; must be non-negative.
      *               A value of {@code 0} produces an empty stream.
      * @return a new stream consisting of the elements of this stream repeated for the specified number of rounds
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code rounds} is negative
      * @see #cycled()
      * @see #sorted()
@@ -1184,7 +1201,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1194,6 +1211,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream consisting of the elements of this stream paired with their indices
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -1232,7 +1250,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1244,6 +1262,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param n the number of leading elements to skip
      * @return a new stream consisting of the remaining elements of this stream after discarding
      *         the first n elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      * @see #limit(long)
      * @see #skipUntil(Object)
@@ -1286,7 +1305,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1299,6 +1318,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param onSkip the action to perform on each skipped element
      * @return a new stream consisting of the remaining elements of this stream after skipping
      *         the first n elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
      * @see #skip(long)
      * @see #filter(Object, Object)
@@ -1344,7 +1364,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1355,6 +1375,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param maxSize the maximum number of elements to include in the new stream
      * @return a new stream consisting of at most maxSize elements from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code maxSize} is negative
      * @see #skip(long)
      * @see #takeWhile(Object)
@@ -1403,7 +1424,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1460,7 +1481,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1471,6 +1492,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param step the interval between selected elements; must be positive (greater than 0)
      * @return a new stream consisting of every 'step'th element of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code step} is less than 1
      * @see #limit(long)
      * @see #skip(long)
@@ -1535,7 +1557,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1546,6 +1568,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param permitsPerSecond the rate limit, specified as permits per second. Must be positive.
      * @return a new stream with the rate limit applied.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero
      * @see #rateLimited(RateLimiter)
      * @see #delay(Duration)
@@ -1615,7 +1638,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1626,6 +1649,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param rateLimiter the RateLimiter instance to use for controlling the rate of element emission
      * @return a new stream with the rate limit applied.
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code rateLimiter} is {@code null}
      * @see #rateLimited(double)
      * @see #delay(Duration)
      * @see #debounce(Duration)
@@ -1716,7 +1741,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1728,6 +1753,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param duration the duration to delay each element in the stream (except the first element).
      *                 Must not be {@code null}.
      * @return a new stream with the delay applied to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code duration} is {@code null}
      * @see #debounce(Duration)
      * @see #rateLimited(double)
@@ -1754,7 +1780,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1765,7 +1791,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param duration the duration to delay each element in the stream (except the first element). Must not be {@code null}.
      * @return a new stream with the delay applied to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code duration} is {@code null}
+     * @throws ArithmeticException if the duration is too large to be represented in milliseconds
      * @see #delay(Duration)
      * @see #rateLimited(double)
      * @see #rateLimited(RateLimiter)
@@ -1849,7 +1877,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1862,6 +1890,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *                 Must not be {@code null} and must have a positive millisecond value.
      * @return a new stream that emits the most recent element of each burst when a later pull observes a
      *         quiet gap, and always emits the final pending element.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code duration} is {@code null} or has a non-positive
      *         millisecond value
      * @see #delay(Duration)
@@ -1899,7 +1928,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1910,6 +1939,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new stream consisting of the elements of this stream with the provided action applied to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #onEach(Object)
      */
     @Beta
@@ -1957,7 +1987,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1968,6 +1998,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new stream consisting of the elements of this stream with the provided action applied to each element.
+     * @throws IllegalStateException if the stream is already closed
      * @see #peek(Object)
      */
     @ParallelSupported
@@ -1996,7 +2027,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2007,6 +2038,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param stream the stream whose elements should be prepended to this stream.
      * @return a new stream consisting of the elements of the provided stream followed by the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -2034,7 +2066,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2045,6 +2077,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param op the optional whose element should be prepended to this stream.
      * @return a new stream consisting of the element of the provided optional (if present) followed by the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -2072,7 +2105,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2083,6 +2116,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param stream the stream whose elements should be appended to this stream.
      * @return a new stream consisting of the elements of this stream followed by the elements of the provided stream.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -2110,7 +2144,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2121,6 +2155,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param op the optional whose element should be appended to this stream.
      * @return a new stream consisting of the elements of this stream followed by the element of the provided optional (if present).
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
@@ -2156,7 +2191,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2167,6 +2202,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param supplier the supplier that provides an alternative stream if this stream is empty.
      * @return a new stream consisting of the elements of this stream if not empty, or the elements from the supplied stream if this stream was empty.
+     * @throws IllegalStateException if the stream is already closed
      * @see #defaultIfEmpty(Supplier)
      */
     @SequentialOnly
@@ -2228,7 +2264,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2240,6 +2276,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param supplier the supplier that provides an alternative stream if this stream is empty.
      *                 Must not be {@code null}.
      * @return a new stream consisting of the elements of this stream if not empty, or the elements from the supplied stream if this stream was empty.
+     * @throws IllegalStateException if the stream is already closed
      * @see #appendIfEmpty(Supplier)
      */
     @SequentialOnly
@@ -2269,7 +2306,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2280,6 +2317,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @return a stream with the same elements as this stream, which throws if it turns out to be
      *         empty when a terminal operation is executed.
+     * @throws IllegalStateException if the stream is already closed
      * @throws java.util.NoSuchElementException if the stream is empty when a terminal operation is executed
      */
     @SequentialOnly
@@ -2307,7 +2345,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2319,6 +2357,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param exceptionSupplier the supplier of the exception to be thrown if this stream is empty.
      * @return a stream with the same elements as this stream, which throws if it turns out to be
      *         empty when a terminal operation is executed.
+     * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException the exception provided by the supplier if the stream is empty when a terminal operation is executed
      */
     @SequentialOnly
@@ -2348,7 +2387,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2360,6 +2399,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param action the action to be executed if the stream is empty
      * @return a stream with the same elements as this stream, which executes the action if it
      *         turns out to be empty when a terminal operation is executed
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @SequentialOnly
@@ -2387,7 +2427,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2398,6 +2438,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param delimiter the sequence of characters to be used as a delimiter between each element in the resulting String.
      * @return a String consisting of the elements of this stream, separated by the specified delimiter.
+     * @throws IllegalStateException if the stream is already closed
      * @see #join(CharSequence, CharSequence, CharSequence)
      */
     @SequentialOnly
@@ -2427,7 +2468,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2440,6 +2481,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param prefix the sequence of characters to be added at the beginning of the resulting String.
      * @param suffix the sequence of characters to be added at the end of the resulting String.
      * @return a String consisting of the elements of this stream, separated by the specified delimiter, and surrounded by the specified prefix and suffix.
+     * @throws IllegalStateException if the stream is already closed
      * @see #join(CharSequence)
      * @see #joinTo(Joiner)
      */
@@ -2469,7 +2511,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2480,6 +2522,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param joiner the Joiner specifying how to join the elements of the stream.
      * @return the provided Joiner after appending all elements of the stream.
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}
+     * @throws IllegalStateException if the stream is already closed
      * @see Joiner
      * @see #join(CharSequence, CharSequence, CharSequence)
      */
@@ -2524,7 +2568,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2534,6 +2578,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return an Optional containing a Map of Percentages to elements if the stream is not empty, otherwise an empty Optional.
+     * @throws IllegalStateException if the stream is already closed
      * @see N#percentilesOfSorted(int[])
      * @see Percentage
      */
@@ -2563,7 +2608,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2573,6 +2618,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return the count of elements in the stream as a long value. Returns 0 if the stream is empty.
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      */
     @SequentialOnly
@@ -2603,7 +2649,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2613,6 +2659,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return an Optional containing the first element of the stream if it exists, otherwise an empty Optional.
+     * @throws IllegalStateException if the stream is already closed
      * @see #last()
      * @see #elementAt(long)
      */
@@ -2641,7 +2688,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2651,6 +2698,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return an Optional containing the last element of the stream if it exists, otherwise an empty Optional.
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #elementAt(long)
      */
@@ -2682,7 +2730,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2693,6 +2741,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param position the zero-based position of the element to return; must be non-negative.
      * @return an Optional containing the element at the specified position in this stream if it exists, otherwise an empty Optional.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code position} is negative
      * @see #first()
      * @see #last()
@@ -2735,7 +2784,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2745,6 +2794,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return an {@code Optional} containing the only element of this stream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @throws TooManyElementsException if the stream contains more than one element
      * @see #first()
      * @see #last()
@@ -2775,7 +2825,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2786,6 +2836,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @return an array containing the elements of this stream; the concrete type depends on the stream type
      *         (e.g., {@code int[]} for {@link IntStream}, {@code Object[]} for {@link Stream})
+     * @throws IllegalStateException if the stream is already closed
      * @see #toList()
      * @see #toSet()
      */
@@ -2818,7 +2869,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2828,6 +2879,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a modifiable List containing the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #toSet()
      * @see #toImmutableList()
      * @see #toArray()
@@ -2859,7 +2911,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2869,6 +2921,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a modifiable Set containing the unique elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #toList()
      * @see #toImmutableSet()
      * @see #distinct()
@@ -2911,7 +2964,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2921,6 +2974,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return an ImmutableList containing the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #toList()
      */
     @SequentialOnly
@@ -2967,7 +3021,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2977,6 +3031,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return an ImmutableSet containing the unique elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #toSet()
      */
     @SequentialOnly
@@ -3006,7 +3061,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3018,6 +3073,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param <CC> The type of Collection to create.
      * @param supplier a supplier function that provides a new, empty Collection of the desired type.
      * @return a Collection of the desired type containing the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #toList()
      * @see #toSet()
      */
@@ -3049,7 +3105,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3059,6 +3115,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a Multiset containing the elements of this stream with their occurrence counts.
+     * @throws IllegalStateException if the stream is already closed
      * @see #toMultiset(Supplier)
      * @see Multiset
      */
@@ -3100,7 +3157,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3111,6 +3168,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param supplier a supplier function that provides a new, empty Multiset of the desired type.
      * @return a Multiset of the desired type containing the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see #toMultiset()
      * @see Multiset
      */
@@ -3138,7 +3196,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3147,6 +3205,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
      * </table>
      *
+     * @throws IllegalStateException if the stream is already closed
      * @see #join(CharSequence, CharSequence, CharSequence)
      * @see System#out
      */
@@ -3186,7 +3245,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3196,6 +3255,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return an iterator for the elements of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @deprecated advisory only and by design — this method is fully supported and is NOT slated for removal.
      *             The returned iterator does not auto-close the stream, so it may leak resources if you forget
      *             to close it. Use the try-with-resources form shown above, or prefer an eager terminal such as
@@ -3271,7 +3331,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3281,6 +3341,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * </table>
      *
      * @return a new stream that is identical to this stream, but in sequential mode.
+     * @throws IllegalStateException if the stream is already closed
      * @see #parallel()
      * @see #isParallel()
      */
@@ -3420,7 +3481,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3431,6 +3492,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @return a new stream that is identical to this stream but configured for parallel execution
      *         using the default thread count ({@code min(cpu_cores, 64)}, i.e. the CPU core count capped by the maximum allowed thread number per operation)
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel(int)
@@ -3485,7 +3547,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3498,6 +3560,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *        bigger than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}),
      *        maximum allowed thread number per operation will be used.
      * @return a new stream configured for parallel execution with the specified maximum thread count
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3547,7 +3610,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3559,6 +3622,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param executor the Executor to use for parallel operations.
      *          {@code Executor} can be specified for bigger thread number than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}) or virtual thread.
      * @return a new stream configured for parallel execution with the specified executor
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3606,7 +3670,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3622,6 +3686,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param executor the Executor to use for parallel operations.
      *          {@code Executor} can be specified for bigger thread number than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}) or virtual thread.
      * @return a new stream configured for parallel execution with the specified parameters
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3662,7 +3727,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3674,6 +3739,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param ps the ParallelSettings object containing configuration for parallel execution,
      *        including maximum thread number, splitor strategy, and executor
      * @return a new stream configured for parallel execution with the specified settings
+     * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3706,7 +3772,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3718,6 +3784,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param <SS> the type of the stream returned by the operation
      * @param ops the function that defines the operations to be performed in parallel mode
      * @return a new stream with the operations applied in parallel mode, then switched back to sequential
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code ops} is {@code null}
      * @see #sps(int, Function)
      * @see #sps(int, Executor, Function)
      * @see #parallel()
@@ -3750,7 +3818,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3763,6 +3831,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param maxThreadNum the maximum number of threads to use for the parallel operation
      * @param ops the function that defines the operations to be performed in parallel mode
      * @return a new stream with the operations applied in parallel mode, then switched back to sequential
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code ops} is {@code null}
      * @see #sps(Function)
      * @see #sps(int, Executor, Function)
      * @see #parallel()
@@ -3796,7 +3866,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3810,6 +3880,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param executor the executor to use for the parallel operation
      * @param ops the function that defines the operations to be performed in parallel mode
      * @return a new stream with the operations applied in parallel mode, then switched back to sequential
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code ops} is {@code null}
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3843,7 +3915,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3856,6 +3928,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param ops the function that defines the operations to be performed in sequential mode
      * @return a new stream with the operations applied in sequential mode, then switched back to parallel
      *         with the same parallel configuration
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code ops} is {@code null}
      * @see #parallel()
      * @see #parallel(Executor)
      * @see #parallel(int, Executor)
@@ -3894,7 +3968,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3906,44 +3980,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param <RS> the type of the new stream
      * @param transfer the transformation function that takes the current stream and returns a new stream
      * @return a new stream transformed by the provided function
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the provided function is {@code null}
-     * @throws IllegalStateException if the stream has already been operated upon or closed
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
     <RS extends BaseStream> RS transform(Function<? super S, ? extends RS> transfer); //NOSONAR
-
-    //    /**
-    //     * Transforms the current stream into a new stream using the provided transformation function.
-    //     * This method allows for complex stream transformations that may change the stream type.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * // Transform stream with filtering and mapping
-    //     * Stream<String> result = Stream.of(1, 2, 3, 4, 5)
-    //     *     .__(s -> s.filter(n -> n % 2 == 0)
-    //     *              .map(n -> "Even: " + n));
-    //     * // result contains ["Even: 2", "Even: 4"]
-    //     * }</pre>
-    //     *
-    //     * @param <RS> the type of the new stream
-    //     * @param transfer the transformation function that takes the current stream and returns a new stream
-    //     * @return a new stream transformed by the provided function
-    //     * @throws IllegalArgumentException if the provided function is {@code null}
-    //     * @throws IllegalStateException if the stream has already been operated upon or closed
-    //     * @deprecated Use {@link #transform(Function)} instead
-    //     * @see #transform(Function)
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    @SequentialOnly
-    //    @IntermediateOp
-    //    @SuppressWarnings("rawtypes")
-    //    default <RS extends BaseStream> RS __(final Function<? super S, ? extends RS> transfer) { //NOSONAR
-    //        return transform(transfer);
-    //    }
 
     /**
      * Applies the provided function to the stream if it is not empty.
@@ -3968,7 +4012,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3982,6 +4026,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param func the function to be applied to the stream if it's not empty
      * @return an Optional containing the result of the function if the stream is not empty,
      *         or an empty Optional if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code func} is {@code null}
      * @throws E if the function throws an exception
      */
     @SequentialOnly
@@ -4013,7 +4059,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4025,6 +4071,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param <E> the type of exception that the consumer can throw
      * @param action the consumer to be applied to the stream if it's not empty
      * @return an OrElse instance which can be used to perform further actions if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the consumer throws an exception
      */
     @SequentialOnly
@@ -4058,7 +4106,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4069,7 +4117,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param closeHandler the Runnable to be invoked when the stream is closed
      * @return a stream with the close handler registered. This may be the same stream instance.
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp

@@ -156,6 +156,28 @@ public class ExcelUtilTest extends TestBase {
         Assertions.assertEquals("CUSTOM_x", dataset.get(0, 0));
     }
 
+    @Test
+    public void test_readDatasetFromSheet_BlankHeaderDoesNotCollideWithExplicitHeader() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Sheet1");
+            Row header = sheet.createRow(0);
+            header.createCell(0).setBlank();
+            header.createCell(1).setCellValue("Column_0");
+            Row data = sheet.createRow(1);
+            data.createCell(0).setCellValue("left");
+            data.createCell(1).setCellValue("right");
+            workbook.write(output);
+        }
+
+        Dataset dataset = ExcelUtil.readDatasetFromSheet(new ByteArrayInputStream(output.toByteArray()), 0, RowExtractors.DEFAULT);
+
+        Assertions.assertEquals(Arrays.asList("Column_0_1", "Column_0"), dataset.columnNames());
+        Assertions.assertEquals("left", dataset.get(0, 0));
+        Assertions.assertEquals("right", dataset.get(0, 1));
+    }
+
     // ========== readDatasetFromSheet(File, String, TriConsumer) ==========
 
     @Test
@@ -1448,6 +1470,12 @@ public class ExcelUtilTest extends TestBase {
         String str = fp.toString();
         Assertions.assertTrue(str.contains("3"));
         Assertions.assertTrue(str.contains("4"));
+    }
+
+    @Test
+    public void test_FreezePane_RejectsNegativeSplits() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FreezePane(-1, 0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FreezePane(0, -1));
     }
 
     @Test

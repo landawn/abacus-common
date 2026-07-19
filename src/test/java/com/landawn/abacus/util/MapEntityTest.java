@@ -236,6 +236,16 @@ public class MapEntityTest extends TestBase {
     }
 
     @Test
+    public void testRemoveAllAcceptsLiveKeySetView() {
+        MapEntity entity = new MapEntity("User");
+        entity.set("a", 1).set("b", 2).set("c", 3);
+
+        entity.removeAll(entity.keySet());
+
+        assertTrue(entity.isEmpty());
+    }
+
+    @Test
     public void testContainsKey_simpleName() {
         MapEntity entity = new MapEntity("User");
         entity.set("email", "john@example.com");

@@ -90,6 +90,16 @@ public class DoubleToIntFunctionTest extends TestBase {
     }
 
     @Test
+    public void testDEFAULT_SpecialValuesAndSaturation() {
+        DoubleToIntFunction function = DoubleToIntFunction.DEFAULT;
+        assertEquals(0, function.applyAsInt(Double.NaN));
+        assertEquals(Integer.MAX_VALUE, function.applyAsInt(Double.POSITIVE_INFINITY));
+        assertEquals(Integer.MIN_VALUE, function.applyAsInt(Double.NEGATIVE_INFINITY));
+        assertEquals(Integer.MAX_VALUE, function.applyAsInt(Double.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, function.applyAsInt(-Double.MAX_VALUE));
+    }
+
+    @Test
     public void testFunctionalInterfaceContract() {
         DoubleToIntFunction lambda = value -> (int) value;
         assertNotNull(lambda);

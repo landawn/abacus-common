@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -92,5 +93,18 @@ public class XMLTypeTest extends TestBase {
         String xml = "<TestBean><name>test</name><value>123</value></TestBean>";
         TestBean result = xmlBeanType.valueOf(xml);
         assertNotNull(result);
+    }
+
+    @Test
+    public void testNestedGenericTargetIsPreserved() {
+        XMLType<List<Long>> type = (XMLType<List<Long>>) createType("XML<List<Long>>");
+        List<Long> source = List.of(1L, 2L);
+
+        List<Long> parsed = type.valueOf(type.stringOf(source));
+
+        assertTrue(type.isParameterizedType());
+        assertEquals("List<Long>", type.parameterTypes().get(0).declaringName());
+        assertEquals(Long.class, parsed.get(0).getClass());
+        assertEquals(source, parsed);
     }
 }

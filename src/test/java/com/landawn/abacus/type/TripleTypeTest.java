@@ -3,10 +3,13 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyChar;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
@@ -97,6 +100,12 @@ public class TripleTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfRejectsWrongElementCount() {
+        assertThrows(IllegalArgumentException.class, () -> tripleType.valueOf("[\"test\",123]"));
+        assertThrows(IllegalArgumentException.class, () -> tripleType.valueOf("[\"test\",123,true,\"unexpected\"]"));
+    }
+
+    @Test
     public void testAppendToWriter() throws IOException {
         Writer writer = new StringWriter();
         tripleType.appendTo(writer, testTriple);
@@ -111,6 +120,29 @@ public class TripleTypeTest extends TestBase {
         Writer writer = new StringWriter();
         tripleType.appendTo(writer, null);
         assertEquals("null", writer.toString());
+    }
+
+    @Test
+    public void testAppendToWriterPropagatesCheckedIOException() {
+        final IOException failure = new IOException("write failure");
+        final Writer writer = new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw failure;
+            }
+
+            @Override
+            public void flush() {
+                // no-op
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+
+        assertSame(failure, assertThrows(IOException.class, () -> tripleType.appendTo(writer, testTriple)));
     }
 
     @Test
@@ -141,6 +173,15 @@ public class TripleTypeTest extends TestBase {
         tripleType.serializeTo(writer, null, config);
 
         verify(writer).write(any(char[].class));
+    }
+
+    @Test
+    public void testSerializeToPropagatesCheckedIOException() throws IOException {
+        final IOException failure = new IOException("write failure");
+        final CharacterWriter writer = createCharacterWriter();
+        doThrow(failure).when(writer).write(anyChar());
+
+        assertSame(failure, assertThrows(IOException.class, () -> tripleType.serializeTo(writer, testTriple, null)));
     }
 
     @Test

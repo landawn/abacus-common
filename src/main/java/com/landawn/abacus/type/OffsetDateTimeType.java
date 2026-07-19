@@ -60,16 +60,16 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     /**
      * Converts an {@link OffsetDateTime} object to its ISO-8601 timestamp string representation.
-     * Uses a format equivalent to {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
-     * (e.g., {@code "2011-12-03T10:15:30+01:00"}), preserving the OffsetDateTime's UTC offset.
+     * Uses a fixed-millisecond ISO format (e.g., {@code "2011-12-03T10:15:30.000+01:00"}),
+     * preserving the OffsetDateTime's UTC offset while truncating sub-millisecond precision.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * via {@link #valueOf(String)}; millisecond-aligned values round-trip exactly. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
      * @param x the OffsetDateTime object to convert
-     * @return the ISO-8601 formatted string, or {@code null} if the input is null
+     * @return the fixed-millisecond ISO-8601 formatted string, or {@code null} if the input is null
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -114,10 +114,8 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      *   <li>numeric UTC offsets, with optional offset-seconds (e.g. {@code "2023-10-15T10:30:45+05:30:15"})</li>
      * </ul>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Because {@code stringOf} formats with the same
-     * {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME ISO_OFFSET_DATE_TIME} representation used by
-     * {@link OffsetDateTime#toString()}, the value returned by {@code toString()} round-trips as well.</p>
+     * <p>This method parses the fixed-millisecond string produced by {@code stringOf}. It also accepts the more
+     * general {@link OffsetDateTime#toString()} representation, including nanoseconds and offsets with seconds.</p>
      *
      * @param str the string to parse
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or represents a {@code null} date-time
@@ -285,11 +283,8 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * The format depends on the serialization configuration:
      * <ul>
      *   <li>{@code LONG}: epoch milliseconds written as a numeric value</li>
-     *   <li>{@code ISO_8601_DATE_TIME}: ISO offset date-time format via
-     *       {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}</li>
-     *   <li>{@code ISO_8601_TIMESTAMP}: ISO offset date-time format via
-     *       {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
-     *       (currently backed by the same formatter as {@code ISO_8601_DATE_TIME})</li>
+     *   <li>{@code ISO_8601_DATE_TIME}: ISO offset date-time at whole-second precision</li>
+     *   <li>{@code ISO_8601_TIMESTAMP}: ISO offset date-time at exactly millisecond precision</li>
      *   <li>Default ({@code null} config or {@code null} format): same as {@link #stringOf(OffsetDateTime)}</li>
      * </ul>
      * When the format is not {@code LONG} and the config specifies a string quotation character,

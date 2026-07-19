@@ -44,6 +44,12 @@ public class FastJsonTest extends TestBase {
     private String expectedJson;
     private String expectedPrettyJson;
 
+    public static class ExplodingBean {
+        public String getValue() {
+            throw new AssertionError("serialization must not start for an invalid destination");
+        }
+    }
+
     public static class TestPerson {
         private String name;
         private int age;
@@ -1138,5 +1144,33 @@ public class FastJsonTest extends TestBase {
             assertEquals("FileReader", result.getName());
             assertEquals(35, result.getAge());
         }
+    }
+
+    @Test
+    public void testByteArraySegmentValidation() {
+        final byte[] json = "xx{\"name\":\"Ada\",\"age\":37}yy".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        final TestPerson person = FastJson.fromJson(json, 2, json.length - 4, TestPerson.class);
+
+        assertEquals("Ada", person.getName());
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson((byte[]) null, 0, 0, TestPerson.class));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson(json, 0, -1, TestPerson.class));
+        assertThrows(IndexOutOfBoundsException.class, () -> FastJson.fromJson(json, -1, 1, TestPerson.class));
+        assertThrows(IndexOutOfBoundsException.class, () -> FastJson.fromJson(json, json.length, 1, TestPerson.class));
+        assertThrows(IndexOutOfBoundsException.class, () -> FastJson.fromJson(json, 1, Integer.MAX_VALUE, TestPerson.class));
+    }
+
+    @Test
+    public void testRequiredConfigurationAndDestinationArgumentsAreValidatedEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> FastJson.toJson(new ExplodingBean(), (Writer) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.toJson(testPerson, (java.io.OutputStream) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.toJson(testPerson, (File) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.toJson(testPerson, (JSONWriter.Context) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.toJson(testPerson, (JSONWriter.Feature[]) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson("{}", (Class<TestPerson>) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson("{}", (Type) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson("{}", (TypeReference<TestPerson>) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson("{}", TestPerson.class, (JSONReader.Context) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson(new StringReader("{}"), TestPerson.class, (JSONReader.Feature[]) null));
+        assertThrows(IllegalArgumentException.class, () -> FastJson.fromJson((Reader) null, TestPerson.class));
     }
 }

@@ -195,4 +195,13 @@ public class BufferedJsonWriterTest extends TestBase {
         w.close();
         assertThrows(IOException.class, () -> w.writeCharacter("x"));
     }
+
+    @Test
+    public void testEmptyEscapedWritesAfterCloseThrow() throws IOException {
+        BufferedJsonWriter w = new BufferedJsonWriter();
+        w.close();
+
+        assertThrows(IOException.class, () -> w.writeCharacter(new char[0]));
+        assertThrows(IOException.class, () -> w.writeCharacter(""));
+    }
 }

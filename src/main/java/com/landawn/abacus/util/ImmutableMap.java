@@ -25,8 +25,9 @@ import com.landawn.abacus.annotation.Beta;
  * Once created, the contents of an {@code ImmutableMap} cannot be modified.
  * All mutating operations ({@code put}, {@code remove}, {@code clear}, etc.) throw {@link UnsupportedOperationException}.
  *
- * <p>Note: instances created via {@link #wrap(Map)} delegate to the supplied backing map; the immutability
- * (and thread-safety) guarantee then depends on that backing map not being modified externally.</p>
+ * <p>Instances created via {@link #wrap(Map)} are read-only live views: changes made directly to the
+ * supplied backing map remain visible. Wrapping does not add synchronization, so concurrent access has
+ * the same safety requirements as the backing map. Use {@link #copyOf(Map)} for independent storage.</p>
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -566,30 +567,6 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         }
     }
 
-    //    /**
-    //     * Returns the value to which the specified key is mapped, or the defaultValue if this map
-    //     * contains no mapping for the key. This method distinguishes between a key that is mapped
-    //     * to {@code null} and a key that is not present in the map.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-    //     * System.out.println(map.getOrDefault("a", 0));    // 1
-    //     * System.out.println(map.getOrDefault("c", 0));    // 0
-    //     * System.out.println(map.getOrDefault("c", 99));   // 99
-    //     * }</pre>
-    //     *
-    //     * @param key the key whose associated value is to be returned.
-    //     * @param defaultValue the value to return if the map contains no mapping for the key.
-    //     * @return the value to which the specified key is mapped, or defaultValue if no mapping exists.
-    //     */
-    //    @Override
-    //    public V getOrDefault(final Object key, final V defaultValue) {
-    //        final V val = get(key);
-    //
-    //        return val == null && !containsKey(key) ? defaultValue : val;
-    //    }
-
     /**
      * Creates a new Builder for constructing an ImmutableMap.
      * The builder allows adding key-value pairs one by one and then creating an immutable map.
@@ -632,7 +609,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param <V> the type of mapped values.
      * @param backedMap the map to be used as the backing storage for the Builder.
      * @return a new Builder instance that will use the provided map.
-     * @throws IllegalArgumentException if backedMap is null.
+     * @throws IllegalArgumentException if backedMap is {@code null}.
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) throws IllegalArgumentException {
         N.checkArgNotNull(backedMap);

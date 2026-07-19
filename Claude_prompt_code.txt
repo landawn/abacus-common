@@ -1,0 +1,486 @@
+
+==============================================================================================================================================
+
+------
+Review all public methods in the classes located under foler: ./src/main/java/ for naming convention consistency, and provide suggestions for design and method naming improvements.
+
+
+
+==============================================================================================================================================
+
+
+------
+Use multiple agents to perform a thorough deep line by line review for all the classes under folder: ./src/main/java to find bugs and fix them, and add unit tests for the fixes to existing test classes.
+
+------
+Use multiple agents to perform a thorough deep line by line review for all the classes in packages: com.landawn.abacus.util under folder: ./src/main/java to find bugs and fix them, and add unit tests for the fixes to existing test classes.
+
+
+
+==============================================================================================================================================
+
+------
+  TASK: API design review of all classes in com.landawn.abacus.util
+
+  Review and evaluate the PUBLIC API of a defined set of classes in the package com.landawn.abacus.util, under ./src/main/java.
+
+  This is a REPORT-ONLY task. Do NOT modify any source code.
+
+  ────────────────────────────────────────────────────────────────────────
+  DECISIONS TO SET BEFORE STARTING  (fill these in; do not guess silently)
+  ────────────────────────────────────────────────────────────────────────
+    MODEL       = <modelName-version>   # e.g. opus-4.8, gpt-5.5,
+                                        # fix ONCE now; reuse for every path below,
+                                        # including on resume. Record it in the state file.
+
+    DATE        = <YYYY-MM-DD>   # fix ONCE now; reuse for every path below,
+                                 # including on resume. Record it in the state file.
+
+    SCOPE       = the explicit class list declared in Step 0 below.
+                  Recommended default (the static-method "utility" holders):
+                    N, CommonUtil, Strings, Numbers, Dates, Maps, Iterables,
+                    Iterators, Index, Array, Beans, IOUtil, CsvUtil
+                  (The package has 218 top-level classes total; most are enums,
+                   value types, immutables, or data structures and are OUT of
+                   scope unless explicitly added to the list.)
+
+    EXECUTION   = one of:
+                  (a) SEQUENTIAL  — single reviewer, one class at a time.
+                      Highest verification fidelity. Default.
+                  (b) PARALLEL    — dispatch one sub-agent per class (or small
+                      batch); the orchestrator VERIFIES every agent finding
+                      against the source before it enters a report. If using
+                      this mode, copy GROUND RULES 1–6 verbatim into each
+                      sub-agent's prompt.
+
+  ────────────────────────────────────────────────────────────────────────
+  GROUND RULES
+  ────────────────────────────────────────────────────────────────────────
+    1. Start from scratch on FINDINGS. Do not rely on prior assumptions, memory
+       files, or past review conclusions to judge whether something is a problem.
+       Inspect the current source directly — read each method's implementation
+       AND Javadoc, not just its signature. Never base a finding on the method
+       name alone. (You MAY use memory/notes to locate files and tooling — just
+       never to pre-judge a finding.)
+
+    2. Establish class relationships first (see Step 0). Determine how the
+       in-scope classes relate: which extend another, which intentionally mirror
+       each other's APIs (e.g., a method visible in two classes via inheritance
+       or by-design mirroring is NOT a duplicate). Verify against the source
+       before flagging anything as overlapping or duplicated.
+
+    3. Scope = all PUBLIC methods of each in-scope class, including deprecated
+       ones (note existing @Deprecated markers and their stated replacements).
+       Treat an overload family (same name, different parameter lists) as ONE
+       unit of review, not N separate findings.
+
+    4. Backward compatibility is NOT a hard constraint:
+       - Prioritize the most correct, accurate, and consistent solution.
+         Breaking backward compatibility is low risk / low priority.
+       - Removing a public method or changing a signature is acceptable.
+       - A rename may be proposed as "add the new method" without first
+         deprecating the old one.
+
+    5. Do NOT excuse an inconsistent/incorrect/inaccurate issue just because the
+       Javadoc documents or clarifies it. Always propose the most correct,
+       accurate, consistent solution.
+
+    6. Evidence required for EVERY finding. Each finding must state:
+         - the method signature (overload family) it concerns
+         - File.java:line (cite the line you actually read)
+         - Confidence: High / Medium / Low
+         - the recommendation (rename / change return / add overload / move /
+           deprecate / remove / keep), with the replacement API where relevant
+       For Low-confidence findings, also state the additional check that would
+       confirm or refute them.
+
+    7. No noise. Report only ACTIONABLE findings. Do not enumerate methods that
+       are fine — summarize healthy areas at the family level (e.g., "the ~40
+       min/max/median overloads are consistent and well-designed"). Group
+       repetitive findings into ONE entry listing all affected methods.
+
+  ────────────────────────────────────────────────────────────────────────
+  STEP 0 — Establish scope and relationships (do this first, record it)
+  ────────────────────────────────────────────────────────────────────────
+    a. Write the final in-scope class list (from SCOPE above) into the state file.
+    b. For those classes, produce a short relationship map: inheritance edges,
+       intentional API-mirroring pairs, and "facade/delegate" relationships
+       (e.g., one class delegating to another). This map is the baseline for
+       judging duplication in GROUND RULE 2 and criterion 1.
+    c. Note per-class size; any file large enough that it cannot be read in one
+       pass must be read in line-range SEGMENTS (track segment progress in the
+       state file). This is a size rule, not specific to any one class.
+
+  ────────────────────────────────────────────────────────────────────────
+  EVALUATION CRITERIA  (apply to each overload family)
+  ────────────────────────────────────────────────────────────────────────
+    1. Functionality
+       - Behavior clear, useful, consistent with sibling methods?
+       - Genuine overlap/duplication AFTER accounting for inheritance/mirroring?
+       - Missing or surprising edge-case semantics (null/empty handling,
+         exception choice)?
+
+    2. Naming
+       - Name accurate to the ACTUAL behavior?
+       - Consistent with the library's established conventions? (Confirm what the
+         convention actually is — across the in-scope classes — before flagging.)
+
+    3. Return type
+       - Appropriate? Inconsistent among siblings (Optional vs null; array vs
+         List vs Stream; mutable vs immutable)?
+
+    4. Parameters
+       - Necessary, clearly named, consistently ordered vs siblings?
+       - Missing overloads the existing pattern implies should exist?
+       - Confusing/unsafe overloads (Object[] vs varargs ambiguity; easily
+         swapped same-type parameters)?
+
+    5. Class placement
+       - Methods that belong in a different in-scope class (or another existing
+         class). Name the target and justify; propose as add-to-target +
+         deprecate-in-source.
+
+    6. Missing methods
+       - Gaps implied by existing patterns (e.g., a primitive variant present
+         for 7 of 8 primitives). Name the target class and explain why.
+
+    7. Deprecation candidates
+       - Redundant, misleading, unsafe, or superseded methods. Recommend
+         deprecate / rename / merge / keep, each with the replacement API.
+
+  ────────────────────────────────────────────────────────────────────────
+  PROCESS
+  ────────────────────────────────────────────────────────────────────────
+    - Review per the chosen EXECUTION mode. Report PER CLASS regardless of mode.
+    - Maintain a state file at ./scripts/api_design_review/<MODEL>_<DATE>/state.md recording:
+      the DATE, the in-scope class list, the relationship map, and per-class
+      (and per-segment) status (todo / in-progress / done). This makes the task
+      resumable across sessions — on resume, reuse the SAME DATE and folder.
+    - Keep a running ./scripts/api_design_review/<MODEL>_<DATE>/cross_class_notes.md while you go,
+      jotting any cross-class consistency observation the moment you notice it,
+      so the SUMMARY isn't reconstructed only at the end.
+
+  ────────────────────────────────────────────────────────────────────────
+  OUTPUT
+  ────────────────────────────────────────────────────────────────────────
+    Per class → ./scripts/api_design_review/<MODEL>_<DATE>/<ClassName>.txt, with sections:
+      1. Overall assessment (one paragraph summarizing healthy areas — NO method
+         lists). If the class has no actionable findings, write a 2–3 line stub
+         saying so and stop; do not pad sections 2–6.
+      2. Naming issues (rename recommendations)
+      3. Return-type and parameter issues
+      4. Misplaced methods (with target class)
+      5. Missing methods (with target class)
+      6. Deprecation/removal candidates (with replacement APIs)
+
+    Every entry in sections 2–6 uses the GROUND RULE 6 format:
+        <signature/overload family> | File.java:line | Confidence | recommendation
+        (+ for Low confidence: the check that would confirm/refute)
+
+    Cross-class → ./scripts/api_design_review/<MODEL>_<DATE>/SUMMARY.txt, with sections:
+      1. Consistency issues spanning multiple classes
+      2. Prioritized action plan, each item tagged:
+           P1 = clear win, low risk
+           P2 = worthwhile, needs a design decision
+           P3 = nice-to-have
+         with estimated effort and compatibility impact.
+
+  ────────────────────────────────────────────────────────────────────────
+  PRIORITIES
+  ────────────────────────────────────────────────────────────────────────
+    API consistency > long-term maintainability > completeness of coverage.
+    When unsure whether to flag a borderline finding, INCLUDE it marked Low
+    confidence — the human reviewer makes the final call.
+
+==============================================================================================================================================
+
+
+------
+  Goal: Multi-agent, line-by-line review of every class under ./src/main/java, producing (a) confirmed
+  bug fixes, (b) Javadoc/comment corrections, and (c) logging/exception-message improvements.
+  These three workstreams have very different risk levels — apply the rigor bar defined for each, and
+  stage the edits by workstream so the diff stays reviewable and a regression can be bisected.
+
+  Scope guardrails (read first)
+	  - Fix only what this pass targets. NO dependency/version bumps, NO new public API, NO refactors beyond
+	    the minimal fix. If a fix appears to need broader change, STOP and flag it in the ledger instead of
+	    making it.
+	  - Before flagging anything, consult prior review ledgers/notes for the documented "deliberate design /
+	    known false-positive" list and do not re-litigate settled items. Add any newly-confirmed false
+	    positives to that list.
+	  - Preserve existing public APIs and current behavior unless a confirmed bug requires the change; note
+	    any behavior change explicitly.
+
+  Orchestration
+	  - Partition every file under ./src/main/java by package/class-group with explicit coverage accounting:
+	    list each file and assign it to exactly one reviewing agent — no overlap, no gaps.
+	  - Sub-agents are READ-ONLY (no Edit/Write tools): they inspect callers, tests, sibling classes,
+	    primitive/generated variants, and analogous implementations, then report findings. They do not edit.
+	  - Dispatch agents in batches of 2–3 and run independent batches in parallel; launching many at once
+	    causes server throttling / empty returns.
+	  - The main agent is the ONLY editor: it consolidates findings, removes duplicates, personally verifies
+	    each candidate, ensures fixes are consistent across variants, applies edits, and re-verifies.
+	  - Triage every finding by severity (low/med/high/critical) and confidence (suspected/likely/confirmed).
+	  - Maintain a resumable ledger at scripts/review_<YYYY-MM-DD>/state.md (confirm whether this path should
+	    be git-ignored): per-file/batch status (pending/in-review/fixed/clean), each finding with file:line,
+	    a minimal trace or repro, proposed fix, severity + confidence, and what was verified. Update it as you
+	    go; on resume, skip batches already marked fixed/clean.
+
+  Workstream 1 — Bug fixes (HIGH risk)
+	  - Hunt: correctness bugs, edge cases, API-contract violations, null-handling, resource leaks,
+	    concurrency races, overflow/saturation, regression risks.
+	  - "Confirmed" = reproduced by a failing unit test OR traced by the main agent with concrete
+	    input→output. A sub-agent's claim is a lead, not a confirmation — personally trace it before fixing,
+	    and verify any example values the agent cites (they are sometimes wrong).
+	  - Fix confirmed bugs only; prefer the smallest, most local fix.
+	  - For every code fix: add/update a regression test in the existing relevant test class, run it against
+	    the UNFIXED code to confirm RED, apply the fix, rerun to confirm GREEN, then move on.
+	  - Treat tests as the source of truth. Do not "fix" intentional design (e.g., methods that throw by
+	    design); if unsure, flag rather than change.
+
+  Workstream 2 — Javadoc/comments (comment-only, no behavior change)
+	  - Document the CONTRACT, not the implementation: what it does, not how
+	  - Accuracy: prose matches actual behavior; @param/@return/@throws match the real signature, names,
+	    return type, and thrown exceptions. Flag stale/copy-paste/contradictory descriptions; missing/extra/
+	    misnamed @param; @return on void or missing on non-void; undocumented or wrong @throws; broken/wrong {@link}/@see.
+	  - Clarity: fix confusing phrasing, typos, incomplete sentences, and descriptions that merely restate the method name.
+	  - Consistency: terminology, phrasing, tag order, formatting. Special attention to cross-variant
+	    divergence — analogous members should document the same concept with the same wording.
+	  - Verify any code in {@code} examples compiles and produces the stated output before trusting it.
+	  - For abnormal/unexpected behavior, add a note starting with <p><b>&#9888;.
+	  - Add comprehensive Javadoc for all public methods, including public static methods, where Javadoc is missing. Skip methods annotated with @Override.
+
+  Workstream 3 — Logging & exception/error messages (LOW risk — note: level/guard edits are code changes)
+	  - Correct level for each message; expensive message construction is guarded or parameterized using the
+	    project's existing logging facade idiom (no eager string concat in hot/disabled paths). Treat guard/
+	    level changes as code edits subject to the build check.
+	  - Messages are clear, specific, and actionable; include relevant identifiers; no restating the obvious.
+	  - No secrets/credentials/PII in logs; no log-and-throw duplication; no swallowed exceptions logged without context.
+
+  Build & test protocol
+	  - Build offline: mvn -o clean compile.
+	  - Before reading results, clear stale reports (target/surefire-reports) and check exit codes — stale
+	    green reports have masked test-compile failures before.
+	  - The suite runs with testFailureIgnore — trust the "Tests run: … Failures: … Errors: …" line, not
+	    BUILD SUCCESS. Record the baseline count BEFORE any change; after changes expect baseline + new
+	    regression tests, with only known non-regressions failing.
+	  - For any scripted multi-line edit, beware CRLF: MSYS grep/awk/sed strip CR — use a PowerShell raw
+	    splice for big line-range deletes and verify with od -c.
+	  - Run targeted tests per changed area as you go; run the full suite once after all fixes. A sub-agent's
+	    narrow RED/GREEN does not substitute for the authoritative full-suite run.
+
+  Final report
+	  - Code fixes (severity/confidence) and the bug each addresses; any behavior change called out.
+	  - Javadoc/comment fixes (counts by class/area).
+	  - Logging/exception-message fixes.
+	  - Tests added/updated.
+	  - Targeted test commands + results; full-suite command + result (the "Tests run" line) with baseline vs. after.
+	  - Remaining unfixed findings with severity, confidence, and rationale; new false-positives appended to
+	    the deliberate-design list.
+	  - Path to the scripts/code_doc_comment_log_review_<date>/ ledger
+
+==============================================================================================================================================
+
+
+------
+  TASK: Independent double review of locally modified files (Subversion working copy)
+
+  This project is a Subversion working copy (local file based repo at file:///C:/Users/haiyangl/Landawn/SVN_2020).
+  This is a REPORT ONLY task — do not modify, revert, add, or commit any source file.
+
+  Step 1 — Enumerate the locally modified files under folder: ./src/main/java/.
+  - Run svn status and take every file with status M (modified) as in scope — review all M files. Note (but do not
+  deep review) A/D/? entries separately.
+  - For each M file, the change set to review is svn diff <path> (working copy vs the checked out BASE).
+  - Print the full list of M files before proceeding.
+
+  Step 2 — Parallel per file review.
+  Launch multiple agents (one per modified file; batch small files) to independently review that file's svn diff
+  <path> output. Each agent must, for every hunk:
+  - Read the surrounding source in the current file (not just the diff) to understand context — never judge from the
+  diff alone.
+  - Verify the change is CORRECT (does what it intends; no logic/type/null/exception/boxing error; compiles;
+  introduces no regression or behavioral surprise).
+  - Verify it is ACCURATE (matches the apparent intent; line for line sound; no copy paste/typo/inverted condition
+  mistakes; cross checks against callers, overrides, and sibling methods where relevant).
+  - Verify it is NECESSARY (fixes a real problem or is a genuine improvement — flag changes that are spurious,
+  redundant, purely cosmetic with no value, or that could have been done more safely).
+  - Every finding must cite File.java:line and a confidence level (High / Medium / Low); for Low confidence, state
+  what additional check would confirm it.
+
+  Ground rules (apply to every agent and to the main thread):
+  - Trace before trusting. Agents tend to over claim "bugs" inferred from patterns — confirm each finding against
+  the actual code (and, where cheap, by compiling/testing) before reporting it. The main thread must spot check
+  every High confidence finding before it lands in a report.
+  - Account for inheritance/renames/overloads — confirm a referenced method/field actually exists in the current
+  tree before flagging it as wrong or missing.
+  - "No issue" is a valid outcome. Do not invent problems to fill a report.
+
+  Step 3 — Reports (only for files with issues).
+  For each file where one or more issues are found, write a report to ./scripts/cross_review/<model>_<date>/<ClassName>.txt
+  (<model> is LLM modelName, e.g. opus-4.8, gpt-5.5. <date> = today, e.g. 2026-06-16). Files reviewed and found clean get no report (just list them in the run
+  summary). Each report contains:
+  1. File + one line verdict.
+  2. Per issue findings: hunk location (File.java:line), what the modification does, the problem (correctness /
+  accuracy / necessity), confidence, and a recommended action (keep / fix how / revert).
+  3. Anything verified clean but worth noting (optional, brief).
+
+  Finally, write ./scripts/cross_review/<model>_<date>/SUMMARY.txt listing: all M files, which were clean, which have
+  reports, and the highest priority issues across files.
+
+
+==============================================================================================================================================
+
+
+------
+
+Follow the steps below strictly and execute them in order.
+
+Step 1 — Use multiple agents to thoroughly review the implementation of all public methods in all classes under ./src/main/java, and add the @MayReturnNull tag to any public method that may return null.
+
+Step 2 — Use multiple agents to thoroughly review the implementation of all public methods which is annotated with @MayReturnNull in all classes under ./src/main/java. Remove @MayReturnNull from any public method that actually never return null.
+
+
+
+==============================================================================================================================================
+
+
+------
+
+Update all Maven dependencies in the project to their latest stable versions.
+
+Requirements:
+1. Check all Maven dependency declarations in the project, including parent POMs, child modules, dependencyManagement sections, pluginManagement sections, build plugins, and test dependencies.
+2. Update each dependency and Maven plugin to the latest stable non-SNAPSHOT release.
+3. Avoid upgrading to milestone, alpha, beta, RC, or SNAPSHOT versions unless the project already uses that release line.
+4. Preserve existing formatting and structure of the pom.xml files as much as possible.
+5. After updating, run the full Maven build and test suite.
+6. If any dependency upgrade causes compilation errors, test failures, binary incompatibilities, or breaking API changes, fix the code or adjust the version to the latest compatible stable version.
+7, Remove un-used dependency.
+8, Update/upgrade the dependency in other *.pom files under this project accordingly.
+9. Summarize all changed dependencies/plugins, including old version, new version, and any compatibility fixes made.
+
+Use multiple agents to execute the same Maven dependencies upgrade tasks for other projects: ../abacus, ../abacus-common, ../abacus-cache, ../abcus-extra, ../abacus-matrix, ../abacus-query, ../abacus-jdbc, ../abacus-da under parent folder: C:\Users\haiyangl\Landawn\
+
+
+==============================================================================================================================================
+
+
+------
+  GOAL
+  Across <SCOPE — e.g. all of src/main/java>, find every method whose declared type
+  parameter is used only once in its signature and DROP that redundant type parameter,
+  replacing its single use with a wildcard. Apply the change to ALL qualifying methods.
+
+  WHAT QUALIFIES (single-use → no linkage)
+  A method-level type parameter <X> is redundant when, across the WHOLE signature —
+  the bounds of the other type parameters + the return type + every formal parameter +
+  the throws clause — X occurs exactly once (not counting its own declaration). One
+  occurrence links nothing, so it can be replaced by a wildcard.
+  Only the case where the lone use is a type ARGUMENT in a PARAMETER (e.g. Collection<X>,
+  Map<K,X>, Function<? super T, ? extends X>) is in scope. Out of scope (cannot become a
+  wildcard): used only in the return type (can't return `?`), used only in `throws`, or a
+  standalone parameter type `X`/`X[]`/`X...` (would become `Object`, not a wildcard).
+
+  ACTION — drop the type parameter
+  For each qualifying method:
+    - Replace its lone use with a wildcard: bare `?` if unbounded, `? extends Bound` if it
+      had a bound (e.g. Collection<T> → Collection<?>; <T extends Number> Collection<? extends T>
+      → Collection<? extends Number>; Map<K,V> with single-use V → Map<K, ? extends Bound>).
+    - Remove <X> from the declaration; if it was the only type parameter, delete the whole <...>.
+    - Delete the corresponding `@param <X>` javadoc tag.
+    - If the body references X, retype the affected local/loop variable to the wildcard/bound
+      when that is behavior-identical.
+
+  BACKWARD COMPATIBILITY IS NOT A CONCERN
+  Do not preserve source/binary compatibility, explicit type-witness call sites
+  (e.g. `Foo.<String>bar(...)`), or cross-overload type-parameter symmetry. Convert wherever
+  it is valid. The only thing that matters is that the result still compiles and behaves identically.
+
+  THE ONE HARD CONSTRAINT — it must compile
+  "Single-use in the signature" does NOT guarantee the body compiles with a wildcard
+  (the wildcard-capture problem). Known blockers, verify each by compiling:
+    - body writes through the type, e.g. coll.add(x), list.set(i, list.get(j)), addAll into the list;
+    - body threads the type, e.g. builds a Map<X,...> or a Collector<...,X,...> from the parameter;
+    - body invokes a Throwable/Exception-bounded functional interface whose checked exception
+      is no longer named;
+    - the method is abstract/overridden — every override in the family must change in lockstep.
+  For any method where the body genuinely needs the variable, LEAVE THAT METHOD UNCHANGED and
+  record it as skipped with the reason. Do NOT introduce helper methods or otherwise restructure
+  code to force the conversion.
+
+  VERIFY
+  The whole tree (main + tests) must compile, and the test suites for every touched file must
+  pass. All changes are erasure-identical, so runtime behavior is unchanged.
+
+  SUMMARIZE THE CHANGE
+  Produce a summary that lists: total type parameters dropped (grouped by file/family); for each
+  converted method, the before → after signature; and every skipped method with its reason
+  (capture-blocked / override-family / not a parameter position).
+
+==============================================================================================================================================
+
+
+Use multiple agents to perform a comprehensive, line-by-line review of every class under:
+
+    ./src/main/java
+
+Your objectives are to identify and fix bugs, improve correctness, and enhance the overall quality of the codebase.
+
+For every issue you find:
+
+1. Fix the underlying implementation.
+2. Add or update unit tests in the existing test classes to verify the fix and prevent regressions.
+3. Correct, clarify, or improve the Javadoc where appropriate.
+
+Do NOT assume that the existing implementation, comments, or Javadoc are correct. Treat all code and documentation as potentially inaccurate, incomplete, outdated, or inconsistent. Verify behavior based on the actual implementation, API contracts, surrounding code, and intended semantics.
+
+Review every line carefully, paying particular attention to:
+
+- Logic errors
+- Edge cases
+- Null handling
+- Exception safety
+- Resource management
+- Memory leaks
+- Concurrency and thread safety
+- Performance issues and unnecessary allocations
+- API consistency
+- Input validation
+- Defensive programming
+- Code readability and maintainability
+- Correctness and completeness of Javadoc, including examples, @param, @return, @throws, @implNote, and @apiNote
+
+Do not blindly trust existing code or documentation. If code and documentation disagree, determine which is correct based on evidence.
+
+When you are uncertain about any behavior or intended semantics:
+
+- Do not make unsupported assumptions.
+- Investigate related classes, call sites, tests, interfaces, inheritance hierarchies, and existing usage patterns.
+- If uncertainty remains, avoid speculative changes unless the fix is clearly justified.
+- Record the uncertainty, supporting evidence, and your recommendation in the final report.
+
+While reviewing, also look for opportunities to:
+
+- Simplify overly complex code.
+- Improve naming consistency.
+- Remove dead or redundant code.
+- Improve error messages.
+- Improve API consistency across similar classes and methods.
+- Improve Javadoc clarity and accuracy.
+- Identify duplicated logic that could be refactored.
+
+At the end, produce a detailed final report that includes:
+
+- All bugs found and fixed.
+- The rationale for each fix.
+- All unit tests added or updated.
+- All Javadoc corrections and improvements.
+- Any remaining suspected bugs.
+- Any ambiguous or questionable behavior.
+- Any API inconsistencies.
+- Any design issues or technical debt discovered.
+- Any recommendations for future improvements, including the reasoning behind each recommendation.
+
+Prioritize correctness over preserving existing behavior. If existing behavior is clearly incorrect, fix it and update the corresponding tests and documentation accordingly.
+

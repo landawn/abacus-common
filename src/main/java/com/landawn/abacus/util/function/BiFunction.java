@@ -15,7 +15,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -67,27 +66,31 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed {@code BiFunction} that first applies this function and then applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws NullPointerException if {@code after} is null
      */
     @Override
     default <V> BiFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after, cs.after);
+        java.util.Objects.requireNonNull(after, cs.after);
         return (t, u) -> after.apply(apply(t, u));
     }
 
     /**
-     * Converts this {@code BiFunction} to a {@code Throwables.BiFunction} that can throw a checked exception.
-     * This method provides a way to use this function in contexts that require explicit exception handling.
+     * Returns this function as a {@link Throwables.BiFunction} view.
+     *
+     * <p>The returned function has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.BiFunction}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<String, String, String> joiner = (s1, s2) -> s1 + " " + s2;
      * var throwableFunction = joiner.toThrowable();
-     * // Can now be used in contexts that handle exceptions
+     * // Can now be used in a context whose callback declares an exception type
      * }</pre>
      *
-     * @param <E> the type of exception that the returned function can throw
-     * @return a {@code Throwables.BiFunction} view of this function that can throw exceptions of type {@code E}
+     * @param <E> the target exception type for compatibility with {@code Throwables.BiFunction}
+     * @return a {@code Throwables.BiFunction} view of this function
      */
     default <E extends Throwable> Throwables.BiFunction<T, U, R, E> toThrowable() {
         return (Throwables.BiFunction<T, U, R, E>) this;

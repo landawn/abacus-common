@@ -5187,6 +5187,31 @@ public class MultimapTest extends AbstractTest {
     }
 
     @Test
+    public void testReplaceEntry_rejectedNewValueException_restoresOldValue() {
+        final Multimap<String, Integer, java.util.NavigableSet<Integer>> mm = N.newMultimap(HashMap::new, TreeSet::new);
+        mm.put("k", 1);
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> mm.replaceEntry("k", 1, null));
+
+        assertTrue(ex.getCause() instanceof NullPointerException);
+        assertEquals(Collections.singleton(1), mm.get("k"));
+        assertEquals(1, mm.totalValueCount());
+    }
+
+    @Test
+    public void testRemoveValues_acceptsWrappedBackingMap() {
+        final Map<String, List<Integer>> backing = new LinkedHashMap<>();
+        backing.put("a", new ArrayList<>(Arrays.asList(1, 2)));
+        backing.put("b", new ArrayList<>(Collections.singletonList(3)));
+        final ListMultimap<String, Integer> mm = ListMultimap.wrap(backing);
+
+        assertTrue(mm.removeValues(backing));
+
+        assertTrue(mm.isEmpty());
+        assertTrue(backing.isEmpty());
+    }
+
+    @Test
     public void testPut_rejectedValueDoesNotLeaveEmptyMapping() {
         // Rejecting Set (null into TreeSet) must not leave key -> empty collection.
         final Multimap<String, Integer, java.util.NavigableSet<Integer>> mm = N.newMultimap(HashMap::new, TreeSet::new);
@@ -5208,9 +5233,10 @@ public class MultimapTest extends AbstractTest {
     }
 
     @Test
-    public void testReplaceValues_noValuesAccepted_removesEmptyMapping() {
+    public void testReplaceValues_noValuesAccepted_reportsFailureWithoutEmptyMapping() {
         // Value collection that accepts only the first add; after clear()+addAll in replaceValues
-        // nothing is accepted and the empty mapping must be removed.
+        // nothing is accepted. Restoration is impossible for this deliberately stateful collection,
+        // so the method reports failure and at least preserves the no-empty-mapping invariant.
         final Multimap<String, Integer, Set<Integer>> rejecting = N.newMultimap(HashMap::new, () -> new HashSet<Integer>() {
             private boolean allowOne = true;
 
@@ -5233,9 +5259,78 @@ public class MultimapTest extends AbstractTest {
             }
         });
         assertTrue(rejecting.put("k", 1)); // first add allowed
-        assertTrue(rejecting.replaceValues("k", Arrays.asList(2, 3))); // clear + rejected adds → empty → remove
+        assertThrows(IllegalStateException.class, () -> rejecting.replaceValues("k", Arrays.asList(2, 3)));
         assertFalse(rejecting.containsKey("k"));
         assertNull(rejecting.get("k"));
+    }
+
+    @Test
+    public void testReplaceValues_partialFailureRestoresPreviousValues() {
+        final Multimap<String, Integer, java.util.NavigableSet<Integer>> mm = N.newMultimap(HashMap::new, TreeSet::new);
+        mm.putValues("k", Arrays.asList(1, 2));
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> mm.replaceValues("k", Arrays.asList(3, null)));
+
+        assertTrue(ex.getCause() instanceof NullPointerException);
+        assertEquals(new TreeSet<>(Arrays.asList(1, 2)), mm.get("k"));
+    }
+
+    @Test
+    public void testBulkPutRejectedValuesDoNotLeaveEmptyMappings() {
+        final Supplier<Set<Integer>> rejectingValueSupplier = () -> new HashSet<Integer>() {
+            @Override
+            public boolean add(final Integer value) {
+                return false;
+            }
+        };
+        final Multimap<String, Integer, Set<Integer>> target = N.newMultimap(HashMap::new, rejectingValueSupplier);
+
+        assertFalse(target.putAll(Collections.singletonMap("map", 1)));
+        assertFalse(target.putValuesIfKeyAbsent("single-key", Arrays.asList(1, 2)));
+
+        final Map<String, Collection<Integer>> valuesByKey = new HashMap<>();
+        valuesByKey.put("map-of-values", Arrays.asList(1, 2));
+        assertFalse(target.putValues(valuesByKey));
+
+        final ListMultimap<String, Integer> source = N.newListMultimap();
+        source.putValues("multimap", Arrays.asList(1, 2));
+        assertFalse(target.putValues(source));
+
+        assertTrue(target.isEmpty());
+        assertFalse(target.containsKey("map"));
+        assertFalse(target.containsKey("single-key"));
+        assertFalse(target.containsKey("map-of-values"));
+        assertFalse(target.containsKey("multimap"));
+    }
+
+    @Test
+    public void testAllValuesSizeSaturatesAndSpliteratorKeepsLongEstimate() {
+        final Map<String, Collection<Integer>> backing = new HashMap<>();
+        backing.put("a", Collections.nCopies(Integer.MAX_VALUE, 1));
+        backing.put("b", Collections.nCopies(Integer.MAX_VALUE, 2));
+        final Multimap<String, Integer, Collection<Integer>> mm = new Multimap<>(backing, ArrayList::new);
+
+        assertThrows(ArithmeticException.class, mm::totalValueCount);
+        assertEquals(Integer.MAX_VALUE, mm.allValues().size());
+        assertEquals(2L * Integer.MAX_VALUE, mm.valueSpliterator().estimateSize());
+    }
+
+    @Test
+    public void testConditionalMutatorsRejectNullPredicatesEagerly() {
+        final Multimap<String, Integer, List<Integer>> empty = N.newListMultimap();
+        final Predicate<String> keyPredicate = null;
+        final BiPredicate<String, List<Integer>> entryPredicate = null;
+
+        assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(keyPredicate, 1));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(entryPredicate, 1));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(keyPredicate, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(entryPredicate, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(keyPredicate));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(entryPredicate));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(keyPredicate, 1, 2));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(entryPredicate, 1, 2));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(keyPredicate, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(entryPredicate, Collections.emptyList()));
     }
 
 }

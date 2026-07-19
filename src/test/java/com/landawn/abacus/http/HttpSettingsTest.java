@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.InetSocketAddress;
@@ -136,6 +137,16 @@ public class HttpSettingsTest extends TestBase {
         HttpSettings result = settings.setConnectTimeout(0L);
         assertEquals(0L, settings.getConnectTimeout());
         assertSame(settings, result);
+    }
+
+    @Test
+    public void testTimeoutsRejectNegativeValues() {
+        final HttpSettings settings = HttpSettings.create();
+
+        assertThrows(IllegalArgumentException.class, () -> settings.setConnectTimeout(-1));
+        assertThrows(IllegalArgumentException.class, () -> settings.setReadTimeout(-1));
+        assertEquals(0, settings.getConnectTimeout());
+        assertEquals(0, settings.getReadTimeout());
     }
 
     @Test

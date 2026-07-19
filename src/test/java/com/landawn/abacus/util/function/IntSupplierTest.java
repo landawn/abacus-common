@@ -15,7 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
 
@@ -98,14 +98,10 @@ public class IntSupplierTest extends TestBase {
 
     @Test
     public void test_RANDOM() {
-        // RANDOM should return int values
-        int value1 = IntSupplier.RANDOM.getAsInt();
-        int value2 = IntSupplier.RANDOM.getAsInt();
-        int value3 = IntSupplier.RANDOM.getAsInt();
-
-        // Verify they are valid int values (always true, but tests don't throw)
-        assertTrue(value1 >= Integer.MIN_VALUE && value1 <= Integer.MAX_VALUE);
-        assertTrue(value2 >= Integer.MIN_VALUE && value2 <= Integer.MAX_VALUE);
-        assertTrue(value3 >= Integer.MIN_VALUE && value3 <= Integer.MAX_VALUE);
+        assertDoesNotThrow(() -> {
+            IntSupplier.RANDOM.getAsInt();
+            IntSupplier.RANDOM.getAsInt();
+            IntSupplier.RANDOM.getAsInt();
+        });
     }
 }

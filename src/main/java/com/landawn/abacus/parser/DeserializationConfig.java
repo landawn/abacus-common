@@ -149,8 +149,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Type<Object> none = config.getElementType();  // returns null (not set)
      *
      * config.setElementType(String.class);
-     * Type<String> type = config.getElementType();  // returns the String type
-     * String typeName = type.name();                // returns "String"
+     * Type<String> type = config.getElementType();   // returns the String type
+     * String typeName = type.name();                 // returns "String"
      * }</pre>
      *
      * @param <T> the element type
@@ -228,8 +228,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Type<Object> none = config.getMapKeyType();  // returns null (not set)
      *
      * config.setMapKeyType(String.class);
-     * Type<String> keyType = config.getMapKeyType();  // returns the String key type
-     * String typeName = keyType.name();               // returns "String"
+     * Type<String> keyType = config.getMapKeyType();   // returns the String key type
+     * String typeName = keyType.name();                // returns "String"
      * }</pre>
      *
      * @param <T> the key type
@@ -266,8 +266,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
      * Type<Long> longType = Type.of(Long.class);
-     * config.setMapKeyType(longType);                  // returns this (config) for chaining
-     * String name = config.getMapKeyType().name();     // returns "Long"
+     * config.setMapKeyType(longType);                // returns this (config) for chaining
+     * String name = config.getMapKeyType().name();   // returns "Long"
      * }</pre>
      *
      * @param keyType the type of map keys
@@ -306,8 +306,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Type<Object> none = config.getMapValueType();  // returns null (not set)
      *
      * config.setMapValueType(Integer.class);
-     * Type<Integer> valueType = config.getMapValueType();  // returns the Integer value type
-     * String typeName = valueType.name();                  // returns "Integer"
+     * Type<Integer> valueType = config.getMapValueType();   // returns the Integer value type
+     * String typeName = valueType.name();                   // returns "Integer"
      * }</pre>
      *
      * @param <T> the value type
@@ -345,8 +345,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
      * Type<Integer> intType = Type.of(Integer.class);
-     * config.setMapValueType(intType);                   // returns this (config) for chaining
-     * String name = config.getMapValueType().name();     // returns "Integer"
+     * config.setMapValueType(intType);                 // returns this (config) for chaining
+     * String name = config.getMapValueType().name();   // returns "Integer"
      * }</pre>
      *
      * @param valueType the type of map values

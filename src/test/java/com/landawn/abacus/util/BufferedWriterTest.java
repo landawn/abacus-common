@@ -523,6 +523,20 @@ public class BufferedWriterTest extends TestBase {
     }
 
     @Test
+    public void testCloseDoesNotSuppressFailureOnItself() throws IOException {
+        IOException sharedFailure = new IOException("shared failure");
+        FailingFlushAndCloseWriter out = new FailingFlushAndCloseWriter(sharedFailure, sharedFailure);
+        BufferedWriter writer = new BufferedWriter(out);
+
+        writer.write("data");
+        IOException thrown = assertThrows(IOException.class, writer::close);
+
+        assertSame(sharedFailure, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+        assertTrue(out.closed);
+    }
+
+    @Test
     public void testDummyWriter_close() {
         BufferedWriter.DummyWriter dw = new BufferedWriter.DummyWriter();
         assertThrows(UnsupportedOperationException.class, () -> dw.close());

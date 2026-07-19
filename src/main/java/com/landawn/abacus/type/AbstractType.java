@@ -131,6 +131,12 @@ public abstract class AbstractType<T> implements Type<T> {
         separatorConverter.put("$", "\\$");
         separatorConverter.put("^", "\\^");
         separatorConverter.put("\\", "\\\\");
+        separatorConverter.put("(", "\\(");
+        separatorConverter.put(")", "\\)");
+        separatorConverter.put("[", "\\[");
+        separatorConverter.put("]", "\\]");
+        separatorConverter.put("{", "\\{");
+        separatorConverter.put("}", "\\}");
     }
 
     /** The name of this type */
@@ -1122,7 +1128,8 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Splits a string using the specified separator.
-     * Handles regex special characters by escaping them.
+     * Handles single-character regex metacharacters by escaping them. Multi-character
+     * separators retain the historical regular-expression behavior.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1140,7 +1147,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * }</pre>
      *
      * @param string the string to split
-     * @param separator the delimiter used to split the input string
+     * @param separator the delimiter used to split the input string; a single regex
+     *        metacharacter is interpreted literally, while a multi-character value is
+     *        treated as a regular expression for backward compatibility
      * @return array of split strings
      */
     protected static String[] split(final String string, final String separator) {

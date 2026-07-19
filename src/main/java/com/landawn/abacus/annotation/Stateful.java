@@ -21,9 +21,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a class, method, or field as stateful, indicating that it maintains mutable internal state
- * that can change between invocations or over time. This annotation serves as a warning that the
- * annotated element is not thread-safe and requires careful handling in concurrent environments.
+ * Marks a class, method, or field as stateful, indicating that behavior depends on state that can
+ * change between invocations or over time. Stateful does not necessarily mean thread-unsafe: an
+ * implementation may protect its state with synchronization, atomics, confinement, or another
+ * documented concurrency policy.
  *
  * <p>Within abacus the marker is applied extensively in the functional toolkits
  * {@code com.landawn.abacus.util.Fn}, {@code Fnn}, {@code IntFunctions}, and on helpers such as
@@ -39,16 +40,17 @@ import java.lang.annotation.Target;
  * <p>Elements marked with {@code @Stateful} have the following characteristics:</p>
  * <ul>
  *   <li>They maintain internal state that affects their behavior.</li>
- *   <li>They are generally not thread-safe without external synchronization.</li>
- *   <li>They should not be cached or shared across multiple threads.</li>
+ *   <li>Their thread-safety and sharing rules must be determined from the annotated API's own
+ *       documentation.</li>
  *   <li>They may produce different results when called multiple times with the same inputs.</li>
  * </ul>
  *
  * <p>Important considerations:</p>
  * <ul>
- *   <li>Do not cache or store stateful objects in shared contexts.</li>
- *   <li>Do not access or update stateful objects from multiple threads without synchronization.</li>
- *   <li>Consider using thread-local storage or instance-per-thread patterns.</li>
+ *   <li>Do not assume a stateful callback is safe to share between pipeline executions.</li>
+ *   <li>Follow the implementation's documented synchronization or confinement policy.</li>
+ *   <li>Where appropriate, consider synchronization, atomics, thread-local storage, or
+ *       instance-per-execution patterns.</li>
  *   <li>Be aware that stateful objects may not be suitable for functional programming patterns.
  *       In particular, avoid using stateful objects or interfaces within parallel streams.</li>
  * </ul>

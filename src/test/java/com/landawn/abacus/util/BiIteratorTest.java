@@ -59,6 +59,30 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
+    public void testAllImplementationsRejectNullCallbacksImmediately() {
+        assertRejectsNullCallbacks(BiIterator.empty());
+        assertRejectsNullCallbacks(BiIterator.of(Map.<String, Integer> of().entrySet().iterator()));
+        assertRejectsNullCallbacks(BiIterator.generate(() -> false, pair -> {
+            // no output for an empty generated iterator
+        }));
+        assertRejectsNullCallbacks(BiIterator.generate(0, 0, (index, pair) -> {
+            // no output for an empty index range
+        }));
+        assertRejectsNullCallbacks(BiIterator.zip(List.<String> of().iterator(), List.<Integer> of().iterator()));
+        assertRejectsNullCallbacks(BiIterator.zip(List.<String> of().iterator(), List.<Integer> of().iterator(), "missing", -1));
+        assertRejectsNullCallbacks(BiIterator.<String, Integer> empty().skip(1));
+        assertRejectsNullCallbacks(BiIterator.<String, Integer> empty().limit(1));
+        assertRejectsNullCallbacks(BiIterator.<String, Integer> empty().filter((left, right) -> true));
+    }
+
+    private static void assertRejectsNullCallbacks(final BiIterator<String, Integer> iter) {
+        assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining((BiConsumer<? super String, ? super Integer>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> iter.foreachRemaining((Throwables.BiConsumer<? super String, ? super Integer, RuntimeException>) null));
+        assertThrows(IllegalArgumentException.class, () -> iter.map((java.util.function.BiFunction<? super String, ? super Integer, Object>) null));
+    }
+
+    @Test
     @DisplayName("Test empty iterator operations chaining")
     public void testEmptyChaining() {
         BiIterator<String, Integer> result = BiIterator.<String, Integer> empty().skip(10).limit(5).filter((a, b) -> true);
@@ -1705,8 +1729,7 @@ public class BiIteratorTest extends TestBase {
         map.put("a", 1);
 
         BiIterator<String, Integer> iter = BiIterator.of(map);
-        iter.map(null);
-        assertNotNull(iter);
+        assertThrows(IllegalArgumentException.class, () -> iter.map(null));
     }
 
     @Test
@@ -1778,7 +1801,7 @@ public class BiIteratorTest extends TestBase {
 
     @Test
     public void testStreamWithMapperNull() {
-        BiIterator.empty().stream(null).forEach(s -> Assertions.fail("Should not be called"));
+        assertThrows(IllegalArgumentException.class, () -> BiIterator.empty().stream(null));
     }
 
     @Test

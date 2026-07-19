@@ -26,8 +26,11 @@ import com.landawn.abacus.annotation.Beta;
  * This class extends {@link ImmutableMap} and maintains its entries in sorted order
  * according to the natural ordering of its keys or by a {@link Comparator} provided at map creation time.
  *
- * <p>Once created, the contents of an {@code ImmutableSortedMap} cannot be modified.
+ * <p>The contents of an {@code ImmutableSortedMap} cannot be modified through its API.
  * All mutating operations ({@code put}, {@code remove}, {@code clear}, etc.) throw {@link UnsupportedOperationException}.</p>
+ *
+ * <p>An instance created by {@link #wrap(SortedMap)} reflects external changes to its backing map;
+ * use {@link #copyOf(Map)} when an independent immutable value is required.</p>
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -516,9 +519,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * If the provided Map is {@code null} or empty, an empty ImmutableSortedMap is returned.
      * Otherwise, a new ImmutableSortedMap is created with the elements of the provided Map.
      *
-     * <p>If a non-empty source is a {@link SortedMap}, the returned map uses the same {@link Comparator}
-     * (or natural ordering) as the source. Empty sources return the shared empty map.
-     * Otherwise, the entries are inserted into a new
+     * <p>If the source is a {@link SortedMap}, the returned map uses the same {@link Comparator}
+     * (or natural ordering) as the source, even when the source is empty. Empty non-sorted sources
+     * return the shared empty map. Otherwise, the entries are inserted into a new
      * {@link TreeMap} using the natural ordering of the keys.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -534,7 +537,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param map the Map whose mappings are to be placed in the {@code ImmutableSortedMap}
-     * @return an {@code ImmutableSortedMap} containing the same mappings as the provided Map, or the same instance if it is already an {@code ImmutableSortedMap}, or an empty instance if {@code map} is {@code null} or empty
+     * @return an {@code ImmutableSortedMap} containing the same mappings as the provided map, or the same instance if it is already an
+     *         {@code ImmutableSortedMap}. The comparator of a {@code SortedMap} source is retained even when the source is empty; a {@code null}
+     *         or empty non-sorted source returns the shared empty instance.
      * @throws ClassCastException if the keys are not mutually comparable (when the source map is not a {@code SortedMap})
      * @throws NullPointerException if the map contains a {@code null} key and natural ordering is used
      * @see #wrap(SortedMap)
@@ -542,10 +547,10 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableSortedMap) {
             return (ImmutableSortedMap<K, V>) map;
-        } else if (N.isEmpty(map)) {
-            return empty();
         } else if (map instanceof SortedMap sortedMap) {
             return new ImmutableSortedMap<>(new TreeMap<>(sortedMap));
+        } else if (N.isEmpty(map)) {
+            return empty();
         } else {
             return new ImmutableSortedMap<>(new TreeMap<>(map));
         }
@@ -655,7 +660,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *         Implementations may, but are not required to, throw this exception if {@code fromKey}
      *         or {@code toKey} cannot be compared to keys currently in the map
      * @throws NullPointerException if {@code fromKey} or {@code toKey} is {@code null} and this map
-     *         does not permit null keys
+     *         does not permit {@code null} keys
      * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}; or if this
      *         map itself has a restricted range, and {@code fromKey} or {@code toKey} lies outside
      *         the bounds of the range
@@ -682,7 +687,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return a view of the portion of this map whose keys are strictly less than {@code toKey}
      * @throws ClassCastException if {@code toKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
-     * @throws NullPointerException if {@code toKey} is {@code null} and this map does not permit null keys
+     * @throws NullPointerException if {@code toKey} is {@code null} and this map does not permit {@code null} keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code toKey} lies outside the bounds of the range
      */
@@ -708,7 +713,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return a view of the portion of this map whose keys are greater than or equal to {@code fromKey}
      * @throws ClassCastException if {@code fromKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
-     * @throws NullPointerException if {@code fromKey} is {@code null} and this map does not permit null keys
+     * @throws NullPointerException if {@code fromKey} is {@code null} and this map does not permit {@code null} keys
      * @throws IllegalArgumentException if this map itself has a restricted range,
      *         and {@code fromKey} lies outside the bounds of the range
      */

@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -59,6 +61,50 @@ public class ParallelArrayIntStreamTest extends TestBase {
     @BeforeEach
     public void setUp() {
         parallelStream = createIntStream(DEFAULT_ARRAY);
+    }
+
+    @Test
+    public void testReduceWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch slowWorkerStarted = new CountDownLatch(1);
+        final AtomicBoolean slowWorkerFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedWorker = new AtomicBoolean();
+        final IntStream testStream = createIntStream(1, 2).onClose(() -> closeObservedFinishedWorker.set(slowWorkerFinished.get()));
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> testStream.reduce(0, (left, right) -> {
+            if (right == 2) {
+                slowWorkerStarted.countDown();
+                sleepForWorkerOverlap();
+                slowWorkerFinished.set(true);
+                return left + right;
+            }
+
+            awaitWorkerStart(slowWorkerStarted);
+            throw new IllegalStateException("worker failure");
+        }));
+
+        assertEquals("worker failure", thrown.getMessage());
+        assertTrue(slowWorkerFinished.get());
+        assertTrue(closeObservedFinishedWorker.get());
+    }
+
+    private static void awaitWorkerStart(final CountDownLatch latch) {
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void sleepForWorkerOverlap() {
+        try {
+            Thread.sleep(200);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(e);
+        }
     }
 
     // Covers the iterator-based terminal-operation branch in ParallelArrayIntStream.
@@ -1244,6 +1290,18 @@ public class ParallelArrayIntStreamTest extends TestBase {
     @Test
     public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
         assertEquals(testMaxThreadNum, ((ParallelArrayIntStream) createIntStream(TEST_ARRAY)).maxThreadNum());
+    }
+
+    @Test
+    public void testCancelUncompletedThreadsIsPreserved() {
+        try (ParallelArrayIntStream stream = new ParallelArrayIntStream(new int[] { 1, 2, 3 }, 0, 3, false, testMaxThreadNum, Splitor.ARRAY, null, true,
+                new ArrayList<>())) {
+            assertTrue(stream.cancelUncompletedThreads());
+
+            try (IntStream prepended = stream.prepend(IntStream.of(0))) {
+                assertTrue(prepended.cancelUncompletedThreads());
+            }
+        }
     }
 
     // forEach with ITERATOR splitor and large array

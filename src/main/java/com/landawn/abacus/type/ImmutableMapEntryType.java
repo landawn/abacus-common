@@ -21,7 +21,6 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -205,8 +204,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
-
-                IOException thrown = null;
+                Throwable failure = null;
 
                 try {
                     bw.write(SK._BRACE_L);
@@ -220,22 +218,12 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (final IOException e) {
-                    thrown = e;
+                } catch (final IOException | RuntimeException | Error e) {
+                    failure = e;
                     throw e;
                 } finally {
                     if (!isBufferedWriter) {
-                        try {
-                            Objectory.recycle((BufferedWriter) bw);
-                        } catch (final UncheckedIOException e) {
-                            final Throwable cause = e.getCause();
-
-                            if (thrown == null && cause instanceof IOException) {
-                                throw (IOException) cause;
-                            } else if (thrown == null) {
-                                throw e;
-                            }
-                        }
+                        Utils.recycle((BufferedWriter) bw, failure);
                     }
                 }
             } else {

@@ -36,7 +36,7 @@ import java.util.function.Supplier;
  * @param <T> the type of the lazily initialized object
  */
 final class LazyInitializer<T> implements com.landawn.abacus.util.function.Supplier<T> {
-    private final Supplier<T> supplier;
+    private Supplier<T> supplier;
     private volatile boolean initialized = false;
     private volatile T value = null; //NOSONAR
 
@@ -81,6 +81,8 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     /**
      * Returns the lazily initialized value. On the first successful call the value is obtained from
      * the supplier and cached. Subsequent calls return the cached value without invoking the supplier again.
+     * The supplier reference is released after successful initialization so captured construction state can
+     * be reclaimed even while this initializer remains reachable.
      *
      * <p>This method is thread-safe and uses double-checked locking to ensure that, in the absence of
      * exceptions, the supplier is invoked exactly once even under concurrent access.</p>
@@ -107,6 +109,7 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
             synchronized (this) {
                 if (!initialized) {
                     value = supplier.get();
+                    supplier = null;
                     initialized = true;
                 }
             }

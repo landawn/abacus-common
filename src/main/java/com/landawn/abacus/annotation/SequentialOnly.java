@@ -23,18 +23,17 @@ import java.lang.annotation.Target;
 /**
  * Indicates that the annotated method or type must run sequentially and is NOT safe to use on a
  * parallelized abacus pipeline. The {@code com.landawn.abacus.util.Seq} and {@code *Stream}
- * APIs use this marker on operations whose correctness depends on encounter-order processing or
- * on mutable state that cannot be safely shared across partitions (for example, a
- * {@link Stateful} predicate such as the one returned by {@code Fn.distinctBy(...)}, or a
- * {@code peek} that mutates an external accumulator). It is the converse of
- * {@link ParallelSupported}.
+ * APIs use this marker on operations whose implementation is supported only in sequential
+ * pipeline mode. Reasons can include encounter-order processing or state that cannot be safely
+ * partitioned. The marker describes pipeline support; it does not, by itself, declare whether a
+ * method or object is thread-safe. It is the converse of {@link ParallelSupported}.
  *
  * <p>This annotation is used to mark:</p>
  * <ul>
  *   <li>Stream operations that cannot be parallelized.</li>
  *   <li>Stateful operations that require sequential processing.</li>
  *   <li>Algorithms that depend on processing order.</li>
- *   <li>Non-thread-safe utility methods.</li>
+ *   <li>Pipeline operations whose implementation is not defined for parallel mode.</li>
  * </ul>
  *
  * <p><b>Common reasons for sequential-only operations:</b></p>

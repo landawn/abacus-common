@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableBoolean;
 
@@ -199,6 +200,16 @@ public class MutableBooleanTypeTest extends TestBase {
         assertDoesNotThrow(() -> {
             mutableBooleanType.serializeTo(characterWriter, null, null);
         });
+    }
+
+    @Test
+    public void testSerializeToWithNullHonorsWriteNullBooleanAsFalse() throws IOException {
+        JsonXmlSerConfig<?> config = Mockito.mock(JsonXmlSerConfig.class);
+        Mockito.when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
+
+        mutableBooleanType.serializeTo(characterWriter, null, config);
+
+        Mockito.verify(characterWriter).write(FALSE_CHAR_ARRAY);
     }
 
     @Test

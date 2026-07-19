@@ -167,11 +167,18 @@ public class AsyncExecutor {
      * }</pre>
      *
      * @param executor the Executor to be used for executing tasks
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
     public AsyncExecutor(final Executor executor) {
-        this(getCorePoolSize(executor), getMaximumPoolSize(executor), getKeepAliveTime(executor), TimeUnit.MILLISECONDS);
+        this(getCorePoolSize(checkExecutor(executor)), getMaximumPoolSize(executor), getKeepAliveTime(executor), TimeUnit.MILLISECONDS);
 
         this.executor = executor;
+    }
+
+    private static Executor checkExecutor(final Executor executor) {
+        N.checkArgNotNull(executor, cs.executor);
+
+        return executor;
     }
 
     private static int getCorePoolSize(final Executor executor) {
@@ -413,17 +420,6 @@ public class AsyncExecutor {
         });
     }
 
-    //    /**
-    //     * Executes a Runnable command asynchronously with automatic retry on failure.
-    //     *
-    //     * @deprecated Use {@link #executeWithRetry(Throwables.Runnable, int, long, Predicate)} instead for clearer semantics.
-    //     */
-    //    @Deprecated
-    //    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final int retryTimes, final long retryIntervalInMillis,
-    //            final Predicate<? super Exception> retryCondition) {
-    //        return executeWithRetry(command, retryTimes, retryIntervalInMillis, retryCondition);
-    //    }
-
     /**
      * Executes a Callable command asynchronously with automatic retry on failure or unsatisfactory result.
      *
@@ -458,17 +454,6 @@ public class AsyncExecutor {
             return retry.call(command);
         });
     }
-
-    //    /**
-    //     * Executes a Callable command asynchronously with automatic retry on failure or unsatisfactory result.
-    //     *
-    //     * @deprecated Use {@link #executeWithRetry(Callable, int, long, BiPredicate)} instead for clearer semantics.
-    //     */
-    //    @Deprecated
-    //    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final int retryTimes, final long retryIntervalInMillis,
-    //            final BiPredicate<? super R, ? super Exception> retryCondition) {
-    //        return executeWithRetry(command, retryTimes, retryIntervalInMillis, retryCondition);
-    //    }
 
     /**
      * Executes a FutureTask asynchronously using the underlying executor.
@@ -513,9 +498,13 @@ public class AsyncExecutor {
      */
     @Internal
     public Executor getExecutor() {
-        if (executor == null) {
+        Executor result = executor;
+
+        if (result == null) {
             synchronized (this) {
-                if (executor == null) {
+                result = executor;
+
+                if (result == null) {
                     // Prevent re-initialization after shutdown
                     if (isShutdown) {
                         throw new IllegalStateException("AsyncExecutor has been shut down and cannot be reused");
@@ -529,6 +518,7 @@ public class AsyncExecutor {
                     //    }
 
                     executor = threadPoolExecutor;
+                    result = threadPoolExecutor;
 
                     final Thread hook = new Thread(() -> {
                         try {
@@ -544,7 +534,9 @@ public class AsyncExecutor {
             }
         }
 
-        return executor;
+        // Return the same non-null snapshot that was tested above. Reading the volatile field again
+        // here could observe shutdown() clearing it between the check and this return.
+        return result;
     }
 
     /**
@@ -596,8 +588,14 @@ public class AsyncExecutor {
      *                           does not wait for termination
      * @param timeUnit the time unit of the {@code terminationTimeout} argument; must not be
      *                 {@code null} when {@code terminationTimeout} is greater than 0
+     * @throws IllegalArgumentException if {@code terminationTimeout} is greater than 0 and
+     *                                  {@code timeUnit} is {@code null}
      */
     public synchronized void shutdownAndAwait(final long terminationTimeout, final TimeUnit timeUnit) {
+        if (terminationTimeout > 0) {
+            N.checkArgNotNull(timeUnit, cs.unit);
+        }
+
         final Thread hook = shutdownHook;
 
         if (hook != null) {

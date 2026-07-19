@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -866,6 +867,35 @@ public class ListMultimapTest extends TestBase {
     }
 
     @Test
+    public void testWrap_MapWithNonInstantiableListUsesArrayListForNewKeys() {
+        final Map<String, List<Integer>> map = new HashMap<>();
+        final List<Integer> fixedSizeValues = Arrays.asList(1, 2);
+        map.put("existing", fixedSizeValues);
+
+        final ListMultimap<String, Integer> multimap = ListMultimap.wrap(map);
+
+        Assertions.assertSame(fixedSizeValues, multimap.get("existing"));
+        Assertions.assertTrue(multimap.put("new", 3));
+        Assertions.assertTrue(map.get("new") instanceof ArrayList);
+        Assertions.assertEquals(Arrays.asList(3), map.get("new"));
+    }
+
+    @Test
+    public void testWrap_MapWithNonInstantiableWrapperType() {
+        final Map<String, List<Integer>> backing = Collections.synchronizedMap(new HashMap<>());
+        backing.put("a", new ArrayList<>(Arrays.asList(1, 2)));
+
+        final ListMultimap<String, Integer> multimap = ListMultimap.wrap(backing);
+        multimap.put("a", 3);
+        final ListMultimap<String, Integer> copy = multimap.copy();
+
+        Assertions.assertEquals(Arrays.asList(1, 2, 3), backing.get("a"));
+        Assertions.assertEquals(Arrays.asList(1, 2, 3), copy.get("a"));
+        copy.put("a", 4);
+        Assertions.assertEquals(Arrays.asList(1, 2, 3), backing.get("a"));
+    }
+
+    @Test
     public void testWrap_WithSupplier() {
         Map<String, List<Integer>> map = new HashMap<>();
         map.put("a", new ArrayList<>(Arrays.asList(1, 2)));
@@ -1348,6 +1378,18 @@ public class ListMultimapTest extends TestBase {
         ListMultimap<String, Integer> multimap = new ListMultimap<>();
         List<Integer> result = multimap.computeIfPresent("a", (k, v) -> new ArrayList<>(Arrays.asList(10)));
         Assertions.assertNull(result);
+    }
+
+    @Test
+    public void testInvertDoesNotReuseOriginalTypeSpecificValueSupplier() {
+        ListMultimap<String, Integer> multimap = new ListMultimap<>(LinkedHashMap::new, () -> Collections.checkedList(new ArrayList<>(), Integer.class));
+        multimap.put("a", 1);
+        multimap.put("b", 1);
+
+        ListMultimap<Integer, String> inverted = multimap.invert();
+
+        Assertions.assertEquals(Arrays.asList("a", "b"), inverted.get(1));
+        Assertions.assertTrue(inverted.get(1) instanceof ArrayList);
     }
 
 }

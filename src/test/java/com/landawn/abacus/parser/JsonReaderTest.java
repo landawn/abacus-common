@@ -195,7 +195,7 @@ public class JsonReaderTest extends AbstractTest {
 
     @Test
     public void test_parser() throws Exception {
-        String str = "{aa: 12, bb: \\\"\\u123dkeialskdfj\\n\\r\\f\\\"}";
+        String str = "{aa: 12, bb: \"\\u123dkeialskdfj\\n\\r\\f\"}";
         char[] cbuf = new char[1024];
         JsonReader reader = JsonStringReader.parse(str, cbuf);
         int token = reader.nextToken();
@@ -221,7 +221,7 @@ public class JsonReaderTest extends AbstractTest {
         N.println(reader.hasText() ? reader.getText() : "null");
         reader.nextToken();
 
-        str = "{aa: 12, bb: \\\"\\u123dkeialskdfj\\n\\r\\f\\\"}";
+        str = "{aa: 12, bb: \"\\u123dkeialskdfj\\n\\r\\f\"}";
         char[] rbuf = new char[32];
         cbuf = new char[1024];
         reader = JsonStreamReader.parse(IOUtil.stringToReader(str), rbuf, cbuf);

@@ -80,7 +80,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param array the array to convert; may be {@code null}
      * @param collClass the class of the collection to create
      *                  (e.g., {@code ArrayList.class}, {@code HashSet.class})
-     * @return a new collection containing all elements from the array,
+     * @return the new collection populated with the array elements
      *         or {@code null} if {@code array} is {@code null}
      * @throws IllegalArgumentException if {@code collClass} cannot be instantiated
      */

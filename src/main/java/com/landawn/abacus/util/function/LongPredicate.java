@@ -14,7 +14,6 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -148,11 +147,11 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default LongPredicate and(final java.util.function.LongPredicate other) {
-        N.checkArgNotNull(other, cs.other);
+        java.util.Objects.requireNonNull(other, cs.other);
         return value -> test(value) && other.test(value);
     }
 
@@ -176,11 +175,11 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws NullPointerException if {@code other} is null
      */
     @Override
     default LongPredicate or(final java.util.function.LongPredicate other) {
-        N.checkArgNotNull(other, cs.other);
+        java.util.Objects.requireNonNull(other, cs.other);
         return value -> test(value) || other.test(value);
     }
 

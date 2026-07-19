@@ -100,6 +100,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         final DoubleConsumer action = it -> rateLimiter.acquire();
@@ -114,6 +116,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream delay(final Duration delay) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(delay, cs.delay);
 
         final long millis = delay.toMillis();
@@ -140,7 +144,9 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public DoubleStream debounce(Duration duration) {
+    public DoubleStream debounce(Duration duration) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
@@ -150,7 +156,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
         final DoubleIteratorEx iter = iteratorEx();
 
-        return newStream(new DoubleIteratorEx() {
+        return newStream(new DoubleIteratorEx() { //NOSONAR
             private final long durationMillis = duration.toMillis();
             private double prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
@@ -256,6 +262,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream mapMulti(final DoubleMapMultiConsumer mapper) {
+        assertNotClosed();
+
         final DoubleFunction<DoubleStream> secondMapper = t -> {
             final SpinedBuffer.OfDouble buffer = new SpinedBuffer.OfDouble();
 
@@ -269,6 +277,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream mapPartial(final DoubleFunction<OptionalDouble> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_DOUBLE).mapToDouble(Fn.GET_AS_DOUBLE));
@@ -280,6 +290,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream mapPartialJdk(final DoubleFunction<java.util.OptionalDouble> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_DOUBLE_JDK).mapToDouble(Fn.GET_AS_DOUBLE_JDK));
@@ -724,6 +736,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
                     a[i] = elements[cursor - i - 1];
                 }
 
+                cursor = fromIndex;
+
                 return a;
             }
 
@@ -811,6 +825,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
                 for (int i = cnt; i < len; i++) {
                     a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
+
+                cnt = len;
 
                 return a;
             }
@@ -938,6 +954,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
                 for (int i = 0; i < cursor; i++) {
                     a[i] = aar[cursor - i - 1];
                 }
+
+                cursor = 0;
 
                 return a;
             }
@@ -1234,7 +1252,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public DoubleStream top(final int n) throws IllegalStateException {
+    public DoubleStream top(final int n) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
 
@@ -1271,7 +1289,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.DoubleFunction<? extends K, E> keyMapper,
-            final Collector<? super Double, ?, D> downstream) throws E {
+            final Collector<? super Double, ?, D> downstream) throws IllegalStateException, E {
         assertNotClosed();
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
@@ -1472,9 +1490,15 @@ abstract class AbstractDoubleStream extends DoubleStream {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}
+     */
     @Override
-    public Joiner joinTo(final Joiner joiner) throws IllegalStateException {
+    public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(joiner, cs.joiner);
 
         try {
             @SuppressWarnings("resource")

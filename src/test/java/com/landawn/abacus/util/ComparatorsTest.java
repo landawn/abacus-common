@@ -1335,6 +1335,22 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
+    public void test_consumingComparators_sameReference_areReflexiveAndDoNotConsume() {
+        final Iterator<Integer> iterator = Arrays.asList(1, 2, 3).iterator();
+        final Comparator<Iterator<Integer>> iteratorComparator = Comparators.comparingIterator(Integer::compare);
+
+        assertEquals(0, iteratorComparator.compare(iterator, iterator));
+        assertEquals(1, iterator.next());
+
+        final Iterator<Integer> oneShotIterator = Arrays.asList(4, 5, 6).iterator();
+        final Iterable<Integer> oneShotIterable = () -> oneShotIterator;
+        final Comparator<Iterable<Integer>> iterableComparator = Comparators.comparingIterable(Integer::compare);
+
+        assertEquals(0, iterableComparator.compare(oneShotIterable, oneShotIterable));
+        assertEquals(4, oneShotIterator.next());
+    }
+
+    @Test
     public void test_comparingMapByKey_noArgs_differentSizes() {
         Comparator<Map<String, Integer>> comp = Comparators.comparingMapByKey();
 

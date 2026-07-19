@@ -242,7 +242,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <tr>
  *     <td>{@code thenDelay(delay, unit)}</td>
  *     <td>{@code —} (compare {@link CompletableFuture#delayedExecutor(long, TimeUnit)})</td>
- *     <td>Inserts a delay before the next stage; applied lazily when {@code get()} is called.</td>
+ *     <td>Inserts a shared delay after upstream completion and before the next stage.</td>
  *     <td>No direct counterpart: {@code CompletableFuture} needs {@code delayedExecutor}/{@code orTimeout}.</td>
  *   </tr>
  * </table>
@@ -684,8 +684,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <T> the type of the value returned by the future.
      * @param future the future to wrap; must not be {@code null}.
      * @return a {@code ContinuableFuture} that wraps the provided future.
+     * @throws IllegalArgumentException if {@code future} is {@code null}.
      */
-    public static <T> ContinuableFuture<T> wrap(final Future<? extends T> future) {
+    public static <T> ContinuableFuture<T> wrap(final Future<? extends T> future) throws IllegalArgumentException {
+        N.checkArgNotNull(future, cs.future);
+
         return new ContinuableFuture<>(future);
     }
 
@@ -931,6 +934,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>The successful result of the computation</li>
      *   <li>The exception that occurred during computation or while waiting</li>
      * </ul>
+     * If waiting is interrupted, the {@link InterruptedException} is returned as the failure and
+     * the current thread's interrupt status is restored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -953,6 +958,9 @@ public class ContinuableFuture<T> implements Future<T> {
     public Result<T, Exception> getAsResult() {
         try {
             return Result.of(get(), null);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Result.of(null, e);
         } catch (final Exception e) {
             return Result.of(null, Futures.convertException(e));
         }
@@ -965,6 +973,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This is the timeout version of {@link #getAsResult()}, useful when you want to limit
      * the waiting time but still handle results in a functional style without checked exceptions.
+     * If waiting is interrupted, the {@link InterruptedException} is returned as the failure and
+     * the current thread's interrupt status is restored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -989,6 +999,9 @@ public class ContinuableFuture<T> implements Future<T> {
     public Result<T, Exception> getAsResult(final long timeout, final TimeUnit unit) {
         try {
             return Result.of(get(timeout, unit), null);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Result.of(null, e);
         } catch (final Exception e) {
             return Result.of(null, Futures.convertException(e));
         }
@@ -1646,7 +1659,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <ul>
      *   <li>result1/exception1 are from this future</li>
      *   <li>result2/exception2 are from the other future</li>
-     *   <li>If a future succeeds, its exception is null and its result is the (possibly null) computed value</li>
+     *   <li>If a future succeeds, its exception is {@code null} and its result is the (possibly null) computed value</li>
      *   <li>If a future fails, its result is {@code null} and exception is non-null</li>
      * </ul>
      *
@@ -1743,8 +1756,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable.
-     * @param other the other future to wait for completion; must not be null.
-     * @param action the callable to execute after both futures complete; must not be null.
+     * @param other the other future to wait for completion; must not be {@code null}.
+     * @param action the callable to execute after both futures complete; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the callable.
      */
     public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<? extends R> action) {
@@ -1776,8 +1789,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the bi-function and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture that must complete before executing the action; must not be null.
-     * @param action the bi-function to execute with both results; must not be null.
+     * @param other the other ContinuableFuture that must complete before executing the action; must not be {@code null}.
+     * @param action the bi-function to execute with both results; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the bi-function.
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
@@ -1817,8 +1830,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the function and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the function that processes the tuple of results and exceptions; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the function that processes the tuple of results and exceptions; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the function.
      * @see #getAsResult()
      */
@@ -1859,8 +1872,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the QuadFunction and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the QuadFunction that processes both results and exceptions; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the QuadFunction that processes both results and exceptions; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the result of the QuadFunction.
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
@@ -1891,8 +1904,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to race against; must not be null.
-     * @param action the Runnable to execute after either future completes; must not be null.
+     * @param other the other ContinuableFuture to race against; must not be {@code null}.
+     * @param action the Runnable to execute after either future completes; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
@@ -1923,8 +1936,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to race against; must not be null.
-     * @param action the Consumer to execute with the first available result; must not be null.
+     * @param other the other ContinuableFuture to race against; must not be {@code null}.
+     * @param action the Consumer to execute with the first available result; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
@@ -1963,8 +1976,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to race against; must not be null.
-     * @param action the BiConsumer to execute with the result and exception; must not be null.
+     * @param other the other ContinuableFuture to race against; must not be {@code null}.
+     * @param action the BiConsumer to execute with the result and exception; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      * @see #getAsResult()
      */
@@ -1997,8 +2010,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the result type of the callable and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to race against; must not be null.
-     * @param action the Callable to execute after either future completes; must not be null.
+     * @param other the other ContinuableFuture to race against; must not be {@code null}.
+     * @param action the Callable to execute after either future completes; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the result of the callable.
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) {
@@ -2029,8 +2042,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the result type of the function and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to race against; must not be null.
-     * @param action the function to transform the first available result; must not be null.
+     * @param other the other ContinuableFuture to race against; must not be {@code null}.
+     * @param action the function to transform the first available result; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
@@ -2071,8 +2084,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to race against; must not be null.
-     * @param action the BiFunction to transform the result and exception; must not be null.
+     * @param other the other ContinuableFuture to race against; must not be {@code null}.
+     * @param action the BiFunction to transform the result and exception; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
      * @see #getAsResult()
      * @see #callAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiFunction)
@@ -2105,8 +2118,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the Runnable to execute after the first successful completion; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the Runnable to execute after the first successful completion; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
@@ -2146,8 +2159,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the Consumer to execute with the first successful result; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the Consumer to execute with the first successful result; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
@@ -2207,8 +2220,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the BiConsumer to execute with the result and exception; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the BiConsumer to execute with the result and exception; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
      */
     @Beta
@@ -2256,8 +2269,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the result type of the callable and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the Callable to execute after the first successful completion; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the Callable to execute after the first successful completion; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the result of the callable.
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Callable<? extends R> action) {
@@ -2297,8 +2310,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the result type of the function and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the function to transform the first successful result; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the function to transform the first successful result; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
@@ -2349,8 +2362,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
-     * @param other the other ContinuableFuture to wait for; must not be null.
-     * @param action the BiFunction to transform based on result and exception; must not be null.
+     * @param other the other ContinuableFuture to wait for; must not be {@code null}.
+     * @param action the BiFunction to transform based on result and exception; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
      * @see #getAsResult()
      */
@@ -2399,6 +2412,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method is useful for implementing timeouts, rate limiting, or introducing
      * deliberate pauses in asynchronous workflows.
+     * The shared delay window begins after upstream completion (successful, exceptional, or
+     * cancelled) is observed. Delay precision is retained in the supplied {@link TimeUnit}, and
+     * concurrent callers wait independently on that same window so one caller cannot prevent
+     * another caller from observing its own timeout. For {@link #get(long, TimeUnit)}, the timeout
+     * is a single budget covering both the upstream wait and the remaining delay.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2410,7 +2428,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param delay the delay duration before the next action is executed; values &lt;= 0 mean no delay.
-     * @param unit the time unit of the delay parameter; must not be null when {@code delay > 0}.
+     * @param unit the time unit of the delay parameter; must not be {@code null} when {@code delay > 0}.
      * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0.
      */
     @SuppressWarnings("deprecation")
@@ -2442,9 +2460,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenRunAsync(result -> writeToFile(result));   // I/O operation
      * }</pre>
      *
-     * @param executor the executor to use for subsequent actions in the chain; must not be null.
+     * @param executor the executor to use for subsequent actions in the chain; must not be {@code null}.
      * @return a new ContinuableFuture configured with the specified executor.
-     * @throws IllegalArgumentException if {@code executor} is null.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @SuppressWarnings("deprecation")
     public ContinuableFuture<T> thenUse(final Executor executor) {
@@ -2453,9 +2471,10 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Internal method that creates a new ContinuableFuture with the specified executor and delay configuration.
-     * This method combines the functionality of thenDelay and thenUse.
+     * This method combines the functionality of thenDelay and thenUse. A positive delay starts
+     * after upstream completion is observed and is shared by every accessor of the returned future.
      *
-     * @param executor the executor to use for subsequent operations; must not be null.
+     * @param executor the executor to use for subsequent operations; must not be {@code null}.
      * @param delay the delay before executing subsequent operations.
      * @param unit the time unit for the delay.
      * @return a new ContinuableFuture with the specified configuration.
@@ -2464,86 +2483,151 @@ public class ContinuableFuture<T> implements Future<T> {
     @Deprecated
     ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) {
         N.checkArgNotNull(executor);
+        N.checkArgNotNull(unit);
 
         //noinspection Convert2Diamond
         return new ContinuableFuture<>(new Future<T>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
-            private final long delayInMillis = unit.toMillis(delay);
-            private final long startTimeInNanos = System.nanoTime();
+            private final long delayInNanos = unit.toNanos(delay);
+            private volatile boolean isDelayStarted = future.isDone();
+            private volatile long delayStartTimeInNanos = isDelayStarted ? System.nanoTime() : 0;
             private volatile boolean isDelayed = false;
 
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
-                return future.cancel(mayInterruptIfRunning);
+                final boolean cancelled = future.cancel(mayInterruptIfRunning);
+
+                if (future.isDone()) {
+                    startDelayIfNeeded();
+                }
+
+                return cancelled;
             }
 
             @Override
             public boolean isCancelled() {
-                return future.isCancelled();
+                final boolean cancelled = future.isCancelled();
+
+                if (cancelled) {
+                    startDelayIfNeeded();
+                }
+
+                return cancelled;
             }
 
             @Override
             public boolean isDone() {
-                return future.isDone();
+                final boolean done = future.isDone();
+
+                if (done) {
+                    startDelayIfNeeded();
+                }
+
+                return done;
             }
 
             @Override
             public T get() throws InterruptedException, ExecutionException {
+                T result = null;
+                CancellationException cancellationException = null;
+                ExecutionException executionException = null;
+
+                try {
+                    result = future.get();
+                } catch (final CancellationException e) {
+                    cancellationException = e;
+                } catch (final ExecutionException e) {
+                    executionException = e;
+                }
+
+                startDelayIfNeeded();
                 delay(Long.MAX_VALUE);
 
-                return future.get();
+                if (cancellationException != null) {
+                    throw cancellationException;
+                } else if (executionException != null) {
+                    throw executionException;
+                }
+
+                return result;
             }
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                 final long timeoutNanos = unit.toNanos(timeout);
                 final long startNanos = System.nanoTime();
+                T result = null;
+                CancellationException cancellationException = null;
+                ExecutionException executionException = null;
 
-                // Cap the artificial delay at the user-supplied timeout. Without this cap, a
-                // delay longer than the timeout would still wait the full delay before timing out,
-                // surprising callers who expect get(t, unit) to return within ~t.
-                final long timeoutMillis = TimeUnit.NANOSECONDS.toMillis(timeoutNanos);
-                delay(timeoutMillis);
-
-                if (!isDelayed) {
-                    // The configured delay was only partially served (the timeout - possibly
-                    // truncated to 0 ms for sub-millisecond values - is shorter than the remaining
-                    // delay): the value must not become visible before the delay fully elapses.
-                    throw new TimeoutException("Timeout after delay");
+                try {
+                    // Future.get permits non-positive timeouts. Normalize them to zero so broken
+                    // implementations do not reject a negative value before checking completion.
+                    result = future.get(Math.max(0L, timeoutNanos), TimeUnit.NANOSECONDS);
+                } catch (final CancellationException e) {
+                    cancellationException = e;
+                } catch (final ExecutionException e) {
+                    executionException = e;
                 }
+
+                startDelayIfNeeded();
 
                 final long elapsedNanos = System.nanoTime() - startNanos;
-                final long remainingNanos = timeoutNanos - elapsedNanos;
+                final long remainingNanos = timeoutNanos <= 0 ? 0 : timeoutNanos - elapsedNanos;
+                delay(Math.max(0L, remainingNanos));
 
-                if (remainingNanos <= 0) {
+                if (!isDelayed) {
+                    // The timeout budget was exhausted by the upstream wait and/or only part of
+                    // the post-completion delay. The value must not become visible early.
                     throw new TimeoutException("Timeout after delay");
                 }
 
-                return future.get(remainingNanos, TimeUnit.NANOSECONDS);
+                if (cancellationException != null) {
+                    throw cancellationException;
+                } else if (executionException != null) {
+                    throw executionException;
+                }
+
+                return result;
             }
 
-            private void delay(final long maxWaitMillis) throws InterruptedException {
-                if (!isDelayed) {
+            private void startDelayIfNeeded() {
+                if (!isDelayStarted) {
                     synchronized (this) {
-                        if (!isDelayed) {
-                            final long elapsedTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTimeInNanos);
-                            final long remainingDelay = delayInMillis - elapsedTime;
-                            if (remainingDelay > 0) {
-                                // Use interruptible Thread.sleep so blocked callers can be
-                                // interrupted promptly per Future#get's contract — the prior
-                                // sleepUninterruptibly silently swallowed InterruptedException.
-                                Thread.sleep(Math.min(remainingDelay, maxWaitMillis));
-                            }
-
-                            // Only mark the configured delay as fully consumed once it has
-                            // actually elapsed. If the wait was capped by maxWaitMillis (e.g.
-                            // a get(timeout, unit) call with a timeout shorter than the
-                            // remaining delay), the delay is NOT yet satisfied and a later
-                            // get() must still honor the remaining delay.
-                            if (remainingDelay <= 0 || remainingDelay <= maxWaitMillis) {
-                                isDelayed = true;
-                            }
+                        if (!isDelayStarted) {
+                            delayStartTimeInNanos = System.nanoTime();
+                            isDelayStarted = true;
                         }
                     }
+                }
+            }
+
+            private void delay(final long maxWaitNanos) throws InterruptedException {
+                if (isDelayed) {
+                    return;
+                }
+
+                final long waitStartTimeInNanos = System.nanoTime();
+
+                while (!isDelayed) {
+                    final long elapsedDelayNanos = System.nanoTime() - delayStartTimeInNanos;
+                    final long remainingDelayNanos = delayInNanos - elapsedDelayNanos;
+
+                    if (remainingDelayNanos <= 0) {
+                        isDelayed = true;
+                        return;
+                    }
+
+                    final long elapsedWaitNanos = System.nanoTime() - waitStartTimeInNanos;
+                    final long remainingWaitNanos = maxWaitNanos - elapsedWaitNanos;
+
+                    if (remainingWaitNanos <= 0) {
+                        return;
+                    }
+
+                    // Each caller waits independently. Holding this Future's monitor while
+                    // sleeping would let an untimed get() prevent another caller's timed get()
+                    // from observing its own timeout.
+                    TimeUnit.NANOSECONDS.sleep(Math.min(remainingDelayNanos, remainingWaitNanos));
                 }
             }
         }, null, executor) {
@@ -2729,16 +2813,16 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>Provides better control over thread pool isolation and resource management</li>
      * </ul>
      *
-     * @param executor the executor to use for asynchronous result retrieval; must not be null.
+     * @param executor the executor to use for asynchronous result retrieval; must not be {@code null}.
      * @return a new {@code CompletableFuture} that completes with the same result as this {@code ContinuableFuture},
      *         executed asynchronously using the provided executor.
-     * @throws IllegalArgumentException if {@code executor} is null.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)
      * @see #toCompletableFuture()
      * @see CompletionException
      */
     @Beta
-    public CompletableFuture<T> toCompletableFuture(final Executor executor) {
+    public CompletableFuture<T> toCompletableFuture(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor);
 
         return CompletableFuture.supplyAsync(() -> {

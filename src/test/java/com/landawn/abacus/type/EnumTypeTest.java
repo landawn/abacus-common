@@ -36,6 +36,17 @@ public class EnumTypeTest extends TestBase {
         VALUE
     }
 
+    private enum DuplicateJsonXmlNameEnum {
+        @JsonXmlField(name = "duplicate")
+        FIRST, @JsonXmlField(name = "duplicate")
+        SECOND
+    }
+
+    private enum JsonXmlNameCollidesWithConstantNameEnum {
+        @JsonXmlField(name = "SECOND")
+        FIRST, SECOND
+    }
+
     public enum DuplicateCodeEnum {
         FIRST(7), SECOND(7);
 
@@ -97,6 +108,12 @@ public class EnumTypeTest extends TestBase {
     @Test
     public void testCodeRepresentationRejectsDuplicateCodes() {
         assertThrows(IllegalArgumentException.class, () -> createType(DuplicateCodeEnum.class.getName() + "(CODE)"));
+    }
+
+    @Test
+    public void testDuplicateJsonXmlNamesAreRejected() {
+        assertThrows(IllegalArgumentException.class, () -> createType(DuplicateJsonXmlNameEnum.class.getName()));
+        assertThrows(IllegalArgumentException.class, () -> createType(JsonXmlNameCollidesWithConstantNameEnum.class.getName()));
     }
 
     @Test

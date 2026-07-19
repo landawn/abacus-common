@@ -26,8 +26,8 @@ import com.landawn.abacus.util.Strings;
  * Type handler for boxed-integer array ({@code Integer[]}) values.
  * This class provides serialization, deserialization, and output operations for {@code Integer[]} arrays.
  *
- * <p>The canonical string format is a bracket-enclosed, comma-separated list where null elements
- * are written as the literal {@code null} (e.g., {@code [1, null, 3, 42]}).
+ * <p>The canonical string format is a bracket-enclosed, comma-separated list where {@code null} elements
+ * are written as the literal null (e.g., {@code [1, null, 3, 42]}).
  *
  * @see ObjectArrayType
  */
@@ -43,7 +43,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
     /**
      * Converts an {@code Integer[]} to its canonical string representation.
-     * The output is a bracket-enclosed, comma-separated list; null elements appear as {@code null}.
+     * The output is a bracket-enclosed, comma-separated list; {@code null} elements appear as {@code null}.
      *
      * <p>Examples:
      * <ul>
@@ -122,7 +122,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     /**
      * Appends an {@code Integer[]} to an {@link Appendable}.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Null elements are written as {@code null}; non-null values use {@link Integer#toString()}.
+     * Null elements are written as {@code null}; {@code non-null} values use {@link Integer#toString()}.
      * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
      * <b>appendTo vs. serializeTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
@@ -167,19 +167,19 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
     /**
      * Writes an {@code Integer[]} to a {@link CharacterWriter}.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Null elements are written as {@code null}; non-null values use the writer's optimized
+     * Null elements are written as {@code null}; {@code non-null} values use the writer's optimized
      * integer-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes numeric literals and {@code null}
-     * elements directly to the {@code CharacterWriter}. The supplied serialization config is not used by this
-     * implementation.
+     * elements directly to the {@code CharacterWriter}. The supplied serialization config is forwarded to the
+     * integer element type, including its {@code writeNullNumberAsZero} setting.
      * <p>
      * <b>serializeTo vs. appendTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
      * {@code Integer[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.
      *
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@code Integer[]} to write; may be {@code null}
-     * @param config serialization configuration (not used for {@code Integer} arrays); may be {@code null}
+     * @param config serialization configuration forwarded to each element; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -194,11 +194,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
                     writer.write(ELEMENT_SEPARATOR);
                 }
 
-                if (x[i] == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    writer.writeInt(x[i]);
-                }
+                elementType.serializeTo(writer, x[i], config);
             }
 
             writer.write(SK._BRACKET_R);

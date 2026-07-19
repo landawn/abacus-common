@@ -4,11 +4,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Fraction;
 
 public class FractionTypeTest extends TestBase {
@@ -56,5 +63,16 @@ public class FractionTypeTest extends TestBase {
         assertNull(fractionType.valueOf(null));
         assertNull(fractionType.valueOf(""));
 
+    }
+
+    @Test
+    public void testSerializeTo_nullAsZero() throws IOException {
+        CharacterWriter writer = createCharacterWriter();
+        JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+        when(config.isWriteNullNumberAsZero()).thenReturn(true);
+
+        fractionType.serializeTo(writer, null, config);
+
+        verify(writer).write('0');
     }
 }

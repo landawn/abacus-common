@@ -97,6 +97,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         final CharConsumer action = it -> rateLimiter.acquire();
@@ -111,6 +113,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream delay(final Duration delay) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(delay, cs.delay);
 
         final long millis = delay.toMillis();
@@ -137,7 +141,9 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream debounce(Duration duration) {
+    public CharStream debounce(Duration duration) throws IllegalArgumentException {
+        assertNotClosed();
+
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
@@ -147,7 +153,7 @@ abstract class AbstractCharStream extends CharStream {
 
         final CharIteratorEx iter = iteratorEx();
 
-        return newStream(new CharIteratorEx() {
+        return newStream(new CharIteratorEx() { //NOSONAR
             private final long durationMillis = duration.toMillis();
             private char prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
@@ -246,6 +252,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream mapPartial(final CharFunction<OptionalChar> mapper) {
+        assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_CHAR).mapToChar(Fn.GET_AS_CHAR));
@@ -691,6 +699,8 @@ abstract class AbstractCharStream extends CharStream {
                     a[i] = elements[cursor - i - 1];
                 }
 
+                cursor = fromIndex;
+
                 return a;
             }
 
@@ -778,6 +788,8 @@ abstract class AbstractCharStream extends CharStream {
                 for (int i = cnt; i < len; i++) {
                     a[i - cnt] = elements[((start + i) % len) + fromIndex];
                 }
+
+                cnt = len;
 
                 return a;
             }
@@ -905,6 +917,8 @@ abstract class AbstractCharStream extends CharStream {
                 for (int i = 0; i < cursor; i++) {
                     a[i] = sortedArray[cursor - i - 1];
                 }
+
+                cursor = 0;
 
                 return a;
             }
@@ -1226,7 +1240,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.CharFunction<? extends K, E> keyMapper,
-            final Collector<? super Character, ?, D> downstream) throws E {
+            final Collector<? super Character, ?, D> downstream) throws IllegalStateException, E {
         assertNotClosed();
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
@@ -1378,9 +1392,15 @@ abstract class AbstractCharStream extends CharStream {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}
+     */
     @Override
-    public Joiner joinTo(final Joiner joiner) throws IllegalStateException {
+    public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(joiner, cs.joiner);
 
         try {
             @SuppressWarnings("resource")

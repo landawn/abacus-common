@@ -70,6 +70,13 @@ public class ImmutableIteratorTest extends TestBase {
     }
 
     @Test
+    public void testToCollection_RejectsNullSupplierResultForEmptyIterator() {
+        ImmutableIterator<String> iter = new TestImmutableIterator<>(Collections.emptyIterator());
+
+        Assertions.assertThrows(NullPointerException.class, () -> iter.toCollection(() -> null));
+    }
+
+    @Test
     public void testToCollection_WithCustomSupplier() {
         List<Integer> list = Arrays.asList(3, 1, 4, 1, 5);
         ImmutableIterator<Integer> iter = new TestImmutableIterator<>(list.iterator());
@@ -180,6 +187,6 @@ public class ImmutableIteratorTest extends TestBase {
         List<String> list = Arrays.asList("a");
         ImmutableIterator<String> iter = new TestImmutableIterator<>(list.iterator());
 
-        Assertions.assertTrue(iter instanceof Immutable);
+        Assertions.assertFalse(iter instanceof Immutable, "An iterator advances mutable cursor state and must not advertise structural immutability");
     }
 }

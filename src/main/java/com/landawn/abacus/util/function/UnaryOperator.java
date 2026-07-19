@@ -15,7 +15,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn.UnaryOperators;
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -56,11 +55,11 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      *
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the before operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is null
+     * @throws NullPointerException if {@code before} is null
      * @see #andThen(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> compose(final java.util.function.UnaryOperator<T> before) {
-        N.checkArgNotNull(before, cs.before);
+        java.util.Objects.requireNonNull(before, cs.before);
         return t -> apply(before.apply(t));
     }
 
@@ -86,11 +85,11 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      *
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the after operator
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws NullPointerException if {@code after} is null
      * @see #compose(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> andThen(final java.util.function.UnaryOperator<T> after) {
-        N.checkArgNotNull(after, cs.after);
+        java.util.Objects.requireNonNull(after, cs.after);
         return t -> after.apply(apply(t));
     }
 

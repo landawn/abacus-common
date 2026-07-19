@@ -261,6 +261,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
         if (this.isSerializable()) {
             final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
+            Throwable failure = null;
 
             try {
                 bw.write(SK._BRACKET_L);
@@ -282,9 +283,14 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
                 return bw.toString();
             } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+                final UncheckedIOException uncheckedException = new UncheckedIOException(e);
+                failure = uncheckedException;
+                throw uncheckedException;
+            } catch (final RuntimeException | Error e) {
+                failure = e;
+                throw e;
             } finally {
-                Objectory.recycle(bw);
+                Utils.recycle(bw, failure);
             }
         } else {
             return Utils.jsonParser.serialize(x, Utils.jsc);
@@ -350,6 +356,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                Throwable failure = null;
 
                 try {
                     bw.write(SK._BRACKET_L);
@@ -372,9 +379,12 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
+                } catch (final IOException | RuntimeException | Error e) {
+                    failure = e;
+                    throw e;
                 } finally {
                     if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
+                        Utils.recycle((BufferedWriter) bw, failure);
                     }
                 }
             } else {
@@ -431,11 +441,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 }
 
-                if (element == null) {
-                    writer.write(NULL_CHAR_ARRAY);
-                } else {
-                    elementType.serializeTo(writer, element, config);
-                }
+                elementType.serializeTo(writer, element, config);
             }
 
             writer.write(SK._BRACKET_R);

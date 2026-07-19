@@ -65,16 +65,18 @@ public final class Password {
      * Password sha512Password = new Password("SHA-512");
      * }</pre>
      *
-     * @param algorithm the name of the digest algorithm to use (for example, {@code "SHA-256"} or {@code "SHA-512"})
+     * @param algorithm the non-null name of the digest algorithm to use (for example, {@code "SHA-256"} or {@code "SHA-512"})
+     * @throws NullPointerException if {@code algorithm} is {@code null}
      * @throws RuntimeException wrapping {@link java.security.NoSuchAlgorithmException} if the specified algorithm
      *         is not available from any registered security provider
      * @see MessageDigest#getInstance(String)
      */
     public Password(final String algorithm) {
-        this.algorithm = algorithm;
+        Objects.requireNonNull(algorithm, "algorithm");
 
         try {
             msgDigest = MessageDigest.getInstance(algorithm);
+            this.algorithm = msgDigest.getProvider().getService("MessageDigest", algorithm).getAlgorithm();
         } catch (final NoSuchAlgorithmException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -129,7 +131,7 @@ public final class Password {
     /**
      * Verifies whether a plain-text password matches a previously hashed password.
      * This method hashes {@code plainPassword} with the configured algorithm and compares
-     * the resulting Base64 text against {@code encodedDigest}. The non-null comparison
+     * the resulting Base64 text against {@code encodedDigest}. The {@code non-null} comparison
      * is performed with {@link MessageDigest#isEqual(byte[], byte[])}, which runs in constant
      * time with respect to the number of matching bytes.
      *
@@ -175,7 +177,8 @@ public final class Password {
 
     /**
      * Compares this Password instance with the specified object for equality.
-     * Two Password instances are considered equal if they use the same algorithm.
+     * Two Password instances are considered equal if their security providers resolve the
+     * requested names or aliases to the same canonical algorithm name.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

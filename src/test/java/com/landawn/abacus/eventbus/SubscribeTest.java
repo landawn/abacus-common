@@ -338,6 +338,25 @@ public class SubscribeTest extends TestBase {
     }
 
     @Test
+    public void testIntervalAlwaysAllowsFirstEvent() {
+        EventBus eventBus = EventBus.create();
+        AtomicInteger eventCount = new AtomicInteger();
+
+        class TestClass {
+            @Subscribe(intervalMillis = Long.MAX_VALUE)
+            public void onEvent(String event) {
+                eventCount.incrementAndGet();
+            }
+        }
+
+        eventBus.register(new TestClass());
+        eventBus.post("first");
+        eventBus.post("second");
+
+        Assertions.assertEquals(1, eventCount.get());
+    }
+
+    @Test
     public void testMultipleAttributesCombined() throws InterruptedException {
         EventBus eventBus = EventBus.create();
         AtomicInteger eventCount = new AtomicInteger(0);

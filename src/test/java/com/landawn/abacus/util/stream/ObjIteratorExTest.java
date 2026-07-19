@@ -404,6 +404,33 @@ public class ObjIteratorExTest extends TestBase {
     }
 
     @Test
+    public void testDeferCachesInitializationFailure() {
+        final int[] invocationCount = { 0 };
+        final IllegalStateException failure = new IllegalStateException("initialization failed");
+        final ObjIteratorEx<String> iter = ObjIteratorEx.defer(() -> {
+            invocationCount[0]++;
+            throw failure;
+        });
+
+        Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, iter::hasNext));
+        Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, iter::next));
+        Assertions.assertEquals(1, invocationCount[0]);
+    }
+
+    @Test
+    public void testDeferRejectsNullIteratorFromSupplier() {
+        final int[] invocationCount = { 0 };
+        final ObjIteratorEx<String> iter = ObjIteratorEx.defer(() -> {
+            invocationCount[0]++;
+            return null;
+        });
+
+        final IllegalStateException first = Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
+        Assertions.assertSame(first, Assertions.assertThrows(IllegalStateException.class, iter::count));
+        Assertions.assertEquals(1, invocationCount[0]);
+    }
+
+    @Test
     public void testDeferAdvanceZero() {
         String[] array = { "a", "b", "c" };
         Supplier<Iterator<String>> supplier = () -> ObjIteratorEx.of(array);
@@ -443,12 +470,18 @@ public class ObjIteratorExTest extends TestBase {
 
     @Test
     public void testDeferCloseResourceBeforeInit() {
+        final boolean[] initialized = { false };
+
         assertDoesNotThrow(() -> {
-            Supplier<Iterator<String>> supplier = () -> Arrays.asList("a").iterator();
+            Supplier<Iterator<String>> supplier = () -> {
+                initialized[0] = true;
+                return Arrays.asList("a").iterator();
+            };
             ObjIteratorEx<String> iter = ObjIteratorEx.defer(supplier);
-            // Close without using - should init and close without exception
             iter.closeResource();
         });
+
+        Assertions.assertFalse(initialized[0]);
     }
 
     @Test

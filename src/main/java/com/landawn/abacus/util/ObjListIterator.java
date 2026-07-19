@@ -44,9 +44,9 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Additional utility methods such as {@code toList()}, {@code toArray()}, and {@code stream()}, mirroring those of {@link ObjIterator}</li>
  * </ul>
  *
- * <p>Note: The {@code set()}, {@code add()}, and {@code remove()} operations
- * are not supported and throw {@link UnsupportedOperationException}, preserving
- * immutability.</p>
+ * <p>The iterators returned by this class's factories and decorators do not support
+ * {@code set()}, {@code add()}, or {@code remove()}. This class is extensible, however, so an
+ * arbitrary subclass is not guaranteed to retain that restriction.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -235,7 +235,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param toIndex the index after the last element to iterate (exclusive)
      * @return an {@code ObjListIterator} over the specified range of array elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0},
-     *         {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     *         {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static <T> ObjListIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -277,7 +277,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * Returns an {@code ObjListIterator} that wraps the specified
      * {@code ListIterator}. If the list iterator is {@code null}, an empty
      * {@code ObjListIterator} is returned. If it is already an
-     * {@code ObjListIterator}, it is returned as-is (no wrapping is performed).
+     * {@code ObjListIterator}, it is still wrapped so that an untrusted subclass cannot expose
+     * mutating {@code set()}, {@code add()}, or {@code remove()} operations through the result.
      *
      * <p>Note: The returned {@code ObjListIterator} does not support the
      * {@code set()} and {@code add()} operations even if the underlying
@@ -299,8 +300,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     public static <T> ObjListIterator<T> of(final ListIterator<? extends T> iter) {
         if (iter == null) {
             return empty();
-        } else if (iter instanceof ObjListIterator) {
-            return (ObjListIterator<T>) iter;
         }
 
         return new ObjListIterator<>() {
@@ -366,10 +365,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * Returns a new {@code ObjListIterator} that skips the first {@code n}
      * elements of this iterator. If {@code n} is greater than or equal to the
      * number of remaining elements, the returned iterator will be empty for
-     * forward iteration. The skip is performed lazily on the first call to
-     * {@code hasNext()} or {@code next()}. If {@code n} is {@code 0}, this
-     * iterator is returned unchanged. Backward iteration delegates to the
-     * underlying iterator and reflects whatever elements it has consumed.
+     * forward iteration. The skip is performed lazily on the first traversal or index operation.
+     * If {@code n} is {@code 0}, this iterator is returned unchanged. After initialization,
+     * backward iteration delegates to the underlying iterator and can revisit skipped elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -417,21 +415,37 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
             @Override
             public boolean hasPrevious() {
+                if (!skipped) {
+                    skip();
+                }
+
                 return iter.hasPrevious();
             }
 
             @Override
             public T previous() {
+                if (!skipped) {
+                    skip();
+                }
+
                 return iter.previous();
             }
 
             @Override
             public int nextIndex() {
+                if (!skipped) {
+                    skip();
+                }
+
                 return iter.nextIndex();
             }
 
             @Override
             public int previousIndex() {
+                if (!skipped) {
+                    skip();
+                }
+
                 return iter.previousIndex();
             }
 
@@ -474,12 +488,17 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     * Returns a new {@code ObjListIterator} that yields at most the first
-     * {@code count} elements of this iterator in forward iteration. If
-     * {@code count} is {@code 0}, an empty iterator is returned. If
-     * {@code count} is greater than the number of remaining elements, all
-     * remaining elements are returned. Backward iteration delegates to the
-     * underlying iterator and is not bounded by {@code count}.
+     * Returns a new {@code ObjListIterator} whose cursor cannot advance more than
+     * {@code count} positions beyond the cursor position at wrapper creation. If
+     * {@code count} is {@code 0}, an empty iterator is returned. If {@code count}
+     * is greater than the number of remaining elements, all remaining elements
+     * can be traversed.
+     *
+     * <p>Backward iteration delegates to the underlying iterator and has no lower
+     * boundary imposed by this wrapper. Consequently, moving backward permits
+     * earlier elements to be revisited, so the total number of successful
+     * {@link #next()} calls over the wrapper's lifetime can exceed {@code count};
+     * only the upper cursor boundary is limited.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -489,8 +508,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * // Can still go backward after reaching the limit
      * }</pre>
      *
-     * @param count the maximum number of elements to return in forward iteration
-     * @return a new {@code ObjListIterator} limited to {@code count} elements
+     * @param count the maximum number of positions the cursor may advance beyond its position at wrapper creation
+     * @return a new {@code ObjListIterator} with the specified upper cursor boundary
      * @throws IllegalArgumentException if {@code count} is negative
      * @see #skip(long)
      */
@@ -504,11 +523,13 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         final ObjListIterator<T> iter = this;
 
         return new ObjListIterator<>() {
-            private long cnt = count;
+            // Position relative to the cursor at wrapper creation. It may become negative because
+            // backward traversal is deliberately unbounded; the upper boundary remains count.
+            private long position = 0;
 
             @Override
             public boolean hasNext() {
-                return cnt > 0 && iter.hasNext();
+                return position < count && iter.hasNext();
             }
 
             @Override
@@ -517,8 +538,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                cnt--;
-                return iter.next();
+                final T result = iter.next();
+                position++;
+                return result;
             }
 
             @Override
@@ -528,7 +550,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
             @Override
             public T previous() {
-                return iter.previous();
+                final T result = iter.previous();
+                position--;
+                return result;
             }
 
             @Override
@@ -586,7 +610,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @return an {@code Optional} containing the first {@code non-null} element,
      *         or an empty {@code Optional} if none is found
      * @deprecated This method partially consumes the iterator and leaves it in an
-     *             intermediate state (elements after the first non-null element remain),
+     *             intermediate state (elements after the first {@code non-null} element remain),
      *             which produces inconsistent results when the iterator is used further.
      */
     @Deprecated

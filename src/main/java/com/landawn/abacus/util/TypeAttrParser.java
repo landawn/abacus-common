@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.landawn.abacus.annotation.Internal;
 
@@ -95,7 +96,7 @@ public final class TypeAttrParser {
     }
 
     /**
-     * Returns the parsed generic type parameters as an array of strings.
+     * Returns a copy of the parsed generic type parameters as an array of strings.
      * Each parameter is trimmed of whitespace. Returns an empty array if no
      * type parameters were present.
      *
@@ -108,11 +109,11 @@ public final class TypeAttrParser {
      * @return an array of generic type parameter strings, never null
      */
     public String[] getTypeParameters() {
-        return typeParameters;
+        return typeParameters.clone();
     }
 
     /**
-     * Returns the parsed constructor parameters as an array of strings.
+     * Returns a copy of the parsed constructor parameters as an array of strings.
      * Each parameter is trimmed of whitespace. Returns an empty array if no
      * constructor parameters were present.
      *
@@ -128,7 +129,7 @@ public final class TypeAttrParser {
      * @return an array of constructor parameter strings, never null
      */
     public String[] getParameters() {
-        return parameters;
+        return parameters.clone();
     }
 
     /**
@@ -142,6 +143,9 @@ public final class TypeAttrParser {
      *   <li>Constructor parameters enclosed in parentheses: {@code (...)}</li>
      *   <li>Nested generics with proper bracket matching</li>
      *   <li>Comma-separated lists in both contexts</li>
+     *   <li>Double-quoted CSV constructor arguments whose commas, parentheses, or angle
+     *       brackets are data rather than outer type delimiters. Backslash-escaped and
+     *       doubled double quotes are recognized consistently with {@link CsvParser}.</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -162,10 +166,10 @@ public final class TypeAttrParser {
      * @param attr the type attribute string to parse
      * @return a {@code TypeAttrParser} instance containing the parsed components; the returned
      *         instance never has {@code null} type-parameter or constructor-parameter arrays
-     * @throws IllegalArgumentException if generic angle brackets are missing, unbalanced, or otherwise malformed
+     * @throws IllegalArgumentException if the class name or a generic parameter at any nesting
+     *         level is empty, or if generic angle brackets, constructor parentheses, or quoted
+     *         constructor arguments are missing, unbalanced, out of order, or otherwise malformed
      * @throws NullPointerException if {@code attr} is {@code null}
-     * @throws StringIndexOutOfBoundsException if the string is malformed, for example an opening
-     *         parenthesis with no matching closing parenthesis
      * @see #getClassName()
      * @see #getTypeParameters()
      * @see #getParameters()
@@ -175,45 +179,95 @@ public final class TypeAttrParser {
         String[] typeParameters = null;
         String[] parameters = null;
 
-        int beginIndex = attr.indexOf('<');
-        if (beginIndex >= 0) {
-            final int endIndex = attr.lastIndexOf('>');
+        final int firstParenthesisIndex = attr.indexOf(_PARENTHESIS_L);
+        final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attr.length() : firstParenthesisIndex;
+        int beginIndex = attr.substring(0, classSyntaxEndIndex).indexOf('<');
+        final int firstClosingGenericIndex = attr.substring(0, classSyntaxEndIndex).indexOf('>');
 
-            if (endIndex <= beginIndex) {
-                throw new IllegalArgumentException("Malformed type attribute: missing closing '>' in: " + attr);
-            }
+        if (firstClosingGenericIndex >= 0 && (beginIndex < 0 || firstClosingGenericIndex < beginIndex)) {
+            throw new IllegalArgumentException("Malformed type attribute: unexpected closing '>' in: " + attr);
+        }
+
+        final int firstClosingParenthesisIndex = attr.indexOf(_PARENTHESIS_R);
+
+        if (firstClosingParenthesisIndex >= 0 && (firstParenthesisIndex < 0 || firstClosingParenthesisIndex < firstParenthesisIndex)) {
+            throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
+        }
+
+        if (beginIndex >= 0) {
+            final int endIndex = findClosingGeneric(attr, beginIndex);
 
             className = attr.substring(0, beginIndex).trim();
             final List<String> typeParameterList = new ArrayList<>();
 
             int bracketNum = 0;
+            int parenthesisDepth = 0;
+            boolean inQuotes = false;
+            int previousIndex = beginIndex + 1;
 
-            for (int idx = beginIndex + 1, previousIndex = idx; idx < endIndex; idx++) {
+            for (int idx = previousIndex; idx < endIndex; idx++) {
                 final char ch = attr.charAt(idx);
 
-                if (ch == '<') {
-                    bracketNum++;
+                if (inQuotes) {
+                    if (ch == SK._BACKSLASH && idx + 1 < endIndex && (attr.charAt(idx + 1) == SK._DOUBLE_QUOTE || attr.charAt(idx + 1) == SK._BACKSLASH)) {
+                        idx++;
+                    } else if (ch == SK._DOUBLE_QUOTE) {
+                        if (idx + 1 < endIndex && attr.charAt(idx + 1) == SK._DOUBLE_QUOTE) {
+                            idx++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    }
 
                     continue;
                 }
 
-                if (ch == '>') {
+                if (ch == SK._DOUBLE_QUOTE) {
+                    inQuotes = true;
+                } else if (ch == _PARENTHESIS_L) {
+                    parenthesisDepth++;
+                } else if (ch == _PARENTHESIS_R) {
+                    if (parenthesisDepth == 0) {
+                        throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
+                    }
+
+                    parenthesisDepth--;
+                } else if (parenthesisDepth > 0) {
+                    // Constructor arguments belonging to a nested type are opaque here. In
+                    // particular, their commas must not split the outer generic parameter list.
+                    continue;
+                } else if (ch == '<') {
+                    bracketNum++;
+                } else if (ch == '>') {
                     if (bracketNum > 0) {
                         bracketNum--;
                     } else {
                         throw new IllegalArgumentException("Malformed type attribute: unexpected closing '>' in: " + attr);
                     }
-                }
-
-                if (bracketNum == 0 && (ch == ',' || idx == endIndex - 1)) {
-                    typeParameterList.add(Strings.trim(ch == ',' ? attr.substring(previousIndex, idx) : attr.substring(previousIndex, idx + 1)));
-
+                } else if (bracketNum == 0 && ch == ',') {
+                    typeParameterList.add(Strings.trim(attr.substring(previousIndex, idx)));
                     previousIndex = idx + 1;
                 }
             }
 
-            if (bracketNum != 0) {
-                throw new IllegalArgumentException("Malformed type attribute: unbalanced generic brackets in: " + attr);
+            if (bracketNum != 0 || parenthesisDepth != 0 || inQuotes) {
+                throw new IllegalArgumentException("Malformed type attribute: unbalanced nested parameter syntax in: " + attr);
+            }
+
+            typeParameterList.add(Strings.trim(attr.substring(previousIndex, endIndex)));
+
+            if (Strings.isEmpty(className)) {
+                throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attr);
+            }
+
+            for (final String typeParameter : typeParameterList) {
+                if (Strings.isEmpty(typeParameter)) {
+                    throw new IllegalArgumentException("Malformed type attribute: empty generic parameter in: " + attr);
+                }
+
+                // Validate every nested declaration as well. Merely balancing the outer text is
+                // insufficient for inputs such as List<Map<String,>> or Map<String, List<>>.
+                parse(typeParameter);
             }
 
             typeParameters = typeParameterList.toArray(new String[0]);
@@ -233,9 +287,12 @@ public final class TypeAttrParser {
                 className = attr.substring(0, beginIndex).trim();
             }
 
-            endIndex = attr.lastIndexOf(_PARENTHESIS_R);
+            endIndex = findClosingParenthesis(attr, beginIndex);
+
             final String str = attr.substring(beginIndex + 1, endIndex).trim();
             parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : CsvUtil.CSV_HEADER_PARSER.apply(str));
+        } else if (attr.indexOf(_PARENTHESIS_R, N.max(0, endIndex)) >= 0) {
+            throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
         }
 
         if (endIndex >= 0 && N.notEmpty(attr.substring(endIndex + 1).trim())) {
@@ -246,7 +303,110 @@ public final class TypeAttrParser {
             className = attr.trim(); // the generics/constructor-paren paths above both trim; a bare name must too
         }
 
+        if (Strings.isEmpty(className)) {
+            throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attr);
+        }
+
         return new TypeAttrParser(className, typeParameters, parameters);
+    }
+
+    /**
+     * Finds the closing angle bracket paired with {@code beginIndex}. Angle brackets inside a
+     * nested type's parenthesized, double-quoted CSV constructor arguments are treated as data.
+     * Backslash-escaped and doubled double quotes follow {@link CsvParser}'s default rules.
+     */
+    private static int findClosingGeneric(final String attr, final int beginIndex) {
+        int depth = 0;
+        int parenthesisDepth = 0;
+        boolean inQuotes = false;
+
+        for (int i = beginIndex, len = attr.length(); i < len; i++) {
+            final char ch = attr.charAt(i);
+
+            if (inQuotes) {
+                if (ch == SK._BACKSLASH && i + 1 < len && (attr.charAt(i + 1) == SK._DOUBLE_QUOTE || attr.charAt(i + 1) == SK._BACKSLASH)) {
+                    i++;
+                } else if (ch == SK._DOUBLE_QUOTE) {
+                    if (i + 1 < len && attr.charAt(i + 1) == SK._DOUBLE_QUOTE) {
+                        i++;
+                    } else {
+                        inQuotes = false;
+                    }
+                }
+
+                continue;
+            }
+
+            if (ch == SK._DOUBLE_QUOTE) {
+                inQuotes = true;
+            } else if (ch == _PARENTHESIS_L) {
+                parenthesisDepth++;
+            } else if (ch == _PARENTHESIS_R) {
+                if (parenthesisDepth == 0) {
+                    throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
+                }
+
+                parenthesisDepth--;
+            } else if (parenthesisDepth > 0) {
+                continue;
+            } else if (ch == '<') {
+                depth++;
+            } else if (ch == '>') {
+                if (--depth == 0) {
+                    return i;
+                }
+
+                if (depth < 0) {
+                    break;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Malformed type attribute: missing closing '>' in: " + attr);
+    }
+
+    /**
+     * Finds the closing parenthesis paired with {@code beginIndex}. Parentheses inside double-quoted
+     * CSV constructor arguments are treated as data, while balanced nested parentheses are allowed.
+     * Backslash-escaped and doubled double quotes follow {@link CsvParser}'s default rules.
+     */
+    private static int findClosingParenthesis(final String attr, final int beginIndex) {
+        int depth = 0;
+        boolean inQuotes = false;
+
+        for (int i = beginIndex, len = attr.length(); i < len; i++) {
+            final char ch = attr.charAt(i);
+
+            if (inQuotes) {
+                if (ch == SK._BACKSLASH && i + 1 < len && (attr.charAt(i + 1) == SK._DOUBLE_QUOTE || attr.charAt(i + 1) == SK._BACKSLASH)) {
+                    i++;
+                } else if (ch == SK._DOUBLE_QUOTE) {
+                    if (i + 1 < len && attr.charAt(i + 1) == SK._DOUBLE_QUOTE) {
+                        i++;
+                    } else {
+                        inQuotes = false;
+                    }
+                }
+
+                continue;
+            }
+
+            if (ch == SK._DOUBLE_QUOTE) {
+                inQuotes = true;
+            } else if (ch == _PARENTHESIS_L) {
+                depth++;
+            } else if (ch == _PARENTHESIS_R) {
+                if (--depth == 0) {
+                    return i;
+                }
+
+                if (depth < 0) {
+                    break;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Malformed type attribute: missing closing ')' in: " + attr);
     }
 
     /**
@@ -367,10 +527,13 @@ public final class TypeAttrParser {
      * @return a new instance of the specified class
      * @throws IllegalArgumentException if {@code args} has an odd length, if an even-indexed
      *         element of {@code args} is not a {@code Class}, or if no matching constructor is found
+     * @throws NullPointerException if {@code attr} or {@code args} is {@code null}
      * @throws RuntimeException if the class cannot be resolved or instantiation fails
      * @see #parse(String)
      */
     public static <T> T newInstance(Class<?> cls, final String attr, final Object... args) {
+        Objects.requireNonNull(args, "args");
+
         final TypeAttrParser attrResult = TypeAttrParser.parse(attr);
         final String className = attrResult.getClassName();
         final String[] attrTypeParameters = attrResult.getTypeParameters();

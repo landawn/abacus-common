@@ -7887,4 +7887,15 @@ public class NumbersTest extends TestBase {
         assertThrows(ArithmeticException.class, () -> Numbers.divide(5, 2, RoundingMode.UNNECESSARY));
     }
 
+    @Test
+    public void testInverseHyperbolicFunctionsRemainFiniteForLargestFiniteInput() {
+        final double expected = Math.log(Double.MAX_VALUE) + Math.log(2.0);
+
+        assertEquals(expected, Numbers.asinh(Double.MAX_VALUE), Math.ulp(expected));
+        assertEquals(-expected, Numbers.asinh(-Double.MAX_VALUE), Math.ulp(expected));
+        assertEquals(expected, Numbers.acosh(Double.MAX_VALUE), Math.ulp(expected));
+        assertTrue(Double.isFinite(Numbers.asinh(Double.MAX_VALUE)));
+        assertTrue(Double.isFinite(Numbers.acosh(Double.MAX_VALUE)));
+    }
+
 }

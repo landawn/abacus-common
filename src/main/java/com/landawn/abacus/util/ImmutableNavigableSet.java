@@ -39,6 +39,10 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * elements in sorted order according to their natural ordering or by a {@link java.util.Comparator}
  * provided at creation time.</p>
  *
+ * <p>{@link #wrap(NavigableSet)} retains the supplied set as live backing storage, whereas
+ * {@link #copyOf(Collection)} creates independent storage. External changes to a wrapped set are
+ * therefore visible through the read-only view.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
@@ -82,27 +86,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
         return EMPTY;
     }
 
-    //    /**
-    //     * Returns an ImmutableNavigableSet containing a single element.
-    //     * The element must implement Comparable to determine its natural ordering.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ImmutableNavigableSet<Integer> singletonSet = ImmutableNavigableSet.just(42);
-    //     * System.out.println(singletonSet.first());   // 42
-    //     * }</pre>
-    //     *
-    //     * @param <E> the type of element, must extend Comparable
-    //     * @param e the element to be contained in the set
-    //     * @return an ImmutableNavigableSet containing only the specified element
-    //     * @throws ClassCastException if the element does not implement Comparable
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> just(final E e) {
-    //        return new ImmutableNavigableSet<>(new TreeSet<>(Collections.singletonList(e)));
-    //    }
-
     /**
      * Returns an ImmutableNavigableSet containing a single element.
      * The element must implement {@link Comparable} to determine its natural ordering.
@@ -110,8 +93,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(42);
-     * set.first();      // returns 42
-     * set.lower(42);    // returns null
+     * set.first();     // returns 42
+     * set.lower(42);   // returns null
      * }</pre>
      *
      * @param <E> the type of element, must extend Comparable
@@ -153,9 +136,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(3, 1, 2);
-     * set.first();      // returns 1
-     * set.last();       // returns 3
-     * set.floor(2);     // returns 2
+     * set.first();    // returns 1
+     * set.last();     // returns 3
+     * set.floor(2);   // returns 2
      * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
@@ -202,9 +185,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
-     * set.lower(3);     // returns 2
-     * set.last();       // returns 5
-     * set.lower(1);     // returns null
+     * set.lower(3);   // returns 2
+     * set.last();     // returns 5
+     * set.lower(1);   // returns null
      * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
@@ -255,9 +238,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5, 6, 7);
-     * set.first();      // returns 1
-     * set.lower(7);     // returns 6
-     * set.higher(7);    // returns null
+     * set.first();     // returns 1
+     * set.lower(7);    // returns 6
+     * set.higher(7);   // returns null
      * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
@@ -314,9 +297,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
-     * set.last();       // returns 9
-     * set.lower(5);     // returns 4
-     * set.higher(9);    // returns null
+     * set.last();      // returns 9
+     * set.lower(5);    // returns 4
+     * set.higher(9);   // returns null
      * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
@@ -400,7 +383,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      *
      * @param <E> the type of elements in the collection
      * @param c the collection whose elements are to be placed into this set
-     * @return an {@code ImmutableNavigableSet} containing the elements of the specified collection, or the same instance if it is already an {@code ImmutableNavigableSet}, or an empty instance if {@code c} is {@code null} or empty
+     * @return an {@code ImmutableNavigableSet} containing the elements of the specified collection, or the same instance if it is already an
+     *         {@code ImmutableNavigableSet}. The comparator of a {@code SortedSet} source is retained even when the source is empty; a {@code null}
+     *         or empty non-sorted source returns the shared empty instance.
      * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
      * @throws NullPointerException if the collection contains a {@code null} element and natural ordering is used
      * @see #wrap(NavigableSet)
@@ -408,10 +393,10 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     public static <E> ImmutableNavigableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableNavigableSet) {
             return (ImmutableNavigableSet<E>) c;
-        } else if (N.isEmpty(c)) {
-            return empty();
         } else if (c instanceof SortedSet sortedSet) {
             return new ImmutableNavigableSet<>(new TreeSet<>(sortedSet));
+        } else if (N.isEmpty(c)) {
+            return empty();
         } else {
             return new ImmutableNavigableSet<>(new TreeSet<>(c));
         }
@@ -630,7 +615,19 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      */
     @Override
     public ObjIterator<E> descendingIterator() {
-        return ObjIterator.of(navigableSet.descendingIterator());
+        final java.util.Iterator<E> iter = navigableSet.descendingIterator();
+
+        return new ObjIterator<>() {
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public E next() {
+                return iter.next();
+            }
+        };
     }
 
     /**

@@ -79,6 +79,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param className the fully qualified class name of the enum type
      * @param enumRepresentation the representation strategy to use ({@code NAME}, {@code ORDINAL}, or {@code CODE});
      *                           if {@code null}, defaults to {@code NAME}
+     * @throws IllegalArgumentException if numeric codes or JSON/XML names are ambiguous between constants
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
@@ -117,18 +118,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 numberEnum.put(code, enumConstant);
 
                 final String jsonXmlName = getJsonXmlName(enumConstant);
-                enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
-                jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
-                jsonXmlNameEnumMap.put(enumConstant.name(), enumConstant);
+                registerJsonXmlNames(enumConstant, jsonXmlName);
             }
         } else {
             for (final T enumConstant : typeClass.getEnumConstants()) {
                 numberEnum.put(enumConstant.ordinal(), enumConstant);
 
                 final String jsonXmlName = getJsonXmlName(enumConstant);
-                enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
-                jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
-                jsonXmlNameEnumMap.put(enumConstant.name(), enumConstant);
+                registerJsonXmlNames(enumConstant, jsonXmlName);
             }
         }
 
@@ -477,6 +474,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
 
         return enumConstant.name();
+    }
+
+    private void registerJsonXmlNames(final T enumConstant, final String jsonXmlName) {
+        enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
+        registerJsonXmlName(jsonXmlName, enumConstant);
+        registerJsonXmlName(enumConstant.name(), enumConstant);
+    }
+
+    private void registerJsonXmlName(final String name, final T enumConstant) {
+        final T previous = jsonXmlNameEnumMap.putIfAbsent(name, enumConstant);
+
+        if (previous != null && previous != enumConstant) {
+            throw new IllegalArgumentException("Duplicate JSON/XML name '" + name + "' in enum class " + ClassUtil.getCanonicalClassName(typeClass) + ": "
+                    + previous.name() + " and " + enumConstant.name());
+        }
     }
 
     /**

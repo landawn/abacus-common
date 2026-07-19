@@ -83,4 +83,16 @@ public class JSONTypeTest extends TestBase {
         assertNull(jsonListType.valueOf(""));
         assertNull(jsonCustomType.valueOf(""));
     }
+
+    @Test
+    public void testNestedGenericTargetIsPreserved() {
+        JSONType<List<Long>> type = (JSONType<List<Long>>) createType("JSON<List<Long>>");
+
+        List<Long> parsed = type.valueOf("[1, 2]");
+
+        assertTrue(type.isParameterizedType());
+        assertEquals("List<Long>", type.parameterTypes().get(0).declaringName());
+        assertEquals(Long.class, parsed.get(0).getClass());
+        assertEquals(List.of(1L, 2L), parsed);
+    }
 }

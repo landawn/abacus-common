@@ -45,6 +45,8 @@ final class ThreadMonitor implements Runnable {
 
     private final long timeout;
 
+    private boolean cancelled;
+
     /**
      * Starts monitoring the current thread with the specified timeout.
      *
@@ -102,13 +104,13 @@ final class ThreadMonitor implements Runnable {
      * @return the monitor thread, or {@code null} if {@code timeout} is not greater than zero
      * @throws IllegalArgumentException if {@code thread} is {@code null}
      */
-    public static Thread start(final Thread thread, final long timeout) {
+    public static Thread start(final Thread thread, final long timeout) throws IllegalArgumentException {
         N.checkArgNotNull(thread, "thread");
 
         Thread monitor = null;
         if (timeout > 0) {
             final ThreadMonitor threadMonitor = new ThreadMonitor(thread, timeout);
-            monitor = new Thread(threadMonitor, ThreadMonitor.class.getSimpleName());
+            monitor = new MonitorThread(threadMonitor);
             monitor.setDaemon(true);
             monitor.start();
         }
@@ -116,11 +118,12 @@ final class ThreadMonitor implements Runnable {
     }
 
     /**
-     * Stops monitoring the specified thread by interrupting the monitor thread.
+     * Stops monitoring the specified thread and interrupts the monitor thread so that it wakes promptly.
      *
      * <p>This method should be called when the monitored operation completes successfully
-     * before the timeout. It interrupts the monitor thread, causing it to exit its sleep
-     * and terminate, preventing the timeout from occurring.</p>
+     * before the timeout. Cancellation and timeout delivery are synchronized: if cancellation
+     * wins, the target will not subsequently be interrupted; if timeout delivery has already won,
+     * the target may already have been interrupted.</p>
      *
      * <p>It is safe to call this method with a {@code null} parameter; in such cases,
      * the method does nothing.</p>
@@ -142,8 +145,16 @@ final class ThreadMonitor implements Runnable {
      * @param thread the monitor thread to stop; may be {@code null}, in which case this method does nothing
      */
     public static void stop(final Thread thread) {
-        if (thread != null) {
+        if (thread instanceof MonitorThread monitorThread) {
+            monitorThread.cancel();
+        } else if (thread != null) {
             thread.interrupt();
+        }
+    }
+
+    private void cancel() {
+        synchronized (this) {
+            cancelled = true;
         }
     }
 
@@ -171,9 +182,34 @@ final class ThreadMonitor implements Runnable {
     public void run() {
         try {
             Thread.sleep(timeout);
-            thread.interrupt();
+
+            synchronized (this) {
+                if (!cancelled) {
+                    thread.interrupt();
+                }
+            }
         } catch (final InterruptedException e) {
             // timeout isn't reached
+        }
+    }
+
+    private static final class MonitorThread extends Thread {
+
+        private final ThreadMonitor task;
+
+        MonitorThread(final ThreadMonitor task) {
+            super(task, ThreadMonitor.class.getSimpleName());
+            this.task = task;
+        }
+
+        void cancel() {
+            interrupt();
+        }
+
+        @Override
+        public void interrupt() {
+            task.cancel();
+            super.interrupt();
         }
     }
 }

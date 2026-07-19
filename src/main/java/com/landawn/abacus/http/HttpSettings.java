@@ -20,7 +20,9 @@ import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.util.Charsets;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 
 /**
  * Configuration settings for HTTP requests.
@@ -140,7 +142,9 @@ public final class HttpSettings {
      *
      * <p>If the timeout expires before a connection is established, a {@link java.net.SocketTimeoutException}
      * will be thrown. A timeout of 0 means not set: the client-level connect timeout
-     * (default 8000 ms) is used instead.</p>
+     * (default 8000 ms) is used instead. Because {@link java.net.HttpURLConnection} exposes an
+     * {@code int}-valued timeout, larger positive values are saturated at
+     * {@link Integer#MAX_VALUE} when the connection is configured.</p>
      *
      * <p><b>Important:</b> This setting only applies to {@code HttpClient}, not {@code OkHttpClient}.</p>
      *
@@ -163,8 +167,10 @@ public final class HttpSettings {
      *
      * @param connectTimeout the connection timeout in milliseconds (0 = not set; the client-level default applies)
      * @return this HttpSettings instance for method chaining
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative
      */
-    public HttpSettings setConnectTimeout(final long connectTimeout) {
+    public HttpSettings setConnectTimeout(final long connectTimeout) throws IllegalArgumentException {
+        N.checkArgNotNegative(connectTimeout, cs.connectTimeout);
         this.connectTimeout = connectTimeout;
 
         return this;
@@ -194,6 +200,8 @@ public final class HttpSettings {
      * Sets the read timeout in milliseconds.
      * The read timeout is the time to wait for data to be available for reading.
      * A timeout of 0 means not set: the client-level read timeout (default 16000 ms) is used instead.
+     * Values above {@link Integer#MAX_VALUE} are saturated when applied to
+     * {@link java.net.HttpURLConnection}.
      *
      * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *
@@ -204,8 +212,10 @@ public final class HttpSettings {
      *
      * @param readTimeout the read timeout in milliseconds (0 = not set; the client-level default applies)
      * @return this HttpSettings instance for method chaining
+     * @throws IllegalArgumentException if {@code readTimeout} is negative
      */
-    public HttpSettings setReadTimeout(final long readTimeout) {
+    public HttpSettings setReadTimeout(final long readTimeout) throws IllegalArgumentException {
+        N.checkArgNotNegative(readTimeout, cs.readTimeout);
         this.readTimeout = readTimeout;
 
         return this;
@@ -671,8 +681,8 @@ public final class HttpSettings {
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
      *     .headers("Accept", "application/json", "User-Agent", "MyApp/1.0");
-     * settings.headers().get("Accept");              // returns "application/json"
-     * settings.headers().get("User-Agent");          // returns "MyApp/1.0"
+     * settings.headers().get("Accept");       // returns "application/json"
+     * settings.headers().get("User-Agent");   // returns "MyApp/1.0"
      * }</pre>
      *
      * @param name1 the first header name
@@ -699,9 +709,9 @@ public final class HttpSettings {
      *     "Accept", "application/json",
      *     "User-Agent", "MyApp/1.0",
      *     "X-Request-Id", "abc-123");
-     * settings.headers().get("Accept");              // returns "application/json"
-     * settings.headers().get("User-Agent");          // returns "MyApp/1.0"
-     * settings.headers().get("X-Request-Id");        // returns "abc-123"
+     * settings.headers().get("Accept");         // returns "application/json"
+     * settings.headers().get("User-Agent");     // returns "MyApp/1.0"
+     * settings.headers().get("X-Request-Id");   // returns "abc-123"
      * }</pre>
      *
      * @param name1 the first header name
@@ -737,9 +747,9 @@ public final class HttpSettings {
      *     "Accept", "application/json",
      *     "User-Agent", "MyApp/1.0"
      * );
-     * settings.headers(headers);                       // merges the three entries in
-     * settings.headers().get("Old");                   // still "value" (kept, not in the map)
-     * settings.headers().get("Accept");                // "application/json" (added/overwritten)
+     * settings.headers(headers);          // merges the three entries in
+     * settings.headers().get("Old");      // still "value" (kept, not in the map)
+     * settings.headers().get("Accept");   // "application/json" (added/overwritten)
      * }</pre>
      *
      * @param headers a map containing header names and values to merge in
@@ -765,9 +775,9 @@ public final class HttpSettings {
      * HttpHeaders custom = HttpHeaders.create().set("Accept", "application/json");
      * HttpSettings settings = HttpSettings.create().header("Old", "value");
      *
-     * settings.setHeaders(custom);                   // replaces all prior headers
-     * settings.headers().get("Accept");              // returns "application/json"
-     * settings.headers().get("Old");                 // returns null (cleared)
+     * settings.setHeaders(custom);        // replaces all prior headers
+     * settings.headers().get("Accept");   // returns "application/json"
+     * settings.headers().get("Old");      // returns null (cleared)
      * }</pre>
      *
      * @param headers the HttpHeaders to set (replacing all existing headers); {@code null} clears all headers

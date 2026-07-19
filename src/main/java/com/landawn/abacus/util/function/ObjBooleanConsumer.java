@@ -13,8 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -75,7 +75,6 @@ public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, 
      * @param t the object to receive or contextualize the side effect
      * @param value the boolean flag that influences the side effect
      */
-    // @ai-ignore Obj* argument order convention - intentional: class name prefix determines parameter order. ObjBoolean* has object first, boolean second. Do not suggest reordering.
     @Override
     void accept(T t, boolean value);
 

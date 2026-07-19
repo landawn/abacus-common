@@ -162,9 +162,10 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Performance Considerations:</b>
  * <ul>
- *   <li>Use EntryStream instead of {@code Stream<Map.Entry>} for better performance and convenience</li>
- *   <li>Parallel processing benefits large datasets (typically &gt; 10,000 entries)</li>
- *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
+ *   <li>Use {@code EntryStream} when its key/value-aware operations make a pipeline clearer; it does not imply a universal
+ *       performance advantage over {@code Stream<Map.Entry>}.</li>
+ *   <li>The crossover point at which parallel processing helps depends on the source, per-entry work, executor, and hardware;
+ *       benchmark representative workloads rather than relying on a fixed entry-count threshold.</li>
  *   <li>Lazy evaluation means intermediate operations are not executed until terminal operations</li>
  * </ul>
  *
@@ -245,7 +246,6 @@ import com.landawn.abacus.util.u.Optional;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
-@com.landawn.abacus.annotation.Immutable
 @LazyEvaluation
 public final class EntryStream<K, V> extends
         StreamBase<Map.Entry<K, V>, Object[], Predicate<? super Map.Entry<K, V>>, Consumer<? super Map.Entry<K, V>>, Optional<Map.Entry<K, V>>, Indexed<Map.Entry<K, V>>, ObjIterator<Map.Entry<K, V>>, EntryStream<K, V>> {
@@ -287,7 +287,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -297,13 +297,14 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new Stream consisting of the keys from the entries in this EntryStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #values()
      * @see Stream#map(Function)
      * @see Fn#key()
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<K> keys() {
+    public Stream<K> keys() throws IllegalStateException {
         _stream.assertNotClosed();
 
         // It won't be parallel stream if m != null.
@@ -334,7 +335,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -344,13 +345,14 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new Stream consisting of the values from the entries in this EntryStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #keys()
      * @see Stream#map(Function)
      * @see Fn#value()
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<V> values() {
+    public Stream<V> values() throws IllegalStateException {
         _stream.assertNotClosed();
 
         // It won't be parallel stream if m != null.
@@ -383,7 +385,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -393,10 +395,11 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new Stream consisting of the entries in this EntryStream
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<Map.Entry<K, V>> entries() {
+    public Stream<Map.Entry<K, V>> entries() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream;
@@ -418,7 +421,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -428,6 +431,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new EntryStream with inverted key-value pairs
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(Function)
      * @see #map(BiFunction)
      * @see Stream#map(Function)
@@ -436,6 +440,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public EntryStream<V, K> invert() {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Map.Entry<V, K>> mapper = Fn.invert();
 
         if (isParallel()) {
@@ -464,7 +470,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -476,12 +482,15 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of keys to select
      * @param clazz the class to filter the keys by
      * @return a new EntryStream with keys filtered by the specified class
+     * @throws IllegalStateException if the stream is already closed
      * @see #selectByValue(Class)
      * @see #filterByKey(Predicate)
      */
     @SequentialOnly
     @IntermediateOp
     public <KK> EntryStream<KK, V> selectByKey(final Class<KK> clazz) {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return (EntryStream<KK, V>) sequential().filterByKey(Fn.instanceOf(clazz))
@@ -510,7 +519,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -522,12 +531,15 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values to select
      * @param clazz the class to filter the values by
      * @return a new EntryStream with values filtered by the specified class
+     * @throws IllegalStateException if the stream is already closed
      * @see #selectByKey(Class)
      * @see #filterByValue(Predicate)
      */
     @SequentialOnly
     @IntermediateOp
     public <VV> EntryStream<K, VV> selectByValue(final Class<VV> clazz) {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             //noinspection resource
             return (EntryStream<K, VV>) sequential().filterByValue(Fn.instanceOf(clazz))
@@ -551,10 +563,13 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless predicate to apply to each entry to determine if it should be included
      * @return a new EntryStream consisting of entries that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#filter(Predicate)
      */
     @Override
     public EntryStream<K, V> filter(final Predicate<? super Map.Entry<K, V>> predicate) {
+        _stream.assertNotClosed();
+
         return of(_stream.filter(predicate));
     }
 
@@ -573,7 +588,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -584,11 +599,13 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of entries that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> filter(final BiPredicate<? super K, ? super V> predicate) {
+        _stream.assertNotClosed();
 
         return of(_stream.filter(Fn.Entries.p(predicate)));
     }
@@ -611,10 +628,13 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to apply to each entry
      * @param onDrop the action to perform on entries that don't match the predicate
      * @return a new EntryStream consisting of entries that match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#filter(Predicate)
      */
     @Override
     public EntryStream<K, V> filter(final Predicate<? super Map.Entry<K, V>> predicate, final Consumer<? super Map.Entry<K, V>> onDrop) {
+        _stream.assertNotClosed();
+
         return of(_stream.filter(predicate, onDrop));
     }
 
@@ -636,7 +656,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -647,12 +667,15 @@ public final class EntryStream<K, V> extends
      *
      * @param keyPredicate a non-interfering, stateless predicate to apply to each key
      * @return a new EntryStream consisting of entries whose keys match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #filterByValue(Predicate)
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> filterByKey(final Predicate<? super K> keyPredicate) {
+        _stream.assertNotClosed();
+
         final Predicate<Map.Entry<K, V>> predicate = Fn.testByKey(keyPredicate);
 
         return of(_stream.filter(predicate));
@@ -676,7 +699,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -687,12 +710,15 @@ public final class EntryStream<K, V> extends
      *
      * @param valuePredicate a non-interfering, stateless predicate to apply to each value
      * @return a new EntryStream consisting of entries whose values match the given predicate
+     * @throws IllegalStateException if the stream is already closed
      * @see #filterByKey(Predicate)
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> filterByValue(final Predicate<? super V> valuePredicate) {
+        _stream.assertNotClosed();
+
         final Predicate<Map.Entry<K, V>> predicate = Fn.testByValue(valuePredicate);
 
         return of(_stream.filter(predicate));
@@ -741,10 +767,13 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless predicate to apply to each entry
      * @return a new EntryStream consisting of elements taken while the predicate returns true
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#takeWhile(Predicate)
      */
     @Override
     public EntryStream<K, V> takeWhile(final Predicate<? super Map.Entry<K, V>> predicate) {
+        _stream.assertNotClosed();
+
         return of(_stream.takeWhile(predicate));
     }
 
@@ -792,7 +821,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -803,11 +832,14 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of elements taken while the predicate returns true
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> takeWhile(final BiPredicate<? super K, ? super V> predicate) {
+        _stream.assertNotClosed();
+
         return of(_stream.takeWhile(Fn.Entries.p(predicate)));
     }
 
@@ -857,10 +889,13 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless predicate to apply to each entry
      * @return a new EntryStream consisting of the remaining elements after dropping
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#dropWhile(Predicate)
      */
     @Override
     public EntryStream<K, V> dropWhile(final Predicate<? super Map.Entry<K, V>> predicate) {
+        _stream.assertNotClosed();
+
         return of(_stream.dropWhile(predicate));
     }
 
@@ -911,7 +946,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -922,11 +957,14 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of the remaining elements after dropping
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> dropWhile(final BiPredicate<? super K, ? super V> predicate) {
+        _stream.assertNotClosed();
+
         return of(_stream.dropWhile(Fn.Entries.p(predicate)));
     }
 
@@ -982,10 +1020,13 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to apply to each entry
      * @param onDrop the action to perform on each dropped entry
      * @return a new EntryStream consisting of the remaining elements after dropping
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#dropWhile(Predicate)
      */
     @Override
     public EntryStream<K, V> dropWhile(final Predicate<? super Map.Entry<K, V>> predicate, final Consumer<? super Map.Entry<K, V>> onDrop) {
+        _stream.assertNotClosed();
+
         return of(_stream.dropWhile(predicate, onDrop));
     }
 
@@ -1031,9 +1072,12 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless predicate to apply to each entry
      * @return a new EntryStream consisting of the remaining elements after skipping
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public EntryStream<K, V> skipUntil(final Predicate<? super Map.Entry<K, V>> predicate) {
+        _stream.assertNotClosed();
+
         return of(_stream.skipUntil(predicate));
     }
 
@@ -1080,7 +1124,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1091,11 +1135,14 @@ public final class EntryStream<K, V> extends
      *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of the remaining elements after skipping
+     * @throws IllegalStateException if the stream is already closed
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> skipUntil(final BiPredicate<? super K, ? super V> predicate) {
+        _stream.assertNotClosed();
+
         return of(_stream.skipUntil(Fn.Entries.p(predicate)));
     }
 
@@ -1116,7 +1163,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1129,11 +1176,14 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless function that transforms each entry
      * @return a new EntryStream with transformed entries
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#map(Function)
      */
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final Function<? super Map.Entry<K, V>, ? extends Map.Entry<? extends KK, ? extends VV>> mapper) {
+        _stream.assertNotClosed();
+
         return _stream.mapToEntry(mapper);
     }
 
@@ -1155,7 +1205,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1169,6 +1219,7 @@ public final class EntryStream<K, V> extends
      * @param keyMapper a non-interfering, stateless function to transform each entry's key
      * @param valueMapper a non-interfering, stateless function to transform each entry's value
      * @return a new EntryStream with transformed entries
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(Function)
      * @see #map(BiFunction, BiFunction)
      * @see Stream#map(Function)
@@ -1177,6 +1228,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper) {
+        _stream.assertNotClosed();
+
         return _stream.mapToEntry(keyMapper, valueMapper);
     }
 
@@ -1198,7 +1251,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1211,6 +1264,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless bi-function that transforms each key-value pair into a new entry
      * @return a new EntryStream with transformed entries
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(Function)
      * @see #map(BiFunction, BiFunction)
      * @see Stream#map(Function)
@@ -1218,6 +1272,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final BiFunction<? super K, ? super V, ? extends Map.Entry<? extends KK, ? extends VV>> mapper) {
+        _stream.assertNotClosed();
+
         return map(Fn.Entries.f(mapper));
     }
 
@@ -1239,7 +1295,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1253,6 +1309,7 @@ public final class EntryStream<K, V> extends
      * @param keyMapper a non-interfering, stateless bi-function to transform each key-value pair into a new key
      * @param valueMapper a non-interfering, stateless bi-function to transform each key-value pair into a new value
      * @return a new EntryStream with transformed entries
+     * @throws IllegalStateException if the stream is already closed
      * @see #map(Function)
      * @see #map(BiFunction)
      * @see #map(Function, Function)
@@ -1262,6 +1319,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final BiFunction<? super K, ? super V, ? extends KK> keyMapper,
             final BiFunction<? super K, ? super V, ? extends VV> valueMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Map.Entry<KK, VV>> mapper = t -> new SimpleImmutableEntry<>(keyMapper.apply(t.getKey(), t.getValue()),
                 valueMapper.apply(t.getKey(), t.getValue()));
 
@@ -1290,7 +1349,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1303,12 +1362,15 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless bi-consumer that receives each entry and a consumer for output entries
      * @return a new EntryStream with mapped entries
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#mapMulti(BiConsumer)
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> mapMulti(final BiConsumer<? super Map.Entry<K, V>, ? super Consumer<Map.Entry<KK, VV>>> mapper) {
+        _stream.assertNotClosed();
+
         return _stream.mapMulti(mapper).mapToEntry(Fn.identity());
     }
 
@@ -1332,7 +1394,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1345,11 +1407,14 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless function that transforms each entry to an optional entry
      * @return a new EntryStream with transformed entries, excluding empty optionals
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#mapPartial(Function)
      */
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> mapPartial(final Function<? super Map.Entry<K, V>, Optional<Map.Entry<? extends KK, ? extends VV>>> mapper) {
+        _stream.assertNotClosed();
+
         return _stream.mapPartial(mapper).mapToEntry(Fn.identity());
     }
 
@@ -1372,7 +1437,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1385,12 +1450,15 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless bi-function that transforms each key-value pair to an optional entry
      * @return a new EntryStream with transformed entries, excluding empty optionals
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapPartial(Function)
      * @see Stream#mapPartial(Function)
      */
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> mapPartial(final BiFunction<? super K, ? super V, Optional<Map.Entry<? extends KK, ? extends VV>>> mapper) {
+        _stream.assertNotClosed();
+
         return mapPartial(Fn.Entries.f(mapper));
     }
 
@@ -1409,7 +1477,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1421,6 +1489,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to transform each key
      * @return a new EntryStream with transformed keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapKey(BiFunction)
      * @see #mapValue(Function)
      * @see #map(Function)
@@ -1429,6 +1498,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> mapKey(final Function<? super K, ? extends KK> keyMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapper = Fn.mapKey(keyMapper);
 
         return map(mapper);
@@ -1450,7 +1521,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1462,6 +1533,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to transform each key using both key and value
      * @return a new EntryStream with transformed keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapKey(Function)
      * @see #mapValue(BiFunction)
      * @see #map(Function)
@@ -1470,6 +1542,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> mapKey(final BiFunction<? super K, ? super V, ? extends KK> keyMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapper = entry -> new SimpleImmutableEntry<>(keyMapper.apply(entry.getKey(), entry.getValue()),
                 entry.getValue());
 
@@ -1491,7 +1565,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1503,6 +1577,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to transform each value
      * @return a new EntryStream with transformed values
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapValue(BiFunction)
      * @see #mapKey(Function)
      * @see #map(Function)
@@ -1511,6 +1586,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> mapValue(final Function<? super V, ? extends VV> valueMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapper = Fn.mapValue(valueMapper);
 
         return map(mapper);
@@ -1532,7 +1609,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1544,6 +1621,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to transform each value using both key and value
      * @return a new EntryStream with transformed values
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapValue(Function)
      * @see #mapKey(BiFunction)
      * @see #map(Function)
@@ -1552,6 +1630,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> mapValue(final BiFunction<? super K, ? super V, ? extends VV> valueMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapper = entry -> new SimpleImmutableEntry<>(entry.getKey(),
                 valueMapper.apply(entry.getKey(), entry.getValue()));
 
@@ -1581,7 +1661,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1593,6 +1673,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to transform each key to an optional key
      * @return a new EntryStream with transformed keys, excluding entries with empty optional keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapKeyPartial(BiFunction)
      * @see #mapValuePartial(Function)
      * @see Stream#mapPartial(Function)
@@ -1600,6 +1681,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> mapKeyPartial(final Function<? super K, Optional<KK>> keyMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         @SuppressWarnings("unchecked")
         final Map.Entry<KK, V> noneEntry = NONE_ENTRY_SENTINEL;
 
@@ -1636,7 +1719,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1648,6 +1731,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to transform each key-value pair to an optional key
      * @return a new EntryStream with transformed keys, excluding entries with empty optional keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapKeyPartial(Function)
      * @see #mapValuePartial(BiFunction)
      * @see Stream#mapPartial(Function)
@@ -1655,6 +1739,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> mapKeyPartial(final BiFunction<? super K, ? super V, Optional<KK>> keyMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         @SuppressWarnings("unchecked")
         final Map.Entry<KK, V> noneEntry = NONE_ENTRY_SENTINEL;
 
@@ -1695,7 +1781,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1707,6 +1793,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to transform each value to an optional value
      * @return a new EntryStream with transformed values, excluding entries with empty optional values
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapValuePartial(BiFunction)
      * @see #mapKeyPartial(Function)
      * @see Stream#mapPartial(Function)
@@ -1714,6 +1801,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> mapValuePartial(final Function<? super V, Optional<VV>> valueMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         @SuppressWarnings("unchecked")
         final Map.Entry<K, VV> noneEntry = NONE_ENTRY_SENTINEL;
 
@@ -1750,7 +1839,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1762,6 +1851,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to transform each key-value pair to an optional value
      * @return a new EntryStream with transformed values, excluding entries with empty optional values
+     * @throws IllegalStateException if the stream is already closed
      * @see #mapValuePartial(Function)
      * @see #mapKeyPartial(BiFunction)
      * @see Stream#mapPartial(Function)
@@ -1769,6 +1859,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> mapValuePartial(final BiFunction<? super K, ? super V, Optional<VV>> valueMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         @SuppressWarnings("unchecked")
         final Map.Entry<K, VV> noneEntry = NONE_ENTRY_SENTINEL;
 
@@ -1789,6 +1881,8 @@ public final class EntryStream<K, V> extends
     /**
      * Returns a new EntryStream by applying a one-to-many transformation where each entry is mapped to an EntryStream.
      * The resulting streams are concatenated into a single stream.
+     * Each non-{@code null} mapped EntryStream is closed after its entries are consumed, or when
+     * the returned EntryStream is closed while consuming it.
      * This is an intermediate operation.
      *
      * <p><b>Naming Convention:</b></p>
@@ -1815,7 +1909,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1828,18 +1922,23 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless function that transforms each entry to an EntryStream
      * @return a new EntryStream with flat-mapped entries
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      * @see Stream#flatmap(Function)
      */
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatMap(final Function<? super Map.Entry<K, V>, ? extends EntryStream<? extends KK, ? extends VV>> mapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         return _stream.flattMapToEntry(mapper);
     }
 
     /**
      * Returns a new EntryStream by applying a one-to-many transformation where each key-value pair is mapped to an EntryStream.
      * The resulting streams are concatenated into a single stream.
+     * Each non-{@code null} mapped EntryStream is closed after its entries are consumed, or when
+     * the returned EntryStream is closed while consuming it.
      * This is an intermediate operation.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1855,7 +1954,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1868,6 +1967,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless bi-function that transforms each key-value pair to an EntryStream
      * @return a new EntryStream with flat-mapped entries
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMap(Function)
      * @see Stream#flatMap(Function)
      * @see Stream#flatmap(Function)
@@ -1875,6 +1975,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatMap(final BiFunction<? super K, ? super V, ? extends EntryStream<? extends KK, ? extends VV>> mapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         return flatMap(Fn.Entries.f(mapper));
     }
 
@@ -1907,7 +2009,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1920,6 +2022,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless function that transforms each entry to a Map
      * @return a new EntryStream with flat-mapped entries
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      * @see Stream#flatmap(Function)
      */
@@ -1927,6 +2030,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatmap(final Function<? super Map.Entry<K, V>, ? extends Map<? extends KK, ? extends VV>> mapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         return _stream.flatmapToEntry(mapper);
     }
 
@@ -1955,7 +2060,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -1968,6 +2073,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting entries
      * @param mapper a non-interfering, stateless BiFunction that transforms each key-value pair into a Map
      * @return a new EntryStream with transformed entries
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatmap(Function)
      * @see Stream#flatMap(Function)
      * @see Stream#flatmap(Function)
@@ -1975,6 +2081,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatmap(final BiFunction<? super K, ? super V, ? extends Map<? extends KK, ? extends VV>> mapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         return flatmap(Fn.Entries.f(mapper));
     }
 
@@ -1985,6 +2093,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>This is an intermediate operation that allows one-to-many transformations where each entry
      * can be transformed into an Abacus {@link Stream} of zero or more new entries.</p>
+     * Each non-{@code null} mapped stream is closed after its entries are consumed, or when the
+     * returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1998,7 +2108,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2011,6 +2121,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting entries
      * @param mapper a non-interfering, stateless Function that transforms each entry
      * @return a new {@code EntryStream} with the flattened contents of the mapped Abacus streams
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      * @see Stream#flatmap(Function)
      */
@@ -2020,6 +2131,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flattMap(
             final Function<? super Map.Entry<K, V>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> mapper) {
+        _stream.assertNotClosed();
+
         return _stream.flatMapToEntry(mapper);
     }
 
@@ -2030,6 +2143,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>This is an intermediate operation that allows one-to-many transformations where each key-value pair
      * can be transformed into an Abacus {@link Stream} of zero or more new entries.</p>
+     * Each non-{@code null} mapped stream is closed after its entries are consumed, or when the
+     * returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2043,7 +2158,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2056,6 +2171,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting entries
      * @param mapper a non-interfering, stateless BiFunction that transforms each key-value pair into a Stream of new entries
      * @return a new {@code EntryStream} with the flattened contents of the mapped Abacus streams
+     * @throws IllegalStateException if the stream is already closed
      * @see #flattMap(Function)
      * @see Stream#flatMap(Function)
      * @see Stream#flatmap(Function)
@@ -2065,6 +2181,8 @@ public final class EntryStream<K, V> extends
     @Beta
     public <KK, VV> EntryStream<KK, VV> flattMap(
             final BiFunction<? super K, ? super V, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> mapper) {
+        _stream.assertNotClosed();
+
         return flattMap(Fn.Entries.f(mapper));
     }
 
@@ -2075,6 +2193,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>This is an intermediate operation that allows one-to-many key transformations while preserving the original values.
      * Each key can be transformed into zero or more new keys, all paired with the same original value.</p>
+     * Each non-{@code null} stream returned by {@code keyMapper} is closed after its keys are
+     * consumed, or when the returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2087,7 +2207,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2099,6 +2219,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to apply to each key to transform it into a Stream of new keys
      * @return a new EntryStream with transformed keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapKey(BiFunction)
      * @see #flatMapValue(Function)
      * @see #flatmapKey(Function)
@@ -2106,9 +2227,11 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> flatMapKey(final Function<? super K, ? extends Stream<? extends KK>> keyMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> {
             final Stream<? extends KK> keys = keyMapper.apply(e.getKey());
-            return keys == null ? Stream.empty() : keys.map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
+            return keys == null ? Stream.empty() : keys.<Map.Entry<KK, V>> map(kk -> new SimpleImmutableEntry<>(kk, e.getValue())).onClose(keys::close);
         };
 
         return flattMap(secondMapper);
@@ -2121,6 +2244,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>This is an intermediate operation that allows one-to-many key transformations based on both key and value.
      * Each entry can be transformed into zero or more new keys, all paired with the same original value.</p>
+     * Each non-{@code null} stream returned by {@code keyMapper} is closed after its keys are
+     * consumed, or when the returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2133,7 +2258,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2145,6 +2270,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Stream of new keys
      * @return a new EntryStream with transformed keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapKey(Function)
      * @see Stream#flatMap(Function)
      * @see #flatMapValue(BiFunction)
@@ -2152,9 +2278,11 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> flatMapKey(final BiFunction<? super K, ? super V, ? extends Stream<? extends KK>> keyMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> {
             final Stream<? extends KK> keys = keyMapper.apply(e.getKey(), e.getValue());
-            return keys == null ? Stream.empty() : keys.map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
+            return keys == null ? Stream.empty() : keys.<Map.Entry<KK, V>> map(kk -> new SimpleImmutableEntry<>(kk, e.getValue())).onClose(keys::close);
         };
 
         return flattMap(secondMapper);
@@ -2179,7 +2307,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2191,6 +2319,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to apply to each key to transform it into a Collection of new keys
      * @return a new EntryStream with transformed keys
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      * @see #flatMapKey(Function)
      * @see #flatmapValue(Function)
@@ -2198,6 +2327,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> flatmapKey(final Function<? super K, ? extends Collection<? extends KK>> keyMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> Stream.of(keyMapper.apply(e.getKey()))
                 .map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
 
@@ -2223,7 +2354,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2235,6 +2366,7 @@ public final class EntryStream<K, V> extends
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Collection of new keys
      * @return a new EntryStream with transformed keys
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapKey(Function)
      * @see #flatMapKey(BiFunction)
      * @see #flatmapValue(BiFunction)
@@ -2242,6 +2374,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> flatmapKey(final BiFunction<? super K, ? super V, ? extends Collection<? extends KK>> keyMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> Stream.of(keyMapper.apply(e.getKey(), e.getValue()))
                 .map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
 
@@ -2255,6 +2389,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>This is an intermediate operation that allows one-to-many value transformations while preserving the original keys.
      * Each value can be transformed into zero or more new values, all paired with the same original key.</p>
+     * Each non-{@code null} stream returned by {@code valueMapper} is closed after its values are
+     * consumed, or when the returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2267,7 +2403,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2279,6 +2415,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to apply to each value to transform it into a Stream of new values
      * @return a new EntryStream with transformed values
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      * @see #flatMapKey(Function)
      * @see #flatmapValue(Function)
@@ -2286,9 +2423,11 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> flatMapValue(final Function<? super V, ? extends Stream<? extends VV>> valueMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> {
             final Stream<? extends VV> values = valueMapper.apply(e.getValue());
-            return values == null ? Stream.empty() : values.map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
+            return values == null ? Stream.empty() : values.<Map.Entry<K, VV>> map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv)).onClose(values::close);
         };
 
         return flattMap(secondMapper);
@@ -2301,6 +2440,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>This is an intermediate operation that allows one-to-many value transformations based on both key and value.
      * Each entry can be transformed into zero or more new values, all paired with the same original key.</p>
+     * Each non-{@code null} stream returned by {@code valueMapper} is closed after its values are
+     * consumed, or when the returned EntryStream is closed while consuming it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2313,7 +2454,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2325,6 +2466,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Stream of new values
      * @return a new EntryStream with transformed values
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapValue(Function)
      * @see Stream#flatMap(Function)
      * @see #flatMapKey(BiFunction)
@@ -2332,9 +2474,11 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> flatMapValue(final BiFunction<? super K, ? super V, ? extends Stream<? extends VV>> valueMapper) {
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> {
             final Stream<? extends VV> values = valueMapper.apply(e.getKey(), e.getValue());
-            return values == null ? Stream.empty() : values.map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
+            return values == null ? Stream.empty() : values.<Map.Entry<K, VV>> map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv)).onClose(values::close);
         };
 
         return flattMap(secondMapper);
@@ -2359,7 +2503,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2371,6 +2515,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to apply to each value to transform it into a Collection of new values
      * @return a new EntryStream with transformed values
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#flatMap(Function)
      * @see #flatMapValue(Function)
      * @see #flatmapKey(Function)
@@ -2378,6 +2523,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> flatmapValue(final Function<? super V, ? extends Collection<? extends VV>> valueMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> Stream.of(valueMapper.apply(e.getValue()))
                 .map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
 
@@ -2403,7 +2550,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2415,6 +2562,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Collection of new values
      * @return a new EntryStream with transformed values
+     * @throws IllegalStateException if the stream is already closed
      * @see #flatMapValue(Function)
      * @see #flatMapValue(BiFunction)
      * @see #flatmapKey(BiFunction)
@@ -2422,6 +2570,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> flatmapValue(final BiFunction<? super K, ? super V, ? extends Collection<? extends VV>> valueMapper) { //NOSONAR
+        _stream.assertNotClosed();
+
         final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> Stream.of(valueMapper.apply(e.getKey(), e.getValue()))
                 .map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
 
@@ -2451,7 +2601,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2461,6 +2611,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new EntryStream with keys and their associated list of values
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function)
      * @see #groupBy(BinaryOperator)
      * @see #groupBy(Collector)
@@ -2469,6 +2620,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, List<V>> groupBy() {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
@@ -2500,7 +2653,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2511,6 +2664,7 @@ public final class EntryStream<K, V> extends
      *
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated list of values
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function, Supplier)
      * @see #groupBy()
      */
@@ -2518,6 +2672,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, List<V>> groupBy(final Supplier<? extends Map<K, List<V>>> mapFactory) {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
@@ -2548,7 +2704,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2562,6 +2718,7 @@ public final class EntryStream<K, V> extends
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group
      * @return a new EntryStream consisting of entries where the key is the group identifier, and the value is a list of elements that mapped to the corresponding key.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function)
      */
     @ParallelSupported
@@ -2569,6 +2726,7 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, List<VV>> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper) {
+        _stream.assertNotClosed();
 
         return of(_stream.groupBy(keyMapper, valueMapper));
     }
@@ -2595,7 +2753,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2610,6 +2768,7 @@ public final class EntryStream<K, V> extends
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream consisting of entries where the key is the group identifier, and the value is a list of elements that mapped to the corresponding key.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function, Supplier)
      */
     @ParallelSupported
@@ -2617,6 +2776,7 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, List<VV>> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final Supplier<? extends Map<KK, List<VV>>> mapFactory) {
+        _stream.assertNotClosed();
 
         return of(_stream.groupBy(keyMapper, valueMapper, mapFactory));
     }
@@ -2638,7 +2798,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2650,12 +2810,15 @@ public final class EntryStream<K, V> extends
      * @param <D> the type of the result of the downstream collector
      * @param downstream the collector to use for grouping the entries
      * @return a new EntryStream with keys and their associated collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Collector)
      */
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
     public <D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, ?, D> downstream) {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
 
         return of(_stream.groupBy(keyMapper, downstream));
@@ -2681,7 +2844,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2694,12 +2857,15 @@ public final class EntryStream<K, V> extends
      * @param downstream the collector to use for grouping the entries
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
     public <D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
 
         return of(_stream.groupBy(keyMapper, downstream, mapFactory));
@@ -2726,7 +2892,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2740,6 +2906,7 @@ public final class EntryStream<K, V> extends
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
      * @param downstream the collector to use for grouping the entries
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of the downstream collector.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Collector)
      */
     @ParallelSupported
@@ -2747,6 +2914,7 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     public <KK, D> EntryStream<KK, D> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Collector<? super Map.Entry<K, V>, ?, D> downstream) {
+        _stream.assertNotClosed();
 
         return of(_stream.groupBy(keyMapper, downstream));
     }
@@ -2773,7 +2941,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2788,6 +2956,7 @@ public final class EntryStream<K, V> extends
      * @param downstream the collector to use for grouping the entries
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of the downstream collector.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Collector, Supplier)
      */
     @ParallelSupported
@@ -2795,6 +2964,7 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     public <KK, D> EntryStream<KK, D> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Collector<? super Map.Entry<K, V>, ?, D> downstream, final Supplier<? extends Map<KK, D>> mapFactory) {
+        _stream.assertNotClosed();
 
         return of(_stream.groupBy(keyMapper, downstream, mapFactory));
     }
@@ -2819,7 +2989,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2830,12 +3000,15 @@ public final class EntryStream<K, V> extends
      *
      * @param mergeFunction the function to merge values associated with the same key
      * @return a new EntryStream with keys and their associated merged values
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction) {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
@@ -2868,7 +3041,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2880,12 +3053,15 @@ public final class EntryStream<K, V> extends
      * @param mergeFunction the function to merge values associated with the same key
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated merged values
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function, BinaryOperator, Supplier)
      */
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory) {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
@@ -2921,7 +3097,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2936,6 +3112,7 @@ public final class EntryStream<K, V> extends
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group
      * @param mergeFunction the function to merge values associated with the same key
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of merging the values that mapped to the corresponding key.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function, BinaryOperator)
      */
     @ParallelSupported
@@ -2943,6 +3120,8 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, VV> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final BinaryOperator<VV> mergeFunction) {
+        _stream.assertNotClosed();
+
         return of(_stream.groupBy(keyMapper, valueMapper, mergeFunction));
     }
 
@@ -2970,7 +3149,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -2986,6 +3165,7 @@ public final class EntryStream<K, V> extends
      * @param mergeFunction the function to merge values associated with the same key
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of merging the values that mapped to the corresponding key.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupBy(Function, Function, BinaryOperator, Supplier)
      */
     @ParallelSupported
@@ -2994,6 +3174,7 @@ public final class EntryStream<K, V> extends
     public <KK, VV> EntryStream<KK, VV> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final BinaryOperator<VV> mergeFunction,
             final Supplier<? extends Map<KK, VV>> mapFactory) {
+        _stream.assertNotClosed();
 
         return of(_stream.groupBy(keyMapper, valueMapper, mergeFunction, mapFactory));
     }
@@ -3020,7 +3201,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3032,12 +3213,15 @@ public final class EntryStream<K, V> extends
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group;
      *        the first parameter is the key of the last (not the first) element of the current group, and the second parameter is the key of the next element to check
      * @return a new Stream with lists of values whose keys are collapsible
+     * @throws IllegalStateException if the stream is already closed
      * @see #collapseByKey(BiPredicate, Function, Collector)
      * @see Stream#collapse(BiPredicate, Collector)
      */
     @SequentialOnly
     @IntermediateOp
     public Stream<List<V>> collapseByKey(final BiPredicate<? super K, ? super K> collapsible) {
+        _stream.assertNotClosed();
+
         return collapseByKey(collapsible, Fn.value(), Collectors.toList());
     }
 
@@ -3063,7 +3247,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3079,12 +3263,15 @@ public final class EntryStream<K, V> extends
      * @param mapper a non-interfering, stateless function that maps each entry to a value
      * @param collector the collector to collect the mapped values
      * @return a new Stream with the collapsed and collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collapse(BiPredicate, Collector)
      */
     @SequentialOnly
     @IntermediateOp
     public <U, R> Stream<R> collapseByKey(final BiPredicate<? super K, ? super K> collapsible, final Function<? super Map.Entry<K, V>, U> mapper,
             final Collector<? super U, ?, R> collector) {
+        _stream.assertNotClosed();
+
         final BiPredicate<? super Map.Entry<K, V>, ? super Map.Entry<K, V>> collapsible2 = (t, u) -> collapsible.test(t.getKey(), u.getKey());
 
         return _stream.collapse(collapsible2, Collectors.mapping(mapper, collector));
@@ -3112,7 +3299,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3124,12 +3311,15 @@ public final class EntryStream<K, V> extends
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group;
      *        the first parameter is the value of the last (not the first) element of the current group, and the second parameter is the value of the next element to check
      * @return a new Stream with lists of keys whose values are collapsible
+     * @throws IllegalStateException if the stream is already closed
      * @see #collapseByValue(BiPredicate, Function, Collector)
      * @see Stream#collapse(BiPredicate, Collector)
      */
     @SequentialOnly
     @IntermediateOp
     public Stream<List<K>> collapseByValue(final BiPredicate<? super V, ? super V> collapsible) {
+        _stream.assertNotClosed();
+
         return collapseByValue(collapsible, Fn.key(), Collectors.toList());
     }
 
@@ -3155,7 +3345,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3171,12 +3361,15 @@ public final class EntryStream<K, V> extends
      * @param mapper a non-interfering, stateless function that maps each entry to a value
      * @param collector the collector to collect the mapped values
      * @return a new Stream with the collapsed and collected results
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collapse(BiPredicate, Collector)
      */
     @SequentialOnly
     @IntermediateOp
     public <U, R> Stream<R> collapseByValue(final BiPredicate<? super V, ? super V> collapsible, final Function<? super Map.Entry<K, V>, U> mapper,
             final Collector<? super U, ?, R> collector) {
+        _stream.assertNotClosed();
+
         final BiPredicate<? super Map.Entry<K, V>, ? super Map.Entry<K, V>> collapsible2 = (t, u) -> collapsible.test(t.getValue(), u.getValue());
 
         return _stream.collapse(collapsible2, Collectors.mapping(mapper, collector));
@@ -3200,7 +3393,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3211,11 +3404,14 @@ public final class EntryStream<K, V> extends
      *
      * @param chunkSize the size of each chunk
      * @return a new Stream consisting of Lists of Map.Entry objects, each representing a chunk of the original Stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#split(int)
      */
     @SequentialOnly
     @IntermediateOp
     public Stream<List<Map.Entry<K, V>>> split(final int chunkSize) {
+        _stream.assertNotClosed();
+
         return _stream.split(chunkSize);
     }
 
@@ -3237,7 +3433,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3250,11 +3446,14 @@ public final class EntryStream<K, V> extends
      * @param chunkSize the size of each chunk
      * @param collectionSupplier a function which returns a new, empty collection of the appropriate type
      * @return a new Stream consisting of collections of Map.Entry objects, each representing a chunk of the original Stream.
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#split(int, IntFunction)
      */
     @SequentialOnly
     @IntermediateOp
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier) {
+        _stream.assertNotClosed();
+
         return _stream.split(chunkSize, collectionSupplier);
     }
 
@@ -3277,7 +3476,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3288,10 +3487,13 @@ public final class EntryStream<K, V> extends
      *
      * @param windowSize the size of the window to be used for sliding over the Stream elements
      * @return a new Stream where each element is a List of Map.Entry objects from the original Stream, representing a window.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
     public Stream<List<Map.Entry<K, V>>> sliding(final int windowSize) {
+        _stream.assertNotClosed();
+
         return _stream.sliding(windowSize);
     }
 
@@ -3314,7 +3516,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3327,10 +3529,13 @@ public final class EntryStream<K, V> extends
      * @param windowSize the size of the window to be used for sliding over the Stream elements
      * @param collectionSupplier a function which returns a new, empty collection of the appropriate type
      * @return a new Stream where each element is a collection of Map.Entry objects from the original Stream, representing a window.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> sliding(final int windowSize, final IntFunction<? extends C> collectionSupplier) {
+        _stream.assertNotClosed();
+
         return _stream.sliding(windowSize, collectionSupplier);
     }
 
@@ -3353,7 +3558,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3365,10 +3570,13 @@ public final class EntryStream<K, V> extends
      * @param windowSize the size of the window to be used for sliding over the Stream elements
      * @param increment the number of elements to move the window forward after each step
      * @return a new Stream where each element is a List of Map.Entry objects from the original Stream, representing a window.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
     public Stream<List<Map.Entry<K, V>>> sliding(final int windowSize, final int increment) {
+        _stream.assertNotClosed();
+
         return _stream.sliding(windowSize, increment);
     }
 
@@ -3391,7 +3599,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3405,11 +3613,14 @@ public final class EntryStream<K, V> extends
      * @param increment the number of elements to move the window forward after each step
      * @param collectionSupplier a function which returns a new, empty collection of the appropriate type
      * @return a new Stream where each element is a collection of Map.Entry objects from the original Stream, representing a window.
+     * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
     @IntermediateOp
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> sliding(final int windowSize, final int increment,
             final IntFunction<? extends C> collectionSupplier) {
+        _stream.assertNotClosed();
+
         return _stream.sliding(windowSize, increment, collectionSupplier);
     }
 
@@ -3436,6 +3647,7 @@ public final class EntryStream<K, V> extends
      * @param c the collection to find common elements with this stream
      * @return a new EntryStream containing entries present in both this stream and the specified collection,
      *         considering the minimum number of occurrences in either source
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#intersection(Collection)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
@@ -3445,6 +3657,8 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public EntryStream<K, V> intersection(final Collection<?> c) {
+        _stream.assertNotClosed();
+
         return of(_stream.intersection(c));
     }
 
@@ -3467,7 +3681,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3479,6 +3693,7 @@ public final class EntryStream<K, V> extends
      * @param map the map to find common elements with this stream
      * @return a new EntryStream containing entries present in both this stream and the specified map,
      *         considering the minimum number of occurrences in either source
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#intersection(Collection)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
@@ -3489,6 +3704,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public EntryStream<K, V> intersection(final Map<? extends K, ? extends V> map) {
+        _stream.assertNotClosed();
+
         return intersection(N.isEmpty(map) ? N.emptyList() : map.entrySet());
     }
 
@@ -3514,6 +3731,7 @@ public final class EntryStream<K, V> extends
      * @param c the collection to compare against this stream
      * @return a new EntryStream containing the elements that are present in this stream but not in the specified collection,
      *         considering the number of occurrences
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#difference(Collection)
      * @see N#difference(Collection, Collection)
      * @see #intersection(Collection)
@@ -3521,6 +3739,8 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public EntryStream<K, V> difference(final Collection<?> c) {
+        _stream.assertNotClosed();
+
         return of(_stream.difference(c));
     }
 
@@ -3543,7 +3763,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3555,6 +3775,7 @@ public final class EntryStream<K, V> extends
      * @param map the map to compare against this stream
      * @return a new EntryStream containing the elements that are present in this stream but not in the specified map,
      *         considering the number of occurrences
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#difference(Collection)
      * @see N#difference(Collection, Collection)
      * @see #intersection(Collection)
@@ -3563,6 +3784,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public EntryStream<K, V> difference(final Map<?, ?> map) {
+        _stream.assertNotClosed();
+
         return difference(N.isEmpty(map) ? N.emptyList() : map.entrySet());
     }
 
@@ -3592,6 +3815,7 @@ public final class EntryStream<K, V> extends
      * @param c the collection to compare with this stream for symmetric difference
      * @return a new EntryStream containing entries that are present in either this stream or the collection,
      *         but not in both, considering the number of occurrences
+     * @throws IllegalStateException if the stream is already closed
      * @see #intersection(Collection)
      * @see #difference(Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -3603,6 +3827,8 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public EntryStream<K, V> symmetricDifference(final Collection<? extends Map.Entry<K, V>> c) {
+        _stream.assertNotClosed();
+
         return of(_stream.symmetricDifference(c));
     }
 
@@ -3628,7 +3854,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3640,6 +3866,7 @@ public final class EntryStream<K, V> extends
      * @param map the map to compare with this stream for symmetric difference
      * @return a new EntryStream containing entries that are present in either this stream or the map,
      *         but not in both, considering the number of occurrences
+     * @throws IllegalStateException if the stream is already closed
      * @see #intersection(Collection)
      * @see #difference(Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -3653,6 +3880,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @SuppressWarnings("rawtypes")
     public EntryStream<K, V> symmetricDifference(final Map<? extends K, ? extends V> map) {
+        _stream.assertNotClosed();
+
         return symmetricDifference(N.isEmpty(map) ? N.emptyList() : (Collection) map.entrySet());
     }
 
@@ -3672,12 +3901,15 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return never returns normally
+     * @throws IllegalStateException if the stream is already closed
      * @throws UnsupportedOperationException always
      * @deprecated Use {@link #sorted(Comparator)} instead.
      */
     @Deprecated
     @Override
     public EntryStream<K, V> sorted() throws UnsupportedOperationException {
+        _stream.assertNotClosed();
+
         //    final Comparator<Map.Entry<K, V>> cmp = Comparators.<K, V> comparingByKey((Comparator) Comparators.naturalOrder())
         //            .thenComparing(Comparators.comparingByValue((Comparator) Comparators.naturalOrder()));
         //
@@ -3703,7 +3935,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3714,6 +3946,7 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return a new EntryStream with entries sorted by the specified comparator
+     * @throws IllegalStateException if the stream is already closed
      * @see #reverseSorted(Comparator)
      * @see Comparators#comparingByKey()
      * @see Comparators#comparingByKey(Comparator)
@@ -3724,6 +3957,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> sorted(final Comparator<? super Map.Entry<K, V>> comparator) {
+        _stream.assertNotClosed();
+
         return of(_stream.sorted(comparator));
     }
 
@@ -3744,7 +3979,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3755,6 +3990,7 @@ public final class EntryStream<K, V> extends
      *
      * @param keyComparator the comparator to compare the keys
      * @return a new EntryStream with entries sorted by the specified key comparator
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedByValue(Comparator)
      * @see #sorted(Comparator)
      * @see Stream#sorted(Comparator)
@@ -3764,6 +4000,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> sortedByKey(final Comparator<? super K> keyComparator) {
+        _stream.assertNotClosed();
+
         final Comparator<Map.Entry<K, V>> comparator = Comparators.comparingByKey(keyComparator);
 
         return of(_stream.sorted(comparator));
@@ -3786,7 +4024,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3797,6 +4035,7 @@ public final class EntryStream<K, V> extends
      *
      * @param valueComparator the comparator to compare the values
      * @return a new EntryStream with entries sorted by the specified value comparator
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedByKey(Comparator)
      * @see #sorted(Comparator)
      * @see Stream#sorted(Comparator)
@@ -3806,6 +4045,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> sortedByValue(final Comparator<? super V> valueComparator) {
+        _stream.assertNotClosed();
+
         final Comparator<Map.Entry<K, V>> comparator = Comparators.comparingByValue(valueComparator);
 
         return of(_stream.sorted(comparator));
@@ -3828,7 +4069,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3839,6 +4080,7 @@ public final class EntryStream<K, V> extends
      *
      * @param sortKeyExtractor the function to extract the comparable value for comparison
      * @return a new EntryStream with entries sorted by the extracted values
+     * @throws IllegalStateException if the stream is already closed
      * @see #sorted(Comparator)
      * @see #sortedByInt(ToIntFunction)
      * @see Stream#sortedBy(Function)
@@ -3848,6 +4090,8 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
     public EntryStream<K, V> sortedBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> sortKeyExtractor) {
+        _stream.assertNotClosed();
+
         return of(_stream.sortedBy(sortKeyExtractor));
     }
 
@@ -3868,7 +4112,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3879,6 +4123,7 @@ public final class EntryStream<K, V> extends
      *
      * @param sortKeyExtractor the function to extract the integer value for comparison
      * @return a new EntryStream with entries sorted by the extracted integer values
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedBy(Function)
      * @see #sortedByLong(ToLongFunction)
      * @see #sorted(Comparator)
@@ -3888,6 +4133,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> sortedByInt(final ToIntFunction<? super Map.Entry<K, V>> sortKeyExtractor) {
+        _stream.assertNotClosed();
+
         final Comparator<? super Map.Entry<K, V>> comparator = Comparators.comparingInt(sortKeyExtractor);
 
         return sorted(comparator);
@@ -3910,7 +4157,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3921,6 +4168,7 @@ public final class EntryStream<K, V> extends
      *
      * @param sortKeyExtractor the function to extract the long value for comparison
      * @return a new EntryStream with entries sorted by the extracted long values
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedByInt(ToIntFunction)
      * @see #sortedByDouble(ToDoubleFunction)
      * @see #sorted(Comparator)
@@ -3930,6 +4178,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> sortedByLong(final ToLongFunction<? super Map.Entry<K, V>> sortKeyExtractor) {
+        _stream.assertNotClosed();
+
         final Comparator<? super Map.Entry<K, V>> comparator = Comparators.comparingLong(sortKeyExtractor);
 
         return sorted(comparator);
@@ -3952,7 +4202,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -3963,6 +4213,7 @@ public final class EntryStream<K, V> extends
      *
      * @param sortKeyExtractor the function to extract the double value for comparison
      * @return a new EntryStream with entries sorted by the extracted double values
+     * @throws IllegalStateException if the stream is already closed
      * @see #sortedByLong(ToLongFunction)
      * @see #sortedByInt(ToIntFunction)
      * @see #sorted(Comparator)
@@ -3972,6 +4223,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> sortedByDouble(final ToDoubleFunction<? super Map.Entry<K, V>> sortKeyExtractor) {
+        _stream.assertNotClosed();
+
         final Comparator<? super Map.Entry<K, V>> comparator = Comparators.comparingDouble(sortKeyExtractor);
 
         return sorted(comparator);
@@ -3993,12 +4246,15 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return never returns normally
+     * @throws IllegalStateException if the stream is already closed
      * @throws UnsupportedOperationException always
      * @deprecated Use {@link #reverseSorted(Comparator)} instead.
      */
     @Deprecated
     @Override
     public EntryStream<K, V> reverseSorted() throws UnsupportedOperationException {
+        _stream.assertNotClosed();
+
         //        @SuppressWarnings("rawtypes")
         //        final Comparator<Map.Entry<K, V>> cmp = Comparators.reverseOrder(Comparators.<K, V> comparingByKey((Comparator) Comparators.naturalOrder())
         //                .thenComparing(Comparators.comparingByValue((Comparator) Comparators.naturalOrder())));
@@ -4026,7 +4282,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4037,6 +4293,7 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return a new EntryStream with entries reverse sorted by the specified comparator
+     * @throws IllegalStateException if the stream is already closed
      * @see #sorted(Comparator)
      * @see Comparators#comparingByKey()
      * @see Comparators#comparingByKey(Comparator)
@@ -4047,6 +4304,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> reverseSorted(final Comparator<? super Map.Entry<K, V>> comparator) {
+        _stream.assertNotClosed();
+
         return of(_stream.reverseSorted(comparator));
     }
 
@@ -4067,7 +4326,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4078,6 +4337,7 @@ public final class EntryStream<K, V> extends
      *
      * @param sortKeyExtractor the function to extract the comparable value for comparison
      * @return a new EntryStream with entries reverse sorted by the extracted values
+     * @throws IllegalStateException if the stream is already closed
      * @see #reverseSorted(Comparator)
      * @see #sortedBy(Function)
      * @see Stream#reverseSortedBy(Function)
@@ -4086,6 +4346,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super Map.Entry<K, V>, ? extends Comparable> sortKeyExtractor) {
+        _stream.assertNotClosed();
+
         return of(_stream.reverseSortedBy(sortKeyExtractor));
     }
 
@@ -4107,10 +4369,13 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a Stream of Indexed objects containing the index and the entry
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#indexed()
      */
     @Override
     public Stream<Indexed<Map.Entry<K, V>>> indexed() {
+        _stream.assertNotClosed();
+
         return _stream.indexed();
     }
 
@@ -4137,10 +4402,13 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a new EntryStream with distinct elements
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#distinct()
      */
     @Override
     public EntryStream<K, V> distinct() {
+        _stream.assertNotClosed();
+
         return of(_stream.distinct());
     }
 
@@ -4164,7 +4432,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4175,12 +4443,15 @@ public final class EntryStream<K, V> extends
      *
      * @param mergeFunction the function to merge duplicate elements
      * @return a new EntryStream with distinct elements
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#distinct(BinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> distinct(final BinaryOperator<Map.Entry<K, V>> mergeFunction) {
+        _stream.assertNotClosed();
+
         return of(_stream.distinct(mergeFunction));
     }
 
@@ -4210,7 +4481,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4220,11 +4491,14 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new EntryStream with distinct elements based on the keys
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#distinctBy(Function)
      */
     @SequentialOnly
     @IntermediateOp
     public EntryStream<K, V> distinctByKey() {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
 
         if (isParallel()) {
@@ -4262,7 +4536,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4272,11 +4546,14 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new EntryStream with distinct elements based on the values
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#distinctBy(Function)
      */
     @SequentialOnly
     @IntermediateOp
     public EntryStream<K, V> distinctByValue() {
+        _stream.assertNotClosed();
+
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
         if (isParallel()) {
@@ -4306,7 +4583,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4317,11 +4594,14 @@ public final class EntryStream<K, V> extends
      *
      * @param keyMapper the function to extract the key for comparison
      * @return a new EntryStream with distinct elements based on the extracted keys
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#distinctBy(Function)
      */
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> distinctBy(final Function<? super Map.Entry<K, V>, ?> keyMapper) {
+        _stream.assertNotClosed();
+
         return of(_stream.distinctBy(keyMapper));
     }
 
@@ -4347,7 +4627,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4359,12 +4639,15 @@ public final class EntryStream<K, V> extends
      * @param keyMapper the function to extract the key for comparison
      * @param mergeFunction the function to merge duplicate elements
      * @return a new EntryStream with distinct elements based on the extracted keys
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#distinctBy(Function, BinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> distinctBy(final Function<? super Map.Entry<K, V>, ?> keyMapper, final BinaryOperator<Map.Entry<K, V>> mergeFunction) {
+        _stream.assertNotClosed();
+
         return of(_stream.distinctBy(keyMapper, mergeFunction));
     }
 
@@ -4390,10 +4673,13 @@ public final class EntryStream<K, V> extends
      *
      * @param distance the distance to rotate the elements
      * @return a new EntryStream with the elements rotated by the specified distance
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#rotated(int)
      */
     @Override
     public EntryStream<K, V> rotated(final int distance) {
+        _stream.assertNotClosed();
+
         return of(_stream.rotated(distance));
     }
 
@@ -4414,10 +4700,13 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a new EntryStream with the elements shuffled
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#shuffled()
      */
     @Override
     public EntryStream<K, V> shuffled() {
+        _stream.assertNotClosed();
+
         return of(_stream.shuffled());
     }
 
@@ -4440,10 +4729,13 @@ public final class EntryStream<K, V> extends
      *
      * @param rnd the random to shuffle the elements
      * @return a new EntryStream with the elements shuffled using the specified random
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#shuffled(Random)
      */
     @Override
     public EntryStream<K, V> shuffled(final Random rnd) {
+        _stream.assertNotClosed();
+
         return of(_stream.shuffled(rnd));
     }
 
@@ -4467,10 +4759,13 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a new EntryStream with the elements reversed
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reversed()
      */
     @Override
     public EntryStream<K, V> reversed() {
+        _stream.assertNotClosed();
+
         return of(_stream.reversed());
     }
 
@@ -4491,10 +4786,13 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a new EntryStream with the elements cycled
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#cycled()
      */
     @Override
     public EntryStream<K, V> cycled() {
+        _stream.assertNotClosed();
+
         return of(_stream.cycled());
     }
 
@@ -4517,11 +4815,14 @@ public final class EntryStream<K, V> extends
      *
      * @param rounds the number of rounds to cycle the elements
      * @return a new EntryStream with the elements cycled the specified number of times
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if rounds is negative
      * @see Stream#cycled(long)
      */
     @Override
     public EntryStream<K, V> cycled(final long rounds) {
+        _stream.assertNotClosed();
+
         return of(_stream.cycled(rounds));
     }
 
@@ -4543,7 +4844,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4555,12 +4856,15 @@ public final class EntryStream<K, V> extends
      * @param <M> the type of the map to prepend
      * @param map the map to prepend to the stream
      * @return a new EntryStream with the elements of the specified map prepended
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#prepend(Collection)
      */
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
     public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> prepend(final M map) {
+        _stream.assertNotClosed();
+
         if (N.isEmpty(map)) {
             return of(_stream);
         }
@@ -4585,10 +4889,13 @@ public final class EntryStream<K, V> extends
      *
      * @param stream the stream to prepend to the current stream
      * @return a new EntryStream with the elements of the specified stream prepended
+     * @throws IllegalStateException if the stream is already closed
      * @see BaseStream#prepend(BaseStream)
      */
     @Override
     public EntryStream<K, V> prepend(final EntryStream<K, V> stream) {
+        _stream.assertNotClosed();
+
         return of(_stream.prepend(stream._stream));
     }
 
@@ -4608,10 +4915,13 @@ public final class EntryStream<K, V> extends
      *
      * @param op the optional entry to prepend to the stream
      * @return a new EntryStream with the optional entry prepended
+     * @throws IllegalStateException if the stream is already closed
      * @see #prepend(Map)
      */
     @Override
     public EntryStream<K, V> prepend(final Optional<Map.Entry<K, V>> op) {
+        _stream.assertNotClosed();
+
         if (op.isEmpty()) {
             return this;
         }
@@ -4637,7 +4947,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4649,12 +4959,15 @@ public final class EntryStream<K, V> extends
      * @param <M> the type of the map to append
      * @param map the map to append to the stream
      * @return a new EntryStream with the elements of the specified map appended
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#append(Collection)
      */
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
     public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> append(final M map) {
+        _stream.assertNotClosed();
+
         if (N.isEmpty(map)) {
             return of(_stream);
         }
@@ -4679,10 +4992,13 @@ public final class EntryStream<K, V> extends
      *
      * @param stream the stream to append to the current stream
      * @return a new EntryStream with the elements of the specified stream appended
+     * @throws IllegalStateException if the stream is already closed
      * @see BaseStream#append(BaseStream)
      */
     @Override
     public EntryStream<K, V> append(final EntryStream<K, V> stream) {
+        _stream.assertNotClosed();
+
         return of(_stream.append(stream._stream));
     }
 
@@ -4702,10 +5018,13 @@ public final class EntryStream<K, V> extends
      *
      * @param op the optional entry to append to the stream
      * @return a new EntryStream with the optional entry appended
+     * @throws IllegalStateException if the stream is already closed
      * @see #append(Map)
      */
     @Override
     public EntryStream<K, V> append(final Optional<Map.Entry<K, V>> op) {
+        _stream.assertNotClosed();
+
         if (op.isEmpty()) {
             return this;
         }
@@ -4737,7 +5056,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4749,12 +5068,15 @@ public final class EntryStream<K, V> extends
      * @param <M> the type of the map to append
      * @param map the map to append to the stream if the stream is empty
      * @return a new EntryStream with the elements of the specified map appended if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#appendIfEmpty(Collection)
      */
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
     public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> appendIfEmpty(final M map) {
+        _stream.assertNotClosed();
+
         if (N.isEmpty(map)) {
             return of(_stream);
         }
@@ -4789,10 +5111,13 @@ public final class EntryStream<K, V> extends
      *
      * @param supplier the supplier providing the EntryStream to append if the current stream is empty
      * @return a new EntryStream with the elements of the specified EntryStream appended if the current stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#appendIfEmpty(Supplier)
      */
     @Override
     public EntryStream<K, V> appendIfEmpty(final Supplier<? extends EntryStream<K, V>> supplier) {
+        _stream.assertNotClosed();
+
         return EntryStream.of(_stream.appendIfEmpty(() -> supplier.get()._stream));
     }
 
@@ -4812,11 +5137,13 @@ public final class EntryStream<K, V> extends
      *
      * @param action the action to execute if the stream is empty
      * @return a new EntryStream with the action registered to execute if the stream is empty
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#ifEmpty(Runnable)
      */
     @Override
     public EntryStream<K, V> ifEmpty(final Runnable action) throws IllegalStateException {
+        _stream.assertNotClosed();
+
         return EntryStream.of(_stream.ifEmpty(action));
     }
 
@@ -4835,7 +5162,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4846,6 +5173,7 @@ public final class EntryStream<K, V> extends
      *
      * @param n the number of elements to skip
      * @return a new EntryStream with the first <i>n</i> elements skipped
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if n is negative
      * @see Stream#skip(long)
      */
@@ -4853,6 +5181,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @Override
     public EntryStream<K, V> skip(final long n) {
+        _stream.assertNotClosed();
+
         return of(_stream.skip(n));
     }
 
@@ -4873,11 +5203,14 @@ public final class EntryStream<K, V> extends
      * @param n the number of elements to skip
      * @param onSkip the consumer to apply to each skipped element
      * @return a new EntryStream with the first <i>n</i> elements skipped
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if n is negative
      * @see #skip(long)
      */
     @Override
     public EntryStream<K, V> skip(final long n, final Consumer<? super Map.Entry<K, V>> onSkip) {
+        _stream.assertNotClosed();
+
         return of(_stream.skip(n, onSkip));
     }
 
@@ -4896,7 +5229,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -4907,6 +5240,7 @@ public final class EntryStream<K, V> extends
      *
      * @param maxSize the maximum number of elements to include in the stream
      * @return a new EntryStream with at most <i>maxSize</i> elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if maxSize is negative
      * @see Stream#limit(long)
      */
@@ -4914,6 +5248,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @Override
     public EntryStream<K, V> limit(final long maxSize) {
+        _stream.assertNotClosed();
+
         return of(_stream.limit(maxSize));
     }
 
@@ -4933,11 +5269,14 @@ public final class EntryStream<K, V> extends
      *
      * @param step the interval between elements to include in the resulting stream
      * @return a new EntryStream consisting of every 'step'th entry of this stream.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if step is not positive
      * @see Stream#step(long)
      */
     @Override
     public EntryStream<K, V> step(final long step) {
+        _stream.assertNotClosed();
+
         return of(_stream.step(step));
     }
 
@@ -4984,12 +5323,16 @@ public final class EntryStream<K, V> extends
      *
      * @param rateLimiter the RateLimiter to control the rate of processing
      * @return a new EntryStream with rate-limited processing
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code rateLimiter} is {@code null}
      * @see #delay(Duration)
      * @see #debounce(Duration)
      * @see Stream#rateLimited(RateLimiter)
      */
     @Override
     public EntryStream<K, V> rateLimited(final RateLimiter rateLimiter) {
+        _stream.assertNotClosed();
+
         return of(_stream.rateLimited(rateLimiter));
     }
 
@@ -5035,12 +5378,16 @@ public final class EntryStream<K, V> extends
      *
      * @param duration the duration to delay each element
      * @return a new EntryStream with delayed processing
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code duration} is {@code null}
      * @see #rateLimited(RateLimiter)
      * @see #debounce(Duration)
      * @see Stream#delay(Duration)
      */
     @Override
     public EntryStream<K, V> delay(final Duration duration) {
+        _stream.assertNotClosed();
+
         return of(_stream.delay(duration));
     }
 
@@ -5104,6 +5451,7 @@ public final class EntryStream<K, V> extends
      *                 Must not be {@code null} and must have a positive millisecond value.
      * @return a new {@code EntryStream} that emits the most recent entry of each burst when a later pull
      *         observes a quiet gap, and always emits the final pending entry
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code duration} is {@code null} or has a non-positive
      *         millisecond value
      * @see #rateLimited(RateLimiter)
@@ -5112,6 +5460,8 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public EntryStream<K, V> debounce(Duration duration) {
+        _stream.assertNotClosed();
+
         return of(_stream.debounce(duration));
     }
 
@@ -5130,12 +5480,15 @@ public final class EntryStream<K, V> extends
      *
      * @param action the action to be performed on the entries pulled by downstream/terminal operation
      * @return a new EntryStream consisting of the elements of this stream with the provided action applied to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #onEach(BiConsumer)
      * @see #onEach(Consumer)
      * @see Stream#onEach(Consumer)
      */
     @Override
     public EntryStream<K, V> peek(final Consumer<? super Map.Entry<K, V>> action) {
+        _stream.assertNotClosed();
+
         return of(_stream.peek(action));
     }
 
@@ -5155,7 +5508,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5166,6 +5519,7 @@ public final class EntryStream<K, V> extends
      *
      * @param action the action to be performed on the entries pulled by downstream/terminal operation
      * @return a new EntryStream consisting of the elements of this stream with the provided action applied to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #onEach(Consumer)
      * @see #onEach(BiConsumer)
      * @see Stream#onEach(Consumer)
@@ -5173,6 +5527,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> peek(final BiConsumer<? super K, ? super V> action) {
+        _stream.assertNotClosed();
+
         return of(_stream.peek(Fn.Entries.c(action)));
     }
 
@@ -5190,12 +5546,15 @@ public final class EntryStream<K, V> extends
      *
      * @param action the action to be performed on the entries pulled by downstream/terminal operation
      * @return a new EntryStream consisting of the elements of this stream with the provided action applied to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #peek(BiConsumer)
      * @see #peek(Consumer)
      * @see Stream#peek(Consumer)
      */
     @Override
     public EntryStream<K, V> onEach(final Consumer<? super Map.Entry<K, V>> action) {
+        _stream.assertNotClosed();
+
         return of(_stream.onEach(action));
     }
 
@@ -5214,7 +5573,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5225,6 +5584,7 @@ public final class EntryStream<K, V> extends
      *
      * @param action the action to be performed on the entries pulled by downstream/terminal operation
      * @return a new EntryStream consisting of the elements of this stream with the provided action applied to each element
+     * @throws IllegalStateException if the stream is already closed
      * @see #peek(Consumer)
      * @see #peek(BiConsumer)
      * @see Stream#peek(Consumer)
@@ -5232,6 +5592,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public EntryStream<K, V> onEach(final BiConsumer<? super K, ? super V> action) {
+        _stream.assertNotClosed();
+
         return of(_stream.onEach(Fn.Entries.c(action)));
     }
 
@@ -5259,7 +5621,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5270,6 +5632,7 @@ public final class EntryStream<K, V> extends
      *
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each entry
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @see #forEach(Throwables.BiConsumer)
      * @see Stream#forEach(Throwables.Consumer)
@@ -5277,6 +5640,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> void forEach(final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
+        _stream.assertNotClosed();
+
         _stream.forEach(action);
     }
 
@@ -5304,7 +5669,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5315,6 +5680,7 @@ public final class EntryStream<K, V> extends
      *
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each key-value pair
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @see #forEach(Throwables.Consumer)
      * @see Stream#forEach(Throwables.Consumer)
@@ -5322,6 +5688,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> void forEach(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
+        _stream.assertNotClosed();
+
         _stream.forEach(Fn.Entries.ec(action));
     }
 
@@ -5350,7 +5718,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5361,12 +5729,15 @@ public final class EntryStream<K, V> extends
      *
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each entry with its index
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @see Stream#forEachIndexed(Throwables.IntObjConsumer)
      */
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> void forEachIndexed(final Throwables.IntObjConsumer<? super Map.Entry<K, V>, E> action) throws E {
+        _stream.assertNotClosed();
+
         _stream.forEachIndexed(action);
     }
 
@@ -5391,7 +5762,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5402,6 +5773,7 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #minByKey(Comparator)
      * @see #minByValue(Comparator)
      * @see #minBy(Function)
@@ -5410,6 +5782,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> min(final Comparator<? super Map.Entry<K, V>> comparator) {
+        _stream.assertNotClosed();
+
         return _stream.min(comparator);
     }
 
@@ -5433,7 +5807,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5444,6 +5818,7 @@ public final class EntryStream<K, V> extends
      *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #min(Comparator)
      * @see #minByValue(Comparator)
      * @see Stream#min(Comparator)
@@ -5451,6 +5826,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> minByKey(final Comparator<? super K> keyComparator) {
+        _stream.assertNotClosed();
+
         return _stream.min(Comparators.comparingBy(Fn.key(), keyComparator));
     }
 
@@ -5474,7 +5851,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5485,6 +5862,7 @@ public final class EntryStream<K, V> extends
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #min(Comparator)
      * @see #minByKey(Comparator)
      * @see Stream#min(Comparator)
@@ -5492,6 +5870,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> minByValue(final Comparator<? super V> valueComparator) {
+        _stream.assertNotClosed();
+
         return _stream.min(Comparators.comparingBy(Fn.value(), valueComparator));
     }
 
@@ -5500,7 +5880,7 @@ public final class EntryStream<K, V> extends
      * of the keys extracted by the key mapper.
      * This is a terminal operation.
      *
-     * <p>Null keys are considered bigger than non-null keys in the comparison.
+     * <p>Null keys are considered bigger than {@code non-null} keys in the comparison.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5516,7 +5896,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5527,6 +5907,7 @@ public final class EntryStream<K, V> extends
      *
      * @param keyMapper the function to extract the comparable key for comparison
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #min(Comparator)
      * @see Stream#minBy(Function)
      */
@@ -5534,6 +5915,8 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     @SuppressWarnings("rawtypes")
     public Optional<Map.Entry<K, V>> minBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper) {
+        _stream.assertNotClosed();
+
         return _stream.minBy(keyMapper);
     }
 
@@ -5558,7 +5941,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5569,6 +5952,7 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #maxByKey(Comparator)
      * @see #maxByValue(Comparator)
      * @see #maxBy(Function)
@@ -5577,6 +5961,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> max(final Comparator<? super Map.Entry<K, V>> comparator) {
+        _stream.assertNotClosed();
+
         return _stream.max(comparator);
     }
 
@@ -5600,7 +5986,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5611,6 +5997,7 @@ public final class EntryStream<K, V> extends
      *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #max(Comparator)
      * @see #maxByValue(Comparator)
      * @see Stream#max(Comparator)
@@ -5618,6 +6005,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> maxByKey(final Comparator<? super K> keyComparator) {
+        _stream.assertNotClosed();
+
         return _stream.max(Comparators.comparingBy(Fn.key(), keyComparator));
     }
 
@@ -5641,7 +6030,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5652,6 +6041,7 @@ public final class EntryStream<K, V> extends
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #max(Comparator)
      * @see #maxByKey(Comparator)
      * @see Stream#max(Comparator)
@@ -5659,6 +6049,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> maxByValue(final Comparator<? super V> valueComparator) {
+        _stream.assertNotClosed();
+
         return _stream.max(Comparators.comparingBy(Fn.value(), valueComparator));
     }
 
@@ -5667,7 +6059,7 @@ public final class EntryStream<K, V> extends
      * of the keys extracted by the key mapper.
      * This is a terminal operation.
      *
-     * <p>Null keys are considered smaller than non-null keys in the comparison.
+     * <p>Null keys are considered smaller than {@code non-null} keys in the comparison.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5683,7 +6075,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5694,6 +6086,7 @@ public final class EntryStream<K, V> extends
      *
      * @param keyMapper the function to extract the comparable key for comparison
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #max(Comparator)
      * @see Stream#maxBy(Function)
      */
@@ -5701,6 +6094,8 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     @SuppressWarnings("rawtypes")
     public Optional<Map.Entry<K, V>> maxBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper) {
+        _stream.assertNotClosed();
+
         return _stream.maxBy(keyMapper);
     }
 
@@ -5725,7 +6120,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5737,6 +6132,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if any elements match the predicate, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #anyMatch(Throwables.BiPredicate)
      * @see #allMatch(Throwables.Predicate)
@@ -5746,6 +6142,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.anyMatch(predicate);
     }
 
@@ -5770,7 +6168,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5782,6 +6180,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if any elements match the predicate, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #anyMatch(Throwables.Predicate)
      * @see Stream#anyMatch(Throwables.Predicate)
@@ -5789,6 +6188,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean anyMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.anyMatch(Fn.Entries.ep(predicate));
     }
 
@@ -5814,7 +6215,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5826,6 +6227,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if all elements match the predicate or this EntryStream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #allMatch(Throwables.BiPredicate)
      * @see #anyMatch(Throwables.Predicate)
@@ -5835,6 +6237,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.allMatch(predicate);
     }
 
@@ -5860,7 +6264,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5872,6 +6276,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if all elements match the predicate or this EntryStream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #allMatch(Throwables.Predicate)
      * @see Stream#allMatch(Throwables.Predicate)
@@ -5879,6 +6284,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean allMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.allMatch(Fn.Entries.ep(predicate));
     }
 
@@ -5904,7 +6311,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5916,6 +6323,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if no elements match the predicate or this EntryStream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #noneMatch(Throwables.BiPredicate)
      * @see #anyMatch(Throwables.Predicate)
@@ -5925,6 +6333,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.noneMatch(predicate);
     }
 
@@ -5950,7 +6360,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -5962,6 +6372,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if no elements match the predicate or this EntryStream is empty, otherwise {@code false}
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #noneMatch(Throwables.Predicate)
      * @see Stream#noneMatch(Throwables.Predicate)
@@ -5969,6 +6380,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean noneMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.noneMatch(Fn.Entries.ep(predicate));
     }
 
@@ -5994,7 +6407,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6008,6 +6421,7 @@ public final class EntryStream<K, V> extends
      * @param atMost the maximum number of elements that need to match the predicate
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return {@code true} if the number of elements matching the predicate is within the specified range (inclusive), {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atLeast > atMost}
      * @throws E if any element processing results in an exception
      * @see #hasMatchCountBetween(long, long, Throwables.BiPredicate)
@@ -6017,6 +6431,8 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     public <E extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost,
             final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.hasMatchCountBetween(atLeast, atMost, predicate);
     }
 
@@ -6042,7 +6458,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6056,6 +6472,7 @@ public final class EntryStream<K, V> extends
      * @param atMost the maximum number of elements that need to match the predicate
      * @param predicate a non-interfering, stateless predicate to apply to each key-value pair
      * @return {@code true} if the number of elements matching the predicate is within the specified range (inclusive), {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atLeast > atMost}
      * @throws E if any element processing results in an exception
      * @see #hasMatchCountBetween(long, long, Throwables.Predicate)
@@ -6065,6 +6482,8 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     public <E extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost,
             final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.hasMatchCountBetween(atLeast, atMost, Fn.Entries.ep(predicate));
     }
 
@@ -6086,7 +6505,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6096,6 +6515,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.Predicate)
@@ -6104,6 +6524,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> findFirst() {
+        _stream.assertNotClosed();
+
         return first();
     }
 
@@ -6125,7 +6547,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6135,6 +6557,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.Predicate)
@@ -6143,6 +6566,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> findAny() {
+        _stream.assertNotClosed();
+
         return first();
     }
 
@@ -6167,7 +6592,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6179,6 +6604,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return an {@code Optional} containing the first entry that matches the predicate, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.BiPredicate)
      * @see #findAny(Throwables.Predicate)
@@ -6188,6 +6614,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.findFirst(predicate);
     }
 
@@ -6212,7 +6640,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6224,6 +6652,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return an {@code Optional} containing the first entry that matches the predicate, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.Predicate)
      * @see Stream#findFirst(Throwables.Predicate)
@@ -6231,6 +6660,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.findFirst(Fn.Entries.ep(predicate));
     }
 
@@ -6257,7 +6688,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6269,6 +6700,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return an {@code Optional} containing any entry that matches the predicate, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.BiPredicate)
      * @see #findFirst(Throwables.Predicate)
@@ -6277,6 +6709,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.findAny(predicate);
     }
 
@@ -6303,7 +6737,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6315,6 +6749,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return an {@code Optional} containing any entry that matches the predicate, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.Predicate)
      * @see Stream#findAny(Throwables.Predicate)
@@ -6322,6 +6757,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.findAny(Fn.Entries.ep(predicate));
     }
 
@@ -6346,7 +6783,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6358,6 +6795,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return an {@code Optional} containing the last entry that matches the predicate, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findLast(Throwables.BiPredicate)
      * @see #findFirst(Throwables.Predicate)
@@ -6367,6 +6805,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findLast(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.findLast(predicate);
     }
 
@@ -6391,7 +6831,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6403,6 +6843,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return an {@code Optional} containing the last entry that matches the predicate, or an empty {@code Optional} if no match is found
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
      * @see #findLast(Throwables.Predicate)
      * @see Stream#findLast(Throwables.Predicate)
@@ -6411,6 +6852,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findLast(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws E {
+        _stream.assertNotClosed();
+
         return _stream.findLast(Fn.Entries.ep(predicate));
     }
 
@@ -6430,11 +6873,14 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return an {@code Optional} containing the first entry, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #last()
      * @see Stream#first()
      */
     @Override
     public Optional<Map.Entry<K, V>> first() {
+        _stream.assertNotClosed();
+
         return _stream.first();
     }
 
@@ -6457,11 +6903,14 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return an {@code Optional} containing the last entry, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see Stream#last()
      */
     @Override
     public Optional<Map.Entry<K, V>> last() {
+        _stream.assertNotClosed();
+
         return _stream.last();
     }
 
@@ -6486,10 +6935,13 @@ public final class EntryStream<K, V> extends
      *
      * @param position the position of the entry to return (zero-based)
      * @return an {@code Optional} containing the entry at the specified position if it exists, otherwise an empty {@code Optional}
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#elementAt(long)
      */
     @Override
     public Optional<Map.Entry<K, V>> elementAt(final long position) {
+        _stream.assertNotClosed();
+
         return _stream.elementAt(position);
     }
 
@@ -6512,11 +6964,14 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return an {@code Optional} containing the only entry of this EntryStream if it is not empty, otherwise an empty {@code Optional}
+     * @throws IllegalStateException if the stream is already closed
      * @throws TooManyElementsException if the EntryStream contains more than one entry
      * @see Stream#onlyOne()
      */
     @Override
     public Optional<Map.Entry<K, V>> onlyOne() throws TooManyElementsException {
+        _stream.assertNotClosed();
+
         return _stream.onlyOne();
     }
 
@@ -6539,6 +6994,7 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return never returns normally
+     * @throws IllegalStateException if the stream is already closed
      * @throws UnsupportedOperationException always
      * @deprecated Use {@link #percentiles(Comparator)} instead.
      * @see #percentiles(Comparator)
@@ -6546,6 +7002,8 @@ public final class EntryStream<K, V> extends
     @Deprecated
     @Override
     public Optional<Map<Percentage, Map.Entry<K, V>>> percentiles() throws UnsupportedOperationException {
+        _stream.assertNotClosed();
+
         //    final Comparator<Map.Entry<Comparable, Comparable>> cmp = Comparators.<Comparable, Comparable> comparingByKey()
         //            .thenComparing(Comparators.comparingByValue());
         //
@@ -6577,7 +7035,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6588,6 +7046,7 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to determine the order of the entries
      * @return an {@code Optional} containing a map of percentiles to entries, or an empty {@code Optional} if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see N#percentilesOfSorted(int[])
      * @see Comparators#comparingByKey()
      * @see Comparators#comparingByKey(Comparator)
@@ -6597,6 +7056,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public Optional<Map<Percentage, Map.Entry<K, V>>> percentiles(final Comparator<? super Map.Entry<K, V>> comparator) {
+        _stream.assertNotClosed();
+
         return _stream.percentiles(comparator);
     }
 
@@ -6616,10 +7077,13 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return the number of entries in this EntryStream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#count()
      */
     @Override
     public long count() {
+        _stream.assertNotClosed();
+
         return _stream.count();
     }
 
@@ -6643,11 +7107,14 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return an iterator over the entries in this EntryStream
+     * @throws IllegalStateException if the stream is already closed
      * @see #biIterator()
      * @see Stream#iterator()
      */
     @Override
     public ObjIterator<Map.Entry<K, V>> iterator() {
+        _stream.assertNotClosed();
+
         return _stream.iteratorEx();
     }
 
@@ -6681,7 +7148,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6709,6 +7176,8 @@ public final class EntryStream<K, V> extends
 
     @Override
     protected Object[] toArray(final boolean closeStream) {
+        _stream.assertNotClosed();
+
         return _stream.toArray(closeStream);
     }
 
@@ -6731,12 +7200,15 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a List containing the entries of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #toSet()
      * @see #toMap()
      * @see Stream#toList()
      */
     @Override
     public List<Map.Entry<K, V>> toList() {
+        _stream.assertNotClosed();
+
         return _stream.toList();
     }
 
@@ -6758,11 +7230,14 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a Set containing the unique entries of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see #toList()
      * @see Stream#toSet()
      */
     @Override
     public Set<Map.Entry<K, V>> toSet() {
+        _stream.assertNotClosed();
+
         return _stream.toSet();
     }
 
@@ -6788,10 +7263,13 @@ public final class EntryStream<K, V> extends
      * @param <C> the type of the collection
      * @param supplier the supplier providing the collection
      * @return a collection containing the entries of this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toCollection(Supplier)
      */
     @Override
     public <C extends Collection<Map.Entry<K, V>>> C toCollection(final Supplier<? extends C> supplier) {
+        _stream.assertNotClosed();
+
         return _stream.toCollection(supplier);
     }
 
@@ -6810,11 +7288,14 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a {@code Multiset} containing all entries from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toMultiset()
      * @see #toMultiset(Supplier)
      */
     @Override
     public Multiset<Map.Entry<K, V>> toMultiset() {
+        _stream.assertNotClosed();
+
         return _stream.toMultiset();
     }
 
@@ -6834,11 +7315,14 @@ public final class EntryStream<K, V> extends
      * @param supplier a function which returns a new, empty {@code Multiset} into which the
      *                 results will be inserted
      * @return a {@code Multiset} containing all entries from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toMultiset(Supplier)
      * @see #toMultiset()
      */
     @Override
     public Multiset<Map.Entry<K, V>> toMultiset(final Supplier<? extends Multiset<Map.Entry<K, V>>> supplier) {
+        _stream.assertNotClosed();
+
         return _stream.toMultiset(supplier);
     }
 
@@ -6859,7 +7343,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6869,6 +7353,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a {@code Map} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if duplicate keys are encountered
      * @see Stream#toMap(Throwables.Function, Throwables.Function)
      * @see #toMap(BinaryOperator)
@@ -6881,6 +7366,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public Map<K, V> toMap() throws IllegalStateException {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().toMap(Fn.key(), Fn.value());
         } else {
@@ -6910,7 +7397,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6922,6 +7409,7 @@ public final class EntryStream<K, V> extends
      * @param mergeFunction a function used to resolve collisions between values associated
      *                      with the same key, as supplied to {@link Map#merge(Object, Object, BiFunction)}
      * @return a {@code Map} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toMap(Throwables.Function, Throwables.Function, BinaryOperator)
      * @see #toMap()
      * @see #toMap(Supplier)
@@ -6933,6 +7421,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public Map<K, V> toMap(final BinaryOperator<V> mergeFunction) {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().toMap(Fn.key(), Fn.value(), mergeFunction);
         } else {
@@ -6962,7 +7452,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -6975,6 +7465,7 @@ public final class EntryStream<K, V> extends
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
      *                   results will be inserted
      * @return a {@code Map} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if duplicate keys are encountered
      * @see Stream#toMap(Throwables.Function, Throwables.Function, Supplier)
      * @see #toMap()
@@ -6987,6 +7478,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <M extends Map<K, V>> M toMap(final Supplier<? extends M> mapFactory) throws IllegalStateException {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().toMap(Fn.key(), Fn.value(), mapFactory);
         } else {
@@ -7016,7 +7509,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7031,6 +7524,7 @@ public final class EntryStream<K, V> extends
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
      *                   results will be inserted
      * @return a {@code Map} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toMap(Throwables.Function, Throwables.Function, BinaryOperator, Supplier)
      * @see #toMap()
      * @see #toMap(BinaryOperator)
@@ -7042,6 +7536,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <M extends Map<K, V>> M toMap(final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().toMap(Fn.key(), Fn.value(), mergeFunction, mapFactory);
         } else {
@@ -7072,7 +7568,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7085,6 +7581,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the function
      * @param func the function to apply to the resulting map
      * @return the result of applying the function to the collected map
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if duplicate keys are encountered during map collection
      * @throws E if the function throws an exception
      * @see #toMap()
@@ -7096,6 +7593,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <R, E extends Exception> R toMapThenApply(final Throwables.Function<? super Map<K, V>, ? extends R, E> func) throws IllegalStateException, E {
+        _stream.assertNotClosed();
+
         return func.apply(toMap());
     }
 
@@ -7122,7 +7621,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7133,6 +7632,7 @@ public final class EntryStream<K, V> extends
      *
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the resulting map
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if duplicate keys are encountered during map collection
      * @throws E if the consumer throws an exception
      * @see #toMap()
@@ -7144,6 +7644,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <E extends Exception> void toMapThenAccept(final Throwables.Consumer<? super Map<K, V>, E> consumer) throws IllegalStateException, E {
+        _stream.assertNotClosed();
+
         consumer.accept(toMap());
     }
 
@@ -7168,7 +7670,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7178,6 +7680,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if duplicate keys are encountered
      * @see Stream#toImmutableMap(Throwables.Function, Throwables.Function)
      * @see #toImmutableMap(BinaryOperator)
@@ -7190,6 +7693,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public ImmutableMap<K, V> toImmutableMap() throws IllegalStateException {
+        _stream.assertNotClosed();
+
         return ImmutableMap.wrap(toMap());
     }
 
@@ -7216,7 +7721,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7228,6 +7733,7 @@ public final class EntryStream<K, V> extends
      * @param mergeFunction a function used to resolve collisions between values associated
      *                      with the same key
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toImmutableMap(Throwables.Function, Throwables.Function, BinaryOperator)
      * @see #toImmutableMap()
      * @see #toMap(BinaryOperator)
@@ -7239,6 +7745,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public ImmutableMap<K, V> toImmutableMap(final BinaryOperator<V> mergeFunction) {
+        _stream.assertNotClosed();
+
         return ImmutableMap.wrap(toMap(mergeFunction));
     }
 
@@ -7265,7 +7773,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7275,6 +7783,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a {@code ListMultimap} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toMultimap(Throwables.Function, Throwables.Function)
      * @see #toMultimap(Supplier)
      * @see #groupTo()
@@ -7283,6 +7792,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public ListMultimap<K, V> toMultimap() {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().toMultimap(Fn.key(), Fn.value());
         } else {
@@ -7316,7 +7827,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7330,6 +7841,7 @@ public final class EntryStream<K, V> extends
      * @param mapFactory a function which returns a new, empty {@code Multimap} into which
      *                   the results will be inserted
      * @return a {@code Multimap} containing all key-value pairs from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#toMultimap(Throwables.Function, Throwables.Function, Supplier)
      * @see #toMultimap()
      * @see #groupTo(Supplier)
@@ -7338,6 +7850,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <C extends Collection<V>, M extends Multimap<K, V, C>> M toMultimap(final Supplier<? extends M> mapFactory) {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().toMultimap(Fn.key(), Fn.value(), mapFactory);
         } else {
@@ -7371,7 +7885,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7382,6 +7896,7 @@ public final class EntryStream<K, V> extends
      *
      * @return a {@code Map} where each key maps to a {@code List} of all values associated
      *         with that key in this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupTo(Throwables.Function, Throwables.Function)
      * @see #groupTo(Supplier)
      * @see #toMultimap()
@@ -7390,6 +7905,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public Map<K, List<V>> groupTo() {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().groupTo(Fn.key(), Fn.value());
         } else {
@@ -7422,7 +7939,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7436,6 +7953,7 @@ public final class EntryStream<K, V> extends
      *                   grouped results will be inserted
      * @return a {@code Map} where each key maps to a {@code List} of all values associated
      *         with that key in this stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#groupTo(Throwables.Function, Throwables.Function, Supplier)
      * @see #groupTo()
      * @see #toMultimap(Supplier)
@@ -7444,6 +7962,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <M extends Map<K, List<V>>> M groupTo(final Supplier<? extends M> mapFactory) {
+        _stream.assertNotClosed();
+
         if (isParallel()) {
             return _stream.sequential().groupTo(Fn.key(), Fn.value(), mapFactory);
         } else {
@@ -7477,7 +7997,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7490,6 +8010,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the function
      * @param func the function to apply to the grouped map
      * @return the result of applying the function to the grouped map
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the function throws an exception
      * @see #groupTo()
      * @see #groupToThenAccept(Throwables.Consumer)
@@ -7497,6 +8018,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <R, E extends Exception> R groupToThenApply(final Throwables.Function<? super Map<K, List<V>>, ? extends R, E> func) throws E {
+        _stream.assertNotClosed();
+
         return func.apply(groupTo());
     }
 
@@ -7525,7 +8048,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7536,6 +8059,7 @@ public final class EntryStream<K, V> extends
      *
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the grouped map
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the consumer throws an exception
      * @see #groupTo()
      * @see #groupToThenApply(Throwables.Function)
@@ -7543,6 +8067,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <E extends Exception> void groupToThenAccept(final Throwables.Consumer<? super Map<K, List<V>>, E> consumer) throws E {
+        _stream.assertNotClosed();
+
         consumer.accept(groupTo());
     }
 
@@ -7571,7 +8097,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7583,12 +8109,15 @@ public final class EntryStream<K, V> extends
      * @param identity the identity value for the accumulating function
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(Object, BinaryOperator)
      * @see #reduce(BinaryOperator)
      */
     @SequentialOnly
     @TerminalOp
     public Map.Entry<K, V> reduce(final Map.Entry<K, V> identity, final BinaryOperator<Map.Entry<K, V>> accumulator) {
+        _stream.assertNotClosed();
+
         return _stream.reduce(identity, accumulator);
     }
 
@@ -7617,7 +8146,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7628,12 +8157,15 @@ public final class EntryStream<K, V> extends
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code Optional} describing the result of the reduction, or empty if the stream is empty
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#reduce(BinaryOperator)
      * @see #reduce(Map.Entry, BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
     public Optional<Map.Entry<K, V>> reduce(final BinaryOperator<Map.Entry<K, V>> accumulator) {
+        _stream.assertNotClosed();
+
         return _stream.reduce(accumulator);
     }
 
@@ -7667,7 +8199,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7683,6 +8215,7 @@ public final class EntryStream<K, V> extends
      * @param combiner an associative, non-interfering, stateless function for combining two
      *                 values, which must be compatible with the accumulator function
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see #collect(Supplier, BiConsumer)
      * @see #collect(Collector)
@@ -7690,6 +8223,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super Map.Entry<K, V>> accumulator, final BiConsumer<R, R> combiner) {
+        _stream.assertNotClosed();
+
         return _stream.collect(supplier, accumulator, combiner);
     }
 
@@ -7725,7 +8260,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7739,6 +8274,7 @@ public final class EntryStream<K, V> extends
      * @param accumulator an associative, non-interfering, stateless function that adds an
      *                    entry into the result container
      * @return the result container
+     * @throws IllegalStateException if the stream is already closed
      * @see #collect(Supplier, BiConsumer, BiConsumer)
      * @see #collect(Collector)
      * @see Stream#collect(Supplier, BiConsumer)
@@ -7746,6 +8282,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super Map.Entry<K, V>> accumulator) {
+        _stream.assertNotClosed();
+
         return _stream.collect(supplier, accumulator);
     }
 
@@ -7777,7 +8315,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7789,6 +8327,7 @@ public final class EntryStream<K, V> extends
      * @param <R> the type of the result
      * @param collector the {@code Collector} describing the reduction
      * @return the result of the reduction
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#collect(Collector)
      * @see #collect(Supplier, BiConsumer, BiConsumer)
      * @see java.util.stream.Collectors
@@ -7796,6 +8335,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <R> R collect(final Collector<? super Map.Entry<K, V>, ?, R> collector) {
+        _stream.assertNotClosed();
+
         return _stream.collect(collector);
     }
 
@@ -7835,7 +8376,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7850,6 +8391,7 @@ public final class EntryStream<K, V> extends
      * @param downstream the {@code Collector} to perform the mutable reduction
      * @param func the function to apply to the result of the collection
      * @return the result of applying the function to the collected data
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the function throws an exception
      * @see Stream#collectThenApply(Collector, Throwables.Function)
      * @see #collect(Collector)
@@ -7859,6 +8401,8 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     public <R, RR, E extends Exception> RR collectThenApply(final Collector<? super Map.Entry<K, V>, ?, R> downstream,
             final Throwables.Function<? super R, ? extends RR, E> func) throws E {
+        _stream.assertNotClosed();
+
         return _stream.collectThenApply(downstream, func);
     }
 
@@ -7892,7 +8436,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -7905,6 +8449,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the consumer
      * @param downstream the {@code Collector} to perform the mutable reduction
      * @param consumer the consumer to accept the result of the collection
+     * @throws IllegalStateException if the stream is already closed
      * @throws E if the consumer throws an exception
      * @see Stream#collectThenAccept(Collector, Throwables.Consumer)
      * @see #collect(Collector)
@@ -7914,6 +8459,8 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     public <R, E extends Exception> void collectThenAccept(final Collector<? super Map.Entry<K, V>, ?, R> downstream,
             final Throwables.Consumer<? super R, E> consumer) throws E {
+        _stream.assertNotClosed();
+
         _stream.collectThenAccept(downstream, consumer);
     }
 
@@ -7932,6 +8479,7 @@ public final class EntryStream<K, V> extends
      *
      * @param delimiter the delimiter to be used between each entry
      * @return a string representation of the entries joined by the delimiter
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#join(CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence)
@@ -7939,6 +8487,8 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public String join(final CharSequence delimiter) {
+        _stream.assertNotClosed();
+
         return join(delimiter, "", "");
     }
 
@@ -7964,6 +8514,7 @@ public final class EntryStream<K, V> extends
      * @param suffix the sequence of characters to be used at the end
      * @return a string representation of the entries joined by the delimiter and
      *         enclosed with prefix and suffix
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#join(CharSequence, CharSequence, CharSequence)
      * @see #join(CharSequence)
      * @see #join(CharSequence, CharSequence)
@@ -7971,6 +8522,8 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) {
+        _stream.assertNotClosed();
+
         return join(delimiter, "=", prefix, suffix);
     }
 
@@ -7995,7 +8548,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8007,6 +8560,7 @@ public final class EntryStream<K, V> extends
      * @param delimiter the delimiter to be used between each entry
      * @param keyValueDelimiter the delimiter to be used between key and value in each entry
      * @return a string representation of the entries
+     * @throws IllegalStateException if the stream is already closed
      * @see #join(CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
@@ -8014,6 +8568,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public String join(final CharSequence delimiter, final CharSequence keyValueDelimiter) {
+        _stream.assertNotClosed();
+
         return join(delimiter, keyValueDelimiter, "", "");
     }
 
@@ -8043,7 +8599,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8057,7 +8613,7 @@ public final class EntryStream<K, V> extends
      * @param prefix the sequence of characters to be used at the beginning
      * @param suffix the sequence of characters to be used at the end
      * @return a string representation of the entries with custom formatting
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      * @see #join(CharSequence)
      * @see #join(CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence)
@@ -8104,7 +8660,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8115,7 +8671,7 @@ public final class EntryStream<K, V> extends
      *
      * @param joiner the {@code Joiner} to use for formatting the entries
      * @return the same {@code Joiner} instance after all entries have been appended
-     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the joiner is null
      * @see Stream#joinTo(Joiner)
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
@@ -8165,7 +8721,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8178,6 +8734,7 @@ public final class EntryStream<K, V> extends
      * @param <VV> the type of the values in the resulting EntryStream
      * @param transfer the function to be applied on the current stream to produce a new stream.
      * @return a new EntryStream transformed by the provided function.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if transfer is null
      * @see #transformB(Function, boolean)
      * @see Stream#transform(Function)
@@ -8188,6 +8745,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> transformB(
             final Function<? super Stream<Map.Entry<K, V>>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> transfer) {
+        _stream.assertNotClosed();
+
         return transformB(transfer, false);
     }
 
@@ -8215,7 +8774,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8229,6 +8788,7 @@ public final class EntryStream<K, V> extends
      * @param transfer the function to be applied on the current stream to produce a new stream.
      * @param deferred if {@code true}, the transformation is deferred until the EntryStream is consumed.
      * @return a new EntryStream transformed by the provided function.
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if transfer is null
      * @see Stream#transform(Function)
      * @see Stream#transformB(Function)
@@ -8238,9 +8798,9 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> transformB(
-            final Function<? super Stream<Map.Entry<K, V>>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> transfer,
-            final boolean deferred) {
-        assertNotClosed();
+            final Function<? super Stream<Map.Entry<K, V>>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> transfer, final boolean deferred)
+            throws IllegalArgumentException, IllegalStateException {
+        _stream.assertNotClosed();
         checkArgNotNull(transfer, cs.transfer);
 
         if (deferred) {
@@ -8295,16 +8855,21 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return a sequential stream
+     * @throws IllegalStateException if the stream is already closed
      * @see Stream#sequential()
      */
     @Override
     public EntryStream<K, V> sequential() {
+        _stream.assertNotClosed();
+
         return _stream.isParallel() ? of(_stream.sequential()) : this;
     }
 
     @Override
     protected EntryStream<K, V> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor,
             final boolean cancelUncompletedThreads) {
+        _stream.assertNotClosed();
+
         return of(_stream.parallel(maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads));
     }
 
@@ -8370,7 +8935,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b></p>
      * <table border="1">
      *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
      *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
      *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
      *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
@@ -8380,6 +8945,7 @@ public final class EntryStream<K, V> extends
      * </table>
      *
      * @return a new EntryStream with inverted keys and values as DisposableEntry
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalStateException if the stream is parallel
      * @deprecated Use {@link #invert()} instead, which returns a standard (non-disposable) inverted EntryStream.
      * @see #invert()
@@ -8389,6 +8955,8 @@ public final class EntryStream<K, V> extends
     @Deprecated
     @Beta
     public EntryStream<V, K> invertToDisposableEntry() {
+        _stream.assertNotClosed();
+
         checkState(!_stream.isParallel(), "invertToDisposableEntry cannot be applied to parallel stream");
 
         final Function<Map.Entry<K, V>, DisposableEntry<V, K>> mapper = new Function<>() {
@@ -8426,9 +8994,12 @@ public final class EntryStream<K, V> extends
      *
      * @param closeHandler a Runnable whose run method will be invoked when the stream is closed.
      * @return an EntryStream with the close handler registered. This may be the same EntryStream instance.
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public EntryStream<K, V> onClose(final Runnable closeHandler) {
+        _stream.assertNotClosed();
+
         // return of(_stream.onClose(closeHandler));
 
         final Stream<Entry<K, V>> s = _stream.onClose(closeHandler);
@@ -8470,6 +9041,11 @@ public final class EntryStream<K, V> extends
     @Override
     public synchronized void close() {
         _stream.close();
+    }
+
+    @Override
+    protected boolean isClosed() {
+        return _stream.isClosed();
     }
 
     @SuppressWarnings({ "rawtypes" })
@@ -9790,9 +10366,9 @@ public final class EntryStream<K, V> extends
          *
          * ReusableEntry<String, Integer> entry3 = new ReusableEntry<>();
          * entry3.set("b", 2);
-         * entry1.equals(entry3); // returns false
+         * entry1.equals(entry3);   // returns false
          *
-         * entry1.equals(null); // returns false
+         * entry1.equals(null);     // returns false
          * }</pre>
          *
          * @param obj the object to be compared for equality with this entry

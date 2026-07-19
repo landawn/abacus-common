@@ -122,16 +122,16 @@ public class DoubleSupplierTest extends TestBase {
     @Test
     public void testGetAsDouble_WithSpecialValues() {
         DoubleSupplier maxSupplier = () -> Double.MAX_VALUE;
-        assertEquals(Double.MAX_VALUE, maxSupplier.getAsDouble(), 0.0001);
+        assertEquals(Double.MAX_VALUE, maxSupplier.getAsDouble());
 
         DoubleSupplier minSupplier = () -> Double.MIN_VALUE;
-        assertEquals(Double.MIN_VALUE, minSupplier.getAsDouble(), 0.0001);
+        assertEquals(Double.MIN_VALUE, minSupplier.getAsDouble());
 
         DoubleSupplier posInfSupplier = () -> Double.POSITIVE_INFINITY;
-        assertEquals(Double.POSITIVE_INFINITY, posInfSupplier.getAsDouble(), 0.0001);
+        assertEquals(Double.POSITIVE_INFINITY, posInfSupplier.getAsDouble());
 
         DoubleSupplier negInfSupplier = () -> Double.NEGATIVE_INFINITY;
-        assertEquals(Double.NEGATIVE_INFINITY, negInfSupplier.getAsDouble(), 0.0001);
+        assertEquals(Double.NEGATIVE_INFINITY, negInfSupplier.getAsDouble());
 
         DoubleSupplier nanSupplier = () -> Double.NaN;
         assertTrue(Double.isNaN(nanSupplier.getAsDouble()));

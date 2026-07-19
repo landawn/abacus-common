@@ -188,12 +188,11 @@ public interface Hasher {
 
     /**
      * Adds a float value to this hasher's internal state. This is equivalent to
-     * {@code put(Float.floatToRawIntBits(f))}, which means the float's binary
-     * representation is hashed, not its numeric value.
+     * {@code put(Float.floatToRawIntBits(f))}, which means the float's raw binary
+     * representation is hashed, including any NaN payload bits.
      *
-     * <p><b>Note:</b> NaN values may have different binary representations but the
-     * same numeric meaning. Use {@link Float#floatToRawIntBits(float)} explicitly
-     * if you need consistent handling of NaN values.
+     * <p><b>Note:</b> Distinct NaN payloads can therefore produce different input bits.
+     * To canonicalize NaN values, add {@code Float.floatToIntBits(f)} as an integer instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -207,12 +206,11 @@ public interface Hasher {
 
     /**
      * Adds a double value to this hasher's internal state. This is equivalent to
-     * {@code put(Double.doubleToRawLongBits(d))}, which means the double's binary
-     * representation is hashed, not its numeric value.
+     * {@code put(Double.doubleToRawLongBits(d))}, which means the double's raw binary
+     * representation is hashed, including any NaN payload bits.
      *
-     * <p><b>Note:</b> NaN values may have different binary representations but the
-     * same numeric meaning. Use {@link Double#doubleToRawLongBits(double)} explicitly
-     * if you need consistent handling of NaN values.
+     * <p><b>Note:</b> Distinct NaN payloads can therefore produce different input bits.
+     * To canonicalize NaN values, add {@code Double.doubleToLongBits(d)} as a long instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -254,7 +252,7 @@ public interface Hasher {
 
     /**
      * Adds all characters from the given array to this hasher's internal state.
-     * This is equivalent to {@code put(chars, 0, chars.length)} for non-null arrays.
+     * This is equivalent to {@code put(chars, 0, chars.length)} for {@code non-null} arrays.
      * A {@code null} array is treated as empty, equivalent to {@code put(null, 0, 0)}.
      *
      * <p>Each character is processed in little-endian order (low byte first, then high byte).

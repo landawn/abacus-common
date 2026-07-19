@@ -372,8 +372,8 @@ public abstract class LongIteratorEx extends LongIterator implements IteratorEx<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIteratorEx iter = LongIteratorEx.of(1L, 2L);
-     * iter.closeResource(); // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext()); // closeResource() does not consume elements
+     * iter.closeResource();         // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * LongIteratorEx iter2 = LongIteratorEx.of(3L, 4L);

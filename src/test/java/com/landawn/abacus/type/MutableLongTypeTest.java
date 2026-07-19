@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.MutableLong;
 
@@ -141,6 +142,19 @@ public class MutableLongTypeTest extends TestBase {
         assertDoesNotThrow(() -> {
             mutableLongType.serializeTo(characterWriter, null, null);
         });
+    }
+
+    @Test
+    public void testSerializeToHonorsNullAndLongStringOptionsTogether() throws IOException {
+        JsonXmlSerConfig<?> config = Mockito.mock(JsonXmlSerConfig.class);
+        Mockito.when(config.isWriteNullNumberAsZero()).thenReturn(true);
+        Mockito.when(config.isWriteLongAsString()).thenReturn(true);
+        Mockito.when(config.getStringQuotation()).thenReturn('"');
+
+        mutableLongType.serializeTo(characterWriter, null, config);
+
+        Mockito.verify(characterWriter, Mockito.times(2)).write('"');
+        Mockito.verify(characterWriter).write(0L);
     }
 
     @Test

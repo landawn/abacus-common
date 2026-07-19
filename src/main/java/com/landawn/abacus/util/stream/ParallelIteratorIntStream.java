@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.IntBinaryOperator;
@@ -67,8 +66,16 @@ import com.landawn.abacus.util.function.IntToShortFunction;
  * int sum = stream.filter(i -> i > 0).sum();
  * }</pre>
  *
- * <p><b>Thread Safety:</b> Operations on this stream are thread-safe and properly synchronized
- * when accessing the underlying iterator during parallel execution.
+ * <p><b>Thread Safety:</b> A parallel operation synchronizes its own worker threads while they
+ * consume the underlying iterator. The stream instance itself is not intended to be driven
+ * concurrently by multiple callers or reused for independent operations.
+ *
+ * <p><b>Encounter Order:</b> Unless an operation explicitly states otherwise, parallel intermediate
+ * operations may emit elements in a different order from the source.
+ *
+ * <p><b>Failure Handling:</b> Terminal operations wait for every submitted worker before closing
+ * the stream or a temporary executor. Partial results are finished before cleanup; the primary
+ * failure is rethrown and additional failures are suppressed.
  *
  * @see IteratorIntStream
  * @see IntStream#parallel()
@@ -589,41 +596,15 @@ final class ParallelIteratorIntStream extends IteratorIntStream {
             });
         }
 
-        // checkRuntimeException(eHolder, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialResults -> {
+            Integer result = null;
 
-        Integer result = null;
-
-        try {
-            for (final ContinuableFuture<Integer> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
-                if (result == null) {
-                    result = future.get();
-                } else {
-                    result = accumulator.applyAsInt(result, future.get());
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwRuntimeException(eHolder);
+            for (final Integer partialResult : partialResults) {
+                result = result == null ? partialResult : accumulator.applyAsInt(result, partialResult);
             }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
-
-        if (eHolder.value() != null) {
-            throwRuntimeException(eHolder);
-        }
-
-        return result == null ? identity : result;
+            return result == null ? identity : result;
+        }, this, asyncExecutor, asyncExecutorToUse);
     }
 
     @Override
@@ -672,45 +653,17 @@ final class ParallelIteratorIntStream extends IteratorIntStream {
             });
         }
 
-        // checkRuntimeException(eHolder, asyncExecutor, asyncExecutorToUse);
+        return completeAndFinishResults(futureList, eHolder, partialResults -> {
+            Integer result = null;
 
-        Integer result = null;
-
-        try {
-            for (final ContinuableFuture<Integer> future : futureList) {
-                if (eHolder.value() != null) {
-                    break;
-                }
-
-                final Integer tmp = future.get();
-
-                if (tmp == null) {
-                    // continue;
-                } else if (result == null) {
-                    result = tmp;
-                } else {
-                    result = accumulator.applyAsInt(result, tmp);
+            for (final Integer partialResult : partialResults) {
+                if (partialResult != null) {
+                    result = result == null ? partialResult : accumulator.applyAsInt(result, partialResult);
                 }
             }
-        } catch (InterruptedException | ExecutionException e) {
-            if (eHolder.value() != null) {
-                throwRuntimeException(eHolder);
-            }
 
-            throw toRuntimeException(e);
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
-            }
-        }
-
-        if (eHolder.value() != null) {
-            throwRuntimeException(eHolder);
-        }
-
-        return result == null ? OptionalInt.empty() : OptionalInt.of(result);
+            return result == null ? OptionalInt.empty() : OptionalInt.of(result);
+        }, this, asyncExecutor, asyncExecutorToUse);
     }
 
     @Override
@@ -1134,5 +1087,15 @@ final class ParallelIteratorIntStream extends IteratorIntStream {
         //  assertNotClosed();
 
         return asyncExecutor;
+    }
+
+    /**
+     * Returns whether unfinished parallel tasks should be cancelled when the stream is closed.
+     *
+     * @return {@code true} if unfinished tasks should be cancelled
+     */
+    @Override
+    protected boolean cancelUncompletedThreads() {
+        return cancelUncompletedThreads;
     }
 }

@@ -36,8 +36,9 @@ public interface FloatTernaryOperator extends Throwables.FloatTernaryOperator<Ru
      * Applies this operator to the given float operands.
      *
      * <p>The implementation defines how the three float values are combined to produce
-     * the result. Common uses include mathematical operations like fused multiply-add
-     * (a * b + c) or conditional operations.</p>
+     * the result. Common uses include mathematical operations like a multiply-add expression
+     * ({@code a * b + c}) or conditional operations. The expression is not guaranteed to use
+     * fused multiply-add rounding; use {@link Math#fma(float, float, float)} when that is required.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

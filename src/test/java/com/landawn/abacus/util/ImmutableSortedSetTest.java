@@ -381,6 +381,14 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_copyOf_emptySortedSetRetainsComparator() {
+        Comparator<String> comparator = Comparator.reverseOrder();
+        SortedSet<String> sortedSet = new TreeSet<>(comparator);
+
+        assertSame(comparator, ImmutableSortedSet.copyOf(sortedSet).comparator());
+    }
+
+    @Test
     public void test_copyOf_withDuplicates() {
         List<Integer> listWithDuplicates = Arrays.asList(1, 2, 2, 3, 3, 3);
         ImmutableSortedSet<Integer> set = ImmutableSortedSet.copyOf(listWithDuplicates);

@@ -219,6 +219,13 @@ public class CsvParserTest extends TestBase {
     }
 
     @Test
+    public void testDisabledQuoteAndEscapePreserveNullCharacters() throws ParsingException {
+        CsvParser parser = new CsvParser(',', CsvParser.NULL_CHARACTER, CsvParser.NULL_CHARACTER);
+
+        assertEquals(List.of("a\0b", "c\0d"), parser.parseLine("a\0b,c\0d"));
+    }
+
+    @Test
     public void testParseLineNull() throws ParsingException {
         CsvParser parser = new CsvParser();
         List<String> result = parser.parseLine(null);
@@ -299,6 +306,13 @@ public class CsvParserTest extends TestBase {
     public void testParseLineWithUnterminatedQuote() {
         CsvParser parser = new CsvParser();
         assertThrows(ParsingException.class, () -> parser.parseLine("a,\"b,c"));
+    }
+
+    @Test
+    public void testUnterminatedFieldEndingInEscapedQuoteIsRejected() {
+        CsvParser parser = new CsvParser();
+
+        assertThrows(ParsingException.class, () -> parser.parseLine("a,\"b\\\" "));
     }
 
     @Test
@@ -700,5 +714,21 @@ public class CsvParserTest extends TestBase {
         assertEquals("a", output[0]);
         assertEquals("", output[1]);
         assertEquals("b", output[2]);
+    }
+
+    @Test
+    public void testQuotedFieldCanHaveUnquotedSuffix() throws ParsingException {
+        CsvParser parser = new CsvParser();
+
+        assertEquals(java.util.Arrays.asList("cleandirty", "text"), parser.parseLine("\"clean\"dirty,\"text\""));
+        assertEquals(java.util.Arrays.asList("ax", "b"), parser.parseLine("\"a\"x,b"));
+    }
+
+    @Test
+    public void testQuoteInUnquotedFieldRemainsLiteral() throws ParsingException {
+        CsvParser parser = new CsvParser();
+
+        assertEquals(java.util.Arrays.asList("abc\"", "d"), parser.parseLine("abc\",d"));
+        assertEquals(java.util.Arrays.asList("bc\"d\"ef", "g"), parser.parseLine("bc\"d\"ef,g"));
     }
 }

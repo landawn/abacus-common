@@ -20,6 +20,7 @@ import java.util.AbstractSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -28,9 +29,10 @@ import com.landawn.abacus.annotation.Internal;
 
 /**
  * A bidirectional map that preserves the uniqueness of both keys and values, enabling efficient
- * forward and reverse lookups. This final class maintains two underlying maps to provide O(1)
+ * forward and reverse lookups. This final class maintains two underlying maps to provide efficient
  * access in both directions while enforcing bijective constraints that ensure each key maps to
- * exactly one value and each value maps to exactly one key.
+ * exactly one value and each value maps to exactly one key. Operation complexity follows that of
+ * the supplied backing maps; the default {@link HashMap} backing provides constant-time average lookup.
  *
  * <p>BiMap extends the traditional Map interface with additional operations for value-based
  * lookups and inverse mapping functionality. The bijective constraint means that both keys
@@ -40,12 +42,12 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Bidirectional Access:</b> O(1) lookup by key or value with efficient reverse operations</li>
+ *   <li><b>Bidirectional Access:</b> Lookup by key or value using separate forward and reverse maps</li>
  *   <li><b>Bijective Constraint:</b> Enforces uniqueness of both keys and values</li>
  *   <li><b>Inverse View:</b> Provides reversed BiMap with swapped keys and values</li>
  *   <li><b>Flexible Construction:</b> Multiple constructors and factory methods for different use cases</li>
  *   <li><b>Force Operations:</b> Override uniqueness constraints when necessary</li>
- *   <li><b>Map Compatibility:</b> Full implementation of Map interface for seamless integration</li>
+ *   <li><b>Map Compatibility:</b> Implements {@link Map}; collection views are deliberately read-only</li>
  *   <li><b>Immutable Views:</b> Key, value, and entry sets as immutable collections</li>
  *   <li><b>Builder Pattern:</b> Fluent construction with validation and error handling</li>
  * </ul>
@@ -152,10 +154,10 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>Forward lookup: O(1) average time - delegates to underlying map</li>
- *   <li>Reverse lookup: O(1) average time - maintains separate reverse map</li>
- *   <li>Put operations: O(1) average time with potential conflict resolution</li>
- *   <li>Space complexity: O(2n) - maintains two underlying maps</li>
+ *   <li>Forward lookup: delegates to the key-to-value backing map</li>
+ *   <li>Reverse lookup: delegates to the value-to-key backing map</li>
+ *   <li>Put operations: follow the complexity of both backing maps</li>
+ *   <li>Space complexity: O(n), with each mapping represented in both backing maps</li>
  *   <li>Inverse view creation: O(1) - cached after first access</li>
  * </ul>
  *
@@ -170,14 +172,14 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Null Handling:</b>
  * <ul>
- *   <li>Null keys and null values are not supported and will cause {@code IllegalArgumentException}</li>
+ *   <li>Null keys and {@code null} values are not supported and will cause {@code IllegalArgumentException}</li>
  * </ul>
  *
  * <p><b>Error Conditions:</b>
  * <ul>
  *   <li><b>Duplicate Values:</b> {@code put()} throws {@link IllegalArgumentException} if the value is already mapped to a different key (use {@link #forcePut} to override)</li>
  *   <li><b>Builder Validation:</b> Builder throws {@code IllegalArgumentException} for duplicates</li>
- *   <li><b>Null Arguments:</b> Factory methods validate non-null arguments</li>
+ *   <li><b>Null Arguments:</b> Factory methods validate {@code non-null} arguments</li>
  * </ul>
  *
  * <p><b>Inverse View Behavior:</b>
@@ -198,7 +200,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Integration Points:</b>
  * <ul>
- *   <li><b>{@link Map}:</b> Full Map interface compatibility</li>
+ *   <li><b>{@link Map}:</b> Standard lookup and mutation operations, with read-only collection views</li>
  *   <li><b>{@link ImmutableSet}:</b> Immutable collection views</li>
  *   <li><b>{@link HashMap}:</b> Default underlying implementation</li>
  *   <li><b>Collections Framework:</b> Standard iteration and stream support</li>
@@ -216,7 +218,7 @@ import com.landawn.abacus.annotation.Internal;
  * <p><b>Memory Management:</b>
  * <ul>
  *   <li>BiMap maintains two complete maps - consider memory implications</li>
- *   <li>Inverse views share underlying data - no additional memory overhead</li>
+ *   <li>Inverse views share underlying data and require only constant additional object overhead</li>
  *   <li>Use {@code clear()} to release all mappings and enable garbage collection</li>
  *   <li>Consider capacity and load factor for large datasets</li>
  * </ul>
@@ -340,7 +342,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param initialCapacity the initial capacity of the BiMap
      * @param loadFactor the load factor of the BiMap
-     * @throws IllegalArgumentException if {@code initialCapacity} is negative
+     * @throws IllegalArgumentException if {@code initialCapacity} is negative, or if {@code loadFactor}
+     *         is not positive or is {@link Float#NaN}
      */
     public BiMap(final int initialCapacity, final float loadFactor) {
         this(new HashMap<>(initialCapacity, loadFactor), new HashMap<>(initialCapacity, loadFactor));
@@ -375,14 +378,29 @@ public final class BiMap<K, V> implements Map<K, V> {
      * // Uses custom suppliers for both maps
      * }</pre>
      *
-     * @param keyMapSupplier the Supplier object providing the Map to be used for storing keys; must not be {@code null}
-     * @param valueMapSupplier the Supplier object providing the Map to be used for storing values; must not be {@code null}
+     * @param keyMapSupplier the supplier of the empty map used for key-to-value mappings; must not be {@code null}
+     * @param valueMapSupplier the supplier of the empty map used for value-to-key mappings; must not be {@code null}
+     * @throws NullPointerException if either supplier or either map returned by a supplier is {@code null}
+     * @throws IllegalArgumentException if a returned map is nonempty or both suppliers return the same map instance
      */
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
-        this.keyMapSupplier = keyMapSupplier;
-        this.valueMapSupplier = valueMapSupplier;
-        keyMap = keyMapSupplier.get();
-        valueMap = valueMapSupplier.get();
+        final Supplier<? extends Map<K, V>> checkedKeyMapSupplier = Objects.requireNonNull(keyMapSupplier, "keyMapSupplier");
+        final Supplier<? extends Map<V, K>> checkedValueMapSupplier = Objects.requireNonNull(valueMapSupplier, "valueMapSupplier");
+        final Map<K, V> suppliedKeyMap = Objects.requireNonNull(checkedKeyMapSupplier.get(), "keyMapSupplier.get()");
+        final Map<V, K> suppliedValueMap = Objects.requireNonNull(checkedValueMapSupplier.get(), "valueMapSupplier.get()");
+
+        if (suppliedKeyMap == suppliedValueMap) {
+            throw new IllegalArgumentException("The suppliers must return distinct map instances");
+        }
+
+        if (!suppliedKeyMap.isEmpty() || !suppliedValueMap.isEmpty()) {
+            throw new IllegalArgumentException("The supplied maps must be empty");
+        }
+
+        this.keyMapSupplier = checkedKeyMapSupplier;
+        this.valueMapSupplier = checkedValueMapSupplier;
+        keyMap = suppliedKeyMap;
+        valueMap = suppliedValueMap;
     }
 
     /**
@@ -1045,6 +1063,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param key the key with which the specified value is to be associated.
      * @param value the value to be associated with the specified key.
      * @return the previous value associated with the key, or {@code null} if there was no mapping for the key.
+     * @throws IllegalArgumentException if the key or value is {@code null}
      * @see #put(Object, Object)
      */
     public V forcePut(final K key, final V value) {
@@ -1054,15 +1073,24 @@ public final class BiMap<K, V> implements Map<K, V> {
     private V put(final K key, final V value, final boolean isForce) {
         if ((key == null) || (value == null)) {
             throw new IllegalArgumentException("Key and value cannot be null");
-        } else if (!isForce && valueMap.containsKey(value) && !key.equals(valueMap.get(value))) {
-            throw new IllegalArgumentException("Value already exists: " + value);
         }
 
         final V oldValue = keyMap.get(key);
+        final K keyForValue = valueMap.get(value);
+        final K keyForOldValue = oldValue == null ? null : valueMap.get(oldValue);
+        final boolean sameMapping = oldValue != null && valueMap.containsKey(value) && keyForValue == keyForOldValue;
+
+        // Compare the inverse entries, rather than K.equals/V.equals, so both backing maps' own
+        // equality semantics are honored (including comparator-based TreeMaps). Two equivalent
+        // lookups in valueMap return the same stored key reference.
+        if (!isForce && valueMap.containsKey(value) && !sameMapping) {
+            throw new IllegalArgumentException("Value already exists: " + value);
+        }
 
         // No-op when the exact mapping already exists: documented for forcePut, and re-inserting
-        // would needlessly move the entry to the end of LinkedHashMap-backed BiMaps.
-        if (value.equals(oldValue)) {
+        // would needlessly move the entry to the end of LinkedHashMap-backed BiMaps. "Same" here
+        // deliberately follows the backing maps' equality semantics.
+        if (sameMapping) {
             return oldValue;
         }
 
@@ -1090,7 +1118,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * with an incoming value is silently removed before the incoming entry is inserted.
      *
      * <p><b>Warning:</b> The results of calling this method may vary depending on the iteration order of {@code m}.
-     * If the operation fails (e.g. a null key or value), some entries may have already been added.
+     * If the operation fails (e.g. a {@code null} key or value), some entries may have already been added.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1136,6 +1164,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Override
     public V putIfAbsent(final K key, final V value) {
+        if ((key == null) || (value == null)) {
+            throw new IllegalArgumentException("Key and value cannot be null");
+        }
+
         final V curValue = keyMap.get(key);
 
         if (curValue != null) {

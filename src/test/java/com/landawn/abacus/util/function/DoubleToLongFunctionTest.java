@@ -53,6 +53,16 @@ public class DoubleToLongFunctionTest extends TestBase {
     }
 
     @Test
+    public void testDEFAULT_SpecialValuesAndSaturation() {
+        DoubleToLongFunction function = DoubleToLongFunction.DEFAULT;
+        assertEquals(0L, function.applyAsLong(Double.NaN));
+        assertEquals(Long.MAX_VALUE, function.applyAsLong(Double.POSITIVE_INFINITY));
+        assertEquals(Long.MIN_VALUE, function.applyAsLong(Double.NEGATIVE_INFINITY));
+        assertEquals(Long.MAX_VALUE, function.applyAsLong(Double.MAX_VALUE));
+        assertEquals(Long.MIN_VALUE, function.applyAsLong(-Double.MAX_VALUE));
+    }
+
+    @Test
     public void testFunctionalInterfaceContract() {
         DoubleToLongFunction lambda = value -> (long) value;
         assertNotNull(lambda);

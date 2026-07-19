@@ -2791,21 +2791,23 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testSize_overflow() {
+    public void testSize_saturatesAtIntegerMaxValue() {
         Multiset<String> multiset = new Multiset<>();
         multiset.add("a", Integer.MAX_VALUE);
         multiset.add("b", 1);
 
-        assertThrows(ArithmeticException.class, () -> multiset.size());
+        assertEquals(Integer.MAX_VALUE, multiset.size());
+        assertEquals((long) Integer.MAX_VALUE + 1, multiset.sumOfOccurrences());
     }
 
     @Test
-    @DisplayName("Test long overflow in sumOfOccurrences")
-    public void testLongOverflowInSum() {
+    @DisplayName("Test size saturation with multiple maximum counts")
+    public void testSizeSaturationWithMultipleMaximumCounts() {
         intMultiset.add(1, Integer.MAX_VALUE);
         intMultiset.add(2, Integer.MAX_VALUE);
 
-        assertThrows(ArithmeticException.class, () -> intMultiset.size());
+        assertEquals(Integer.MAX_VALUE, intMultiset.size());
+        assertEquals(2L * Integer.MAX_VALUE, intMultiset.sumOfOccurrences());
     }
 
     @Test
@@ -3747,6 +3749,11 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
+    public void testConstructorWithMapSupplierReturningNull() {
+        assertThrows(NullPointerException.class, () -> new Multiset<String>((Supplier<Map<String, ?>>) () -> null));
+    }
+
+    @Test
     public void testRemoveAllSelfClearsWithoutConcurrentModification() {
         Multiset<String> set = Multiset.of("a", "a", "b");
 
@@ -3762,6 +3769,16 @@ public class MultisetTest extends AbstractTest {
 
         assertTrue(set.removeAllOccurrencesOf(set));
         assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testRemoveOccurrencesSelfClearsWithoutConcurrentModification() {
+        Multiset<String> set = Multiset.of("a", "a", "b");
+
+        assertTrue(set.removeOccurrences(set, 1));
+        assertTrue(set.isEmpty());
+
+        assertFalse(set.removeOccurrences(set, 1));
     }
 
     @Test
@@ -3786,5 +3803,10 @@ public class MultisetTest extends AbstractTest {
 
         assertTrue(set.removeAll(set.elementSet()));
         assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testToMapSortedByOccurrencesRejectsNullComparatorWhenEmpty() {
+        assertThrows(IllegalArgumentException.class, () -> new Multiset<String>().toMapSortedByOccurrences(null));
     }
 }

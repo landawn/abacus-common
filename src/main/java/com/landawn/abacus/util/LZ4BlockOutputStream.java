@@ -18,19 +18,24 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * An output stream that compresses data using the LZ4 block format.
+ * An output stream that compresses data using the custom block-stream format implemented by
+ * {@code net.jpountz.lz4.LZ4BlockOutputStream}.
  * This class wraps the net.jpountz.lz4.LZ4BlockOutputStream to provide
  * LZ4 compression capabilities with a consistent API.
  *
  * <p>LZ4 is a fast compression algorithm that provides a good balance between
  * compression ratio and speed. Data written to this stream is automatically
- * compressed and can be decompressed using LZ4BlockInputStream.</p>
+ * compressed and can be decompressed using {@link LZ4BlockInputStream}. This container is not the
+ * standardized LZ4 Frame format, so generic {@code .lz4} tools are not necessarily interoperable
+ * with it.</p>
  *
  * <p>The stream buffers data internally and compresses it in fixed-size blocks.
  * Calling {@link #close()} (for example, via try-with-resources) automatically
  * flushes and finishes the compressed stream; call {@link #finish()} explicitly
  * only when you want to finish the LZ4 stream without closing the underlying
  * output stream.</p>
+ *
+ * <p>This class is not thread-safe.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,6 +50,7 @@ import java.io.OutputStream;
 public final class LZ4BlockOutputStream extends OutputStream {
 
     private final net.jpountz.lz4.LZ4BlockOutputStream out;
+    private final OutputStream underlying;
 
     /**
      * Creates a new LZ4BlockOutputStream that will compress data and write it to
@@ -56,9 +62,12 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut);
      * }</pre>
      *
-     * @param os the output stream to write compressed data to
+     * @param os the output stream to write compressed data to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
     public LZ4BlockOutputStream(final OutputStream os) {
+        N.checkArgNotNull(os, "os");
+        underlying = os;
         out = new net.jpountz.lz4.LZ4BlockOutputStream(os);
     }
 
@@ -77,13 +86,15 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut, 1024 * 1024);
      * }</pre>
      *
-     * @param os the output stream to write compressed data to
+     * @param os the output stream to write compressed data to; must not be {@code null}
      * @param blockSize the maximum number of bytes to compress at once, must be
      *        between 64 and 32 MB (inclusive)
-     * @throws IllegalArgumentException if {@code blockSize} is less than 64 or
-     *         greater than 32 MB
+     * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code blockSize}
+     *         is less than 64 or greater than 32 MB
      */
     public LZ4BlockOutputStream(final OutputStream os, final int blockSize) {
+        N.checkArgNotNull(os, "os");
+        underlying = os;
         out = new net.jpountz.lz4.LZ4BlockOutputStream(os, blockSize);
     }
 
@@ -225,6 +236,24 @@ public final class LZ4BlockOutputStream extends OutputStream {
      */
     @Override
     public void close() throws IOException {
-        out.close();
+        try {
+            out.close();
+        } catch (final IOException e) {
+            closeUnderlyingAfterFailure(e);
+            throw e;
+        } catch (final RuntimeException | Error e) {
+            closeUnderlyingAfterFailure(e);
+            throw e;
+        }
+    }
+
+    private void closeUnderlyingAfterFailure(final Throwable primary) {
+        try {
+            underlying.close();
+        } catch (final IOException | RuntimeException | Error cleanupFailure) {
+            if (cleanupFailure != primary) {
+                primary.addSuppressed(cleanupFailure);
+            }
+        }
     }
 }

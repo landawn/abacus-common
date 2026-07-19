@@ -56,12 +56,9 @@ public class OffsetDateTimeTypeTest extends TestBase {
 
     @Test
     public void testStringOfWithValue() {
-        OffsetDateTime dateTime = OffsetDateTime.of(2023, 5, 15, 10, 30, 45, 0, ZoneOffset.UTC);
+        OffsetDateTime dateTime = OffsetDateTime.of(2023, 5, 15, 10, 30, 45, 123456789, ZoneOffset.ofHoursMinutes(5, 30));
         String result = offsetDateTimeType.stringOf(dateTime);
-        assertNotNull(result);
-        assertTrue(result.contains("2023"));
-        assertTrue(result.contains("05"));
-        assertTrue(result.contains("15"));
+        assertEquals("2023-05-15T10:30:45.123+05:30", result);
     }
 
     @Test
@@ -281,22 +278,22 @@ public class OffsetDateTimeTypeTest extends TestBase {
 
     @Test
     public void testSerializeToWithISO8601DateTimeFormat() throws IOException {
-        OffsetDateTime dateTime = OffsetDateTime.now();
+        OffsetDateTime dateTime = OffsetDateTime.of(2023, 12, 25, 10, 30, 45, 123456789, ZoneOffset.ofHoursMinutes(5, 30));
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         offsetDateTimeType.serializeTo(writer, dateTime, config);
-        verify(writer).write(anyString());
+        verify(writer).write("2023-12-25T10:30:45+05:30");
     }
 
     @Test
     public void testSerializeToWithISO8601TimestampFormat() throws IOException {
-        OffsetDateTime dateTime = OffsetDateTime.now();
+        OffsetDateTime dateTime = OffsetDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneOffset.ofHoursMinutes(5, 30));
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
         offsetDateTimeType.serializeTo(writer, dateTime, config);
-        verify(writer).write(anyString());
+        verify(writer).write("2023-12-25T10:30:45.000+05:30");
     }
 
     @Test

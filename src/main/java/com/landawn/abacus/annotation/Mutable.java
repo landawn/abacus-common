@@ -20,31 +20,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the annotated type or method represents mutable data or operations.
- * This annotation explicitly documents that state can be changed after creation,
- * which is important for understanding thread safety and usage patterns.
+ * Indicates that the annotated type has mutable state or that the annotated method mutates state.
+ * Mutability alone does not determine thread safety: a mutable implementation may synchronize its
+ * state, use lock-free coordination, or require external synchronization.
  *
  * <p><b>When applied to types (classes/interfaces):</b></p>
  * <ul>
  *   <li>The type's instances have modifiable state.</li>
  *   <li>Fields may change after object construction.</li>
- *   <li>The type is NOT thread-safe without external synchronization.</li>
- *   <li>Instances should not be shared between threads without proper synchronization.</li>
+ *   <li>Consult the type's own contract before sharing instances between threads.</li>
  * </ul>
  *
  * <p><b>When applied to methods:</b></p>
  * <ul>
  *   <li>The method modifies the object's state.</li>
  *   <li>The method has side effects.</li>
- *   <li>Calling the method may produce different results over time.</li>
- *   <li>The method is not safe to call concurrently without synchronization.</li>
+ *   <li>Concurrent-call safety is specified separately by the declaring type.</li>
  * </ul>
  *
  * <p><b>Important considerations for mutable types:</b></p>
  * <ul>
  *   <li>Not suitable as Map keys or Set elements (unless {@code equals}/{@code hashCode} are immutable).</li>
  *   <li>Require defensive copying when passing between untrusted code.</li>
- *   <li>Need synchronization for thread-safe access.</li>
+ *   <li>Need an appropriate concurrency policy when accessed from multiple threads.</li>
  *   <li>May cause unexpected behavior if aliased (multiple references).</li>
  * </ul>
  *
@@ -65,9 +63,8 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <p>This annotation has {@link RetentionPolicy#CLASS} retention and serves as documentation;
- * static analysis tools may use it to verify mutability contracts and flag inappropriate use
- * such as caching a mutable instance in a thread-shared map without synchronization. It is the
+ * <p>This annotation has {@link RetentionPolicy#CLASS} retention and serves as documentation.
+ * Static-analysis tools may consume it if configured to understand this declaration. It is the
  * counterpart of {@link Immutable}.</p>
  *
  * @see Immutable

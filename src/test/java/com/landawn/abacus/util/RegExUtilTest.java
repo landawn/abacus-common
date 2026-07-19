@@ -10,8 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
+import com.landawn.abacus.util.function.IntBiFunction;
 
 public class RegExUtilTest extends AbstractTest {
 
@@ -76,6 +79,10 @@ public class RegExUtilTest extends AbstractTest {
         assertTrue(RegExUtil.PHONE_NUMBER_FINDER.matcher("+1 234 567 8900").find());
         assertTrue(RegExUtil.PHONE_NUMBER_FINDER.matcher("555").find());
         assertFalse(RegExUtil.PHONE_NUMBER_FINDER.matcher("ab").find());
+        assertFalse(RegExUtil.PHONE_NUMBER_FINDER.matcher("   ").find());
+        assertFalse(RegExUtil.PHONE_NUMBER_MATCHER.matcher("  1 ").matches());
+        assertTrue(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("+1 234 567 8900").matches());
+        assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("               ").matches());
     }
 
     @Test
@@ -123,6 +130,8 @@ public class RegExUtilTest extends AbstractTest {
         assertTrue(RegExUtil.URL_FINDER.matcher("https://www.example.com").find());
         assertTrue(RegExUtil.URL_FINDER.matcher("ftp://ftp.example.com/file").find());
         assertTrue(RegExUtil.URL_FINDER.matcher("http://localhost:8080/api").find());
+        assertTrue(RegExUtil.URL_FINDER.matcher("HTTPS://EXAMPLE.COM/path").find());
+        assertEquals("http://a", RegExUtil.findFirst("http://a trailing", RegExUtil.URL_FINDER));
         assertFalse(RegExUtil.URL_FINDER.matcher("not a url").find());
     }
 
@@ -131,6 +140,7 @@ public class RegExUtilTest extends AbstractTest {
     public void testHttpUrlFinder() {
         assertTrue(RegExUtil.HTTP_URL_FINDER.matcher("http://www.example.com").find());
         assertTrue(RegExUtil.HTTP_URL_FINDER.matcher("https://api.example.com:8443/v1/users?id=123").find());
+        assertTrue(RegExUtil.HTTP_URL_FINDER.matcher("HTTP://EXAMPLE.COM").find());
         assertFalse(RegExUtil.HTTP_URL_FINDER.matcher("ftp://example.com").find());
     }
 
@@ -211,8 +221,8 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test pattern compilation caching")
-    public void testPatternCompilationCaching() {
+    @DisplayName("Test precompiled pattern reuse")
+    public void testPrecompiledPatternReuse() {
         Pattern pattern = Pattern.compile("\\d+");
         assertTrue(RegExUtil.find("123", pattern));
         assertTrue(RegExUtil.find("456", pattern));
@@ -1944,6 +1954,8 @@ public class RegExUtilTest extends AbstractTest {
     @DisplayName("Test split(String, String, int) with limit")
     public void testSplitWithRegexAndLimit() {
         assertArrayEquals(new String[] { "one", "two", "three,four" }, RegExUtil.split("one,two,three,four", ",", 3));
+        assertArrayEquals(new String[] { "a", "b" }, RegExUtil.split("a,b,,", ",", 0));
+        assertArrayEquals(new String[] { "a", "b", "", "" }, RegExUtil.split("a,b,,", ",", -1));
         assertArrayEquals(new String[0], RegExUtil.split(null, ",", 3));
         assertArrayEquals(new String[] { "" }, RegExUtil.split("", ",", 3));
     }
@@ -1962,6 +1974,8 @@ public class RegExUtilTest extends AbstractTest {
     public void testSplitWithPatternAndLimit() {
         Pattern pattern = Pattern.compile(",");
         assertArrayEquals(new String[] { "a", "b", "c,d" }, RegExUtil.split("a,b,c,d", pattern, 3));
+        assertArrayEquals(new String[] { "a", "b" }, RegExUtil.split("a,b,,", pattern, 0));
+        assertArrayEquals(new String[] { "a", "b", "", "" }, RegExUtil.split("a,b,,", pattern, -1));
         assertArrayEquals(new String[0], RegExUtil.split(null, pattern, 3));
         assertArrayEquals(new String[] { "" }, RegExUtil.split("", pattern, 3));
     }
@@ -2033,6 +2047,8 @@ public class RegExUtilTest extends AbstractTest {
     @DisplayName("Test splitToLines(String, int) with limit")
     public void testSplitToLinesWithLimit() {
         assertArrayEquals(new String[] { "Line 1", "Line 2", "Line 3\nLine 4" }, RegExUtil.splitToLines("Line 1\nLine 2\nLine 3\nLine 4", 3));
+        assertArrayEquals(new String[] { "Line 1", "Line 2" }, RegExUtil.splitToLines("Line 1\nLine 2\n\n", 0));
+        assertArrayEquals(new String[] { "Line 1", "Line 2", "", "" }, RegExUtil.splitToLines("Line 1\nLine 2\n\n", -1));
         assertArrayEquals(new String[0], RegExUtil.splitToLines(null, 3));
         assertArrayEquals(new String[] { "" }, RegExUtil.splitToLines("", 3));
     }
@@ -2102,6 +2118,81 @@ public class RegExUtilTest extends AbstractTest {
         assertEquals("X", RegExUtil.replaceLast("ababab", Pattern.compile("(ab)+"), "X"));
         assertEquals("X", RegExUtil.replaceLast("aba", Pattern.compile("aba|a"), "X"));
         assertEquals("Hello123WorldX", RegExUtil.replaceLast("Hello123World456", "\\d+", "X"));
+    }
+
+    @Test
+    public void testJavaIdentifierPatternsSupportUnicodeIdentifiers() {
+        assertTrue(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("\u53d8\u91cf2").matches());
+        assertTrue(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("\u03c0Value").matches());
+        assertTrue(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("\uD835\uDC9Cvalue").matches());
+        assertEquals("\u53d8\u91cf2", RegExUtil.findFirst("123\u53d8\u91cf2!", RegExUtil.JAVA_IDENTIFIER_FINDER));
+        assertFalse(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("\uD83D\uDE00value").matches());
+    }
+
+    @Test
+    public void testWholeInputPatternsDoNotAcceptTrailingLineTerminators() {
+        assertFalse(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("identifier\n").find());
+        assertFalse(RegExUtil.INTEGER_MATCHER.matcher("123\r\n").find());
+        assertFalse(RegExUtil.DATE_MATCHER.matcher("2026-07-16\n").find());
+        assertFalse(RegExUtil.EMAIL_ADDRESS_RFC_5322_MATCHER.matcher("USER@EXAMPLE.COM\n").find());
+        assertFalse(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com\n").find());
+
+        // The helper that adds strict anchors must retain the finder's flags.
+        assertTrue(RegExUtil.EMAIL_ADDRESS_RFC_5322_MATCHER.matcher("USER@EXAMPLE.COM").matches());
+    }
+
+    @Test
+    public void testDuplicatePatternsHandleWholeInputMultilineAndUnicodeText() {
+        assertTrue(RegExUtil.DUPLICATES_MATCHER.matcher("alpha beta alpha").matches());
+        assertTrue(RegExUtil.DUPLICATES_MATCHER.matcher("alpha beta alpha").find());
+        assertTrue(RegExUtil.DUPLICATES_FINDER.matcher("\u732b\n\u72d7\n\u732b").find());
+        assertTrue(RegExUtil.DUPLICATES_MATCHER.matcher("\u732b\n\u72d7\n\u732b").matches());
+        assertFalse(RegExUtil.DUPLICATES_MATCHER.matcher("alpha beta gamma").matches());
+        assertFalse(RegExUtil.DUPLICATES_MATCHER.matcher("Alpha beta alpha").matches());
+    }
+
+    @Test
+    public void testStringRegexIsValidatedForNullOrEmptySources() {
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.findAll(null, "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.replaceFirst(null, "[", "x"));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.replaceFirst("", "[", match -> "x"));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.replaceFirst("", "[", (start, end) -> "x"));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.replaceLast(null, "[", "x"));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.replaceLast("", "[", match -> "x"));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.replaceLast("", "[", (start, end) -> "x"));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.countMatches(null, "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.matchResults("", "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.matchIndices(null, "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.split(null, "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.split("", "[", 2));
+    }
+
+    @Test
+    public void testFunctionalReplacersRejectNullCallbacksEvenForEmptySources() {
+        final Pattern pattern = Pattern.compile("x");
+
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (Function<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (IntBiFunction<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (Function<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (IntBiFunction<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (Function<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (IntBiFunction<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (Function<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (IntBiFunction<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (Function<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (IntBiFunction<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", pattern, (Function<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", pattern, (IntBiFunction<String>) null));
+    }
+
+    @Test
+    public void testNullFunctionalReplacementResultsRemoveMatchesConsistently() {
+        assertEquals("ab2", RegExUtil.replaceFirst("a1b2", "\\d", match -> null));
+        assertEquals("ab2", RegExUtil.replaceFirst("a1b2", "\\d", (start, end) -> null));
+        assertEquals("a1b", RegExUtil.replaceLast("a1b2", "\\d", match -> null));
+        assertEquals("a1b", RegExUtil.replaceLast("a1b2", "\\d", (start, end) -> null));
+        assertEquals("ab", RegExUtil.replaceAll("a1b2", "\\d", match -> null));
+        assertEquals("ab", RegExUtil.replaceAll("a1b2", "\\d", (start, end) -> null));
     }
 
 }

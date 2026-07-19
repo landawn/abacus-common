@@ -17,6 +17,7 @@
 package com.landawn.abacus.util;
 
 import java.util.Map;
+import java.util.Objects;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -86,7 +87,7 @@ import com.landawn.abacus.util.u.Optional;
  *     <td>Hash/equals stability</td>
  *     <td>Hash code changes when elements are mutated — <b>do not use as a {@code HashMap} key
  *         or {@code HashSet} element while mutating</b></td>
- *     <td>Stable — safe to use as a {@code Map} key or {@code Set} element</td>
+ *     <td>Stable only while the equality/hash state of both referenced elements remains unchanged</td>
  *   </tr>
  *   <tr>
  *     <td>Use when</td>
@@ -736,6 +737,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed with the left and right elements as arguments;
      *               must not be {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}.
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
@@ -765,6 +767,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed with this pair as the argument;
      *               must not be {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}.
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws E {
@@ -791,6 +794,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param <E> the type of exception that the mapper function may throw.
      * @param mapper the function to apply to the left and right elements; must not be {@code null}.
      * @return the result of applying the mapper function to both elements.
+     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper function throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> mapper) throws E {
@@ -816,6 +820,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param <E> the type of exception that the mapper function may throw.
      * @param mapper the function to apply to this pair; must not be {@code null}.
      * @return the result of applying the mapper function to this pair.
+     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper function throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, ? extends U, E> mapper) throws E {
@@ -847,6 +852,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param predicate the condition to test with the left and right elements; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
+     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
@@ -879,6 +885,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param predicate the condition to test with this pair; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
+     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E {
@@ -1010,6 +1017,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Note that because XOR is commutative, {@code Pair.of(a, b)} and {@code Pair.of(b, a)} always have the
      * same hash code, regardless of the element values.</p>
      *
+     * <p>The component hash codes follow the {@link Map.Entry} contract and therefore use each
+     * component's ordinary {@link Object#hashCode()} implementation. In particular, array
+     * components use identity-based array hash codes rather than content-based hashes.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair1 = Pair.of("Hello", 42);
@@ -1026,7 +1037,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      */
     @Override
     public int hashCode() {
-        return N.hashCode(left) ^ N.hashCode(right);
+        return Objects.hashCode(left) ^ Objects.hashCode(right);
     }
 
     /**
@@ -1036,6 +1047,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * <p>Two elements are considered equal if they are both {@code null},
      * or if they are equal according to their equals() method.</p>
+     *
+     * <p>This follows the {@link Map.Entry} equality contract exactly. Array-valued keys or values
+     * are consequently compared by array identity, as ordinary arrays do not override
+     * {@link Object#equals(Object)}. This preserves symmetry with JDK {@code Map.Entry}
+     * implementations.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1055,7 +1071,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Note:</b> Equality is defined against the {@link Map.Entry} interface, not against {@code Pair}
      * specifically. Any {@code Map.Entry} with an equal key and value is considered equal,
      * so {@code Pair.of(k, v).equals(Map.entry(k, v))} is {@code true}. A {@code Tuple2} (which
-     * is not a {@code Map.Entry}) is never equal to a {@code Pair}, even with the same elements.
+     * is not a {@code Map.Entry}) is never equal to a {@code Pair}, even with the same elements.</p>
      *
      * @param obj the object to be compared for equality with this pair.
      * @return {@code true} if the specified object is equal to this pair, {@code false} otherwise.
@@ -1067,7 +1083,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
         }
 
         if (obj instanceof Map.Entry<?, ?> other) {
-            return N.equals(left, other.getKey()) && N.equals(right, other.getValue());
+            return Objects.equals(left, other.getKey()) && Objects.equals(right, other.getValue());
         }
 
         return false;

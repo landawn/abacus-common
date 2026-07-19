@@ -138,7 +138,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * @throws IllegalArgumentException if {@code value} is {@code null}
      */
     @Override
-    public void accept(final BigInteger value) {
+    public void accept(final BigInteger value) throws IllegalArgumentException {
         N.checkArgNotNull(value, cs.value);
 
         ++count;

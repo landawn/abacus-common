@@ -5102,6 +5102,17 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
+    public void testCopyIntoOverlappingRangesUseSourceSnapshot() {
+        final List<Integer> randomAccess = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
+        Iterables.copyInto(randomAccess, 0, randomAccess, 1, 3);
+        assertEquals(Arrays.asList(1, 1, 2, 3), randomAccess);
+
+        final List<Integer> sequential = new LinkedList<>(Arrays.asList(1, 2, 3, 4));
+        Iterables.copyInto(sequential, 0, sequential, 1, 3);
+        assertEquals(Arrays.asList(1, 1, 2, 3), sequential);
+    }
+
+    @Test
     public void testCopyRange_Dedicated() {
         List<Integer> src = Arrays.asList(1, 2, 3, 4, 5);
         List<Integer> dest = new ArrayList<>(Arrays.asList(10, 20, 30, 40, 50));
@@ -5670,6 +5681,39 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
+    public void testSetViewsRemainLiveWhenBackingSetsStartEmpty() {
+        final Set<Integer> unionLeft = new HashSet<>();
+        final Set<Integer> unionRight = new HashSet<>();
+        final Iterables.SetView<Integer> union = Iterables.union(unionLeft, unionRight);
+        unionLeft.add(1);
+        unionRight.add(2);
+        assertEquals(N.asSet(1, 2), union.copyInto(new HashSet<>()));
+
+        final Set<Integer> intersectionLeft = new HashSet<>();
+        final Set<Integer> intersectionRight = new HashSet<>();
+        final Iterables.SetView<Integer> intersection = Iterables.intersection(intersectionLeft, intersectionRight);
+        intersectionLeft.add(3);
+        intersectionRight.add(3);
+        assertEquals(N.asSet(3), intersection.copyInto(new HashSet<>()));
+
+        final Set<Integer> differenceLeft = new HashSet<>();
+        final Set<Integer> differenceRight = new HashSet<>();
+        final Iterables.SetView<Integer> difference = Iterables.difference(differenceLeft, differenceRight);
+        differenceLeft.add(4);
+        assertTrue(difference.contains(4));
+        differenceRight.add(4);
+        assertFalse(difference.contains(4));
+
+        final Set<Integer> symmetricLeft = new HashSet<>();
+        final Set<Integer> symmetricRight = new HashSet<>();
+        final Iterables.SetView<Integer> symmetricDifference = Iterables.symmetricDifference(symmetricLeft, symmetricRight);
+        symmetricLeft.add(5);
+        assertTrue(symmetricDifference.contains(5));
+        symmetricRight.add(5);
+        assertFalse(symmetricDifference.contains(5));
+    }
+
+    @Test
     public void testSubSet() {
         NavigableSet<Integer> set = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         Range<Integer> range = Range.closedOpen(3, 8);
@@ -5723,6 +5767,9 @@ public class IterablesTest extends AbstractTest {
         Range<Integer> range = Range.closed(1, 5);
         NavigableSet<Integer> subset = Iterables.subSet(emptySet, range);
         assertTrue(subset.isEmpty());
+
+        emptySet.add(3);
+        assertTrue(subset.contains(3));
     }
 
     @Test
@@ -6675,6 +6722,10 @@ public class IterablesTest extends AbstractTest {
 
         assertTrue(avg.isPresent());
         assertEquals((double) Long.MAX_VALUE, avg.getAsDouble(), 0.0d);
+
+        final OptionalDouble oppositeExtremes = Iterables.averageLong(Arrays.asList(Long.MIN_VALUE, Long.MAX_VALUE), v -> v);
+        assertTrue(oppositeExtremes.isPresent());
+        assertEquals(-0.5d, oppositeExtremes.getAsDouble(), 0.0d);
     }
 
     @Test

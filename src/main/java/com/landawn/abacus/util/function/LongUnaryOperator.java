@@ -14,7 +14,6 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
@@ -91,13 +90,13 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is null
+     * @throws NullPointerException if {@code before} is null
      *
      * @see #andThen(java.util.function.LongUnaryOperator)
      */
     @Override
     default LongUnaryOperator compose(final java.util.function.LongUnaryOperator before) {
-        N.checkArgNotNull(before, cs.before);
+        java.util.Objects.requireNonNull(before, cs.before);
         return (final long v) -> applyAsLong(before.applyAsLong(v));
     }
 
@@ -120,13 +119,13 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws NullPointerException if {@code after} is null
      *
      * @see #compose(java.util.function.LongUnaryOperator)
      */
     @Override
     default LongUnaryOperator andThen(final java.util.function.LongUnaryOperator after) {
-        N.checkArgNotNull(after, cs.after);
+        java.util.Objects.requireNonNull(after, cs.after);
         return (final long t) -> after.applyAsLong(applyAsLong(t));
     }
 

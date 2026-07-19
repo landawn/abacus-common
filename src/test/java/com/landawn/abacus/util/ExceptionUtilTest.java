@@ -7,11 +7,19 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.exceptions.base.MockitoException;
+import org.mockito.exceptions.misusing.InvalidUseOfMatchersException;
+import org.mockito.exceptions.misusing.MissingMethodInvocationException;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedException;
@@ -59,10 +67,132 @@ public class ExceptionUtilTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(RuntimeException.class, e -> e));
     }
 
-    // TODO: testRegisterAndUseCustomMapper - cannot register exception classes from com.landawn.abacus.util package
-    // The registerRuntimeExceptionMapper method blocks built-in packages including com.landawn.abacus.*
-    // which is the package of all test inner classes. Custom exception classes would need to be in a
-    // different package to be registered.
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRegisterRuntimeExceptionMapperInvalidatesDerivedSubclassCache() throws Exception {
+        final Field registryField = ExceptionUtil.class.getDeclaredField("toRuntimeExceptionFuncMap");
+        final Field resolvedCacheField = ExceptionUtil.class.getDeclaredField("resolvedToRuntimeExceptionFuncCache");
+        final Field lockField = ExceptionUtil.class.getDeclaredField("runtimeExceptionMapperLock");
+        registryField.setAccessible(true);
+        resolvedCacheField.setAccessible(true);
+        lockField.setAccessible(true);
+
+        final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> registry = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) registryField
+                .get(null);
+        final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> resolvedCache = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) resolvedCacheField
+                .get(null);
+        final Object mapperLock = lockField.get(null);
+        final Function<Throwable, RuntimeException> previousRegistration;
+        final Function<Throwable, RuntimeException> previousResolution;
+
+        synchronized (mapperLock) {
+            previousRegistration = registry.remove(MockitoException.class);
+            previousResolution = resolvedCache.remove(InvalidUseOfMatchersException.class);
+        }
+
+        try {
+            final InvalidUseOfMatchersException beforeRegistration = new InvalidUseOfMatchersException("before");
+            Assertions.assertSame(beforeRegistration, ExceptionUtil.toRuntimeException(beforeRegistration));
+
+            ExceptionUtil.registerRuntimeExceptionMapper(MockitoException.class, e -> new CustomRuntimeException("mapped", e), true);
+
+            final InvalidUseOfMatchersException afterRegistration = new InvalidUseOfMatchersException("after");
+            final RuntimeException mapped = ExceptionUtil.toRuntimeException(afterRegistration);
+            Assertions.assertInstanceOf(CustomRuntimeException.class, mapped);
+            Assertions.assertSame(afterRegistration, mapped.getCause());
+        } finally {
+            synchronized (mapperLock) {
+                if (previousRegistration == null) {
+                    registry.remove(MockitoException.class);
+                } else {
+                    registry.put(MockitoException.class, previousRegistration);
+                }
+
+                if (previousResolution == null) {
+                    resolvedCache.remove(InvalidUseOfMatchersException.class);
+                } else {
+                    resolvedCache.put(InvalidUseOfMatchersException.class, previousResolution);
+                }
+            }
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRegisterRuntimeExceptionMapperWithoutForceIsAtomic() throws Exception {
+        final Field registryField = ExceptionUtil.class.getDeclaredField("toRuntimeExceptionFuncMap");
+        final Field resolvedCacheField = ExceptionUtil.class.getDeclaredField("resolvedToRuntimeExceptionFuncCache");
+        final Field lockField = ExceptionUtil.class.getDeclaredField("runtimeExceptionMapperLock");
+        registryField.setAccessible(true);
+        resolvedCacheField.setAccessible(true);
+        lockField.setAccessible(true);
+
+        final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> registry = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) registryField
+                .get(null);
+        final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> resolvedCache = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) resolvedCacheField
+                .get(null);
+        final Object mapperLock = lockField.get(null);
+        final Function<Throwable, RuntimeException> previousRegistration;
+        final Function<Throwable, RuntimeException> previousResolution;
+
+        synchronized (mapperLock) {
+            previousRegistration = registry.remove(MissingMethodInvocationException.class);
+            previousResolution = resolvedCache.remove(MissingMethodInvocationException.class);
+        }
+
+        try {
+            final CountDownLatch ready = new CountDownLatch(2);
+            final CountDownLatch start = new CountDownLatch(1);
+            final AtomicInteger successes = new AtomicInteger();
+            final AtomicInteger duplicates = new AtomicInteger();
+            final AtomicInteger unexpectedFailures = new AtomicInteger();
+            final Runnable registration = () -> {
+                ready.countDown();
+
+                try {
+                    start.await();
+                    ExceptionUtil.registerRuntimeExceptionMapper(MissingMethodInvocationException.class, e -> new CustomRuntimeException(e.getMessage(), e));
+                    successes.incrementAndGet();
+                } catch (final IllegalArgumentException e) {
+                    duplicates.incrementAndGet();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    unexpectedFailures.incrementAndGet();
+                } catch (final Throwable e) { // NOSONAR -- asserted below
+                    unexpectedFailures.incrementAndGet();
+                }
+            };
+            final Thread first = new Thread(registration, "exception-mapper-registration-1");
+            final Thread second = new Thread(registration, "exception-mapper-registration-2");
+
+            first.start();
+            second.start();
+            Assertions.assertTrue(ready.await(5, TimeUnit.SECONDS));
+            start.countDown();
+            first.join(5000);
+            second.join(5000);
+
+            Assertions.assertFalse(first.isAlive());
+            Assertions.assertFalse(second.isAlive());
+            Assertions.assertEquals(1, successes.get());
+            Assertions.assertEquals(1, duplicates.get());
+            Assertions.assertEquals(0, unexpectedFailures.get());
+        } finally {
+            synchronized (mapperLock) {
+                if (previousRegistration == null) {
+                    registry.remove(MissingMethodInvocationException.class);
+                } else {
+                    registry.put(MissingMethodInvocationException.class, previousRegistration);
+                }
+
+                if (previousResolution == null) {
+                    resolvedCache.remove(MissingMethodInvocationException.class);
+                } else {
+                    resolvedCache.put(MissingMethodInvocationException.class, previousResolution);
+                }
+            }
+        }
+    }
 
     @Test
     public void testRegisterRuntimeExceptionMapper_WithoutForce() {

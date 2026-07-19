@@ -194,8 +194,8 @@ public class MutableShortType extends NumberType<MutableShort> {
 
     /**
      * Writes the short value of a {@link MutableShort} to a {@link CharacterWriter}.
-     * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
-     * The {@code config} parameter is not used for short values.
+     * Writes {@code null} when {@code x} is {@code null}, or zero when
+     * {@link JsonXmlSerConfig#isWriteNullNumberAsZero()} is enabled.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
@@ -206,7 +206,7 @@ public class MutableShortType extends NumberType<MutableShort> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableShort} to write, may be {@code null}
-     * @param config the serialization configuration (unused for short values)
+     * @param config the serialization configuration controlling null-number output; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

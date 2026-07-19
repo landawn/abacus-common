@@ -119,6 +119,10 @@ public final class ExceptionUtil {
     // ("already registered") and let stale derived entries out-rank later-registered mappers.
     private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> resolvedToRuntimeExceptionFuncCache = new ConcurrentHashMap<>();
 
+    // Serializes the rare registration/cache-miss paths so a resolver cannot repopulate a
+    // stale derived mapping after a concurrent registration has invalidated the cache.
+    private static final Object runtimeExceptionMapperLock = new Object();
+
     private static final String UncheckedSQLExceptionClassName = UncheckedSQLException.class.getSimpleName();
 
     private static final String UncheckedIOExceptionClassName = UncheckedIOException.class.getSimpleName();
@@ -166,7 +170,8 @@ public final class ExceptionUtil {
      * @param <E> the type of exception to map
      * @param exceptionClass the class of the exception to map; must not be {@code null}
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException; must not be {@code null}
-     * @param force if {@code true}, overwrites an existing mapper; if {@code false}, throws an exception if a mapper already exists
+     * @param force if {@code true}, overwrites an existing mapper; if {@code false}, throws an exception if a mapper already exists.
+     *              The check-and-register operation is atomic for concurrent registrations of the same class.
      * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
      *         if trying to register a built-in class (package starting with "java.", "javax.", or "com.landawn.abacus"),
      *         or if a mapper for the specified exception class already exists and {@code force} is {@code false}
@@ -182,14 +187,19 @@ public final class ExceptionUtil {
                     + exceptionClass.getPackage().getName());
         }
 
-        if (toRuntimeExceptionFuncMap.containsKey(exceptionClass) && !force) {
-            throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
+        final Function<Throwable, RuntimeException> mapper = (Function) runtimeExceptionMapper;
+
+        synchronized (runtimeExceptionMapperLock) {
+            if (force) {
+                toRuntimeExceptionFuncMap.put(exceptionClass, mapper);
+            } else if (toRuntimeExceptionFuncMap.putIfAbsent(exceptionClass, mapper) != null) {
+                throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
+            }
+
+            // Invalidate derived resolutions the new mapper may now apply to while holding the
+            // same lock used by cache-miss resolution, preventing stale cache repopulation.
+            resolvedToRuntimeExceptionFuncCache.keySet().removeIf(exceptionClass::isAssignableFrom);
         }
-
-        toRuntimeExceptionFuncMap.put(exceptionClass, (Function) runtimeExceptionMapper);
-
-        // Invalidate derived resolutions the new mapper may now apply to.
-        resolvedToRuntimeExceptionFuncCache.keySet().removeIf(exceptionClass::isAssignableFrom);
     }
 
     /**
@@ -336,26 +346,33 @@ public final class ExceptionUtil {
             func = resolvedToRuntimeExceptionFuncCache.get(cls);
         }
 
-        Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candidate = null;
-
         if (func == null) {
-            for (final Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> entry : toRuntimeExceptionFuncMap.entrySet()) { //NOSONAR
-                if (entry.getKey().isAssignableFrom(cls) && (candidate == null || candidate.getKey().isAssignableFrom(entry.getKey()))) {
-                    candidate = entry;
+            synchronized (runtimeExceptionMapperLock) {
+                // A registration may have completed while this thread was waiting for the lock.
+                func = toRuntimeExceptionFuncMap.get(cls);
+
+                if (func == null) {
+                    func = resolvedToRuntimeExceptionFuncCache.get(cls);
+                }
+
+                if (func == null) {
+                    Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candidate = null;
+
+                    for (final Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> entry : toRuntimeExceptionFuncMap.entrySet()) { //NOSONAR
+                        if (entry.getKey().isAssignableFrom(cls) && (candidate == null || candidate.getKey().isAssignableFrom(entry.getKey()))) {
+                            candidate = entry;
+                        }
+                    }
+
+                    if (candidate == null) {
+                        func = e instanceof RuntimeException ? RUNTIME_FUNC : CHECKED_FUNC;
+                    } else {
+                        func = candidate.getValue();
+                    }
+
+                    resolvedToRuntimeExceptionFuncCache.put(cls, func);
                 }
             }
-
-            if (candidate == null) {
-                if (e instanceof RuntimeException) {
-                    func = RUNTIME_FUNC;
-                } else {
-                    func = CHECKED_FUNC;
-                }
-            } else {
-                func = candidate.getValue();
-            }
-
-            resolvedToRuntimeExceptionFuncCache.put(cls, func);
         }
 
         return func.apply(e);

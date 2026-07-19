@@ -211,6 +211,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * type.appendTo(sb2, null);
      * // sb2.toString() equals "null"
      * }</pre>
+     *
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -265,6 +266,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * type.serializeTo(writer, null, null);
      * // Writes: null
      * }</pre>
+     *
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -315,9 +317,9 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * }</pre>
      *
      * @param c the Collection of Integer objects to convert
-     * @return a primitive int array containing all elements from the collection,
-     *         or {@code null} if the input collection is null
+     * @return an array containing the unboxed collection elements, or {@code null} if the input collection is null
      * @throws ClassCastException if any element in the collection is not an Integer
+     * @throws NullPointerException if any element in the collection is {@code null}
      */
     @Override
     public int[] collectionToArray(final Collection<?> c) {

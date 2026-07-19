@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -137,7 +138,7 @@ public class PropertiesTest extends AbstractTest {
         props.put("key", null);
 
         String value = props.getOrDefault("key", "default");
-        assertEquals("default", value);
+        assertNull(value);
     }
 
     @Test
@@ -357,7 +358,15 @@ public class PropertiesTest extends AbstractTest {
         assertNull(props.get("nullKey"));
 
         String defaultValue = props.getOrDefault("nullKey", "default");
-        assertEquals("default", defaultValue);
+        assertNull(defaultValue);
+    }
+
+    @Test
+    public void testResetRejectsNullBackingMap() {
+        Properties<String, String> props = new Properties<>();
+
+        assertThrows(NullPointerException.class, () -> props.reset(null));
+        assertTrue(props.isEmpty());
     }
 
     @Test

@@ -1035,4 +1035,13 @@ public class TripleTest extends TestBase {
         assertEquals(Tuple.of("A", 1, true), tuple);
     }
 
+    @Test
+    public void testArrayComponentsUseContentEqualityAndMatchingHashCode() {
+        Triple<int[], Object[], String> first = Triple.of(new int[] { 1, 2 }, new Object[] { new int[] { 3, 4 } }, "value");
+        Triple<int[], Object[], String> second = Triple.of(new int[] { 1, 2 }, new Object[] { new int[] { 3, 4 } }, "value");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
 }

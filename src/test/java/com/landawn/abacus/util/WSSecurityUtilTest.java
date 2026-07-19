@@ -332,6 +332,19 @@ public class WSSecurityUtilTest extends TestBase {
     }
 
     @Test
+    public void testDoPasswordDigest_incrementalDigestMatchesKnownVectors() {
+        // Regression: the implementation now feeds each component to MessageDigest separately
+        // instead of allocating nonce.length + created.length + password.length bytes. These
+        // independent vectors guard the exact concatenation order and chunk-boundary semantics.
+        byte[] nonce = new byte[] { 1, 2, 3, 4 };
+        byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
+        byte[] password = "secret".getBytes(StandardCharsets.UTF_8);
+
+        Assertions.assertEquals("ANVG+rR8Ea6eARzR7LEvAEd0FA8=", WSSecurityUtil.computePasswordDigest(nonce, created, password));
+        Assertions.assertEquals("PQRs7zedW68UVxCH7bQ4HcU7oo/oF0mo11zEPRi7qVE=", WSSecurityUtil.computePasswordDigest(nonce, created, password, "SHA-256"));
+    }
+
+    @Test
     public void testDoPasswordDigest_withAlgorithm_bytes_differentFromSHA1() {
         byte[] nonce = new byte[] { 1, 2, 3, 4 };
         byte[] created = "2024-01-01T12:00:00Z".getBytes(StandardCharsets.UTF_8);
