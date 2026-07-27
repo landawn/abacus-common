@@ -26,11 +26,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -3991,106 +3995,18 @@ public class IOUtilTest extends TestBase {
         unmap(buffer);
     }
 
-    @Test
-    public void testSimplifyPath_BasicPath() {
-        String result = IOUtil.simplifyPath("/foo/bar/baz");
-        assertEquals("/foo/bar/baz", result);
+    static Stream<Arguments> simplifyPathCases() {
+        return Stream.of(Arguments.of("/foo/bar/baz", "/foo/bar/baz"), Arguments.of("/foo/./bar", "/foo/bar"), Arguments.of("/foo/bar/../baz", "/foo/baz"),
+                Arguments.of("/foo/bar/", "/foo/bar"), Arguments.of("/", "/"), Arguments.of(".", "."), Arguments.of("foo/bar/baz", "foo/bar/baz"),
+                Arguments.of("foo/./bar", "foo/bar"), Arguments.of("foo/bar/../baz", "foo/baz"), Arguments.of("..", ".."), Arguments.of("/../foo", "/foo"),
+                Arguments.of("C:\\foo\\bar\\..\\baz", "C:/foo/baz"), Arguments.of("/foo\\bar/baz", "/foo/bar/baz"), Arguments.of("/a/./b/../../c/", "/c"),
+                Arguments.of("/foo/bar/../../baz", "/baz"), Arguments.of("/foo//bar///baz", "/foo/bar/baz"), Arguments.of("", "."));
     }
 
-    @Test
-    public void testSimplifyPath_WithDots() {
-        String result = IOUtil.simplifyPath("/foo/./bar");
-        assertEquals("/foo/bar", result);
-    }
-
-    @Test
-    public void testSimplifyPath_WithDoubleDots() {
-        String result = IOUtil.simplifyPath("/foo/bar/../baz");
-        assertEquals("/foo/baz", result);
-    }
-
-    @Test
-    public void testSimplifyPath_TrailingSlash() {
-        String result = IOUtil.simplifyPath("/foo/bar/");
-        assertEquals("/foo/bar", result);
-    }
-
-    @Test
-    public void testSimplifyPath_RootPath() {
-        String result = IOUtil.simplifyPath("/");
-        assertEquals("/", result);
-    }
-
-    @Test
-    public void testSimplifyPath_CurrentDir() {
-        String result = IOUtil.simplifyPath(".");
-        assertEquals(".", result);
-    }
-
-    @Test
-    public void testSimplifyPath_RelativePath() {
-        String result = IOUtil.simplifyPath("foo/bar/baz");
-        assertEquals("foo/bar/baz", result);
-    }
-
-    @Test
-    public void testSimplifyPath_RelativeWithDots() {
-        String result = IOUtil.simplifyPath("foo/./bar");
-        assertEquals("foo/bar", result);
-    }
-
-    @Test
-    public void testSimplifyPath_RelativeWithDoubleDots() {
-        String result = IOUtil.simplifyPath("foo/bar/../baz");
-        assertEquals("foo/baz", result);
-    }
-
-    @Test
-    public void testSimplifyPath_OnlyDoubleDots() {
-        String result = IOUtil.simplifyPath("..");
-        assertEquals("..", result);
-    }
-
-    @Test
-    public void testSimplifyPath_DoubleDotsBeyondRoot() {
-        String result = IOUtil.simplifyPath("/../foo");
-        assertEquals("/foo", result);
-    }
-
-    @Test
-    public void testSimplifyPath_WindowsStyle() {
-        String result = IOUtil.simplifyPath("C:\\foo\\bar\\..\\baz");
-        assertEquals("C:/foo/baz", result);
-    }
-
-    @Test
-    public void testSimplifyPath_MixedSlashes() {
-        String result = IOUtil.simplifyPath("/foo\\bar/baz");
-        assertEquals("/foo/bar/baz", result);
-    }
-
-    @Test
-    public void testSimplifyPath_Complex() {
-        String result = IOUtil.simplifyPath("/a/./b/../../c/");
-        assertEquals("/c", result);
-    }
-
-    @Test
-    public void testSimplifyPath_MultipleDoubleDots() {
-        String result = IOUtil.simplifyPath("/foo/bar/../../baz");
-        assertEquals("/baz", result);
-    }
-
-    @Test
-    public void testSimplifyPath_MultipleSlashes() {
-        String result = IOUtil.simplifyPath("/foo//bar///baz");
-        assertEquals("/foo/bar/baz", result);
-    }
-
-    @Test
-    public void testSimplifyPath_EmptyString() {
-        String result = IOUtil.simplifyPath("");
-        assertEquals(".", result);
+    @ParameterizedTest(name = "simplifyPath({0}) -> {1}")
+    @MethodSource("simplifyPathCases")
+    public void testSimplifyPath(final String input, final String expected) {
+        assertEquals(expected, IOUtil.simplifyPath(input));
     }
 
     @Test
@@ -5109,19 +5025,10 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testNewBrotliInputStream_BasicDecompression() throws IOException {
-        byte[] testData = TEST_CONTENT.getBytes(Charsets.UTF_8);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try (InputStream testInput = new ByteArrayInputStream(testData)) {
-            try {
-                BrotliInputStream brotliIn = IOUtil.newBrotliInputStream(testInput);
-                assertNotNull(brotliIn);
-                brotliIn.close();
-            } catch (NoClassDefFoundError | UncheckedIOException e) {
-                assertTrue(true);
-            }
+    public void testNewBrotliInputStream() throws IOException {
+        try (InputStream testInput = new ByteArrayInputStream(new byte[0]);
+             BrotliInputStream brotliIn = IOUtil.newBrotliInputStream(testInput)) {
+            assertNotNull(brotliIn);
         }
     }
 
@@ -6938,6 +6845,34 @@ public class IOUtilTest extends TestBase {
         File[] parts = destDir.listFiles();
         assertNotNull(parts);
         assertEquals(1, parts.length);
+    }
+
+    @Test
+    public void testSplitBySize_EmptyFile_CreatesOneEmptyPart() throws Exception {
+        // BUG FIX: an empty source file previously threw IOException ("Source file ended before
+        // split part 1 was complete") instead of producing the documented single empty part.
+        File sourceFile = Files.createTempFile(tempFolder, "split-empty", ".txt").toFile();
+        File destDir = Files.createTempDirectory(tempFolder, "split-empty-dest").toFile();
+
+        IOUtil.splitBySize(sourceFile, 10, destDir);
+
+        File[] parts = destDir.listFiles();
+        assertNotNull(parts);
+        assertEquals(1, parts.length);
+        assertEquals(0, parts[0].length());
+    }
+
+    @Test
+    public void testSplit_EmptyFile_CreatesOneEmptyPart() throws Exception {
+        File sourceFile = Files.createTempFile(tempFolder, "split-empty-count", ".txt").toFile();
+        File destDir = Files.createTempDirectory(tempFolder, "split-empty-count-dest").toFile();
+
+        IOUtil.split(sourceFile, 3, destDir);
+
+        File[] parts = destDir.listFiles();
+        assertNotNull(parts);
+        assertEquals(1, parts.length);
+        assertEquals(0, parts[0].length());
     }
 
     @Test
@@ -9035,6 +8970,172 @@ public class IOUtilTest extends TestBase {
         final File missing = tempFolder.resolve("missing_big_integer_directory").toFile();
 
         assertThrows(IllegalArgumentException.class, () -> IOUtil.sizeOfDirectoryAsBigInteger(missing));
+    }
+
+    @Test
+    public void testWriteFlushFlagIsHonoredWhenNoContentIsWritten() throws Exception {
+        final java.util.concurrent.atomic.AtomicInteger byteFlushes = new java.util.concurrent.atomic.AtomicInteger();
+        final java.io.OutputStream output = new java.io.ByteArrayOutputStream() {
+            @Override
+            public void flush() {
+                byteFlushes.incrementAndGet();
+            }
+        };
+
+        assertEquals(0L, IOUtil.write(new ByteArrayInputStream(new byte[0]), 0, 0, output, true));
+        assertEquals(0L, IOUtil.write(new ByteArrayInputStream(new byte[] { 1 }), 2, 1, output, true));
+        assertEquals(2, byteFlushes.get());
+
+        final java.util.concurrent.atomic.AtomicInteger charFlushes = new java.util.concurrent.atomic.AtomicInteger();
+        final Writer writer = new java.io.StringWriter() {
+            @Override
+            public void flush() {
+                charFlushes.incrementAndGet();
+            }
+        };
+
+        assertEquals(0L, IOUtil.write(new StringReader(""), 0, 0, writer, true));
+        assertEquals(0L, IOUtil.write(new StringReader("a"), 2, 1, writer, true));
+        assertEquals(2, charFlushes.get());
+    }
+
+    @Test
+    public void testContentEqualsMakesProgressWhenBulkReadReturnsZero() throws Exception {
+        final byte[] bytes = { 0, 1, 2, 3 };
+        assertTrue(IOUtil.contentEquals(zeroBulkInputStream(bytes), new ByteArrayInputStream(bytes)));
+
+        final char[] chars = { 0, 'a', 'b' };
+        assertTrue(IOUtil.contentEquals(zeroBulkReader(chars), new StringReader(new String(chars))));
+    }
+
+    @Test
+    public void testForLinesValidatesEmptyInputsAndMissingFiles() {
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.forLines(java.util.Collections.emptyList(), -1, 0, 0, 0, line -> {
+        }));
+        assertThrows(IllegalArgumentException.class,
+                () -> IOUtil.forLines(java.util.Collections.emptyList(), 0, 0, 0, 0, (Throwables.Consumer<String, RuntimeException>) null));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.forLines(tempFolder.resolve("missing-lines.txt").toFile(), line -> {
+        }));
+    }
+
+    @Test
+    public void testSimplifyPathKeepsWindowsDriveRoot() {
+        assertEquals("C:/file.txt", IOUtil.simplifyPath("C:/../file.txt"));
+        assertEquals("C:/", IOUtil.simplifyPath("C:/folder/../.."));
+    }
+
+    @Test
+    public void testZipSkipsHardLinkAliasesOfArchiveInsideSourceDirectory() throws Exception {
+        final Path sourceDir = Files.createDirectory(tempFolder.resolve("zip-source-with-alias"));
+        Files.write(sourceDir.resolve("data.txt"), "data".getBytes(UTF_8));
+        final Path archive = sourceDir.resolve("archive.zip");
+        Files.write(archive, new byte[] { 1 });
+        final Path alias = sourceDir.resolve("archive-alias.zip");
+        Files.createLink(alias, archive);
+
+        IOUtil.zip(sourceDir.toFile(), archive.toFile());
+
+        try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(archive.toFile())) {
+            final String root = sourceDir.getFileName() + "/";
+            assertNotNull(zip.getEntry(root + "data.txt"));
+            assertNull(zip.getEntry(root + "archive.zip"));
+            assertNull(zip.getEntry(root + "archive-alias.zip"));
+        }
+    }
+
+    @Test
+    public void testUnzipRejectsAbsoluteEntriesAndSourceArchiveOverwrite() throws Exception {
+        final File rootedArchive = tempFolder.resolve("rooted-entry.zip").toFile();
+        try (java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(new FileOutputStream(rootedArchive))) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("/outside/"));
+            zip.closeEntry();
+        }
+
+        assertThrows(IOException.class, () -> IOUtil.unzip(rootedArchive, tempFolder.resolve("rooted-target").toFile()));
+
+        final File backslashTraversalArchive = tempFolder.resolve("backslash-traversal.zip").toFile();
+        try (java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(new FileOutputStream(backslashTraversalArchive))) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("..\\outside.txt"));
+            zip.write(1);
+            zip.closeEntry();
+        }
+
+        assertThrows(IOException.class, () -> IOUtil.unzip(backslashTraversalArchive, tempFolder.resolve("backslash-traversal-target").toFile()));
+
+        final Path targetDir = Files.createDirectory(tempFolder.resolve("archive-self-target"));
+        final File selfArchive = targetDir.resolve("self.zip").toFile();
+        try (java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(new FileOutputStream(selfArchive))) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("self.zip"));
+            zip.write("replacement".getBytes(UTF_8));
+            zip.closeEntry();
+        }
+
+        final byte[] originalArchive = Files.readAllBytes(selfArchive.toPath());
+        assertThrows(IOException.class, () -> IOUtil.unzip(selfArchive, targetDir.toFile()));
+        assertArrayEquals(originalArchive, Files.readAllBytes(selfArchive.toPath()));
+    }
+
+    @Test
+    public void testSplitReportsSourceThatEndsBeforeAdvertisedLength() throws Exception {
+        final File actual = tempFolder.resolve("short-source.bin").toFile();
+        Files.write(actual.toPath(), new byte[] { 1, 2, 3 });
+        final File lengthChangingSource = new File(actual.getPath()) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public long length() {
+                return 10;
+            }
+        };
+
+        assertThrows(IOException.class, () -> IOUtil.split(lengthChangingSource, 2, tempFolder.resolve("short-source-parts").toFile()));
+    }
+
+    @Test
+    public void testCompressedFileExtensionIsCaseInsensitive() throws Exception {
+        final File gzip = tempFolder.resolve("text.GZ").toFile();
+        try (java.util.zip.GZIPOutputStream output = new java.util.zip.GZIPOutputStream(new FileOutputStream(gzip))) {
+            output.write("hello".getBytes(UTF_8));
+        }
+
+        assertEquals("hello", IOUtil.readAllToString(gzip));
+    }
+
+    private static InputStream zeroBulkInputStream(final byte[] bytes) {
+        return new InputStream() {
+            private int position;
+
+            @Override
+            public int read(final byte[] buffer, final int offset, final int length) {
+                return length == 0 ? 0 : (position < bytes.length ? 0 : -1);
+            }
+
+            @Override
+            public int read() {
+                return position < bytes.length ? bytes[position++] & 0xff : -1;
+            }
+        };
+    }
+
+    private static Reader zeroBulkReader(final char[] chars) {
+        return new Reader() {
+            private int position;
+
+            @Override
+            public int read(final char[] buffer, final int offset, final int length) {
+                return length == 0 ? 0 : (position < chars.length ? 0 : -1);
+            }
+
+            @Override
+            public int read() {
+                return position < chars.length ? chars[position++] : -1;
+            }
+
+            @Override
+            public void close() {
+                // no resources
+            }
+        };
     }
 
 }

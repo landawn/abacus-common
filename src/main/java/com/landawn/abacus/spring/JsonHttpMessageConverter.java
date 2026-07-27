@@ -164,6 +164,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *            Must not be {@code null}. Use {@link JsonDeserConfig} to customize deserialization behavior.
      *            Both configuration objects are retained by reference and should not be mutated while
      *            the converter is serving concurrent requests.
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}
      * @see JsonSerConfig
      * @see JsonDeserConfig
      * @see com.landawn.abacus.parser.Exclusion
@@ -226,6 +227,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
      * @param supportedMediaTypes the media types this converter should support. If none are supplied,
      *                            the inherited default media types are kept unchanged.
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
@@ -255,6 +257,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
      * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
      *                            the inherited default media types are kept unchanged.
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */

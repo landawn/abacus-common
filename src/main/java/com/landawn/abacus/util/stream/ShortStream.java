@@ -136,10 +136,11 @@ import com.landawn.abacus.util.function.TriFunction;
  *     .summaryStatistics();          // gets min, max, avg, count
  *
  * // Parallel processing for large datasets
- * int result = ShortStream.range((short) 1, (short) 10000)
+ * long result = ShortStream.range((short) 1, (short) 10000)
  *     .parallel()              // uses parallel processing
  *     .filter(this::isPrime)   // filters prime numbers
  *     .mapToInt(s -> s * s)    // maps each prime to its square
+ *     .asLongStream()          // widens before summing to avoid int overflow
  *     .sum();                  // sums the squares
  *
  * // Integration with other stream types
@@ -163,7 +164,7 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p><b>Performance Considerations:</b>
  * <ul>
  *   <li>Use ShortStream instead of {@code Stream<Short>} to avoid boxing overhead</li>
- *   <li>Parallel processing benefits large datasets (typically &gt; 10,000 elements)</li>
+ *   <li>Whether parallel processing helps depends on data size, operation cost, and runtime environment</li>
  *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
  *   <li>Lazy evaluation means intermediate operations are not executed until terminal operations</li>
  * </ul>
@@ -237,17 +238,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short)1, (short)2).takeWhile(x -> x < 10).toArray();   // returns [(short)1, (short)2]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new {@code ShortStream} consisting of elements from this stream until an element is encountered that doesn't match the predicate
@@ -308,17 +299,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short)5, (short)6).dropWhile(x -> x < 3).toArray();   // returns [(short)5, (short)6]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
@@ -353,17 +334,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from short to short
      * @return a new ShortStream consisting of the results of applying the mapper function to each element
@@ -400,17 +371,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from short to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
@@ -443,17 +404,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.empty().mapToObj(s -> "x" + s).toList();   // returns []
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function to apply to each element
@@ -492,17 +443,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from short to ShortStream
      * @return a new {@link ShortStream} consisting of the flattened contents of the mapped streams
@@ -552,17 +493,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from short to {@code Collection<Short>}
      * @return a new {@code ShortStream} consisting of the flattened contents of the collections produced by the mapper
@@ -598,17 +529,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from short to short[]
      * @return a new {@code ShortStream} consisting of the flattened contents of the arrays produced by the mapper
@@ -644,17 +565,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function to apply to each element
      *               which produces an IntStream of new values
@@ -687,17 +598,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function to apply to each element
@@ -729,17 +630,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function to apply to each element
@@ -775,17 +666,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function to apply to each element
@@ -823,17 +704,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return the new stream containing only the mapped values that were present
@@ -867,17 +738,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // returns [(short) 3, (short) 11, (short) 14]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
@@ -885,7 +746,6 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the sameRange predicate or mapper function is null
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
@@ -918,17 +778,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toList();   // returns list of Range objects
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -937,7 +787,6 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the sameRange predicate or mapper function is null
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
@@ -968,20 +817,10 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toList();   // returns [2, 3, 1]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers the current group in memory.
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
-     *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
+     *        The first parameter is the last (not the first) element of the current group, and the second parameter is the next element to check.
      * @return a stream of lists, each containing a sequence of consecutive elements that are collapsible with each other
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#collapse(BiPredicate)
@@ -1012,20 +851,10 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // returns [(short) 1, (short) 7, (short) 10]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
-     *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
+     *        The first parameter is the last (not the first) element of the current group, and the second parameter is the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
@@ -1059,17 +888,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // collects groups with flexible criteria
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
      *          The collapsible predicate takes three elements: the first and last elements of current group, and the next element to check.
@@ -1106,17 +925,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // returns [(short) 2, (short) 6, (short) 24]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param accumulator a {@code ShortBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code ShortStream} consisting of the results of the scan operation on the elements of the original stream.
@@ -1150,17 +959,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // returns [(short) 20, (short) 60, (short) 240]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      *        It will be ignored if this stream is empty and won't be the first element of the returned stream.
@@ -1194,19 +993,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // returns [(short) 11, (short) 13, (short) 16]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
+     * @param init the initial value used as the starting accumulated value. When {@code initIncluded} is {@code true}, it is also emitted as the first element of the returned stream.
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator a {@code ShortBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code ShortStream} consisting of the results of the scan operation on the elements of the original stream.
@@ -1229,17 +1018,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *     .toArray();   // returns [(short)1, (short)2, (short)3, (short)4]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param a the elements to prepend to this stream
      * @return a new stream with the specified elements prepended
@@ -1261,17 +1040,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *     .toArray();   // returns [(short)1, (short)2, (short)3, (short)4]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param a the elements to append to this stream
      * @return a new stream with the specified elements appended
@@ -1282,8 +1051,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     public abstract ShortStream append(final short... a);
 
     /**
-     * Returns a stream consisting of the elements of this stream with the specified elements appended if this stream is empty.
-     * If this stream is not empty, returns this stream unchanged.
+     * Returns a stream consisting of this stream's elements when it is non-empty, or the specified elements when it is empty.
      *
      * <p>This is an intermediate operation.
      *
@@ -1300,20 +1068,10 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *     .toArray();   // returns [(short)10, (short)20]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param a the elements to append if this stream is empty
-     * @return this stream if not empty, otherwise a new stream containing the specified elements
+     * @return a stream containing this stream's elements if it is non-empty, otherwise the specified elements
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -1336,17 +1094,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // returns the 3 largest elements: [9, 8, 5] (order not guaranteed)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers up to {@code n} elements.
      *
      * @param n the number of top elements to return
      * @return a new stream containing the top n elements
@@ -1374,17 +1122,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *       .toArray();   // returns the 3 smallest elements: [1, 2, 5] (order not guaranteed)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers up to {@code n} elements.
      *
      * @param n the number of top elements to return
      * @param comparator a comparator to compare elements
@@ -1409,17 +1147,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortList emptyList = ShortStream.empty().toShortList();   // returns ShortList with size 0
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a {@code ShortList} containing the elements of this stream
      * @throws IllegalStateException if the stream is already closed
@@ -1456,17 +1184,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * }
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1475,10 +1193,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
      * @return a {@code Map} whose keys and values are the result of applying mapping functions to the input elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are found
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
-     * @throws IllegalStateException if duplicate keys are found
      * @see Collectors#toMap(Function, Function)
      */
     @ParallelSupported
@@ -1515,17 +1232,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {1=1, 2=4, 3=9}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1536,11 +1243,10 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueMapper a mapping function to produce values
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the result of applying mapping functions to the input elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are found
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
-     * @throws IllegalStateException if duplicate keys are found
-     * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
+     * @see Collectors#toMap(Function, Function, Supplier)
      */
     @ParallelSupported
     @TerminalOp
@@ -1578,17 +1284,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {0=3, 2=8}  (max of values with same key)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1645,17 +1341,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {odd=20, even=30} (5+15=20, 10+20=30)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1713,17 +1399,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {0="5, 8, 3", 1="12, 15"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1772,17 +1448,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {low=12.5, high=25.0}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1823,17 +1489,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.empty().reduce((short)0, (a, b) -> (short)(a + b));   // returns 0
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param identity the identity value for the accumulator function, and the value returned when the stream is empty
      * @param accumulator the function for combining the current accumulated value and the current stream element
@@ -1864,17 +1520,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                                  .reduce((a, b) -> (short)(a + b));   // returns OptionalShort.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return an OptionalShort describing the result of the reduction. If the stream is empty, an empty {@code OptionalShort} is returned.
@@ -1893,7 +1539,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Collect into a custom container
      * List<Short> list = ShortStream.of((short)1, (short)2, (short)3)
      *                               .collect(ArrayList::new,
-     *                                        (list, value) -> list.add(value),
+     *                                        (c, value) -> c.add(value),
      *                                        List::addAll);
      * // Result: [1, 2, 3]
      *
@@ -1919,17 +1565,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: stats with sum=30, count=3
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container.
      *
      * @param <R> The type of the result
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -1958,13 +1594,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Collect into ArrayList (no combiner needed)
      * List<Short> list = ShortStream.of((short)1, (short)2, (short)3, (short)4)
      *                               .collect(ArrayList::new,
-     *                                        (list, value) -> list.add(value));
+     *                                        (c, value) -> c.add(value));
      * // Result: [1, 2, 3, 4]
      *
      * // Collect into HashSet
      * Set<Short> set = ShortStream.of((short)1, (short)2, (short)2, (short)3)
      *                             .collect(HashSet::new,
-     *                                      (set, value) -> set.add(value));
+     *                                      (c, value) -> c.add(value));
      * // Result: [1, 2, 3]
      *
      * // Collect into StringBuilder
@@ -1980,17 +1616,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: ShortList[100, 200, 300]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container.
      *
      * @param <R> The type of the result. It must be {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -2026,17 +1652,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.empty().forEach(System.out::println);   // prints nothing
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
@@ -2070,17 +1686,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.empty().forEachIndexed((index, value) -> System.out.println(index));   // prints nothing
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements, taking both index and element
@@ -2117,17 +1723,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                            .anyMatch(n -> n > 0);   // returns false
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -2165,17 +1761,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                            .allMatch(n -> n > 100);   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -2213,17 +1799,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                            .noneMatch(n -> n > 0);   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -2236,37 +1812,21 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     public abstract <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws E;
 
     /**
-     * Returns the first element in the stream, if present, otherwise returns an empty {@code OptionalShort}.
-     * This is a terminal operation that short-circuits on the first element.
+     * Returns the first element of this stream wrapped in an {@code OptionalShort}, or an empty
+     * {@code OptionalShort} if this stream is empty. This is a short-circuiting terminal operation:
+     * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element in
-     * encounter order, including for parallel streams.</p>
-     *
-     * <p>Note: This method is an alias for {@link #first()} to align with the standard Stream API naming conventions.</p>
-     *
-     * <p><b>Note:</b> Consider using {@link #first()}, which is the primary method in this library; this
-     * method exists for API compatibility with the standard Java Stream API naming conventions.
+     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element
+     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
+     * the standard {@link java.util.stream.Stream#findFirst()} API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalShort first = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-     *                                 .findFirst();   // returns OptionalShort[1]
-     *
-     * // Empty stream returns empty optional
-     * ShortStream.empty().findFirst();   // returns OptionalShort.empty()
+     * OptionalShort first = ShortStream.of((short) 1, (short) 2, (short) 3).findFirst();   // returns OptionalShort.of((short) 1)
+     * OptionalShort none = ShortStream.empty().findFirst();   // returns OptionalShort.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code OptionalShort} containing the first element of the stream, or an empty {@code OptionalShort} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2274,6 +1834,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @see #findAny()
      * @see #findFirst(Throwables.ShortPredicate)
      * @see #findAny(Throwables.ShortPredicate)
+     * @see #last()
      */
     @ParallelSupported
     @TerminalOp
@@ -2284,37 +1845,22 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     }
 
     /**
-     * Returns the first element in the stream, if present, otherwise returns an empty {@code OptionalShort}.
-     * This is a terminal operation that may short-circuit on any element.
+     * Returns the first element of this stream wrapped in an {@code OptionalShort}, or an empty
+     * {@code OptionalShort} if this stream is empty. This is a short-circuiting terminal operation:
+     * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()} and {@link #findFirst()}; despite the
-     * JDK-style name it returns the FIRST element, not an arbitrary one, even for parallel streams.</p>
-     *
-     * <p>Note: This method is an alias for {@link #first()} to align with the standard Stream API naming conventions.</p>
-     *
-     * <p><b>Note:</b> Consider using {@link #first()}, which is the primary method in this library; this
-     * method exists for API compatibility with the standard Java Stream API naming conventions.
+     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.Stream#findAny()},
+     * which may return an arbitrary element (especially for parallel streams), this method is an alias of
+     * {@link #first()} and always returns the first element in encounter order, even for parallel
+     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalShort any = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-     *                              .findAny();   // returns OptionalShort[1] (in sequential stream)
-     *
-     * // Empty stream returns empty optional
-     * ShortStream.empty().findAny();   // returns OptionalShort.empty()
+     * OptionalShort any = ShortStream.of((short) 1, (short) 2, (short) 3).findAny();   // returns OptionalShort.of((short) 1)
+     * OptionalShort none = ShortStream.empty().findAny();   // returns OptionalShort.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code OptionalShort} containing the first element of the stream, or an empty {@code OptionalShort} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2322,6 +1868,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @see #findFirst()
      * @see #findFirst(Throwables.ShortPredicate)
      * @see #findAny(Throwables.ShortPredicate)
+     * @see #last()
      */
     @ParallelSupported
     @TerminalOp
@@ -2332,154 +1879,99 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     }
 
     /**
-     * Returns an {@code OptionalShort} describing the first element of this stream that matches the given predicate,
-     * or an empty {@code OptionalShort} if no such element is found.
+     * Returns the first element of this stream that matches the given {@code predicate}, wrapped in an
+     * {@code OptionalShort}, or an empty {@code OptionalShort} if no element matches. This is a
+     * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>This is a short-circuiting terminal operation.
+     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
+     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * {@link #findAny(Throwables.ShortPredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Find first element greater than 10
-     * OptionalShort first = ShortStream.of((short)5, (short)12, (short)8, (short)15)
-     *                                  .findFirst(n -> n > 10);   // returns OptionalShort[12]
-     *
-     * // Find first even number
-     * OptionalShort firstEven = ShortStream.of((short)1, (short)3, (short)4, (short)6)
-     *                                      .findFirst(n -> n % 2 == 0);   // returns OptionalShort[4]
-     *
-     * // No matching element
-     * OptionalShort notFound = ShortStream.of((short)1, (short)2, (short)3)
-     *                                     .findFirst(n -> n > 100);   // returns OptionalShort.empty()
-     *
-     * // Safe retrieval with default value
-     * short value = ShortStream.of((short)5, (short)10, (short)15)
-     *                          .findFirst(n -> n > 7)
-     *                          .orElse((short)0);   // returns 10
+     * OptionalShort firstEven = ShortStream.of((short) 1, (short) 3, (short) 4, (short) 6)
+     *                                      .findFirst(x -> x % 2 == 0);   // returns OptionalShort.of((short) 4)
+     * OptionalShort none = ShortStream.of((short) 1, (short) 3, (short) 5)
+     *                                 .findFirst(x -> x % 2 == 0);   // returns OptionalShort.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param <E> the type of exception thrown by the predicate
-     * @param predicate a non-interfering, stateless predicate that tests each element
-     * @return an {@code OptionalShort} describing the first element that matches the predicate, or an empty {@code OptionalShort} if no such element is found
+     * @param <E> the type of exception that the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to test each element of the stream
+     * @return an {@code OptionalShort} containing the first element that matches the predicate, or an empty {@code OptionalShort} if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @see #findAny(Throwables.ShortPredicate)
+     * @see #findLast(Throwables.ShortPredicate)
+     * @see #findFirst()
      */
     @ParallelSupported
     @TerminalOp
     public abstract <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate) throws E;
 
     /**
-     * Returns an {@code OptionalShort} describing some element of this stream that matches the given predicate,
-     * or an empty {@code OptionalShort} if no such element is found.
+     * Returns any element of this stream that matches the given {@code predicate}, wrapped in an
+     * {@code OptionalShort}, or an empty {@code OptionalShort} if no element matches. This is a
+     * short-circuiting terminal operation: it stops as soon as a match is found, and the stream is then closed.
      *
-     * <p>This is a short-circuiting terminal operation.
-     *
-     * <p>The behavior of this operation is explicitly nondeterministic; it is free to select any element in the stream that matches the predicate.
-     * This is to allow for maximal performance in parallel operations; the cost is that multiple invocations on the same source may not return the same result.
+     * <p>In sequential streams this behaves exactly like {@link #findFirst(Throwables.ShortPredicate)}. In parallel
+     * streams there is no ordering guarantee: the matching element found first by any worker thread is
+     * returned, so the result may differ between runs — which is what can make it faster than
+     * {@link #findFirst(Throwables.ShortPredicate)} in parallel. (Note the contrast with the no-arg {@link #findAny()},
+     * which is a deterministic alias of {@link #first()}.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Find any element greater than 10
-     * OptionalShort any = ShortStream.of((short)5, (short)12, (short)8, (short)15)
-     *                                .findAny(n -> n > 10);   // returns OptionalShort[12] or OptionalShort[15]
-     *
-     * // Find any even number
-     * OptionalShort anyEven = ShortStream.of((short)1, (short)3, (short)4, (short)6)
-     *                                    .findAny(n -> n % 2 == 0);   // returns OptionalShort[4] or OptionalShort[6]
-     *
-     * // No matching element
-     * OptionalShort notFound = ShortStream.of((short)1, (short)2, (short)3)
-     *                                     .findAny(n -> n > 100);   // returns OptionalShort.empty()
-     *
-     * // Useful in parallel streams for performance
-     * OptionalShort parallel = ShortStream.of((short)1, (short)2, (short)3, (short)4, (short)5)
-     *                                     .parallel()
-     *                                     .findAny(n -> n > 2);   // returns any matching element efficiently
+     * OptionalShort anyEven = ShortStream.of((short) 1, (short) 3, (short) 4, (short) 6)
+     *                                    .findAny(x -> x % 2 == 0);   // returns a matching element, e.g. OptionalShort.of((short) 4)
+     * OptionalShort none = ShortStream.of((short) 1, (short) 3, (short) 5)
+     *                                 .findAny(x -> x % 2 == 0);   // returns OptionalShort.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param <E> the type of exception thrown by the predicate
-     * @param predicate a non-interfering, stateless predicate that tests each element
-     * @return an {@code OptionalShort} describing some element that matches the predicate, or an empty {@code OptionalShort} if no such element is found
+     * @param <E> the type of exception that the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to test each element of the stream
+     * @return an {@code OptionalShort} containing a matching element, or an empty {@code OptionalShort} if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @see #findFirst(Throwables.ShortPredicate)
+     * @see #findLast(Throwables.ShortPredicate)
+     * @see #findAny()
      */
     @ParallelSupported
     @TerminalOp
     public abstract <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate) throws E;
 
     /**
-     * Returns an {@code OptionalShort} describing the last element of this stream that matches the given predicate,
-     * or an empty {@code OptionalShort} if no such element is found.
+     * Returns the last element of this stream that matches the given {@code predicate}, wrapped in an
+     * {@code OptionalShort}, or an empty {@code OptionalShort} if no element matches. This is a terminal
+     * operation, and the stream is then closed.
      *
-     * <p>This is a terminal operation.
-     *
-     * <p>Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
-     *
-     * <p><b>Note:</b> This method is marked as {@code @Beta} because it requires traversing the entire stream
-     * to find the last matching element, which may have performance implications for large streams.
-     * Consider using {@code reversed().findFirst(predicate)} for better performance when applicable.
-     * The API may be refined based on usage patterns and performance feedback.
+     * <p>Unlike {@link #findFirst(Throwables.ShortPredicate)}, this operation cannot short-circuit: every element
+     * must be tested, because a later element is always a better candidate. The result is deterministic
+     * even for parallel streams: when several elements match, the one at the largest encounter-order
+     * index wins.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Find last element greater than 10
-     * OptionalShort last = ShortStream.of((short)5, (short)12, (short)8, (short)15)
-     *                                 .findLast(n -> n > 10);   // returns OptionalShort[15]
-     *
-     * // Find last even number
-     * OptionalShort lastEven = ShortStream.of((short)1, (short)4, (short)3, (short)6, (short)5)
-     *                                     .findLast(n -> n % 2 == 0);   // returns OptionalShort[6]
-     *
-     * // No matching element
-     * OptionalShort notFound = ShortStream.of((short)1, (short)2, (short)3)
-     *                                     .findLast(n -> n > 100);   // returns OptionalShort.empty()
-     *
-     * // Better performance with reversed stream
-     * OptionalShort efficient = ShortStream.of((short)1, (short)2, (short)3, (short)4, (short)5)
-     *                                      .reversed()
-     *                                      .findFirst(n -> n > 2);   // returns OptionalShort[5]
+     * OptionalShort lastEven = ShortStream.of((short) 1, (short) 3, (short) 4, (short) 6)
+     *                                     .findLast(x -> x % 2 == 0);   // returns OptionalShort.of((short) 6)
+     * OptionalShort none = ShortStream.of((short) 1, (short) 3, (short) 5)
+     *                                 .findLast(x -> x % 2 == 0);   // returns OptionalShort.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param <E> the type of exception thrown by the predicate
-     * @param predicate a non-interfering, stateless predicate that tests each element
-     * @return an {@code OptionalShort} describing the last element that matches the predicate, or an empty {@code OptionalShort} if no such element is found
+     * @param <E> the type of exception that the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to test each element of the stream
+     * @return an {@code OptionalShort} containing the last element that matches the predicate, or an empty {@code OptionalShort} if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @see #findFirst(Throwables.ShortPredicate)
+     * @see #findAny(Throwables.ShortPredicate)
+     * @see #last()
      */
     @Beta
     @ParallelSupported
@@ -2505,17 +1997,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short) 42).min();                                                              // returns OptionalShort[42]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code OptionalShort} containing the minimum element of this stream, or an empty {@code OptionalShort} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2543,17 +2025,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short) 42).max();                                                              // returns OptionalShort[42]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code OptionalShort} containing the maximum element of this stream, or an empty {@code OptionalShort} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2584,17 +2056,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short) 1, (short) 2).kthLargest(0);   // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements.
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalShort} containing the k-th largest element, or an empty {@code OptionalShort} if the stream is empty or contains fewer than {@code k} elements
@@ -2631,17 +2093,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.range((short) 1, (short) 1001).sum();   // returns 500500 (int, no overflow)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return the sum of elements in this stream as an {@code int}, or {@code 0} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2672,17 +2124,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short) 42).average();                                              // returns OptionalDouble[42.0]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an OptionalDouble containing the average of the elements of this stream,
      *         or an empty optional if the stream is empty
@@ -2712,17 +2154,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * emptyStats.getCount();   // returns 0
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a {@code ShortSummaryStatistics} describing various summary data about the elements of this stream
      * @throws IllegalStateException if the stream is already closed
@@ -2746,17 +2178,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * Optional<Map<Percentage, Short>> percentiles = result.right();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a {@code Pair} containing summary statistics and a map of percentile values
      * @throws IllegalStateException if the stream is already closed
@@ -2783,17 +2205,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *     .toArray();   // returns [1, 2]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param b the stream to merge with
      * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
@@ -2822,17 +2234,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *            .toArray();   // returns [(short)11, (short)22, (short)33]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the ShortStream to be combined with the current ShortStream. Must be {@code non-null}.
      * @param zipFunction a ShortBinaryOperator that determines the combination of elements in the combined ShortStream. Must be {@code non-null}.
@@ -2859,17 +2261,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *            .toArray();   // returns [(short)111, (short)222]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the second ShortStream to be combined with the current ShortStream. Will be closed along with this ShortStream.
      * @param c the third ShortStream to be combined with the current ShortStream. Will be closed along with this ShortStream.
@@ -2896,17 +2288,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *            .toArray();   // returns [(short)11, (short)2, (short)3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the ShortStream to be combined with the current ShortStream. Will be closed along with this ShortStream.
      * @param valueForNoneA the default value to use for the current ShortStream when it runs out of elements
@@ -2935,17 +2317,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *            .toArray();   // returns [(short)111, (short)2, (short)3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the second ShortStream to be combined with the current ShortStream. Will be closed along with this ShortStream.
      * @param c the third ShortStream to be combined with the current ShortStream. Will be closed along with this ShortStream.
@@ -2979,17 +2351,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.empty().asIntStream().toArray();   // returns []
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code IntStream} consisting of the elements of this stream, widened to int
      * @throws IllegalStateException if the stream is already closed
@@ -3031,17 +2393,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: Optional[8]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a Stream consisting of the elements of this stream, each boxed to a Short
      * @throws IllegalStateException if the stream is already closed
@@ -3067,10 +2419,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Use as default return value
-     * public ShortStream getNumbers(boolean hasData) {
-     *     return hasData ? ShortStream.of(data) : ShortStream.empty();
-     * }
+     * // Use as a default value
+     * ShortStream numbers = hasData ? ShortStream.of(data) : ShortStream.empty();
      *
      * // Terminal operations on empty stream
      * ShortStream.empty().count();     // returns 0
@@ -3128,8 +2478,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * stream.forEach(System.out::println);   // "Stream created!" is printed, then numbers 1-9
      *
      * // Conditional stream creation
+     * boolean includeValues = true;
      * ShortStream conditional = ShortStream.defer(() -> {
-     *     if (someCondition()) {
+     *     if (includeValues) {
      *         return ShortStream.of((short) 1, (short) 2, (short) 3);
      *     } else {
      *         return ShortStream.empty();
@@ -4594,8 +3945,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.concat(streams)
      *     .toArray();   // returns [1, 2, 10, 11, 12, 20]
      *
-     * // Concatenate and process
-     * ShortStream.concat(streams)
+     * // Use fresh source streams for a second terminal pipeline
+     * ShortStream.concat(
+     *         ShortStream.of((short) 1, (short) 2),
+     *         ShortStream.range((short) 10, (short) 13),
+     *         ShortStream.of((short) 20))
      *     .filter(s -> s > 5)
      *     .toArray();   // returns [10, 11, 12, 20]
      * }</pre>
@@ -5549,6 +4903,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * and close handlers.
      */
     public abstract static class ShortStreamEx extends ShortStream {
+        /**
+         * Constructor for ShortStreamEx.
+         *
+         * @param sorted whether the stream is sorted
+         * @param closeHandlers collection of close handlers
+         */
         private ShortStreamEx(final boolean sorted, final Collection<LocalRunnable> closeHandlers) { //NOSONAR
             super(sorted, closeHandlers);
         }

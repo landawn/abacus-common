@@ -41,7 +41,7 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * operations, offering pre-built comparators for common data types and flexible builder patterns
  * for custom comparison logic.
  *
- * <p>Comparators addresses the limitations of the standard Java {@link Comparator} interface by
+ * <p>This class addresses the limitations of the standard Java {@link Comparator} interface by
  * providing consistent {@code null} handling semantics, specialized comparators for primitive arrays and
  * collections, and advanced features like case-insensitive string comparison, length-based
  * comparisons, and bean property comparisons. All comparators follow predictable {@code null} handling
@@ -72,7 +72,9 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * <ul>
  *   <li><b>nullsFirst():</b> Treats {@code null} as the minimum value (null &lt; any {@code non-null} value)</li>
  *   <li><b>nullsLast():</b> Treats {@code null} as the maximum value (null &gt; any {@code non-null} value)</li>
- *   <li><b>Default Behavior:</b> Most comparators use nullsFirst semantics by default</li>
+ *   <li><b>Per-factory behavior:</b> Natural-order comparators use nulls-first by default;
+ *       size and lexicographic factories document when {@code null} is treated like an empty value,
+ *       while extractor-based comparators generally require a non-{@code null} object</li>
  *   <li><b>Consistency:</b> Both nulls compare as equal (null == {@code null} returns 0)</li>
  * </ul>
  *
@@ -139,10 +141,10 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * people.sort(Comparators.reversedComparingInt(Person::getAge));
  *
  * // Optional value handling
- * List<Optional<String>> optionals = Arrays.asList(
- *     Optional.of("Alice"),
- *     Optional.empty(),
- *     Optional.of("Bob")
+ * List<u.Optional<String>> optionals = Arrays.asList(
+ *     u.Optional.of("Alice"),
+ *     u.Optional.empty(),
+ *     u.Optional.of("Bob")
  * );
  * optionals.sort(Comparators.emptiesFirst());
  * // Result: [empty, "Alice", "Bob"]
@@ -252,13 +254,14 @@ import com.landawn.abacus.util.function.ToShortFunction;
  *   <li><b>Convenience Methods:</b> More factory methods for common comparison scenarios</li>
  * </ul>
  *
- * <p><b>Constants:</b>
+ * <p><b>Public constants:</b>
  * <ul>
- *   <li>{@code NATURAL_ORDER} - Default natural ordering with nulls first</li>
- *   <li>{@code REVERSED_ORDER} - Reversed natural ordering with nulls last</li>
- *   <li>{@code *_ARRAY_COMPARATOR} - Predefined comparators for each primitive array type</li>
- *   <li>{@code COLLECTION_COMPARATOR} - Element-wise collection comparison</li>
+ *   <li>{@code *_ARRAY_COMPARATOR} - Predefined element-wise comparators for each primitive array type,
+ *       plus {@link #OBJECT_ARRAY_COMPARATOR}</li>
+ *   <li>{@link #COLLECTION_COMPARATOR} - Element-wise collection comparison</li>
  * </ul>
+ * <p>The natural-order and reverse-natural-order comparators are not exposed as constants; obtain them
+ * from {@link #naturalOrder()} (nulls first) and {@link #reverseOrder()} (nulls last).</p>
  *
  * <p><b>Integration Points:</b>
  * <ul>
@@ -842,8 +845,8 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Optional<String>> list = Arrays.asList(
-     *     Optional.of("b"), Optional.empty(), Optional.of("a")
+     * List<u.Optional<String>> list = Arrays.asList(
+     *     u.Optional.of("b"), u.Optional.empty(), u.Optional.of("a")
      * );
      * list.sort(Comparators.emptiesFirst());
      * // Result: [Optional.empty(), Optional.of("a"), Optional.of("b")]
@@ -866,8 +869,8 @@ public final class Comparators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
-     * List<Optional<String>> list = Arrays.asList(
-     *     Optional.of("long"), Optional.empty(), Optional.of("a")
+     * List<u.Optional<String>> list = Arrays.asList(
+     *     u.Optional.of("long"), u.Optional.empty(), u.Optional.of("a")
      * );
      * list.sort(Comparators.emptiesFirst(lengthComparator));
      * // Result: [Optional.empty(), Optional.of("a"), Optional.of("long")]
@@ -876,7 +879,7 @@ public final class Comparators {
      * @param <T> the type of the optional value
      * @param cmp the comparator to use for comparing present values
      * @return a comparator that treats empty optionals as less than present optionals
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <T> Comparator<u.Optional<T>> emptiesFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -893,8 +896,8 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Optional<Integer>> list = Arrays.asList(
-     *     Optional.of(2), Optional.empty(), Optional.of(1)
+     * List<u.Optional<Integer>> list = Arrays.asList(
+     *     u.Optional.of(2), u.Optional.empty(), u.Optional.of(1)
      * );
      * list.sort(Comparators.emptiesLast());
      * // Result: [Optional.of(1), Optional.of(2), Optional.empty()]
@@ -917,8 +920,8 @@ public final class Comparators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> reverseComparator = Comparator.reverseOrder();
-     * List<Optional<String>> list = Arrays.asList(
-     *     Optional.of("a"), Optional.empty(), Optional.of("b")
+     * List<u.Optional<String>> list = Arrays.asList(
+     *     u.Optional.of("a"), u.Optional.empty(), u.Optional.of("b")
      * );
      * list.sort(Comparators.emptiesLast(reverseComparator));
      * // Result: [Optional.of("b"), Optional.of("a"), Optional.empty()]
@@ -927,7 +930,7 @@ public final class Comparators {
      * @param <T> the type of the optional value
      * @param cmp the comparator to use for comparing present values
      * @return a comparator that treats empty optionals as greater than present optionals
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <T> Comparator<u.Optional<T>> emptiesLast(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -1185,7 +1188,7 @@ public final class Comparators {
 
     /**
      * Returns a comparator that compares objects by extracting a char value using the provided function.
-     * Characters are compared by their numeric (Unicode code point) values.
+     * Characters are compared by their numeric UTF-16 code-unit values.
      * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1510,7 +1513,7 @@ public final class Comparators {
      * @param <V> the value type
      * @param cmp the comparator to use for comparing keys
      * @return a comparator that compares map entries by their keys
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -1540,7 +1543,7 @@ public final class Comparators {
      * @param <V> the value type
      * @param cmp the comparator to use for comparing values
      * @return a comparator that compares map entries by their values
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -1681,7 +1684,9 @@ public final class Comparators {
      *
      * <p>This method is equivalent to calling {@code comparingArray(Comparators.naturalOrder())}
      * (null elements are treated as the minimum value)
-     * but is type-safe for arrays of Comparable elements.</p>
+     * but is type-safe for arrays of Comparable elements.
+     * An empty or {@code null} array is considered less than a non-empty array, and an empty array
+     * and a {@code null} array compare as equal.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1722,7 +1727,7 @@ public final class Comparators {
      * @param <T> the type of elements in the arrays
      * @param cmp the comparator to use for comparing array elements
      * @return a comparator that performs lexicographic comparison of arrays
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <T> Comparator<T[]> comparingArray(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -1757,6 +1762,7 @@ public final class Comparators {
      *
      * <p>This method is particularly useful for comparing Lists, Sets, or other Collections
      * where element order matters. For Sets, the iteration order depends on the Set implementation.</p>
+     * A {@code null} collection is treated the same as an empty collection.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1781,7 +1787,8 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty collections are considered less than non-empty collections</li>
+     *   <li>Empty or {@code null} collections are considered less than non-empty collections;
+     *       {@code null} and empty compare as equal</li>
      *   <li>Elements are compared in iteration order until a difference is found</li>
      *   <li>If all compared elements are equal, the smaller collection is considered less</li>
      * </ol>
@@ -1798,7 +1805,7 @@ public final class Comparators {
      * @param <C> the type of Collection
      * @param cmp the comparator to use for comparing collection elements
      * @return a comparator that performs lexicographic comparison of collections
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -1836,6 +1843,7 @@ public final class Comparators {
      *
      * <p>This method works with any Iterable implementation, including custom iterables.
      * The comparison continues until one iterable is exhausted or a difference is found.</p>
+     * A {@code null} iterable is treated the same as an empty iterable.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1860,7 +1868,8 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty iterables are considered less than non-empty iterables</li>
+     *   <li>Empty or {@code null} iterables are considered less than non-empty iterables;
+     *       {@code null} and empty compare as equal</li>
      *   <li>Elements are compared in iteration order</li>
      *   <li>If one iterable is exhausted first, it is considered less</li>
      *   <li>If both are exhausted simultaneously with all elements equal, they are equal</li>
@@ -1884,7 +1893,7 @@ public final class Comparators {
      * @param <C> the type of Iterable
      * @param cmp the comparator to use for comparing iterable elements
      * @return a comparator that performs lexicographic comparison of iterables
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <T, C extends Iterable<T>> Comparator<C> comparingIterable(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -1923,7 +1932,9 @@ public final class Comparators {
      * by consuming elements from both iterators until a difference is found or one is exhausted.
      *
      * <p><strong>Warning:</strong> This comparator consumes elements from the iterators during
-     * comparison. The iterators cannot be reused after comparison.</p>
+     * comparison. The iterators cannot be reused after comparison. The sole exception is when both
+     * arguments are the same iterator object: the comparator returns {@code 0} without consuming it.</p>
+     * A {@code null} iterator is treated the same as an empty iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1955,7 +1966,8 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty iterators are considered less than non-empty iterators</li>
+     *   <li>Empty or {@code null} iterators are considered less than non-empty iterators;
+     *       {@code null} and empty compare as equal</li>
      *   <li>Elements are consumed and compared until a difference is found</li>
      *   <li>If one iterator is exhausted first, it is considered less</li>
      * </ol>
@@ -1973,7 +1985,7 @@ public final class Comparators {
      * @param <C> the type of Iterator
      * @param cmp the comparator to use for comparing iterator elements
      * @return a comparator that performs lexicographic comparison of iterators
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -2010,6 +2022,7 @@ public final class Comparators {
      *
      * <p><strong>Note:</strong> The comparison order depends on the Map implementation. For predictable results,
      * use sorted maps (e.g., TreeMap) or maps with consistent iteration order (e.g., LinkedHashMap).</p>
+     * A {@code null} map is treated the same as an empty map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2040,7 +2053,8 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty maps are considered less than non-empty maps</li>
+     *   <li>Empty or {@code null} maps are considered less than non-empty maps;
+     *       {@code null} and empty compare as equal</li>
      *   <li>Keys are compared in iteration order using the provided comparator</li>
      *   <li>If all compared keys are equal, the smaller map is considered less</li>
      * </ol>
@@ -2064,7 +2078,7 @@ public final class Comparators {
      * @param <M> the type of Map
      * @param cmp the comparator to use for comparing map keys
      * @return a comparator that compares maps by their keys
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <K, M extends Map<K, ?>> Comparator<M> comparingMapByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -2102,6 +2116,7 @@ public final class Comparators {
      *
      * <p><strong>Note:</strong> The comparison order depends on the Map implementation and may not be predictable
      * for hash-based maps. This comparator is most useful when the iteration order is meaningful.</p>
+     * A {@code null} map is treated the same as an empty map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2132,6 +2147,7 @@ public final class Comparators {
      *
      * <p>This comparator is useful for comparing maps based on their value content rather than
      * their keys. The iteration order of values depends on the Map implementation.</p>
+     * A {@code null} map is treated the same as an empty map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2147,7 +2163,7 @@ public final class Comparators {
      * @param <M> the type of Map
      * @param cmp the comparator to use for comparing map values
      * @return a comparator that compares maps by their values
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     public static <V, M extends Map<?, V>> Comparator<M> comparingMapByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp);
@@ -2626,6 +2642,10 @@ public final class Comparators {
      * <p>This comparator is useful for sorting map entries by key in descending order,
      * such as when processing map entries in reverse alphabetical or reverse numeric order.</p>
      *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (a {@code null} key compares as greater than a
+     * {@code non-null} key, but a {@code null} entry is not tolerated).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Carol", 92);
@@ -2649,6 +2669,10 @@ public final class Comparators {
      * <p>This comparator is useful for sorting map entries by value in descending order,
      * such as creating a ranking from highest to lowest values.</p>
      *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (a {@code null} value compares as greater than a
+     * {@code non-null} value, but a {@code null} entry is not tolerated).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Carol", 92);
@@ -2670,6 +2694,10 @@ public final class Comparators {
      * reverse order using the specified comparator. This allows custom comparison
      * logic for the keys while maintaining reverse ordering.
      *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (null-key handling is delegated to the reversed form of
+     * the supplied comparator, but a {@code null} entry is not tolerated).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sort entries by key length in reverse order (longest first)
@@ -2687,7 +2715,7 @@ public final class Comparators {
      * @param <V> the value type
      * @param cmp the comparator to use for comparing keys (will be reversed)
      * @return a comparator that compares entries by key using reversed cmp
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     @Beta
     public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
@@ -2702,6 +2730,10 @@ public final class Comparators {
      * Returns a comparator that compares {@link Map.Entry} objects by their values in
      * reverse order using the specified comparator. This allows custom comparison
      * logic for the values while maintaining reverse ordering.
+     *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (null-value handling is delegated to the reversed form of
+     * the supplied comparator, but a {@code null} entry is not tolerated).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2720,7 +2752,7 @@ public final class Comparators {
      * @param <V> the value type
      * @param cmp the comparator to use for comparing values (will be reversed)
      * @return a comparator that compares entries by value using reversed cmp
-     * @throws IllegalArgumentException if cmp is null
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
      */
     @Beta
     public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {

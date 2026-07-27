@@ -118,7 +118,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     .toMap(Multiset.Entry::element, Multiset.Entry::count);
  *
  * // Custom backing map for sorted elements
- * Multiset<String> sorted = new Multiset<>(TreeMap::new);
+ * Multiset<String> sorted = new Multiset<>(() -> new TreeMap<>());
  * sorted.addAll(Arrays.asList("zebra", "apple", "banana"));
  * // Elements will be ordered alphabetically
  * }</pre>
@@ -297,7 +297,8 @@ public final class Multiset<E> implements Collection<E> {
      * Multiset<String> orderedMultiset = new Multiset<>(LinkedHashMap.class);
      * }</pre>
      *
-     * @param valueMapType the class of the map to be used as the backing map.
+     * @param valueMapType the class of the map to be used as the backing map; it must have an accessible no-arg constructor.
+     * @throws NullPointerException if {@code valueMapType} is {@code null}.
      * @throws IllegalArgumentException if the specified map type cannot be instantiated.
      */
     @SuppressWarnings("rawtypes")
@@ -315,12 +316,19 @@ public final class Multiset<E> implements Collection<E> {
      * Multiset<String> multiset = new Multiset<>(() -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
      * }</pre>
      *
-     * @param mapSupplier the supplier that provides the map to be used as the backing map.
+     * @param mapSupplier the supplier that provides the empty map to be used as the backing map.
      * @throws NullPointerException if {@code mapSupplier} or the map it supplies is {@code null}
+     * @throws IllegalArgumentException if the supplied map is not empty
      */
     @SuppressWarnings("unchecked")
     public Multiset(final Supplier<? extends Map<? extends E, ?>> mapSupplier) {
-        backingMap = (Map<E, MutableInt>) N.requireNonNull(N.requireNonNull(mapSupplier).get());
+        final Map<? extends E, ?> suppliedMap = N.requireNonNull(N.requireNonNull(mapSupplier).get());
+
+        if (!suppliedMap.isEmpty()) {
+            throw new IllegalArgumentException("The supplied map must be empty");
+        }
+
+        backingMap = (Map<E, MutableInt>) suppliedMap;
     }
 
     Multiset(final Map<E, MutableInt> valueMap) {
@@ -365,8 +373,9 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param <T> the type of elements.
-     * @param coll the collection whose elements are to be placed into the multiset.
-     * @return a new multiset containing the elements of the specified collection.
+     * @param coll the iterable whose elements are to be placed into the multiset; a {@code null}
+     *             iterable results in an empty multiset.
+     * @return a new multiset containing the elements of the specified iterable.
      */
     public static <T> Multiset<T> create(final Iterable<? extends T> coll) {
         return new Multiset<>(coll);
@@ -384,7 +393,8 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param <T> the type of elements.
-     * @param iter the iterator whose elements are to be placed into the multiset.
+     * @param iter the iterator whose elements are to be placed into the multiset; a {@code null}
+     *             iterator results in an empty multiset.
      * @return a new multiset containing the elements from the iterator.
      * @throws IllegalArgumentException if adding an element would exceed {@link Integer#MAX_VALUE} occurrences.
      */
@@ -1573,6 +1583,10 @@ public final class Multiset<E> implements Collection<E> {
      * in the element set, and removing an element from the returned set removes all of its
      * occurrences from the multiset.
      *
+     * <p>The returned set supports removal ({@code remove}, {@code removeAll}, {@code retainAll},
+     * {@code clear} and {@code Iterator.remove}) but not addition: {@code add} and {@code addAll}
+     * throw {@link UnsupportedOperationException}. Its iteration order is that of the backing map.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "b", "c");
@@ -1580,7 +1594,9 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(elements);   // prints [a, b, c] (order may vary)
      * }</pre>
      *
-     * @return a view of the distinct elements in this multiset
+     * @return a live view of the distinct elements in this multiset; never {@code null}
+     * @see #entrySet()
+     * @see #countOfDistinctElements()
      */
     public Set<E> elementSet() {
         return backingMap.keySet();
@@ -1907,8 +1923,11 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param <M> the type of the map to be returned.
-     * @param supplier a function that generates a new instance of the desired map type.
-     * @return a map with the elements of this multiset as keys and their counts as values
+     * @param supplier a function that creates a new, empty map of the desired type; it is called
+     *                 once with the number of distinct elements in this multiset as a size hint.
+     * @return the map created by {@code supplier}, populated with the elements of this multiset as
+     *         keys and their counts as values
+     * @see #toMap()
      */
     public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier) {
         final M result = supplier.apply(backingMap.size());
@@ -1934,7 +1953,10 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: a=1, b=2, c=3
      * }</pre>
      *
-     * @return a map with the elements of this multiset as keys and their counts as values, sorted by the counts
+     * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is by
+     *         ascending count; empty if this multiset is empty
+     * @see #toMapSortedByOccurrences(Comparator)
+     * @see #toMapSortedByKey(Comparator)
      */
     @SuppressWarnings("rawtypes")
     public Map<E, Integer> toMapSortedByOccurrences() {
@@ -1956,8 +1978,10 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param cmp the comparator to be used for sorting the counts of the elements; must not be {@code null}
-     * @return a map with the elements of this multiset as keys and their counts as values, sorted by the counts using the provided comparator
+     * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
+     *         {@code cmp} induces on the counts; empty if this multiset is empty
      * @throws IllegalArgumentException if {@code cmp} is {@code null}
+     * @see #toMapSortedByOccurrences()
      */
     public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) {
         N.checkArgNotNull(cmp, cs.comparator);
@@ -1979,8 +2003,11 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: a=2, b=1, c=1
      * }</pre>
      *
-     * @param cmp the comparator to be used for sorting the keys of the elements.
-     * @return a map with the elements of this multiset as keys and their counts as values, sorted by the keys using the provided comparator
+     * @param cmp the comparator to be used for sorting the keys of the elements; must not be {@code null}
+     * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
+     *         {@code cmp} induces on the elements; empty if this multiset is empty
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}
+     * @see #toMapSortedByOccurrences()
      */
     public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) {
         return toMapSortedBy(Comparators.comparingByKey(cmp));
@@ -2002,7 +2029,8 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param cmp the comparator to be used for sorting; it compares {@code Map.Entry<E, MutableInt>} objects
      *            by their key, value, or both.
-     * @return a map with the elements of this multiset as keys and their counts as values, sorted according to the provided comparator.
+     * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
+     *         {@code cmp} induces on the backing entries; empty if this multiset is empty
      */
     Map<E, Integer> toMapSortedBy(final Comparator<Map.Entry<E, MutableInt>> cmp) {
         if (N.isEmpty(backingMap)) {
@@ -2054,8 +2082,10 @@ public final class Multiset<E> implements Collection<E> {
      *     multiset.toImmutableMap(size -> new TreeMap<>());
      * }</pre>
      *
-     * @param mapSupplier a function that generates a new instance of the desired map type.
+     * @param mapSupplier a function that creates a new, empty map of the desired type; it is called
+     *                    once with the number of distinct elements in this multiset as a size hint.
      * @return an immutable map with the elements of this multiset as keys and their counts as values
+     * @see #toImmutableMap()
      */
     public ImmutableMap<E, Integer> toImmutableMap(final IntFunction<? extends Map<E, Integer>> mapSupplier) {
         return ImmutableMap.wrap(toMap(mapSupplier));

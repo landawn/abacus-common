@@ -47,7 +47,9 @@ import com.landawn.abacus.util.EnumType;
  *   <li>Custom enum mappings</li>
  * </ul>
  *
- * <p><b>Usage Examples:</b></p>
+ * <p><b>Usage Examples:</b> Custom names such as {@code EncryptedString} below assume that a
+ * corresponding {@link com.landawn.abacus.type.Type Type} has first been registered with
+ * {@link com.landawn.abacus.type.TypeFactory TypeFactory}.</p>
  * <pre>{@code
  * public class User {
  *     @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
@@ -80,7 +82,8 @@ import com.landawn.abacus.util.EnumType;
 public @interface Type {
 
     /**
-     * Deprecated alias for {@link #name()}.
+     * Deprecated alias for {@link #name()}. When both are specified, this element wins:
+     * {@link #name()} is consulted only if this one is empty.
      *
      * @return the type name, or an empty string if not specified
      * @deprecated Use {@link #name()} to specify the type name explicitly.
@@ -106,7 +109,7 @@ public @interface Type {
      * private String sensitiveData;
      *
      * @Type(name = "LocalDateTime")
-     * private Date timestamp;
+     * private LocalDateTime timestamp;
      * }</pre>
      *
      * @return the type name, or empty string to use default type handling
@@ -115,20 +118,32 @@ public @interface Type {
 
     /**
      * Specifies a custom {@code Type} class to handle value conversion.
-     * The specified class must implement {@link com.landawn.abacus.type.Type} and
-     * provide the necessary conversion methods.
+     * The specified class must implement {@link com.landawn.abacus.type.Type} (typically by
+     * extending {@link com.landawn.abacus.type.AbstractType}) and provide the necessary conversion
+     * methods.
      *
      * <p>This is useful for complex custom conversions that can't be handled
      * by the built-in types. The custom type class should:</p>
      * <ul>
-     *   <li>Have a no-argument constructor</li>
+     *   <li>Have a no-argument constructor; or, when {@link #name()} (or deprecated
+     *       {@link #value()}) is specified, a constructor accepting one {@link String}. The
+     *       single-argument constructor is preferred when both are present.</li>
      *   <li>Override the necessary conversion methods</li>
      *   <li>Be thread-safe if used in concurrent contexts</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * public class EncryptedStringType implements Type<String> {
+     * public class EncryptedStringType extends AbstractType<String> {
+     *     public EncryptedStringType() {
+     *         super("EncryptedString");
+     *     }
+     *
+     *     @Override
+     *     public Class<String> javaType() {
+     *         return String.class;
+     *     }
+     *
      *     @Override
      *     public String valueOf(String value) {
      *         return decrypt(value);
@@ -183,11 +198,11 @@ public @interface Type {
      *
      * // Using NAME (default) - stored as "LOW", "MEDIUM", etc.
      * @Type(enumerated = EnumType.NAME)
-     * private Priority priority;
+     * private Priority priorityByName;
      *
      * // Using ORDINAL - stored as 0, 1, 2, 3
      * @Type(enumerated = EnumType.ORDINAL)
-     * private Priority priority;
+     * private Priority priorityByOrdinal;
      * }</pre>
      *
      * @return the enum representation strategy, defaults to {@link EnumType#NAME}

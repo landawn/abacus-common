@@ -59,6 +59,10 @@ import com.landawn.abacus.logging.LoggerFactory;
 @Internal
 public final class DataSourceUtil {
 
+    /**
+     * Logger used by the {@code closeQuietly} family and by {@link #executeBatch(Statement)} to record
+     * close/clear failures that are deliberately swallowed rather than propagated.
+     */
     static final Logger logger = LoggerFactory.getLogger(DataSourceUtil.class);
 
     // volatile because releaseConnection writes this from any thread on a NoClassDefFoundError;
@@ -69,7 +73,9 @@ public final class DataSourceUtil {
         try {
             //noinspection ConstantValue
             isInSpring = ClassUtil.forName("org.springframework.jdbc.datasource.DataSourceUtils") != null;
-        } catch (final Throwable e) {
+        } catch (final LinkageError | RuntimeException e) {
+            // Dependency/linkage failures mean Spring integration is unavailable. VM failures and
+            // other control-flow Errors must still propagate rather than being silently swallowed.
             isInSpring = false;
         }
     }
@@ -90,6 +96,10 @@ public final class DataSourceUtil {
      *
      * <p>This method should be used instead of directly calling {@code Connection.close()}
      * when working with Spring-managed data sources to ensure proper transaction handling.</p>
+     *
+     * <p>If the Spring class is on the classpath at detection time but turns out to be unusable
+     * when first invoked, Spring delegation is disabled for the remaining lifetime of the JVM and
+     * this and all later calls fall back to closing the connection quietly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -723,12 +733,13 @@ public final class DataSourceUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PreparedStatement pstmt = conn.prepareStatement("INSERT INTO users (name) VALUES (?)");
-     * for (String name : names) {
-     *     pstmt.setString(1, name);
-     *     pstmt.addBatch();
+     * try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO users (name) VALUES (?)")) {
+     *     for (String name : names) {
+     *         pstmt.setString(1, name);
+     *         pstmt.addBatch();
+     *     }
+     *     int[] results = DataSourceUtil.executeBatch(pstmt);
      * }
-     * int[] results = DataSourceUtil.executeBatch(pstmt);
      * }</pre>
      *
      * @param stmt the Statement containing the batch commands to execute; must not be {@code null}

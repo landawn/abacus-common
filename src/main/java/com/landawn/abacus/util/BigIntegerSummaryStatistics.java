@@ -97,7 +97,9 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * @param min the minimum value, may be {@code null} if no values were recorded
      * @param max the maximum value, may be {@code null} if no values were recorded
      * @param sum the sum of values; if {@code null}, it is treated as {@link BigInteger#ZERO}
-     * @throws IllegalArgumentException if {@code count} is negative, or if {@code min} is greater than {@code max}
+     * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state has non-null
+     *         min/max values or a nonzero sum; or if a non-empty state has a null min/max value or
+     *         {@code min} is greater than {@code max}
      */
     public BigIntegerSummaryStatistics(final long count, final BigInteger min, final BigInteger max, final BigInteger sum) {
         if (count < 0) {
@@ -148,7 +150,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     }
 
     /**
-     * Combines the state of another BigIntegerSummaryStatistics into this one.
+     * Combines the state of another {@code BigIntegerSummaryStatistics} into this one.
      *
      * <p>This method is useful for parallel processing where multiple
      * summary statistics objects are created for different partitions
@@ -168,7 +170,8 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * // stats1 now contains combined statistics of all four values
      * }</pre>
      *
-     * @param other another BigIntegerSummaryStatistics to be combined with this one
+     * @param other another {@code BigIntegerSummaryStatistics} to be combined with this one; must not be {@code null}
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     public void combine(final BigIntegerSummaryStatistics other) {
         count += other.count;

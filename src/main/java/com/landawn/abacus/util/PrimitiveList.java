@@ -33,10 +33,10 @@ import com.landawn.abacus.annotation.Beta;
 /**
  * An abstract base class that provides a comprehensive framework for implementing lists of primitive data types
  * with high-performance operations and extensive functionality. This class serves as the foundation for all
- * primitive list implementations in the abacus-common framework, offering optimized storage and operations that avoid
- * the boxing overhead associated with standard Java collections containing primitive wrapper objects.
+ * primitive list implementations in abacus-core, offering primitive-array storage and operations that avoid
+ * boxing while elements remain in the primitive-list API.
  *
- * <p>PrimitiveList extends the concept of traditional collections by providing specialized implementations
+ * <p>{@code PrimitiveList} is not a {@link Collection}; it provides specialized implementations
  * for primitive types (boolean, byte, char, short, int, long, float, double) with type-safe operations,
  * memory-efficient storage, and performance-optimized algorithms. The class design follows the template
  * method pattern, defining the contract and common functionality while allowing concrete implementations
@@ -44,13 +44,13 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Zero-Boxing Overhead:</b> Direct primitive storage without wrapper object allocation</li>
+ *   <li><b>Primitive Storage:</b> Direct primitive storage; conversion methods such as {@link #boxed()} box elements</li>
  *   <li><b>Memory Efficiency:</b> Compact array-based storage with intelligent capacity management</li>
- *   <li><b>Type Safety:</b> Compile-time type checking with generic type parameters</li>
+ *   <li><b>Type-Specific APIs:</b> Separate concrete classes for each supported primitive type</li>
  *   <li><b>Rich API:</b> Comprehensive set of operations including sorting, searching, and set operations</li>
  *   <li><b>Performance Optimization:</b> Specialized algorithms optimized for primitive data types</li>
- *   <li><b>Collection Integration:</b> Seamless interoperability with standard Java collections</li>
- *   <li><b>Serialization Support:</b> Built-in serialization capabilities for persistence and transmission</li>
+ *   <li><b>Collection Conversion:</b> Explicit conversion to standard Java collections when needed</li>
+ *   <li><b>Serialization Support:</b> Implements {@link java.io.Serializable}; subclasses define their serialized state</li>
  *   <li><b>Random Access:</b> O(1) element access by index through RandomAccess interface</li>
  * </ul>
  *
@@ -109,7 +109,7 @@ import com.landawn.abacus.annotation.Beta;
  *   <li><b>Sorting Operations:</b> sort, reverseSort, isSorted</li>
  *   <li><b>Set Operations:</b> intersection, difference, symmetricDifference, disjoint</li>
  *   <li><b>Transformation:</b> reverse, rotate, shuffle, swap</li>
- *   <li><b>Range Operations:</b> subList, removeRange, replaceRange</li>
+ *   <li><b>Range Operations:</b> copy(int, int), removeRange, replaceRange, moveRange</li>
  *   <li><b>Conversion:</b> toArray, boxed, toSet, toCollection</li>
  * </ul>
  *
@@ -120,7 +120,7 @@ import com.landawn.abacus.annotation.Beta;
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) linear search, O(log n) binary search on sorted data</li>
  *   <li><b>Sorting:</b> O(n log n) using optimized primitive-specific algorithms</li>
- *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection</li>
+ *   <li><b>Set Operations:</b> Complexity depends on the concrete implementation and input sizes</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
@@ -136,28 +136,29 @@ import com.landawn.abacus.annotation.Beta;
  *   <li><b>Not Thread-Safe:</b> Implementations are not synchronized by default</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access (e.g., synchronize on the list instance)</li>
  *   <li><b>Concurrent Access:</b> Undefined behavior under concurrent modification</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read without synchronization</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation</li>
  * </ul>
  *
  * <p><b>Serialization Support:</b>
  * <ul>
  *   <li><b>Serializable Interface:</b> Implements {@link java.io.Serializable} for persistence</li>
- *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Custom Serialization:</b> Subclasses may implement custom serialization logic</li>
- *   <li><b>Cross-Platform:</b> Serialized form is platform-independent</li>
+ *   <li><b>Versioning:</b> This base class declares a {@code serialVersionUID}; subclasses may declare their own</li>
+ *   <li><b>Serialized Form:</b> Compatibility depends on the concrete subclass and its fields</li>
  * </ul>
  *
  * <p><b>Integration with Java Collections Framework:</b>
  * <ul>
  *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
  *   <li><b>Boxed Conversion:</b> Seamless conversion to standard List&lt;B&gt;</li>
- *   <li><b>Collection Compatibility:</b> Works with Collections utility methods</li>
- *   <li><b>Stream Integration:</b> Can be converted to streams for functional processing</li>
+ *   <li><b>Collection Compatibility:</b> Convert explicitly before passing a primitive list to collection-only APIs</li>
+ *   <li><b>Stream Integration:</b> Concrete subclasses expose type-specific stream methods</li>
  * </ul>
  *
  * <p><b>Advanced Set Operations:</b>
  * <ul>
- *   <li><b>Mathematical Sets:</b> Union, intersection, difference, symmetric difference</li>
+ *   <li><b>Multiset Semantics:</b> intersection, difference and symmetric difference match up
+ *       occurrences rather than distinct values; there is no {@code union} method (append with
+ *       {@code addAll} and, if wanted, {@code removeDuplicates})</li>
  *   <li><b>Algorithm Selection:</b> Automatic choice between linear and hash-based algorithms</li>
  *   <li><b>Disjoint Testing:</b> Efficient checking for common elements</li>
  *   <li><b>Duplicate Handling:</b> Detection and removal of duplicate elements</li>
@@ -181,7 +182,7 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Growth:</b> Empty storage grows to at least 10 elements on its first required allocation</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion factor for balanced performance</li>
  *   <li><b>Maximum Capacity:</b> Platform-specific maximum array size</li>
  *   <li><b>Trimming:</b> Ability to reduce capacity to actual size</li>
@@ -189,9 +190,9 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p><b>Comparison with Standard Collections:</b>
  * <ul>
- *   <li><b>Performance:</b> Significantly faster for primitive operations</li>
- *   <li><b>Memory Usage:</b> 2-4x less memory consumption than boxed collections</li>
- *   <li><b>Type Safety:</b> Compile-time prevention of type mixing</li>
+ *   <li><b>Performance:</b> Primitive storage avoids per-element wrapper allocation</li>
+ *   <li><b>Memory Usage:</b> Primitive arrays generally use less storage than individually boxed elements</li>
+ *   <li><b>Type Safety:</b> Concrete classes prevent mixing different primitive element types</li>
  *   <li><b>Functionality:</b> Additional primitive-specific operations</li>
  * </ul>
  *
@@ -243,10 +244,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     private static final long serialVersionUID = 1504784980113045443L;
 
     /**
-     * Default initial capacity.
+     * Minimum allocation used when an empty backing array first needs to grow.
      */
     static final int DEFAULT_CAPACITY = 10;
 
+    /**
+     * Largest backing-array length a primitive list may allocate; requests beyond it raise
+     * {@link OutOfMemoryError}. Mirrors {@code N.MAX_ARRAY_SIZE}.
+     */
     static final int MAX_ARRAY_SIZE = N.MAX_ARRAY_SIZE;
 
     /**
@@ -1248,7 +1253,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param fromIndex the starting index (inclusive) of the range to copy.
      *                  For forward stepping, must be &lt; toIndex.
-     *                  For reverse stepping, must be &gt; toIndex (or toIndex can be -1 for start).
+     *                  For reverse stepping, must be &gt; toIndex (or toIndex can be -1 to copy through the first element).
      * @param toIndex the ending index (exclusive) of the range to copy.
      *                Can be -1 when using negative step to indicate copying to the start.
      * @param step the interval between selected elements. Must not be zero.
@@ -1567,6 +1572,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance with the given initial capacity.
      *                 The supplier receives the number of elements that will be added.
      * @return a Collection containing all elements from this list as boxed objects
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws RuntimeException if the supplier throws an exception during Collection creation
      * @see #toCollection(int, int, IntFunction)
      */
     public <C extends Collection<B>> C toCollection(final IntFunction<? extends C> supplier) {
@@ -1685,6 +1692,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing elements from the specified range with their occurrence counts
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier);

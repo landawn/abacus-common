@@ -169,6 +169,8 @@ public interface NoCachingNoUpdating {
             if (len < 0) {
                 throw new IllegalArgumentException("Length must be non-negative: " + len);
             }
+
+            N.checkArgNotNull(componentType, "componentType");
             return new DisposableArray<>(N.newArray(componentType, len));
         }
 
@@ -245,7 +247,7 @@ public interface NoCachingNoUpdating {
          * @param target the array into which the elements are to be stored if it is large enough;
          *               otherwise a new array of the same runtime type is allocated
          * @return an array containing the elements; the supplied {@code target} if it was large
-         *         enough, otherwise a newly allocated array
+         *         enough and is not the wrapped backing array, otherwise a newly allocated array
          * @throws IllegalArgumentException if {@code target} is {@code null}
          */
         @SuppressWarnings("unchecked")
@@ -254,7 +256,10 @@ public interface NoCachingNoUpdating {
 
             final int len = length();
 
-            if (target.length < len) {
+            // A caller that originally supplied the wrapped array can pass that same object
+            // back as the target. Returning it would violate this type's documented snapshot
+            // contract and make a supposedly safe result mutate when the producer reuses it.
+            if (target == a || target.length < len) {
                 target = (A[]) java.lang.reflect.Array.newInstance(target.getClass().getComponentType(), len);
             } else if (target.length > len) {
                 // Mirror Collection.toArray(T[]) contract: when the supplied array is larger
@@ -280,8 +285,8 @@ public interface NoCachingNoUpdating {
          * DisposableArray<String> empty = DisposableArray.wrap(new String[0]);
          * empty.copy();                  // returns empty String[]
          * DisposableArray<String> single = DisposableArray.wrap(new String[] {"x"});
-         * single.copy();              // returns ["x"]
-         * arr.copy() != arr.copy();   // true (independent copies)
+         * single.copy();                                          // returns ["x"]
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new array containing the same element references
@@ -738,7 +743,7 @@ public interface NoCachingNoUpdating {
          * arr.copy();                                                  // returns [true, false, true]
          * DisposableBooleanArray.wrap(new boolean[0]).copy();          // returns empty boolean[]
          * DisposableBooleanArray.wrap(new boolean[] {false}).copy();   // returns [false]
-         * arr.copy() != arr.copy();                                    // true (independent copies)
+         * boolean independentCopies = arr.copy() != arr.copy();        // true
          * }</pre>
          *
          * @return a new boolean array containing copies of the elements
@@ -757,7 +762,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                                  // returns [Boolean.TRUE, Boolean.FALSE, Boolean.TRUE]
          * DisposableBooleanArray.wrap(new boolean[0]).box();          // returns empty Boolean[]
          * DisposableBooleanArray.wrap(new boolean[] {false}).box();   // returns [Boolean.FALSE]
-         * arr.box().length;                                           // returns 3
+         * int boxedLength = arr.box().length;                         // returns 3
          * }</pre>
          *
          * @return a new Boolean array containing boxed values
@@ -1073,10 +1078,10 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
-         * arr.copy();                                          // returns ['a', 'b', 'c']
-         * DisposableCharArray.wrap(new char[0]).copy();        // returns empty char[]
-         * DisposableCharArray.wrap(new char[] {'x'}).copy();   // returns ['x']
-         * arr.copy() != arr.copy();                            // true (independent copies)
+         * arr.copy();                                             // returns ['a', 'b', 'c']
+         * DisposableCharArray.wrap(new char[0]).copy();           // returns empty char[]
+         * DisposableCharArray.wrap(new char[] {'x'}).copy();      // returns ['x']
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new char array containing copies of the elements
@@ -1094,7 +1099,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                          // returns [Character.valueOf('a'), Character.valueOf('b'), Character.valueOf('c')]
          * DisposableCharArray.wrap(new char[0]).box();        // returns empty Character[]
          * DisposableCharArray.wrap(new char[] {'x'}).box();   // returns [Character.valueOf('x')]
-         * arr.box().length;                                   // returns 3
+         * int boxedLength = arr.box().length;                 // returns 3
          * }</pre>
          *
          * @return a new Character array containing boxed values
@@ -1488,10 +1493,10 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
-         * arr.copy();                                         // returns [1, 2, 3]
-         * DisposableByteArray.wrap(new byte[0]).copy();       // returns empty byte[]
-         * DisposableByteArray.wrap(new byte[] {99}).copy();   // returns [99]
-         * arr.copy() != arr.copy();                           // true (independent copies)
+         * arr.copy();                                             // returns [1, 2, 3]
+         * DisposableByteArray.wrap(new byte[0]).copy();           // returns empty byte[]
+         * DisposableByteArray.wrap(new byte[] {99}).copy();       // returns [99]
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new byte array containing copies of the elements
@@ -1509,7 +1514,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                         // returns [Byte.valueOf((byte)1), Byte.valueOf((byte)2), Byte.valueOf((byte)3)]
          * DisposableByteArray.wrap(new byte[0]).box();       // returns empty Byte[]
          * DisposableByteArray.wrap(new byte[] {99}).box();   // returns [Byte.valueOf((byte)99)]
-         * arr.box().length;                                  // returns 3
+         * int boxedLength = arr.box().length;                // returns 3
          * }</pre>
          *
          * @return a new Byte array containing boxed values
@@ -1897,10 +1902,10 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
-         * arr.copy();                                           // returns [1, 2, 3]
-         * DisposableShortArray.wrap(new short[0]).copy();       // returns empty short[]
-         * DisposableShortArray.wrap(new short[] {99}).copy();   // returns [99]
-         * arr.copy() != arr.copy();                             // true (independent copies)
+         * arr.copy();                                             // returns [1, 2, 3]
+         * DisposableShortArray.wrap(new short[0]).copy();         // returns empty short[]
+         * DisposableShortArray.wrap(new short[] {99}).copy();     // returns [99]
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new short array containing copies of the elements
@@ -1918,7 +1923,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                           // returns [Short.valueOf((short)1), Short.valueOf((short)2), Short.valueOf((short)3)]
          * DisposableShortArray.wrap(new short[0]).box();       // returns empty Short[]
          * DisposableShortArray.wrap(new short[] {99}).box();   // returns [Short.valueOf((short)99)]
-         * arr.box().length;                                    // returns 3
+         * int boxedLength = arr.box().length;                  // returns 3
          * }</pre>
          *
          * @return a new Short array containing boxed values
@@ -2307,10 +2312,10 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
-         * arr.copy();                                       // returns [1, 2, 3]
-         * DisposableIntArray.wrap(new int[0]).copy();       // returns empty int[]
-         * DisposableIntArray.wrap(new int[] {99}).copy();   // returns [99]
-         * arr.copy() != arr.copy();                         // true (independent copies)
+         * arr.copy();                                             // returns [1, 2, 3]
+         * DisposableIntArray.wrap(new int[0]).copy();             // returns empty int[]
+         * DisposableIntArray.wrap(new int[] {99}).copy();         // returns [99]
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new int array containing copies of the elements
@@ -2328,7 +2333,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                       // returns [Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)]
          * DisposableIntArray.wrap(new int[0]).box();       // returns empty Integer[]
          * DisposableIntArray.wrap(new int[] {99}).box();   // returns [Integer.valueOf(99)]
-         * arr.box().length;                                 // returns 3
+         * int boxedLength = arr.box().length;              // returns 3
          * }</pre>
          *
          * @return a new Integer array containing boxed values
@@ -2338,7 +2343,7 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Converts the array to a IntList.
+         * Converts the array to an IntList.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2716,10 +2721,10 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
-         * arr.copy();                                         // returns [1, 2, 3]
-         * DisposableLongArray.wrap(new long[0]).copy();       // returns empty long[]
-         * DisposableLongArray.wrap(new long[] {99}).copy();   // returns [99]
-         * arr.copy() != arr.copy();                           // true (independent copies)
+         * arr.copy();                                             // returns [1, 2, 3]
+         * DisposableLongArray.wrap(new long[0]).copy();           // returns empty long[]
+         * DisposableLongArray.wrap(new long[] {99}).copy();       // returns [99]
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new long array containing copies of the elements
@@ -2737,7 +2742,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                         // returns [Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)]
          * DisposableLongArray.wrap(new long[0]).box();       // returns empty Long[]
          * DisposableLongArray.wrap(new long[] {99}).box();   // returns [Long.valueOf(99)]
-         * arr.box().length;                                  // returns 3
+         * int boxedLength = arr.box().length;                // returns 3
          * }</pre>
          *
          * @return a new Long array containing boxed values
@@ -3125,10 +3130,10 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
-         * arr.copy();                                           // returns [1, 2, 3]
-         * DisposableFloatArray.wrap(new float[0]).copy();       // returns empty float[]
-         * DisposableFloatArray.wrap(new float[] {99}).copy();   // returns [99]
-         * arr.copy() != arr.copy();                             // true (independent copies)
+         * arr.copy();                                             // returns [1, 2, 3]
+         * DisposableFloatArray.wrap(new float[0]).copy();         // returns empty float[]
+         * DisposableFloatArray.wrap(new float[] {99}).copy();     // returns [99]
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new float array containing copies of the elements
@@ -3146,7 +3151,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                           // returns [Float.valueOf(1), Float.valueOf(2), Float.valueOf(3)]
          * DisposableFloatArray.wrap(new float[0]).box();       // returns empty Float[]
          * DisposableFloatArray.wrap(new float[] {99}).box();   // returns [Float.valueOf(99)]
-         * arr.box().length;                                    // returns 3
+         * int boxedLength = arr.box().length;                  // returns 3
          * }</pre>
          *
          * @return a new Float array containing boxed values
@@ -3537,7 +3542,7 @@ public interface NoCachingNoUpdating {
          * arr.copy();                                             // returns [1, 2, 3]
          * DisposableDoubleArray.wrap(new double[0]).copy();       // returns empty double[]
          * DisposableDoubleArray.wrap(new double[] {99}).copy();   // returns [99]
-         * arr.copy() != arr.copy();                               // true (independent copies)
+         * boolean independentCopies = arr.copy() != arr.copy();   // true
          * }</pre>
          *
          * @return a new double array containing copies of the elements
@@ -3555,7 +3560,7 @@ public interface NoCachingNoUpdating {
          * arr.box();                                             // returns [Double.valueOf(1), Double.valueOf(2), Double.valueOf(3)]
          * DisposableDoubleArray.wrap(new double[0]).box();       // returns empty Double[]
          * DisposableDoubleArray.wrap(new double[] {99}).box();   // returns [Double.valueOf(99)]
-         * arr.box().length;                                      // returns 3
+         * int boxedLength = arr.box().length;                    // returns 3
          * }</pre>
          *
          * @return a new Double array containing boxed values
@@ -3958,7 +3963,10 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Returns an array containing all elements of the deque.
+         * Returns an array containing all elements of the deque, in iteration order.
+         * If the supplied array is large enough, the elements are stored in it; otherwise a new
+         * array of the same runtime type is allocated. Follows the same contract as
+         * {@link java.util.Collection#toArray(Object[])}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3968,10 +3976,7 @@ public interface NoCachingNoUpdating {
          * deque.toArray(new String[5]);   // returns ["a", "b", "c", null, null] (padded)
          * }</pre>
          *
-         * If the supplied array is large enough, the elements are stored in it; otherwise a new
-         * array of the same runtime type is allocated. Follows the same contract as
-         * {@link java.util.Collection#toArray(Object[])}.
-         * The returned array is safe to cache and modify.
+         * <p>The returned array is safe to cache and modify.</p>
          *
          * @param <A> the runtime type of the target array
          * @param a the array into which the elements are to be stored if it is large enough;
@@ -4527,6 +4532,14 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given bi-consumer action with the left and right elements.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Pair<String, Integer> pair = Pair.of("left", 100);
+         * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
+         * disposable.accept((l, r) -> System.out.println(l + "=" + r));   // prints "left=100"
+         * DisposablePair.wrap(Pair.of("x", 1)).accept((l, r) -> {});      // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the bi-consumer action to perform
          * @throws NullPointerException if {@code action} is {@code null}
@@ -4872,8 +4885,8 @@ public interface NoCachingNoUpdating {
          * <pre>{@code
          * Timed<String> t1 = Timed.of("value", 12345L);
          * Timed<String> t2 = Timed.of("value", 12345L);
-         * t1.hashCode() == t2.hashCode();   // returns true
-         * Timed.of(null, 0L).hashCode();    // returns valid hash code
+         * boolean sameHashCode = t1.hashCode() == t2.hashCode();   // returns true
+         * Timed.of(null, 0L).hashCode();                           // returns valid hash code
          * }</pre>
          *
          * @return the hash code

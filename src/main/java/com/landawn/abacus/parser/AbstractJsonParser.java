@@ -36,7 +36,6 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Common constants for JSON syntax characters (braces, brackets, quotation marks)</li>
  *   <li>Default type definitions for objects, strings, and booleans</li>
- *   <li>Character replacement mappings for JSON escaping</li>
  *   <li>Default serialization and deserialization configurations</li>
  *   <li>Implementation of {@link JsonParser} methods with configuration support</li>
  * </ul>
@@ -51,38 +50,38 @@ import com.landawn.abacus.util.stream.Stream;
  */
 abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDeserConfig> implements JsonParser {
 
+    /** Opening brace <code>&#123;</code>, which starts a JSON object. */
     protected static final char _BRACE_L = SK._BRACE_L;
 
+    /** Closing brace <code>&#125;</code>, which ends a JSON object. */
     protected static final char _BRACE_R = SK._BRACE_R;
 
+    /** Opening bracket {@code [}, which starts a JSON array. */
     protected static final char _BRACKET_L = SK._BRACKET_L;
 
+    /** Closing bracket {@code ]}, which ends a JSON array. */
     protected static final char _BRACKET_R = SK._BRACKET_R;
 
+    /** Double quote, the string quotation character mandated by the JSON specification. */
     protected static final char _DOUBLE_QUOTE = SK._DOUBLE_QUOTE;
 
+    /** Single quote, accepted on input as a non-standard string delimiter. */
     protected static final char _SINGLE_QUOTE = SK._SINGLE_QUOTE;
 
+    /** Cached {@code Object} type, used when no more specific type is known. */
     protected static final Type<Object> objType = TypeFactory.getType(Object.class);
 
+    /** Cached {@code String} type. */
     protected static final Type<String> strType = TypeFactory.getType(String.class);
 
+    /** Cached {@code Boolean} type. */
     protected static final Type<Boolean> boolType = TypeFactory.getType(Boolean.class);
 
+    /** Key type assumed for map entries when the configuration specifies none ({@code Object}). */
     protected static final Type<?> defaultKeyType = objType;
 
+    /** Value type assumed for map entries and elements when the configuration specifies none ({@code Object}). */
     protected static final Type<?> defaultValueType = objType;
-
-    protected static final String[] REPLACEMENT_CHARS;
-
-    static {
-        final int length = 128;
-        REPLACEMENT_CHARS = new String[length];
-
-        for (int i = 0; i < length; i++) {
-            REPLACEMENT_CHARS[i] = String.format("\\u%04x", i);
-        }
-    }
 
     /** The fallback serialization configuration used when a per-call {@code config} argument is {@code null}. */
     protected final JsonSerConfig defaultJsonSerConfig;
@@ -113,7 +112,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON string into an object of the specified target type using default deserialization configuration.
      * This method provides a convenient way to parse JSON without specifying custom configuration options.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = parser.parse("{\"name\":\"John\",\"age\":30}", Type.of(User.class));
      * List<String> names = parser.parse("[\"Alice\",\"Bob\"]", Type.of(List.class));
@@ -136,7 +135,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON string into an object of the specified target class using default deserialization configuration.
      * This method provides a convenient way to parse JSON without specifying custom configuration options.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = parser.parse("{\"name\":\"John\",\"age\":30}", User.class);
      * List<String> names = parser.parse("[\"Alice\",\"Bob\"]", List.class);
@@ -184,7 +183,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided object array with the deserialized elements.
      * This method uses default deserialization configuration and directly populates the output array.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] output = new Object[3];
      * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", output);
@@ -208,7 +207,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
      * subclasses must override this method to provide actual parsing behavior.</p>
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] output = new Object[3];
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -229,7 +228,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON array string and populates the provided collection with the deserialized elements.
      * This method uses default deserialization configuration and adds elements to the output collection.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
      * parser.parse("[\"Alice\",\"Bob\"]", output);
@@ -253,7 +252,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
      * subclasses must override this method to provide actual parsing behavior.</p>
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -274,7 +273,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a JSON object string and populates the provided map with the deserialized key-value pairs.
      * This method uses default deserialization configuration and adds entries to the output map.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
      * parser.parse("{\"name\":\"John\",\"age\":30}", output);
@@ -298,7 +297,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
      * subclasses must override this method to provide actual parsing behavior.</p>
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -319,7 +318,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object of the specified target type using default configuration.
      * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * User user = parser.deserialize(json, 10, 25, Type.of(User.class));
@@ -345,7 +344,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object of the specified target class using default configuration.
      * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * User user = parser.deserialize(json, 10, 25, User.class);
@@ -371,7 +370,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process for a specific portion of the input.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -399,7 +398,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
      * This method allows fine-grained control over the deserialization process for a specific portion of the input.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"users\":[{\"name\":\"John\"}]}";
      * JsonDeserConfig config = new JsonDeserConfig();
@@ -427,7 +426,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array string.
      * This method provides efficient streaming of large JSON arrays without loading all elements into memory at once.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream<User> userStream = parser.stream("[{\"name\":\"John\"},{\"name\":\"Jane\"}]", Type.of(User.class));
      * userStream.forEach(System.out::println);
@@ -447,10 +446,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array file.
      * This method provides efficient streaming of large JSON files without loading the entire file into memory.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File jsonFile = new File("users.json");
-     * Stream<User> userStream = parser.stream(jsonFile, Type.of(User.class));
+     * try (Stream<User> userStream = parser.stream(jsonFile, Type.of(User.class))) {
+     *     userStream.forEach(System.out::println);
+     * }
      * }</pre>
      *
      * @param <T> the type of elements in the stream
@@ -467,10 +468,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array input stream.
      * This method provides efficient streaming from input streams with optional automatic resource management.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * InputStream is = new FileInputStream("users.json");
-     * Stream<User> userStream = parser.stream(is, true, Type.of(User.class));
+     * try (InputStream is = new FileInputStream("users.json");
+     *      Stream<User> userStream = parser.stream(is, true, Type.of(User.class))) {
+     *     userStream.forEach(System.out::println);
+     * }
      * }</pre>
      *
      * @param <T> the type of elements in the stream
@@ -488,10 +491,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Creates a stream that lazily deserializes elements from a JSON array reader.
      * This method provides efficient streaming from readers with optional automatic resource management.
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("users.json");
-     * Stream<User> userStream = parser.stream(reader, true, Type.of(User.class));
+     * try (Reader reader = new FileReader("users.json");
+     *      Stream<User> userStream = parser.stream(reader, true, Type.of(User.class))) {
+     *     userStream.forEach(System.out::println);
+     * }
      * }</pre>
      *
      * @param <T> the type of elements in the stream

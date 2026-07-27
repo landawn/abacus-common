@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -5049,6 +5050,14 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
+    public void testFill_NullSupplierRejectedForEmptyTargetsAndRanges() {
+        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], (Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], 0, 0, (Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), (Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
+    }
+
+    @Test
     public void testCopyLists() {
         List<String> src = Arrays.asList("a", "b", "c");
         List<String> dest = new ArrayList<>(Arrays.asList("x", "y", "z", "w"));
@@ -5803,6 +5812,11 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
+    public void testSubSet_NullRangeRejectedEvenForNullSet() {
+        assertThrows(IllegalArgumentException.class, () -> Iterables.subSet((NavigableSet<Integer>) null, null));
+    }
+
+    @Test
     public void testPowerSet() {
         Set<Integer> input = new HashSet<>(Arrays.asList(1, 2, 3));
         Set<Set<Integer>> powerSet = Iterables.powerSet(input);
@@ -6018,6 +6032,7 @@ public class IterablesTest extends AbstractTest {
         assertTrue(perms.contains(list(1, 2)));
         assertTrue(perms.contains(list(2, 1)));
         assertFalse(perms.contains(list(1, 3)));
+        assertFalse(perms.contains(new LinkedHashSet<>(Arrays.asList(1, 2))));
         assertFalse(perms.contains("not a list"));
     }
 
@@ -6101,7 +6116,14 @@ public class IterablesTest extends AbstractTest {
         assertTrue(perms.contains(list(1, 2)));
         assertTrue(perms.contains(list(2, 1)));
         assertFalse(perms.contains(list(1, 3)));
+        assertFalse(perms.contains(new LinkedHashSet<>(Arrays.asList(1, 2))));
         assertFalse(perms.contains("not a list"));
+    }
+
+    @Test
+    public void testOrderedPermutations_NullComparatorRejectedForEveryInputSize() {
+        assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.<Integer> emptyList(), null));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.singletonList(1), null));
     }
 
     @Test
@@ -6625,6 +6647,7 @@ public class IterablesTest extends AbstractTest {
         assertEquals(6, r.size());
         assertEquals(Arrays.asList(1, 10), r.get(0));
         assertEquals(Arrays.asList(3, 20), r.get(5));
+        assertFalse(r.contains(new LinkedHashSet<>(Arrays.asList(1, 10))));
     }
 
     @Test
@@ -6733,6 +6756,112 @@ public class IterablesTest extends AbstractTest {
         final List<Collection<? extends Integer>> axes = Arrays.asList(Arrays.asList(1), null);
 
         assertTrue(Iterables.cartesianProduct(axes).isEmpty());
+    }
+
+    @Test
+    public void testPowerSet_AllSubsetsHaveExpectedContent() {
+        // regression: the element list was rebuilt per SubSet; it is now built once in PowerSet
+        // and shared by all subset views — subset content and iteration must be unchanged.
+        final Set<Integer> input = new java.util.LinkedHashSet<>(Arrays.asList(1, 2, 3, 4));
+        final Set<Set<Integer>> powerSet = Iterables.powerSet(input);
+
+        assertEquals(16, powerSet.size());
+
+        final Set<Set<Integer>> materialized = new HashSet<>();
+        for (final Set<Integer> subset : powerSet) {
+            assertTrue(materialized.add(subset)); // subsets are pairwise distinct
+            assertTrue(input.containsAll(subset)); // every subset is a real subset of the input
+        }
+
+        assertEquals(16, materialized.size());
+        assertTrue(materialized.contains(Collections.emptySet()));
+        assertTrue(materialized.contains(input));
+        for (final Integer e : input) {
+            assertTrue(materialized.contains(Collections.singleton(e)));
+        }
+
+        // a second full iteration yields the same subsets again
+        final Set<Set<Integer>> secondPass = new HashSet<>();
+        for (final Set<Integer> subset : powerSet) {
+            secondPass.add(subset);
+        }
+        assertEquals(materialized, secondPass);
+    }
+
+    @Test
+    public void testSetViewIteratorContract() {
+        // hasNext() must be idempotent and next() must throw NoSuchElementException once drained.
+        final Set<Integer> set1 = new java.util.LinkedHashSet<>(Arrays.asList(1, 2, 3));
+        final Set<Integer> set2 = new java.util.LinkedHashSet<>(Arrays.asList(3, 4));
+
+        final List<Set<Integer>> views = Arrays.asList(Iterables.union(set1, set2), Iterables.intersection(set1, set2), Iterables.difference(set1, set2),
+                Iterables.symmetricDifference(set1, set2));
+
+        for (final Set<Integer> view : views) {
+            final Iterator<Integer> iter = view.iterator();
+            while (iter.hasNext()) {
+                assertTrue(iter.hasNext()); // idempotent
+                iter.next();
+            }
+            assertFalse(iter.hasNext());
+            assertThrows(java.util.NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    public void testSetViewsWithNullElements() {
+        // null elements must flow through the NULL_SENTINEL-based view iterators
+        final Set<Integer> set1 = new java.util.LinkedHashSet<>(Arrays.asList(1, null, 2));
+        final Set<Integer> set2 = new java.util.LinkedHashSet<>(Arrays.asList(null, 2, 3));
+
+        assertEquals(new HashSet<>(Arrays.asList(1, null, 2, 3)), new HashSet<>(Iterables.union(set1, set2)));
+        assertEquals(new HashSet<>(Arrays.asList(null, 2)), new HashSet<>(Iterables.intersection(set1, set2)));
+        assertEquals(new HashSet<>(Arrays.asList(1)), new HashSet<>(Iterables.difference(set1, set2)));
+        assertEquals(new HashSet<>(Arrays.asList(1, 3)), new HashSet<>(Iterables.symmetricDifference(set1, set2)));
+    }
+
+    @Test
+    public void testCopyIntoSameListBackwardOverlap() {
+        // destPos < srcPos on the same list takes the direct (non-snapshot) path; reads stay ahead of writes
+        final List<Integer> randomAccess = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
+        Iterables.copyInto(randomAccess, 2, randomAccess, 0, 2);
+        assertEquals(Arrays.asList(3, 4, 3, 4), randomAccess);
+
+        final List<Integer> sequential = new LinkedList<>(Arrays.asList(1, 2, 3, 4));
+        Iterables.copyInto(sequential, 2, sequential, 0, 2);
+        assertEquals(Arrays.asList(3, 4, 3, 4), sequential);
+    }
+
+    @Test
+    public void testSubSet_CustomComparatorConsistentWithNaturalOrder() {
+        // a custom comparator that orders like the natural ordering passes the consistency check
+        final NavigableSet<Integer> set = new TreeSet<>(Comparator.<Integer> naturalOrder());
+        set.addAll(Arrays.asList(1, 2, 3, 4, 5));
+
+        assertEquals(new TreeSet<>(Arrays.asList(3, 4)), Iterables.subSet(set, Range.closedOpen(3, 5)));
+    }
+
+    @Test
+    public void testKthLargest_NonPositiveKThrows() {
+        // documented: IllegalArgumentException if k <= 0 and the input is neither null nor empty
+        assertThrows(IllegalArgumentException.class, () -> Iterables.kthLargest(new Integer[] { 3, 1, 2 }, 0));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.kthLargest(Arrays.asList(3, 1, 2), -1));
+
+        // null/empty input still yields an empty Nullable for k <= 0
+        assertTrue(Iterables.kthLargest(new Integer[0], 0).isEmpty());
+        assertTrue(Iterables.kthLargest((List<Integer>) null, 0).isEmpty());
+    }
+
+    @Test
+    public void testAverageBigInteger_AllNullValues_ReturnsZero() {
+        // documented quirk: a non-empty iterable whose extracted values are all null -> Optional[0]
+        final Optional<BigDecimal> avgInt = Iterables.averageBigInteger(Arrays.asList("a", "b"), s -> null);
+        assertTrue(avgInt.isPresent());
+        assertEquals(BigDecimal.ZERO, avgInt.get());
+
+        final Optional<BigDecimal> avgDec = Iterables.averageBigDecimal(Arrays.asList("a", "b"), s -> null);
+        assertTrue(avgDec.isPresent());
+        assertEquals(BigDecimal.ZERO, avgDec.get());
     }
 
 }

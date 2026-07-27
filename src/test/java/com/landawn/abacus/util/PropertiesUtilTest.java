@@ -2069,7 +2069,7 @@ public class PropertiesUtilTest extends TestBase {
         assertTrue(generatedFile.exists());
         String content = Files.readString(generatedFile.toPath());
         assertTrue(content.contains("public Database getDatabase()"), content);
-        assertTrue(content.contains("public static class Database extends Properties<String, Object>"), content);
+        assertTrue(content.contains("public static class Database extends com.landawn.abacus.util.Properties<String, Object>"), content);
         assertFalse(content.contains("public String getDatabase()"), content);
         // The leaf inside the nested class is still a plain String property
         assertTrue(content.contains("public String getUrl()"), content);
@@ -2106,6 +2106,92 @@ public class PropertiesUtilTest extends TestBase {
         new File(srcPath).mkdirs();
 
         assertThrows(RuntimeException.class, () -> PropertiesUtil.xmlToJava(xml, srcPath, "com.deepdup", "DeepDupConfig", false));
+    }
+
+    @Test
+    public void testLoadAutoRefreshReturnsRegisteredInstanceWhenFileIsTemporarilyMissing() throws IOException {
+        final Properties<String, String> first = PropertiesUtil.load(testPropertiesFile, true);
+        assertTrue(testPropertiesFile.delete());
+
+        final Properties<String, String> second = PropertiesUtil.load(testPropertiesFile, true);
+        Assertions.assertSame(first, second);
+    }
+
+    @Test
+    public void testStoreConvertsNonStringKeysAndValues() throws IOException {
+        final Properties<Integer, Object> props = new Properties<>();
+        props.put(7, 42L);
+
+        final StringWriter writer = new StringWriter();
+        PropertiesUtil.store(props, null, writer);
+
+        final java.util.Properties reloaded = new java.util.Properties();
+        reloaded.load(new StringReader(writer.toString()));
+        assertEquals("42", reloaded.getProperty("7"));
+    }
+
+    @Test
+    public void testStoreToXmlRejectsInvalidNamesBeforeWriting() {
+        final Properties<String, Object> props = new Properties<>();
+        props.put("not an xml name", "value");
+        final StringWriter writer = new StringWriter();
+
+        assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.storeToXml(props, "config", true, writer));
+        assertEquals("", writer.toString());
+        assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.storeToXml(new Properties<>(), "bad:unboundPrefix", true, writer));
+    }
+
+    @Test
+    public void testStoreToXmlRejectsNestedPropertiesCycleBeforeWriting() {
+        final Properties<String, Object> props = new Properties<>();
+        props.put("self", props);
+        final StringWriter writer = new StringWriter();
+
+        assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.storeToXml(props, "config", true, writer));
+        assertEquals("", writer.toString());
+    }
+
+    @Test
+    public void testXmlToJavaNormalizesRootAndNestedClassNamesAndCompiles() throws IOException {
+        final String xml = "<app-config><database-settings><retry-count type=\"int\">3</retry-count></database-settings></app-config>";
+        final Path sourceRoot = Files.createDirectories(tempDir.resolve("normalized-source"));
+
+        PropertiesUtil.xmlToJava(xml, sourceRoot.toString(), "com.normalized", null, false);
+
+        final Path generated = sourceRoot.resolve("com/normalized/AppConfig.java");
+        final String content = Files.readString(generated);
+        assertTrue(content.contains("class AppConfig"), content);
+        assertTrue(content.contains("class DatabaseSettings"), content);
+        assertTrue(content.contains("getRetryCount"), content);
+
+        final javax.tools.JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
+        assertNotNull(compiler, "The test requires a JDK, not a JRE");
+        assertEquals(0, compiler.run(null, null, null, "-classpath", System.getProperty("java.class.path"), generated.toString()));
+    }
+
+    @Test
+    public void testXmlToJavaSupportsDefaultPackage() throws IOException {
+        final Path sourceRoot = Files.createDirectories(tempDir.resolve("default-package-source"));
+        PropertiesUtil.xmlToJava("<config><name>test</name></config>", sourceRoot.toString(), "", "Config", false);
+
+        final String content = Files.readString(sourceRoot.resolve("Config.java"));
+        assertFalse(content.contains("package ;"), content);
+        assertTrue(content.contains("public class Config"), content);
+    }
+
+    @Test
+    public void testXmlToJavaValidationDoesNotOverwriteExistingSource() throws IOException {
+        final Path packageDir = Files.createDirectories(tempDir.resolve("preserved-source/com/preserved"));
+        final Path existing = packageDir.resolve("Config.java");
+        Files.writeString(existing, "original source");
+
+        final String recursiveClassName = "<config><config><value>x</value></config></config>";
+        assertThrows(IllegalArgumentException.class,
+                () -> PropertiesUtil.xmlToJava(recursiveClassName, tempDir.resolve("preserved-source").toString(), "com.preserved", "Config", false));
+        assertEquals("original source", Files.readString(existing));
+
+        assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.xmlToJava("<config/>", tempDir.toString(), "com..invalid", "Config", false));
+        assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.xmlToJava("<config/>", tempDir.toString(), "com.valid", "../Config", false));
     }
 
 }

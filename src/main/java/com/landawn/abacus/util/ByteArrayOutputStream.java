@@ -168,9 +168,9 @@ public final class ByteArrayOutputStream extends OutputStream {
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * baos.write("Hello".getBytes());
      *
-     * FileOutputStream fos = new FileOutputStream("output.txt");
-     * baos.writeTo(fos);   // Writes "Hello" to the file
-     * fos.close();
+     * try (FileOutputStream fos = new FileOutputStream("output.txt")) {
+     *     baos.writeTo(fos);   // Writes "Hello" to the file
+     * }
      * }</pre>
      *
      * @param out the output stream to write to

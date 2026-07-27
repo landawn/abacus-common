@@ -50,7 +50,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Stream all pages
  * userPages.stream()
- *     .flatMap(List::stream)
+ *     .flatmap(page -> page)
  *     .forEach(user -> process(user));
  *
  * // Iterate through pages
@@ -111,7 +111,7 @@ public interface Paginated<T> extends Iterable<T> {
      * // Get the most recent log entries (assuming newest last)
      * logs.lastPage().ifPresent(recentLogs -> {
      *     System.out.println("Latest " + recentLogs.size() + " log entries");
-     *     recentLogs.forEach(this::processLogEntry);
+     *     recentLogs.forEach(System.out::println);
      * });
      *
      * // Check if there's data before processing
@@ -193,10 +193,10 @@ public interface Paginated<T> extends Iterable<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Old code
-     * int count = paginated.pageCount();
+     * int oldPageCount = paginated.pageCount();
      *
      * // New code
-     * int count = paginated.totalPages();
+     * int newPageCount = paginated.totalPages();
      * }</pre>
      *
      * @return the total number of pages
@@ -251,7 +251,7 @@ public interface Paginated<T> extends Iterable<T> {
      *
      * // Process all transactions across all pages
      * long totalAmount = transactions.stream()
-     *     .flatMap(List::stream)
+     *     .flatmap(page -> page)
      *     .mapToLong(Transaction::getAmount)
      *     .sum();
      *

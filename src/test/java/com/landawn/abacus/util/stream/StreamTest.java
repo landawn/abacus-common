@@ -54,6 +54,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -6616,12 +6617,6 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testPrintlnEmpty() {
-        Stream.empty().println();
-        assertTrue(true);
-    }
-
-    @Test
     public void testToImmutableListEmpty() {
         List<Integer> result = Stream.<Integer> empty().toImmutableList();
         assertTrue(result.isEmpty());
@@ -8066,7 +8061,6 @@ public class StreamTest extends AbstractTest {
         long expectedSum = ((long) size * (size - 1)) / 2;
         assertEquals(expectedSum, sum);
     }
-
 
 
     @Test
@@ -12274,6 +12268,7 @@ public class StreamTest extends AbstractTest {
         assertTrue(Stream.parallelConcat((Stream<Integer>[]) null).toList().isEmpty());
     }
 
+
     @Test
     public void testReferenceArrayMergeRejectsNullSelectorEagerly() {
         assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[0], new Integer[0], null));
@@ -12311,6 +12306,39 @@ public class StreamTest extends AbstractTest {
         }).get());
         assertEquals(4, closeCount.get());
         assertThrows(IllegalStateException.class, source::count);
+    }
+
+    @Test
+    public void testAsyncTerminalWrappersCloseStreamWhenSchedulingIsRejected() {
+        final RejectedExecutionException rejection = new RejectedExecutionException("expected");
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> runSource = Stream.of(1).onClose(closeCount::incrementAndGet);
+
+        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> runSource.runAsync(s -> s.count(), command -> {
+            throw rejection;
+        })));
+        assertEquals(1, closeCount.get());
+        assertThrows(IllegalStateException.class, runSource::count);
+
+        final Stream<Integer> callSource = Stream.of(1).onClose(closeCount::incrementAndGet);
+        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> callSource.callAsync(s -> s.count(), command -> {
+            throw rejection;
+        })));
+        assertEquals(2, closeCount.get());
+        assertThrows(IllegalStateException.class, callSource::count);
+
+        final IllegalStateException closeFailure = new IllegalStateException("close failed");
+        final Stream<Integer> closeFailingSource = Stream.of(1).onClose(() -> {
+            throw closeFailure;
+        });
+        final RejectedExecutionException thrown = assertThrows(RejectedExecutionException.class, () -> closeFailingSource.runAsync(s -> s.count(), command -> {
+            throw rejection;
+        }));
+
+        assertSame(rejection, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(closeFailure, thrown.getSuppressed()[0]);
+        assertThrows(IllegalStateException.class, closeFailingSource::count);
     }
 
     private static <T> Iterator<T> countingIterator(final List<T> values, final AtomicInteger nextCalls) {

@@ -65,7 +65,7 @@ public final class Timed<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> message = Timed.of("System started");
-     * Timed<List<String>> snapshot = Timed.of(activeUsers);
+     * Timed<List<String>> snapshot = Timed.of(List.of("alice", "bob"));
      * }</pre>
      *
      * @param <T> the type of the value.
@@ -88,9 +88,9 @@ public final class Timed<T> implements Immutable {
      * long yesterday = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
      * Timed<String> historicalEvent = Timed.of("Event occurred", yesterday);
      *
-     * // Create from a database timestamp
-     * long dbTimestamp = resultSet.getTimestamp("created_at").getTime();
-     * Timed<User> timedUser = Timed.of(user, dbTimestamp);
+     * // Create from a database-style timestamp
+     * long dbTimestamp = java.sql.Timestamp.valueOf("2025-01-15 10:30:00").getTime();
+     * Timed<String> timedUser = Timed.of("Alice", dbTimestamp);
      * }</pre>
      *
      * @param <T> the type of the value.
@@ -127,9 +127,9 @@ public final class Timed<T> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Timed<User> timedUser = Timed.of(currentUser);
-     * User user = timedUser.value();
-     * processUser(user);
+     * Timed<String> timedUser = Timed.of("Alice");
+     * String user = timedUser.value();
+     * System.out.println(user);
      * }</pre>
      *
      * @return the value associated with the timestamp; can be {@code null}.
@@ -175,8 +175,8 @@ public final class Timed<T> implements Immutable {
      * Timed<String> t2 = Timed.of("hello", 1000L);
      * Timed<String> t3 = Timed.of("hello", 2000L);
      *
-     * assertTrue(t1.equals(t2));    // same value and timestamp
-     * assertFalse(t1.equals(t3));   // same value, different timestamp
+     * boolean same = t1.equals(t2);       // true: same value and timestamp
+     * boolean different = t1.equals(t3);  // false: same value, different timestamp
      * }</pre>
      *
      * @param obj the reference object with which to compare.

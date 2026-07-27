@@ -94,7 +94,11 @@ class JsonStreamReader extends JsonStringReader {
      * <pre>{@code
      * try (Reader reader = new FileReader("data.json")) {
      *     JsonReader jsonReader = JsonStreamReader.parse(reader, new char[8192], new char[8192]);
-     *     // ... use jsonReader ...
+     *     while (jsonReader.nextToken() != JsonReader.EOF) {
+     *         if (jsonReader.hasText()) {
+     *             System.out.println(jsonReader.getText());
+     *         }
+     *     }
      * }
      * }</pre>
      *
@@ -395,7 +399,7 @@ class JsonStreamReader extends JsonStringReader {
     /**
      * Reads the next character from the input source, refilling the buffer if necessary.
      *
-     * @return the next character, or -1 if the end of the input is reached
+     * @return the next character, or {@code -1} if the end of the input is reached
      */
     protected int nextChar() {
         if (strBeginIndex >= strEndIndex) {

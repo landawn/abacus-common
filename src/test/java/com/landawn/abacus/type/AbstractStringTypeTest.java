@@ -140,6 +140,22 @@ public class AbstractStringTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfClobPreservesPrimaryErrorWhenFreeFailsUnchecked() throws SQLException {
+        Clob clob = mock(Clob.class);
+        AssertionError primaryFailure = new AssertionError();
+        RuntimeException cleanupFailure = new IllegalStateException();
+
+        when(clob.length()).thenThrow(primaryFailure);
+        doThrow(cleanupFailure).when(clob).free();
+
+        AssertionError thrown = assertThrows(AssertionError.class, () -> stringType.valueOf(clob));
+
+        assertSame(primaryFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+    }
+
+    @Test
     public void testGetFromResultSetByIndex() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         when(rs.getString(1)).thenReturn("value1");

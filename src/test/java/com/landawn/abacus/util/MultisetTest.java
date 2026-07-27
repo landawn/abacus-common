@@ -3754,6 +3754,11 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
+    public void testConstructorWithMapSupplierReturningNonEmptyMap() {
+        assertThrows(IllegalArgumentException.class, () -> new Multiset<String>(() -> Map.of("a", 1)));
+    }
+
+    @Test
     public void testRemoveAllSelfClearsWithoutConcurrentModification() {
         Multiset<String> set = Multiset.of("a", "a", "b");
 

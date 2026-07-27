@@ -15,9 +15,8 @@
 package com.landawn.abacus.util;
 
 /**
- * A high-performance string writer implementation built on StringBuilder.
- * Unlike {@link java.io.StringWriter}, this implementation is NOT thread-safe,
- * trading thread safety for better performance in single-threaded scenarios.
+ * An unsynchronized string writer implementation backed by a {@link StringBuilder}.
+ * Unlike {@link java.io.StringWriter}, this implementation is not thread-safe.
  *
  * <p>This class extends {@link AppendableWriter} and uses a StringBuilder as its
  * internal buffer. It provides all standard Writer operations plus additional
@@ -26,7 +25,7 @@ package com.landawn.abacus.util;
  * <p>Key differences from java.io.StringWriter:
  * <ul>
  *   <li>Not thread-safe (no synchronization overhead)</li>
- *   <li>Built on StringBuilder for better performance</li>
+ *   <li>Built on {@link StringBuilder} rather than a synchronized buffer</li>
  *   <li>Provides direct access to the underlying StringBuilder</li>
  *   <li>Returns <i>this</i> from append methods for method chaining</li>
  * </ul>
@@ -180,7 +179,7 @@ public final class StringWriter extends AppendableWriter {
      * @return this StringWriter instance for method chaining
      * @throws IndexOutOfBoundsException if {@code start} or {@code end} are negative,
      *         {@code start} is greater than {@code end}, or {@code end} is greater than
-     *         {@code csq.length()}
+     *         the effective sequence length (four when {@code csq} is {@code null})
      */
     @Override
     public StringWriter append(final CharSequence csq, final int start, final int end) {
@@ -241,6 +240,7 @@ public final class StringWriter extends AppendableWriter {
      * @param len the number of characters to write
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code off + len} is greater than {@code cbuf.length}
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     @Override
     public void write(final char[] cbuf, final int off, final int len) {

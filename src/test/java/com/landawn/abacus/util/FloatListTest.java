@@ -1790,16 +1790,6 @@ public class FloatListTest extends TestBase {
     }
 
     @Test
-    public void testMaxArraySize() {
-        try {
-            FloatList largeList = new FloatList(Integer.MAX_VALUE - 8);
-            assertTrue(largeList.isEmpty());
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
     public void testMedian() {
         FloatList list = FloatList.of(3.0f, 1.0f, 2.0f);
         OptionalFloat median = list.median();
@@ -2689,19 +2679,6 @@ public class FloatListTest extends TestBase {
         assertEquals(100, fl.size());
         assertEquals(0.0f, fl.get(0), 0.0001f);
         assertEquals(99.0f, fl.get(99), 0.0001f);
-    }
-
-    @Test
-    public void testEnsureCapacityOverflow() {
-        list.add(1.1f);
-        try {
-            for (int i = 0; i < 100; i++) {
-                list.add(i * 0.1f);
-            }
-            assertTrue(list.size() > 1);
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
     }
 
     @Test

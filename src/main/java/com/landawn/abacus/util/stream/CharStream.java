@@ -147,7 +147,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
  *     .parallel()                      // switches to parallel processing
  *     .filter(Character::isUpperCase)  // filters uppercase letters
  *     .mapToInt(c -> c)                // maps to int stream
- *     .average();                      // gets average ASCII value
+ *     .average();                      // gets average Unicode code-unit value
  *
  * // Advanced text operations
  * String result = Stream.of("Hello", "World")
@@ -171,7 +171,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
  *   <li>Use CharStream instead of {@code Stream<Character>} to avoid boxing overhead</li>
  *   <li>Parallel processing benefits large text datasets (typically &gt; 10,000 characters)</li>
  *   <li>Sequential processing is more efficient for small text and simple operations</li>
- *   <li>Lazy evaluation means intermediate operations are not executed until terminal operations</li>
+ *   <li>Most intermediate operations are evaluated lazily when a terminal operation consumes the stream</li>
  * </ul>
  *
  * @see StreamBase
@@ -211,17 +211,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *       .toCharList();   // returns ['d', 'e']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
@@ -270,17 +260,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *       .toArray();   // returns ['a', 'b', 'c']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
@@ -332,17 +312,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *       .toArray();   // returns ['d', 'e', 'b', 'a']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
@@ -372,17 +342,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from char to char
      * @return a new CharStream consisting of the results of applying the mapper function to the elements of this stream
@@ -416,17 +376,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from char to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
@@ -462,17 +412,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from char to T
@@ -505,17 +445,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
@@ -569,17 +499,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from char to {@code Collection<Character>}
      * @return a new {@code CharStream} consisting of the flattened contents of the collections produced by the mapper
@@ -615,17 +535,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a char array
      * @return a new {@code CharStream} consisting of the flattened contents of the arrays produced by the mapper
@@ -659,17 +569,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
@@ -702,22 +602,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param <T> the element type of the new stream
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
+     * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to a Stream
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
@@ -746,17 +636,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to a Collection
@@ -787,17 +667,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element to an array
@@ -831,17 +701,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *       .toArray();   // returns ['b', 'd']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element from char to OptionalChar
      * @return a new {@code CharStream} containing only the char values from non-empty {@code OptionalChar} results
@@ -871,17 +731,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *       .toCharList();   // returns ['a', 'x'] (first of ranges 'a'-'c' and 'x'-'z')
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
@@ -927,17 +777,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toList();   // returns []
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -978,17 +818,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toList();   // returns []
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
@@ -1031,17 +861,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toArray();   // returns ['x']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
@@ -1081,17 +901,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toArray();   // returns []
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
      *          The collapsible predicate takes three elements: the first and last elements of current group, and the next element to check.
@@ -1128,17 +938,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toArray();   // [(char)1, (char)3, (char)6, (char)10]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param accumulator a {@code CharBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code CharStream} consisting of the results of the scan operation on the elements of the original stream.
@@ -1175,17 +975,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toArray();   // [(char)11, (char)13, (char)16]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      *        It will be ignored if this stream is empty and won't be the first element of the returned stream.
@@ -1220,17 +1010,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toArray();   // [(char)11, (char)13, (char)16]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      * @param initIncluded if {@code true}, the {@code init} value is included as the first element of the returned stream;
@@ -1256,17 +1036,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * CharStream.of('c', 'd').prepend('a', 'b').toArray();   // returns ['a', 'b', 'c', 'd']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param a the elements to prepend to this stream
      * @return a new stream with the specified elements prepended
@@ -1286,17 +1056,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * CharStream.of('a', 'b').append('c', 'd').toArray();   // returns ['a', 'b', 'c', 'd']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param a the elements to append to this stream
      * @return a new stream with the specified elements appended
@@ -1318,17 +1078,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * CharStream.of('a').appendIfEmpty('x', 'y').toArray();   // returns ['a']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param a the elements to append if this stream is empty
      * @return this stream if not empty, otherwise a new stream containing the specified elements
@@ -1363,17 +1113,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: ['A', 'B', 'C']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a CharList containing all elements of this stream
      * @throws IllegalStateException if the stream is already closed
@@ -1406,17 +1146,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toMap(c -> c, c -> Character.toUpperCase(c));   // throws on duplicate key 'a'
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1425,10 +1155,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
      * @return a Map whose keys and values are the result of applying mapping functions to the input elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
-     * @throws IllegalStateException if duplicate keys are encountered
      * @see Collectors#toMap(Function, Function)
      */
     @ParallelSupported
@@ -1456,17 +1185,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'a'=97, 'b'=98, 'c'=99} in natural order
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1477,11 +1196,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param valueMapper a mapping function to produce values
      * @param mapFactory a supplier providing a new empty Map into which the results will be inserted
      * @return a Map whose keys and values are the result of applying mapping functions to the input elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
-     * @throws IllegalStateException if duplicate keys are encountered
-     * @see Collectors#toMap(Function, Function)
+     * @see Collectors#toMap(Function, Function, Supplier)
      */
     @ParallelSupported
     @TerminalOp
@@ -1514,17 +1232,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'a'="Last-a", 'b'="Last-b", 'c'="Last-c"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1565,17 +1273,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'a'="aa", 'b'="bb", 'c'="c", 'd'="d"} in natural order
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1620,17 +1318,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {4="1", 5="23", 9="abc"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1668,17 +1356,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'a'=2, 'b'=2, 'c'=2} in natural order
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1721,17 +1399,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: character with value 294 (97+98+99)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param identity the identity value for the accumulating function
      * @param accumulator an associative, non-interfering, stateless function for combining two values
@@ -1767,17 +1435,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: OptionalChar.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an OptionalChar describing the result of the reduction
@@ -1820,17 +1478,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'A', 'B', 'C'}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <R> the type of the mutable result container
      * @param supplier a function that creates a new mutable result container.
@@ -1880,17 +1528,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: ['x', 'y', 'z']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <R> the type of the mutable result container. Must be one of:
      *            {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
@@ -1927,17 +1565,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // prints: a, b, c, d, e (each on a new line)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the action may throw
      * @param action a non-interfering action to perform on the elements
@@ -1969,17 +1597,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Element at index 2: z
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the action may throw
      * @param action a non-interfering action to perform on the elements, taking both index and element
@@ -2013,17 +1631,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .anyMatch(c -> c == 'a');   // returns false
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -2062,17 +1670,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .allMatch(c -> c >= 'a' && c <= 'z');   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -2111,17 +1709,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .noneMatch(c -> !Character.isLetterOrDigit(c));   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -2134,28 +1722,21 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     public abstract <E extends Exception> boolean noneMatch(final Throwables.CharPredicate<E> predicate) throws E;
 
     /**
-     * Returns the first element in the stream, if present, otherwise returns an empty {@code OptionalChar}.
-     * This is a terminal operation that short-circuits on the first element.
+     * Returns the first element of this stream wrapped in an {@code OptionalChar}, or an empty
+     * {@code OptionalChar} if this stream is empty. This is a short-circuiting terminal operation:
+     * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>Note: This method is an alias for {@link #first()} to align with the standard Stream API naming conventions.</p>
+     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element
+     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
+     * the standard {@link java.util.stream.Stream#findFirst()} API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar first = CharStream.of('a', 'b', 'c', 'd', 'e')
-     *                                 .findFirst();   // returns OptionalChar.of('a')
+     * OptionalChar first = CharStream.of('a', 'b', 'c').findFirst();   // returns OptionalChar.of('a')
+     * OptionalChar none = CharStream.empty().findFirst();   // returns OptionalChar.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code OptionalChar} containing the first element of the stream, or an empty {@code OptionalChar} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2163,6 +1744,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @see #findAny()
      * @see #findFirst(Throwables.CharPredicate)
      * @see #findAny(Throwables.CharPredicate)
+     * @see #last()
      */
     @ParallelSupported
     @TerminalOp
@@ -2173,32 +1755,22 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     }
 
     /**
-     * Returns the first element in the stream, if present, otherwise returns an empty {@code OptionalChar}.
-     * This is a terminal operation that short-circuits on the first element.
+     * Returns the first element of this stream wrapped in an {@code OptionalChar}, or an empty
+     * {@code OptionalChar} if this stream is empty. This is a short-circuiting terminal operation:
+     * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()} and {@link #findFirst()}; despite the
-     * JDK-style name it returns the FIRST element, not an arbitrary one, even for parallel streams.</p>
-     *
-     * <p>Note: This method is an alias for {@link #first()} to align with the standard Stream API naming conventions.
-     * The current implementation always delegates to {@link #first()}, returning the first element in encounter order.</p>
+     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.Stream#findAny()}, which may return
+     * an arbitrary element (especially for parallel streams), this method is an alias of
+     * {@link #first()} and always returns the first element in encounter order, even for parallel
+     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar any = CharStream.of('a', 'b', 'c', 'd', 'e')
-     *                              .findAny();   // returns OptionalChar.of('a')
+     * OptionalChar any = CharStream.of('a', 'b', 'c').findAny();   // returns OptionalChar.of('a')
+     * OptionalChar none = CharStream.empty().findAny();   // returns OptionalChar.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code OptionalChar} containing the first element of the stream, or an empty {@code OptionalChar} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2206,6 +1778,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @see #findFirst()
      * @see #findFirst(Throwables.CharPredicate)
      * @see #findAny(Throwables.CharPredicate)
+     * @see #last()
      */
     @ParallelSupported
     @TerminalOp
@@ -2216,132 +1789,93 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     }
 
     /**
-     * Returns an {@link OptionalChar} describing the first element of this stream that matches
-     * the given predicate, or an empty {@code OptionalChar} if no such element exists.
+     * Returns the first element of this stream that matches the given {@code predicate}, wrapped in an
+     * {@code OptionalChar}, or an empty {@code OptionalChar} if no element matches. This is a
+     * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>If the stream is empty or no element matches the predicate, then an empty {@code OptionalChar} is returned.
-     *
-     * <p>This is a short-circuiting terminal operation.
+     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
+     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * {@link #findAny(Throwables.CharPredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar firstDigit = CharStream.of('a', 'b', '1', '2', 'c')
-     *     .findFirst(Character::isDigit);   // OptionalChar['1']
-     *
-     * OptionalChar firstUpper = CharStream.of("helloWorld")
-     *     .findFirst(Character::isUpperCase);   // OptionalChar['W']
-     *
-     * OptionalChar notFound = CharStream.of("hello")
-     *     .findFirst(Character::isDigit);   // OptionalChar.empty()
+     * OptionalChar firstUpper = CharStream.of('a', 'B', 'c', 'D').findFirst(Character::isUpperCase);   // returns OptionalChar.of('B')
+     * OptionalChar none = CharStream.of('a', 'b', 'c').findFirst(Character::isUpperCase);   // returns OptionalChar.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate a non-interfering, stateless predicate that tests each element
-     * @return an {@code OptionalChar} describing the first element that matches the predicate,
-     *         or an empty {@code OptionalChar} if no such element exists
+     * @param predicate a non-interfering, stateless predicate to test each element of the stream
+     * @return an {@code OptionalChar} containing the first element that matches the predicate, or an empty {@code OptionalChar} if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @see #findAny(Throwables.CharPredicate)
+     * @see #findLast(Throwables.CharPredicate)
+     * @see #findFirst()
      */
     @ParallelSupported
     @TerminalOp
     public abstract <E extends Exception> OptionalChar findFirst(final Throwables.CharPredicate<E> predicate) throws E;
 
     /**
-     * Returns an {@link OptionalChar} describing some element of the stream that matches
-     * the given predicate, or an empty {@code OptionalChar} if no such element exists.
+     * Returns any element of this stream that matches the given {@code predicate}, wrapped in an
+     * {@code OptionalChar}, or an empty {@code OptionalChar} if no element matches. This is a
+     * short-circuiting terminal operation: it stops as soon as a match is found, and the stream is then closed.
      *
-     * <p>This is a short-circuiting terminal operation.
-     *
-     * <p>The behavior of this operation is explicitly nondeterministic; it is
-     * free to select any element in the stream that matches the predicate. This is to allow for maximal
-     * performance in parallel operations; the cost is that multiple invocations
-     * on the same source may not return the same result.
+     * <p>In sequential streams this behaves exactly like {@link #findFirst(Throwables.CharPredicate)}. In parallel
+     * streams there is no ordering guarantee: the matching element found first by any worker thread is
+     * returned, so the result may differ between runs — which is what can make it faster than
+     * {@link #findFirst(Throwables.CharPredicate)} in parallel. (Note the contrast with the no-arg {@link #findAny()},
+     * which is a deterministic alias of {@link #first()}.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar anyDigit = CharStream.of('a', 'b', '1', '2', 'c')
-     *     .findAny(Character::isDigit);   // OptionalChar['1'] or OptionalChar['2'] in parallel
-     *
-     * OptionalChar anyUpper = CharStream.of("helloWorld")
-     *     .findAny(Character::isUpperCase);   // OptionalChar['W']
-     *
-     * OptionalChar notFound = CharStream.of("hello")
-     *     .findAny(Character::isDigit);   // OptionalChar.empty()
+     * OptionalChar anyUpper = CharStream.of('a', 'B', 'c', 'D').findAny(Character::isUpperCase);   // returns a matching element, e.g. OptionalChar.of('B')
+     * OptionalChar none = CharStream.of('a', 'b', 'c').findAny(Character::isUpperCase);   // returns OptionalChar.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate a non-interfering, stateless predicate that tests each element
-     * @return an {@code OptionalChar} describing some element that matches the predicate,
-     *         or an empty {@code OptionalChar} if no such element exists
+     * @param predicate a non-interfering, stateless predicate to test each element of the stream
+     * @return an {@code OptionalChar} containing a matching element, or an empty {@code OptionalChar} if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @see #findFirst(Throwables.CharPredicate)
+     * @see #findLast(Throwables.CharPredicate)
+     * @see #findAny()
      */
     @ParallelSupported
     @TerminalOp
     public abstract <E extends Exception> OptionalChar findAny(final Throwables.CharPredicate<E> predicate) throws E;
 
     /**
-     * Returns an {@link OptionalChar} describing the last element of this stream that matches
-     * the given predicate, or an empty {@code OptionalChar} if no such element exists.
+     * Returns the last element of this stream that matches the given {@code predicate}, wrapped in an
+     * {@code OptionalChar}, or an empty {@code OptionalChar} if no element matches. This is a terminal
+     * operation, and the stream is then closed.
      *
-     * <p>Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
-     *
-     * <p>This is a terminal operation.
+     * <p>Unlike {@link #findFirst(Throwables.CharPredicate)}, this operation cannot short-circuit: every element
+     * must be tested, because a later element is always a better candidate. The result is deterministic
+     * even for parallel streams: when several elements match, the one at the largest encounter-order
+     * index wins.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar lastDigit = CharStream.of('a', '1', 'b', '2', 'c')
-     *     .findLast(Character::isDigit);   // OptionalChar['2']
-     *
-     * OptionalChar lastUpper = CharStream.of("helloWorldFoo")
-     *     .findLast(Character::isUpperCase);   // OptionalChar['F']
-     *
-     * OptionalChar notFound = CharStream.of("hello")
-     *     .findLast(Character::isDigit);   // OptionalChar.empty()
+     * OptionalChar lastUpper = CharStream.of('a', 'B', 'c', 'D').findLast(Character::isUpperCase);   // returns OptionalChar.of('D')
+     * OptionalChar none = CharStream.of('a', 'b', 'c').findLast(Character::isUpperCase);   // returns OptionalChar.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate a non-interfering, stateless predicate that tests each element
-     * @return an {@code OptionalChar} describing the last element that matches the predicate,
-     *         or an empty {@code OptionalChar} if no such element exists
+     * @param predicate a non-interfering, stateless predicate to test each element of the stream
+     * @return an {@code OptionalChar} containing the last element that matches the predicate, or an empty {@code OptionalChar} if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @see #findFirst(Throwables.CharPredicate)
+     * @see #findAny(Throwables.CharPredicate)
+     * @see #last()
      */
     @Beta
     @ParallelSupported
@@ -2368,17 +1902,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * char minValue = CharStream.of('x', 'y', 'z').min().orElse('a');   // returns 'x'
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code OptionalChar} containing the minimum element of this
      *         stream, or an empty {@code OptionalChar} if the stream is empty
@@ -2408,17 +1932,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * char maxValue = CharStream.of('x', 'y', 'z').max().orElse('a');   // returns 'z'
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code OptionalChar} containing the maximum element of this
      *         stream, or an empty {@code OptionalChar} if the stream is empty
@@ -2452,17 +1966,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * (ascending) and take the tail, or {@code boxed().top(n)} on the resulting {@code Stream<Character>}.
      * This is by design.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; may buffer up to {@code k} elements.
      *
      * @param k the position of the element to find (1-based, so k=1 returns the largest element,
      *          k=2 returns the second-largest, etc.)
@@ -2496,17 +2000,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * int digitSum = CharStream.of("123".toCharArray()).sum();   // returns 150
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return the sum of Unicode code-unit values of elements in this stream as an {@code int},
      *         or {@code 0} if the stream is empty
@@ -2539,17 +2033,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * double avg = CharStream.of('x', 'y', 'z').average().orElse(0.0);   // returns 121.0
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code OptionalDouble} containing the arithmetic mean of the Unicode code-unit values,
      *         or an empty optional if the stream is empty
@@ -2577,17 +2061,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * System.out.println("Average: " + stats.getAverage());   // 67.0
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a CharSummaryStatistics describing various summary data about the
      *         elements of this stream
@@ -2618,9 +2092,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * // Access percentile values
      * result.right().ifPresent(percentiles -> {
-     *     Character median = percentiles.get(Percentage.of(50));
-     *     Character p25 = percentiles.get(Percentage.of(25));
-     *     Character p75 = percentiles.get(Percentage.of(75));
+     *     Character median = percentiles.get(Percentage._50);
+     *     Character p25 = percentiles.get(Percentage._25);
+     *     Character p75 = percentiles.get(Percentage._75);
      *     System.out.println("Median (50th percentile): " + median);
      *     System.out.println("25th percentile: " + p25);
      *     System.out.println("75th percentile: " + p75);
@@ -2632,17 +2106,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // emptyResult.right() is Optional.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a Pair containing CharSummaryStatistics and an Optional map of percentile values.
      *         The map's keys are Percentage values and the values are the corresponding percentile values.
@@ -2666,17 +2130,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *       .toArray();   // returns ['a', 'b', 'c', 'd', 'e', 'f']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param b the other stream to merge with
      * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
@@ -2707,17 +2161,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *           .toCharList();   // returns ['x', 'y', 'z'] (length of shorter stream)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the CharStream to be combined with the current CharStream. Must be {@code non-null}.
      * @param zipFunction a CharBinaryOperator that determines the combination of elements in the combined CharStream. Must be {@code non-null}.
@@ -2745,17 +2189,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *           .toCharList();   // returns ['x', 'y'] (length of shortest stream)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the second CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
      * @param c the third CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
@@ -2783,17 +2217,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *           .toCharList();   // returns [(char)('a'+'x'), (char)('b'+'\0'), (char)('c'+'\0')]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
      * @param valueForNoneA the default value to use for the current CharStream when it runs out of elements
@@ -2823,17 +2247,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *           .toCharList();   // returns [(char)('a'+'x'+'1'), (char)('b'+'\0'+'\0'), (char)('c'+'\0'+'\0')]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the second CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
      * @param c the third CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
@@ -2859,17 +2273,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * CharStream.of('a', 'b', 'c').asIntStream().toArray();   // returns [97, 98, 99]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an IntStream consisting of the elements of this stream converted to int
      * @throws IllegalStateException if the stream is already closed
@@ -2888,17 +2292,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * CharStream.of('a', 'b', 'c').boxed().toList();   // returns ['a', 'b', 'c']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Does not require all elements to be buffered before producing results.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a Stream consisting of the elements of this stream, each boxed to a Character
      * @throws IllegalStateException if the stream is already closed
@@ -2923,10 +2317,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Return an empty stream as a default
-     * CharStream getCharsOrEmpty(String str) {
-     *     return str == null ? CharStream.empty() : CharStream.of(str);
-     * }
+     * // Use an empty stream as a default
+     * CharStream chars = str == null ? CharStream.empty() : CharStream.of(str);
      *
      * // Use as initial value for stream concatenation
      * CharStream result = CharStream.empty();
@@ -3523,9 +2915,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     /**
      * Returns a sequential {@code CharStream} containing characters read from the specified {@code File}.
      *
-     * <p>This factory method creates a stream that reads characters from a file using the platform's
-     * default character encoding. The file is opened when the stream is created and should be properly
-     * closed after use, preferably using a try-with-resources statement.
+     * <p>This factory method creates a stream that reads characters from a file using UTF-8
+     * ({@code IOUtil.DEFAULT_CHARSET}), <i>not</i> the JVM platform default charset. The file is opened
+     * when the stream is created and should be properly closed after use, preferably using a
+     * try-with-resources statement.
      *
      * <p>The returned stream is automatically configured to close the underlying {@code FileReader}
      * when the stream is closed, ensuring proper resource cleanup.
@@ -3541,10 +2934,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *          .forEach(System.out::print);
      * }  // closes the file automatically
      *
-     * // Count lines in a file (by counting newline characters)
+     * // Count line-feed characters in a file
      * try (CharStream chars = CharStream.of(new File("document.txt"))) {
-     *     long lineCount = chars.filter(c -> c == '\n').count() + 1;
-     *     System.out.println("Lines: " + lineCount);
+     *     long newlineCount = chars.filter(c -> c == '\n').count();
+     *     System.out.println("Line feeds: " + newlineCount);
      * }
      *
      * // Extract all digits from a file
@@ -3565,9 +2958,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * }
      * }</pre>
      *
-     * <p><b>Note:</b> By design this factory reads using the platform-default charset (via
-     * {@link java.io.FileReader}). For explicit charset control, open the file yourself and pass an
-     * {@code InputStreamReader} configured for the desired {@link java.nio.charset.Charset} to
+     * <p><b>Note:</b> By design this factory reads using UTF-8 ({@code IOUtil.DEFAULT_CHARSET}), which is
+     * <i>not</i> the JVM platform-default charset. For explicit charset control, open the file yourself and
+     * pass an {@code InputStreamReader} configured for the desired {@link java.nio.charset.Charset} to
      * {@link #of(Reader)}.
      *
      * @param file the {@code File} to read from; must not be null
@@ -3597,23 +2990,23 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read from a reader that will be managed separately
-     * Reader reader = new StringReader("Hello World");
-     * CharStream.of(reader)
-     *     .filter(Character::isLetter)
-     *     .forEach(System.out::print);  // prints HelloWorld
-     * reader.close();                   // closes the reader manually
+     * try (Reader reader = new StringReader("Hello World")) {
+     *     CharStream.of(reader)
+     *         .filter(Character::isLetter)
+     *         .forEach(System.out::print);  // prints HelloWorld
+     * }
      *
      * // Process characters from InputStreamReader
-     * Reader inputReader = new InputStreamReader(inputStream);
-     * CharStream.of(inputReader)
-     *     .map(Character::toLowerCase)
-     *     .toArray();
-     * inputReader.close();  // cleanup is manual
+     * try (Reader inputReader = new InputStreamReader(inputStream)) {
+     *     CharStream.of(inputReader)
+     *         .map(Character::toLowerCase)
+     *         .toArray();
+     * }
      *
      * // Read from BufferedReader
-     * BufferedReader bufferedReader = new BufferedReader(new FileReader("file.txt"));
-     * long charCount = CharStream.of(bufferedReader).count();
-     * bufferedReader.close();  // closes manually
+     * try (BufferedReader bufferedReader = new BufferedReader(new FileReader("file.txt"))) {
+     *     long charCount = CharStream.of(bufferedReader).count();
+     * }
      *
      * // Null reader produces empty stream
      * CharStream.of((Reader) null)
@@ -3652,29 +3045,23 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Automatic reader cleanup with try-with-resources
-     * try (CharStream chars = CharStream.of(new FileReader("data.txt"), true)) {
+     * try (Reader reader = new FileReader("data.txt");
+     *      CharStream chars = CharStream.of(reader, true)) {
      *     chars.filter(Character::isDigit)
      *          .forEach(System.out::print);
      * }  // closes the reader automatically
      *
      * // Manual reader management
-     * Reader reader = new StringReader("Hello");
-     * CharStream chars = CharStream.of(reader, false);
-     * chars.forEach(System.out::print);
-     * chars.close();    // closes the stream, reader stays open
-     * reader.close();   // closes the reader manually
+     * try (Reader reader = new StringReader("Hello")) {
+     *     CharStream.of(reader, false).forEach(System.out::print);
+     * } // the caller-owned reader is closed here
      *
-     * // Process multiple streams from the same reader
-     * BufferedReader bufferedReader = new BufferedReader(new FileReader("file.txt"));
-     * // First pass - don't close reader
-     * CharStream.of(bufferedReader, false)
-     *     .filter(Character::isLetter)
-     *     .count();
-     * // Second pass - now close reader
-     * CharStream.of(bufferedReader, true)
-     *     .filter(Character::isDigit)
-     *     .count();
-     * // Reader is closed after second stream completes
+     * // Process consecutive portions from the same reader
+     * try (BufferedReader bufferedReader = new BufferedReader(new FileReader("file.txt"))) {
+     *     CharStream.of(bufferedReader, false).limit(100).count();
+     *     // Continue from the reader's current position, then let this stream close it.
+     *     CharStream.of(bufferedReader, true).filter(Character::isDigit).count();
+     * }
      *
      * // Read from InputStreamReader with automatic cleanup
      * try (CharStream chars = CharStream.of(
@@ -4771,15 +4158,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *                    () -> (char) ('a' + counter.getAndIncrement()))
      *     .forEach(System.out::print);   // prints abcde
      *
-     * // Iterate from a reader-like source
-     * BufferedReader reader = new BufferedReader(new StringReader("abc"));
-     * CharStream.iterate(() -> {
-     *     try { return reader.ready(); }
-     *     catch (IOException e) { return false; }
-     * }, () -> {
-     *     try { return (char) reader.read(); }
-     *     catch (IOException e) { throw new UncheckedIOException(e); }
-     * }).forEach(System.out::print);
+     * // Iterate from another primitive iterator
+     * CharIterator source = CharIterator.of('a', 'b', 'c');
+     * CharStream.iterate(source::hasNext, source::nextChar)
+     *     .forEach(System.out::print);   // prints abc
      * }</pre>
      *
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
@@ -6110,7 +5492,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     CharStream.of("789")
      * );
      * CharStream.merge(customStreams, (x, y) -> x > y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-     *     .forEach(System.out::print);   // prints in descending order priority
+     *     .forEach(System.out::print);   // prints 789456123
      * }</pre>
      *
      * @param streams the collection of CharStreams to merge; a {@code null} collection and {@code null} elements are treated as empty

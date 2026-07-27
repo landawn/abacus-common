@@ -36,9 +36,10 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * // Use constants from cs class
  * map.put(cs.columnName, value);
  *
- * // In method signatures and calls
- * void processData(String columnName) { ... }
- * processData(cs.columnName);
+ * // In callable declarations and calls
+ * java.util.function.Consumer<String> processData =
+ *     columnName -> System.out.println("Processing " + columnName);
+ * processData.accept(cs.columnName);
  * }</pre>
  *
  * <p><strong>Note:</strong> This class is marked as {@link Beta} and {@link Internal},
@@ -147,6 +148,7 @@ public final class cs { // NOSONAR
     public static final String endExclusive = "endExclusive";
     public static final String entry = "entry";
     public static final String entryFilter = "entryFilter";
+    public static final String entryPredicate = "entryPredicate";
     public static final String enumClass = "enumClass";
     public static final String equalsFunction = "equalsFunction";
     public static final String exceptionClass = "exceptionClass";
@@ -189,6 +191,7 @@ public final class cs { // NOSONAR
     public static final String keyExtractor = "keyExtractor";
     public static final String keyFilter = "keyFilter";
     public static final String keyMapper = "keyMapper";
+    public static final String keyPredicate = "keyPredicate";
     // public static final String keyExtractor = "keyExtractor";
     public static final String keyType = "keyType";
     public static final String leftKeyExtractor = "leftKeyExtractor";
@@ -286,6 +289,8 @@ public final class cs { // NOSONAR
     public static final String startInclusive = "startInclusive";
     public static final String startIndex = "startIndex";
     public static final String startTime = "startTime";
+
+    public static final String startTimeSupplier = "startTimeSupplier";
     public static final String step = "step";
     public static final String subColl = "subColl";
     public static final String suffix = "suffix";
@@ -350,6 +355,7 @@ public final class cs { // NOSONAR
     // public static final String rowExtractor = "rowExtractor";
 
     public static final String regex = "regex";
+    public static final String replacer = "replacer";
     public static final String pattern = "pattern";
 
     public static final String keysToCompare = "keysToCompare";
@@ -358,7 +364,7 @@ public final class cs { // NOSONAR
 
     public static final String elements = "elements";
 
-    public static final String extractStrategy = "extractStrategy";
+    public static final String delimiterMatchMode = "delimiterMatchMode";
 
     // public static final String outputFile = "outputFile";
 

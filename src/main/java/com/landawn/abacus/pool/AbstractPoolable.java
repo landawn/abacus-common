@@ -37,7 +37,7 @@ package com.landawn.abacus.pool;
  *         try {
  *             connection.close();
  *         } catch (SQLException e) {
- *             // log error
+ *             System.err.println("Failed to close pooled connection: " + e.getMessage());
  *         }
  *     }
  *
@@ -72,7 +72,7 @@ public abstract class AbstractPoolable implements Poolable {
      *
      *     @Override
      *     public void destroy(Caller caller) {
-     *         // cleanup logic
+     *         System.out.println("destroyed by " + caller);
      *     }
      * }
      * }</pre>

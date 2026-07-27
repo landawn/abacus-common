@@ -55,6 +55,8 @@ import okio.Buffer;
  * request.get();
  * }</pre>
  *
+ * @see WebUtil#createCurlLoggingOkHttpRequest(String, Consumer)
+ * @see WebUtil#buildCurl(HttpMethod, String, Map, String, String, char)
  */
 class CurlInterceptor implements Interceptor {
     static final char DEFAULT_QUOTE_CHAR = '\'';
@@ -67,6 +69,7 @@ class CurlInterceptor implements Interceptor {
      *
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
      * @see #CurlInterceptor(char, Consumer)
      */
     public CurlInterceptor(final Consumer<? super String> logHandler) {
@@ -80,6 +83,7 @@ class CurlInterceptor implements Interceptor {
      *                  Can be either single quote ({@code '}) or double quote ({@code "}) depending on shell requirements.
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) throws IllegalArgumentException {
         this.logHandler = N.checkArgNotNull(logHandler, "logHandler");

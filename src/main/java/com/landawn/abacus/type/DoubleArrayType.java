@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and output operations for {@code Double[]} arrays.
  *
  * <p>The canonical string format is a bracket-enclosed, comma-separated list where {@code null} elements
- * are written as the literal null (e.g., {@code [1.5, null, 3.14, -0.5]}).
+ * are written as the literal {@code null} (e.g., {@code [1.5, null, 3.14, -0.5]}).
  *
  * @see ObjectArrayType
  */
@@ -171,8 +171,8 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * double-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes numeric literals and {@code null}
-     * elements directly to the {@code CharacterWriter}. The supplied serialization config is not used by this
-     * implementation.
+     * elements directly to the {@code CharacterWriter}, forwarding the supplied serialization config to each
+     * element.
      * <p>
      * <b>serializeTo vs. appendTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
      * {@code Double[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.

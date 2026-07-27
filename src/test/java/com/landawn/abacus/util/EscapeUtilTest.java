@@ -1543,6 +1543,13 @@ public class EscapeUtilTest extends TestBase {
     }
 
     @Test
+    public void testNumericBeanUnescaper_OptionalDecimalStopsBeforeHexLetter() {
+        EscapeUtil.NumericBeanUnescaper unescaper = new EscapeUtil.NumericBeanUnescaper(EscapeUtil.NumericBeanUnescaper.OPTION.semiColonOptional);
+
+        assertEquals("Afoo", unescaper.translate("&#65foo"));
+    }
+
+    @Test
     public void testNumericBeanUnescaper_OPTION_Values() {
         EscapeUtil.NumericBeanUnescaper.OPTION[] values = EscapeUtil.NumericBeanUnescaper.OPTION.values();
         assertEquals(3, values.length);

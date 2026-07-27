@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 import com.landawn.abacus.annotation.Beta;
@@ -75,13 +76,13 @@ public final class CodeGenerationUtil {
      */
     public static final String S = "s";
 
-    /** Default nested interface name for snake_case property constants. */
+    /** Default nested interface name ({@code "sl"}) for snake_case property constants. */
     public static final String SL = "sl";
 
-    /** Default nested interface name for SCREAMING_SNAKE_CASE property constants. */
+    /** Default nested interface name ({@code "su"}) for SCREAMING_SNAKE_CASE property constants. */
     public static final String SU = "su";
 
-    /** Default nested interface name for function-based property constants. */
+    /** Default nested interface name ({@code "sf"}) for function-based property constants. */
     public static final String SF = "sf";
 
     /**
@@ -138,8 +139,81 @@ public final class CodeGenerationUtil {
     }
 
     private static void checkGeneratedFieldName(final String fieldName, final String sourceDescription) {
-        final String emittedName = Strings.isJavaKeyword(fieldName) ? "_" + fieldName : fieldName;
+        final String emittedName = toGeneratedFieldName(fieldName);
         N.checkArgument(Strings.isValidJavaIdentifier(emittedName), "%s produced an invalid Java field name: %s", sourceDescription, fieldName);
+    }
+
+    private static String toGeneratedFieldName(final String fieldName) {
+        return Strings.isJavaKeyword(fieldName) ? "_" + fieldName : fieldName;
+    }
+
+    private static void addGeneratedFieldName(final Set<String> generatedFieldNames, final String fieldName, final String sourceDescription) {
+        N.checkArgument(generatedFieldNames.add(fieldName), "%s produced duplicate Java field name: %s", sourceDescription, fieldName);
+    }
+
+    private static String addUniqueGeneratedFieldName(final Set<String> generatedFieldNames, final String requestedFieldName) {
+        String fieldName = toGeneratedFieldName(requestedFieldName);
+
+        while (!generatedFieldNames.add(fieldName)) {
+            fieldName = "_" + fieldName;
+        }
+
+        return fieldName;
+    }
+
+    private static String escapeJavaStringLiteral(final String str) {
+        final StringBuilder sb = new StringBuilder(str.length());
+
+        for (int i = 0, len = str.length(); i < len; i++) {
+            final char ch = str.charAt(i);
+
+            switch (ch) {
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\f':
+                    sb.append("\\f");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                default:
+                    if (ch < 32 || ch == 127) {
+                        sb.append('\\').append((char) ('0' + ((ch >> 6) & 7))).append((char) ('0' + ((ch >> 3) & 7))).append((char) ('0' + (ch & 7)));
+                    } else {
+                        sb.append(ch);
+                    }
+                    break;
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private static String escapeJavadocText(final String str) {
+        return str.replace("&", "&amp;")
+                // Java translates Unicode escapes before recognizing comments. Rendering a
+                // backslash as an entity prevents text such as "\\u002a\\u002f" from becoming
+                // a comment terminator in the generated source while preserving its Javadoc text.
+                .replace("\\", "&#92;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("*/", "*&#47;")
+                .replace('\r', ' ')
+                .replace('\n', ' ');
     }
 
     private static void checkPackageName(final String packageName) {
@@ -244,16 +318,16 @@ public final class CodeGenerationUtil {
                 .append(LINE_SEPARATOR); //
 
         for (final String propName : Beans.getPropNameList(entityClass)) {
+            checkGeneratedFieldName(propName, "bean property name");
 
             sb.append("        /** Property(field) name {@code \"")
                     .append(propName)
                     .append("\"} */")
                     .append(LINE_SEPARATOR)
                     .append("        String ")
-                    .append(Strings.isJavaKeyword(propName) ? "_" : "")
-                    .append(propName)
+                    .append(toGeneratedFieldName(propName))
                     .append(" = \"")
-                    .append(propName)
+                    .append(escapeJavaStringLiteral(propName))
                     .append("\";")
                     .append(LINE_SEPARATOR)
                     .append(LINE_SEPARATOR);
@@ -414,14 +488,19 @@ public final class CodeGenerationUtil {
      * @return generated Java source for the property-name table class
      * @throws IllegalArgumentException if {@code codeConfig} is {@code null}, its {@code entityClasses}
      *         is {@code null} or empty, its class/package/converted property names are not valid Java names, or
-     *         {@code generateClassPropNameList} is enabled while the entities have duplicate simple class names,
-     *         or no usable entity class remains after filtering out interfaces and Lombok builder classes
+     *         generated interface/field names collide, {@code extendedInterfaces} contains a non-interface
+     *         or duplicate type, {@code generateClassPropNameList} is enabled while the entities have duplicate
+     *         simple class names, or no usable entity class remains after filtering out interfaces and Lombok builder classes
      * @throws RuntimeException if writing to file fails when {@code srcDir} is configured
      */
     public static String generatePropNameTableClasses(final PropNameTableCodeConfig codeConfig) throws IllegalArgumentException {
         N.checkArgNotNull(codeConfig, cs.codeConfig);
 
         final Collection<Class<?>> entityClasses = N.checkArgNotEmpty(codeConfig.getEntityClasses(), "codeConfig.getEntityClasses()");
+
+        for (final Class<?> cls : entityClasses) {
+            N.checkArgNotNull(cls, "entity class");
+        }
 
         final List<Class<?>> entityClassesToUse = Stream.of(entityClasses).filter(cls -> {
             if (cls.isInterface()) {
@@ -446,11 +525,28 @@ public final class CodeGenerationUtil {
         final Collection<Class<?>> extendedInterfaces = codeConfig.getExtendedInterfaces();
         final BiFunction<Class<?>, String, String> propNameConverter = N.defaultIfNull(codeConfig.getPropNameConverter(), identityPropNameConverter);
 
-        final String interfaceName = Stream.of(extendedInterfaces)
-                .map(ClassUtil::getCanonicalClassName)
+        final List<String> extendedInterfaceNames = new ArrayList<>();
+        final Set<String> uniqueExtendedInterfaceNames = N.newHashSet();
+        final String generatedCanonicalName = Strings.isEmpty(packageName) ? propNameTableClassName : packageName + "." + propNameTableClassName;
+
+        if (extendedInterfaces != null) {
+            for (final Class<?> extendedInterface : extendedInterfaces) {
+                N.checkArgNotNull(extendedInterface, "extended interface");
+                N.checkArgument(extendedInterface.isInterface(), "extendedInterfaces must contain only interfaces: %s", extendedInterface);
+
+                final String extendedInterfaceName = ClassUtil.getCanonicalClassName(extendedInterface);
+                N.checkArgument(!generatedCanonicalName.equals(extendedInterfaceName), "Generated interface cannot extend itself: %s", generatedCanonicalName);
+                N.checkArgument(uniqueExtendedInterfaceNames.add(extendedInterfaceName), "Duplicate extended interface: %s", extendedInterfaceName);
+                extendedInterfaceNames.add(extendedInterfaceName);
+            }
+        }
+
+        final String interfaceName = Stream.of(extendedInterfaceNames)
                 .map(it -> Strings.isNotEmpty(packageName) && it.startsWith(packageName + ".") ? it.substring(packageName.length() + 1) : it)
                 .mapFirst(it -> " extends " + it)
                 .join(", ", "public interface " + propNameTableClassName, "");
+        final Set<String> generatedNestedTypeNames = N.newHashSet();
+        generatedNestedTypeNames.add(propNameTableClassName);
 
         final StringBuilder sb = new StringBuilder();
 
@@ -519,9 +615,12 @@ public final class CodeGenerationUtil {
 
             final List<String> propNames = new ArrayList<>(propNameMap.keySet());
             N.sort(propNames);
+            final Set<String> generatedFieldNames = N.newHashSet();
 
             for (final String propName : propNames) {
                 final String clsNameList = Stream.of(propNameMap.get(propName)).sorted().join(", ", "{@code [", "]}");
+                final String generatedFieldName = toGeneratedFieldName(propName);
+                addGeneratedFieldName(generatedFieldNames, generatedFieldName, "propNameConverter");
 
                 sb.append(LINE_SEPARATOR)
                         .append("    /** Property(field) name {@code \"")
@@ -531,17 +630,17 @@ public final class CodeGenerationUtil {
                         .append(" */")
                         .append(LINE_SEPARATOR)
                         .append("    String ")
-                        .append(Strings.isJavaKeyword(propName) ? "_" : "")
-                        .append(propName)
+                        .append(generatedFieldName)
                         .append(" = \"")
-                        .append(propName)
+                        .append(escapeJavaStringLiteral(propName))
                         .append("\";")
                         .append(LINE_SEPARATOR);
             }
 
             if (generateClassPropNameList) {
                 for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap) {
-                    final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
+                    final String fieldNameForPropNameList = addUniqueGeneratedFieldName(generatedFieldNames,
+                            Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList");
 
                     sb.append(LINE_SEPARATOR)
                             .append("    /** Unmodifiable property(field) name list for class: {@code \"")
@@ -550,10 +649,9 @@ public final class CodeGenerationUtil {
                             .append(" */")
                             .append(LINE_SEPARATOR)
                             .append("    List<String> ")
-                            .append(propNameMap.containsKey(fieldNameForPropNameList) ? "_" : "")
                             .append(fieldNameForPropNameList)
                             .append(" = List.of(")
-                            .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(it -> Strings.isJavaKeyword(it) ? "_" + it : it).join(", "))
+                            .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(CodeGenerationUtil::toGeneratedFieldName).join(", "))
                             .append(");")
                             .append(LINE_SEPARATOR);
                 }
@@ -564,6 +662,7 @@ public final class CodeGenerationUtil {
             if (codeConfig.isGenerateSnakeCase()) {
                 final String snakeCaseClassName = N.defaultIfEmpty(codeConfig.getClassNameForSnakeCase(), SL);
                 checkJavaIdentifier(snakeCaseClassName, "codeConfig.getClassNameForSnakeCase()");
+                N.checkArgument(generatedNestedTypeNames.add(snakeCaseClassName), "Generated interface names must be unique: %s", snakeCaseClassName);
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
                 final BiFunction<Class<?>, String, String> propNameConverterForSnakeCase = CommonUtil
@@ -623,33 +722,35 @@ public final class CodeGenerationUtil {
                         .append(LINE_SEPARATOR); //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
-                final List<String> propNames = N.map(propNameTPs, it -> it._1);
                 N.sortBy(propNameTPs, it -> it._1);
+                final Set<String> generatedFieldNames = N.newHashSet();
 
                 for (final Tuple2<String, String> propNameTP : propNameTPs) {
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
+                    final String generatedFieldName = toGeneratedFieldName(propNameTP._1);
+                    addGeneratedFieldName(generatedFieldNames, generatedFieldName, "snake-case property names");
 
                     sb.append(LINE_SEPARATOR)
                             .append(INDENTATION)
-                            .append("    /** Property(field) name in lower case concatenated with underscore: {@code \"")
-                            .append(propNameTP._2)
-                            .append("\"} for classes: ")
+                            .append("    /** Property(field) name in lower case concatenated with underscore: <code>&quot;")
+                            .append(escapeJavadocText(propNameTP._2))
+                            .append("&quot;</code> for classes: ")
                             .append(clsNameList)
                             .append(" */")
                             .append(LINE_SEPARATOR)
                             .append(INDENTATION)
                             .append("    String ")
-                            .append(Strings.isJavaKeyword(propNameTP._1) ? "_" : "")
-                            .append(propNameTP._1)
+                            .append(generatedFieldName)
                             .append(" = \"")
-                            .append(propNameTP._2)
+                            .append(escapeJavaStringLiteral(propNameTP._2))
                             .append("\";")
                             .append(LINE_SEPARATOR);
                 }
 
                 if (generateClassPropNameList) {
                     for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap) {
-                        final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
+                        final String fieldNameForPropNameList = addUniqueGeneratedFieldName(generatedFieldNames,
+                                Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList");
 
                         sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
@@ -660,10 +761,9 @@ public final class CodeGenerationUtil {
                                 .append(LINE_SEPARATOR)
                                 .append(INDENTATION)
                                 .append("    List<String> ")
-                                .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
                                 .append(fieldNameForPropNameList)
                                 .append(" = List.of(")
-                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(it -> Strings.isJavaKeyword(it) ? "_" + it : it).join(", "))
+                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(CodeGenerationUtil::toGeneratedFieldName).join(", "))
                                 .append(");")
                                 .append(LINE_SEPARATOR);
                     }
@@ -678,6 +778,8 @@ public final class CodeGenerationUtil {
             if (codeConfig.isGenerateScreamingSnakeCase()) {
                 final String screamingSnakeCaseClassName = N.defaultIfEmpty(codeConfig.getClassNameForScreamingSnakeCase(), SU);
                 checkJavaIdentifier(screamingSnakeCaseClassName, "codeConfig.getClassNameForScreamingSnakeCase()");
+                N.checkArgument(generatedNestedTypeNames.add(screamingSnakeCaseClassName), "Generated interface names must be unique: %s",
+                        screamingSnakeCaseClassName);
                 final ListMultimap<Tuple2<String, String>, String> propNameMap = N.newListMultimap();
                 final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
                 final BiFunction<Class<?>, String, String> propNameConverterForScreamingSnakeCase = CommonUtil
@@ -737,33 +839,35 @@ public final class CodeGenerationUtil {
                         .append(LINE_SEPARATOR); //
 
                 final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(propNameMap.keySet());
-                final List<String> propNames = N.map(propNameTPs, it -> it._1);
                 N.sortBy(propNameTPs, it -> it._1);
+                final Set<String> generatedFieldNames = N.newHashSet();
 
                 for (final Tuple2<String, String> propNameTP : propNameTPs) {
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
+                    final String generatedFieldName = toGeneratedFieldName(propNameTP._1);
+                    addGeneratedFieldName(generatedFieldNames, generatedFieldName, "screaming-snake-case property names");
 
                     sb.append(LINE_SEPARATOR)
                             .append(INDENTATION)
-                            .append("    /** Property(field) name in upper case concatenated with underscore: {@code \"")
-                            .append(propNameTP._2)
-                            .append("\"} for classes: ")
+                            .append("    /** Property(field) name in upper case concatenated with underscore: <code>&quot;")
+                            .append(escapeJavadocText(propNameTP._2))
+                            .append("&quot;</code> for classes: ")
                             .append(clsNameList)
                             .append(" */")
                             .append(LINE_SEPARATOR)
                             .append(INDENTATION)
                             .append("    String ")
-                            .append(Strings.isJavaKeyword(propNameTP._1) ? "_" : "")
-                            .append(propNameTP._1)
+                            .append(generatedFieldName)
                             .append(" = \"")
-                            .append(propNameTP._2)
+                            .append(escapeJavaStringLiteral(propNameTP._2))
                             .append("\";")
                             .append(LINE_SEPARATOR);
                 }
 
                 if (generateClassPropNameList) {
                     for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap) {
-                        final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
+                        final String fieldNameForPropNameList = addUniqueGeneratedFieldName(generatedFieldNames,
+                                Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList");
 
                         sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
@@ -774,10 +878,9 @@ public final class CodeGenerationUtil {
                                 .append(LINE_SEPARATOR)
                                 .append(INDENTATION)
                                 .append("    List<String> ")
-                                .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
                                 .append(fieldNameForPropNameList)
                                 .append(" = List.of(")
-                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(it -> Strings.isJavaKeyword(it) ? "_" + it : it).join(", "))
+                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(CodeGenerationUtil::toGeneratedFieldName).join(", "))
                                 .append(");")
                                 .append(LINE_SEPARATOR);
                     }
@@ -791,13 +894,15 @@ public final class CodeGenerationUtil {
             if (codeConfig.isGenerateFunctionPropName()) {
                 final String functionClassName = N.defaultIfEmpty(codeConfig.getFunctionClassName(), SF);
                 checkJavaIdentifier(functionClassName, "codeConfig.getFunctionClassName()");
+                N.checkArgument(generatedNestedTypeNames.add(functionClassName), "Generated interface names must be unique: %s", functionClassName);
                 final Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFuncMap = N.nullToEmpty(codeConfig.getPropFunctions());
 
                 final List<ListMultimap<Tuple2<String, String>, String>> funcPropNameMapList = new ArrayList<>();
 
                 for (final Map.Entry<String, TriFunction<Class<?>, Class<?>, String, String>> propFuncEntry : propFuncMap.entrySet()) {
-                    final String funcName = propFuncEntry.getKey();
-                    final TriFunction<Class<?>, Class<?>, String, String> propFunc = propFuncEntry.getValue();
+                    final String funcName = N.checkArgNotEmpty(propFuncEntry.getKey(), "propFunctions key");
+                    final TriFunction<Class<?>, Class<?>, String, String> propFunc = N.checkArgNotNull(propFuncEntry.getValue(), "propFunctions value");
+                    checkGeneratedFieldName(funcName + "_property", "propFunctions key");
                     final ListMultimap<Tuple2<String, String>, String> funcPropNameMap = N.newListMultimap();
 
                     for (final Class<?> cls : entityClassesToUse) {
@@ -828,7 +933,7 @@ public final class CodeGenerationUtil {
 
                             final String generatedFieldName = funcName + "_" + newPropName;
                             checkGeneratedFieldName(generatedFieldName, "propFunctions key");
-                            funcPropNameMap.put(Tuple.of(generatedFieldName, funcPropName), simpleClassName);
+                            funcPropNameMap.put(Tuple.of(toGeneratedFieldName(generatedFieldName), funcPropName), simpleClassName);
                         }
                     }
 
@@ -859,18 +964,21 @@ public final class CodeGenerationUtil {
                         .append(Character.isLowerCase(functionClassName.charAt(0)) ? " // NOSONAR" : "")
                         .append(LINE_SEPARATOR); //
 
+                final Set<String> generatedFieldNames = N.newHashSet();
+
                 for (final ListMultimap<Tuple2<String, String>, String> funcPropNameMap : funcPropNameMapList) {
                     final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(funcPropNameMap.keySet());
                     N.sortBy(propNameTPs, it -> it._1);
 
                     for (final Tuple2<String, String> propNameTP : propNameTPs) {
                         final String clsNameList = Stream.of(funcPropNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
+                        addGeneratedFieldName(generatedFieldNames, propNameTP._1, "propFunctions");
 
                         sb.append(LINE_SEPARATOR)
                                 .append(INDENTATION)
-                                .append("    /** Function property(field) name {@code \"")
-                                .append(propNameTP._2)
-                                .append("\"} for classes: ")
+                                .append("    /** Function property(field) name <code>&quot;")
+                                .append(escapeJavadocText(propNameTP._2))
+                                .append("&quot;</code> for classes: ")
                                 .append(clsNameList)
                                 .append(" */")
                                 .append(LINE_SEPARATOR)
@@ -878,7 +986,7 @@ public final class CodeGenerationUtil {
                                 .append("    String ")
                                 .append(propNameTP._1)
                                 .append(" = \"")
-                                .append(propNameTP._2)
+                                .append(escapeJavaStringLiteral(propNameTP._2))
                                 .append("\";")
                                 .append(LINE_SEPARATOR);
                     }
@@ -928,6 +1036,7 @@ public final class CodeGenerationUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Collection<Class<?>> classes = Arrays.asList(User.class, Order.class);
      * PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
      *         .entityClasses(classes)
      *         .className(CodeGenerationUtil.S)
@@ -963,9 +1072,10 @@ public final class CodeGenerationUtil {
         private String srcDir;
 
         /**
-         * Optional interfaces that the generated top-level interface should extend. Interfaces in
-         * the generated package are emitted relative to that package; other interfaces retain their
-         * fully qualified canonical names.
+         * Optional, distinct interface types that the generated top-level interface should extend.
+         * Classes, duplicate interfaces, {@code null} elements, and the generated interface itself are rejected.
+         * Interfaces in the generated package are emitted relative to that package; other interfaces retain
+         * their fully qualified canonical names.
          */
         private Collection<Class<?>> extendedInterfaces;
 
@@ -1021,7 +1131,7 @@ public final class CodeGenerationUtil {
         /**
          * Function definitions used when {@link #generateFunctionPropName} is enabled.
          *
-         * <p>Map key is a constant prefix (for example {@code min}); function input is
+         * <p>Map key is a non-empty constant prefix (for example {@code min}); function input is
          * {@code (entityClass, propertyType, convertedPropertyName)}; returning {@code null} or
          * empty skips the property. Each key, when combined with an underscore and a converted
          * property name, must form a valid Java identifier.

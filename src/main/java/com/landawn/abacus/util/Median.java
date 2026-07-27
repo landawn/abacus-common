@@ -71,6 +71,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Primitive Types:</b> Use specialized Optional types (OptionalInt, OptionalLong, etc.)</li>
  *   <li><b>Object Types:</b> Use generic Optional&lt;T&gt; for the second median value</li>
  * </ul>
+ * <p>Primitive overloads avoid requiring boxed input arrays and provide primitive optional results, but their
+ * priority-queue path internally boxes retained values because it uses the JDK object-based {@link PriorityQueue}.</p>
+ *
  * <p><b>Null upper median:</b> For object inputs that permit {@code null}, a {@code null} upper
  * median is represented by an empty {@code Optional}, because {@code Optional} cannot contain
  * {@code null}. Consequently, presence of the right value alone does not identify input parity
@@ -127,7 +130,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * });
  *
  * // Custom object with natural ordering
- * public class Score implements Comparable<Score> {
+ * class Score implements Comparable<Score> {
  *     private final int value;
  *     public Score(int value) { this.value = value; }
  *     public int compareTo(Score other) { return Integer.compare(this.value, other.value); }
@@ -192,7 +195,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Efficient Heap:</b> Priority queue automatically manages memory for optimal performance</li>
  *   <li><b>Conditional Copying:</b> The normal path does not copy the input; object inputs containing
  *       {@code null} are copied before sorting because {@link PriorityQueue} rejects null elements</li>
- *   <li><b>Garbage Collection:</b> Minimal object creation reduces GC pressure</li>
+ *   <li><b>Garbage Collection:</b> Object inputs retain existing references; primitive heap paths allocate boxed values</li>
  * </ul>
  *
  * <p><b>Numerical Stability:</b>
@@ -207,7 +210,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Best Practices:</b>
  * <ul>
- *   <li>Use appropriate primitive-specific methods to avoid boxing overhead</li>
+ *   <li>Use primitive-specific methods to avoid boxed input arrays and obtain primitive optional results</li>
  *   <li>Check {@code Optional.isPresent()} before accessing the second median value</li>
  *   <li>Provide explicit {@code Comparator} for custom objects to avoid ClassCastException</li>
  *   <li>Validate input ranges before calling range-based methods</li>
@@ -348,7 +351,7 @@ public final class Median {
      *
      * @param source the array of characters to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -461,7 +464,7 @@ public final class Median {
      *
      * @param source the array of bytes to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -574,7 +577,7 @@ public final class Median {
      *
      * @param source the array of short integers to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -688,7 +691,7 @@ public final class Median {
      *
      * @param source the array of integers to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -802,7 +805,7 @@ public final class Median {
      *
      * @param source the array of long integers to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -918,7 +921,7 @@ public final class Median {
      *
      * @param source the array of float values to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -1037,7 +1040,7 @@ public final class Median {
      *
      * @param source the array of double values to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -1153,7 +1156,7 @@ public final class Median {
      * @param <T> the type of elements in the array, which must implement {@code Comparable}.
      * @param source the array of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
@@ -1200,7 +1203,7 @@ public final class Median {
      * @param <T> the type of elements in the array.
      * @param source the array of objects to find the median from. Must not be {@code null} or empty.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, nulls-first natural
-     *            ordering is used. The comparator must be consistent with equals for predictable results.
+     *            ordering is used. The comparator must obey the general {@link Comparator} contract; it need not be consistent with {@code equals}.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -1246,11 +1249,11 @@ public final class Median {
      * @param <T> the type of elements in the array.
      * @param source the array of objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the array to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, nulls-first natural
-     *            ordering is used. The comparator must be consistent with equals for predictable results.
+     *            ordering is used. The comparator must obey the general {@link Comparator} contract; it need not be consistent with {@code equals}.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -1390,7 +1393,7 @@ public final class Median {
      * @param <T> the type of elements in the collection.
      * @param source the collection of objects to find the median from. Must not be {@code null} or empty.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, nulls-first natural
-     *            ordering is used. The comparator must be consistent with equals for predictable results.
+     *            ordering is used. The comparator must obey the general {@link Comparator} contract; it need not be consistent with {@code equals}.
      * @return a {@code Pair} containing the median value(s). For odd-size collections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size collections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -1489,7 +1492,7 @@ public final class Median {
      * @param <T> the type of elements in the collection, which must implement Comparable.
      * @param source the collection of Comparable objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the collection to consider.
      *                Must be greater than fromIndex and not exceed collection size.
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
@@ -1539,11 +1542,11 @@ public final class Median {
      * @param <T> the type of elements in the collection.
      * @param source the collection of objects to find the median from. Must not be {@code null} or empty.
      * @param fromIndex the starting index (inclusive) of the range within the collection to consider.
-     *                  Must be non-negative and less than or equal to toIndex.
+     *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the collection to consider.
      *                Must be greater than fromIndex and not exceed collection size.
      * @param cmp the comparator to use for ordering the elements. If {@code null}, nulls-first natural
-     *            ordering is used. The comparator must be consistent with equals for predictable results.
+     *            ordering is used. The comparator must obey the general {@link Comparator} contract; it need not be consistent with {@code equals}.
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.

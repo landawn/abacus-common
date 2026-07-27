@@ -35,8 +35,8 @@ import com.landawn.abacus.util.function.LongToDoubleFunction;
 import com.landawn.abacus.util.function.LongToFloatFunction;
 import com.landawn.abacus.util.function.LongToIntFunction;
 import com.landawn.abacus.util.function.LongUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelArrayLongStreamTest extends TestBase {
 
@@ -48,11 +48,11 @@ public class ParallelArrayLongStreamTest extends TestBase {
     private LongStream parallelStream;
 
     protected LongStream createLongStream(long... elements) {
-        return LongStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
+        return LongStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
     }
 
-    protected LongStream createIteratorSplitorLongStream(long... elements) {
-        return new ParallelArrayLongStream(elements, 0, elements.length, false, testMaxThreadNum, Splitor.ITERATOR, null, false, new ArrayList<>());
+    protected LongStream createIteratorSplitStrategyLongStream(long... elements) {
+        return new ParallelArrayLongStream(elements, 0, elements.length, false, testMaxThreadNum, SplitStrategy.ITERATOR, null, false, new ArrayList<>());
     }
 
     @BeforeEach
@@ -106,31 +106,31 @@ public class ParallelArrayLongStreamTest extends TestBase {
 
     // Helper: creates a ParallelArrayLongStream with a single element so canBeSequential() returns true.
     protected LongStream createSingleElementLongStream(long value) {
-        return new ParallelArrayLongStream(new long[] { value }, 0, 1, false, testMaxThreadNum, Splitor.ARRAY, null, false, new ArrayList<>());
+        return new ParallelArrayLongStream(new long[] { value }, 0, 1, false, testMaxThreadNum, SplitStrategy.ARRAY, null, false, new ArrayList<>());
     }
 
     // Covers the iterator-based terminal-operation branch in ParallelArrayLongStream.
     @Test
-    public void testReduceAndFindMethods_IteratorSplitor() {
-        assertEquals(15L, createIteratorSplitorLongStream(4L, 2L, 1L, 3L, 5L).reduce(0L, Long::sum));
+    public void testReduceAndFindMethods_IteratorSplitStrategy() {
+        assertEquals(15L, createIteratorSplitStrategyLongStream(4L, 2L, 1L, 3L, 5L).reduce(0L, Long::sum));
 
-        OptionalLong reduced = createIteratorSplitorLongStream(4L, 2L, 1L, 3L, 5L).reduce(Long::sum);
+        OptionalLong reduced = createIteratorSplitStrategyLongStream(4L, 2L, 1L, 3L, 5L).reduce(Long::sum);
         assertTrue(reduced.isPresent());
         assertEquals(15L, reduced.get());
 
-        OptionalLong firstOdd = createIteratorSplitorLongStream(4L, 2L, 1L, 3L, 5L).findFirst(l -> (l & 1L) == 1L);
+        OptionalLong firstOdd = createIteratorSplitStrategyLongStream(4L, 2L, 1L, 3L, 5L).findFirst(l -> (l & 1L) == 1L);
         assertTrue(firstOdd.isPresent());
         assertEquals(1L, firstOdd.get());
 
-        OptionalLong anyOdd = createIteratorSplitorLongStream(4L, 2L, 1L, 3L, 5L).findAny(l -> (l & 1L) == 1L);
+        OptionalLong anyOdd = createIteratorSplitStrategyLongStream(4L, 2L, 1L, 3L, 5L).findAny(l -> (l & 1L) == 1L);
         assertTrue(anyOdd.isPresent());
         assertTrue(anyOdd.get() == 1L || anyOdd.get() == 3L || anyOdd.get() == 5L);
 
-        OptionalLong lastOdd = createIteratorSplitorLongStream(4L, 2L, 1L, 3L, 5L).findLast(l -> (l & 1L) == 1L);
+        OptionalLong lastOdd = createIteratorSplitStrategyLongStream(4L, 2L, 1L, 3L, 5L).findLast(l -> (l & 1L) == 1L);
         assertTrue(lastOdd.isPresent());
         assertEquals(5L, lastOdd.get());
 
-        OptionalLong notFound = createIteratorSplitorLongStream(4L, 2L, 1L, 3L, 5L).findAny(l -> l > 10L);
+        OptionalLong notFound = createIteratorSplitStrategyLongStream(4L, 2L, 1L, 3L, 5L).findAny(l -> l > 10L);
         assertFalse(notFound.isPresent());
     }
 
@@ -663,9 +663,9 @@ public class ParallelArrayLongStreamTest extends TestBase {
     }
 
     @Test
-    public void testForEach_IteratorSplitor() {
+    public void testForEach_IteratorSplitStrategy() {
         java.util.concurrent.atomic.AtomicLong sum = new java.util.concurrent.atomic.AtomicLong(0);
-        createIteratorSplitorLongStream(1L, 2L, 3L, 4L, 5L).forEach(l -> sum.addAndGet(l));
+        createIteratorSplitStrategyLongStream(1L, 2L, 3L, 4L, 5L).forEach(l -> sum.addAndGet(l));
         assertEquals(15L, sum.get());
     }
 
@@ -851,23 +851,18 @@ public class ParallelArrayLongStreamTest extends TestBase {
     public void testOverflowScenarios() {
         parallelStream = createLongStream(new long[] { Long.MAX_VALUE - 1, 1L, 1L });
 
-        try {
-            long sum = parallelStream.reduce(0L, Long::sum);
-            assertTrue(sum < 0 || sum == Long.MAX_VALUE);
-        } catch (ArithmeticException e) {
-            assertTrue(true);
-        }
+        assertEquals(Long.MIN_VALUE, parallelStream.reduce(0L, Long::sum));
     }
 
     @Test
-    public void testIteratorSplitorReduceAndFindOperations_SparseMatch() {
-        assertEquals(72L, createIteratorSplitorLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).reduce(0L, Long::sum));
+    public void testIteratorSplitStrategyReduceAndFindOperations_SparseMatch() {
+        assertEquals(72L, createIteratorSplitStrategyLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).reduce(0L, Long::sum));
 
-        OptionalLong reduced = createIteratorSplitorLongStream(21L, 2L, 4L).reduce(Long::sum);
+        OptionalLong reduced = createIteratorSplitStrategyLongStream(21L, 2L, 4L).reduce(Long::sum);
         assertTrue(reduced.isPresent());
         assertEquals(27L, reduced.get());
 
-        OptionalLong firstMatch = createIteratorSplitorLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).findFirst(l -> {
+        OptionalLong firstMatch = createIteratorSplitStrategyLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).findFirst(l -> {
             if (l == 21L) {
                 try {
                     Thread.sleep(10L);
@@ -881,11 +876,11 @@ public class ParallelArrayLongStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals(21L, firstMatch.get());
 
-        OptionalLong anyMatch = createIteratorSplitorLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).findAny(l -> (l & 1L) == 1L && l > 5L);
+        OptionalLong anyMatch = createIteratorSplitStrategyLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).findAny(l -> (l & 1L) == 1L && l > 5L);
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21L || anyMatch.get() == 7L || anyMatch.get() == 11L || anyMatch.get() == 13L);
 
-        OptionalLong lastMatch = createIteratorSplitorLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).findLast(l -> {
+        OptionalLong lastMatch = createIteratorSplitStrategyLongStream(21L, 2L, 4L, 7L, 6L, 11L, 8L, 13L).findLast(l -> {
             if (l == 13L) {
                 try {
                     Thread.sleep(10L);
@@ -914,8 +909,8 @@ public class ParallelArrayLongStreamTest extends TestBase {
     }
 
     @Test
-    public void testCollect_IteratorSplitor() {
-        List<Long> result = createIteratorSplitorLongStream(1L, 2L, 3L).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    public void testCollect_IteratorSplitStrategy() {
+        List<Long> result = createIteratorSplitStrategyLongStream(1L, 2L, 3L).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertHaveSameElements(List.of(1L, 2L, 3L), result);
     }
 
@@ -959,17 +954,17 @@ public class ParallelArrayLongStreamTest extends TestBase {
         assertTrue(createLongStream(new long[] {}).noneMatch(l -> true));
     }
 
-    // Cover the ITERATOR splitor path for anyMatch / allMatch / noneMatch / collect / forEach
+    // Cover the ITERATOR splitStrategy path for anyMatch / allMatch / noneMatch / collect / forEach
     @Test
-    public void testAnyMatchAllMatchNoneMatch_IteratorSplitor() {
-        assertTrue(createIteratorSplitorLongStream(1L, 2L, 3L, 4L, 5L).anyMatch(l -> l > 4L));
-        assertFalse(createIteratorSplitorLongStream(1L, 2L, 3L).anyMatch(l -> l > 10L));
+    public void testAnyMatchAllMatchNoneMatch_IteratorSplitStrategy() {
+        assertTrue(createIteratorSplitStrategyLongStream(1L, 2L, 3L, 4L, 5L).anyMatch(l -> l > 4L));
+        assertFalse(createIteratorSplitStrategyLongStream(1L, 2L, 3L).anyMatch(l -> l > 10L));
 
-        assertTrue(createIteratorSplitorLongStream(1L, 2L, 3L).allMatch(l -> l >= 1L && l <= 3L));
-        assertFalse(createIteratorSplitorLongStream(1L, 2L, 3L).allMatch(l -> l < 3L));
+        assertTrue(createIteratorSplitStrategyLongStream(1L, 2L, 3L).allMatch(l -> l >= 1L && l <= 3L));
+        assertFalse(createIteratorSplitStrategyLongStream(1L, 2L, 3L).allMatch(l -> l < 3L));
 
-        assertTrue(createIteratorSplitorLongStream(1L, 2L, 3L).noneMatch(l -> l > 10L));
-        assertFalse(createIteratorSplitorLongStream(1L, 2L, 3L).noneMatch(l -> l > 2L));
+        assertTrue(createIteratorSplitStrategyLongStream(1L, 2L, 3L).noneMatch(l -> l > 10L));
+        assertFalse(createIteratorSplitStrategyLongStream(1L, 2L, 3L).noneMatch(l -> l > 2L));
     }
 
     @Test
@@ -1276,7 +1271,7 @@ public class ParallelArrayLongStreamTest extends TestBase {
     @Test
     public void testZipWithBinaryDefaults_SequentialFallback_UnevenLengths() {
         List<Long> result = LongStream.of(1L, 2L, 3L)
-                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
                 .zipWith(LongStream.of(10L), 0L, -1L, Long::sum)
                 .toList();
 
@@ -1318,8 +1313,8 @@ public class ParallelArrayLongStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ARRAY, ((ParallelArrayLongStream) createLongStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ARRAY, ((ParallelArrayLongStream) createLongStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

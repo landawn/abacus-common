@@ -1284,7 +1284,7 @@ public final class IntFunctions {
      * IntFunction<DisposableObjArray> func = IntFunctions.ofDisposableArray();
      * DisposableObjArray array1 = func.apply(10);   // returns a DisposableObjArray of length 10
      * DisposableObjArray array2 = func.apply(20);   // returns the same instance (length ignored)
-     * assert array1 == array2;                            // same instance reused
+     * assert array1 == array2;                      // same instance reused
      * }</pre>
      *
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
@@ -1325,7 +1325,7 @@ public final class IntFunctions {
      * IntFunction<DisposableArray<String>> func = IntFunctions.ofDisposableArray(String.class);
      * DisposableArray<String> array1 = func.apply(10);   // returns typed DisposableArray
      * DisposableArray<String> array2 = func.apply(20);   // returns the same instance (length ignored)
-     * assert array1 == array2;                            // same instance reused
+     * assert array1 == array2;                           // same instance reused
      * }</pre>
      *
      * @param <T> the component type of the array
@@ -1377,8 +1377,10 @@ public final class IntFunctions {
      * IntFunction<? extends Collection<String>> hashFunc = IntFunctions.ofCollection(HashSet.class);
      * Collection<String> set = hashFunc.apply(50);   // returns HashSet sized for 50 elements
      *
-     * IntFunctions.ofCollection(String.class);       // throws IllegalArgumentException (not a Collection)
-     * IntFunctions.ofCollection(null);               // throws NullPointerException
+     * // Only Collection classes are accepted, so a non-Collection argument is a compile error;
+     * // the "not a Collection" check below guards raw-typed calls.
+     * IntFunctions.ofCollection(java.util.AbstractSequentialList.class);   // throws IllegalArgumentException (abstract, no usable creator)
+     * IntFunctions.ofCollection(null);                                     // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -1449,12 +1451,13 @@ public final class IntFunctions {
                 }
 
                 try {
-                    final Constructor<?> constructor = ret == null ? ClassUtil.getDeclaredConstructor(targetType) : null;
-
-                    if (constructor != null) {
+                    // Mirrors Suppliers: N.newInstance also handles non-static member and anonymous
+                    // classes, whose declared constructor takes the enclosing instance and so is not
+                    // found by getDeclaredConstructor(targetType).
+                    if (ret == null && Suppliers.canInstantiateWithoutProbe(targetType)) {
                         ret = size -> {
                             try {
-                                return (Collection<T>) N.invoke(constructor);
+                                return (Collection<T>) N.newInstance(targetType);
                             } catch (final Throwable e) { // NOSONAR
                                 throw new IllegalArgumentException("Not able to create instance for collection: " + targetType, e);
                             }
@@ -1513,7 +1516,9 @@ public final class IntFunctions {
      * IntFunction<? extends Map<String, Integer>> treeFunc = IntFunctions.ofMap(TreeMap.class);
      * Map<String, Integer> tree = treeFunc.apply(50);   // returns TreeMap (capacity ignored)
      *
-     * IntFunctions.ofMap(String.class);                 // throws IllegalArgumentException (not a Map)
+     * // Only Map classes are accepted, so a non-Map argument is a compile error; the
+     * // "not a Map" check below guards raw-typed calls. An abstract Map with no usable
+     * // constructor (e.g. a custom abstract Map subclass) throws IllegalArgumentException.
      * IntFunctions.ofMap(null);                         // throws NullPointerException
      * }</pre>
      *
@@ -1573,12 +1578,13 @@ public final class IntFunctions {
                 }
 
                 try {
-                    final Constructor<?> constructor = ret == null ? ClassUtil.getDeclaredConstructor(targetType) : null;
-
-                    if (constructor != null) {
+                    // Mirrors Suppliers: N.newInstance also handles non-static member and anonymous
+                    // classes, whose declared constructor takes the enclosing instance and so is not
+                    // found by getDeclaredConstructor(targetType).
+                    if (ret == null && Suppliers.canInstantiateWithoutProbe(targetType)) {
                         ret = size -> {
                             try {
-                                return (Map<K, V>) N.invoke(constructor);
+                                return (Map<K, V>) N.newInstance(targetType);
                             } catch (final Throwable e) { // NOSONAR
                                 throw new IllegalArgumentException("Not able to create instance for Map: " + targetType, e);
                             }
@@ -1747,5 +1753,4 @@ public final class IntFunctions {
         throw new UnsupportedOperationException();
     }
 
-    //    /**
 }

@@ -8,12 +8,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +79,30 @@ public class CodeGenerationUtilTest extends TestBase {
 
         public void setDefault(final String value) {
             this.value = value;
+        }
+    }
+
+    public static class Foo_Bar {
+        private String id;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(final String id) {
+            this.id = id;
+        }
+    }
+
+    public static class FooBar {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
         }
     }
 
@@ -419,6 +453,37 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
+    public void test_generatePropNameTableClasses_rejectsNonInterfaceAndDuplicateExtendedTypes() {
+        final PropNameTableCodeConfig nonInterface = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("s")
+                .extendedInterfaces(Arrays.asList(String.class))
+                .build();
+        final PropNameTableCodeConfig duplicateInterface = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("s")
+                .extendedInterfaces(Arrays.asList(java.io.Serializable.class, java.io.Serializable.class))
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(nonInterface));
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(duplicateInterface));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_rejectsDuplicateNestedInterfaceNames() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("s")
+                .generateSnakeCase(true)
+                .classNameForSnakeCase("caseNames")
+                .generateScreamingSnakeCase(true)
+                .classNameForScreamingSnakeCase("caseNames")
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(config));
+    }
+
+    @Test
     public void test_generatePropNameTableClasses_config_filterInterface() {
         @Data
         class ConcreteClass {
@@ -491,6 +556,63 @@ public class CodeGenerationUtilTest extends TestBase {
 
         assertNotNull(code);
         assertTrue(code.contains("USER_ID_CUSTOM"));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_escapesGeneratedStringAndJavadocText() {
+        final Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions = new LinkedHashMap<>();
+        propFunctions.put("expr", (cls, propClass, propName) -> "fn(\"" + propName + "\\path\nnext*/)");
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("s")
+                .generateSnakeCase(true)
+                .propNameConverterForSnakeCase((cls, propName) -> "quoted\"value\\path\nnext*/")
+                .generateFunctionPropName(true)
+                .propFunctions(propFunctions)
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertTrue(code.contains("quoted\\\"value\\\\path\\nnext*/"), code);
+        assertTrue(code.contains("fn(\\\"id\\\\path\\nnext*/)"), code);
+        assertTrue(code.contains("*&#47;"), code);
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_unicodeEscapeCommentTerminatorCompiles() throws IOException {
+        final String unicodeEscapeCommentTerminator = "\\u002a\\u002f";
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("GeneratedProps")
+                .generateSnakeCase(true)
+                .propNameConverterForSnakeCase((cls, propName) -> "value" + unicodeEscapeCommentTerminator)
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertTrue(code.contains("value&#92;u002a&#92;u002f"), code);
+
+        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        assertNotNull(compiler, "Tests must run on a JDK so generated source can be compiled");
+
+        final Path compilationDir = Files.createTempDirectory("codegen-unicode-javadoc");
+
+        try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, StandardCharsets.UTF_8)) {
+            final JavaFileObject source = new SimpleJavaFileObject(URI.create("string:///GeneratedProps.java"), JavaFileObject.Kind.SOURCE) {
+                @Override
+                public CharSequence getCharContent(final boolean ignoreEncodingErrors) {
+                    return code;
+                }
+            };
+            final StringWriter compilerOutput = new StringWriter();
+            final Boolean compiled = compiler
+                    .getTask(compilerOutput, fileManager, null, Arrays.asList("-proc:none", "-d", compilationDir.toString()), null, Arrays.asList(source))
+                    .call();
+
+            assertTrue(Boolean.TRUE.equals(compiled), compilerOutput + System.lineSeparator() + code);
+        } finally {
+            IOUtil.deleteRecursivelyIfExists(compilationDir.toFile());
+        }
     }
 
     @Test
@@ -696,6 +818,31 @@ public class CodeGenerationUtilTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(config));
         assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(invalidFunctionPrefix));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_rejectsCollidingEmittedPropertyNames() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("Props")
+                .propNameConverter((cls, propName) -> propName.equals("id") ? "default" : propName.equals("name") ? "_default" : null)
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(config));
+    }
+
+    @Test
+    public void test_generatePropNameTableClasses_disambiguatesClassListFieldNames() {
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(Foo_Bar.class, FooBar.class))
+                .className("Props")
+                .generateClassPropNameList(true)
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertTrue(code.contains("List<String> fooBarPropNameList ="), code);
+        assertTrue(code.contains("List<String> _fooBarPropNameList ="), code);
     }
 
     @Test

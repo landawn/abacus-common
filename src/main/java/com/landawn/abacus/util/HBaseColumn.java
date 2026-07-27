@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Create a column with current timestamp
+ * // Create a column using Long.MAX_VALUE as the latest-version sentinel
  * HBaseColumn<String> col1 = HBaseColumn.valueOf("value");
  *
  * // Create a column with specific version
@@ -56,7 +56,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /** Empty boolean column instance with value {@code false} and version {@code 0}. */
     public static final HBaseColumn<Boolean> EMPTY_BOOLEAN_COLUMN = HBaseColumn.valueOf(false, 0);
 
-    /** Empty character column instance with value {@code '\0'} and version {@code 0}. */
+    /** Empty character column instance with value {@code (char) 0} and version {@code 0}. */
     public static final HBaseColumn<Character> EMPTY_CHAR_COLUMN = HBaseColumn.valueOf((char) 0, 0);
 
     /** Empty byte column instance with value {@code 0} and version {@code 0}. */
@@ -494,7 +494,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * String value = col.value();   // returns "myValue"
      * }</pre>
      *
-     * @return the column value
+     * @return the column value, which may be {@code null}
      */
     public T value() {
         return value;

@@ -871,6 +871,20 @@ public class HolderTest extends TestBase {
     }
 
     @Test
+    public void testFilterReturnsValueThatWasTestedWhenPredicateMutatesHolder() throws Exception {
+        Holder<Integer> holder = Holder.of(10);
+
+        Nullable<Integer> result = holder.filter(v -> {
+            holder.setValue(null);
+            return true;
+        });
+
+        assertTrue(result.isPresent());
+        assertEquals(10, result.get());
+        assertNull(holder.value());
+    }
+
+    @Test
     public void test_filterIfNotNull_PredicateTrue() throws Exception {
         Holder<Integer> holder = Holder.of(10);
         Optional<Integer> result = holder.filterIfNotNull(n -> n > 5);
@@ -921,6 +935,20 @@ public class HolderTest extends TestBase {
         Holder<String> holder = Holder.of(null);
         com.landawn.abacus.util.u.Optional<String> result = holder.filterIfNotNull(v -> true);
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFilterIfNotNullReturnsValueThatWasTestedWhenPredicateMutatesHolder() throws Exception {
+        Holder<Integer> holder = Holder.of(10);
+
+        Optional<Integer> result = holder.filterIfNotNull(v -> {
+            holder.setValue(null);
+            return true;
+        });
+
+        assertTrue(result.isPresent());
+        assertEquals(10, result.get());
+        assertNull(holder.value());
     }
 
     @Test

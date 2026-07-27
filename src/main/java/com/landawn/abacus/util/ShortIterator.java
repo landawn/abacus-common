@@ -28,9 +28,11 @@ import com.landawn.abacus.util.stream.ShortStream;
  * This class provides various factory methods and operations for creating and manipulating
  * iterators over {@code short} values without the overhead of boxing/unboxing.
  *
- * <p>The iterator is immutable, meaning elements cannot be removed during iteration.
+ * <p>The iterator is unmodifiable, meaning elements cannot be removed through it; like every iterator,
+ * its traversal position is mutable and instances are generally neither reusable nor thread-safe.
  * It provides specialized methods like {@code nextShort()} to avoid boxing overhead,
- * and various transformation methods like {@code skip()}, {@code limit()}, and {@code filter()}.</p>
+ * and lazy operations such as {@code skip()}, {@code limit()}, and {@code filter()}. These operations
+ * share and consume the original iterator rather than copying its remaining values.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -102,7 +104,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a {@code ShortIterator} from the specified short array.
      *
      * <p>If the array is {@code null} or empty, returns an empty iterator.
-     * The iterator will iterate over all elements in the array from start to end.</p>
+     * The iterator reads the supplied array directly from start to end; changes made to an element
+     * before that element is consumed are therefore visible to the iterator.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -136,7 +139,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code ShortIterator} over the specified range, or an empty iterator if the validated range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -675,11 +678,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param action the action to perform on each element
+     * @throws NullPointerException if {@code action} is {@code null}
      * @deprecated use {@link #foreachRemaining(Throwables.ShortConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) throws IllegalArgumentException {
+    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) {
         super.forEachRemaining(action);
     }
 
@@ -723,8 +727,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each (index, value) pair; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the source has another element after index
-     *         {@link Integer#MAX_VALUE} has already been emitted
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {

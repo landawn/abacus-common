@@ -107,9 +107,9 @@ import com.landawn.abacus.util.stream.Stream;
  * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi =
  *     Fnn.rateLimiter(10.0);   // limits to 10 requests per second
  *
- * // Map entry manipulation
- * Map<String, Integer> scores = entryStream
- *     .toMap(Fnn.key(), Fnn.value());
+ * // Map entry manipulation (Seq accepts Throwables functional interfaces; java.util streams do not)
+ * Seq<Map.Entry<String, Integer>, Exception> entrySeq = Seq.of(N.asMap("a", 1, "b", 2));
+ * Map<String, Integer> scores = entrySeq.toMap(Fnn.key(), Fnn.value());
  * }</pre>
  *
  * <p><b>Naming Convention:</b>
@@ -265,11 +265,11 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Expensive database connection initialization
-     * Throwables.Supplier<Connection, SQLException> dbSupplier =
-     *     Fnn.memoize(() -> DriverManager.getConnection(url, user, pass));
-     * Connection conn1 = dbSupplier.get();   // returns connection
-     * Connection conn2 = dbSupplier.get();   // returns same connection
+     * // Read and cache immutable configuration text on first use
+     * Throwables.Supplier<String, IOException> schemaSupplier = Fnn.memoize(
+     *     () -> java.nio.file.Files.readString(java.nio.file.Path.of("schema.sql")));
+     * String schema1 = schemaSupplier.get();   // reads the file
+     * String schema2 = schemaSupplier.get();   // returns the same cached text
      * }</pre>
      *
      * @param <T> the type of results supplied by this supplier
@@ -524,7 +524,7 @@ public final class Fnn {
      *     enableFiltering ? Fnn.pp(customFilter) : Fnn.alwaysTrue();
      *
      * // Accept all elements in stream
-     * stream.filter(Fnn.alwaysTrue())
+     * stream.filter(Fnn.alwaysTrue());
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -1518,8 +1518,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fnn.<String, Integer, Exception>testByKey(k -> k.startsWith("a")).test(new AbstractMap.SimpleEntry<>("apple", 1));   // returns true
-     * Fnn.testByKey((Throwables.Predicate<String, Exception>) k -> k.length() > 3).test(Map.entry("hello", 1));            // returns true
-     * Fnn.testByKey((Throwables.Predicate<String, Exception>) k -> k.length() > 3).test(Map.entry("hi", 2));               // returns false
+     * Fnn.<String, Integer, Exception>testByKey(k -> k.length() > 3).test(Map.entry("hello", 1));                          // returns true
+     * Fnn.<String, Integer, Exception>testByKey(k -> k.length() > 3).test(Map.entry("hi", 2));                             // returns false
      * Fnn.testByKey(null);                                                                                                 // throws IllegalArgumentException
      * }</pre>
      *
@@ -1544,9 +1544,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.testByValue((Throwables.Predicate<Integer, Exception>) v -> v > 0).test(Map.entry("a", 5));    // returns true
-     * Fnn.testByValue((Throwables.Predicate<Integer, Exception>) v -> v > 0).test(Map.entry("a", -1));   // returns false
-     * Fnn.testByValue(null);                                                                             // throws IllegalArgumentException
+     * Fnn.<String, Integer, Exception>testByValue(v -> v > 0).test(Map.entry("a", 5));    // returns true
+     * Fnn.<String, Integer, Exception>testByValue(v -> v > 0).test(Map.entry("a", -1));   // returns false
+     * Fnn.testByValue(null);                                                              // throws IllegalArgumentException
      * }</pre>
      *
      * @param <K> the type of the key
@@ -1571,8 +1571,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> keys = new ArrayList<>();
-     * Fnn.acceptByKey((Throwables.Consumer<String, Exception>) keys::add).accept(Map.entry("a", 1));   // keys now contains "a"
-     * Fnn.acceptByKey(null);                                                                           // throws IllegalArgumentException
+     * Fnn.<String, Integer, Exception>acceptByKey(keys::add).accept(Map.entry("a", 1));   // keys now contains "a"
+     * Fnn.acceptByKey(null);                                                              // throws IllegalArgumentException
      * }</pre>
      *
      * @param <K> the type of the key
@@ -1597,8 +1597,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> values = new ArrayList<>();
-     * Fnn.acceptByValue((Throwables.Consumer<Integer, Exception>) values::add).accept(Map.entry("a", 1));   // values now contains 1
-     * Fnn.acceptByValue(null);                                                                              // throws IllegalArgumentException
+     * Fnn.<String, Integer, Exception>acceptByValue(values::add).accept(Map.entry("a", 1));   // values now contains 1
+     * Fnn.acceptByValue(null);                                                                // throws IllegalArgumentException
      * }</pre>
      *
      * @param <K> the type of the key
@@ -1813,8 +1813,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the entry with the smallest key in a map
-     * Optional<Map.Entry<String, Integer>> minEntry = entryStream
-     *     .reduce(Fnn.minByKey());
+     * Seq<Map.Entry<String, Integer>, Exception> entrySeq = Seq.of(N.asMap("b", 2, "a", 1));
+     * Optional<Map.Entry<String, Integer>> minEntry = entrySeq.reduce(Fnn.minByKey());   // Optional of a=1
      * }</pre>
      *
      * @param <K> the type of the Comparable key
@@ -1844,8 +1844,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the entry with the smallest value in a map
-     * Optional<Map.Entry<String, Integer>> minEntry = entryStream
-     *     .reduce(Fnn.minByValue());
+     * Seq<Map.Entry<String, Integer>, Exception> entrySeq = Seq.of(N.asMap("a", 2, "b", 1));
+     * Optional<Map.Entry<String, Integer>> minEntry = entrySeq.reduce(Fnn.minByValue());   // Optional of b=1
      * }</pre>
      *
      * @param <K> the type of the key
@@ -2008,7 +2008,7 @@ public final class Fnn {
      * <pre>{@code
      * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("");        // returns false
      * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("hello");   // returns true
-     * Fnn.not(null);                                                                       // throws IllegalArgumentException
+     * Fnn.not((Throwables.Predicate<String, Exception>) null);                             // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2057,8 +2057,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fnn.not((Throwables.TriPredicate<String, Integer, Boolean, Exception>) (s, i, b) -> s.length() > i && b)
-     *     .test("hi", 5, true);  // returns true (negation of false && true)
-     * Fnn.not(null);             // throws IllegalArgumentException
+     *     .test("hi", 5, true);                                                      // returns true (negation of false && true)
+     * Fnn.not((Throwables.TriPredicate<String, Integer, Boolean, Exception>) null);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <A> the type of the first argument to the predicate
@@ -2079,8 +2079,9 @@ public final class Fnn {
     /**
      * Returns a stateful Predicate that returns {@code true} for at most the specified number of evaluations.
      * The predicate maintains an internal counter that decrements with each test, returning {@code true}
-     * while the counter is positive and {@code false} once it reaches zero. This predicate is thread-safe
-     * and can be used in parallel streams.
+     * while the counter is positive and {@code false} once it reaches zero. Its atomic counter prevents
+     * concurrent evaluations from exceeding the limit. In a parallel stream, the accepted elements are
+     * selected by invocation order and are not guaranteed to be the first elements in encounter order.
      *
      * <p><b>Note:</b> This predicate is stateful and should not be saved or cached for reuse.</p>
      *
@@ -3110,7 +3111,7 @@ public final class Fnn {
      * com.landawn.abacus.util.function.Consumer<String> consumer = s -> System.out.println(s);
      * Throwables.Consumer<String, IOException> throwableConsumer = Fnn.cc(consumer);
      * throwableConsumer.accept("hello");   // prints "hello"
-     * Fnn.cc(null);                        // throws IllegalArgumentException
+     * Fnn.cc((Consumer<String>) null);     // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the input to the consumer
@@ -3282,8 +3283,8 @@ public final class Fnn {
      * <pre>{@code
      * com.landawn.abacus.util.function.Function<String, Integer> func = String::length;
      * Throwables.Function<String, Integer, IOException> throwableFunc = Fnn.ff(func);
-     * throwableFunc.apply("hello");   // returns 5
-     * Fnn.ff(null);                   // throws IllegalArgumentException
+     * throwableFunc.apply("hello");               // returns 5
+     * Fnn.ff((Function<String, Integer>) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the input to the function

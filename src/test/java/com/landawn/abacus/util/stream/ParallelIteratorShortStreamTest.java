@@ -30,8 +30,8 @@ import com.landawn.abacus.util.function.ShortFunction;
 import com.landawn.abacus.util.function.ShortPredicate;
 import com.landawn.abacus.util.function.ShortTernaryOperator;
 import com.landawn.abacus.util.function.ShortUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelIteratorShortStreamTest extends TestBase {
 
@@ -46,7 +46,7 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     private short[] smallArray;
 
     protected ShortStream createShortStream(short... elements) {
-        return ShortStream.of(elements).map(e -> (short) (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
+        return ShortStream.of(elements).map(e -> (short) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     // ---- Sequential-fallback path: 1-thread iterator stream => canBeSequential(maxThreadNum) == true ----
 
     private ShortStream createSingleThreadStream(short... elements) {
-        return ShortStream.of(elements).map(e -> (short) (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1));
+        return ShortStream.of(elements).map(e -> (short) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test
@@ -852,7 +852,7 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     @Test
     public void testZipWithDefaultValues_SequentialFallback_UnevenLengths() {
         List<Short> result = ShortStream.of((short) 1, (short) 2, (short) 3)
-                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
                 .zipWith(ShortStream.of((short) 10), (short) 0, (short) -1, (a, b) -> (short) (a + b))
                 .toList();
 
@@ -886,8 +886,8 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor_SequentialFallback() {
-        assertEquals(Splitor.ITERATOR, ((ParallelIteratorShortStream) createShortStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy_SequentialFallback() {
+        assertEquals(SplitStrategy.ITERATOR, ((ParallelIteratorShortStream) createShortStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

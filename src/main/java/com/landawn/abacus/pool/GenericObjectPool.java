@@ -144,7 +144,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
+     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) {
@@ -158,7 +158,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
+     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size; required when {@code maxMemorySize > 0}
      * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
@@ -264,11 +264,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public boolean add(final E element) throws IllegalStateException {
+        assertNotClosed();
+
         if (element == null) {
             throw new IllegalArgumentException("Element cannot be null");
         }
-
-        assertNotClosed();
 
         if (element.activityPrint().isExpired()) {
             return false;
@@ -524,6 +524,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if the timeout elapsed or add failed
+     * @throws IllegalArgumentException if the element or unit is null
+     * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
@@ -578,7 +580,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @return an object from the pool, or {@code null} if the pool is empty
      * @throws IllegalStateException if the pool has been closed
-     * @throws IllegalArgumentException if the unit is null
      */
     @MayReturnNull
     @Override

@@ -30,9 +30,9 @@ import com.landawn.abacus.util.Strings;
 /**
  * The abstract base class for {@code byte} types in the type system.
  * <p>
- * This class provides common functionality for handling {@code byte}/{@code Byte} values,
+ * This class provides common functionality for handling {@code byte} values,
  * including string/character-array parsing, JDBC read/write operations, and serialization.
- * It uses {@code Number} as its generic type parameter so that both the primitive
+ * This class uses {@code Number} as its generic type parameter so that both the primitive
  * {@code byte} type and the {@code Byte} wrapper type can share this implementation.
  * Concrete subclasses cover each of those two variants.
  * </p>
@@ -43,7 +43,7 @@ import com.landawn.abacus.util.Strings;
 public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
-     * Constructs a new {@code AbstractByteType} with the specified type name.
+     * Constructs an {@code AbstractByteType} with the specified type name.
      *
      * @param typeName the name of the byte type (e.g., "Byte", "byte")
      */

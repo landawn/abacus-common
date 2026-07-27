@@ -86,10 +86,18 @@ public @interface JsonXmlConfig {
     String[] ignoredFields() default {};
 
     /**
-     * Specifies the date format pattern to use for date/time serialization.
-     * If empty, the default ISO-8601 format is used.
+     * Specifies the date format pattern to use when serializing and deserializing supported
+     * date/time fields. If empty, each field's default ISO-8601 representation is used.
      *
-     * <p>The pattern must conform to {@link java.text.SimpleDateFormat} conventions.</p>
+     * <p>Legacy {@link java.util.Date}, {@link java.util.Calendar}, and {@code java.sql} date/time
+     * fields use {@link java.text.SimpleDateFormat} pattern syntax. {@code java.time.LocalDateTime},
+     * {@code LocalDate}, {@code LocalTime}, and {@code ZonedDateTime} fields use
+     * {@link java.time.format.DateTimeFormatter} pattern syntax. When Joda-Time is present,
+     * {@code DateTime} and {@code MutableDateTime} fields use its {@code DateTimeFormat} syntax.
+     * {@code java.time.Instant} is not supported by this format option.</p>
+     *
+     * <p>The special value {@code "long"} reads and writes epoch milliseconds. It is not valid for
+     * {@code java.time.LocalDate} or {@code java.time.LocalTime}.</p>
      *
      * <p><b>Common patterns:</b></p>
      * <ul>
@@ -100,6 +108,7 @@ public @interface JsonXmlConfig {
      *
      * @return the date format pattern, or an empty string for the default ISO-8601 format
      * @see java.text.SimpleDateFormat
+     * @see java.time.format.DateTimeFormatter
      */
     String dateFormat() default "";
 
@@ -168,7 +177,7 @@ public @interface JsonXmlConfig {
      * <p><b>Common exclusion policies:</b></p>
      * <ul>
      *   <li>{@link Exclusion#NULL} (default): Excludes fields with {@code null} values</li>
-     *   <li>{@link Exclusion#DEFAULT}: Excludes {@code null} values and primitive type default values (0, false, etc.)</li>
+     *   <li>{@link Exclusion#DEFAULT}: Excludes {@code null} values and primitive type default values (0, {@code false}, etc.)</li>
      *   <li>{@link Exclusion#NONE}: Includes all fields</li>
      * </ul>
      *

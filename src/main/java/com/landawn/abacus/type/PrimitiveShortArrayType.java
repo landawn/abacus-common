@@ -259,14 +259,19 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {100, 200, 300};
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter nullWriter = Objectory.createBufferedJsonWriter();
      * JsonXmlSerConfig<?> config = null;
-     * type.serializeTo(writer, array, config);
-     * System.out.println(writer.toString());   // Output: [100, 200, 300]
+     * try {
+     *     type.serializeTo(writer, array, config);
+     *     System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
-     * BufferedJsonWriter nullWriter = new BufferedJsonWriter();
-     * type.serializeTo(nullWriter, null, config);
-     * System.out.println(nullWriter.toString());   // Output: null
+     *     type.serializeTo(nullWriter, null, config);
+     *     System.out.println(nullWriter.toString());   // Output: null
+     * } finally {
+     *     Objectory.recycle(writer);
+     *     Objectory.recycle(nullWriter);
+     * }
      * }</pre>
      *
      * <p>
@@ -354,7 +359,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * Set<Short> set = new HashSet<>();
      * type.arrayToCollection(array, set);
-     * System.out.println(set);   // Output: [1, 2, 3]
+     * boolean containsAll = set.size() == 3
+     *         && set.containsAll(List.of((short) 1, (short) 2, (short) 3));   // true
      * }</pre>
      *
      * @param x the short array to convert

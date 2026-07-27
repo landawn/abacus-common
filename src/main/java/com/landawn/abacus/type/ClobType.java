@@ -92,7 +92,7 @@ public class ClobType extends AbstractType<Clob> {
             return null;
         }
 
-        RuntimeException primaryException = null;
+        Throwable primaryException = null;
 
         try {
             final long len = x.length();
@@ -101,11 +101,12 @@ public class ClobType extends AbstractType<Clob> {
             }
             return x.getSubString(1, (int) len);
         } catch (final SQLException e) {
-            primaryException = new UncheckedSQLException(e);
-            throw primaryException;
-        } catch (final RuntimeException e) {
+            final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
+            primaryException = uncheckedException;
+            throw uncheckedException;
+        } catch (final RuntimeException | Error e) {
             primaryException = e;
-            throw primaryException;
+            throw e;
         } finally {
             try {
                 x.free();
@@ -115,6 +116,12 @@ public class ClobType extends AbstractType<Clob> {
                     primaryException.addSuppressed(freeException);
                 } else {
                     throw freeException; //NOSONAR
+                }
+            } catch (final RuntimeException | Error e) {
+                if (primaryException == null) {
+                    throw e;
+                } else if (primaryException != e) {
+                    primaryException.addSuppressed(e);
                 }
             }
         }

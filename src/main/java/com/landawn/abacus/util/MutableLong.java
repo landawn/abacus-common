@@ -62,7 +62,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableLong num = new MutableLong();
+     * MutableLong num = MutableLong.of(0L);
      * }</pre>
      *
      */
@@ -74,7 +74,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableLong num = new MutableLong(1000000L);
+     * MutableLong num = MutableLong.of(1000000L);
      * }</pre>
      *
      * @param value the initial value to store
@@ -117,8 +117,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     //-----------------------------------------------------------------------
 
     /**
-     * Gets the value as a long.
-     * This method is deprecated in favor of {@link #value()}.
+     * Gets the value as a primitive long.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -156,10 +155,11 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Returns the current value and then sets it to the new value.
+     * Returns the current value and then sets the new value.
      *
-     * <p><b>Note:</b> This operation is not atomic. External synchronization is required
-     * for safe concurrent use; see the class-level thread-safety note.</p>
+     * <p><strong>Note:</strong> this is not atomic; it simply returns the previous value
+     * and assigns the new one within a single method call. External synchronization is
+     * required for concurrent use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -168,7 +168,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * }</pre>
      *
      * @param newValue the new value to set
-     * @return the previous value before it was updated
+     * @return the value before it was updated
      */
     public long getAndSet(final long newValue) {
         final long result = this.value;
@@ -177,7 +177,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Sets the value to the new value and then returns it.
+     * Sets the value and then returns it.
      * This is useful when you want to update and immediately use the new value.
      *
      * <p><b>Usage Examples:</b></p>
@@ -187,7 +187,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * }</pre>
      *
      * @param newValue the new value to set
-     * @return the new value that was set
+     * @return the new value after it has been set
      */
     public long setAndGet(final long newValue) {
         this.value = newValue;
@@ -195,7 +195,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Sets the value to the new value if the predicate evaluates to {@code true} when testing the current value.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>
@@ -206,7 +206,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw
-     * @param predicate the predicate to test against the current value
+     * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws NullPointerException if {@code predicate} is {@code null}

@@ -135,8 +135,8 @@ import com.landawn.abacus.util.u.OptionalInt;
  *
  * // Complex pattern searching
  * boolean[] flags = {true, false, true, true, false, true, true, false};
- * boolean[] pattern = {true, true, false};
- * OptionalInt lastPattern = Index.lastOfSubArray(flags, pattern);   // returns OptionalInt[5]
+ * boolean[] flagPattern = {true, true, false};
+ * OptionalInt lastPattern = Index.lastOfSubArray(flags, flagPattern);   // returns OptionalInt[5]
  * }</pre>
  *
  * <p><b>Predicate-Based Searching:</b>
@@ -197,9 +197,9 @@ import com.landawn.abacus.util.u.OptionalInt;
  * <p><b>Error Handling and Edge Cases:</b>
  * <ul>
  *   <li><b>Null Inputs:</b> Graceful handling of {@code null} arrays and collections</li>
- *   <li><b>Empty Inputs:</b> Returns {@code OptionalInt.empty()} for empty arrays/collections</li>
- *   <li><b>Invalid Ranges:</b> Validates index parameters and throws {@code IndexOutOfBoundsException}</li>
- *   <li><b>Null Elements:</b> Proper null-safe comparison using {@code Objects.equals()}</li>
+ *   <li><b>Empty Inputs:</b> Single-value searches return {@code OptionalInt.empty()}; an empty subarray or sublist can match at a valid boundary</li>
+ *   <li><b>Range Handling:</b> Search start indices are clamped or produce no match; explicit pattern-slice bounds are validated and may throw {@code IndexOutOfBoundsException}</li>
+ *   <li><b>Null Elements:</b> Proper null-safe comparison using {@link N#equals(Object, Object)}</li>
  * </ul>
  *
  * <p><b>Optimization Strategies:</b>
@@ -693,6 +693,8 @@ public final class Index {
      * This method searches for the first occurrence of a value that falls within the range
      * {@code [valueToFind - tolerance, valueToFind + tolerance]} in the given float array,
      * beginning at the specified {@code fromIndex}. Negative {@code fromIndex} values are treated as 0.
+     * Matching uses {@link Numbers#fuzzyEquals(float, float, float)}, so two {@link Float#NaN} values are
+     * considered equal and infinities of the same sign match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -782,6 +784,8 @@ public final class Index {
      * This method searches for the first occurrence of a value that falls within the range
      * {@code [valueToFind - tolerance, valueToFind + tolerance]} in the given double array,
      * beginning at the specified {@code fromIndex}. Negative {@code fromIndex} values are treated as 0.
+     * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}, so two {@link Double#NaN} values are
+     * considered equal and infinities of the same sign match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1051,7 +1055,7 @@ public final class Index {
      * @param valueToFind the substring to search for, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return an OptionalInt containing the zero-based index of the first occurrence of the substring at or after {@code fromIndex}
-     *         (an empty substring returns {@code Math.min(fromIndex, source.length())}), or an empty OptionalInt if the substring is not found or either
+     *         (an empty substring returns {@code Math.min(Math.max(fromIndex, 0), source.length())}), or an empty OptionalInt if the substring is not found or either
      *         parameter is {@code null}
      * @see #of(String, String)
      * @see #ofIgnoreCase(String, String, int)
@@ -1105,7 +1109,7 @@ public final class Index {
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return an OptionalInt containing the zero-based index of the first occurrence of the substring (ignoring case) at or after {@code fromIndex}
-     *         (an empty substring returns {@code Math.min(fromIndex, source.length())}), or an empty OptionalInt if the substring is not found or either
+     *         (an empty substring returns {@code Math.min(Math.max(fromIndex, 0), source.length())}), or an empty OptionalInt if the substring is not found or either
      *         parameter is {@code null}
      * @see #ofIgnoreCase(String, String)
      * @see Strings#indexOfIgnoreCase(String, String, int)
@@ -2948,7 +2952,8 @@ public final class Index {
      * <p>
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of a value
      * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
-     * Matching uses {@link Numbers#fuzzyEquals(float, float, float)}.
+     * Matching uses {@link Numbers#fuzzyEquals(float, float, float)}, so two {@link Float#NaN} values are
+     * considered equal and infinities of the same sign match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3039,7 +3044,8 @@ public final class Index {
      * <p>
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of a value
      * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
-     * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}.
+     * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}, so two {@link Double#NaN} values are
+     * considered equal and infinities of the same sign match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5195,6 +5201,7 @@ public final class Index {
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
      *         returns an empty BitSet if the value is not found or the array is {@code null} or empty
      * @see #allOf(double[], double, int)
+     * @see #allOf(double[], double, int, double)
      * @see #allOf(Object[], Object)
      */
     public static BitSet allOf(final double[] source, final double valueToFind) {
@@ -5472,6 +5479,7 @@ public final class Index {
      * @param predicate the predicate to test elements; must not be {@code null}
      * @return a BitSet containing the zero-based indices of all elements matching the predicate;
      *         returns an empty BitSet if no elements match or the array is {@code null} or empty
+     * @throws NullPointerException if {@code predicate} is {@code null} and the array is {@code non-null} and non-empty
      * @see #allOf(Object[], Predicate, int)
      */
     public static <T> BitSet allOf(final T[] source, final Predicate<? super T> predicate) {
@@ -5500,6 +5508,7 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return a BitSet containing the zero-based indices of all elements at or after {@code fromIndex} matching the predicate;
      *         returns an empty BitSet if no elements match, the array is {@code null}, or {@code fromIndex >= array.length}
+     * @throws NullPointerException if {@code predicate} is {@code null} and the array is {@code non-null}, non-empty, and {@code fromIndex} is within range
      * @see #allOf(Object[], Predicate)
      */
     public static <T> BitSet allOf(final T[] source, final Predicate<? super T> predicate, final int fromIndex) {
@@ -5553,6 +5562,7 @@ public final class Index {
      * @param predicate the predicate to test elements; must not be {@code null}
      * @return a BitSet containing the zero-based indices (in iteration order) of all elements matching the predicate;
      *         returns an empty BitSet if no elements match or the collection is {@code null} or empty
+     * @throws NullPointerException if {@code predicate} is {@code null} and the collection is {@code non-null} and non-empty
      * @see #allOf(Collection, Predicate, int)
      */
     public static <T> BitSet allOf(final Collection<? extends T> source, final Predicate<? super T> predicate) {

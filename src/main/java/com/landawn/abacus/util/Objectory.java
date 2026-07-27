@@ -61,7 +61,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * StringBuilder sb = Objectory.createStringBuilder();
  * try {
  *     sb.append("Hello").append(" ").append("World");
- *     return sb.toString();
+ *     String result = sb.toString();
  * } finally {
  *     Objectory.recycle(sb);   // returns sb to the pool for reuse
  * }
@@ -83,8 +83,14 @@ public final class Objectory {
 
     private static final AtomicInteger created = new AtomicInteger();
 
+    /** Number of bytes in one kibibyte, used to express the buffer sizes below. */
     static final int KB = 1024;
 
+    /**
+     * The default buffer size used by the {@code char[]}, {@code byte[]}, {@link StringBuilder} and
+     * {@link ByteArrayOutputStream} factories, derived from the available heap and clamped to
+     * {@code [16 KB, 128 KB]}. Only buffers of exactly this length are eligible for pooling.
+     */
     static final int BUFFER_SIZE = Math.min(Math.max(IOUtil.MAX_MEMORY_IN_MB, KB * 16), 128 * KB);
 
     private static final int POOL_SIZE_FOR_COLLECTION = 256;
@@ -100,7 +106,7 @@ public final class Objectory {
     private static final int MAX_ARRAY_LENGTH = IOUtil.IS_PLATFORM_ANDROID ? 128 : 1024;
 
     @SuppressWarnings("unchecked")
-    private static final Queue<Object[]>[] objectArrayPool = new Queue[POOLABLE_SIZE + 1];
+    private static final Queue<Object[]>[] objectArrayPool = new Queue[POOLABLE_ARRAY_LENGTH + 1]; // indexed by array length, capped at POOLABLE_ARRAY_LENGTH
 
     private static final Queue<List<?>> listPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_COLLECTION);
 
@@ -131,6 +137,9 @@ public final class Objectory {
 
     private static final Queue<BufferedReader> bufferedReaderPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private Objectory() {
         // Utility class - private constructor to prevent instantiation
     }
@@ -371,8 +380,7 @@ public final class Objectory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] buffer = Objectory.createCharArrayBuffer();
-     * try {
-     *     Reader reader = new FileReader("file.txt");
+     * try (Reader reader = new FileReader("file.txt")) {
      *     int charsRead = reader.read(buffer);
      * } finally {
      *     Objectory.recycle(buffer);
@@ -399,8 +407,7 @@ public final class Objectory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] buffer = Objectory.createCharArrayBuffer(1024);
-     * try {
-     *     Reader reader = new FileReader("file.txt");
+     * try (Reader reader = new FileReader("file.txt")) {
      *     int charsRead = reader.read(buffer);
      *     // Process the characters
      * } finally {
@@ -441,8 +448,7 @@ public final class Objectory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = Objectory.createByteArrayBuffer();
-     * try {
-     *     InputStream input = new FileInputStream("file.bin");
+     * try (InputStream input = new FileInputStream("file.bin")) {
      *     int bytesRead = input.read(buffer);
      * } finally {
      *     Objectory.recycle(buffer);
@@ -469,8 +475,7 @@ public final class Objectory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = Objectory.createByteArrayBuffer(4096);
-     * try {
-     *     InputStream input = new FileInputStream("file.bin");
+     * try (InputStream input = new FileInputStream("file.bin")) {
      *     int bytesRead = input.read(buffer);
      *     // Process the bytes
      * } finally {
@@ -514,7 +519,7 @@ public final class Objectory {
      * StringBuilder sb = Objectory.createStringBuilder();
      * try {
      *     sb.append("Hello").append(" ").append("World");
-     *     return sb.toString();
+     *     String result = sb.toString();
      * } finally {
      *     Objectory.recycle(sb);
      * }
@@ -544,7 +549,7 @@ public final class Objectory {
      *     sb.append("Hello");
      *     sb.append(" ");
      *     sb.append("World");
-     *     return sb.toString();
+     *     String result = sb.toString();
      * } finally {
      *     Objectory.recycle(sb);
      * }
@@ -582,7 +587,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
+     * com.landawn.abacus.util.ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
      * try {
      *     baos.write("Hello".getBytes());
      *     byte[] result = baos.toByteArray();
@@ -608,7 +613,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream(4096);
+     * com.landawn.abacus.util.ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream(4096);
      * try {
      *     baos.write("Hello".getBytes());
      *     byte[] result = baos.toByteArray();
@@ -699,8 +704,11 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedWriter} writing to the specified stream
+     * @throws NullPointerException if {@code os} is {@code null}
      */
     public static java.io.BufferedWriter createBufferedWriter(final OutputStream os) {
+        N.requireNonNull(os, "os");
+
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
@@ -737,8 +745,11 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedWriter} writing to the specified writer
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
     public static java.io.BufferedWriter createBufferedWriter(final Writer writer) {
+        N.requireNonNull(writer, "writer");
+
         if (writer instanceof java.io.BufferedWriter) {
             return (java.io.BufferedWriter) writer;
         }
@@ -801,6 +812,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
      * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(outputStream);
      * try {
      *     writer.write("Hello");
@@ -811,8 +823,11 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedXmlWriter} writing to the specified stream
+     * @throws NullPointerException if {@code os} is {@code null}
      */
     public static BufferedXmlWriter createBufferedXmlWriter(final OutputStream os) {
+        N.requireNonNull(os, "os");
+
         BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
 
         if (bw == null) {
@@ -846,8 +861,11 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedXmlWriter} writing to the specified writer
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
     public static BufferedXmlWriter createBufferedXmlWriter(final Writer writer) {
+        N.requireNonNull(writer, "writer");
+
         BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
 
         if (bw == null) {
@@ -904,6 +922,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
      * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(outputStream);
      * try {
      *     writer.write("Hello");
@@ -914,8 +933,11 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedJsonWriter} writing to the specified stream
+     * @throws NullPointerException if {@code os} is {@code null}
      */
     public static BufferedJsonWriter createBufferedJsonWriter(final OutputStream os) {
+        N.requireNonNull(os, "os");
+
         BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
 
         if (bw == null) {
@@ -949,8 +971,11 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedJsonWriter} writing to the specified writer
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
     public static BufferedJsonWriter createBufferedJsonWriter(final Writer writer) {
+        N.requireNonNull(writer, "writer");
+
         BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
 
         if (bw == null) {
@@ -1009,6 +1034,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
      * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(outputStream);
      * try {
      *     writer.write("Hello");
@@ -1019,8 +1045,11 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedCsvWriter} writing to the specified stream
+     * @throws NullPointerException if {@code os} is {@code null}
      */
     public static BufferedCsvWriter createBufferedCsvWriter(final OutputStream os) {
+        N.requireNonNull(os, "os");
+
         BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
 
         if (bw == null) {
@@ -1054,8 +1083,11 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedCsvWriter} writing to the specified writer
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
     public static BufferedCsvWriter createBufferedCsvWriter(final Writer writer) {
+        N.requireNonNull(writer, "writer");
+
         BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
 
         if (bw == null) {
@@ -1091,9 +1123,10 @@ public final class Objectory {
      *
      * @param str the {@code String} to read from
      * @return a {@code BufferedReader} reading from the specified string
+     * @throws NullPointerException if {@code str} is {@code null}
      */
     public static java.io.BufferedReader createBufferedReader(final String str) {
-        return createBufferedReader(new java.io.StringReader(str));
+        return createBufferedReader(new java.io.StringReader(N.requireNonNull(str, "str")));
     }
 
     /**
@@ -1119,8 +1152,11 @@ public final class Objectory {
      *
      * @param is the {@code InputStream} to read from
      * @return a {@code BufferedReader} reading from the specified stream
+     * @throws NullPointerException if {@code is} is {@code null}
      */
     public static java.io.BufferedReader createBufferedReader(final InputStream is) {
+        N.requireNonNull(is, "is");
+
         final BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
@@ -1157,8 +1193,11 @@ public final class Objectory {
      *
      * @param reader the {@code Reader} to read from
      * @return a {@code BufferedReader} reading from the specified reader
+     * @throws NullPointerException if {@code reader} is {@code null}
      */
     public static java.io.BufferedReader createBufferedReader(final Reader reader) {
+        N.requireNonNull(reader, "reader");
+
         if (reader instanceof java.io.BufferedReader) {
             return (java.io.BufferedReader) reader;
         }
@@ -1428,7 +1467,7 @@ public final class Objectory {
      * StringBuilder sb = Objectory.createStringBuilder();
      * try {
      *     sb.append("Hello World");
-     *     return sb.toString();
+     *     String result = sb.toString();
      * } finally {
      *     Objectory.recycle(sb);
      * }
@@ -1457,7 +1496,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
+     * com.landawn.abacus.util.ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
      * try {
      *     baos.write("data".getBytes());
      *     byte[] result = baos.toByteArray();
@@ -1491,6 +1530,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
      * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(outputStream);
      * try {
      *     writer.write("<root>Hello</root>");
@@ -1526,6 +1566,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
      * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(outputStream);
      * try {
      *     writer.write("{\"name\": \"value\"}");
@@ -1562,6 +1603,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
      * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(outputStream);
      * try {
      *     writer.write("Hello");
@@ -1606,6 +1648,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
      * java.io.BufferedWriter writer = Objectory.createBufferedWriter(outputStream);
      * try {
      *     writer.write("Some text");
@@ -1646,6 +1689,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * java.io.ByteArrayInputStream inputStream = new java.io.ByteArrayInputStream("Some text".getBytes(java.nio.charset.StandardCharsets.UTF_8));
      * java.io.BufferedReader reader = Objectory.createBufferedReader(inputStream);
      * try {
      *     String line = reader.readLine();

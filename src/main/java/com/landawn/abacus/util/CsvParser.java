@@ -32,7 +32,7 @@ import com.landawn.abacus.exception.ParsingException;
  * <li>Handles quoted fields with embedded delimiters</li>
  * <li>Supports escaped characters within quoted fields</li>
  * <li>Options for strict quote handling and whitespace trimming</li>
- * <li>Can ignore quotation marks entirely for simple parsing</li>
+ * <li>Can disable quoted-region semantics for simple parsing</li>
  * </ul>
  *
  * <p><b>Divergences from RFC 4180 (opencsv-style dialect):</b></p>
@@ -147,7 +147,7 @@ public class CsvParser {
      */
     private final boolean ignoreLeadingWhitespace;
     /**
-     * Whether to skip over quotation characters when parsing.
+     * Whether quotation characters are prevented from establishing quoted regions.
      */
     private final boolean ignoreQuotations;
 
@@ -177,6 +177,8 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
+     * @throws UnsupportedOperationException if {@code separator} is {@link #NULL_CHARACTER} or equals
+     *         the default quote or escape character
      */
     public CsvParser(final char separator) {
         this(separator, DEFAULT_QUOTE_CHARACTER, DEFAULT_ESCAPE_CHARACTER);
@@ -195,6 +197,9 @@ public class CsvParser {
      *
      * @param separator the delimiter to use for separating entries
      * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
+     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and the
+     *         default escape character are the same non-{@link #NULL_CHARACTER} characters, or if
+     *         {@code separator} is {@link #NULL_CHARACTER}
      */
     public CsvParser(final char separator, final char quoteChar) {
         this(separator, quoteChar, DEFAULT_ESCAPE_CHARACTER);
@@ -213,6 +218,8 @@ public class CsvParser {
      * @param separator the delimiter to use for separating entries
      * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
      * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
+     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and {@code escape}
+     *         are the same non-{@link #NULL_CHARACTER} characters, or if {@code separator} is {@link #NULL_CHARACTER}
      */
     public CsvParser(final char separator, final char quoteChar, final char escape) {
         this(separator, quoteChar, escape, DEFAULT_STRICT_QUOTES);
@@ -233,6 +240,8 @@ public class CsvParser {
      * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
      * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
+     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and {@code escape}
+     *         are the same non-{@link #NULL_CHARACTER} characters, or if {@code separator} is {@link #NULL_CHARACTER}
      */
     public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes) {
         this(separator, quoteChar, escape, strictQuotes, DEFAULT_IGNORE_LEADING_WHITESPACE);
@@ -255,6 +264,8 @@ public class CsvParser {
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
+     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and {@code escape}
+     *         are the same non-{@link #NULL_CHARACTER} characters, or if {@code separator} is {@link #NULL_CHARACTER}
      */
     public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhitespace) {
         this(separator, quoteChar, escape, strictQuotes, ignoreLeadingWhitespace, DEFAULT_IGNORE_QUOTATIONS);
@@ -279,8 +290,9 @@ public class CsvParser {
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
-     * @param ignoreQuotations if {@code true}, quote characters are consumed but quoted regions do not
-     *        protect separators or escapes
+     * @param ignoreQuotations if {@code true}, quote characters do not establish quoted regions and
+     *        therefore do not protect separators or escapes. Delimiting quote characters are omitted,
+     *        while some quotes embedded in unquoted text are retained as literal data
      * @throws UnsupportedOperationException if any two of separator, quoteChar, and escape are the same
      *         non-{@link #NULL_CHARACTER} characters, or if separator is {@link #NULL_CHARACTER}
      */
@@ -414,7 +426,7 @@ public class CsvParser {
      * boolean ignoreQuotes = parser.isIgnoreQuotations();   // returns true
      * }</pre>
      *
-     * @return {@code true} if quotations are ignored
+     * @return {@code true} if quotation characters do not establish quoted regions
      */
     public boolean isIgnoreQuotations() {
         return ignoreQuotations;
@@ -535,8 +547,10 @@ public class CsvParser {
                 if (escape != NULL_CHARACTER && c == escape) {
                     if (isNextCharacterEscapable(nextLine, inQuotes(inQuotes), i)) {
                         sb.append(nextLine.charAt(++i));
-                    } else {
-                        sb.append(c); // escape character is not followed by a quote or escape, so append it.
+                    } else if (!strictQuotes || inQuotes(inQuotes)) {
+                        // Escape character is not followed by a quote or escape, so append it — unless
+                        // strictQuotes is on and we are outside quotes (same guard as ordinary characters).
+                        sb.append(c);
                     }
                 } else if (quoteChar != NULL_CHARACTER && c == quoteChar) {
                     if (ignoreQuotations) {

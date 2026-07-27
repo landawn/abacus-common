@@ -31,8 +31,11 @@ import java.io.Serial;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * MutableByte counter = MutableByte.of((byte)0);
- * byteArray.forEach(b -> counter.add(b));
+ * byte[] values = { 1, 2, 3 };
+ * MutableByte counter = MutableByte.of((byte) 0);
+ * for (byte value : values) {
+ *     counter.add(value);
+ * }
  * System.out.println("Sum: " + counter.value());
  * }</pre>
  *
@@ -59,7 +62,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByte num = new MutableByte();
+     * MutableByte num = MutableByte.of((byte) 0);
      * }</pre>
      *
      */
@@ -71,7 +74,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByte num = new MutableByte((byte)127);
+     * MutableByte num = MutableByte.of((byte) 127);
      * }</pre>
      *
      * @param value the initial value to store
@@ -114,10 +117,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     //-----------------------------------------------------------------------
 
     /**
-     * Gets the value as a byte primitive.
-     *
-     * <p>This method is deprecated in favor of {@link #value()} which provides
-     * the same functionality with a more concise name.</p>
+     * Gets the value as a primitive byte.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -155,7 +155,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Returns the current value and then sets it to the specified new value.
+     * Returns the current value and then sets the new value.
      *
      * <p><strong>Note:</strong> this is not atomic; it simply returns the previous value
      * and assigns the new one within a single method call. External synchronization is
@@ -168,7 +168,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * }</pre>
      *
      * @param newValue the new value to set
-     * @return the previous value before it was updated
+     * @return the value before it was updated
      */
     public byte getAndSet(final byte newValue) {
         final byte result = this.value;
@@ -177,11 +177,8 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Sets the value to the specified new value and then returns it. Useful when you
-     * want to update and immediately use the new value.
-     *
-     * <p><strong>Note:</strong> this is not atomic. External synchronization is required
-     * for concurrent use.</p>
+     * Sets the value and then returns it.
+     * This is useful when you want to update and immediately use the new value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -190,7 +187,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * }</pre>
      *
      * @param newValue the new value to set
-     * @return the new value that was just set
+     * @return the new value after it has been set
      */
     public byte setAndGet(final byte newValue) {
         this.value = newValue;
@@ -198,8 +195,8 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Sets the value to the specified new value if the predicate evaluates to {@code true}
-     * when testing the current value. If the predicate returns {@code false}, the value remains unchanged.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
+     * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -209,9 +206,9 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw
-     * @param predicate the predicate to test the current value; receives current value as parameter
+     * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
-     * @return {@code true} if the predicate returned {@code true} and the value was updated, {@code false} otherwise
+     * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws NullPointerException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */

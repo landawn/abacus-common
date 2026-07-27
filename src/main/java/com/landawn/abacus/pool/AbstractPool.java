@@ -56,6 +56,9 @@ public abstract class AbstractPool implements Pool {
     @Serial
     private static final long serialVersionUID = -7780250223658416202L;
 
+    /**
+     * Shared logger for all pool implementations in this package.
+     */
     static final Logger logger = LoggerFactory.getLogger(AbstractPool.class);
 
     /**
@@ -124,10 +127,23 @@ public abstract class AbstractPool implements Pool {
      */
     transient Condition notFull = newCondition(lock); //NOSONAR
 
+    /**
+     * Creates the lock instance used to synchronize pool operations. Factored out so that both the
+     * field initializer and deserialization can rebuild the (transient) lock the same way.
+     *
+     * @return a new, unlocked {@link ReentrantLock}
+     */
     static ReentrantLock newLock() {
         return new ReentrantLock();
     }
 
+    /**
+     * Creates a condition bound to the given pool lock. Factored out so that both the field
+     * initializers and deserialization can rebuild the (transient) conditions the same way.
+     *
+     * @param lock the lock the returned condition is bound to
+     * @return a new {@link Condition} for the specified lock
+     */
     static Condition newCondition(final ReentrantLock lock) {
         return lock.newCondition();
     }
@@ -223,6 +239,12 @@ public abstract class AbstractPool implements Pool {
         // window would invoke close() against half-initialized state and NPE.
     }
 
+    /**
+     * Creates (but does not register) the JVM shutdown hook that closes this pool. The hook is kept
+     * in a field so it can later be registered by {@link #registerShutdownHook()} and removed by
+     * {@link #removeShutdownHook()}. It is called from the constructor and again after
+     * deserialization, since the hook thread is not serializable state.
+     */
     final void initShutdownHook() {
         final Class<?> cls = this.getClass();
 

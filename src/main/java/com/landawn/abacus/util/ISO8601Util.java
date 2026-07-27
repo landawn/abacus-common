@@ -39,14 +39,13 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
+ * // Parsing
+ * Date date = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
+ * Date date2 = ISO8601Util.parse("20231225T103045Z");
+ *
  * // Formatting
- * Date date = new Date();
  * String iso = ISO8601Util.format(date);                   // "2023-12-25T10:30:45Z"
  * String isoWithMillis = ISO8601Util.format(date, true);   // "2023-12-25T10:30:45.123Z"
- *
- * // Parsing
- * Date parsed = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
- * Date parsed2 = ISO8601Util.parse("20231225T103045Z");
  * }</pre>
  *
  * @see <a href="http://www.w3.org/TR/NOTE-datetime">W3C NOTE-datetime specification</a>
@@ -62,8 +61,9 @@ final class ISO8601Util {
     static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 
     /**
-     * The timezone used for 'Z' suffix in ISO8601 date/time values (UTC timezone).
-     * Since version 2.7, this is {@link Dates#UTC_TIME_ZONE}.
+     * The timezone used for the 'Z' suffix in ISO8601 date/time values (UTC timezone).
+     * This is an independent {@code TimeZone} instance, deliberately <i>not</i> aliased to
+     * {@link Dates#UTC_TIME_ZONE} — see the implementation note below.
      */
     // Do not alias Dates.UTC_TIME_ZONE: it is a mutable public compatibility constant and callers
     // can change its raw offset. ISO parsing and formatting must retain an independent UTC zone.
@@ -83,7 +83,7 @@ final class ISO8601Util {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = new Date();
+     * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z");
      * String formatted = ISO8601Util.format(date);   // "2023-12-25T10:30:45Z"
      * }</pre>
      *
@@ -102,7 +102,7 @@ final class ISO8601Util {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = new Date();
+     * Date date = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
      * String withMillis = ISO8601Util.format(date, true);   // "2023-12-25T10:30:45.123Z"
      * String noMillis = ISO8601Util.format(date, false);    // "2023-12-25T10:30:45Z"
      * }</pre>
@@ -138,7 +138,7 @@ final class ISO8601Util {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Date date = new Date();
+     * Date date = ISO8601Util.parse("2023-12-25T15:30:45.123Z");
      * TimeZone tz = TimeZone.getTimeZone("America/New_York");
      * String formatted = ISO8601Util.format(date, true, tz, Locale.US);
      * // "2023-12-25T10:30:45.123-05:00"
@@ -203,9 +203,14 @@ final class ISO8601Util {
      * Date date4 = ISO8601Util.parse("20231225T103045Z");
      * }</pre>
      *
+     * <p>The entire input must be one complete ISO8601 value: any unparsed trailing characters are
+     * rejected. Use {@link #parse(String, ParsePosition)} to parse a date prefix out of a longer string.</p>
+     *
      * @param date the ISO8601 string to parse
      * @return the parsed Date object
-     * @throws IllegalArgumentException if the date string cannot be parsed
+     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or has
+     *         unparsed trailing characters
+     * @see #parse(String, ParsePosition)
      */
     public static Date parse(final String date) {
         final ParsePosition pos = new ParsePosition(0);
@@ -233,6 +238,8 @@ final class ISO8601Util {
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]]}</li>
      * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]][Z|[+-]HH:mm|[+-]HHmm]}</li>
      * </ul>
+     * Fractional seconds may contain one or more digits; precision beyond milliseconds is consumed
+     * but truncated after the first three digits.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -246,7 +253,9 @@ final class ISO8601Util {
      *            updated to the index immediately after the last consumed character, and on
      *            failure it is left unchanged
      * @return the parsed {@link Date} object
-     * @throws IllegalArgumentException if the date string cannot be parsed or is malformed
+     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or is malformed
+     * @throws NullPointerException if {@code pos} is {@code null}
+     * @see #parse(String)
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static Date parse(final String date, final ParsePosition pos) {

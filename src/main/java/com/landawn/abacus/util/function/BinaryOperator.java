@@ -74,7 +74,8 @@ public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.Binar
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BinaryOperator<String> concatenator = (s1, s2) -> s1 + s2;
-     * var throwableOp = concatenator.toThrowable();
+     * Throwables.BinaryOperator<String, IOException> throwableOp = concatenator.toThrowable();
+     * // Can now be used in a context that declares IOException; no new checked exception is introduced
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.BinaryOperator}

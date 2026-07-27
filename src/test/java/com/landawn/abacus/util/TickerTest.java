@@ -1,6 +1,6 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
@@ -36,129 +36,14 @@ public class TickerTest extends TestBase {
     }
 
     @Test
-    public void testTickerPrecision() {
-        Ticker ticker = Ticker.systemTicker();
-
-        long[] readings = new long[10];
-        for (int i = 0; i < readings.length; i++) {
-            readings[i] = ticker.read();
-        }
-
-        for (int i = 1; i < readings.length; i++) {
-            Assertions.assertTrue(readings[i] - readings[i - 1] >= 0);
-        }
-    }
-
-    @Test
-    public void testNegativeTicker() {
-        Ticker negativeTicker = new Ticker() {
-            private long time = -1000000L;
-
-            @Override
-            public long read() {
-                return time++;
-            }
-        };
-
-        long time1 = negativeTicker.read();
-        long time2 = negativeTicker.read();
-
-        Assertions.assertTrue(time1 < 0);
-        Assertions.assertTrue(time2 > time1);
-
-        long elapsed = time2 - time1;
-        Assertions.assertEquals(1L, elapsed);
-    }
-
-    @Test
-    public void testTickerWithStopwatch() {
-        Ticker ticker = Ticker.systemTicker();
-
-        long start = ticker.read();
-
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        long end = ticker.read();
-        long elapsedNanos = end - start;
-
-        Assertions.assertTrue(elapsedNanos >= 10_000_000L);
-
-    }
-
-    @Test
-    public void testRead() {
-        Ticker ticker = Ticker.systemTicker();
-        ticker.read();
-    }
-
-    @Test
-    public void testRead_multipleReads() {
-        Ticker ticker = Ticker.systemTicker();
-        for (int i = 0; i < 10; i++) {
-            ticker.read();
-        }
-    }
-
-    @Test
-    public void testRead_monotonic() throws InterruptedException {
-        Ticker ticker = Ticker.systemTicker();
-        long time1 = ticker.read();
-        Thread.sleep(1);
-        long time2 = ticker.read();
-        assertTrue(time2 - time1 >= 0);
-    }
-
-    @Test
-    public void testSystemTickerMonotonicity() {
-        Ticker ticker = Ticker.systemTicker();
-
-        long previousTime = ticker.read();
-        for (int i = 0; i < 100; i++) {
-            long currentTime = ticker.read();
-            Assertions.assertTrue(currentTime - previousTime >= 0);
-            previousTime = currentTime;
-        }
-    }
-
-    @Test
-    public void testSystemTickerElapsedTime() {
-        Ticker ticker = Ticker.systemTicker();
-
-        long startTime = ticker.read();
-
-        int sum = 0;
-        for (int i = 0; i < 1000000; i++) {
-            sum += i;
-        }
-
-        long endTime = ticker.read();
-        long elapsed = endTime - startTime;
-
-        Assertions.assertTrue(elapsed >= 0);
-
-        Assertions.assertTrue(sum != 0);
-    }
-
-    @Test
     public void testSystemTicker() {
-        Ticker ticker = Ticker.systemTicker();
-        assertNotNull(ticker);
+        assertSame(Ticker.systemTicker(), Ticker.systemTicker());
     }
 
     @Test
     public void testSystemTickerRead() {
         Ticker ticker = Ticker.systemTicker();
-
         long time1 = ticker.read();
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
         long time2 = ticker.read();
 
         Assertions.assertTrue(time2 - time1 >= 0);

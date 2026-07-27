@@ -204,7 +204,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param toIndex the index after the last element to iterate (exclusive)
      * @return an {@code ObjIterator} over the specified range of array elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0},
-     *         {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     *         {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -324,15 +324,21 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an {@code ObjIterator} over the elements in the specified {@code Iterable}.
      * If the iterable is {@code null}, an empty {@code ObjIterator} is returned.
      *
+     * <p>Note that an argument whose static type is a {@code Collection} resolves to the more
+     * specific {@link #of(Collection)} overload instead; declare the variable as
+     * {@code Iterable} (as below) to select this one.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> list = Arrays.asList("a", "b", "c");
-     * ObjIterator<String> iter = ObjIterator.of(list);
+     * Iterable<String> iterable = Arrays.asList("a", "b", "c");
+     * ObjIterator<String> iter = ObjIterator.of(iterable);
+     * iter.toList();   // returns ["a", "b", "c"]
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
      * @param iterable the {@code Iterable} whose elements are to be iterated
      * @return an {@code ObjIterator} over the iterable elements
+     * @see #of(Collection)
      */
     public static <T> ObjIterator<T> of(final Iterable<? extends T> iterable) {
         return iterable == null ? ObjIterator.empty() : of(iterable.iterator());
@@ -850,19 +856,15 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class Person {
-     *     String name;
-     *     int age;
-     *     // constructor, getters...
-     * }
+     * record Person(String name, int age) {}
      *
      * ObjIterator<Person> people = ObjIterator.of(
      *     new Person("Alice", 30),
      *     new Person("Bob", 25),
      *     new Person("Alice", 35)
      * );
-     * ObjIterator<Person> uniqueNames = people.distinctBy(Person::getName);
-     * // Iterates over: Person("Alice", 30), Person("Bob", 25)
+     * ObjIterator<Person> uniqueNames = people.distinctBy(Person::name);
+     * // Iterates over: Person[name=Alice, age=30], Person[name=Bob, age=25]
      * }</pre>
      *
      * @param keyExtractor the function to extract the comparison key from each element; must not be {@code null}
@@ -887,7 +889,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of(null, null, "found", "next");
-     * Optional<String> first = iter.firstNonNull();   // returns Optional.of("found")
+     * u.Optional<String> first = iter.firstNonNull();   // returns Optional.of("found")
      * }</pre>
      *
      * @return an {@code Optional} containing the first {@code non-null} element,
@@ -1139,8 +1141,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * iter.foreachIndexed((index, value) ->
-     *     System.out.println(index + ": " + value)
-     * );
+     *     System.out.println(index + ": " + value));
      * // Prints:
      * // 0: a
      * // 1: b
@@ -1150,8 +1151,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each element and its index
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator yields more than
-     *         {@link Integer#MAX_VALUE} elements (index overflow)
+     * @throws IllegalStateException if a remaining element would require an index greater than
+     *         {@link Integer#MAX_VALUE}
      * @throws E if the action throws an exception
      * @see #foreachRemaining(Throwables.Consumer)
      */

@@ -68,6 +68,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * // Execute with an executor
      * ExecutorService executor = Executors.newSingleThreadExecutor();
      * executor.execute(printTask);
+     * executor.shutdown();
      * }</pre>
      *
      * @see java.lang.Thread#run()
@@ -93,6 +94,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      *
      * // Wait for completion
      * future.get();   // Returns null when task completes
+     * executor.shutdown();
      * }</pre>
      *
      * @return a {@code Callable<Void>} that executes this runnable and returns {@code null}

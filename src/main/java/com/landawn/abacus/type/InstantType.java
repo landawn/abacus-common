@@ -37,7 +37,7 @@ import com.landawn.abacus.util.Numbers;
  */
 public class InstantType extends AbstractTemporalType<Instant> {
 
-    /** The type name constant for Instant type identification. */
+    /** The type name constant for Instant type identification, equal to {@code "Instant"}. */
     public static final String INSTANT = Instant.class.getSimpleName();
 
     /**
@@ -103,7 +103,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Converts a string representation to an {@link Instant} instance.
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
-     *   <li>{@code "sysTime"}: returns {@link Instant#now()}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns {@link Instant#now()}</li>
      *   <li>Numeric strings (possible millis): parsed as milliseconds since the epoch</li>
      *   <li>20-character strings ending in {@code 'Z'}: parsed as ISO-8601 date-time</li>
      *   <li>24-character strings ending in {@code 'Z'}: parsed as ISO-8601 timestamp with milliseconds</li>
@@ -307,6 +307,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @param x      the {@link Instant} to write; may be {@code null}
      * @param config the serialization configuration; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
+     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
      */
     @SuppressWarnings("null")
     @Override

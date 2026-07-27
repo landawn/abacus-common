@@ -27,9 +27,11 @@ import com.landawn.abacus.util.stream.Stream;
  * This abstract class provides an efficient iteration mechanism for boolean values
  * without the overhead of boxing/unboxing.
  *
- * <p>This iterator is immutable and provides various utility methods for transformation,
- * filtering, and conversion operations. It extends ImmutableIterator to ensure that
- * the remove() operation is not supported.</p>
+ * <p>This class provides various utility methods for transformation, filtering, and conversion
+ * operations. It extends {@link ImmutableIterator} to ensure that the {@code remove()} operation
+ * is not supported; the traversal position itself is mutable and is consumed as values are read,
+ * so instances are neither reusable nor safe for concurrent consumption. Transformation methods
+ * return wrappers over this same source iterator; consuming a wrapper also advances the source.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -122,7 +124,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -672,7 +675,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) throws IllegalArgumentException {
+    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) {
         super.forEachRemaining(action);
     }
 
@@ -708,15 +711,14 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * iter.foreachIndexed((index, value) ->
-     *     System.out.println("Index " + index + ": " + value)
-     * );
+     *     System.out.println("Index " + index + ": " + value));
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each (index, value) pair; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
-     *         causing the index to overflow
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws IllegalArgumentException, E {

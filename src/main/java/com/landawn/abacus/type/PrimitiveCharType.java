@@ -19,7 +19,7 @@ package com.landawn.abacus.type;
  * It provides type information and default value handling for {@code char} primitives.
  *
  * <p>The key distinction from {@code CharacterType} (which handles {@link Character}) is the default value:
- * {@link #defaultValue()} returns {@code '\u0000'} (matching the JLS default for {@code char}),
+ * {@link #defaultValue()} returns the null character (<code>'&#92;u0000'</code>, matching the JLS default for {@code char}),
  * whereas the wrapper type's default is {@code null}.</p>
  *
  * <p><b>Usage Examples:</b></p>

@@ -88,7 +88,8 @@ import lombok.experimental.Accessors;
  *       promoting memory-efficient streaming operations over collection materialization</li>
  *   <li><b>Lazy Evaluation:</b> Operations are performed lazily when possible, allowing for efficient
  *       processing of large datasets without excessive memory consumption</li>
- *   <li><b>Read-Only Operations:</b> Methods only read input iterators without modifying source data</li>
+ *   <li><b>Consuming Operations:</b> Methods do not call {@link Iterator#remove()}, but they advance
+ *       and therefore consume the supplied iterators</li>
  *   <li><b>Exception Avoidance:</b> Methods avoid throwing unnecessary exceptions when contracts
  *       are not violated, preferring empty results over exceptions for edge cases</li>
  *   <li><b>Nullable Returns:</b> Many methods return {@code Nullable} types for null-safe value handling</li>
@@ -143,7 +144,8 @@ import lombok.experimental.Accessors;
  * <p><b>Parallel Processing Support:</b>
  * <ul>
  *   <li><b>Concurrent Operations:</b> Multi-threaded {@code forEach} with configurable read and process thread counts</li>
- *   <li><b>Thread-Safe Design:</b> Safe concurrent consumption of iterator elements</li>
+ *   <li><b>Coordinated Parallel Consumption:</b> The parallel {@code forEach} overloads coordinate
+ *       access to their combined iterator; ordinary iterators returned by this class are not thread-safe</li>
  *   <li><b>Bounded Queue:</b> Configurable queue size for buffering elements before processing</li>
  *   <li><b>Exception Handling:</b> Proper exception propagation in parallel contexts</li>
  * </ul>
@@ -159,8 +161,9 @@ import lombok.experimental.Accessors;
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
- *   <li><b>Immutable Operations:</b> Methods create new iterators rather than modifying inputs</li>
+ *   <li><b>Static Design:</b> The utility methods do not retain caller data between invocations</li>
+ *   <li><b>Single-use Results:</b> Adapter methods create new iterators that consume their input
+ *       iterators and should normally be used by one thread</li>
  *   <li><b>Parallel Support:</b> Built-in support for concurrent processing with ExecutorService</li>
  *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
  * </ul>
@@ -185,7 +188,8 @@ import lombok.experimental.Accessors;
  * <ul>
  *   <li><b>Streaming Operations:</b> Process data without loading entire datasets into memory</li>
  *   <li><b>Iterator Chaining:</b> Compose operations without intermediate collection creation</li>
- *   <li><b>Resource Cleanup:</b> Proper handling of iterator lifecycle and resource management</li>
+ *   <li><b>Resource Ownership:</b> Plain iterators have no close contract; callers remain responsible
+ *       for closing any stream, reader, or other resource from which an iterator was obtained</li>
  *   <li><b>Garbage Collection Friendly:</b> Minimal object allocation and retention</li>
  * </ul>
  *
@@ -2434,11 +2438,14 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the {@code Iterable} objects.
-     * @param a the first {@code Iterable} object to be merged.
-     * @param b the second {@code Iterable} object to be merged.
+     * @param a the first {@code Iterable} object to be merged, or {@code null} which is treated as empty.
+     * @param b the second {@code Iterable} object to be merged, or {@code null} which is treated as empty.
      * @param nextSelector a {@code BiFunction} that determines the order of elements in the resulting iterator.
+     *                     The element from {@code a} (the first parameter) is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the element from {@code b} (the second parameter) is selected.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided {@code Iterable} objects in the order determined by {@code nextSelector}.
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @see #merge(Iterator, Iterator, BiFunction)
+     * @see #mergeIterables(Collection, BiFunction)
      */
     public static <T> ObjIterator<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -2654,11 +2661,13 @@ public final class Iterators {
      * @param <A> the type of elements in the first {@code Iterable}.
      * @param <B> the type of elements in the second {@code Iterable}.
      * @param <R> the type of elements in the resulting {@code ObjIterator}.
-     * @param a the first {@code Iterable} to be zipped.
-     * @param b the second {@code Iterable} to be zipped.
+     * @param a the first {@code Iterable} to be zipped, or {@code null} which is treated as empty.
+     * @param b the second {@code Iterable} to be zipped, or {@code null} which is treated as empty.
      * @param zipFunction a {@code BiFunction} that takes an element from each {@code Iterable} and returns a new element for the resulting {@code ObjIterator}.
-     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}.
+     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}. The resulting iterator stops as soon as either input is exhausted.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @see #zip(Iterator, Iterator, BiFunction)
+     * @see #zip(Iterable, Iterable, Object, Object, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -2738,12 +2747,14 @@ public final class Iterators {
      * @param <B> the type of elements in the second {@code Iterable}.
      * @param <C> the type of elements in the third {@code Iterable}.
      * @param <R> the type of elements in the resulting {@code ObjIterator}.
-     * @param a the first {@code Iterable} to be zipped.
-     * @param b the second {@code Iterable} to be zipped.
-     * @param c the third {@code Iterable} to be zipped.
+     * @param a the first {@code Iterable} to be zipped, or {@code null} which is treated as empty.
+     * @param b the second {@code Iterable} to be zipped, or {@code null} which is treated as empty.
+     * @param c the third {@code Iterable} to be zipped, or {@code null} which is treated as empty.
      * @param zipFunction a {@code TriFunction} that takes an element from each {@code Iterable} and returns a new element for the resulting {@code ObjIterator}.
-     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}.
+     * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}. The resulting iterator stops as soon as any input is exhausted.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @see #zip(Iterator, Iterator, Iterator, TriFunction)
+     * @see #zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2828,8 +2839,9 @@ public final class Iterators {
      * @param valueForNoneA the default value to be used when the first Iterable is exhausted.
      * @param valueForNoneB the default value to be used when the second Iterable is exhausted.
      * @param zipFunction a BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until both inputs are exhausted, substituting the corresponding default value for an exhausted input.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @see #zip(Iterable, Iterable, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -2927,8 +2939,9 @@ public final class Iterators {
      * @param valueForNoneB the default value to be used when the second Iterable is exhausted.
      * @param valueForNoneC the default value to be used when the third Iterable is exhausted.
      * @param zipFunction a TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
+     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until all inputs are exhausted, substituting the corresponding default value for an exhausted input.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @see #zip(Iterable, Iterable, Iterable, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -3081,6 +3094,9 @@ public final class Iterators {
      *
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times or until {@code hasNext()} returns {@code false}, whichever comes first.
      *
+     * <p><b>Note:</b> this is the eager form; {@link #skip(Iterator, long)} is the lazy equivalent that wraps
+     * the iterator instead of consuming it immediately.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5).iterator();
@@ -3098,7 +3114,7 @@ public final class Iterators {
      * @param numberToAdvance the number of elements to advance the iterator.
      * @return the actual number of elements the iterator was advanced, or {@code 0} if {@code iterator} is {@code null}.
      * @throws IllegalArgumentException if {@code numberToAdvance} is negative.
-     * @see #skip(Iterator, long) for the lazy equivalent that wraps the iterator instead of eagerly consuming it.
+     * @see #skip(Iterator, long)
      */
     public static long advance(final Iterator<?> iterator, final long numberToAdvance) throws IllegalArgumentException {
         N.checkArgNotNegative(numberToAdvance, cs.numberToAdvance);
@@ -3122,6 +3138,9 @@ public final class Iterators {
      *
      * <p>This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
+     * <p><b>Note:</b> {@link #advance(Iterator, long)} is the eager equivalent; it consumes the iterator
+     * immediately and returns the number of elements actually advanced.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5).iterator();
@@ -3138,7 +3157,7 @@ public final class Iterators {
      * @param n the number of elements to skip from the beginning of the iterator.
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator starting from the (n+1)th element, or an empty iterator if {@code iter} is {@code null}.
      * @throws IllegalArgumentException if {@code n} is negative.
-     * @see #advance(Iterator, long) for the eager equivalent that consumes the iterator and returns the number actually advanced.
+     * @see #advance(Iterator, long)
      */
     public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -3253,7 +3272,7 @@ public final class Iterators {
      * @param offset the number of elements to skip from the beginning. Must be non-negative.
      * @param count the maximum number of elements to return after skipping. Must be non-negative.
      * @return an {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element, or an empty iterator if {@code iter} is {@code null}.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see N#slice(Iterator, int, int)
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
@@ -4141,7 +4160,7 @@ public final class Iterators {
      * <p><b>Naming Convention:</b></p>
      * <p>This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:</p>
      * <ul>
-     *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable} or {@link java.util.Iterator Iterator}.</li>
+     *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable}.</li>
      *   <li>{@link #flatmap(Iterable, Function) flatmap} (lowercase 'm') - transforms elements into an array.</li>
      * </ul>
      *
@@ -4223,7 +4242,7 @@ public final class Iterators {
             }
 
             @Override
-            public U next() throws IllegalArgumentException {
+            public U next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4239,7 +4258,7 @@ public final class Iterators {
      * <p><b>Naming Convention:</b></p>
      * <p>This library uses specific naming for {@code flatMap} variants in {@code Iterators} and {@code N}:</p>
      * <ul>
-     *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable} or {@link java.util.Iterator Iterator}.</li>
+     *   <li>{@link #flatMap(Iterable, Function) flatMap} (uppercase 'M') - transforms elements into an {@link java.lang.Iterable Iterable}.</li>
      *   <li>{@link #flatmap(Iterable, Function) flatmap} (lowercase 'm') - transforms elements into an array.</li>
      * </ul>
      *
@@ -4788,15 +4807,14 @@ public final class Iterators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Iterator<String>> iterators = Arrays.asList(
-     *     Files.lines(Paths.get("file1.txt")).iterator(),
-     *     Files.lines(Paths.get("file2.txt")).iterator()
-     * );
-     * AtomicInteger lineCount = new AtomicInteger();
-     * Iterators.forEach(iterators, 2, 4, 100,
-     *     line -> lineCount.incrementAndGet(),
-     *     () -> System.out.println("Total lines: " + lineCount.get())
-     * );
+     * try (java.util.stream.Stream<String> lines1 = Files.lines(Paths.get("file1.txt"));
+     *         java.util.stream.Stream<String> lines2 = Files.lines(Paths.get("file2.txt"))) {
+     *     List<Iterator<String>> iterators = Arrays.asList(lines1.iterator(), lines2.iterator());
+     *     AtomicInteger lineCount = new AtomicInteger();
+     *     Iterators.forEach(iterators, 2, 4, 100,
+     *         line -> lineCount.incrementAndGet(),
+     *         () -> System.out.println("Total lines: " + lineCount.get()));
+     * }
      * // Reads from 2 files in parallel, processes with 4 threads
      * }</pre>
      *
@@ -4908,6 +4926,7 @@ public final class Iterators {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
                 "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
 
         if (N.isEmpty(iterators)) {
             // onComplete is documented to run after all elements have been processed - vacuously
@@ -4966,7 +4985,9 @@ public final class Iterators {
                                 synchronized (errorHolder) {
                                     if (errorHolder.value() == null) {
                                         errorHolder.setValue(e);
-                                    } else {
+                                    } else if (errorHolder.value() != e) {
+                                        // A consumer is allowed to throw a cached exception instance.
+                                        // Throwable rejects suppressing an exception onto itself.
                                         errorHolder.value().addSuppressed(e);
                                     }
                                 }
@@ -5077,15 +5098,15 @@ public final class Iterators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Iterator<String>> iterators = Arrays.asList(
-     *     Files.lines(Paths.get("file1.txt")).iterator(),
-     *     Files.lines(Paths.get("file2.txt")).iterator()
-     * );
-     * AtomicInteger lineCount = new AtomicInteger();
-     * Iterators.forEach(iterators,
-     *     IterateOptions.builder().readThreads(2).processThreads(4).queueSize(100).build(),
-     *     line -> lineCount.incrementAndGet(),
-     *     () -> System.out.println("Total lines: " + lineCount.get()));
+     * try (java.util.stream.Stream<String> lines1 = Files.lines(Paths.get("file1.txt"));
+     *         java.util.stream.Stream<String> lines2 = Files.lines(Paths.get("file2.txt"))) {
+     *     List<Iterator<String>> iterators = Arrays.asList(lines1.iterator(), lines2.iterator());
+     *     AtomicInteger lineCount = new AtomicInteger();
+     *     Iterators.forEach(iterators,
+     *         IterateOptions.builder().readThreads(2).processThreads(4).queueSize(100).build(),
+     *         line -> lineCount.incrementAndGet(),
+     *         () -> System.out.println("Total lines: " + lineCount.get()));
+     * }
      * }</pre>
      *
      * @param <T> the type of elements in the original iterators.

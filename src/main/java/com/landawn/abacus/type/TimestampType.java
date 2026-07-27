@@ -79,12 +79,13 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <pre>{@code
      * Type<Timestamp> type = TypeFactory.getType(Timestamp.class);
      * Timestamp ts1 = type.valueOf(1609459200000L);          // From milliseconds
-     * Timestamp ts2 = type.valueOf(new Date());              // From Date
+     * Timestamp ts2 = type.valueOf(new java.util.Date());    // From Date
      * Timestamp ts3 = type.valueOf("2021-01-01 00:00:00");   // From String
      * }</pre>
      *
      * @param obj the object to convert to Timestamp
-     * @return a Timestamp representation of the object, or {@code null} if obj is null
+     * @return a Timestamp representation of the object, or {@code null} if {@code obj} is {@code null}
+     *         or is a value whose string form {@link #valueOf(String)} maps to {@code null}
      */
     @Override
     public Timestamp valueOf(final Object obj) {

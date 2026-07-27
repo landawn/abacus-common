@@ -35,11 +35,22 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * Utility class for generating cryptographic message digests (hashes) using various algorithms.
- * This class provides convenient static methods for computing digests of byte arrays, files,
- * input streams, and strings using standard algorithms like MD5, SHA-1, SHA-256, etc.
+ * This class provides convenient static methods for computing digests of byte arrays, {@link ByteBuffer}s,
+ * {@link File}s, {@link Path}s, {@link RandomAccessFile}s, {@link InputStream}s, and strings using standard
+ * algorithms like MD5, SHA-1, SHA-256, etc.
  *
  * <p>This class is immutable and thread-safe. However, the MessageDigest instances it creates
  * generally won't be thread-safe.</p>
+ *
+ * <p><b>Conventions shared by every method here:</b>
+ * <ul>
+ *   <li>A {@code String} input is always encoded as UTF-8 before being digested</li>
+ *   <li>A {@code *Hex} method returns the digest as a <b>lowercase</b> hexadecimal string of exactly
+ *       twice the digest's byte length</li>
+ *   <li>An {@code InputStream} argument is read to EOF but is <b>never closed</b>; a {@code File} or
+ *       {@code Path} argument is opened and closed by the method</li>
+ *   <li>Arguments must not be {@code null}; a {@code null} argument results in a {@link NullPointerException}</li>
+ * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -56,7 +67,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * @see MessageDigestAlgorithms
  */
-public class DigestUtil {
+public final class DigestUtil {
 
     static final int BUFFER_SIZE = 1024;
 
@@ -197,6 +208,7 @@ public class DigestUtil {
      * @param data the RandomAccessFile to read and digest (must not be {@code null})
      * @return The computed digest as a byte array; length depends on the algorithm used
      * @throws IOException if an I/O error occurs while reading the file
+     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
      */
     public static byte[] digest(final MessageDigest messageDigest, final RandomAccessFile data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -298,9 +310,8 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> MD5 is cryptographically broken and should NOT be used
      * for security purposes such as password hashing, digital signatures, or certificates.
-     * However, it may still be acceptable for non-security purposes like checksums,
-     * file integrity verification, or hash-based data structures where collision resistance
-     * is not critical.</p>
+     * It may still be used for compatibility or non-adversarial corruption checks where collision
+     * resistance is explicitly not a requirement.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -322,8 +333,8 @@ public class DigestUtil {
      *
      * <p><strong>WARNING:</strong> SHA-1 is deprecated for cryptographic use due to known
      * collision vulnerabilities. It should NOT be used for digital signatures, certificates,
-     * or other security-critical applications. Consider using SHA-256 or SHA-512 instead.
-     * SHA-1 may still be acceptable for HMAC and non-security purposes.</p>
+     * or other security-critical applications. Use an algorithm selected for the surrounding
+     * protocol and threat model instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -914,8 +925,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] hash = DigestUtil.sha("data".getBytes());    // deprecated
-     * byte[] hash = DigestUtil.sha1("data".getBytes());   // preferred
+     * byte[] legacyHash = DigestUtil.sha(Strings.getBytesUtf8("data"));    // deprecated
+     * byte[] preferredHash = DigestUtil.sha1(Strings.getBytesUtf8("data"));
      * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
@@ -958,8 +969,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] hash = DigestUtil.sha("message");    // deprecated
-     * byte[] hash = DigestUtil.sha1("message");   // preferred
+     * byte[] legacyHash = DigestUtil.sha("message");    // deprecated
+     * byte[] preferredHash = DigestUtil.sha1("message");
      * }</pre>
      *
      * @param data The string to digest (must not be {@code null})
@@ -1363,7 +1374,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-224 digest of the input data.
+     * Calculates the SHA3-224 digest of the input data and returns it as a 28-byte array.
      * SHA-3 is an alternative to SHA-2 with different internal structure based on the Keccak algorithm.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1413,7 +1424,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-224 digest and returns it as a hexadecimal string.
+     * Calculates the SHA3-224 digest and returns it as a 56-character hexadecimal string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1462,7 +1473,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-256 digest of the input data.
+     * Calculates the SHA3-256 digest of the input data and returns it as a 32-byte array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1511,7 +1522,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-256 digest and returns it as a hexadecimal string.
+     * Calculates the SHA3-256 digest and returns it as a 64-character hexadecimal string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1560,7 +1571,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-384 digest of the input data.
+     * Calculates the SHA3-384 digest of the input data and returns it as a 48-byte array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1609,7 +1620,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-384 digest and returns it as a hexadecimal string.
+     * Calculates the SHA3-384 digest and returns it as a 96-character hexadecimal string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1658,7 +1669,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-512 digest of the input data.
+     * Calculates the SHA3-512 digest of the input data and returns it as a 64-byte array.
      * Provides the highest security level in the SHA-3 family.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1708,7 +1719,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA3-512 digest and returns it as a hexadecimal string.
+     * Calculates the SHA3-512 digest and returns it as a 128-character hexadecimal string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1939,7 +1950,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA-512/224 digest of the input data.
+     * Calculates the SHA-512/224 digest of the input data and returns it as a 28-byte array.
      * This is a truncated variant of SHA-512 that produces 224-bit output.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1989,7 +2000,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA-512/224 digest and returns it as a hexadecimal string.
+     * Calculates the SHA-512/224 digest and returns it as a 56-character hexadecimal string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2038,7 +2049,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA-512/256 digest of the input data.
+     * Calculates the SHA-512/256 digest of the input data and returns it as a 32-byte array.
      * This truncated variant offers better 64-bit performance than SHA-256.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2088,7 +2099,7 @@ public class DigestUtil {
     }
 
     /**
-     * Calculates the SHA-512/256 digest and returns it as a hexadecimal string.
+     * Calculates the SHA-512/256 digest and returns it as a 64-character hexadecimal string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2225,8 +2236,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hash = DigestUtil.shaHex("data".getBytes());    // deprecated
-     * String hash = DigestUtil.sha1Hex("data".getBytes());   // preferred
+     * String legacyHash = DigestUtil.shaHex(Strings.getBytesUtf8("data"));    // deprecated
+     * String preferredHash = DigestUtil.sha1Hex(Strings.getBytesUtf8("data"));
      * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
@@ -2269,8 +2280,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hash = DigestUtil.shaHex("message");    // deprecated
-     * String hash = DigestUtil.sha1Hex("message");   // preferred
+     * String legacyHash = DigestUtil.shaHex("message");    // deprecated
+     * String preferredHash = DigestUtil.sha1Hex("message");
      * }</pre>
      *
      * @param data The string to digest (must not be {@code null})
@@ -2474,7 +2485,7 @@ public class DigestUtil {
      * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html">
      *      Java Security Standard Algorithm Names</a>
      */
-    static class MessageDigestAlgorithms {
+    public static final class MessageDigestAlgorithms {
 
         /**
          * The MD2 message digest algorithm defined in RFC 1319.
@@ -2497,7 +2508,6 @@ public class DigestUtil {
         /**
          * The SHA-224 hash algorithm defined in FIPS PUB 180-3.
          * Present in Oracle Java 8.
-         *
          */
         public static final String SHA_224 = "SHA-224";
 
@@ -2522,42 +2532,36 @@ public class DigestUtil {
         /**
          * The SHA-512/224 hash algorithm defined in FIPS PUB 180-4.
          * A truncated variant of SHA-512. Included starting in Oracle Java 9.
-         *
          */
         public static final String SHA_512_224 = "SHA-512/224";
 
         /**
          * The SHA-512/256 hash algorithm defined in FIPS PUB 180-4.
          * A truncated variant of SHA-512. Included starting in Oracle Java 9.
-         *
          */
         public static final String SHA_512_256 = "SHA-512/256";
 
         /**
          * The SHA3-224 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         *
          */
         public static final String SHA3_224 = "SHA3-224";
 
         /**
          * The SHA3-256 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         *
          */
         public static final String SHA3_256 = "SHA3-256";
 
         /**
          * The SHA3-384 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         *
          */
         public static final String SHA3_384 = "SHA3-384";
 
         /**
          * The SHA3-512 hash algorithm defined in FIPS PUB 202.
          * Part of the SHA-3 family. Included starting in Oracle Java 9.
-         *
          */
         public static final String SHA3_512 = "SHA3-512";
 

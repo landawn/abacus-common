@@ -29,8 +29,8 @@ import com.landawn.abacus.util.Strings;
  * <p>
  * This class provides common functionality for handling {@code boolean}/{@code Boolean} values,
  * including string conversion (recognising {@code "true"}, {@code "Y"}, {@code "y"}, and
- * {@code "1"} as {@code true}), conversion from {@code Number} values (positive numbers are
- * {@code true}), JDBC read/write operations using {@link java.sql.Types#BOOLEAN}, and JSON/XML
+ * {@code "1"} as {@code true}), conversion from {@code Number} values ({@code true} when
+ * {@code longValue() > 0}), JDBC read/write operations using {@link java.sql.Types#BOOLEAN}, and JSON/XML
  * serialization with optional {@code writeNullBooleanAsFalse} support.
  * Concrete subclasses cover the primitive {@code boolean} type and the {@code Boolean} wrapper.
  * </p>
@@ -79,10 +79,13 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *   <li>{@code Boolean} — returned as-is.</li>
      *   <li>{@code Number} — returns {@code true} if {@code longValue() > 0}, {@code false} otherwise.</li>
      *   <li>{@code CharSequence} — single character {@code 'Y'}, {@code 'y'}, or {@code '1'} returns
-     *       {@code true}; any other single character returns {@code false}; multi-character values are
-     *       parsed using {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}).</li>
+     *       {@code true}; any other single character returns {@code false}; all other values (including
+     *       the empty string) are parsed using {@link Boolean#valueOf(String)} (case-insensitive
+     *       {@code "true"} yields {@code true}).</li>
      *   <li>Other objects — converted via {@code Boolean.valueOf(obj.toString())}.</li>
      * </ul>
+     * <p><b>Note:</b> unlike {@link #valueOf(String)}, this method does not special-case the empty
+     * string: an empty {@code CharSequence} yields {@link Boolean#FALSE} rather than the default value.</p>
      *
      * @param obj the source object to convert, may be {@code null}
      * @return the corresponding {@code Boolean} value, or the default value if the input is {@code null}
@@ -265,7 +268,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * literal form and ignores string quotation/escaping config.
      *
      * @param appendable the {@code Appendable} to write to
-     * @param x the boolean value to append
+     * @param x the boolean value to append, may be {@code null}
      * @throws IOException if an I/O error occurs
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -295,7 +298,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
-     * @param x the boolean value to write
+     * @param x the boolean value to write, may be {@code null}
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
      */

@@ -50,7 +50,7 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * public class User {
+ * class User {
  *     private Long id;
  *     private String username;
  *     private String email;

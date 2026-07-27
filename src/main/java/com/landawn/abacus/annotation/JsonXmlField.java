@@ -110,20 +110,29 @@ public @interface JsonXmlField {
     String type() default "";
 
     /**
-     * Specifies the date format pattern for date/time field serialization.
-     * Uses {@link java.text.SimpleDateFormat} pattern syntax.
+     * Specifies the date format pattern for date/time field serialization and deserialization.
+     * Legacy {@link java.util.Date}, {@link java.util.Calendar}, and {@code java.sql} date/time
+     * fields use {@link java.text.SimpleDateFormat} pattern syntax. {@code java.time.LocalDateTime},
+     * {@code LocalDate}, {@code LocalTime}, and {@code ZonedDateTime} fields use
+     * {@link java.time.format.DateTimeFormatter} pattern syntax. When Joda-Time is present,
+     * {@code DateTime} and {@code MutableDateTime} fields use its {@code DateTimeFormat} syntax.
+     * {@code java.time.Instant} is not supported by this format option.
+     *
+     * <p>The special value {@code "long"} reads and writes epoch milliseconds. It is not valid for
+     * {@code java.time.LocalDate} or {@code java.time.LocalTime}, which do not identify an instant.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss")
      * private Date created;  // "2023-12-25 10:30:45"
      *
-     * @JsonXmlField(dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-     * private Instant timestamp;  // "2023-12-25T10:30:45.123Z"
+     * @JsonXmlField(dateFormat = "uuuu-MM-dd'T'HH:mm:ss.SSSXXX", timeZone = "UTC")
+     * private ZonedDateTime timestamp;  // "2023-12-25T10:30:45.123Z"
      * }</pre>
      *
      * @return the date format pattern, or an empty string for the default format
      * @see java.text.SimpleDateFormat
+     * @see java.time.format.DateTimeFormatter
      */
     String dateFormat() default "";
 

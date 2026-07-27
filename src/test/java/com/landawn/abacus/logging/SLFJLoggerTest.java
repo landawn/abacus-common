@@ -16,6 +16,7 @@ import static org.slf4j.spi.LocationAwareLogger.WARN_INT;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -138,12 +139,17 @@ public class SLFJLoggerTest extends TestBase {
 
         final int threadCount = 5;
         Thread[] threads = new Thread[threadCount];
+        AtomicReference<Throwable> failure = new AtomicReference<>();
 
         for (int i = 0; i < threadCount; i++) {
             final int threadId = i;
             threads[i] = new Thread(() -> {
-                for (int j = 0; j < 10; j++) {
-                    logger.info("Thread {} message {}", threadId, j);
+                try {
+                    for (int j = 0; j < 10; j++) {
+                        logger.info("Thread {} message {}", threadId, j);
+                    }
+                } catch (Throwable e) {
+                    failure.compareAndSet(null, e);
                 }
             });
         }
@@ -156,7 +162,7 @@ public class SLFJLoggerTest extends TestBase {
             thread.join();
         }
 
-        assertTrue(true);
+        assertNull(failure.get());
     }
 
     @DisplayName("Test LocationAwareLogger usage")

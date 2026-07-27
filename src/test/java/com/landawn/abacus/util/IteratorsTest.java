@@ -5778,6 +5778,12 @@ public class IteratorsTest extends TestBase {
         assertTrue(done2.get());
     }
 
+    @Test
+    public void testForEachEmptyIteratorCollectionStillValidatesConsumer() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Iterators.forEach(Collections.<Iterator<Integer>> emptyList(), (Throwables.Consumer<Integer, RuntimeException>) null));
+    }
+
     // --- tests for the IterateOptions builder + forEach(Collection, IterateOptions, ...) overloads (R-2) ---
 
     @Test

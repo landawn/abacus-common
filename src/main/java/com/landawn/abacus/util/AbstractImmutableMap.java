@@ -49,16 +49,37 @@ import java.util.function.Function;
 @SuppressWarnings("java:S2160")
 abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
+    /**
+     * The read-only view through which all lookups and collection views ({@code keySet()},
+     * {@code values()}, {@code entrySet()}) are served. It is the same instance as {@link #valueMap}
+     * only when the supplied backing map was already declared unmodifiable at construction time.
+     */
     final Map<K, V> map;
 
+    /**
+     * The backing map exactly as supplied at construction time, used for {@code equals}/{@code hashCode}/
+     * {@code toString} so that this map compares equal to the mappings it holds.
+     */
     final Map<K, V> valueMap;
 
+    /**
+     * Constructs a read-only map over the given backing map, always wrapping it in an unmodifiable view.
+     *
+     * @param map the backing map holding the mappings of this map
+     */
     AbstractImmutableMap(final Map<? extends K, ? extends V> map) {
         // A class name is not a reliable immutability contract. Always create an unmodifiable
         // view here so that entrySet() entries and all collection views are read-only.
         this(map, false);
     }
 
+    /**
+     * Constructs a read-only map over the given backing map.
+     *
+     * @param map the backing map holding the mappings of this map
+     * @param isUnmodifiable {@code true} if {@code map} is already unmodifiable and therefore does not
+     *        need to be wrapped in an additional unmodifiable view
+     */
     AbstractImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
         this.valueMap = (Map<K, V>) map;
         this.map = isUnmodifiable ? valueMap : Collections.unmodifiableMap(valueMap); // to create immutable keySet(), values(), entrySet()

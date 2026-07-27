@@ -63,25 +63,54 @@ import com.landawn.abacus.util.function.ObjByteConsumer;
  * <li>Support for partial array ranges via fromIndex and toIndex</li>
  * <li>Optimized implementations of filter, map, flatMap, and terminal operations</li>
  * <li>Efficient sorted stream handling with specialized algorithms</li>
+ * <li>Type conversion support to other primitive stream types</li>
  * </ul>
+ *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public ByteStream factory methods rather than instantiating this class directly.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * byte[] data = {1, 2, 3, 4, 5};
  * ByteStream stream = ByteStream.of(data);
- * byte max = stream.max().orElse((byte)0);
+ * byte max = stream.max().orElse((byte) 0);
+ *
+ * // Filtering and mapping
+ * ByteStream evenDoubled = ByteStream.of(data)
+ *     .filter(n -> n % 2 == 0)
+ *     .map(n -> (byte) (n * 2));
+ *
+ * // Statistical operations
+ * ByteStream stats = ByteStream.of(data);
+ * ByteSummaryStatistics summary = stats.summaryStatistics();
+ * System.out.println("Average: " + summary.getAverage());
  * }</pre>
  *
+ * @see ByteStream
  */
 class ArrayByteStream extends AbstractByteStream {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final byte[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
      * Constructs an ArrayByteStream from the entire byte array.
+     * This constructor creates a stream that processes all elements in the provided array
+     * from index 0 to the end of the array.
      *
-     * @param values the byte array to stream
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3, 4, 5};
+     * ByteStream stream = new ArrayByteStream(data);
+     * }</pre>
+     *
+     * @param values the byte array to stream over
      */
     ArrayByteStream(final byte[] values) {
         this(values, 0, values.length);
@@ -89,9 +118,19 @@ class ArrayByteStream extends AbstractByteStream {
 
     /**
      * Constructs an ArrayByteStream from the entire byte array with close handlers.
+     * The close handlers will be executed when the stream is closed, allowing for
+     * resource cleanup or other post-processing operations.
      *
-     * @param values the byte array to stream
-     * @param closeHandlers handlers to execute when the stream is closed
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3, 4, 5};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * ByteStream stream = new ArrayByteStream(data, handlers);
+     * }</pre>
+     *
+     * @param values the byte array to stream over
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      */
     ArrayByteStream(final byte[] values, final Collection<LocalRunnable> closeHandlers) {
         this(values, 0, values.length, closeHandlers);
@@ -99,10 +138,19 @@ class ArrayByteStream extends AbstractByteStream {
 
     /**
      * Constructs an ArrayByteStream from the entire byte array with sorting state and close handlers.
+     * The sorted flag indicates whether the array is already in sorted order, which can be used
+     * to optimize certain stream operations.
      *
-     * @param values the byte array to stream
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] sortedData = {1, 2, 3, 4, 5};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * ByteStream stream = new ArrayByteStream(sortedData, true, handlers);
+     * }</pre>
+     *
+     * @param values the byte array to stream over
      * @param sorted whether the array elements are in sorted order
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      */
     ArrayByteStream(final byte[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
         this(values, 0, values.length, sorted, closeHandlers);
@@ -110,10 +158,19 @@ class ArrayByteStream extends AbstractByteStream {
 
     /**
      * Constructs an ArrayByteStream from a range within the byte array.
+     * This allows streaming over a subset of the array elements, from the specified
+     * start index (inclusive) to the end index (exclusive).
      *
-     * @param values the byte array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3, 4, 5, 6, 7, 8};
+     * // Stream over elements from index 2 to 5 (exclusive): {3, 4, 5}
+     * ByteStream stream = new ArrayByteStream(data, 2, 5);
+     * }</pre>
+     *
+     * @param values the byte array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
@@ -123,11 +180,21 @@ class ArrayByteStream extends AbstractByteStream {
 
     /**
      * Constructs an ArrayByteStream from a range within the byte array with close handlers.
+     * Combines range specification with close handler support for resource management.
      *
-     * @param values the byte array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
-     * @param closeHandlers handlers to execute when the stream is closed
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] data = {1, 2, 3, 4, 5, 6, 7, 8};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * // Stream over elements from index 2 to 5 with close handlers
+     * ByteStream stream = new ArrayByteStream(data, 2, 5, handlers);
+     * }</pre>
+     *
+     * @param values the byte array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
@@ -137,13 +204,23 @@ class ArrayByteStream extends AbstractByteStream {
 
     /**
      * Constructs an ArrayByteStream from a range within the byte array with all configuration options.
-     * This is the primary constructor that all other constructors delegate to.
+     * This is the primary constructor that all other constructors delegate to. It provides full
+     * control over the stream configuration including range, sorting state, and close handlers.
      *
-     * @param values the byte array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] sortedData = {1, 2, 3, 4, 5, 6, 7, 8};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * // Stream over sorted elements from index 2 to 6 with close handlers
+     * ByteStream stream = new ArrayByteStream(sortedData, 2, 6, true, handlers);
+     * }</pre>
+     *
+     * @param values the byte array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
      * @param sorted whether the array elements in the range are in sorted order
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
@@ -1360,7 +1437,7 @@ class ArrayByteStream extends AbstractByteStream {
      * and an associative accumulation function, and returns the reduced value. Closes the stream.
      *
      * <pre>{@code
-     * byte sum = ByteStream.of(data).reduce((byte)0, (a, b) -> (byte)(a + b));
+     * byte sum = ByteStream.of((byte) 1, (byte) 2, (byte) 3).reduce((byte) 0, (a, b) -> (byte) (a + b));
      * }</pre>
      *
      * @param identity the identity value for the accumulating function
@@ -1421,7 +1498,7 @@ class ArrayByteStream extends AbstractByteStream {
      * The {@code combiner} is used only in parallel executions and is ignored here.
      *
      * <pre>{@code
-     * ByteList list = ByteStream.of(data).collect(ByteList::new, ByteList::add, (l1, l2) -> l1.addAll(l2));
+     * ByteList list = ByteStream.of((byte) 1, (byte) 2, (byte) 3).collect(ByteList::new, ByteList::add, ByteList::addAll);
      * }</pre>
      *
      * @param <R> the type of the mutable result container
@@ -1978,17 +2055,18 @@ class ArrayByteStream extends AbstractByteStream {
      * Returns a {@link ParallelArrayByteStream} that operates on the same array range.
      *
      * @param maxThreadNum the maximum number of threads to use for parallel execution
-     * @param splitor the strategy for splitting work across threads
+     * @param splitStrategy the strategy for splitting work across threads
      * @param asyncExecutor the executor to use for parallel tasks
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @return a parallel {@code ByteStream} backed by the same array range
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected ByteStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected ByteStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayByteStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelArrayByteStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 

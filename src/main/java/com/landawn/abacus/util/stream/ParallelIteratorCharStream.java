@@ -54,6 +54,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a parallel char stream from an iterator
+ * CharIterator charIterator = CharIterator.of('a', 'B', 'C');
  * CharStream stream = CharStream.of(charIterator).parallel();
  *
  * // Process elements in parallel
@@ -76,7 +77,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
  */
 final class ParallelIteratorCharStream extends IteratorCharStream {
     private final int maxThreadNum;
-    private final Splitor splitor;
+    private final SplitStrategy splitStrategy;
     private final AsyncExecutor asyncExecutor;
     private final boolean cancelUncompletedThreads;
     private volatile IteratorCharStream sequential;
@@ -88,17 +89,17 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
      * @param values the CharIterator to stream from
      * @param sorted whether the iterator elements are in sorted order
      * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitor the strategy for dividing work among threads (null uses default)
+     * @param splitStrategy the strategy for dividing work among threads (null uses default)
      * @param asyncExecutor the executor for running parallel tasks (null uses default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers handlers to execute when the stream is closed
      */
-    ParallelIteratorCharStream(final CharIterator values, final boolean sorted, final int maxThreadNum, final Splitor splitor,
+    ParallelIteratorCharStream(final CharIterator values, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
             final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Collection<LocalRunnable> closeHandlers) {
         super(values, sorted, closeHandlers);
 
         this.maxThreadNum = maxThreadNum == 0 ? DEFAULT_MAX_THREAD_NUM : maxThreadNum;
-        this.splitor = splitor == null ? DEFAULT_SPLITOR : splitor;
+        this.splitStrategy = splitStrategy == null ? DEFAULT_SPLIT_STRATEGY : splitStrategy;
         this.asyncExecutor = asyncExecutor == null ? DEFAULT_ASYNC_EXECUTOR : asyncExecutor;
         this.cancelUncompletedThreads = cancelUncompletedThreads;
     }
@@ -110,14 +111,14 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
      * @param stream the CharStream to convert and stream from
      * @param sorted whether the stream elements are in sorted order
      * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitor the strategy for dividing work among threads (null uses default)
+     * @param splitStrategy the strategy for dividing work among threads (null uses default)
      * @param asyncExecutor the executor for running parallel tasks (null uses default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers handlers to execute when the stream is closed
      */
-    ParallelIteratorCharStream(final CharStream stream, final boolean sorted, final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor,
-            final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
-        this(iterate(stream), sorted, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, mergeCloseHandlers(closeHandlers, stream));
+    ParallelIteratorCharStream(final CharStream stream, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
+            final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
+        this(iterate(stream), sorted, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, mergeCloseHandlers(closeHandlers, stream));
     }
 
     /**
@@ -127,14 +128,15 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
      * @param stream the Stream of Character objects to convert and stream from
      * @param sorted whether the stream elements are in sorted order
      * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitor the strategy for dividing work among threads (null uses default)
+     * @param splitStrategy the strategy for dividing work among threads (null uses default)
      * @param asyncExecutor the executor for running parallel tasks (null uses default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers handlers to execute when the stream is closed
      */
-    ParallelIteratorCharStream(final Stream<Character> stream, final boolean sorted, final int maxThreadNum, final Splitor splitor,
+    ParallelIteratorCharStream(final Stream<Character> stream, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
             final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
-        this(charIterator(iterate(stream)), sorted, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, mergeCloseHandlers(closeHandlers, stream));
+        this(charIterator(iterate(stream)), sorted, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
+                mergeCloseHandlers(closeHandlers, stream));
     }
 
     /**
@@ -159,7 +161,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         final Stream<Character> stream = boxed().filter(predicate::test);
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -184,7 +186,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         final Stream<Character> stream = boxed().takeWhile(predicate::test);
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -210,7 +212,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         final Stream<Character> stream = boxed().dropWhile(predicate::test);
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -233,7 +235,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         @SuppressWarnings("resource")
         final CharStream stream = boxed().mapToChar(mapper::applyAsChar);
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -256,7 +258,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         @SuppressWarnings("resource")
         final IntStream stream = boxed().mapToInt(mapper::applyAsInt);
 
-        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -297,13 +299,14 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorCharStream(sequential().flatMap(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+            return new ParallelIteratorCharStream(sequential().flatMap(mapper), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
+                    null);
         }
 
         @SuppressWarnings("resource")
         final CharStream stream = boxed().flatMapToChar(mapper::apply);
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -322,13 +325,14 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorCharStream(sequential().flatmap(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+            return new ParallelIteratorCharStream(sequential().flatmap(mapper), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
+                    null);
         }
 
         @SuppressWarnings("resource")
         final CharStream stream = boxed().flatmap(mapper::apply).mapToChar(ToCharFunction.UNBOX);
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -347,14 +351,14 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorCharStream(sequential().flatMapArray(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorCharStream(sequential().flatMapArray(mapper), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         @SuppressWarnings("resource")
         final CharStream stream = boxed().flatMapToChar(value -> CharStream.of(mapper.apply(value)));
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -373,14 +377,14 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorIntStream(sequential().flatMapToInt(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+            return new ParallelIteratorIntStream(sequential().flatMapToInt(mapper), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                     null);
         }
 
         @SuppressWarnings("resource")
         final IntStream stream = boxed().flatMapToInt(mapper::apply);
 
-        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -400,8 +404,8 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorStream<>(sequential().flatMapToObj(mapper), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorStream<>(sequential().flatMapToObj(mapper), false, null, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         //noinspection resource
@@ -425,8 +429,8 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorStream<>(sequential().flatmapToObj(mapper), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorStream<>(sequential().flatmapToObj(mapper), false, null, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         //noinspection resource
@@ -435,7 +439,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
     /**
      * Returns a parallel stream that applies the given action to each element as elements are
-     * consumed. The action is applied sequentially within the internal object stream before
+     * consumed. The action may be invoked concurrently from multiple worker threads before
      * the result is mapped back to chars. This method is primarily used for debugging.
      *
      * <p>If the stream can be processed sequentially, delegates to the sequential implementation.
@@ -455,7 +459,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         @SuppressWarnings("resource")
         final CharStream stream = boxed().onEach(action::accept).sequential().mapToChar(ToCharFunction.UNBOX);
 
-        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -1139,12 +1143,12 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         assertNotClosed();
 
         if (canBeSequential(maxThreadNum)) {
-            return new ParallelIteratorCharStream(CharStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorCharStream(CharStream.zip(this, b, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorCharStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsChar, maxThreadNum), false, maxThreadNum, splitor,
-                asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorCharStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsChar, maxThreadNum), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1165,12 +1169,12 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         assertNotClosed();
 
         if (canBeSequential(maxThreadNum)) {
-            return new ParallelIteratorCharStream(CharStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor,
+            return new ParallelIteratorCharStream(CharStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
                     cancelUncompletedThreads, null);
         }
 
         return new ParallelIteratorCharStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsChar, maxThreadNum), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, null);
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1192,12 +1196,12 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
         assertNotClosed();
 
         if (canBeSequential(maxThreadNum)) {
-            return new ParallelIteratorCharStream(CharStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor,
+            return new ParallelIteratorCharStream(CharStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitStrategy,
                     asyncExecutor, cancelUncompletedThreads, null);
         }
 
         return new ParallelIteratorCharStream(Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsChar, maxThreadNum),
-                false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+                false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1222,12 +1226,12 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorCharStream(CharStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
-                    splitor, asyncExecutor, cancelUncompletedThreads, null);
+                    splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
         }
 
         return new ParallelIteratorCharStream(
                 Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction::applyAsChar, maxThreadNum), false,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1281,17 +1285,17 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
     }
 
     /**
-     * Returns the {@link BaseStream.Splitor} strategy configured for this stream. Since this
+     * Returns the {@link BaseStream.SplitStrategy} strategy configured for this stream. Since this
      * stream is iterator-backed, elements are always consumed via a shared synchronized iterator
-     * regardless of the splitor setting.
+     * regardless of the splitStrategy setting.
      *
-     * @return the splitor strategy for this parallel stream
+     * @return the splitStrategy strategy for this parallel stream
      */
     @Override
-    protected BaseStream.Splitor splitor() {
+    protected BaseStream.SplitStrategy splitStrategy() {
         //  assertNotClosed();
 
-        return splitor;
+        return splitStrategy;
     }
 
     /**

@@ -8920,4 +8920,83 @@ public class ArrayTest extends TestBase {
         assertEquals(Byte.MAX_VALUE, b[0]);
     }
 
+    @Test
+    public void test_range_char_stepExceedsCharRange() {
+        // |by| larger than the whole char range: only the start value fits (exercises the (char) by truncation path).
+        assertArrayEquals(new char[] { 'a' }, Array.range('a', 'z', 65537));
+        assertArrayEquals(new char[] { 'z' }, Array.range('z', 'a', -65537));
+        assertArrayEquals(new char[] { 'a' }, Array.rangeClosed('a', 'z', 65537));
+        assertArrayEquals(new char[] { 'z' }, Array.rangeClosed('z', 'a', -65537));
+    }
+
+    @Test
+    public void test_rangeClosed_char_fullRangeWithLargeStep() {
+        assertArrayEquals(new char[] { 0, 65535 }, Array.rangeClosed((char) 0, (char) 65535, 65535));
+        assertArrayEquals(new char[] { 65535, 0 }, Array.rangeClosed((char) 65535, (char) 0, -65535));
+    }
+
+    @Test
+    public void test_random_fullIntRange() {
+        final int[] values = Array.random(Integer.MIN_VALUE, Integer.MAX_VALUE, 1000);
+        assertEquals(1000, values.length);
+
+        boolean hasNegative = false;
+        boolean hasNonNegative = false;
+        boolean hasDistinct = false;
+
+        for (final int value : values) {
+            hasNegative |= value < 0;
+            hasNonNegative |= value >= 0;
+            hasDistinct |= value != values[0];
+        }
+
+        assertTrue(hasNegative);
+        assertTrue(hasNonNegative);
+        assertTrue(hasDistinct);
+    }
+
+    @Test
+    public void test_concat2D_nullFirstEmptySecond() {
+        final String[][] result = Array.concat2D(null, new String[0][]);
+        assertNotNull(result);
+        assertEquals(0, result.length);
+        assertEquals(String[].class, result.getClass().getComponentType());
+    }
+
+    @Test
+    public void test_concat2D_bothEmpty_preservesComponentType() {
+        final String[][] result = Array.concat2D(new String[0][], new String[0][]);
+        assertNotNull(result);
+        assertEquals(0, result.length);
+        assertEquals(String[].class, result.getClass().getComponentType());
+    }
+
+    @Test
+    public void test_concat3D_nullFirstEmptySecond() {
+        final String[][][] result = Array.concat3D(null, new String[0][][]);
+        assertNotNull(result);
+        assertEquals(0, result.length);
+        assertEquals(String[][].class, result.getClass().getComponentType());
+    }
+
+    @Test
+    public void test_transpose_zeroColumnsMultiRow() {
+        // A 2x0 matrix transposes to a 0x2 matrix (rows > cols branch with cols == 0).
+        final int[][] transposed = Array.transpose(new int[2][0]);
+        assertNotNull(transposed);
+        assertEquals(0, transposed.length);
+        assertEquals(int[].class, transposed.getClass().getComponentType());
+
+        final String[][] genericTransposed = Array.transpose(new String[3][0]);
+        assertNotNull(genericTransposed);
+        assertEquals(0, genericTransposed.length);
+        assertEquals(String[].class, genericTransposed.getClass().getComponentType());
+    }
+
+    @Test
+    public void test_repeat_array_overflow() {
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new int[] { 1, 2, 3 }, Integer.MAX_VALUE));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new String[] { "a", "b" }, Integer.MAX_VALUE, String.class));
+    }
+
 }

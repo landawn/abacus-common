@@ -1151,6 +1151,33 @@ public class XmlUtilTest extends TestBase {
     }
 
     @Test
+    public void testGetAttributeTypeClass_rejectsUnlistedJdkClass() throws Exception {
+        String xml = "<root type=\"java.lang.Runtime\"/>";
+        DocumentBuilder builder = XmlUtil.createDOMParser();
+        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
+
+        Assertions.assertNull(XmlUtil.getAttributeTypeClass(doc.getDocumentElement()));
+    }
+
+    @Test
+    public void testGetAttributeTypeClass_rejectsGenericExpression() throws Exception {
+        String xml = "<root type=\"java.util.List&lt;java.lang.Runtime&gt;\"/>";
+        DocumentBuilder builder = XmlUtil.createDOMParser();
+        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
+
+        Assertions.assertNull(XmlUtil.getAttributeTypeClass(doc.getDocumentElement()));
+    }
+
+    @Test
+    public void testGetAttributeTypeClass_allowsSafeArray() throws Exception {
+        String xml = "<root type=\"java.lang.String[][]\"/>";
+        DocumentBuilder builder = XmlUtil.createDOMParser();
+        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
+
+        Assertions.assertEquals(String[][].class, XmlUtil.getAttributeTypeClass(doc.getDocumentElement()));
+    }
+
+    @Test
     public void testGetConcreteClass_typeClassAndTargetClass() {
         // typeClass is assignable from targetClass — should return typeClass
         Class<?> result = XmlUtil.getConcreteClass(Object.class, String.class);

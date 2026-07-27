@@ -67,6 +67,7 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
  * @see ShortIteratorEx
  */
 class IteratorShortStream extends AbstractShortStream {
+    /** The backing iterator supplying this stream's elements; it is consumed lazily as the stream is traversed. */
     final ShortIteratorEx elements;
 
     //    OptionalShort head;
@@ -79,6 +80,13 @@ class IteratorShortStream extends AbstractShortStream {
      * Constructs an IteratorShortStream from a ShortIterator.
      * Creates an unsorted stream with no close handlers.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortIterator iterator = ShortIterator.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
+     * IteratorShortStream stream = new IteratorShortStream(iterator);
+     * stream.forEach(System.out::println);   // prints 1, 2, 3, 4, 5
+     * }</pre>
+     *
      * @param values the short iterator to wrap as a stream
      */
     IteratorShortStream(final ShortIterator values) {
@@ -88,6 +96,21 @@ class IteratorShortStream extends AbstractShortStream {
     /**
      * Constructs an IteratorShortStream from a ShortIterator with close handlers.
      * Creates an unsorted stream that will execute the provided close handlers when closed.
+     * The close handlers are invoked in order when the stream's close() method is called,
+     * ensuring proper resource cleanup.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortIterator iterator = ShortIterator.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
+     * List<LocalRunnable> closeHandlers = new ArrayList<>();
+     * closeHandlers.add(() -> System.out.println("Stream closed"));
+     * IteratorShortStream stream = new IteratorShortStream(iterator, closeHandlers);
+     * try {
+     *     stream.forEach(System.out::println);
+     * } finally {
+     *     stream.close();   // invokes all close handlers
+     * }
+     * }</pre>
      *
      * @param values the short iterator to wrap as a stream
      * @param closeHandlers collection of close handlers to execute when the stream is closed, may be null
@@ -98,7 +121,25 @@ class IteratorShortStream extends AbstractShortStream {
 
     /**
      * Constructs an IteratorShortStream from a ShortIterator with sorting and close handlers.
-     * This is the primary constructor that all other constructors delegate to.
+     * This is the primary constructor that all other constructors delegate to. The sorted flag
+     * allows optimization of operations like min(), max(), and distinct() when elements are
+     * known to be in natural ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a sorted stream with close handlers
+     * ShortIterator sortedIterator = ShortIterator.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
+     * List<LocalRunnable> closeHandlers = new ArrayList<>();
+     * closeHandlers.add(() -> System.out.println("Cleanup complete"));
+     *
+     * IteratorShortStream stream = new IteratorShortStream(sortedIterator, true, closeHandlers);
+     * try {
+     *     OptionalShort min = stream.min();           // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.get());    // prints 1
+     * } finally {
+     *     stream.close();
+     * }
+     * }</pre>
      *
      * @param values the short iterator to wrap as a stream
      * @param sorted {@code true} if the elements are already sorted in natural order, {@code false} otherwise
@@ -1520,10 +1561,11 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    protected ShortStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected ShortStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorShortStream(elements, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorShortStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     @Override

@@ -196,14 +196,17 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     /**
      * Deserializes a string into an {@link ImmutableSet} instance.
      * First deserializes to a mutable set via the underlying set type handler,
-     * then wraps it in an {@link ImmutableSet}.
+     * then wraps it in an {@link ImmutableSet}. When this handler was created for a
+     * sorted or navigable subtype, the declared subtype is produced instead: an
+     * {@link ImmutableNavigableSet} or {@link ImmutableSortedSet} copy of the parsed elements.
      *
      * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
      * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to parse; may be {@code null}
-     * @return a new {@link ImmutableSet} containing the parsed elements, or {@code null} if the input is {@code null}
+     * @param str the string to parse; may be {@code null} or blank
+     * @return a new {@link ImmutableSet} (or the declared sorted/navigable subtype) containing the parsed elements,
+     *         or {@code null} if {@code str} is {@code null} or blank
      * @see #valueOf(Object)
      * @see #stringOf(ImmutableSet)
      */

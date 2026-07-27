@@ -29,38 +29,32 @@ package com.landawn.abacus.pool;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Example Poolable resource class
  * class MyResource extends AbstractPoolable {
- *     // ... resource implementation
+ *     MyResource() {
+ *         super(3_600_000, 600_000);   // one-hour lifetime, ten-minute max idle time
+ *     }
+ *
+ *     void use() {
+ *         System.out.println("resource in use");
+ *     }
+ *
+ *     @Override
+ *     public void destroy(Poolable.Caller caller) {
+ *         System.out.println("destroyed by " + caller);
+ *     }
  * }
  *
- * // Simple object pool with capacity 100
- * ObjectPool<MyResource> pool1 = PoolFactory.createObjectPool(100);
- *
- * // Object pool with eviction every 5 minutes
- * ObjectPool<MyResource> pool2 = PoolFactory.createObjectPool(100, 300000);
- *
- * // Keyed pool with custom eviction policy
- * class DBConnection extends AbstractPoolable {
- *     // ... connection implementation
+ * try (ObjectPool<MyResource> pool = PoolFactory.createObjectPool(100)) {
+ *     pool.add(new MyResource());
+ *     MyResource resource = pool.poll();
+ *     if (resource != null) {
+ *         try {
+ *             resource.use();
+ *         } finally {
+ *             pool.add(resource);
+ *         }
+ *     }
  * }
- * KeyedObjectPool<String, DBConnection> pool3 = PoolFactory.createKeyedObjectPool(
- *     50, 60000, EvictionPolicy.ACCESS_COUNT
- * );
- *
- * // Pool with memory constraints
- * class PooledBuffer extends AbstractPoolable {
- *     private int capacity;
- *     public PooledBuffer() { super(3600000, 600000); }
- *     public int capacity() { return capacity; }
- *     @Override public void destroy(Poolable.Caller caller) {}   // release resources here
- * }
- * ObjectPool.MemoryMeasure<PooledBuffer> measure = buffer -> buffer.capacity();
- * ObjectPool<PooledBuffer> pool4 = PoolFactory.createObjectPool(
- *     1000, 30000, EvictionPolicy.LAST_ACCESS_TIME,
- *     1024 * 1024 * 100, // 100MB max
- *     measure
- * );
  * }</pre>
  *
  * @see ObjectPool

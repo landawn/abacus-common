@@ -4,7 +4,7 @@ import static com.landawn.abacus.util.Strings.base64Encode;
 import static com.landawn.abacus.util.Strings.base64EncodeString;
 import static com.landawn.abacus.util.Strings.concat;
 import static com.landawn.abacus.util.Strings.concatNullToEmpty;
-import static com.landawn.abacus.util.Strings.extractFirstDouble;
+import static com.landawn.abacus.util.Strings.findFirstDouble;
 import static com.landawn.abacus.util.Strings.isBase64;
 import static com.landawn.abacus.util.Strings.join;
 import static com.landawn.abacus.util.Strings.joinEntries;
@@ -64,7 +64,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.util.Strings.ExtractStrategy;
+import com.landawn.abacus.util.Strings.DelimiterMatchMode;
 import com.landawn.abacus.util.Strings.StrUtil;
 
 public class StringsTest extends AbstractTest {
@@ -111,11 +111,11 @@ public class StringsTest extends AbstractTest {
     }
 
     private List<String> substringsBetween_StackBased_(final String str, final char fromDelimiter, final char toDelimiter) {
-        return Strings.substringsBetween(str, fromDelimiter, toDelimiter, ExtractStrategy.STACK_BASED);
+        return Strings.substringsBetween(str, fromDelimiter, toDelimiter, DelimiterMatchMode.ALL_LEVELS);
     }
 
     private List<String> substringsBetween_IgnoreNested_(final String str, final char fromDelimiter, final char toDelimiter) {
-        return Strings.substringsBetween(str, fromDelimiter, toDelimiter, ExtractStrategy.IGNORE_NESTED);
+        return Strings.substringsBetween(str, fromDelimiter, toDelimiter, DelimiterMatchMode.OUTERMOST_ONLY);
     }
 
     @Test
@@ -333,8 +333,8 @@ public class StringsTest extends AbstractTest {
     public void test_findEmail() {
         final String str = "*** test@gmail.orgg&&^ test2@gmail.cn ((& ";
         N.println(Strings.isValidEmailAddress("test@gmail.com"));
-        N.println(Strings.extractEmailAddress(str));
-        N.println(Strings.extractAllEmailAddresses(str));
+        N.println(Strings.findFirstEmailAddress(str));
+        N.println(Strings.findAllEmailAddresses(str));
         assertNotNull(str);
     }
 
@@ -2057,7 +2057,7 @@ public class StringsTest extends AbstractTest {
      */
     @Test
     public void testToCamelCase_startPositionIndexBugFix() {
-        // Multi-token path (firstSplitorIndex >= 0): the fixed code records
+        // Multi-token path (firstSplitStrategyIndex >= 0): the fixed code records
         // startPos before appending toLowerCase'd token, then uses startPos
         // for setCharAt.  Verify correct capitalisation for every non-first token.
         assertEquals("helloWorld", Strings.toCamelCase("hello_world"));
@@ -5209,6 +5209,11 @@ public class StringsTest extends AbstractTest {
         assertEquals(5, StrUtil.lastIndexOf("abc, aa, aa", "aa", ", ", 6));
         assertEquals(7, StrUtil.lastIndexOf("abc,aa,aa", "aa", ","));
         assertEquals(-1, StrUtil.lastIndexOf("aaaa", "aa", ",", 3));
+        assertEquals(5, StrUtil.lastIndexOf("abc,,", "", ","));
+        assertEquals(4, StrUtil.lastIndexOf("abc,,", "", ",", 4));
+        assertEquals(5, StrUtil.lastIndexOfIgnoreCase("abc,,", "", ","));
+        assertEquals(4, StrUtil.lastIndexOfIgnoreCase("abc,,", "", ",", 4));
+        assertEquals(4, StrUtil.lastIndexOfIgnoreCase("aEND", "", "end"));
 
         assertEquals(0, Strings.indexOf("abc,,", ""));
         assertEquals(1, Strings.indexOf("abc,,", "", 1));
@@ -9020,27 +9025,27 @@ public class StringsTest extends AbstractTest {
     public void test_substringsBetween() {
 
         {
-            assertEquals("[\"a2[c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"c\", \"a2[c]\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"a2[c]\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"a2[c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[\"c\", \"a2[c]\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[\"a2[c]\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
         {
-            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[\"a2c\", \"a\"]", N.stringOf(Strings.substringsBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
         {
-            assertEquals("[\"[b[a\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"a\", \"b[a]\", \"[b[a]]c\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"[b[a]]c\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"[b[a\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[\"a\", \"b[a]\", \"[b[a]]c\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[\"[b[a]]c\"]", N.stringOf(Strings.substringsBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
         {
-            assertEquals("[\"[b[a\", \"c\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[\"a\", \"c\", \"b[a][c]d\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[\"b[a][c]d\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[\"[b[a\", \"c\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[\"a\", \"c\", \"b[a][c]d\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[\"b[a][c]d\"]", N.stringOf(Strings.substringsBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
     }
@@ -9266,27 +9271,27 @@ public class StringsTest extends AbstractTest {
     public void test_substringIndicesBetween() {
 
         {
-            assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[5, 6], [2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[[5, 6], [2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
         {
-            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
         {
-            assertEquals("[[1, 5]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[4, 5], [2, 6], [1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[[1, 5]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[[4, 5], [2, 6], [1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[[1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
         {
-            assertEquals("[[1, 5], [7, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.DEFAULT)));
-            assertEquals("[[4, 5], [7, 8], [2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.STACK_BASED)));
-            assertEquals("[[2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', ExtractStrategy.IGNORE_NESTED)));
+            assertEquals("[[1, 5], [7, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
+            assertEquals("[[4, 5], [7, 8], [2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
+            assertEquals("[[2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
         }
 
     }
@@ -9295,31 +9300,31 @@ public class StringsTest extends AbstractTest {
     public void test_substringIndicesBetween_maxCount() {
         final String str = "3[a2[c]]2[a]";
 
-        // DEFAULT: maxCount simply limits sequential matches.
-        assertEquals("[[2, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.DEFAULT, 1)));
-        assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.DEFAULT, 2)));
+        // SEQUENTIAL: maxCount simply limits sequential matches.
+        assertEquals("[[2, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 1)));
+        assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 2)));
 
-        // STACK_BASED: matches are reported inner-first, so maxCount limits in that discovery order.
-        assertEquals("[[5, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.STACK_BASED, 1)));
-        assertEquals("[[5, 6], [2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.STACK_BASED, 2)));
+        // ALL_LEVELS: matches are reported inner-first, so maxCount limits in that discovery order.
+        assertEquals("[[5, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 1)));
+        assertEquals("[[5, 6], [2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 2)));
 
-        // IGNORE_NESTED: nested matches must never be returned, even when maxCount stops the scan early.
+        // OUTERMOST_ONLY: nested matches must never be returned, even when maxCount stops the scan early.
         // Before the fix, maxCount=1 returned [[5, 6]] ("c"), a nested match that the strategy promises to ignore.
-        assertEquals("[[2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 1)));
-        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 2)));
-        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 10)));
+        assertEquals("[[2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1)));
+        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 2)));
+        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10)));
 
         // Value-returning variant goes through the same code path.
-        assertEquals(N.toList("a2[c]"), Strings.substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 1));
+        assertEquals(N.toList("a2[c]"), Strings.substringsBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
 
         // Unclosed outer delimiter: pending matches stay, but the result must still honor maxCount.
         final String unclosed = "[a[b]c[d]";
         assertEquals("[[3, 4], [7, 8]]",
-                N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 10)));
-        assertEquals("[[3, 4]]", N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 1)));
+                N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10)));
+        assertEquals("[[3, 4]]", N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1)));
 
         // maxCount == 0 returns an empty list.
-        assertTrue(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 0).isEmpty());
+        assertTrue(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 0).isEmpty());
     }
 
     @Test
@@ -11434,25 +11439,25 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test extractEmailAddress()")
+    @DisplayName("Test findFirstEmailAddress()")
     public void testFindFirstEmailAddress() {
-        assertEquals("test@example.com", Strings.extractEmailAddress("Contact: test@example.com"));
-        assertNull(Strings.extractEmailAddress("No email here"));
-        assertNull(Strings.extractEmailAddress(null));
+        assertEquals("test@example.com", Strings.findFirstEmailAddress("Contact: test@example.com"));
+        assertNull(Strings.findFirstEmailAddress("No email here"));
+        assertNull(Strings.findFirstEmailAddress(null));
     }
 
     @Test
     public void testFindFirstEmailAddress_EdgeCases() {
-        assertEquals("test@gmail.com", Strings.extractEmailAddress("contact test@gmail.com for info"));
-        assertNull(Strings.extractEmailAddress("no email here"));
-        assertNull(Strings.extractEmailAddress(null));
-        assertNull(Strings.extractEmailAddress(""));
+        assertEquals("test@gmail.com", Strings.findFirstEmailAddress("contact test@gmail.com for info"));
+        assertNull(Strings.findFirstEmailAddress("no email here"));
+        assertNull(Strings.findFirstEmailAddress(null));
+        assertNull(Strings.findFirstEmailAddress(""));
     }
 
     @Test
-    @DisplayName("Test extractAllEmailAddresses()")
+    @DisplayName("Test findAllEmailAddresses()")
     public void testFindAllEmailAddresses() {
-        List<String> emails = Strings.extractAllEmailAddresses("Contact: test@example.com and admin@test.org");
+        List<String> emails = Strings.findAllEmailAddresses("Contact: test@example.com and admin@test.org");
         assertEquals(2, emails.size());
         assertTrue(emails.contains("test@example.com"));
         assertTrue(emails.contains("admin@test.org"));
@@ -11460,10 +11465,10 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testFindAllEmailAddresses_EdgeCases() {
-        List<String> emails = Strings.extractAllEmailAddresses("a@b.com and c@d.com");
+        List<String> emails = Strings.findAllEmailAddresses("a@b.com and c@d.com");
         assertEquals(2, emails.size());
-        assertEquals(0, Strings.extractAllEmailAddresses("no email").size());
-        assertEquals(0, Strings.extractAllEmailAddresses(null).size());
+        assertEquals(0, Strings.findAllEmailAddresses("no email").size());
+        assertEquals(0, Strings.findAllEmailAddresses(null).size());
     }
 
     @Test
@@ -11505,64 +11510,64 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test extractFirstInteger()")
-    public void testExtractFirstInteger() {
-        assertEquals("123", Strings.extractFirstInteger("abc123def"));
-        assertNull(Strings.extractFirstInteger("abc"));
-        assertNull(Strings.extractFirstInteger(null));
+    @DisplayName("Test findFirstInteger()")
+    public void testFindFirstInteger() {
+        assertEquals("123", Strings.findFirstInteger("abc123def"));
+        assertNull(Strings.findFirstInteger("abc"));
+        assertNull(Strings.findFirstInteger(null));
     }
 
     @Test
-    public void testExtractFirstInteger_EdgeCases() {
-        assertEquals("123", Strings.extractFirstInteger("abc123def"));
-        assertEquals("-123", Strings.extractFirstInteger("abc-123def"));
-        assertNull(Strings.extractFirstInteger("abc"));
-        assertNull(Strings.extractFirstInteger(null));
-        assertNull(Strings.extractFirstInteger(""));
+    public void testFindFirstInteger_EdgeCases() {
+        assertEquals("123", Strings.findFirstInteger("abc123def"));
+        assertEquals("-123", Strings.findFirstInteger("abc-123def"));
+        assertNull(Strings.findFirstInteger("abc"));
+        assertNull(Strings.findFirstInteger(null));
+        assertNull(Strings.findFirstInteger(""));
     }
 
     @Test
-    @DisplayName("Test extractFirstDouble()")
-    public void testExtractFirstDouble() {
-        assertEquals("123.45", Strings.extractFirstDouble("abc123.45def"));
-        assertNull(Strings.extractFirstDouble("abc"));
-        assertNull(Strings.extractFirstDouble(null));
+    @DisplayName("Test findFirstDouble()")
+    public void testFindFirstDouble() {
+        assertEquals("123.45", Strings.findFirstDouble("abc123.45def"));
+        assertNull(Strings.findFirstDouble("abc"));
+        assertNull(Strings.findFirstDouble(null));
     }
 
     @Test
     @DisplayName("Test extractFirstSciNumber method")
-    public void testExtractFirstSciNumber() {
-        assertEquals("1.23e10", Strings.extractFirstDouble("value1.23e10test", true));
-        assertEquals("4.56E-5", Strings.extractFirstDouble("test4.56E-5", true));
-        assertEquals("1e3", Strings.extractFirstDouble("1e3test", true));
+    public void testFindFirstSciNumber() {
+        assertEquals("1.23e10", Strings.findFirstDouble("value1.23e10test", true));
+        assertEquals("4.56E-5", Strings.findFirstDouble("test4.56E-5", true));
+        assertEquals("1e3", Strings.findFirstDouble("1e3test", true));
 
-        assertEquals("-1.23e10", Strings.extractFirstDouble("value-1.23e10test", true));
+        assertEquals("-1.23e10", Strings.findFirstDouble("value-1.23e10test", true));
 
-        assertNull(Strings.extractFirstDouble("no sci numbers here", true));
-        assertNull(Strings.extractFirstDouble("", true));
-        assertNull(Strings.extractFirstDouble(null, true));
-        assertEquals("123.45", Strings.extractFirstDouble("123.45", true));
+        assertNull(Strings.findFirstDouble("no sci numbers here", true));
+        assertNull(Strings.findFirstDouble("", true));
+        assertNull(Strings.findFirstDouble(null, true));
+        assertEquals("123.45", Strings.findFirstDouble("123.45", true));
 
-        assertEquals("1.23e10", Strings.extractFirstDouble("first1.23e10second4.56e-5", true));
+        assertEquals("1.23e10", Strings.findFirstDouble("first1.23e10second4.56e-5", true));
     }
 
     @Test
-    public void testExtractFirstDouble_WithScientific() {
-        assertEquals("1.23e4", extractFirstDouble("value=1.23e4", true));
-        assertEquals("1.23E-4", extractFirstDouble("small=1.23E-4", true));
-        assertEquals("123.45", extractFirstDouble("abc123.45def", true));
-        assertNull(extractFirstDouble("no numbers", true));
-        assertNull(extractFirstDouble("", true));
-        assertNull(extractFirstDouble(null, true));
+    public void testFindFirstDouble_WithScientific() {
+        assertEquals("1.23e4", findFirstDouble("value=1.23e4", true));
+        assertEquals("1.23E-4", findFirstDouble("small=1.23E-4", true));
+        assertEquals("123.45", findFirstDouble("abc123.45def", true));
+        assertNull(findFirstDouble("no numbers", true));
+        assertNull(findFirstDouble("", true));
+        assertNull(findFirstDouble(null, true));
     }
 
     @Test
-    public void testExtractFirstDouble_EdgeCases() {
-        assertEquals("12.34", Strings.extractFirstDouble("abc12.34def"));
-        assertEquals("-12.34", Strings.extractFirstDouble("abc-12.34def"));
-        assertNull(Strings.extractFirstDouble("abc"));
-        assertNull(Strings.extractFirstDouble(null));
-        assertNull(Strings.extractFirstDouble(""));
+    public void testFindFirstDouble_EdgeCases() {
+        assertEquals("12.34", Strings.findFirstDouble("abc12.34def"));
+        assertEquals("-12.34", Strings.findFirstDouble("abc-12.34def"));
+        assertNull(Strings.findFirstDouble("abc"));
+        assertNull(Strings.findFirstDouble(null));
+        assertNull(Strings.findFirstDouble(""));
     }
 
     @Test
@@ -11622,8 +11627,8 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void test_regularExpression() {
-        assertEquals("123", Strings.extractFirstInteger("abc123"));
-        assertEquals("-12.34e+5", Strings.extractFirstDouble("abc-12.34e+5xyz", true));
+        assertEquals("123", Strings.findFirstInteger("abc123"));
+        assertEquals("-12.34e+5", Strings.findFirstDouble("abc-12.34e+5xyz", true));
         assertEquals(Double.parseDouble("-12.34e+5"), Numbers.extractFirstDouble("abc-12.34e+5xyz", true).get());
 
         RegExUtil.matchResults("123", RegExUtil.INTEGER_MATCHER).map(MatchResult::group).forEach(N::println);
@@ -12219,14 +12224,14 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testSubstringsBetweenStackBased_honorsToIndex() {
-        // regression: the STACK_BASED branch ignored toIndex, returning matches partially or entirely
+        // regression: the ALL_LEVELS branch ignored toIndex, returning matches partially or entirely
         // outside the requested range
-        assertTrue(Strings.substringsBetween("a[b]c", 0, 3, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE).isEmpty());
-        assertTrue(Strings.substringsBetween("a[bcdefg]h", 0, 3, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE).isEmpty());
-        assertEquals(N.asList("a"), Strings.substringsBetween("[a]x[b]", 0, 4, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE));
+        assertTrue(Strings.substringsBetween("a[b]c", 0, 3, "[", "]", DelimiterMatchMode.ALL_LEVELS, Integer.MAX_VALUE).isEmpty());
+        assertTrue(Strings.substringsBetween("a[bcdefg]h", 0, 3, "[", "]", DelimiterMatchMode.ALL_LEVELS, Integer.MAX_VALUE).isEmpty());
+        assertEquals(N.asList("a"), Strings.substringsBetween("[a]x[b]", 0, 4, "[", "]", DelimiterMatchMode.ALL_LEVELS, Integer.MAX_VALUE));
 
         // full-range behavior unchanged
-        assertEquals(N.asList("b"), Strings.substringsBetween("a[b]c", 0, 5, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE));
+        assertEquals(N.asList("b"), Strings.substringsBetween("a[b]c", 0, 5, "[", "]", DelimiterMatchMode.ALL_LEVELS, Integer.MAX_VALUE));
     }
 
     @Test
@@ -12591,7 +12596,7 @@ public class StringsTest extends AbstractTest {
     public void testSubstringsBetween_EndDelimiterMustFitWithinRange() {
         final String str = "a<x>>z";
 
-        for (final ExtractStrategy strategy : ExtractStrategy.values()) {
+        for (final DelimiterMatchMode strategy : DelimiterMatchMode.values()) {
             assertTrue(Strings.substringsBetween(str, 0, 4, "<", ">>", strategy, Integer.MAX_VALUE).isEmpty());
             assertEquals(N.asList("x"), Strings.substringsBetween(str, 0, 5, "<", ">>", strategy, Integer.MAX_VALUE));
         }

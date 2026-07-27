@@ -77,6 +77,9 @@ import com.landawn.abacus.util.function.TriFunction;
  * <li>Type-safe operations on generic arrays</li>
  * </ul>
  *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public Stream factory methods rather than instantiating this class directly.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String[] data = {"apple", "banana", "cherry"};
@@ -85,10 +88,17 @@ import com.landawn.abacus.util.function.TriFunction;
  * }</pre>
  *
  * @param <T> the type of stream elements
+ * @see Stream
  */
 class ArrayStream<T> extends AbstractStream<T> {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final T[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
@@ -459,7 +469,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         assertNotClosed();
 
         final int windowSize = 2;
-        checkArgPositive(increment, "increment"); //NOSONAR
+        checkArgPositive(increment, cs.increment); //NOSONAR
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
@@ -1049,7 +1059,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         };
 
-        return newStream(iter, false, null).onClose(iter::closeResource); //NOSONAR
+        return newStream(iter, false, null, mergeCloseHandlers(iter::closeResource, closeHandlers())); //NOSONAR
     }
 
     @Override
@@ -2596,6 +2606,24 @@ class ArrayStream<T> extends AbstractStream<T> {
         }
     }
 
+    /**
+     * Copies all elements of this stream into the given array, in encounter order, and returns it.
+     * If {@code a} is too short to hold every element, a new array of the same runtime component type
+     * and of exactly the required length is allocated and returned instead.
+     *
+     * <p>Unlike {@link java.util.Collection#toArray(Object[])}, no trailing {@code null} terminator is
+     * written when {@code a} is longer than this stream; slots beyond the copied elements keep their
+     * previous values.
+     *
+     * <p>This is a terminal operation. The stream is closed after this call.
+     *
+     * @param <A> the component type of the target array
+     * @param a the array into which the elements are copied, if it is large enough; must not be {@code null}
+     * @return {@code a} if it was large enough, otherwise a newly allocated array holding all elements
+     * @throws IllegalStateException if the stream is already closed
+     * @throws ArrayStoreException if an element of this stream cannot be stored in an array of type {@code A}
+     * @see #toArray(IntFunction)
+     */
     <A> A[] toArray(A[] a) {
         assertNotClosed();
 
@@ -3276,7 +3304,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    public long count() throws IllegalStateException, IllegalArgumentException {
+    public long count() throws IllegalStateException {
         assertNotClosed();
 
         try {
@@ -3690,25 +3718,27 @@ class ArrayStream<T> extends AbstractStream<T> {
      * Creates a parallel version of this array-backed stream using the specified parameters.
      *
      * @param maxThreadNum the maximum number of threads for parallel execution
-     * @param splitor the strategy used to split the array for parallel processing
+     * @param splitStrategy the strategy used to split the array for parallel processing
      * @param asyncExecutor the executor for submitting parallel tasks
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @return a new {@link ParallelArrayStream} over the same backing array range
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected Stream<T> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected Stream<T> parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayStream<>(elements, fromIndex, toIndex, isSorted(), comparator(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                closeHandlers());
+        return new ParallelArrayStream<>(elements, fromIndex, toIndex, isSorted(), comparator(), maxThreadNum, splitStrategy, asyncExecutor,
+                cancelUncompletedThreads, closeHandlers());
     }
 
     /**
      * Returns a standard JDK {@link java.util.stream.Stream} backed by this stream's underlying array.
      * Close handlers registered on this stream are forwarded to the returned JDK stream.
      *
-     * <p>This is a terminal operation that transfers ownership to the returned JDK stream.
+     * <p>This conversion is lazy. The returned JDK stream owns subsequent traversal and should
+     * be closed when it is no longer needed, particularly when this stream has close handlers.
      *
      * @return a JDK {@link java.util.stream.Stream} over the elements of this stream
      * @throws IllegalStateException if the stream is already closed

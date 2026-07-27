@@ -276,7 +276,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * numeric form. Only {@code writeLongAsString} with a non-zero quotation character writes quoted output.
      *
      * @param appendable the {@code Appendable} to write to
-     * @param x the {@code Number} value to append as {@code long}
+     * @param x the {@code Number} value to append as {@code long}, may be {@code null}
      * @throws IOException if an I/O error occurs
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -301,7 +301,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * Writes a {@code long} value to a {@code CharacterWriter} with optional configuration.
      * <p>
      * If the configuration specifies {@code writeNullNumberAsZero} and the value is {@code null},
-     * writes {@code 0L} instead of {@code null}. If the configuration specifies {@code writeLongAsString}
+     * writes {@code 0} instead of {@code null}. If the configuration specifies {@code writeLongAsString}
      * <strong>and</strong> {@code getStringQuotation()} is non-zero, the long value is wrapped in the
      * configured quotation character; otherwise the long is written unquoted.
      * </p>
@@ -315,7 +315,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * rendering.
      *
      * @param writer the {@code CharacterWriter} to write to
-     * @param x the {@code Number} value to write as {@code long}
+     * @param x the {@code Number} value to write as {@code long}, may be {@code null}
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
      */

@@ -41,6 +41,7 @@ public final class BeanType<T> extends AbstractType<T> {
     private final Class<T> typeClass;
     private final java.lang.reflect.Type javaType;
     private final List<Type<?>> parameterTypes;
+    private final String xmlName;
 
     /**
      * Package-private constructor for {@code BeanType}.
@@ -54,6 +55,7 @@ public final class BeanType<T> extends AbstractType<T> {
         super(javaType == null ? TypeFactory.getClassName(clazz) : TypeFactory.getJavaTypeName(javaType));
         this.typeClass = clazz;
         this.javaType = javaType == null ? clazz : javaType;
+        this.xmlName = TypeFactory.getJavaTypeName(this.javaType).replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
 
         if (this.javaType instanceof ParameterizedType parameterizedType) {
             final java.lang.reflect.Type[] arguments = parameterizedType.getActualTypeArguments();
@@ -89,6 +91,19 @@ public final class BeanType<T> extends AbstractType<T> {
     @Override
     public java.lang.reflect.Type reflectType() {
         return javaType;
+    }
+
+    /**
+     * Returns the fully qualified XML type name for this bean.
+     *
+     * <p>Unlike the compact display {@linkplain #name() name}, a serialized type discriminator
+     * must distinguish beans that have the same simple class name in different packages.</p>
+     *
+     * @return the XML-safe, fully qualified bean type name
+     */
+    @Override
+    public String xmlName() {
+        return xmlName;
     }
 
     @Override

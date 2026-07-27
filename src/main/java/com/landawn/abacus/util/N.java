@@ -206,7 +206,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Collection operations with null safety
  * List<String> list = Arrays.asList("apple", "banana", "apple", null);
- * Map<String, Integer> freq = N.frequencyMap(list);           // returns {apple=2, banana=1, null=1}
+ * Map<String, Integer> freq = N.frequencyMap(list);           // counts apple=2, banana=1 and null=1 (map order unspecified)
  * List<String> unique = N.distinct(list);                     // returns [apple, banana, null]
  * List<String> filtered = N.filter(list, Objects::nonNull);   // returns [apple, banana, apple]
  *
@@ -398,7 +398,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Mathematical analysis
  * double average = N.averageInt(processedNumbers);                        // returns 2.0
  * Integer maximum = N.max(processedNumbers);                              // returns 3
- * Map<Integer, Integer> frequencies = N.frequencyMap(processedNumbers);   // returns {1=1, 2=1, 3=1}
+ * Map<Integer, Integer> frequencies = N.frequencyMap(processedNumbers);   // counts 1=1, 2=1 and 3=1 (map order unspecified)
  *
  * // Async processing
  * N.asyncExecute(() -> {
@@ -447,15 +447,24 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 public final class N extends CommonUtil {
 
+    /** The maximum number of elements the {@code println} helpers render before the output is truncated. */
     static final int MAX_SIZE_FOR_PRINTLN = 1000;
 
     private static final int MAX_INITIAL_BATCH_BUFFER_CAPACITY = 8192;
 
+    /**
+     * The shared executor backing the {@code asyncExecute} methods. Its thread pool is sized from the number of
+     * available CPU cores, with a floor of 64 core / 128 maximum threads and a 180-second idle keep-alive.
+     */
     static final AsyncExecutor ASYNC_EXECUTOR = new AsyncExecutor(//
             max(64, InternalUtil.CPU_CORES * 8), // coreThreadPoolSize
             max(128, InternalUtil.CPU_CORES * 16), // maxThreadPoolSize
             180L, TimeUnit.SECONDS);
 
+    /**
+     * The shared executor backing the delayed/scheduled {@code asyncExecute} methods. It is wrapped so that its
+     * threads never keep the JVM alive on shutdown.
+     */
     static final ScheduledExecutorService SCHEDULED_EXECUTOR;
 
     static {
@@ -664,7 +673,8 @@ public final class N extends CommonUtil {
     /**
      * Returns the number of occurrences of the specified value in the array.
      *
-     * <p>Note: Uses Float.compare() for proper handling of NaN and -0.0/+0.0 comparisons.</p>
+     * <p>Uses {@link Float#compare(float, float)}: all NaN values compare equal, while
+     * {@code -0.0f} and {@code +0.0f} remain distinct.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -696,7 +706,8 @@ public final class N extends CommonUtil {
     /**
      * Returns the number of occurrences of the specified value in the array.
      *
-     * <p>Note: Uses Double.compare() for proper handling of NaN and -0.0/+0.0 comparisons.</p>
+     * <p>Uses {@link Double#compare(double, double)}: all NaN values compare equal, while
+     * {@code -0.0d} and {@code +0.0d} remain distinct.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -865,7 +876,7 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * String[] words = {"apple", "banana", "apple", "cherry", "banana", "apple"};
      * Map<String, Integer> result = N.frequencyMap(words);
-     * // returns {apple=3, banana=2, cherry=1}
+     * // counts apple=3, banana=2 and cherry=1 (HashMap iteration order is unspecified)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -914,7 +925,7 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "banana", "apple", "cherry");
      * Map<String, Integer> result = N.frequencyMap(words);
-     * // returns {apple=2, banana=1, cherry=1}
+     * // counts apple=2, banana=1 and cherry=1 (HashMap iteration order is unspecified)
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
@@ -976,7 +987,7 @@ public final class N extends CommonUtil {
      * List<String> words = Arrays.asList("apple", "banana", "apple", "cherry");
      * Iterator<String> iter = words.iterator();
      * Map<String, Integer> result = N.frequencyMap(iter);
-     * // returns {apple=2, banana=1, cherry=1} (iterator is now exhausted)
+     * // counts apple=2, banana=1 and cherry=1; map order is unspecified (iterator is now exhausted)
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -1141,7 +1152,8 @@ public final class N extends CommonUtil {
     /**
      * Returns {@code true} if the array contains the specified value.
      *
-     * <p>Note: Uses Float.compare() for proper handling of NaN and -0.0/+0.0 comparisons.</p>
+     * <p>Uses {@link Float#compare(float, float)}: all NaN values compare equal, while
+     * {@code -0.0f} and {@code +0.0f} remain distinct.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1161,7 +1173,8 @@ public final class N extends CommonUtil {
     /**
      * Returns {@code true} if the array contains the specified value.
      *
-     * <p>Note: Uses Double.compare() for proper handling of NaN and -0.0/+0.0 comparisons.</p>
+     * <p>Uses {@link Double#compare(double, double)}: all NaN values compare equal, while
+     * {@code -0.0d} and {@code +0.0d} remain distinct.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2709,6 +2722,8 @@ public final class N extends CommonUtil {
      * The size of the chunks is larger first.
      * <br />
      * The size of returned List may be less than the specified {@code maxChunkCount} if the input Collection size is less than {@code maxChunkCount}.
+     * Each returned chunk is an independent {@code ArrayList}; later structural changes to the source collection
+     * do not invalidate or change a chunk.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2734,6 +2749,8 @@ public final class N extends CommonUtil {
      * The size of the chunks can be either smaller or larger first based on the flag.
      * <br />
      * The size of returned List may be less than the specified {@code maxChunkCount} if the input Collection size is less than {@code maxChunkCount}.
+     * Each returned chunk is an independent {@code ArrayList}; later structural changes to the source collection
+     * do not invalidate or change a chunk.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2764,7 +2781,7 @@ public final class N extends CommonUtil {
 
         if (c instanceof List) { // NOSONAR
             final List<T> list = (List<T>) c; // NOSONAR
-            func = list::subList;
+            func = (fromIndex, toIndex) -> new ArrayList<>(list.subList(fromIndex, toIndex));
         } else {
             final Iterator<? extends T> iter = c.iterator();
 
@@ -2915,6 +2932,8 @@ public final class N extends CommonUtil {
 
     /**
      * Concatenates multiple char arrays into a single new array.
+     * Returns an empty array if the input is {@code null} or empty.
+     * Null or empty arrays within the input are skipped.
      *
      * <p>This method creates a new array containing all elements from each input array in the order they are provided.
      * The original arrays are not modified. This is useful for combining multiple character sequences or building
@@ -3554,6 +3573,8 @@ public final class N extends CommonUtil {
      * @param b the second array
      * @return a new array containing elements from both arrays, or {@code null} if both {@code a} and {@code b} are {@code null}
      * @throws IllegalArgumentException if the combined array length would exceed {@code Integer.MAX_VALUE}
+     * @throws ArrayStoreException if both arrays are non-empty and an element of {@code b} is not assignable to
+     *         the runtime component type of {@code a}, which determines the result array type
      * @see #concat(Object[]...)
      * @see #merge(Object[], Object[], BiFunction)
      */
@@ -3735,7 +3756,7 @@ public final class N extends CommonUtil {
      *     Arrays.asList("A", "B"),
      *     Arrays.asList("C", "D")
      * );
-     * Set<String> result = N.concat(lists, HashSet::new);
+     * Set<String> result = N.concat(lists, (IntFunction<Set<String>>) HashSet::new);
      * // returns a HashSet containing ["A", "B", "C", "D"]
      * }</pre>
      *
@@ -3836,8 +3857,10 @@ public final class N extends CommonUtil {
      * // returns {true, false, true, true, false, false}
      * }</pre>
      *
-     * @param a the two-dimensional array to flatten
-     * @return a one-dimensional array containing all elements from all {@code non-null} rows
+     * @param a the two-dimensional boolean array to be flattened, may be {@code null} or empty
+     * @return a one-dimensional boolean array containing all elements from all {@code non-null} rows in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(char[][])
      */
     public static boolean[] flatten(final boolean[][] a) {
@@ -3894,6 +3917,7 @@ public final class N extends CommonUtil {
      * @param a the two-dimensional char array to be flattened, may be {@code null} or empty
      * @return a one-dimensional char array containing all elements from all {@code non-null} rows in the input array.
      *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static char[] flatten(final char[][] a) {
@@ -3947,6 +3971,7 @@ public final class N extends CommonUtil {
      * @param a the two-dimensional byte array to be flattened, may be {@code null} or empty
      * @return a one-dimensional byte array containing all elements from all {@code non-null} rows in the input array.
      *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static byte[] flatten(final byte[][] a) {
@@ -3992,6 +4017,7 @@ public final class N extends CommonUtil {
      * @param a the two-dimensional short array to be flattened, may be {@code null} or empty
      * @return a one-dimensional short array containing all elements from all {@code non-null} rows in the input array.
      *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static short[] flatten(final short[][] a) {
@@ -4037,6 +4063,7 @@ public final class N extends CommonUtil {
      * @param a the two-dimensional int array to be flattened, may be {@code null} or empty
      * @return a one-dimensional int array containing all elements from all {@code non-null} rows in the input array.
      *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static int[] flatten(final int[][] a) {
@@ -4082,6 +4109,7 @@ public final class N extends CommonUtil {
      * @param a the two-dimensional long array to be flattened, may be {@code null} or empty
      * @return a one-dimensional long array containing all elements from all {@code non-null} rows in the input array.
      *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static long[] flatten(final long[][] a) {
@@ -4127,6 +4155,7 @@ public final class N extends CommonUtil {
      * @param a the two-dimensional float array to be flattened, may be {@code null} or empty
      * @return a one-dimensional float array containing all elements from all {@code non-null} rows in the input array.
      *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static float[] flatten(final float[][] a) {
@@ -4172,6 +4201,7 @@ public final class N extends CommonUtil {
      * @param a the two-dimensional double array to be flattened, may be {@code null} or empty
      * @return a one-dimensional double array containing all elements from all {@code non-null} rows in the input array.
      *         Returns an empty array if the input array is {@code null} or empty, or if all rows are {@code null}.
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static double[] flatten(final double[][] a) {
@@ -4214,6 +4244,7 @@ public final class N extends CommonUtil {
      * @param <T> the type of the elements in the array
      * @param a the two-dimensional array to be flattened, may be {@code null}
      * @return a one-dimensional array containing all elements in the input array. Returns {@code null} if the input array is {@code null}
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][], Class)
      */
     @MayReturnNull
@@ -4240,6 +4271,9 @@ public final class N extends CommonUtil {
      * @param componentType the class object representing the component type of the new array, must not be {@code null}
      * @return a one-dimensional array containing all elements in the input array.
      *         Returns an empty array if the input array is {@code null} or empty.
+     * @throws NullPointerException if {@code componentType} is {@code null}
+     * @throws ArrayStoreException if an input element is not assignable to {@code componentType}
+     * @throws IllegalArgumentException if the combined length of the sub-arrays exceeds the maximum array size
      * @see #flatten(Object[][])
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
@@ -4480,9 +4514,11 @@ public final class N extends CommonUtil {
      * // returns {true, false, true} (min occurrences: true=2, false=1)
      * }</pre>
      *
-     * @param a the first array
-     * @param b the second array
-     * @return a new array containing elements present in both arrays
+     * @param a the first boolean array
+     * @param b the second boolean array
+     * @return a new boolean array containing the elements present in both arrays,
+     *         considering the minimum number of occurrences in either array.
+     *         Returns an empty array if either input array is {@code null} or empty.
      * @see BooleanList#intersection(BooleanList)
      * @see #intersection(int[], int[])
      */
@@ -4503,11 +4539,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * char[] a = {'a', 'b', 'b', 'c'};
      * char[] b = {'a', 'b', 'b', 'b', 'd'};
-     * char[] result = intersection(a, b);   // returns {'a', 'b', 'b'}
+     * char[] result = N.intersection(a, b);   // returns {'a', 'b', 'b'}
      *
      * char[] c = {'x', 'y'};
      * char[] d = {'z', 'w'};
-     * char[] result2 = intersection(c, d);   // returns {} (empty array)
+     * char[] result2 = N.intersection(c, d);   // returns {} (empty array)
      * }</pre>
      *
      * @param a the first char array
@@ -4535,11 +4571,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * byte[] a = {1, 2, 2, 3, 4};
      * byte[] b = {1, 2, 2, 2, 5, 6};
-     * byte[] result = intersection(a, b);   // returns {1, 2, 2}
+     * byte[] result = N.intersection(a, b);   // returns {1, 2, 2}
      *
      * byte[] c = {1, 2, 3};
      * byte[] d = {4, 5, 6};
-     * byte[] result2 = intersection(c, d);   // returns {} (empty array)
+     * byte[] result2 = N.intersection(c, d);   // returns {} (empty array)
      * }</pre>
      *
      * @param a the first byte array
@@ -4567,11 +4603,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * short[] a = {1, 2, 2, 3, 4};
      * short[] b = {1, 2, 2, 2, 5, 6};
-     * short[] result = intersection(a, b);   // returns {1, 2, 2}
+     * short[] result = N.intersection(a, b);   // returns {1, 2, 2}
      *
      * short[] c = {1, 2, 3};
      * short[] d = {4, 5, 6};
-     * short[] result2 = intersection(c, d);   // returns {} (empty array)
+     * short[] result2 = N.intersection(c, d);   // returns {} (empty array)
      * }</pre>
      *
      * @param a the first short array
@@ -4599,11 +4635,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * int[] a = {1, 2, 2, 3, 4};
      * int[] b = {1, 2, 2, 2, 5, 6};
-     * int[] result = intersection(a, b);   // returns {1, 2, 2}
+     * int[] result = N.intersection(a, b);   // returns {1, 2, 2}
      *
      * int[] c = {1, 2, 3};
      * int[] d = {4, 5, 6};
-     * int[] result2 = intersection(c, d);   // returns {} (empty array)
+     * int[] result2 = N.intersection(c, d);   // returns {} (empty array)
      * }</pre>
      *
      * @param a the first int array
@@ -4630,11 +4666,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * long[] a = {1, 2, 2, 3, 4};
      * long[] b = {1, 2, 2, 2, 5, 6};
-     * long[] result = intersection(a, b);   // returns {1, 2, 2}
+     * long[] result = N.intersection(a, b);   // returns {1, 2, 2}
      *
      * long[] c = {1, 2, 3};
      * long[] d = {4, 5, 6};
-     * long[] result2 = intersection(c, d);   // returns {} (empty array)
+     * long[] result2 = N.intersection(c, d);   // returns {} (empty array)
      * }</pre>
      *
      * @param a the first long array
@@ -4662,11 +4698,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 2.0f, 3.0f, 4.0f};
      * float[] b = {1.0f, 2.0f, 2.0f, 2.0f, 5.0f, 6.0f};
-     * float[] result = intersection(a, b);   // returns {1.0f, 2.0f, 2.0f}
+     * float[] result = N.intersection(a, b);   // returns {1.0f, 2.0f, 2.0f}
      *
      * float[] c = {1.0f, 2.0f, 3.0f};
      * float[] d = {4.0f, 5.0f, 6.0f};
-     * float[] result2 = intersection(c, d);   // returns {} (empty array)
+     * float[] result2 = N.intersection(c, d);   // returns {} (empty array)
      * }</pre>
      *
      * @param a the first float array
@@ -4694,11 +4730,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * double[] a = {1.0, 2.0, 2.0, 3.0, 4.0};
      * double[] b = {1.0, 2.0, 2.0, 2.0, 5.0, 6.0};
-     * double[] result = intersection(a, b);   // returns {1.0, 2.0, 2.0}
+     * double[] result = N.intersection(a, b);   // returns {1.0, 2.0, 2.0}
      *
      * double[] c = {1.0, 2.0, 3.0};
      * double[] d = {4.0, 5.0, 6.0};
-     * double[] result2 = intersection(c, d);   // returns {} (empty array)
+     * double[] result2 = N.intersection(c, d);   // returns {} (empty array)
      * }</pre>
      *
      * @param a the first double array
@@ -4729,11 +4765,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * String[] a = {"A", "B", "B", "C", "D"};
      * String[] b = {"A", "B", "B", "B", "E", "F"};
-     * List<String> result = intersection(a, b);   // returns ["A", "B", "B"]
+     * List<String> result = N.intersection(a, b);   // returns ["A", "B", "B"]
      *
      * Integer[] c = {1, 2, 3};
      * Integer[] d = {4, 5, 6};
-     * List<Integer> result2 = intersection(c, d);   // returns [] (empty list)
+     * List<Integer> result2 = N.intersection(c, d);   // returns [] (empty list)
      * }</pre>
      *
      * @param <T> the type of the elements in the first array
@@ -4771,11 +4807,11 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * List<String> a = Arrays.asList("A", "B", "B", "C", "D");
      * List<String> b = Arrays.asList("A", "B", "B", "B", "E", "F");
-     * List<String> result = intersection(a, b);   // returns ["A", "B", "B"]
+     * List<String> result = N.intersection(a, b);   // returns ["A", "B", "B"]
      *
      * List<Integer> c = Arrays.asList(1, 2, 3);
      * List<Integer> d = Arrays.asList(4, 5, 6);
-     * List<Integer> result2 = intersection(c, d);   // returns [] (empty list)
+     * List<Integer> result2 = N.intersection(c, d);   // returns [] (empty list)
      * }</pre>
      *
      * @param <T> the type of elements in the first collection
@@ -4818,13 +4854,13 @@ public final class N extends CommonUtil {
      * List<String> b = Arrays.asList("A", "B", "B", "B", "D");
      * List<String> c = Arrays.asList("A", "B", "E");
      * List<List<String>> collections = Arrays.asList(a, b, c);
-     * List<String> result = intersection(collections);   // returns ["A", "B"]
+     * List<String> result = N.intersection(collections);   // returns ["A", "B"]
      *
      * List<Integer> x = Arrays.asList(1, 2, 2, 3);
      * List<Integer> y = Arrays.asList(2, 2, 4);
      * List<Integer> z = Arrays.asList(1, 2, 5);
      * List<List<Integer>> numbers = Arrays.asList(x, y, z);
-     * List<Integer> result2 = intersection(numbers);   // returns [2]
+     * List<Integer> result2 = N.intersection(numbers);   // returns [2]
      * }</pre>
      *
      * @param <T> the type of elements in the collections
@@ -4875,13 +4911,13 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name"),
      *     new Object[][] {
      *          {1, "Alice"},
      *          {2, "Bob"},
      *          {2, "Bob"},
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name"),
      *     new Object[][] {
      *          {1, "Alice"},
      *          {2, "Bob"},
@@ -4922,13 +4958,13 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name"),
      *     new Object[][] {
      *          {1, "Alice"},
      *          {2, "Bob"},
      *          {2, "Bob"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name"),
      *     new Object[][] {
      *          {1, "Alice"},
      *          {2, "Bob"},
@@ -4967,13 +5003,13 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {2, "Bob", "Engineering"},
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {1, "Alice", 75000},
      *          {2, "Bob", 75000},
@@ -4984,7 +5020,7 @@ public final class N extends CommonUtil {
      *
      * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = N.intersection(dataset1, dataset2, keyColumns);
-     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (min of 2 and 3 occurrences)
+     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (min of 2 and 2 occurrences)
      * // with column structure matching dataset1
      * }</pre>
      *
@@ -5015,13 +5051,13 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {2, "Bob", "Engineering"},
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {1, "Alice", 75000},
      *          {2, "Bob", 75000},
@@ -5032,7 +5068,7 @@ public final class N extends CommonUtil {
      *
      * Collection<String> keyColumns = Arrays.asList("id", "name");
      * Dataset result = N.intersection(dataset1, dataset2, keyColumns, false);
-     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (min of 2 and 3 occurrences)
+     * // Result contains {1, "Alice", "HR"} once and {2, "Bob", "Engineering"} twice (min of 2 and 2 occurrences)
      * // with column structure matching dataset1
      * }</pre>
      *
@@ -5214,12 +5250,12 @@ public final class N extends CommonUtil {
      * boolean[] a = {true, true, false, true};
      * boolean[] b = {true, false};
      * // Only one 'true' and one 'false' are removed from a
-     * boolean[] result = difference(a, b);   // returns {true, true}
+     * boolean[] result = N.difference(a, b);   // returns {true, true}
      *
      * boolean[] c = {true, false, false};
      * boolean[] d = {false, false, false};
      * // All occurrences of 'false' are removed from c
-     * boolean[] result2 = difference(c, d);   // returns {true}
+     * boolean[] result2 = N.difference(c, d);   // returns {true}
      *
      * }</pre>
      *
@@ -5259,12 +5295,12 @@ public final class N extends CommonUtil {
      * char[] a = {'a', 'b', 'b', 'c', 'd'};
      * char[] b = {'a', 'b', 'e'};
      * // Only one 'a' and one 'b' are removed from a
-     * char[] result = difference(a, b);   // returns {'b', 'c', 'd'}
+     * char[] result = N.difference(a, b);   // returns {'b', 'c', 'd'}
      *
      * char[] c = {'a', 'b', 'b'};
      * char[] d = {'b', 'b', 'b'};
      * // All occurrences of 'b' are removed from c
-     * char[] result2 = difference(c, d);   // returns {'a'}
+     * char[] result2 = N.difference(c, d);   // returns {'a'}
      *
      * }</pre>
      *
@@ -5304,12 +5340,12 @@ public final class N extends CommonUtil {
      * byte[] a = {1, 2, 2, 3, 4};
      * byte[] b = {2, 5};
      * // Only one '2' is removed from a because b contains only one '2'
-     * byte[] result = difference(a, b);   // returns {1, 2, 3, 4}
+     * byte[] result = N.difference(a, b);   // returns {1, 2, 3, 4}
      *
      * byte[] c = {1, 2, 2};
      * byte[] d = {2, 2, 2};
      * // All occurrences of '2' are removed from c because d contains at least as many
-     * byte[] result2 = difference(c, d);   // returns {1}
+     * byte[] result2 = N.difference(c, d);   // returns {1}
      *
      * }</pre>
      *
@@ -5349,12 +5385,12 @@ public final class N extends CommonUtil {
      * short[] a = {1, 2, 2, 3, 4};
      * short[] b = {2, 5};
      * // Only one '2' is removed from a because b contains only one '2'
-     * short[] result = difference(a, b);   // returns {1, 2, 3, 4}
+     * short[] result = N.difference(a, b);   // returns {1, 2, 3, 4}
      *
      * short[] c = {1, 2, 2};
      * short[] d = {2, 2, 2};
      * // All occurrences of '2' are removed from c because d contains at least as many
-     * short[] result2 = difference(c, d);   // returns {1}
+     * short[] result2 = N.difference(c, d);   // returns {1}
      *
      * }</pre>
      *
@@ -5394,12 +5430,12 @@ public final class N extends CommonUtil {
      * int[] a = {1, 2, 2, 3, 4};
      * int[] b = {2, 5};
      * // Only one '2' is removed from a because b contains only one '2'
-     * int[] result = difference(a, b);   // returns {1, 2, 3, 4}
+     * int[] result = N.difference(a, b);   // returns {1, 2, 3, 4}
      *
      * int[] c = {1, 2, 2};
      * int[] d = {2, 2, 2};
      * // All occurrences of '2' are removed from c because d contains at least as many
-     * int[] result2 = difference(c, d);   // returns {1}
+     * int[] result2 = N.difference(c, d);   // returns {1}
      *
      * }</pre>
      *
@@ -5438,12 +5474,12 @@ public final class N extends CommonUtil {
      * long[] a = {1, 2, 2, 3, 4};
      * long[] b = {2, 5};
      * // Only one '2' is removed from a because b contains only one '2'
-     * long[] result = difference(a, b);   // returns {1, 2, 3, 4}
+     * long[] result = N.difference(a, b);   // returns {1, 2, 3, 4}
      *
      * long[] c = {1, 2, 2};
      * long[] d = {2, 2, 2};
      * // All occurrences of '2' are removed from c because d contains at least as many
-     * long[] result2 = difference(c, d);   // returns {1}
+     * long[] result2 = N.difference(c, d);   // returns {1}
      *
      * }</pre>
      *
@@ -5483,12 +5519,12 @@ public final class N extends CommonUtil {
      * float[] a = {1.0f, 2.0f, 2.0f, 3.0f, 4.0f};
      * float[] b = {2.0f, 5.0f};
      * // Only one '2.0f' is removed from a because b contains only one '2.0f'
-     * float[] result = difference(a, b);   // returns {1.0f, 2.0f, 3.0f, 4.0f}
+     * float[] result = N.difference(a, b);   // returns {1.0f, 2.0f, 3.0f, 4.0f}
      *
      * float[] c = {1.0f, 2.0f, 2.0f};
      * float[] d = {2.0f, 2.0f, 2.0f};
      * // All occurrences of '2.0f' are removed from c because d contains at least as many
-     * float[] result2 = difference(c, d);   // returns {1.0f}
+     * float[] result2 = N.difference(c, d);   // returns {1.0f}
      *
      * }</pre>
      *
@@ -5527,14 +5563,25 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * double[] a = {1.0, 2.0, 2.0, 3.0, 4.0};
      * double[] b = {2.0, 5.0};
+     * // Only one '2.0' is removed from a because b contains only one '2.0'
      * double[] result = N.difference(a, b);   // returns {1.0, 2.0, 3.0, 4.0}
+     *
+     * double[] c = {1.0, 2.0, 2.0};
+     * double[] d = {2.0, 2.0, 2.0};
+     * // All occurrences of '2.0' are removed from c because d contains at least as many
+     * double[] result2 = N.difference(c, d);   // returns {1.0}
+     *
      * }</pre>
      *
-     * <p>Note: Unlike {@link #removeAll(double[], double[])}, this method considers occurrence counts, excluding only as many as found in the second array.
+     * <p>Unlike {@link #removeAll(double[], double[])} which removes all occurrences of elements found in the second array,
+     * this method considers the count of occurrences, excluding only as many as found in the second array.
      *
-     * @param a the first double array
-     * @param b the second double array
-     * @return elements in <i>a</i> not in <i>b</i> (considering occurrences; empty if <i>a</i> is {@code null}/empty; clone of <i>a</i> if <i>b</i> is {@code null}/empty)
+     * @param a the first double array, elements from this array will be in the result if they don't appear in b
+     * @param b the second double array, elements from this array will be removed from a
+     * @return a new double array containing the elements that are present in <i>a</i> but not in <i>b</i>,
+     *         considering the number of occurrences.
+     *         Returns an empty array if <i>a</i> is {@code null} or empty.
+     *         Returns a clone of <i>a</i> if <i>b</i> is {@code null} or empty.
      * @see #removeAll(double[], double[])
      * @see DoubleList#difference(DoubleList)
      * @see #difference(Object[], Object[])
@@ -5656,14 +5703,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"},
      *          {3, "Charlie", "Marketing"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {1, "Alice", 50000},
      *          {4, "Dave", 60000},
@@ -5701,14 +5748,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"},
      *          {3, "Charlie", "Marketing"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {1, "Alice", 50000},
      *          {4, "Dave", 60000},
@@ -5744,14 +5791,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"},
      *          {3, "Charlie", "Finance"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {1, "Alice", 50000},
      *          {3, "Charlie", 60000}
@@ -5790,14 +5837,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"},
      *          {3, "Charlie", "Finance"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {1, "Alice", 50000},
      *          {3, "Charlie", 60000}
@@ -5836,12 +5883,12 @@ public final class N extends CommonUtil {
      * boolean[] b = {true, false, false};
      * // One 'true' remains because 'a' has one more occurrence than 'b'
      * // One 'false' remains because 'b' has one more occurrence than 'a'
-     * boolean[] result = symmetricDifference(a, b);   // returns {true, false}
+     * boolean[] result = N.symmetricDifference(a, b);   // returns {true, false}
      *
      * boolean[] c = {true, false};
      * boolean[] d = {true, true, false};
      * // One 'true' appears in the result because 'd' has one more occurrence than 'c'
-     * boolean[] result2 = symmetricDifference(c, d);   // returns {true}
+     * boolean[] result2 = N.symmetricDifference(c, d);   // returns {true}
      *
      * }</pre>
      *
@@ -6196,14 +6243,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {2, "Bob", 50000},
      *          {3, "Charlie", 55000},
@@ -6244,14 +6291,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {2, "Bob", 50000},
      *          {3, "Charlie", 55000},
@@ -6290,14 +6337,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {2, "Bob", 50000},
      *          {3, "Charlie", 55000},
@@ -6340,14 +6387,14 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset1 = Dataset.rows(Arrays.asList("id", "name", "department"),
+     * Dataset dataset1 = N.newDataset(Arrays.asList("id", "name", "department"),
      *     new Object[][] {
      *          {1, "Alice", "HR"},
      *          {2, "Bob", "Engineering"},
      *          {2, "Bob", "Engineering"},
      *          {3, "Charlie", "Marketing"}
      *     });
-     * Dataset dataset2 = Dataset.rows(Arrays.asList("id", "name", "salary"),
+     * Dataset dataset2 = N.newDataset(Arrays.asList("id", "name", "salary"),
      *     new Object[][] {
      *          {2, "Bob", 50000},
      *          {3, "Charlie", 55000},
@@ -6429,6 +6476,7 @@ public final class N extends CommonUtil {
      * @return a set containing the elements that are present in all collections within <i>c</i>.
      *         If <i>c</i> is empty or {@code null}, an empty set is returned.
      *         If <i>c</i> contains only one collection, a set containing the elements of this collection is returned.
+     *         If the first collection is a {@link List} or {@link LinkedHashSet}, the result preserves its encounter order.
      * @see #intersection(Collection, Collection)
      * @see Collection#retainAll(Collection)
      * @see Iterables#intersection(Set, Set)
@@ -6437,7 +6485,9 @@ public final class N extends CommonUtil {
         if (isEmpty(c)) {
             return newHashSet();
         } else if (c.size() == 1) {
-            return newHashSet(c.iterator().next());
+            final Collection<? extends T> first = c.iterator().next();
+
+            return first instanceof List || first instanceof LinkedHashSet ? newLinkedHashSet(first) : newHashSet(first);
         }
 
         Collection<? extends T> smallest = null;
@@ -6482,12 +6532,23 @@ public final class N extends CommonUtil {
             cnt++;
         }
 
-        final Collection<? extends T> firstSet = N.firstOrNullIfEmpty(c);
-        final Set<T> result = firstSet instanceof List || firstSet instanceof LinkedHashSet ? newLinkedHashSet(map.size()) : newHashSet(map.size());
+        final Collection<? extends T> first = N.firstOrNullIfEmpty(c);
+        final boolean preserveOrder = first instanceof List || first instanceof LinkedHashSet;
+        final Set<T> result = preserveOrder ? newLinkedHashSet(map.size()) : newHashSet(map.size());
 
-        for (final Map.Entry<T, MutableInt> entry : map.entrySet()) {
-            if (entry.getValue().value() == cnt) {
-                result.add(entry.getKey());
+        if (preserveOrder) {
+            for (final T e : first) {
+                val = map.get(e);
+
+                if (val != null && val.value() == cnt) {
+                    result.add(e);
+                }
+            }
+        } else {
+            for (final Map.Entry<T, MutableInt> entry : map.entrySet()) {
+                if (entry.getValue().value() == cnt) {
+                    result.add(entry.getKey());
+                }
             }
         }
 
@@ -8991,6 +9052,8 @@ public final class N extends CommonUtil {
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new byte array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(byte[], byte)
+     * @see #insert(byte[], int, byte)
      */
     public static byte[] addAll(final byte[] a, final byte... elementsToAdd) {
         if (isEmpty(a)) {
@@ -9022,6 +9085,8 @@ public final class N extends CommonUtil {
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new short array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(short[], short)
+     * @see #insert(short[], int, short)
      */
     public static short[] addAll(final short[] a, final short... elementsToAdd) {
         if (isEmpty(a)) {
@@ -9086,6 +9151,8 @@ public final class N extends CommonUtil {
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new long array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(long[], long)
+     * @see #insert(long[], int, long)
      */
     public static long[] addAll(final long[] a, final long... elementsToAdd) {
         if (isEmpty(a)) {
@@ -9117,6 +9184,8 @@ public final class N extends CommonUtil {
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new float array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(float[], float)
+     * @see #insert(float[], int, float)
      */
     public static float[] addAll(final float[] a, final float... elementsToAdd) {
         if (isEmpty(a)) {
@@ -9148,6 +9217,8 @@ public final class N extends CommonUtil {
      * @param a the first array whose elements are added to the new array.
      * @param elementsToAdd the additional elements to be added to the new array.
      * @return a new double array containing the elements from <i>a</i> and <i>elementsToAdd</i>.
+     * @see #add(double[], double)
+     * @see #insert(double[], int, double)
      */
     public static double[] addAll(final double[] a, final double... elementsToAdd) {
         if (isEmpty(a)) {
@@ -9395,6 +9466,8 @@ public final class N extends CommonUtil {
      * @param elementToInsert the char value to be inserted into the array
      * @return a new char array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(char[], char)
+     * @see #insertAll(char[], int, char...)
      */
     public static char[] insert(final char[] a, final int index, final char elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -9435,6 +9508,8 @@ public final class N extends CommonUtil {
      * @param elementToInsert the byte value to be inserted into the array
      * @return a new byte array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(byte[], byte)
+     * @see #insertAll(byte[], int, byte...)
      */
     public static byte[] insert(final byte[] a, final int index, final byte elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -9475,6 +9550,8 @@ public final class N extends CommonUtil {
      * @param elementToInsert the short value to be inserted into the array
      * @return a new short array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(short[], short)
+     * @see #insertAll(short[], int, short...)
      */
     public static short[] insert(final short[] a, final int index, final short elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -9557,6 +9634,8 @@ public final class N extends CommonUtil {
      * @param elementToInsert the long value to be inserted into the array
      * @return a new long array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(long[], long)
+     * @see #insertAll(long[], int, long...)
      */
     public static long[] insert(final long[] a, final int index, final long elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -9597,6 +9676,8 @@ public final class N extends CommonUtil {
      * @param elementToInsert the float value to be inserted into the array
      * @return a new float array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(float[], float)
+     * @see #insertAll(float[], int, float...)
      */
     public static float[] insert(final float[] a, final int index, final float elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -9637,6 +9718,8 @@ public final class N extends CommonUtil {
      * @param elementToInsert the double value to be inserted into the array
      * @return a new double array with the original elements and the inserted element
      * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @see #add(double[], double)
+     * @see #insertAll(double[], int, double...)
      */
     public static double[] insert(final double[] a, final int index, final double elementToInsert) throws IndexOutOfBoundsException {
         checkPositionIndex(index, len(a));
@@ -10470,7 +10553,7 @@ public final class N extends CommonUtil {
      * @param index the position of the element to be removed
      * @return a new int array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if the specified array is {@code null}
-     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
      *         a non-{@code null} empty array always throws this exception as it contains no valid index
      * @see #remove(int[], int)
      * @see #removeAt(int[], int...)
@@ -10508,8 +10591,10 @@ public final class N extends CommonUtil {
      * @param index the position of the element to be removed
      * @return a new long array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if the specified array is {@code null}
-     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
      *         a non-{@code null} empty array always throws this exception as it contains no valid index
+     * @see #remove(long[], long)
+     * @see #removeAt(long[], int...)
      */
     public static long[] removeAt(@NotNull final long[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
@@ -10544,8 +10629,10 @@ public final class N extends CommonUtil {
      * @param index the position of the element to be removed
      * @return a new float array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if the specified array is {@code null}
-     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
      *         a non-{@code null} empty array always throws this exception as it contains no valid index
+     * @see #remove(float[], float)
+     * @see #removeAt(float[], int...)
      */
     public static float[] removeAt(@NotNull final float[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
@@ -10580,8 +10667,10 @@ public final class N extends CommonUtil {
      * @param index the position of the element to be removed
      * @return a new double array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if the specified array is {@code null}
-     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
      *         a non-{@code null} empty array always throws this exception as it contains no valid index
+     * @see #remove(double[], double)
+     * @see #removeAt(double[], int...)
      */
     public static double[] removeAt(@NotNull final double[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
@@ -10727,6 +10816,8 @@ public final class N extends CommonUtil {
      *         the specified array is returned (an empty array if the specified array is {@code null})
      * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
      *         more indices always throws this exception, as it has no valid index to remove
+     * @see #removeAt(char[], int)
+     * @see #removeRange(char[], int, int)
      */
     public static char[] removeAt(final char[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
@@ -10795,6 +10886,8 @@ public final class N extends CommonUtil {
      *         the specified array is returned (an empty array if the specified array is {@code null})
      * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
      *         more indices always throws this exception, as it has no valid index to remove
+     * @see #removeAt(byte[], int)
+     * @see #removeRange(byte[], int, int)
      */
     public static byte[] removeAt(final byte[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
@@ -10863,6 +10956,8 @@ public final class N extends CommonUtil {
      *         the specified array is returned (an empty array if the specified array is {@code null})
      * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
      *         more indices always throws this exception, as it has no valid index to remove
+     * @see #removeAt(short[], int)
+     * @see #removeRange(short[], int, int)
      */
     public static short[] removeAt(final short[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
@@ -11001,6 +11096,8 @@ public final class N extends CommonUtil {
      *         the specified array is returned (an empty array if the specified array is {@code null})
      * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
      *         more indices always throws this exception, as it has no valid index to remove
+     * @see #removeAt(long[], int)
+     * @see #removeRange(long[], int, int)
      */
     public static long[] removeAt(final long[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
@@ -11069,8 +11166,10 @@ public final class N extends CommonUtil {
      *         the specified array is returned (an empty array if the specified array is {@code null})
      * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
      *         more indices always throws this exception, as it has no valid index to remove
+     * @see #removeAt(float[], int)
+     * @see #removeRange(float[], int, int)
      */
-    public static float[] removeAt(final float[] a, int... indices) throws IndexOutOfBoundsException {
+    public static float[] removeAt(final float[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
         }
@@ -11137,6 +11236,8 @@ public final class N extends CommonUtil {
      *         the specified array is returned (an empty array if the specified array is {@code null})
      * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
      *         more indices always throws this exception, as it has no valid index to remove
+     * @see #removeAt(double[], int)
+     * @see #removeRange(double[], int, int)
      */
     public static double[] removeAt(final double[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
@@ -11205,6 +11306,8 @@ public final class N extends CommonUtil {
      *         the specified array is returned (an empty array if the specified array is {@code null})
      * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
      *         more indices always throws this exception, as it has no valid index to remove
+     * @see #removeAt(Object[], int)
+     * @see #removeRange(String[], int, int)
      */
     public static String[] removeAt(final String[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
@@ -12082,10 +12185,32 @@ public final class N extends CommonUtil {
 
         if (valuesToRemove instanceof final Collection<?> coll) { // NOSONAR
             //noinspection SuspiciousMethodCalls
-            return c.removeAll(new ArrayList<>(coll));
+            return c.removeAll(snapshotForRemoval(coll));
         } else {
             return removeAll(c, valuesToRemove.iterator());
         }
+    }
+
+    /**
+     * Copies {@code valuesToRemove} so that it may safely be {@code c} itself or a view backed by
+     * {@code c} while {@code c} is being modified.
+     *
+     * <p>The copy preserves the source's membership cost. {@code Collection.removeAll} probes its
+     * argument once per element of the receiver, so snapshotting a set into a list would turn a
+     * linear removal into a quadratic one.</p>
+     *
+     * @param coll the values to be removed
+     * @return an independent copy with the same membership semantics and lookup cost
+     */
+    private static Collection<?> snapshotForRemoval(final Collection<?> coll) {
+        if (coll instanceof final java.util.SortedSet<?> sortedSet) {
+            // The SortedSet constructor carries the comparator over, so membership is unchanged.
+            return new java.util.TreeSet<>(sortedSet);
+        } else if (coll instanceof Set) {
+            return new HashSet<>(coll);
+        }
+
+        return new ArrayList<>(coll);
     }
 
     /**
@@ -12111,7 +12236,10 @@ public final class N extends CommonUtil {
 
         // Capture the values before modifying c. In particular, valuesToRemove may be an iterator obtained
         // from c itself; mutating a Set while consuming that iterator would otherwise fail fast.
-        return removeAll(c, toSet(valuesToRemove));
+        // toSet already produces an independent set, so it is passed straight to removeAll: routing it
+        // back through the Iterable overload would copy it a second time.
+        //noinspection SuspiciousMethodCalls
+        return c.removeAll(toSet(valuesToRemove));
     }
 
     /**
@@ -14820,7 +14948,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14861,7 +14989,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14902,7 +15030,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14943,7 +15071,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -14984,7 +15112,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -15025,7 +15153,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -15066,7 +15194,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -15107,7 +15235,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -15148,7 +15276,7 @@ public final class N extends CommonUtil {
      * @param a the original array to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfArray - lengthOfRange, inclusive.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the array
@@ -15190,7 +15318,7 @@ public final class N extends CommonUtil {
      * @param c the original list to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and sizeOfList - lengthOfRange, inclusive.
      * @return {@code true} if the list was modified (elements were moved), {@code false} otherwise
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
@@ -15232,21 +15360,21 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Moving a range of characters
-     * moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
-     * moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 5)
-     * moveRange("Hello World", 0, 5, 6);   // returns " WorldHello" (moves "Hello" to position 6)
+     * N.moveRange("ABCDEFGH", 2, 5, 0);      // returns "CDEABFGH" (moves "CDE" to position 0)
+     * N.moveRange("ABCDEFGH", 2, 5, 5);      // returns "ABFGHCDE" (moves "CDE" to position 5)
+     * N.moveRange("Hello World", 0, 5, 6);   // returns " WorldHello" (moves "Hello" to position 6)
      *
      * // Edge cases
-     * moveRange(null, 0, 0, 0);            // returns ""
-     * moveRange("", 0, 0, 0);              // returns ""
-     * moveRange("ABC", 1, 1, 1);           // returns "ABC" (no change when fromIndex == toIndex)
-     * moveRange("ABC", 0, 2, 0);           // returns "ABC" (no change when already at position)
+     * N.moveRange((String) null, 0, 0, 0);   // returns ""
+     * N.moveRange("", 0, 0, 0);              // returns ""
+     * N.moveRange("ABC", 1, 1, 1);           // returns "ABC" (no change when fromIndex == toIndex)
+     * N.moveRange("ABC", 0, 2, 0);           // returns "ABC" (no change when already at position)
      * }</pre>
      *
      * @param str the original string to be modified
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
-     * @param newPositionAfterMove — the zero-based index where the first element of the range will be placed after the move;
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and lengthOfString - lengthOfRange, inclusive.
      * @return a new string with the specified range moved to the new position. An empty String is returned if the specified String is {@code null} or empty.
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
@@ -15258,6 +15386,18 @@ public final class N extends CommonUtil {
         return Strings.moveRange(str, fromIndex, toIndex, newPositionAfterMove);
     }
 
+    /**
+     * Validates the arguments of a {@code moveRange} call: first that {@code [fromIndex, toIndex)} is a valid range
+     * within {@code len}, then that the moved range still fits entirely inside the sequence once relocated - that is,
+     * that {@code newPositionAfterMove} lies in {@code [0, len - (toIndex - fromIndex)]}.
+     *
+     * @param fromIndex the starting index (inclusive) of the range to be moved
+     * @param toIndex the ending index (exclusive) of the range to be moved
+     * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move
+     * @param len the length/size of the sequence the range belongs to
+     * @throws IndexOutOfBoundsException if the range is out of bounds, or if {@code newPositionAfterMove} would push part
+     *         of the range outside the sequence
+     */
     static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove, final int len) {
         checkFromToIndex(fromIndex, toIndex, len);
 
@@ -15266,8 +15406,6 @@ public final class N extends CommonUtil {
                     + "=(array.length - (toIndex - fromIndex))]");
         }
     }
-
-    //    /**
 
     /**
      * Returns a new array with the specified range skipped, effectively excluding elements
@@ -16059,11 +16197,11 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] arr1 = {"A", "B", "C"};
-     * boolean result1 = N.containsDuplicates(arr1);   // returns: false
+     * String[] sorted = {"A", "B", "B", "C"};
+     * boolean result1 = N.containsDuplicates(sorted, true);   // returns true (using optimized sorted check)
      *
-     * String[] arr2 = {"A", "B", "A"};
-     * boolean result2 = N.containsDuplicates(arr2);   // returns: true
+     * String[] unsorted = {"C", "A", "B", "A"};
+     * boolean result2 = N.containsDuplicates(unsorted, false);   // returns true
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -16221,6 +16359,15 @@ public final class N extends CommonUtil {
         }
     }
 
+    /**
+     * Converts a value into a key that can safely be put into a {@code HashSet}/{@code HashMap} for
+     * duplicate detection. {@code null} is replaced by a shared sentinel (so it can be stored even in
+     * collections that reject {@code null}), and arrays are wrapped in a {@link Wrapper} so that they are
+     * compared by their contents rather than by identity. Any other value is returned unchanged.
+     *
+     * @param obj the value to convert, may be {@code null}
+     * @return a non-{@code null} key with content-based {@code equals}/{@code hashCode} semantics
+     */
     static Object hashKey(final Object obj) {
         return obj == null ? NULL_SENTINEL : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
     }
@@ -16719,7 +16866,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {0.1f, 0.2f, 0.3f};
-     * double sum = N.sumToDouble(values);   // returns 0.6 (as double precision)
+     * double sum = N.sumToDouble(values);   // returns 0.6000000163912773 (the float values widened to double)
      * }</pre>
      *
      * @param a the array of floats to be summed.
@@ -16742,7 +16889,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
-     * double sum = N.sumToDouble(values, 1, 4);   // returns 9.9 (2.2 + 3.3 + 4.4)
+     * double sum = N.sumToDouble(values, 1, 4);   // returns 9.900000095367432 (2.2f + 3.3f + 4.4f widened to double)
      * }</pre>
      *
      * @param a the array of floats to be summed.
@@ -17267,6 +17414,12 @@ public final class N extends CommonUtil {
     /**
      * Sums all elements in the given array of numbers and returns the result as an integer.
      *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] numbers = {10, 20, 30};
@@ -17281,6 +17434,8 @@ public final class N extends CommonUtil {
      * @return the sum of all elements in the array as an integer.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static <T extends Number> int sumInt(final T[] a) {
         return sumInt(a, Fn.numToInt());
@@ -17288,6 +17443,12 @@ public final class N extends CommonUtil {
 
     /**
      * Sums all elements within the specified range in the input array of numbers and returns the result as an integer.
+     *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17303,6 +17464,8 @@ public final class N extends CommonUtil {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given array.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static <T extends Number> int sumInt(final T[] a, final int fromIndex, final int toIndex) {
         return sumInt(a, fromIndex, toIndex, Fn.numToInt());
@@ -17310,6 +17473,12 @@ public final class N extends CommonUtil {
 
     /**
      * Sums all elements in the given array using the provided function to convert each element to an integer.
+     *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17324,6 +17493,8 @@ public final class N extends CommonUtil {
      * @return the sum of all elements in the array as an integer.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static <T> int sumInt(final T[] a, final ToIntFunction<? super T> func) {
         if (isEmpty(a)) {
@@ -17335,6 +17506,12 @@ public final class N extends CommonUtil {
 
     /**
      * Sums all elements within the specified range in the input array using the provided function to convert each element to an integer.
+     *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17352,6 +17529,8 @@ public final class N extends CommonUtil {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static <T> int sumInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17372,6 +17551,12 @@ public final class N extends CommonUtil {
     /**
      * Sums all elements within the specified range in the input collection of numbers and returns the result as an integer.
      *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(10, 20, 30, 40, 50);
@@ -17385,6 +17570,8 @@ public final class N extends CommonUtil {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given collection.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static int sumInt(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return sumInt(c, fromIndex, toIndex, Fn.numToInt());
@@ -17392,6 +17579,12 @@ public final class N extends CommonUtil {
 
     /**
      * Sums all elements within the specified range in the input collection using the provided function to convert each element to an integer.
+     *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17409,6 +17602,8 @@ public final class N extends CommonUtil {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static <T> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
             throws IndexOutOfBoundsException {
@@ -17449,6 +17644,12 @@ public final class N extends CommonUtil {
     /**
      * Sums all elements in the given iterable of numbers and returns the result as an integer.
      *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(10, 20, 30);
@@ -17459,6 +17660,8 @@ public final class N extends CommonUtil {
      * @return the sum of all elements in the iterable as an integer.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static int sumInt(final Iterable<? extends Number> c) {
         return sumInt(c, Fn.numToInt());
@@ -17466,6 +17669,12 @@ public final class N extends CommonUtil {
 
     /**
      * Sums all elements in the given iterable using the provided function to convert each element to an integer.
+     *
+     * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
+     * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
+     * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
+     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
+     * different overflow behavior in the two APIs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17480,6 +17689,8 @@ public final class N extends CommonUtil {
      * @return the sum of all elements in the iterable as an integer.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
+     * @see Stream#sumInt(ToIntFunction)
+     * @see Seq#sumInt(Throwables.ToIntFunction)
      */
     public static <T> int sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
         return Numbers.toIntExact(sumIntToLong(c, func));
@@ -19081,6 +19292,7 @@ public final class N extends CommonUtil {
      * @see #min(Object, Object, Comparator)
      * @see #max(Comparable, Comparable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final T a, final T b) {
         return min(a, b, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -19379,7 +19591,7 @@ public final class N extends CommonUtil {
      * N.min(a, 1, 1);   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
-     * @param a the array of char values, must not be {@code null}
+     * @param a the array of char values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest char value within the specified range
@@ -19442,7 +19654,7 @@ public final class N extends CommonUtil {
      * N.min(a, 1, 1);   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
-     * @param a the array of byte values, must not be {@code null}
+     * @param a the array of byte values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest byte value within the specified range
@@ -19504,7 +19716,7 @@ public final class N extends CommonUtil {
      * N.min(a, 1, 1);   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
-     * @param a the array of short values, must not be {@code null}
+     * @param a the array of short values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest short value within the specified range
@@ -19568,7 +19780,7 @@ public final class N extends CommonUtil {
      * N.min(a, 1, 1);   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
-     * @param a the array of int values, must not be {@code null}
+     * @param a the array of int values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest int value within the specified range
@@ -19631,7 +19843,7 @@ public final class N extends CommonUtil {
      * N.min(a, 1, 1);   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
-     * @param a the array of long values, must not be {@code null}
+     * @param a the array of long values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest long value within the specified range
@@ -19680,7 +19892,7 @@ public final class N extends CommonUtil {
      * @see #min(float[], int, int)
      * @see #max(float...)
      * @see Math#min(float, float)
-     * @see IEEE754rUtil#min(float[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#min(float[]) IEEE754rUtil.min(float[]), which skips NaN per IEEE 754r
      */
     public static float min(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -19703,7 +19915,7 @@ public final class N extends CommonUtil {
      * float skipNaN = N.min(withNaN, 0, 1);   // returns 1.0f (NaN excluded by range)
      * }</pre>
      *
-     * @param a the array of float values, must not be {@code null}
+     * @param a the array of float values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest float value within the specified range; NaN if any value in the range is NaN
@@ -19713,7 +19925,7 @@ public final class N extends CommonUtil {
      * @see #min(float...)
      * @see #max(float[], int, int)
      * @see Math#min(float, float)
-     * @see IEEE754rUtil#min(float[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#min(float[]) IEEE754rUtil.min(float[]), which skips NaN per IEEE 754r
      */
     public static float min(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -19754,7 +19966,7 @@ public final class N extends CommonUtil {
      * @see #min(double[], int, int)
      * @see #max(double...)
      * @see Math#min(double, double)
-     * @see IEEE754rUtil#min(double[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#min(double[]) IEEE754rUtil.min(double[]), which skips NaN per IEEE 754r
      */
     public static double min(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -19777,7 +19989,7 @@ public final class N extends CommonUtil {
      * double skipNaN = N.min(withNaN, 0, 1);   // returns 1.0 (NaN excluded by range)
      * }</pre>
      *
-     * @param a the array of double values, must not be {@code null}
+     * @param a the array of double values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest double value within the specified range; NaN if any value in the range is NaN
@@ -19787,7 +19999,7 @@ public final class N extends CommonUtil {
      * @see #min(double...)
      * @see #max(double[], int, int)
      * @see Math#min(double, double)
-     * @see IEEE754rUtil#min(double[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#min(double[]) IEEE754rUtil.min(double[]), which skips NaN per IEEE 754r
      */
     public static double min(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -20470,8 +20682,6 @@ public final class N extends CommonUtil {
      * when the array is {@code null} or empty <i>and</i> when the array is non-empty but every extracted value is
      * {@code null} (an all-{@code null} extraction is treated as "empty").
      *
-     * <p><b>Note:</b> This method is marked as {@code @Beta} and its API may change in future versions.</p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] people = {"Alice:30", "Bob:25"};
@@ -20593,8 +20803,6 @@ public final class N extends CommonUtil {
 
     /**
      * Returns the minimum integer value extracted from the array or a default value if the array is {@code null} or empty.
-     *
-     * <p><b>Note:</b> This method is marked as {@code @Beta} and its API may change in future versions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21309,6 +21517,7 @@ public final class N extends CommonUtil {
      * @see #max(Object, Object, Comparator)
      * @see #min(Comparable, Comparable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final T a, final T b) {
         return max(a, b, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -21332,7 +21541,7 @@ public final class N extends CommonUtil {
      * @param a the first value
      * @param b the second value
      * @param cmp the Comparator to compare values; if {@code null}, natural ordering with nulls first is used
-     * @return the larger of the two values according to the comparator; {@code null} if both are {@code null}
+     * @return the larger of the two values according to the comparator; may be {@code null} if the larger value is itself {@code null} (for example, when both values are {@code null})
      * @see #max(Comparable, Comparable)
      * @see #min(Object, Object, Comparator)
      */
@@ -21896,7 +22105,7 @@ public final class N extends CommonUtil {
      * @see #min(float...)
      * @see #median(float...)
      * @see Math#max(float, float)
-     * @see IEEE754rUtil#max(float[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#max(float[]) IEEE754rUtil.max(float[]), which skips NaN per IEEE 754r
      */
     public static float max(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -21929,7 +22138,7 @@ public final class N extends CommonUtil {
      * @see #max(float...)
      * @see #min(float[], int, int)
      * @see Math#max(float, float)
-     * @see IEEE754rUtil#max(float[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#max(float[]) IEEE754rUtil.max(float[]), which skips NaN per IEEE 754r
      */
     public static float max(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -21972,7 +22181,7 @@ public final class N extends CommonUtil {
      * @see #min(double...)
      * @see #median(double...)
      * @see Math#max(double, double)
-     * @see IEEE754rUtil#max(double[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#max(double[]) IEEE754rUtil.max(double[]), which skips NaN per IEEE 754r
      */
     public static double max(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -22005,7 +22214,7 @@ public final class N extends CommonUtil {
      * @see #max(double...)
      * @see #min(double[], int, int)
      * @see Math#max(double, double)
-     * @see IEEE754rUtil#max(double[]) that skips NaN per IEEE 754r
+     * @see IEEE754rUtil#max(double[]) IEEE754rUtil.max(double[]), which skips NaN per IEEE 754r
      */
     public static double max(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -23931,6 +24140,8 @@ public final class N extends CommonUtil {
     @MayReturnNull
     public static <T extends Comparable<? super T>> T median(final T[] a, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
@@ -24914,6 +25125,8 @@ public final class N extends CommonUtil {
     @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
@@ -26189,6 +26402,15 @@ public final class N extends CommonUtil {
         return res;
     }
 
+    /**
+     * Creates a comparator that orders {@link Indexed} wrappers by the values they wrap, ignoring their indices.
+     * If {@code cmp} is {@code null}, the wrapped values are compared by natural ordering with {@code null} treated
+     * as the smallest value.
+     *
+     * @param <T> the type of the wrapped values
+     * @param cmp the comparator for the wrapped values; may be {@code null} for natural ordering with nulls first
+     * @return a comparator over {@code Indexed<T>} that delegates to the value comparison
+     */
     @SuppressWarnings("rawtypes")
     private static <T> Comparator<Indexed<T>> createComparatorForIndexedObject(final Comparator<? super T> cmp) {
         Comparator<Indexed<T>> pairCmp = null;
@@ -26525,60 +26747,24 @@ public final class N extends CommonUtil {
 
     /**
      * Calculates the percentiles of the provided sorted array of integers.
+     * Returns a map containing percentile values from the predefined {@link Percentage} enum
+     * (0.0001%, 0.001%, 0.01%, 0.1%, 1%-99%, 99.9%, 99.99%, 99.999%, 99.9999%).
+     *
+     * <p><b>Important:</b> The input array must be sorted in ascending order for accurate results.
+     * Use {@link java.util.Arrays#sort(int[])} if needed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * final int[] sortedArray = Array.range(1, 101);
      * final Map<Percentage, Integer> percentiles = N.percentilesOfSorted(sortedArray);
      * percentiles.forEach(Fn.println("="));
-     *                     0.0001%=1
-     *                     0.001%=1
-     *                     0.01%=1
-     *                     0.1%=1
-     *                     1%=2
-     *                     2%=3
-     *                     3%=4
-     *                     4%=5
-     *                     5%=6
-     *                     6%=7
-     *                     7%=8
-     *                     8%=9
-     *                     9%=10
-     *                     10%=11
-     *                     15%=16
-     *                     20%=21
-     *                     25%=26
-     *                     30%=31
-     *                     35%=36
-     *                     40%=41
-     *                     45%=46
-     *                     50%=51
-     *                     55%=56
-     *                     60%=61
-     *                     65%=66
-     *                     70%=71
-     *                     75%=76
-     *                     80%=81
-     *                     85%=86
-     *                     90%=91
-     *                     91%=92
-     *                     92%=93
-     *                     93%=94
-     *                     94%=95
-     *                     95%=96
-     *                     96%=97
-     *                     97%=98
-     *                     98%=99
-     *                     99%=100
-     *                     99.9%=100
-     *                     99.99%=100
-     *                     99.999%=100
-     *                     99.9999%=100
+     * // Prints all configured percentile/value pairs, including 50%=51 and 99%=100.
      * }</pre>
      *
      * @param sortedArray the sorted array of integers for which to calculate the percentiles.
      * @return a map where the keys are the percentiles and the values are the corresponding integers from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty.
+     * @see Percentage
      */
     public static Map<Percentage, Integer> percentilesOfSorted(final int[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
@@ -29439,7 +29625,7 @@ public final class N extends CommonUtil {
      * String[] words = {"Hi", "Hello"};
      * Set<Character> result = N.flatMap(words,
      *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
-     *     n -> new HashSet<>());
+     *     (IntFunction<Set<Character>>) HashSet::new);
      * // returns all unique characters from all words
      * }</pre>
      *
@@ -29666,7 +29852,7 @@ public final class N extends CommonUtil {
      * Iterable<String> words = Arrays.asList("Hi", "Hello");
      * Set<Character> result = N.flatMap(words,
      *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
-     *     n -> new HashSet<>());
+     *     (IntFunction<Set<Character>>) HashSet::new);
      * // returns all unique characters from all words
      * }</pre>
      *
@@ -29732,7 +29918,7 @@ public final class N extends CommonUtil {
      * Iterator<String> iter = Arrays.asList("Hi", "Hello").iterator();
      * Set<Character> result = N.flatMap(iter,
      *     s -> s.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()),
-     *     n -> new HashSet<>());
+     *     (IntFunction<Set<Character>>) HashSet::new);
      * // returns all unique characters from all words
      * }</pre>
      *
@@ -29774,7 +29960,8 @@ public final class N extends CommonUtil {
      * String[] sentences = {"Hi there", "Hello world"};
      * List<Character> result = N.flatMap(sentences,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
+     *     (Function<String, Collection<Character>>) word ->
+     *         word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // returns all characters from all words
      * }</pre>
      *
@@ -29855,7 +30042,8 @@ public final class N extends CommonUtil {
      * Iterable<String> sentences = Arrays.asList("Hi there", "Hello world");
      * List<Character> result = N.flatMap(sentences,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
+     *     (Function<String, Collection<Character>>) word ->
+     *         word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // returns all characters from all words
      * }</pre>
      *
@@ -29936,7 +30124,8 @@ public final class N extends CommonUtil {
      * Iterator<String> iter = Arrays.asList("Hi there", "Hello world").iterator();
      * List<Character> result = N.flatMap(iter,
      *     s -> Arrays.asList(s.split(" ")),
-     *     word -> word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
+     *     (Function<String, Collection<Character>>) word ->
+     *         word.chars().mapToObj(c -> (char)c).collect(java.util.stream.Collectors.toList()));
      * // returns all characters from all words
      * }</pre>
      *
@@ -30829,7 +31018,7 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new array containing only the unique elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
      * @see #distinct(boolean[])
      */
     public static boolean[] distinct(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -30868,7 +31057,7 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new array containing only the unique elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
      * @see #distinct(char[])
      */
     public static char[] distinct(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -30907,7 +31096,7 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new array containing only the unique elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
      * @see #distinct(byte[])
      */
     public static byte[] distinct(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -30946,7 +31135,7 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new array containing only the unique elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
      * @see #distinct(short[])
      */
     public static short[] distinct(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -30985,7 +31174,7 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new array containing only the unique elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
      * @see #distinct(int[])
      */
     public static int[] distinct(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -31024,7 +31213,7 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new array containing only the unique elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
      * @see #distinct(long[])
      */
     public static long[] distinct(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -31377,6 +31566,9 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new collection containing only elements with unique keys extracted by the given function (collection created by the provided supplier, preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -31500,6 +31692,9 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new collection containing only elements with unique keys extracted by the given function (collection created by the provided supplier, preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -31563,6 +31758,9 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new collection containing only elements with unique keys extracted by the given function (collection created by the provided supplier, preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p>Note: The iterator will be fully consumed by this operation.</p>
      *
@@ -31668,7 +31866,7 @@ public final class N extends CommonUtil {
     /**
      * Returns {@code true} if all elements match the given predicate.
      *
-     * <p>Note: The iterator will be fully consumed by this operation.</p>
+     * <p>Note: The iterator is consumed until the first non-matching element is found or it is fully exhausted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -32623,6 +32821,7 @@ public final class N extends CommonUtil {
      * @param a the array
      * @param filter the predicate to test each element
      * @return the number of elements that match the predicate (0 if array is {@code null}/empty)
+     * @see #count(Object[], int, int, Predicate)
      */
     public static <T> int count(final T[] a, final Predicate<? super T> filter) {
         if (isEmpty(a)) {
@@ -32649,6 +32848,7 @@ public final class N extends CommonUtil {
      * @param filter the predicate to test each element
      * @return the number of elements within the range that match the predicate (0 if array is {@code null}/empty or range is empty)
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     * @see #count(Object[], Predicate)
      */
     public static <T> int count(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -32684,12 +32884,13 @@ public final class N extends CommonUtil {
      * @param filter the predicate to test each element
      * @return the number of elements within the range that match the predicate (0 if collection is {@code null}/empty or range is empty)
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > c.size() || fromIndex > toIndex}
+     * @see #count(Iterable, Predicate)
      */
     public static <T> int count(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
+        if (fromIndex == toIndex) {
             return 0;
         }
 
@@ -33146,8 +33347,6 @@ public final class N extends CommonUtil {
         }
     }
 
-    //    /**
-
     /**
      * Zips two arrays into a single list using the provided zip function.
      * The size of the resulting list is equal to the size of the shorter input array.
@@ -33569,10 +33768,10 @@ public final class N extends CommonUtil {
      * @param <R> the type of elements in the resulting array
      * @param a the first array to zip
      * @param b the second array to zip
-     * @param targetElementType the class of the resulting array's element type
      * @param zipFunction a function that combines elements from the two arrays
+     * @param targetElementType the class of the resulting array's element type
      * @return an array containing the zipped elements (an empty array is returned if any input array is {@code null} or empty)
-     * @throws IllegalArgumentException if targetElementType is {@code null}
+     * @throws IllegalArgumentException if {@code targetElementType} is {@code null}
      */
     public static <A, B, R> R[] zip(final A[] a, final B[] b, final BiFunction<? super A, ? super B, ? extends R> zipFunction, final Class<R> targetElementType)
             throws IllegalArgumentException {
@@ -33608,10 +33807,10 @@ public final class N extends CommonUtil {
      * @param b the second array to zip
      * @param valueForNoneA the default value to use if the first array is shorter
      * @param valueForNoneB the default value to use if the second array is shorter
-     * @param targetElementType the class of the resulting array's element type
      * @param zipFunction a function that combines elements from the two arrays
-     * @return an array containing the zipped elements
-     * @throws IllegalArgumentException if targetElementType is {@code null}
+     * @param targetElementType the class of the resulting array's element type
+     * @return an array containing the zipped elements; its length equals {@code max(a.length, b.length)}, treating {@code null} arrays as length 0
+     * @throws IllegalArgumentException if {@code targetElementType} is {@code null}
      */
     public static <A, B, R> R[] zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction, final Class<R> targetElementType) throws IllegalArgumentException {
@@ -33658,10 +33857,10 @@ public final class N extends CommonUtil {
      * @param a the first array to zip
      * @param b the second array to zip
      * @param c the third array to zip
-     * @param targetElementType the class of the resulting array's element type
      * @param zipFunction a function that combines elements from the three arrays
+     * @param targetElementType the class of the resulting array's element type
      * @return an array containing the zipped elements (an empty array is returned if any input array is {@code null} or empty)
-     * @throws IllegalArgumentException if targetElementType is {@code null}
+     * @throws IllegalArgumentException if {@code targetElementType} is {@code null}
      */
     public static <A, B, C, R> R[] zip(final A[] a, final B[] b, final C[] c, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction,
             final Class<R> targetElementType) throws IllegalArgumentException {
@@ -33703,10 +33902,10 @@ public final class N extends CommonUtil {
      * @param valueForNoneA the default value to use if the first array is shorter
      * @param valueForNoneB the default value to use if the second array is shorter
      * @param valueForNoneC the default value to use if the third array is shorter
-     * @param targetElementType the class of the resulting array's element type
      * @param zipFunction a function that combines elements from the three arrays
-     * @return an array containing the zipped elements
-     * @throws IllegalArgumentException if targetElementType is {@code null}
+     * @param targetElementType the class of the resulting array's element type
+     * @return an array containing the zipped elements; its length equals {@code max(a.length, b.length, c.length)}, treating {@code null} arrays as length 0
+     * @throws IllegalArgumentException if {@code targetElementType} is {@code null}
      */
     public static <A, B, C, R> R[] zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final Class<R> targetElementType) throws IllegalArgumentException {
@@ -34094,7 +34293,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "apricot", "banana"};
-     * LinkedHashMap<Character, List<String>> result = N.groupBy(words, s -> s.charAt(0), LinkedHashMap::new);
+     * LinkedHashMap<Character, List<String>> result = N.groupBy(words, s -> s.charAt(0),
+     *     (Supplier<LinkedHashMap<Character, List<String>>>) LinkedHashMap::new);
      * // returns a LinkedHashMap with insertion order preserved
      * }</pre>
      *
@@ -34306,7 +34506,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "apricot", "banana");
-     * LinkedHashMap<Character, List<String>> result = N.groupBy(words, s -> s.charAt(0), LinkedHashMap::new);
+     * LinkedHashMap<Character, List<String>> result = N.groupBy(words, s -> s.charAt(0),
+     *     (Supplier<LinkedHashMap<Character, List<String>>>) LinkedHashMap::new);
      * // returns a LinkedHashMap with insertion order
      * }</pre>
      *
@@ -34373,7 +34574,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("apple", "apricot").iterator();
-     * LinkedHashMap<Character, List<String>> result = N.groupBy(iter, s -> s.charAt(0), LinkedHashMap::new);
+     * LinkedHashMap<Character, List<String>> result = N.groupBy(iter, s -> s.charAt(0),
+     *     (Supplier<LinkedHashMap<Character, List<String>>>) LinkedHashMap::new);
      * // returns a LinkedHashMap with insertion order
      * }</pre>
      *
@@ -34871,6 +35073,20 @@ public final class N extends CommonUtil {
         return ret;
     }
 
+    /**
+     * Replaces every value of the given map, in place, with the result of applying {@code downstreamFinisher} to it.
+     * <br />
+     * This is the shared finishing step of the {@code groupBy}/{@code countBy} implementations: they accumulate a
+     * mutable intermediate container (a collector container, a {@code MutableInt}, ...) per key and then convert
+     * each one into the value type the caller actually sees. The caller is responsible for the unchecked
+     * reinterpretation of the map's value type that this conversion implies.
+     *
+     * @param <V> the type of the intermediate values currently held by the map
+     * @param intermediate the map whose values are finished in place; its entries must support {@link Map.Entry#setValue(Object)}
+     * @param downstreamFinisher the function applied to each intermediate value to produce the final value
+     * @see #groupBy(Iterable, Function, Collector, Supplier)
+     * @see #countBy(Iterable, Function, Supplier)
+     */
     static <V> void updateIntermediateValue(final Map<?, V> intermediate, final Function<? super V, ?> downstreamFinisher) {
         for (final Map.Entry<?, V> entry : intermediate.entrySet()) {
             entry.setValue((V) downstreamFinisher.apply(entry.getValue()));
@@ -34974,7 +35190,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<List<String>> groups = Arrays.asList(Arrays.asList("A", "B"), Arrays.asList("C", "D"));
-     * List<Iterator<String>> result = N.iterateEach(groups);
+     * List<ObjIterator<String>> result = N.iterateEach(groups);
      * // returns list of 2 separate iterators
      * }</pre>
      *
@@ -35134,6 +35350,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
+     * Map<String, Object> person = Map.of("name", "Alice", "age", 25);
      * String result = N.toJson(person, config);
      * // returns pretty-formatted JSON
      * }</pre>
@@ -35403,6 +35620,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
+     * String jsonString = "{\"name\":\"Alice\",\"unknown\":true}";
      * Person result = N.fromJson(jsonString, config, Person.class);
      * // returns Person (unmatched JSON properties are ignored)
      * }</pre>
@@ -35430,6 +35648,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
+     * String jsonString = "[{\"name\":\"Alice\",\"unknown\":true}]";
      * List<Person> result = N.fromJson(jsonString, config, new TypeReference<List<Person>>(){}.type());
      * // returns List (unmatched JSON properties are ignored)
      * }</pre>
@@ -35904,13 +36123,14 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a stream of elements deserialized from the JSON array in the file.
+     * Closing the returned stream closes the file reader opened by this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("people.json");
-     * Stream<Person> result = N.streamJson(file, new TypeReference<Person>(){}.type());
-     *
-     * // Streams Person objects from the file
+     * try (Stream<Person> result = N.streamJson(file, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
+     * }
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -35927,14 +36147,15 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a stream of elements deserialized from the JSON array in the file using the specified configuration.
+     * Closing the returned stream closes the file reader opened by this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * File file = new File("people.json");
-     * Stream<Person> result = N.streamJson(file, config, new TypeReference<Person>(){}.type());
-     *
-     * // Streams Person objects (unmatched JSON properties are ignored)
+     * try (Stream<Person> result = N.streamJson(file, config, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
+     * }
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -35956,9 +36177,9 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream in = new FileInputStream("people.json")) {
-     *     Stream<Person> result = N.streamJson(in, new TypeReference<Person>(){}.type());
-     *     // Streams Person objects from the input stream
+     * try (InputStream in = new FileInputStream("people.json");
+     *         Stream<Person> result = N.streamJson(in, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
      * }
      * }</pre>
      *
@@ -35979,9 +36200,10 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * InputStream in = new FileInputStream("people.json");
-     * Stream<Person> result = N.streamJson(in, true, new TypeReference<Person>(){}.type());
-     * // Input stream will be closed when stream is closed
+     * try (InputStream in = new FileInputStream("people.json");
+     *         Stream<Person> result = N.streamJson(in, true, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
+     * }   // closes both the returned stream and the input stream
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -36002,10 +36224,10 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
-     * InputStream in = new FileInputStream("people.json");
-     * Stream<Person> result = N.streamJson(in, config, true, new TypeReference<Person>(){}.type());
-     *
-     * // Streams Person objects (unmatched JSON properties are ignored)
+     * try (InputStream in = new FileInputStream("people.json");
+     *         Stream<Person> result = N.streamJson(in, config, true, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
+     * }   // closes both the returned stream and the input stream
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -36029,9 +36251,9 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (Reader reader = new FileReader("people.json")) {
-     *     Stream<Person> result = N.streamJson(reader, new TypeReference<Person>(){}.type());
-     *     // Streams Person objects from the reader
+     * try (Reader reader = new FileReader("people.json");
+     *         Stream<Person> result = N.streamJson(reader, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
      * }
      * }</pre>
      *
@@ -36052,9 +36274,10 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("people.json");
-     * Stream<Person> result = N.streamJson(reader, true, new TypeReference<Person>(){}.type());
-     * // Reader will be closed when stream is closed
+     * try (Reader reader = new FileReader("people.json");
+     *         Stream<Person> result = N.streamJson(reader, true, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
+     * }   // closes both the returned stream and the reader
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -36075,10 +36298,10 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
-     * Reader reader = new FileReader("people.json");
-     * Stream<Person> result = N.streamJson(reader, config, true, new TypeReference<Person>(){}.type());
-     *
-     * // Streams Person objects (unmatched JSON properties are ignored)
+     * try (Reader reader = new FileReader("people.json");
+     *         Stream<Person> result = N.streamJson(reader, config, true, new TypeReference<Person>(){}.type())) {
+     *     result.forEach(System.out::println);
+     * }   // closes both the returned stream and the reader
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -36328,7 +36551,7 @@ public final class N extends CommonUtil {
      * Map<String, Object> person = Map.of("name", "Alice", "age", 25);
      * File outputFile = new File("person.xml");
      *
-     * // Writes <map><name>Alice</name><age>25</age></map> to file
+     * // Writes the XML representation of person to the file
      * N.toXml(person, outputFile);   // outputFile contains XML for person
      * }</pre>
      *
@@ -36373,7 +36596,7 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * Map<String, Object> person = Map.of("name", "Alice", "age", 25);
      * try (OutputStream out = new FileOutputStream("person.xml")) {
-     *     // Writes <map><name>Alice</name><age>25</age></map> to stream
+     *     // Writes the XML representation of person to the stream
      *     N.toXml(person, out);   // invokes XML serialization
      * }
      * }</pre>
@@ -36421,7 +36644,7 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * Map<String, Object> person = Map.of("name", "Alice", "age", 25);
      * try (Writer writer = new FileWriter("person.xml")) {
-     *     // Writes <map><name>Alice</name><age>25</age></map> to writer
+     *     // Writes the XML representation of person to the writer
      *     N.toXml(person, writer);   // invokes XML serialization
      * }
      * }</pre>
@@ -36487,7 +36710,7 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String xml = "<list><item>Alice</item><item>Bob</item></list>";
+     * String xml = "<ArrayList><item>Alice</item><item>Bob</item></ArrayList>";
      * List<String> result = N.fromXml(xml, new TypeReference<List<String>>(){}.type());
      * // returns a List<String> with the deserialized data
      * }</pre>
@@ -36592,7 +36815,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
-     * String xml = "<list><item>Alice</item><item>Bob</item></list>";
+     * String xml = "<ArrayList><item>Alice</item><item>Bob</item></ArrayList>";
      * List<String> result = N.fromXml(xml, config, new TypeReference<List<String>>(){}.type());
      * // returns a List<String> with deserialization according to config
      * }</pre>
@@ -36954,7 +37177,7 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String xml = "<list><item>Alice</item><item>Bob</item></list>";
+     * String xml = "<ArrayList><item>Alice</item><item>Bob</item></ArrayList>";
      * String result = N.formatXml(xml, new TypeReference<List<String>>(){}.type());
      * // returns formatted XML with proper structure for List<String> type
      * }</pre>
@@ -37020,7 +37243,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlSerConfig config = new XmlSerConfig().setIndentation("  ");
-     * String xml = "<list><item>Alice</item><item>Bob</item></list>";
+     * String xml = "<ArrayList><item>Alice</item><item>Bob</item></ArrayList>";
      * String result = N.formatXml(xml, config, new TypeReference<List<String>>(){}.type());
      * // returns formatted XML with custom indentation
      * }</pre>
@@ -37731,6 +37954,8 @@ public final class N extends CommonUtil {
      * @throws E if the flatMapper throws an exception
      * @throws E2 if the flatMapper2 throws an exception
      * @throws E3 if the action throws an exception
+     * @see #forEach(Iterable, Throwables.Function, Throwables.Function, Throwables.TriConsumer)
+     * @see #forEachNonNull(Object[], Throwables.Function, Throwables.Function, Throwables.TriConsumer)
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final T[] a,
             final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
@@ -37786,6 +38011,8 @@ public final class N extends CommonUtil {
      * @throws E if the flatMapper throws an exception
      * @throws E2 if the flatMapper2 throws an exception
      * @throws E3 if the action throws an exception
+     * @see #forEach(Object[], Throwables.Function, Throwables.Function, Throwables.TriConsumer)
+     * @see #forEachNonNull(Iterable, Throwables.Function, Throwables.Function, Throwables.TriConsumer)
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
@@ -37841,6 +38068,8 @@ public final class N extends CommonUtil {
      * @throws E if the flatMapper throws an exception
      * @throws E2 if the flatMapper2 throws an exception
      * @throws E3 if the action throws an exception
+     * @see #forEach(Iterable, Throwables.Function, Throwables.Function, Throwables.TriConsumer)
+     * @see #forEachNonNull(Iterator, Throwables.Function, Throwables.Function, Throwables.TriConsumer)
      */
     public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
@@ -38113,6 +38342,8 @@ public final class N extends CommonUtil {
      * @param valueForNoneB the value to be used if the second array is shorter than the first array
      * @param action the action to be performed for each pair of elements from the arrays
      * @throws E if the action throws an exception
+     * @see #forEach(Iterable, Iterable, Object, Object, Throwables.BiConsumer)
+     * @see #forEach(Object[], Object[], Throwables.BiConsumer)
      */
     public static <A, B, E extends Exception> void forEach(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
@@ -38145,6 +38376,8 @@ public final class N extends CommonUtil {
      * @param valueForNoneB the value to be used if the second iterable is shorter than the first iterable
      * @param action the action to be performed for each pair of elements from the iterables
      * @throws E if the action throws an exception
+     * @see #forEach(Object[], Object[], Object, Object, Throwables.BiConsumer)
+     * @see #forEach(Iterable, Iterable, Throwables.BiConsumer)
      */
     public static <A, B, E extends Exception> void forEach(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
             final B valueForNoneB, final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
@@ -38174,6 +38407,8 @@ public final class N extends CommonUtil {
      * @param valueForNoneB the value to be used if the second iterator is shorter than the first iterator
      * @param action the action to be performed for each pair of elements from the iterators
      * @throws E if the action throws an exception
+     * @see #forEach(Iterable, Iterable, Object, Object, Throwables.BiConsumer)
+     * @see #forEach(Iterator, Iterator, Throwables.BiConsumer)
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
             final B valueForNoneB, final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
@@ -38211,11 +38446,13 @@ public final class N extends CommonUtil {
      * @param a the first array whose elements are to be processed
      * @param b the second array whose elements are to be processed
      * @param c the third array whose elements are to be processed
-     * @param valueForNoneA the value to be used if the first array is shorter than the second and third arrays
-     * @param valueForNoneB the value to be used if the second array is shorter than the first and third arrays
-     * @param valueForNoneC the value to be used if the third array is shorter than the first and second arrays
+     * @param valueForNoneA the value to be used if the first array is shorter than the second or third arrays
+     * @param valueForNoneB the value to be used if the second array is shorter than the first or third arrays
+     * @param valueForNoneC the value to be used if the third array is shorter than the first or second arrays
      * @param action the action to be performed for each triple of elements from the arrays
      * @throws E if the action throws an exception
+     * @see #forEach(Iterable, Iterable, Iterable, Object, Object, Object, Throwables.TriConsumer)
+     * @see #forEach(Object[], Object[], Object[], Throwables.TriConsumer)
      */
     public static <A, B, C, E extends Exception> void forEach(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
@@ -38248,11 +38485,13 @@ public final class N extends CommonUtil {
      * @param a the first iterable whose elements are to be processed
      * @param b the second iterable whose elements are to be processed
      * @param c the third iterable whose elements are to be processed
-     * @param valueForNoneA the value to be used if the first iterable is shorter than the second and third iterables
-     * @param valueForNoneB the value to be used if the second iterable is shorter than the first and third iterables
-     * @param valueForNoneC the value to be used if the third iterable is shorter than the first and second iterables
+     * @param valueForNoneA the value to be used if the first iterable is shorter than the second or third iterables
+     * @param valueForNoneB the value to be used if the second iterable is shorter than the first or third iterables
+     * @param valueForNoneC the value to be used if the third iterable is shorter than the first or second iterables
      * @param action the action to be performed for each triple of elements from the iterables
      * @throws E if the action throws an exception
+     * @see #forEach(Object[], Object[], Object[], Object, Object, Object, Throwables.TriConsumer)
+     * @see #forEach(Iterable, Iterable, Iterable, Throwables.TriConsumer)
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -38282,11 +38521,13 @@ public final class N extends CommonUtil {
      * @param a the first iterator whose elements are to be processed
      * @param b the second iterator whose elements are to be processed
      * @param c the third iterator whose elements are to be processed
-     * @param valueForNoneA the value to be used if the first iterator is shorter than the second and third iterators
-     * @param valueForNoneB the value to be used if the second iterator is shorter than the first and third iterators
-     * @param valueForNoneC the value to be used if the third iterator is shorter than the first and second iterators
+     * @param valueForNoneA the value to be used if the first iterator is shorter than the second or third iterators
+     * @param valueForNoneB the value to be used if the second iterator is shorter than the first or third iterators
+     * @param valueForNoneC the value to be used if the third iterator is shorter than the first or second iterators
      * @param action the action to be performed for each triple of elements from the iterators
      * @throws E if the action throws an exception
+     * @see #forEach(Iterable, Iterable, Iterable, Object, Object, Object, Throwables.TriConsumer)
+     * @see #forEach(Iterator, Iterator, Iterator, Throwables.TriConsumer)
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -38814,7 +39055,7 @@ public final class N extends CommonUtil {
      * // prints 2: Charlie, 1: Bob
      * }</pre>
      *
-     * <p>Note: For {@link java.util.List} with {@link java.util.RandomAccess}, uses optimized access; otherwise uses iterator-based access.
+     * <p>Note: For {@link java.util.List} with {@link java.util.RandomAccess}, uses optimized access; otherwise uses iterator-based access.</p>
      *
      * @param <T> the type of elements in the collection
      * @param <E> the type of exception that the action may throw
@@ -39484,6 +39725,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if {@code processThreadNum} is not positive
      * @throws RuntimeException if an error occurs during parallel execution
      * @see #forEachInParallel(Iterable, Throwables.Consumer, int, Executor)
+     * @see #forEachInParallel(Iterator, Throwables.Consumer, int)
      */
     public static <T, E extends Exception> void forEachInParallel(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
             final int processThreadNum) {
@@ -39496,7 +39738,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> urls = Arrays.asList("http://a.com", "http://b.com");
-     * Executor executor = Executors.newFixedThreadPool(2);
+     * Executor executor = ForkJoinPool.commonPool();
      *
      * // Processes URLs in parallel using custom executor
      * N.forEachInParallel(urls, url -> System.out.println(url), 2, executor);   // prints URLs in parallel
@@ -39511,6 +39753,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if {@code processThreadNum} is not positive
      * @throws RuntimeException if an error occurs during parallel execution
      * @see #forEachInParallel(Iterable, Throwables.Consumer, int)
+     * @see #forEachInParallel(Iterator, Throwables.Consumer, int, Executor)
      */
     public static <T, E extends Exception> void forEachInParallel(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
             final int processThreadNum, final Executor executor) throws IllegalArgumentException {
@@ -39556,7 +39799,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com").iterator();
-     * Executor executor = Executors.newFixedThreadPool(2);
+     * Executor executor = ForkJoinPool.commonPool();
      *
      * // Processes iterator elements in parallel using custom executor
      * N.forEachInParallel(iter, url -> System.out.println(url), 2, executor);   // prints iterator elements in parallel
@@ -39581,37 +39824,53 @@ public final class N extends CommonUtil {
         final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
         final Holder<Throwable> errorHolder = new Holder<>();
 
-        for (int i = 0; i < processThreadNum; i++) {
-            executor.execute(() -> {
-                T element = null;
+        int submittedWorkerCount = 0;
 
-                try {
-                    while (errorHolder.value() == null) {
-                        synchronized (iteratorII) {
-                            if (iteratorII.hasNext()) {
-                                element = iteratorII.next();
+        try {
+            for (; submittedWorkerCount < processThreadNum; submittedWorkerCount++) {
+                executor.execute(() -> {
+                    T element = null;
+
+                    try {
+                        while (errorHolder.value() == null) {
+                            synchronized (iteratorII) {
+                                if (iteratorII.hasNext()) {
+                                    element = iteratorII.next();
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            elementConsumer.accept(element);
+                        }
+                    } catch (final Throwable e) { // catch Throwable (not just Exception) so an Error thrown by
+                                                  // the action is recorded and surfaced, instead of leaking to
+                                                  // the executor while the other workers keep running and this
+                                                  // method returns as if it had succeeded.
+                        synchronized (errorHolder) {
+                            if (errorHolder.value() == null) {
+                                errorHolder.setValue(e);
                             } else {
-                                break;
+                                errorHolder.value().addSuppressed(e);
                             }
                         }
-
-                        elementConsumer.accept(element);
+                    } finally {
+                        countDownLatch.countDown();
                     }
-                } catch (final Throwable e) { // catch Throwable (not just Exception) so an Error thrown by
-                                              // the action is recorded and surfaced, instead of leaking to
-                                              // the executor while the other workers keep running and this
-                                              // method returns as if it had succeeded.
-                    synchronized (errorHolder) {
-                        if (errorHolder.value() == null) {
-                            errorHolder.setValue(e);
-                        } else {
-                            errorHolder.value().addSuppressed(e);
-                        }
-                    }
-                } finally {
-                    countDownLatch.countDown();
+                });
+            }
+        } catch (final Throwable e) {
+            synchronized (errorHolder) {
+                if (errorHolder.value() == null) {
+                    errorHolder.setValue(e);
+                } else {
+                    errorHolder.value().addSuppressed(e);
                 }
-            });
+            }
+
+            while (submittedWorkerCount++ < processThreadNum) {
+                countDownLatch.countDown();
+            }
         }
 
         try {
@@ -39659,7 +39918,7 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * // Processes URLs in parallel using custom executor with indices
      * List<String> urls = Arrays.asList("http://a.com", "http://b.com", "http://c.com");
-     * ExecutorService executor = Executors.newFixedThreadPool(2);
+     * Executor executor = ForkJoinPool.commonPool();
      * N.forEachIndexedInParallel(urls, (idx, url) ->
      *     System.out.println(idx + ": " + url), 2, executor);
      * }</pre>
@@ -39722,12 +39981,12 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * // Processes iterator elements in parallel using custom executor with indices
      * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com", "http://c.com").iterator();
-     * ExecutorService executor = Executors.newFixedThreadPool(2);
+     * Executor executor = ForkJoinPool.commonPool();
      * N.forEachIndexedInParallel(iter, (idx, url) ->
      *     System.out.println(idx + ": " + url), 2, executor);
      * }</pre>
      *
-     * <p>Note: Indices are assigned atomically in the order elements are retrieved from the iterator.
+     * <p>Note: Indices are assigned atomically in the order elements are retrieved from the iterator.</p>
      *
      * @param <T> the type of elements in the iterator
      * @param <E> the type of exception that the action may throw
@@ -39736,6 +39995,7 @@ public final class N extends CommonUtil {
      * @param processThreadNum the number of threads for parallel processing
      * @param executor the executor to use for parallel processing
      * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
      * @see #forEachIndexedInParallel(Iterator, Throwables.IntObjConsumer, int)
      * @see #forEachIndexedInParallel(Iterable, Throwables.IntObjConsumer, int, Executor)
      */
@@ -39749,39 +40009,55 @@ public final class N extends CommonUtil {
         final AtomicInteger index = new AtomicInteger(0);
         final Holder<Throwable> errorHolder = new Holder<>();
 
-        for (int i = 0; i < processThreadNum; i++) {
-            executor.execute(() -> {
-                int idx = 0;
-                T element = null;
+        int submittedWorkerCount = 0;
 
-                try {
-                    while (errorHolder.value() == null) {
-                        synchronized (iteratorII) {
-                            if (iteratorII.hasNext()) {
-                                idx = index.getAndIncrement();
-                                element = iteratorII.next();
+        try {
+            for (; submittedWorkerCount < processThreadNum; submittedWorkerCount++) {
+                executor.execute(() -> {
+                    int idx = 0;
+                    T element = null;
+
+                    try {
+                        while (errorHolder.value() == null) {
+                            synchronized (iteratorII) {
+                                if (iteratorII.hasNext()) {
+                                    idx = index.getAndIncrement();
+                                    element = iteratorII.next();
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            elementConsumer.accept(idx, element);
+                        }
+                    } catch (final Throwable e) { // catch Throwable (not just Exception) so an Error thrown by
+                                                  // the action is recorded and surfaced, instead of leaking to
+                                                  // the executor while the other workers keep running and this
+                                                  // method returns as if it had succeeded.
+                        synchronized (errorHolder) {
+                            if (errorHolder.value() == null) {
+                                errorHolder.setValue(e);
                             } else {
-                                break;
+                                errorHolder.value().addSuppressed(e);
                             }
                         }
-
-                        elementConsumer.accept(idx, element);
+                    } finally {
+                        countDownLatch.countDown();
                     }
-                } catch (final Throwable e) { // catch Throwable (not just Exception) so an Error thrown by
-                                              // the action is recorded and surfaced, instead of leaking to
-                                              // the executor while the other workers keep running and this
-                                              // method returns as if it had succeeded.
-                    synchronized (errorHolder) {
-                        if (errorHolder.value() == null) {
-                            errorHolder.setValue(e);
-                        } else {
-                            errorHolder.value().addSuppressed(e);
-                        }
-                    }
-                } finally {
-                    countDownLatch.countDown();
+                });
+            }
+        } catch (final Throwable e) {
+            synchronized (errorHolder) {
+                if (errorHolder.value() == null) {
+                    errorHolder.setValue(e);
+                } else {
+                    errorHolder.value().addSuppressed(e);
                 }
-            });
+            }
+
+            while (submittedWorkerCount++ < processThreadNum) {
+                countDownLatch.countDown();
+            }
         }
 
         try {
@@ -39823,7 +40099,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Command runs asynchronously on the specified executor
-     * ExecutorService executor = Executors.newFixedThreadPool(2);
+     * Executor executor = ForkJoinPool.commonPool();
      * ContinuableFuture<Void> future = N.asyncExecute(() -> System.out.println("processed"), executor);
      * future.get();   // returns null after completion
      * }</pre>
@@ -39892,7 +40168,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Command runs asynchronously on the specified executor
-     * ExecutorService executor = Executors.newFixedThreadPool(2);
+     * Executor executor = ForkJoinPool.commonPool();
      * ContinuableFuture<String> future = N.asyncExecute(() -> "data", executor);
      * String result = future.get();   // returns "data"
      * }</pre>
@@ -40044,7 +40320,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // All tasks run asynchronously using the specified executor
-     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Executor executor = ForkJoinPool.commonPool();
      * List<Throwables.Runnable<Exception>> tasks = Arrays.asList(
      *     () -> System.out.println("file1"),
      *     () -> System.out.println("file2"),
@@ -40114,7 +40390,7 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Executor executor = ForkJoinPool.commonPool();
      * Collection<Throwables.Runnable<Exception>> tasks = new LinkedHashSet<>();
      * tasks.add(() -> System.out.println("file1"));
      * tasks.add(() -> System.out.println("file2"));
@@ -40187,7 +40463,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // All tasks run asynchronously using the specified executor
-     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Executor executor = ForkJoinPool.commonPool();
      * Collection<Callable<String>> tasks = Arrays.asList(
      *     () -> "data1",
      *     () -> "data2",
@@ -40238,11 +40514,11 @@ public final class N extends CommonUtil {
      * }
      * }</pre>
      *
-     * <p><b>Note:</b> The returned iterator drives completion by polling: {@code hasNext()} spins, sleeping ~1ms
-     * between checks, until the next command finishes, so there is a ~1ms latency floor per yielded element.
-     * A command's failure is only re-thrown when iteration reaches it; if the iterator is not fully exhausted,
+     * <p><b>Note:</b> The returned iterator drives completion by polling: when no completion is available,
+     * {@code hasNext()} sleeps for roughly 1 ms between checks, which can add up to roughly 1 ms of detection latency.
+     * A command's failure is re-thrown during a later iteration check; if the iterator is not fully exhausted,
      * failures of not-yet-observed commands are never surfaced. Commands that have already started are not
-     * canceled when iteration stops early.
+     * canceled when iteration stops early.</p>
      *
      * @param commands the collection of commands to execute asynchronously
      * @return an iterator that yields one {@code null} per completed command, in completion order. The caller
@@ -40264,7 +40540,7 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Executor executor = ForkJoinPool.commonPool();
      * Collection<Throwables.Runnable<Exception>> tasks = Arrays.asList(
      *     () -> System.out.println("file1"),
      *     () -> System.out.println("file2"),
@@ -40278,11 +40554,11 @@ public final class N extends CommonUtil {
      * }
      * }</pre>
      *
-     * <p><b>Note:</b> The returned iterator drives completion by polling: {@code hasNext()} spins, sleeping ~1ms
-     * between checks, until the next command finishes, so there is a ~1ms latency floor per yielded element.
-     * A command's failure is only re-thrown when iteration reaches it; if the iterator is not fully exhausted,
+     * <p><b>Note:</b> The returned iterator drives completion by polling: when no completion is available,
+     * {@code hasNext()} sleeps for roughly 1 ms between checks, which can add up to roughly 1 ms of detection latency.
+     * A command's failure is re-thrown during a later iteration check; if the iterator is not fully exhausted,
      * failures of not-yet-observed commands are never surfaced. Commands that have already started are not
-     * canceled when iteration stops early.
+     * canceled when iteration stops early.</p>
      *
      * @param commands the collection of commands to execute asynchronously
      * @param executor the executor to use for execution
@@ -40332,7 +40608,8 @@ public final class N extends CommonUtil {
                             try {
                                 future.get();
                             } catch (InterruptedException | ExecutionException e) {
-                                // cause inconsistent if iterate result or not. Secondly, asynchronized execution should not impact each other.
+                                // Do not cancel the other independent tasks: whether they run must not depend on how far
+                                // the caller chooses to iterate through the completion results.
                                 //    while (iter.hasNext()) {
                                 //        iter.next().cancel(false);
                                 //    }
@@ -40382,6 +40659,7 @@ public final class N extends CommonUtil {
      * Each result is returned as commands complete.
      * If an error occurs in a command, iteration is interrupted and the error is thrown.
      * Other commands continue running and are not canceled.
+     * The returned iterator polls for completion and should be fully exhausted so that failures are surfaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40416,11 +40694,12 @@ public final class N extends CommonUtil {
      * Each result is returned as commands complete.
      * If an error occurs in a command, iteration is interrupted and the error is thrown.
      * Other commands continue running and are not canceled.
+     * The returned iterator polls for completion and should be fully exhausted so that failures are surfaced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Iterate results as they complete (fastest first)
-     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Executor executor = ForkJoinPool.commonPool();
      * Collection<Callable<String>> tasks = Arrays.asList(
      *     () -> "data1",
      *     () -> "data2",
@@ -40489,7 +40768,8 @@ public final class N extends CommonUtil {
                             try {
                                 future.get();
                             } catch (InterruptedException | ExecutionException e) {
-                                // Cause inconsistent if iterate result or not. Secondly, asynchronized execution should not impact each other.
+                                // Do not cancel the other independent tasks: whether they run must not depend on how far
+                                // the caller chooses to iterate through the completion results.
                                 //    while (iter.hasNext()) {
                                 //        iter.next().cancel(false);
                                 //    }
@@ -40847,7 +41127,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // All commands execute in parallel using the specified executor
-     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Executor executor = ForkJoinPool.commonPool();
      * Collection<Throwables.Runnable<Exception>> tasks = Arrays.asList(
      *     () -> System.out.println("file1"),
      *     () -> System.out.println("file2"),
@@ -41185,7 +41465,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // All commands execute in parallel using the specified executor
-     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Executor executor = ForkJoinPool.commonPool();
      * Collection<Callable<String>> tasks = Arrays.asList(
      *     () -> "data1",
      *     () -> "data2",
@@ -41813,9 +42093,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Executes the command uninterruptibly, blocking until completion even if the thread is interrupted.
-     * If the thread is interrupted during execution, continues to block until the command completes, then restores the interrupted status.
-     * This is useful for operations that must complete atomically without being interrupted mid-execution.
+     * Invokes the command until it returns normally, retrying it from the beginning whenever it throws {@link InterruptedException}.
+     * If one or more invocations are interrupted, the interrupted status is restored after a later invocation succeeds.
+     * Because the command may be invoked more than once, it should be safe to retry; this wrapper neither resumes an
+     * interrupted invocation nor makes arbitrary command work atomic.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
@@ -41826,10 +42107,11 @@ public final class N extends CommonUtil {
      *     Thread.sleep(1);
      * });
      *
-     * // no exception thrown if interrupted
+     * // If interrupted, the callback is retried and the interrupted status is restored afterward.
      * }</pre>
      *
      * @param cmd the command to execute uninterruptibly
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
      * @see #runUninterruptibly(Throwables.LongConsumer, long)
      */
     public static void runUninterruptibly(final Throwables.Runnable<InterruptedException> cmd) throws IllegalArgumentException {
@@ -41854,26 +42136,29 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Executes the command uninterruptibly with a timeout, blocking until completion or timeout even if the thread is interrupted.
-     * If the thread is interrupted during execution, continues to block until the command completes or the timeout elapses, then restores the interrupted status.
-     * The command receives the remaining time in milliseconds on each attempt.
+     * Invokes a timed command until it returns normally, retrying it from the beginning whenever it throws {@link InterruptedException}.
+     * The command receives the remaining timeout budget in milliseconds on each attempt; after the budget has elapsed,
+     * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
+     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
      * Remaining time is derived from the monotonic {@link System#nanoTime()} clock, so wall-clock adjustments do not change the timeout budget.
-     * This is useful for timed operations that must complete atomically without being interrupted mid-execution.
+     * Because the command may be invoked more than once, it should be safe to retry.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Attempts lock acquisition with remaining time on each retry
+     * CountDownLatch latch = new CountDownLatch(1);
+     * // Awaits with the remaining timeout budget on each retry
      * N.runUninterruptibly(remainingMillis -> {
-     *     lock.tryLock(remainingMillis, TimeUnit.MILLISECONDS);
+     *     latch.await(remainingMillis, TimeUnit.MILLISECONDS);
      * }, 5000);
      *
-     * // no exception thrown if interrupted
+     * // If interrupted, the callback is retried and the interrupted status is restored afterward.
      * }</pre>
      *
      * @param cmd the command to execute with remaining time in milliseconds
      * @param timeoutInMillis the maximum time to wait in milliseconds
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
      * @see #runUninterruptibly(Throwables.BiConsumer, long, TimeUnit)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
@@ -41903,10 +42188,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Executes the command uninterruptibly with a timeout and time unit, blocking until completion or timeout even if the thread is interrupted.
-     * If the thread is interrupted during execution, continues to block until the command completes or the timeout elapses, then restores the interrupted status.
-     * The command receives the remaining time and time unit (always nanoseconds) on each attempt.
-     * This is useful for timed operations that must complete atomically without being interrupted mid-execution.
+     * Invokes a timed command until it returns normally, retrying it from the beginning whenever it throws {@link InterruptedException}.
+     * The command receives the remaining timeout budget in nanoseconds on each attempt; after the budget has elapsed,
+     * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
+     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
+     * Because the command may be invoked more than once, it should be safe to retry.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
@@ -41919,13 +42205,13 @@ public final class N extends CommonUtil {
      *     latch.await(remainingTime, timeUnit);
      * }, 1, TimeUnit.MILLISECONDS);
      *
-     * // no exception thrown if interrupted
+     * // If interrupted, the callback is retried and the interrupted status is restored afterward.
      * }</pre>
      *
      * @param cmd the command to execute with remaining time and unit (nanoseconds)
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
-     * @throws IllegalArgumentException if {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code cmd} or {@code unit} is {@code null}
      * @see #runUninterruptibly(Throwables.LongConsumer, long)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
@@ -41957,9 +42243,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Calls the command uninterruptibly and returns the result, blocking until completion even if the thread is interrupted.
-     * If the thread is interrupted during execution, continues to block until the command completes, then restores the interrupted status.
-     * This is useful for operations that must complete atomically without being interrupted mid-execution.
+     * Invokes the command until it returns a result, retrying it from the beginning whenever it throws {@link InterruptedException}.
+     * If one or more invocations are interrupted, the interrupted status is restored after a later invocation succeeds.
+     * Because the command may be invoked more than once, it should be safe to retry; this wrapper neither resumes an
+     * interrupted invocation nor makes arbitrary command work atomic.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
@@ -41975,6 +42262,7 @@ public final class N extends CommonUtil {
      * @param <R> the type of result returned by the command
      * @param cmd the command to call uninterruptibly
      * @return the result of the command, which may be {@code null} if the command returns {@code null}
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
      * @see #callUninterruptibly(Throwables.LongFunction, long)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
@@ -41999,22 +42287,21 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Calls the command uninterruptibly with a timeout and returns the result, blocking until completion or timeout even if the thread is interrupted.
-     * If the thread is interrupted during execution, continues to block until the command completes or the timeout elapses, then restores the interrupted status.
-     * The command receives the remaining time in milliseconds on each attempt.
+     * Invokes a timed command until it returns a result, retrying it from the beginning whenever it throws {@link InterruptedException}.
+     * The command receives the remaining timeout budget in milliseconds on each attempt; after the budget has elapsed,
+     * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
+     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
      * Remaining time is derived from the monotonic {@link System#nanoTime()} clock, so wall-clock adjustments do not change the timeout budget.
-     * This is useful for timed operations that must complete atomically without being interrupted mid-execution.
+     * Because the command may be invoked more than once, it should be safe to retry.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = N.callUninterruptibly(remainingMillis -> {
-     *     if (lock.tryLock(remainingMillis, TimeUnit.MILLISECONDS)) {
-     *         return "acquired";
-     *     }
-     *     return "failed";
-     * }, 5000);
+     * CountDownLatch latch = new CountDownLatch(1);
+     * boolean completed = N.callUninterruptibly(
+     *     remainingMillis -> latch.await(remainingMillis, TimeUnit.MILLISECONDS),
+     *     5000);
      *
      * // Attempts operation with remaining time on each retry
      * }</pre>
@@ -42023,6 +42310,7 @@ public final class N extends CommonUtil {
      * @param cmd the command to call with remaining time in milliseconds
      * @param timeoutInMillis the maximum time to wait in milliseconds
      * @return the result of the command, which may be {@code null} if the command returns {@code null}
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}
      * @see #callUninterruptibly(Throwables.BiFunction, long, TimeUnit)
      * @see #callUninterruptibly(Throwables.Callable)
      */
@@ -42053,24 +42341,22 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Calls the command uninterruptibly with a timeout and time unit and returns the result, blocking until completion or timeout even if the thread is interrupted.
-     * If the thread is interrupted during execution, continues to block until the command completes or the timeout elapses, then restores the interrupted status.
-     * The command receives the remaining time and time unit (always nanoseconds) on each attempt.
-     * This is useful for timed operations that must complete atomically without being interrupted mid-execution.
+     * Invokes a timed command until it returns a result, retrying it from the beginning whenever it throws {@link InterruptedException}.
+     * The command receives the remaining timeout budget in nanoseconds on each attempt; after the budget has elapsed,
+     * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
+     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
+     * Because the command may be invoked more than once, it should be safe to retry.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Future<String> future = CompletableFuture.completedFuture("success");
-     * String result = N.callUninterruptibly((remainingTime, timeUnit) -> {
-     *     if (future.get(remainingTime, timeUnit) != null) {
-     *         return "success";
-     *     }
-     *     return "timeout";
-     * }, 1, TimeUnit.MILLISECONDS);
+     * CountDownLatch latch = new CountDownLatch(1);
+     * boolean completed = N.callUninterruptibly(
+     *     (remainingTime, timeUnit) -> latch.await(remainingTime, timeUnit),
+     *     1, TimeUnit.MILLISECONDS);
      *
-     * // Attempts future get with remaining time on each retry
+     * // Attempts latch await with the remaining timeout budget on each retry
      * }</pre>
      *
      * @param <T> the type of result returned by the command
@@ -42078,7 +42364,7 @@ public final class N extends CommonUtil {
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
      * @return the result of the command, which may be {@code null} if the command returns {@code null}
-     * @throws IllegalArgumentException if {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code cmd} or {@code unit} is {@code null}
      * @see #callUninterruptibly(Throwables.LongFunction, long)
      * @see #callUninterruptibly(Throwables.Callable)
      */
@@ -42199,7 +42485,7 @@ public final class N extends CommonUtil {
      * <pre>{@code
      * String result = N.tryOrDefaultIfExceptionOccurred(
      *     () -> riskyOperation(),
-     *     () -> "default value"
+     *     (Supplier<String>) () -> "default value"
      * );
      * // returns result on success, "default value" on exception
      * }</pre>
@@ -42284,7 +42570,7 @@ public final class N extends CommonUtil {
      * String content = N.tryOrDefaultIfExceptionOccurred(
      *     url,
      *     u -> fetchContent(u),
-     *     () -> "default content"
+     *     (Supplier<String>) () -> "default content"
      * );
      * // returns content on success, "default content" on exception
      * }</pre>
@@ -42858,14 +43144,6 @@ public final class N extends CommonUtil {
      *     })
      *     .collect(java.util.stream.Collectors.toList());
      *
-     * // Method reference style
-     * public URL parseURL(String url) {
-     *     try {
-     *         return new URL(url);
-     *     } catch (Exception e) {
-     *         throw N.toRuntimeException(e); // throws e if already runtime, otherwise wraps it
-     *     }
-     * }
      * }</pre>
      *
      * @param e the exception to be converted to a runtime exception.
@@ -42929,8 +43207,9 @@ public final class N extends CommonUtil {
      * }
      *
      * // Use when catching Throwable from reflection or proxies
+     * Object obj = "example";
      * try {
-     *     Method method = obj.getClass().getMethod("someMethod");
+     *     Method method = obj.getClass().getMethod("toString");
      *     method.invoke(obj);
      * } catch (Throwable t) {
      *     throw N.toRuntimeException(t);
@@ -42964,7 +43243,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     someBlockingCall();
+     *     Thread.sleep(100);
      * } catch (Throwable t) {
      *     throw N.toRuntimeException(t, true);
      *     // wraps t; if t is an InterruptedException, also re-interrupts the thread

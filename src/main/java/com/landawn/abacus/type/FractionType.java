@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Strings;
  */
 public class FractionType extends AbstractType<Fraction> {
 
-    /** The type name constant for Fraction type identification. */
+    /** The type name constant for Fraction type identification, equal to {@code "Fraction"}. */
     public static final String FRACTION = Fraction.class.getSimpleName();
 
     /**

@@ -36,11 +36,9 @@ import com.landawn.abacus.util.function.FloatUnaryOperator;
 import com.landawn.abacus.util.stream.FloatStream;
 
 /**
- * A high-performance, resizable array implementation for primitive float values that provides
- * specialized operations optimized for single-precision floating-point data types. This class extends
- * {@link PrimitiveList} to offer memory-efficient storage and operations that avoid the boxing overhead
- * associated with {@code List<Float>}, making it ideal for applications requiring intensive float array
- * manipulation with optimal performance characteristics.
+ * A resizable-array implementation for primitive {@code float} values. This class extends
+ * {@link PrimitiveList} and stores elements without the per-element boxing required by
+ * {@code List<Float>}.
  *
  * <p>FloatList is specifically designed for scenarios involving large collections of floating-point
  * values such as scientific computing, graphics programming, audio processing, machine learning,
@@ -53,9 +51,8 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li><b>Zero-Boxing Overhead:</b> Direct float primitive storage without Float wrapper allocation</li>
  *   <li><b>Memory Efficiency:</b> Compact float array storage with minimal memory overhead</li>
  *   <li><b>Single-Precision Arithmetic:</b> Full support for IEEE 754 single-precision operations</li>
- *   <li><b>High Performance:</b> Optimized algorithms for floating-point specific operations</li>
  *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Set Operations:</b> Occurrence-aware intersection, difference, and symmetric difference operations</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
  *   <li><b>Type Conversions:</b> Seamless conversion to other numeric primitive lists</li>
@@ -90,7 +87,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * OptionalFloat min = coordinates.min();         // find minimum value
  * OptionalFloat max = coordinates.max();         // find maximum value
  * OptionalFloat median = coordinates.median();   // calculate median value
- * double sum = coordinates.stream().sum();       // calculate sum (each element widened to double; convert to DoubleList for higher-precision accumulation)
+ * double sum = coordinates.stream().sum();       // calculate the sum as a double
  *
  * // Set operations for data analysis
  * FloatList set1 = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f);
@@ -119,15 +116,15 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
  *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
- *   <li><b>Parallel Sorting:</b> O(n log n) with improved constants on multi-core systems</li>
- *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Parallel Sorting:</b> O(n log n), delegated to the JDK primitive-array parallel sort</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²), depending on the operation and input sizes</li>
  *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
  * </ul>
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
  *   <li><b>Storage:</b> 4 bytes per element (32 bits) with no object overhead</li>
- *   <li><b>vs List&lt;Float&gt;:</b> ~4x less memory usage (no Float wrapper objects)</li>
+ *   <li><b>vs List&lt;Float&gt;:</b> Avoids one wrapper object per stored element; exact savings are JVM-dependent</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
  * </ul>
@@ -139,6 +136,8 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li><b>Precision:</b> ~7 decimal digits of precision (24-bit mantissa)</li>
  *   <li><b>Range:</b> Approximately ±3.4 × 10^38 with subnormal support</li>
  *   <li><b>Comparison:</b> NaN-aware comparison operations</li>
+ *   <li><b>Aggregation:</b> {@code min()} and {@code max()} propagate NaN; {@code median()}
+ *       orders NaN after finite and infinite values</li>
  * </ul>
  *
  * <p><b>Float-Specific Operations:</b>
@@ -178,14 +177,14 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <p><b>Thread Safety:</b>
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
- *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>External Synchronization:</b> Required when any thread may mutate the list</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Capacity:</b> The no-argument constructor starts with shared zero-length storage; first growth allocates at least 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
  *   <li><b>Manual Control:</b> specify the initial capacity via the {@code FloatList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
@@ -202,9 +201,8 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <p><b>Serialization Support:</b>
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
- *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of float arrays</li>
- *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ *   <li><b>Version Identifier:</b> Declares a fixed {@code serialVersionUID}</li>
+ *   <li><b>Format:</b> Default Java serialization includes the backing array, including unused capacity</li>
  * </ul>
  *
  * <p><b>Integration with Collections Framework:</b>
@@ -217,7 +215,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  *
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
- *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
+ *   <li><b>Aggregation:</b> {@code min()} and {@code max()} are direct methods; sum is available via the stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
@@ -225,9 +223,9 @@ import com.landawn.abacus.util.stream.FloatStream;
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Float&gt;:</b> 4x less memory, significantly faster operations</li>
+ *   <li><b>vs List&lt;Float&gt;:</b> Avoids boxed element storage</li>
  *   <li><b>vs float[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
- *   <li><b>vs DoubleList:</b> Half the memory usage, lower precision, faster for simple operations</li>
+ *   <li><b>vs DoubleList:</b> Uses half the element storage, with lower precision and range</li>
  *   <li><b>vs ArrayList&lt;Float&gt;:</b> No boxing overhead, primitive-specific methods</li>
  * </ul>
  *
@@ -237,7 +235,6 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
  *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
  *   <li>Convert to {@code DoubleList} when higher precision is required</li>
- *   <li>Leverage parallel sorting for large datasets (>10,000 elements)</li>
  *   <li>Be aware of floating-point precision limitations in comparisons</li>
  * </ul>
  *
@@ -246,7 +243,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li>Pre-size lists with known capacity using the {@code FloatList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
- *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
+ *   <li>Benchmark {@code parallelSort()} for the actual data size and runtime environment</li>
  *   <li>Consider {@code stream()} API for complex transformations and filtering</li>
  * </ul>
  *
@@ -254,7 +251,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <ul>
  *   <li><b>3D Graphics:</b> {@code FloatList vertices = FloatList.of(x1, y1, z1, x2, y2, z2);}</li>
  *   <li><b>Audio Processing:</b> {@code FloatList samples = new FloatList(sampleRate);}</li>
- *   <li><b>Machine Learning:</b> {@code FloatList features = dataset.stream().mapToFloat(...).collect(...);}</li>
+ *   <li><b>Machine Learning:</b> {@code FloatList normalized = FloatList.of(2f, 4f, 6f).stream().map(value -> value / 6f).toFloatList();}</li>
  *   <li><b>Scientific Data:</b> {@code FloatList measurements = FloatList.random(count);}</li>
  * </ul>
  *
@@ -285,10 +282,9 @@ import com.landawn.abacus.util.stream.FloatStream;
  * // Extract coordinates
  * float[] vertexArray = vertices.toArray();
  *
- * // Calculate bounding box
- * float[] all = vertices.toArray();
- * OptionalFloat minX = vertices.min();
- * OptionalFloat maxX = vertices.max();
+ * // Find the minimum and maximum coordinate values
+ * OptionalFloat minCoordinate = vertices.min();
+ * OptionalFloat maxCoordinate = vertices.max();
  * }</pre>
  *
  * @see PrimitiveList
@@ -309,6 +305,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     @Serial
     private static final long serialVersionUID = 6459013170687883950L;
 
+    /** Shared random number generator used by {@link #random(int)}. */
     static final Random RAND = new SecureRandom();
 
     /**
@@ -375,8 +372,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * FloatList list = new FloatList(arr);
      * list.size();   // returns 3
      * list.get(0);   // returns 1.0
-     * arr[0] = 9f;      // backing array is shared
-     * list.get(0);      // returns 9.0
+     * arr[0] = 9f;   // backing array is shared
+     * list.get(0);   // returns 9.0
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
@@ -403,6 +400,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
+     * @throws NullPointerException if {@code a} is {@code null}
      */
     public FloatList(final float[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -508,6 +506,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @return a new FloatList containing a copy of the elements in the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      *                                   or {@code fromIndex > toIndex}
+     * @throws NullPointerException if {@code a} is {@code null}
      */
     public static FloatList copyOf(final float[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -891,7 +890,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             N.copy(elementData, index + 1, elementData, index, numMoved);
         }
 
-        elementData[--size] = 0; // clear to let GC do its work
+        elementData[--size] = 0; // clear the vacated slot
     }
 
     /**
@@ -2163,9 +2162,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
-     * list.forEach(0, 3, action);    // Forward: processes indices 0,1,2
-     * list.forEach(3, 0, action);    // Backward: processes indices 3,2,1
-     * list.forEach(4, -1, action);   // Backward: processes indices 4,3,2,1,0
+     * FloatList selected = new FloatList();
+     * list.forEach(0, 3, selected::add);    // selected is [1.0, 2.0, 3.0]
+     * selected.clear();
+     * list.forEach(3, 0, selected::add);    // selected is [4.0, 3.0, 2.0]
+     * selected.clear();
+     * list.forEach(4, -1, selected::add);   // selected is [5.0, 4.0, 3.0, 2.0, 1.0]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
@@ -2510,6 +2512,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     @Override
     public FloatList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
+
+        if (size == 0) {
+            return new FloatList(N.copyOfRange(elementData, 0, 0, step));
+        }
 
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.

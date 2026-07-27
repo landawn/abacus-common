@@ -26,8 +26,8 @@ import com.landawn.abacus.util.CharacterWriter;
 
 /**
  * Type handler for java.sql.RowId objects.
- * A SQL ROWID is a unique identifier for a row in a database table, representing the physical
- * address of the row. RowId values are database-specific and typically used for efficient
+ * A SQL ROWID identifies a row in a database table. Its representation and whether it denotes a
+ * physical or logical location are database-specific; RowId values are typically used for efficient
  * row identification and retrieval.
  *
  * <p>This type handler provides limited functionality because RowId objects are database-specific
@@ -40,8 +40,8 @@ import com.landawn.abacus.util.CharacterWriter;
  *   <li>This type is NOT serializable (isSerializable() returns false)</li>
  *   <li>valueOf(String) operation is not supported and will throw UnsupportedOperationException</li>
  *   <li>stringOf() is supported for display purposes but the result cannot be converted back to RowId</li>
- *   <li>RowId values are typically only valid within a single database session</li>
- *   <li>RowId lifetime and validity are database-specific</li>
+ *   <li>RowId lifetime and validity are database-specific; query
+ *       {@link java.sql.DatabaseMetaData#getRowIdLifetime()} for the driver's declared lifetime</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -54,20 +54,19 @@ import com.landawn.abacus.util.CharacterWriter;
  *         RowId rowId = type.get(rs, 1);
  *         String name = rs.getString(2);
  *
+ *         // Converting to string is supported for logging, but is not reversible
+ *         System.out.println("Row ID: " + type.stringOf(rowId));
+ *
  *         // Use RowId for quick row access
- *         PreparedStatement updateStmt = conn.prepareStatement("UPDATE employees SET name = ? WHERE ROWID = ?");
- *         updateStmt.setString(1, "New Name");
- *         type.set(updateStmt, 2, rowId);
- *         updateStmt.executeUpdate();
+ *         try (PreparedStatement updateStmt = conn.prepareStatement("UPDATE employees SET name = ? WHERE ROWID = ?")) {
+ *             updateStmt.setString(1, "New Name");
+ *             type.set(updateStmt, 2, rowId);
+ *             updateStmt.executeUpdate();
+ *         }
  *     }
  * }
- *
- * // Converting to string for logging (one-way conversion)
- * String rowIdStr = type.stringOf(rowId);   // OK for display
- * System.out.println("Row ID: " + rowIdStr);
- *
  * // Note: This operation is NOT supported
- * // RowId restored = type.valueOf(rowIdStr);   // Throws UnsupportedOperationException
+ * // RowId restored = type.valueOf("driver-specific text");   // Throws UnsupportedOperationException
  * }</pre>
  *
  */
@@ -251,19 +250,22 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * type.serializeTo(writer, rowId, null);   // Writes RowId to character stream
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * try {
+     *     type.serializeTo(writer, rowId, null);   // Writes RowId to character stream
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}. The value is written unquoted and unescaped; the supplied serialization config is
-     * currently not applied for RowId values. It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method writes the display form of {@code x} to the {@code CharacterWriter}. The value is unquoted and
+     * unescaped, and the supplied serialization config is not applied. Because this type reports
+     * {@link #isSerializable()} as {@code false}, the resulting driver-specific text is not guaranteed to be valid
+     * standalone JSON or to round-trip. It is the streaming counterpart of {@code stringOf}.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces unquoted machine-readable JSON/XML output,
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> both methods produce the same plain, driver-specific display rendering;
+     * neither applies JSON/XML quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the RowId to write

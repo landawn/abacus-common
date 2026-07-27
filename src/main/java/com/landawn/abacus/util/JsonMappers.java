@@ -175,7 +175,6 @@ public final class JsonMappers {
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
      * @return a JSON string representation of the object
-     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see #toJson(Object, boolean)
      * @see #toJson(Object, SerializationFeature, SerializationFeature...)
@@ -238,6 +237,11 @@ public final class JsonMappers {
      *   <li>WRAP_ROOT_VALUE - Wrap the root value with the type name</li>
      * </ul>
      *
+     * <p>Note that each supplied feature is <i>enabled</i>; this method cannot disable a feature.
+     * To disable a feature (or otherwise customize the configuration), use
+     * {@link #toJson(Object, SerializationConfig)} with a config built via
+     * {@link #createSerializationConfig()}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Serialize with multiple features
@@ -252,8 +256,9 @@ public final class JsonMappers {
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
      * @param first the first serialization feature to apply (required to ensure at least one feature)
-     * @param features additional serialization features to apply (optional)
+     * @param features additional serialization features to apply; may be empty but not {@code null}
      * @return a JSON string representation of the object
+     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see SerializationFeature
      * @see #toJson(Object, SerializationConfig)
@@ -717,7 +722,7 @@ public final class JsonMappers {
      * @param json the JSON content as a string
      * @param targetType the class of the object to deserialize to
      * @param first the first deserialization feature to apply (required)
-     * @param features additional deserialization features to apply (optional)
+     * @param features additional deserialization features to apply; may be empty but not {@code null}
      * @return the deserialized object; {@code null} if JSON string is "null"
      * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
      * @throws RuntimeException if deserialization fails
@@ -1166,12 +1171,12 @@ public final class JsonMappers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deserialize a List of objects
-     * byte[] jsonBytes = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]".getBytes();
+     * byte[] jsonBytes = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]".getBytes(StandardCharsets.UTF_8);
      * List<Person> people = JsonMappers.fromJson(jsonBytes,
      *     new TypeReference<List<Person>>() {});
      *
      * // Deserialize a Map
-     * byte[] mapBytes = "{\"key1\":\"value1\",\"key2\":\"value2\"}".getBytes();
+     * byte[] mapBytes = "{\"key1\":\"value1\",\"key2\":\"value2\"}".getBytes(StandardCharsets.UTF_8);
      * Map<String, String> map = JsonMappers.fromJson(mapBytes,
      *     new TypeReference<Map<String, String>>() {});
      *
@@ -1305,7 +1310,7 @@ public final class JsonMappers {
      * @param json the JSON content as a string
      * @param targetType TypeReference capturing the generic type information
      * @param first the first deserialization feature to apply (required)
-     * @param features additional deserialization features to apply (optional)
+     * @param features additional deserialization features to apply; may be empty but not {@code null}
      * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
      * @throws RuntimeException if deserialization fails
@@ -1861,6 +1866,16 @@ public final class JsonMappers {
         private final ObjectMapper jsonMapper;
         private final ObjectMapper jsonMapperForPretty;
 
+        /**
+         * Creates a wrapper around the specified mapper. The mapper is used as-is for compact output
+         * and for every read; a {@linkplain ObjectMapper#copy() copy} with
+         * {@link SerializationFeature#INDENT_OUTPUT} enabled is taken at construction time and used
+         * whenever pretty formatting is requested. Later changes to {@code jsonMapper} are therefore
+         * not reflected in the pretty-printing snapshot.
+         *
+         * @param jsonMapper the mapper to wrap; must not be {@code null}
+         * @see JsonMappers#wrap(ObjectMapper)
+         */
         One(final ObjectMapper jsonMapper) {
             this.jsonMapper = jsonMapper;
             jsonMapperForPretty = jsonMapper.copy();
@@ -1931,6 +1946,9 @@ public final class JsonMappers {
          * Serializes a Java object to JSON and writes it to the specified file.
          * The file is created if it doesn't exist, or overwritten if it does.
          *
+         * <p>The character encoding used is UTF-8. The parent directory must already exist;
+         * this method does not create missing parent directories.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<User> users = getUserList();
@@ -1939,7 +1957,8 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
-         * @param output the file to write the JSON to; created or overwritten as needed
+         * @param output the file to write the JSON to; created or overwritten as needed, but its
+         *               parent directory must already exist
          * @throws RuntimeException if serialization fails or the file cannot be written
          */
         public void toJson(final Object obj, final File output) {
@@ -1977,7 +1996,9 @@ public final class JsonMappers {
 
         /**
          * Serializes a Java object to JSON and writes it to the specified Writer.
-         * This method is useful for character-based output destinations.
+         * This method is useful for character-based output destinations. Note: with Jackson's default
+         * settings the wrapped mapper closes the writer after writing
+         * ({@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2038,8 +2059,6 @@ public final class JsonMappers {
          * @param json byte array containing JSON data
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
-         * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
@@ -2142,7 +2161,7 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param <T> the type of the object to deserialize to
-         * @param json the InputStream containing JSON data
+         * @param json the InputStream containing JSON data; closed after reading by Jackson's default auto-close behavior
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
@@ -2157,7 +2176,9 @@ public final class JsonMappers {
 
         /**
          * Deserializes JSON from a Reader into a Java object of the specified type.
-         * This method is suitable for character-based input sources.
+         * This method is suitable for character-based input sources. Note: with Jackson's default
+         * settings the wrapped mapper closes the reader after reading
+         * ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2167,7 +2188,7 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param <T> the type of the object to deserialize to
-         * @param json the Reader containing JSON data
+         * @param json the Reader containing JSON data; closed after reading by Jackson's default auto-close behavior
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
@@ -2274,6 +2295,8 @@ public final class JsonMappers {
          * @param len the number of bytes to read
          * @param targetType TypeReference describing the target type
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+         * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
@@ -2345,7 +2368,9 @@ public final class JsonMappers {
 
         /**
          * Deserializes JSON from an InputStream into a Java object of the specified generic type.
-         * This method handles stream-based input with complex generic types.
+         * This method handles stream-based input with complex generic types. Note: with Jackson's
+         * default settings the wrapped mapper closes the stream after reading
+         * ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2356,7 +2381,7 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param <T> the type of the object to deserialize to
-         * @param json the InputStream containing JSON data
+         * @param json the InputStream containing JSON data; closed after reading by Jackson's default auto-close behavior
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
@@ -2372,7 +2397,9 @@ public final class JsonMappers {
 
         /**
          * Deserializes JSON from a Reader into a Java object of the specified generic type.
-         * This method combines character-based input with generic type support.
+         * This method combines character-based input with generic type support. Note: with Jackson's
+         * default settings the wrapped mapper closes the reader after reading
+         * ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2382,7 +2409,7 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param <T> the type of the object to deserialize to
-         * @param json the Reader containing JSON data
+         * @param json the Reader containing JSON data; closed after reading by Jackson's default auto-close behavior
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization

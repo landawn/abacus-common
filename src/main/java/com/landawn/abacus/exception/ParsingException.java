@@ -96,7 +96,7 @@ public class ParsingException extends RuntimeException {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Token could represent a position, token type, or error code
-     * throw new ParsingException("Unexpected character '}' at position 42", 42);
+     * throw new ParsingException("Unexpected character ']' at position 42", 42);
      * }</pre>
      *
      * @param message the detail message. The detail message is saved for later retrieval

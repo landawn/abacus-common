@@ -72,6 +72,9 @@ import com.landawn.abacus.util.function.LongToFloatFunction;
  * <li>Type conversion support to other primitive stream types</li>
  * </ul>
  *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public LongStream factory methods rather than instantiating this class directly.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * long[] data = {1L, 2L, 3L, 4L, 5L};
@@ -89,10 +92,17 @@ import com.landawn.abacus.util.function.LongToFloatFunction;
  * System.out.println("Average: " + summary.getAverage());
  * }</pre>
  *
+ * @see LongStream
  */
 class ArrayLongStream extends AbstractLongStream {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final long[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
@@ -1902,10 +1912,11 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    protected LongStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected LongStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayLongStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelArrayLongStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 

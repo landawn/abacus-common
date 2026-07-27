@@ -125,7 +125,7 @@ public final class ParserUtil {
     // Shared, stateless splitter for nested property paths (e.g. "address.city"); reused to avoid per-call allocation.
     private static final Splitter PROP_NAME_SPLITTER = Splitter.with(PROP_NAME_SEPARATOR);
 
-    // ...
+    // Conventional JavaBean accessor prefixes.
     private static final String GET = "get";
 
     private static final String SET = "set";
@@ -144,7 +144,7 @@ public final class ParserUtil {
     // Cached once: NamingPolicy.values() clones its backing array on every call, and name tags are built per property.
     private static final NamingPolicy[] NAMING_POLICIES = NamingPolicy.values();
 
-    // ...
+    // Bean metadata cache, keyed by the complete reflective type.
     private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ObjectPool<>(POOL_SIZE);
 
     private ParserUtil() {
@@ -156,7 +156,11 @@ public final class ParserUtil {
      *
      * <p>A field is considered serializable if it is not static and not explicitly marked as ignored
      * through various annotation mechanisms including {@code @JsonXmlField(ignore=true)},
-     * {@code @JSONField(serialize=false)}, or {@code @JsonIgnore}.</p>
+     * {@code @JSONField(serialize=false)}, or {@code @JsonIgnore}. It is also excluded when its name
+     * equals, or matches as a regular expression, one of {@code JsonXmlConfig.ignoredFields()}.</p>
+     *
+     * <p>A {@code null} field is reported as serializable, so callers holding a method-only property
+     * do not need a null check.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -352,6 +356,10 @@ public final class ParserUtil {
      *   <li>Default to {@code EnumType.NAME}</li>
      * </ol>
      *
+     * <p>The field-level value is only taken into account when it differs from {@code EnumType.NAME}:
+     * the annotation attribute always has a value, so a field annotated only for some other attribute
+     * would otherwise silently override the class-level {@code @JsonXmlConfig(enumerated = ...)} setting.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Field statusField = MyBean.class.getDeclaredField("status");
@@ -444,13 +452,13 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
-     * // tags[0].name = "firstName" (CAMEL_CASE)
-     * // tags[1].name = "FirstName" (UPPER_CAMEL_CASE)
-     * // tags[2].name = "first_name" (SNAKE_CASE)
+     * // tags[0].name holds "firstName"  (NamingPolicy.CAMEL_CASE)
+     * // tags[1].name holds "FirstName"  (NamingPolicy.UPPER_CAMEL_CASE)
+     * // tags[2].name holds "first_name" (NamingPolicy.SNAKE_CASE)
      * }</pre>
      *
      * @param name the original name to convert
-     * @return an array of JSON name tags for all naming policies
+     * @return an array of JSON name tags, indexed by {@link NamingPolicy#ordinal()}
      */
     static JsonNameTag[] getJsonNameTags(final String name) {
         final NamingPolicy[] namingPolicies = NAMING_POLICIES;
@@ -472,13 +480,14 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlNameTag[] tags = ParserUtil.getXmlNameTags("firstName", "string", false);
-     * // tags[0].name = "firstName", typeName = "string", isBean = false
+     * // tags[0].namedStart holds "<firstName>"  (NamingPolicy.CAMEL_CASE)
+     * // tags[2].namedStart holds "<first_name>" (NamingPolicy.SNAKE_CASE)
      * }</pre>
      *
      * @param name the original name to convert
      * @param typeName the type name for XML serialization
      * @param isBean whether this represents a bean type
-     * @return an array of XML name tags for all naming policies
+     * @return an array of XML name tags, indexed by {@link NamingPolicy#ordinal()}
      */
     static XmlNameTag[] getXmlNameTags(final String name, final String typeName, final boolean isBean) {
         final NamingPolicy[] namingPolicies = NAMING_POLICIES;
@@ -507,7 +516,8 @@ public final class ParserUtil {
      *
      * @param propName the property name
      * @param field the field to check for naming annotations
-     * @return an array of JSON name tags
+     * @return an array of JSON name tags, indexed by {@link NamingPolicy#ordinal()}; every entry holds the
+     *         custom name when one is configured, otherwise the policy-converted property name
      * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
      */
     static JsonNameTag[] getJsonNameTags(final String propName, final Field field) {
@@ -589,7 +599,8 @@ public final class ParserUtil {
      * @param field the field to check for naming annotations
      * @param typeName the type name for XML serialization
      * @param isBean whether this represents a bean type
-     * @return an array of XML name tags
+     * @return an array of XML name tags, indexed by {@link NamingPolicy#ordinal()}; every entry holds the
+     *         custom name when one is configured, otherwise the policy-converted property name
      * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
      */
     static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isBean) {
@@ -626,7 +637,8 @@ public final class ParserUtil {
      * }</pre>
      *
      * @param field the field to check for alias annotations
-     * @return an array of aliases, or {@code null} if no aliases are defined
+     * @return an array of aliases, or {@code null} if none is defined. The array is empty when the only
+     *         declared alias was the field's own name, which is always removed
      */
     static String[] getAliases(final Field field) {
         String[] alias = null;
@@ -931,6 +943,18 @@ public final class ParserUtil {
         }
     }
 
+    /**
+     * Creates a {@link VarHandle} for direct read/write access to the specified field.
+     *
+     * <p>A plain lookup is attempted first; if that is rejected, a private lookup in
+     * {@code entityClass} is tried. Failure is not fatal - the caller falls back to
+     * ordinary reflection - so this method logs at debug level and returns {@code null}
+     * instead of throwing.</p>
+     *
+     * @param entityClass the class used as the host for a private lookup when the plain lookup fails
+     * @param field the field to unreflect, may be {@code null}
+     * @return a VarHandle for the field, or {@code null} if {@code field} is {@code null} or access was denied
+     */
     static VarHandle unreflect(final Class<?> entityClass, final Field field) {
         if (field == null) {
             return null;
@@ -1022,24 +1046,34 @@ public final class ParserUtil {
         /** All annotations present on this class and its superclasses */
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
 
+        /** Naming policy applied to property names during JSON/XML processing; {@code CAMEL_CASE} when unconfigured. */
         final NamingPolicy jsonXmlNamingPolicy;
 
+        /** Value-exclusion rule applied during serialization; {@code Exclusion.NULL} when unconfigured. */
         final Exclusion jsonXmlSeriExclusion;
 
+        /** The name of {@link #type}, used as the XML {@code type} attribute for this bean. */
         final String typeName;
 
+        /** JSON tags for this bean's own element name, indexed by {@link NamingPolicy#ordinal()}. */
         final JsonNameTag[] jsonNameTags;
 
+        /** XML tags for this bean's own element name, indexed by {@link NamingPolicy#ordinal()}. */
         final XmlNameTag[] xmlNameTags;
 
+        /** All properties of the bean, in declaration order; the array backing {@link #propInfoList}. */
         final PropInfo[] propInfos;
 
+        /** The subset of {@link #propInfos} that is not excluded from JSON/XML serialization. */
         final PropInfo[] jsonXmlSerializablePropInfos;
 
+        /** The serializable properties that are not transient - the ones written by default. */
         final PropInfo[] nonTransientSeriPropInfos;
 
+        /** The serializable properties that are transient - written only when transient output is requested. */
         final PropInfo[] transientSeriPropInfos;
 
+        /** The names of {@link #transientSeriPropInfos}, for fast membership tests. */
         final Set<String> transientSeriPropNameSet = N.newHashSet();
 
         private final Map<String, Optional<PropInfo>> propInfoMap;
@@ -1447,7 +1481,7 @@ public final class ParserUtil {
                     }
                 }
 
-                // set method mask to avoid querying next time.
+                // Cache the result (including a miss marker) to avoid querying next time.
                 if (propInfoOpt == null) {
                     propInfoOpt = Optional.empty();
                 } else if (propInfoOpt.isPresent()) {
@@ -1562,7 +1596,7 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propName the property name
          * @param propValue the value to set
-         * @throws IllegalArgumentException if no setter method found and ignoreUnmatchedProperty is false
+         * @throws IllegalArgumentException if no setter method is found for {@code propName}
          */
         public void setPropValue(final Object obj, final String propName, final Object propValue) {
             setPropValue(obj, propName, propValue, false);
@@ -1759,7 +1793,8 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param propName the property path (e.g., "address.street")
-         * @return a list of PropInfo objects for each level, or empty list if invalid
+         * @return an immutable list holding one PropInfo per path segment; an empty list if {@code propName}
+         *         contains no {@code '.'} separator, or if any segment cannot be resolved
          */
         public List<PropInfo> getPropInfoChain(final String propName) {
             List<PropInfo> propInfoQueue = propInfoQueueMap.get(propName);
@@ -2041,7 +2076,7 @@ public final class ParserUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Object intermediate = beanInfo.createBeanResult();
-         * // Populate intermediate object...
+         * beanInfo.setPropValue(intermediate, "name", "Ada");
          * Person person = beanInfo.finishBeanResult(intermediate);
          * }</pre>
          *
@@ -2123,12 +2158,14 @@ public final class ParserUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get property value
-     * PropInfo propInfo = ... // propInfo is obtained from BeanInfo
-     * Object value = propInfo.getPropValue(myObject);
-     *
-     * // Set property value with automatic type conversion
-     * propInfo.setPropValue(myObject, "new value");
+     * class Person {
+     *     public String name;
+     * }
+     * Person person = new Person();
+     * person.name = "old value";
+     * PropInfo propInfo = ParserUtil.getBeanInfo(Person.class).getPropInfo("name");
+     * Object value = propInfo.getPropValue(person); // returns "old value"
+     * propInfo.setPropValue(person, "new value");
      * }</pre>
      *
      * @see BeanInfo
@@ -2253,7 +2290,7 @@ public final class ParserUtil {
 
         /**
          * Pre-compiled DateTimeFormatter for Java 8+ date/time types.
-         * Null if no date format is specified.
+         * Null if no date format is specified, or if the format is the {@code "long"} epoch-millis marker.
          */
         final DateTimeFormatter dateTimeFormatter;
 
@@ -2265,7 +2302,7 @@ public final class ParserUtil {
 
         /**
          * Holder for Joda-Time formatter, if Joda-Time is available.
-         * Null if Joda-Time is not in the classpath.
+         * Null if no date format is specified or Joda-Time is not on the classpath.
          */
         final JodaDateTimeFormatterHolder jodaDTFH;
 
@@ -2557,8 +2594,9 @@ public final class ParserUtil {
 
             columnName = Strings.isEmpty(tmpColumnName) ? Optional.empty() : Optional.ofNullable(tmpColumnName);
 
-            tablePrefix = type.isBean() && clazz.getAnnotation(Table.class) != null ? Optional.ofNullable(clazz.getAnnotation(Table.class).alias())
-                    : Optional.empty();
+            final String tmpTableAlias = type.isBean() && clazz.getAnnotation(Table.class) != null ? clazz.getAnnotation(Table.class).alias() : null;
+
+            tablePrefix = Strings.isEmpty(tmpTableAlias) ? Optional.empty() : Optional.of(tmpTableAlias);
 
             canSetFieldByGetMethod = Beans.isRegisteredXmlBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
@@ -2579,8 +2617,12 @@ public final class ParserUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Person person = new Person("John", 30);
-         * PropInfo nameProp = ...                      // nameProp is property info for "name"
+         * class Person {
+         *     public String name;
+         * }
+         * Person person = new Person();
+         * person.name = "John";
+         * PropInfo nameProp = ParserUtil.getBeanInfo(Person.class).getPropInfo("name");
          * String name = nameProp.getPropValue(person); // returns "John"
          * }</pre>
          *
@@ -2628,8 +2670,11 @@ public final class ParserUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * class Person {
+         *     public int age;
+         * }
          * Person person = new Person();
-         * PropInfo ageProp = ... // ageProp is property info for "age"
+         * PropInfo ageProp = ParserUtil.getBeanInfo(Person.class).getPropInfo("age");
          * ageProp.setPropValue(person, 25);
          * ageProp.setPropValue(person, "30");   // value is converted from String
          * }</pre>
@@ -3069,15 +3114,27 @@ public final class ParserUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * PropInfo dateProp = ... // dateProp has date format "yyyy-MM-dd"
-         * Date date = (Date) dateProp.readPropValue("2023-12-25");
+         * class Event {
+         *     @JsonXmlField(dateFormat = "yyyy-MM-dd", timeZone = "UTC")
+         *     public java.util.Date date;
          *
-         * PropInfo longDateProp = ... // longDateProp has "long" date format
-         * Date date2 = (Date) longDateProp.readPropValue("1703462400000");
+         *     @JsonXmlField(dateFormat = "long")
+         *     public java.util.Date createdAt;
+         * }
+         *
+         * BeanInfo beanInfo = ParserUtil.getBeanInfo(Event.class);
+         * PropInfo dateProp = beanInfo.getPropInfo("date");
+         * java.util.Date date = (java.util.Date) dateProp.readPropValue("2023-12-25");
+         *
+         * PropInfo longDateProp = beanInfo.getPropInfo("createdAt");
+         * java.util.Date date2 = (java.util.Date) longDateProp.readPropValue("1703462400000");
          * }</pre>
          *
          * @param strValue the string value to parse
-         * @return the parsed value in the appropriate type, or {@code null} when {@code strValue} is {@code null} (number/date formats and most types pass {@code null} through; the primitive {@code long} "long"-format reader instead returns {@code 0L})
+         * @return the parsed value in the appropriate type. Returns {@code null} when {@code strValue} is
+         *         {@code null}: the number-format branch, the date-format readers and most other types all
+         *         pass {@code null} through. The one exception is a primitive {@code long} property with the
+         *         {@code "long"} date format, whose reader returns {@code 0L}
          * @throws UnsupportedOperationException if a date format is specified for an unsupported type
          * @throws RuntimeException if a number format is specified and {@code strValue} cannot be parsed against it
          */
@@ -3131,10 +3188,20 @@ public final class ParserUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * PropInfo dateProp = ... // dateProp has date format
-         * CharacterWriter writer = new CharacterWriter();
-         * Date now = new Date();
-         * dateProp.writePropValue(writer, now, config);
+         * class Event {
+         *     @JsonXmlField(dateFormat = "yyyy-MM-dd", timeZone = "UTC")
+         *     public java.util.Date date;
+         * }
+         *
+         * PropInfo dateProp = ParserUtil.getBeanInfo(Event.class).getPropInfo("date");
+         * com.landawn.abacus.util.BufferedJsonWriter writer =
+         *         com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+         * try {
+         *     dateProp.writePropValue(writer, new java.util.Date(), new JsonSerConfig());
+         *     String jsonValue = writer.toString();
+         * } finally {
+         *     com.landawn.abacus.util.Objectory.recycle(writer);
+         * }
          * }</pre>
          *
          * @param writer the character writer to write to
@@ -3553,16 +3620,49 @@ public final class ParserUtil {
         }
     }
 
+    /**
+     * A {@link PropInfo} that reads and writes the property through reflectasm-generated accessors
+     * instead of {@code java.lang.reflect}.
+     *
+     * <p>Instances are created only when reflectasm is available on the classpath and ASM support is
+     * enabled for the bean. Behavior is identical to {@code PropInfo}; only the access mechanism differs.
+     * When an accessor index cannot be resolved (index {@code -1}) the corresponding reflective path is
+     * used as the fallback.</p>
+     *
+     * @see PropInfo
+     */
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static class ASMPropInfo extends PropInfo { //NOSONAR
+        /** Generated accessor for the declaring class of the getter, or {@code null} if there is no getter. */
         final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess;
+        /** Generated accessor for the declaring class of the setter, or {@code null} if there is no setter. */
         final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess;
+        /** Generated accessor for the declaring class of the field, or {@code null} if there is no field. */
         final com.esotericsoftware.reflectasm.FieldAccess fieldAccess;
 
+        /** Index of the getter within {@link #getMethodAccess}, or {@code -1} if unavailable. */
         final int getMethodAccessIndex;
+        /** Index of the setter within {@link #setMethodAccess}, or {@code -1} if unavailable. */
         final int setMethodAccessIndex;
+        /** Index of the field within {@link #fieldAccess}, or {@code -1} if the field is not public, is final, or is not directly gettable. */
         final int fieldAccessIndex;
 
+        /**
+         * Constructs an ASM-backed PropInfo, resolving the reflectasm accessors and their indexes.
+         *
+         * @param name the name of the property
+         * @param field the field object (may be {@code null} for method-only properties)
+         * @param getMethod the getter method (may be {@code null} for write-only properties)
+         * @param setMethod the setter method (may be {@code null} for read-only properties)
+         * @param jsonXmlConfig configuration for JSON/XML processing
+         * @param classAnnotations annotations from the declaring class
+         * @param fieldOrder the ordinal position of this field
+         * @param isImmutableBean whether this property belongs to an immutable bean
+         * @param isByBuilder whether this property uses builder pattern
+         * @param idPropNames list of property names that are identifiers
+         * @param readOnlyIdPropNames list of property names that are read-only identifiers
+         * @param typeParamArgMap mapping of type variables to actual types for generic resolution
+         */
         ASMPropInfo(final String name, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
@@ -3688,12 +3788,25 @@ public final class ParserUtil {
         }
     }
 
+    /**
+     * An immutable bundle of pre-rendered JSON fragments for one property name under one naming policy.
+     *
+     * <p>Serialization writes these {@code char[]} fragments straight to the output buffer, so the
+     * quoting, the {@code ": "} separator and the {@code null} literal never have to be concatenated
+     * per value. Instances are shared between naming policies that resolve to the same name.</p>
+     */
     static class JsonNameTag {
+        /** The bare name, e.g. {@code id}. */
         final char[] name;
+        /** The bare name followed by {@code ": "}. */
         final char[] nameWithColon;
+        /** The bare name followed by {@code ": null"}. */
         final char[] nameNull;
+        /** The name wrapped in double quotes, e.g. {@code "id"}. */
         final char[] quotedName;
+        /** The quoted name followed by {@code ": "}. */
         final char[] quotedNameWithColon;
+        /** The quoted name followed by {@code ": null"}. */
         final char[] quotedNameNull;
 
         /**
@@ -3736,17 +3849,37 @@ public final class ParserUtil {
         }
     }
 
+    /**
+     * An immutable bundle of pre-rendered XML fragments for one property name under one naming policy.
+     *
+     * <p>Two element styles are prepared: the {@code ep*} fragments use a generic
+     * {@code <bean name="..."/>} or {@code <property name="..."/>} element, while the {@code named*}
+     * fragments use the property name as the element name itself. Each style additionally provides a
+     * variant carrying a {@code type} attribute and a self-closing {@code isNull="true"} variant.
+     * Instances are shared between naming policies that resolve to the same name.</p>
+     */
     static class XmlNameTag {
+        /** The bare name, e.g. {@code age}. */
         final char[] name;
+        /** Generic start tag, e.g. {@code <property name="age">}. */
         final char[] epStart;
+        /** Generic start tag including the {@code type} attribute. */
         final char[] epStartWithType;
+        /** Generic end tag, e.g. {@code </property>}. */
         final char[] epEnd;
+        /** Generic self-closing null element, e.g. {@code <property name="age" isNull="true" />}. */
         final char[] epNull;
+        /** Generic self-closing null element including the {@code type} attribute. */
         final char[] epNullWithType;
+        /** Name-as-element start tag, e.g. {@code <age>}. */
         final char[] namedStart;
+        /** Name-as-element start tag including the {@code type} attribute. */
         final char[] namedStartWithType;
+        /** Name-as-element end tag, e.g. {@code </age>}. */
         final char[] namedEnd;
+        /** Name-as-element self-closing null element, e.g. {@code <age isNull="true" />}. */
         final char[] namedNull;
+        /** Name-as-element self-closing null element including the {@code type} attribute. */
         final char[] namedNullWithType;
 
         /**
@@ -3809,13 +3942,25 @@ public final class ParserUtil {
         }
     }
 
+    /**
+     * Reads and writes one date/time (or number-like) representation on behalf of a formatted property.
+     *
+     * <p>One implementation is registered per supported property class in
+     * {@code PropInfo.propFuncMap}; {@link PropInfo#readPropValue(String)} and
+     * {@link PropInfo#writePropValue(CharacterWriter, Object, JsonXmlSerConfig)} dispatch through it
+     * whenever the property declares a date format. Implementations honor the property's
+     * {@code dateFormat}, {@code timeZone} and the {@code "long"} epoch-millis marker.</p>
+     *
+     * @param <T> the value type handled by this reader/writer
+     */
     interface DateTimeReaderWriter<T> {
         /**
          * Parses a string value into the target date/time type for the specified property.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Date value = readerWriter.read(propInfo, "2026-01-01");
+         * DateTimeReaderWriter<java.util.Date> readerWriter = PropInfo.propFuncMap.get(java.util.Date.class);
+         * java.util.Date value = readerWriter.read(propInfo, "2026-01-01");
          * }</pre>
          *
          * @param propInfo metadata for the target property.
@@ -3840,10 +3985,25 @@ public final class ParserUtil {
         void write(PropInfo propInfo, T x, CharacterWriter writer) throws IOException;
     }
 
+    /**
+     * Holds the Joda-Time zone and formatter derived from a property's date format and time zone.
+     *
+     * <p>Kept in a separate class so that the Joda-Time types are only loaded when Joda-Time is
+     * actually present on the classpath.</p>
+     */
     static class JodaDateTimeFormatterHolder {
+        /** The Joda zone corresponding to the property's {@link TimeZone}. */
         final org.joda.time.DateTimeZone dtz;
+        /** The formatter for the property's pattern, or {@code null} for the {@code "long"} epoch-millis format. */
         final org.joda.time.format.DateTimeFormatter dtf;
 
+        /**
+         * Builds the zone and, unless the format is the {@code "long"} epoch-millis marker, the pattern formatter.
+         *
+         * @param dateFormat the property's date format pattern, or {@code "long"} for epoch milliseconds
+         * @param timeZone the property's time zone
+         * @throws IllegalArgumentException if {@code dateFormat} is neither {@code "long"} nor a valid Joda pattern
+         */
         JodaDateTimeFormatterHolder(final String dateFormat, final TimeZone timeZone) {
             dtz = org.joda.time.DateTimeZone.forTimeZone(timeZone);
             // "long" means epoch millis (isLongDateFormat); only the zone is needed then and

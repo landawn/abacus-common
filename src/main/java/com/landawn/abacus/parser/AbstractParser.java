@@ -110,7 +110,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    // ... it has to be big enough to make it's safety to add an element to ArrayBlockingQueue.
+    // Keep this large enough that adding an element to an ArrayBlockingQueue is safe.
     static final int POOL_SIZE = 1000;
 
     static final int CLS_POOL_SIZE = 3000;
@@ -384,12 +384,13 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * with special handling for:</p>
      * <ul>
      *   <li>Primitive arrays: Uses the target type's conversion method</li>
-     *   <li>Object arrays: Attempts to determine the actual element type from collection contents</li>
+     *   <li>Object arrays: Uses the declared component type when it accepts the collection elements</li>
      *   <li>Empty collections: Returns an empty array of the target type</li>
      * </ul>
      *
-     * <p>The method inspects the first {@code non-null} element to determine if a more specific
-     * array type should be used than the declared target type.</p>
+     * <p>For an object array, the method inspects the first {@code non-null} element. It uses the
+     * declared target type when that element is assignable to its component type; otherwise it
+     * falls back to an array whose component type is that element's runtime class.</p>
      *
      * @param <T> the return type
      * @param c the collection to convert (may be {@code null})

@@ -52,14 +52,14 @@ import com.landawn.abacus.util.stream.CharStream;
  * <ul>
  *   <li><b>Zero-Boxing Overhead:</b> Direct char primitive storage without Character wrapper allocation</li>
  *   <li><b>Memory Efficiency:</b> Compact char array storage with minimal memory overhead</li>
- *   <li><b>Unicode Support:</b> Full support for 16-bit Unicode characters (BMP)</li>
+ *   <li><b>UTF-16 Storage:</b> Stores Java {@code char} code units; supplementary characters occupy two entries</li>
  *   <li><b>High Performance:</b> Optimized algorithms for character-specific operations</li>
- *   <li><b>Rich Text API:</b> String conversion, character search, pattern matching</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Character API:</b> Array conversion, primitive search, sorting, filtering, and replacement</li>
+ *   <li><b>Occurrence Operations:</b> Intersection, difference, and symmetric difference with multiset semantics</li>
  *   <li><b>Range Generation:</b> Built-in support for character sequences and alphabets</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
- *   <li><b>String Integration:</b> Seamless conversion to/from String and StringBuilder</li>
+ *   <li><b>String Integration:</b> Construction from {@code String#toCharArray()} and bracketed text representation</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -127,7 +127,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
  *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
- *   <li><b>String Conversion:</b> O(n) with efficient array copying</li>
+ *   <li><b>Array and Text Representation:</b> O(n) conversion to a char array or bracketed string</li>
  *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
  * </ul>
  *
@@ -144,10 +144,10 @@ import com.landawn.abacus.util.stream.CharStream;
  * <p><b>Character-Specific Operations:</b>
  * <ul>
  *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for character sequences</li>
- *   <li><b>String Integration:</b> {@code toString()} for string conversion</li>
+ *   <li><b>Text Representation:</b> {@code toString()} returns the list-style bracketed representation</li>
  *   <li><b>Character Analysis:</b> Integration with Character utility methods</li>
  *   <li><b>Case Operations:</b> Efficient case conversion via stream transformations</li>
- *   <li><b>Pattern Matching:</b> Character-level pattern searching and matching</li>
+ *   <li><b>Searching:</b> Linear and binary search for individual {@code char} values</li>
  * </ul>
  *
  * <p><b>Factory Methods:</b>
@@ -163,7 +163,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * <p><b>Conversion Methods:</b>
  * <ul>
  *   <li><b>{@code toArray()}:</b> Convert to primitive char array</li>
- *   <li><b>{@code toString()}:</b> Convert to String</li>
+ *   <li><b>{@code toString()}:</b> Produce a bracketed list representation</li>
  *   <li><b>{@code boxed()}:</b> Convert to {@code List<Character>}</li>
  *   <li><b>{@code stream()}:</b> Convert to CharStream for functional processing</li>
  * </ul>
@@ -257,8 +257,8 @@ import com.landawn.abacus.util.stream.CharStream;
  * <ul>
  *   <li><b>Text Building:</b> {@code CharList buffer = new CharList(expectedLength);}</li>
  *   <li><b>Character Analysis:</b> {@code CharList chars = CharList.of(text.toCharArray());}</li>
- *   <li><b>Alphabet Generation:</b> {@code CharList letters = CharList.range('a', 'z');}</li>
- *   <li><b>Character Filtering:</b> {@code CharList filtered = chars.stream().filter(...).collect(...);}</li>
+ *   <li><b>Alphabet Generation:</b> {@code CharList letters = CharList.rangeClosed('a', 'z');}</li>
+ *   <li><b>Character Filtering:</b> {@code CharList filtered = CharList.of('a', '1', 'b').stream().filter(Character::isLetter).toCharList();}</li>
  * </ul>
  *
  * <p><b>Related Classes:</b>
@@ -270,7 +270,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *   <li><b>{@link CharStream}:</b> Functional processing of character sequences</li>
  * </ul>
  *
- * <p><b>Usage Examples: Text Processing</b>
+ * <p><b>Usage Examples: Text Processing</b></p>
  * <pre>{@code
  * // Process text document
  * String document = "The Quick Brown Fox Jumps Over The Lazy Dog";
@@ -1023,7 +1023,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Private method to remove the element at the specified position without range checking.
+     * Removes the element at the specified index without bounds checking.
      *
      * @param index the index of the element to remove
      */
@@ -2745,6 +2745,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public CharList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
+        if (size == 0) {
+            return new CharList(N.copyOfRange(elementData, 0, 0, step));
+        }
+
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.
         return new CharList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
@@ -2911,16 +2915,16 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Converts this CharList to an IntList.
-     * Each char value is widened to an int value, preserving its Unicode code point.
+     * Each {@code char} value is widened to its numeric UTF-16 code-unit value.
      * The returned IntList is independent of this list.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
-     * IntList ints = list.toIntList();   // returns [97, 98, 99] (Unicode code points)
+     * IntList ints = list.toIntList();   // returns [97, 98, 99] (UTF-16 code-unit values)
      * }</pre>
      *
-     * @return a new IntList containing the Unicode code point values of all elements in this list
+     * @return a new IntList containing the numeric UTF-16 code-unit values of all elements in this list
      */
     public IntList toIntList() {
         final int[] a = new int[size];
@@ -3018,10 +3022,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * charList.stream()
+     * CharList list = CharList.of('a', '1', 'b');
+     * list.stream()
      *     .filter(ch -> Character.isLetter(ch))
      *     .map(ch -> Character.toUpperCase(ch))
-     *     .forEach(System.out::print);
+     *     .forEach(System.out::print);   // prints "AB"
      * }</pre>
      *
      * @return a CharStream over all elements in this list

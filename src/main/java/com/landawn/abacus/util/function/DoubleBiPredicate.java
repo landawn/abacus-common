@@ -115,6 +115,9 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
      *
+     * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
+     * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleBiPredicate bothPositive = (d1, d2) -> d1 > 0 && d2 > 0;
@@ -135,6 +138,9 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     /**
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
+     *
+     * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
+     * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

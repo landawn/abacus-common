@@ -48,6 +48,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -84,41 +87,69 @@ import com.landawn.abacus.util.stream.Stream;
  * in other programming languages.
  *
  * <p>Although the class is named {@code RowDataset}, the underlying data is stored column-wise
- * (one {@code List<Object>} per column) for memory efficiency and cache-friendly columnar access.
- * Logically the dataset is still addressed by row index and column name/index, exposing a familiar
- * row-oriented API on top of the columnar storage. This implementation is cloneable and provides
- * methods for filtering, sorting, grouping, joining, and aggregating data.</p>
+ * (one {@code List<Object>} per column), which supports direct column access. Logically the dataset
+ * is addressed by row index and column name/index, exposing a row-oriented API on top of that
+ * storage. This implementation is cloneable and provides methods for filtering, sorting, grouping,
+ * joining, and aggregating data.</p>
+ *
+ * <p>This mutable class is not thread-safe. Its public constructors retain the supplied column-name
+ * and column lists rather than defensively copying them. {@link #freeze()} only prevents mutation
+ * through the Dataset API; it neither detaches those retained lists nor deep-freezes cell values.
+ * In addition, {@link #slice(int, int)} and pages returned by {@link #paginate(int)} are frozen,
+ * backed views: non-structural source updates are visible through them, while structural source
+ * changes can invalidate them.</p>
+ *
+ * <p>The cursor used by the one-coordinate accessors is positional. Row-removal operations clamp it
+ * to the last remaining row, or reset it to {@code 0} when the dataset becomes empty; they do not
+ * preserve the identity of the row that previously occupied the cursor position.</p>
  *
  * @see Dataset
  */
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S1854", "java:S6539" })
 public final class RowDataset implements Dataset, Cloneable {
 
+    /**
+     * The shared, frozen, zero-column/zero-row instance returned by {@link Dataset#empty()}.
+     * It is immutable, so it can safely be handed out to any number of callers.
+     */
     static final Dataset EMPTY_DATASET = new RowDataset(N.emptyList(), N.emptyList());
 
     static {
         EMPTY_DATASET.freeze();
     }
 
+    /**
+     * The immutable empty map used as the properties of a dataset that carries no metadata. It is compared by
+     * identity ({@code ==}) to distinguish "no properties" from a caller-supplied map.
+     */
     static final Map<String, Object> EMPTY_PROPERTIES = N.emptyMap();
 
+    /** The character separating a prefix from a property name in a nested column name, as in {@code "account.id"}. */
     static final char PROP_NAME_SEPARATOR = '.';
 
+    /** The text written for a {@code null} value. */
     static final String NULL_STRING = "null";
 
+    /** {@link #NULL_STRING} as a {@code char[]}, so it can be written without re-allocating. */
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
+    /** The text written for {@code Boolean.TRUE}. */
     static final String TRUE = Boolean.TRUE.toString().intern();
 
+    /** {@link #TRUE} as a {@code char[]}, so it can be written without re-allocating. */
     static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
 
+    /** The text written for {@code Boolean.FALSE}. */
     static final String FALSE = Boolean.FALSE.toString().intern();
 
+    /** {@link #FALSE} as a {@code char[]}, so it can be written without re-allocating. */
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
+    /** The numeric column types (primitive and wrapper) accepted as a count/aggregate column. */
     static final Set<Class<?>> SUPPORTED_COUNT_COLUMN_TYPES = N.toSet(int.class, Integer.class, long.class, Long.class, float.class, Float.class, double.class,
             Double.class);
 
+    /** The properties key under which a resolved property-name list may be cached. */
     static final String CACHED_PROP_NAMES = "cachedPropNames";
 
     private static final String COUNT = "count";
@@ -151,6 +182,59 @@ public final class RowDataset implements Dataset, Cloneable {
         } finally {
             Objectory.recycle(bw);
         }
+    }
+
+    private static void checkXmlElementName(final Document document, final String name, final String parameterName) {
+        try {
+            document.createElementNS(null, name);
+        } catch (final DOMException e) {
+            throw new IllegalArgumentException("Invalid XML element name for " + parameterName + ": " + name, e);
+        }
+    }
+
+    private static <T> T checkSupplierResult(final T result, final String supplierName) {
+        if (result == null) {
+            throw new IllegalArgumentException(supplierName + " returned null");
+        }
+
+        return result;
+    }
+
+    private static Object[] checkObjectArrayCapacity(final Object[] array, final int requiredLength, final String supplierName) {
+        if (array.length < requiredLength) {
+            throw new IllegalArgumentException(
+                    supplierName + " returned an array of length " + array.length + ", but at least " + requiredLength + " elements are required");
+        }
+
+        return array;
+    }
+
+    private static void checkSupportedRowType(final Class<?> rowType, final String parameterName) {
+        N.checkArgNotNull(rowType, parameterName);
+
+        final Type<?> type = Type.of(rowType);
+
+        if (!(type.isObjectArray() || type.isCollection() || type.isMap() || type.isBean())) {
+            throw new IllegalArgumentException("Unsupported row type: " + ClassUtil.getCanonicalClassName(rowType)
+                    + ". Only Object array, Collection, Map and bean classes are supported");
+        }
+    }
+
+    private static <T> IntFunction<? extends T> reuseFirstSuppliedRow(final T firstRow, final IntFunction<? extends T> rowSupplier) {
+        return new IntFunction<>() {
+            private T next = firstRow;
+
+            @Override
+            public T apply(final int columnCount) {
+                if (next != null) {
+                    final T result = next;
+                    next = null;
+                    return result;
+                }
+
+                return checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
+            }
+        };
     }
 
     private List<String> _columnNameList; //NOSONAR
@@ -194,9 +278,9 @@ public final class RowDataset implements Dataset, Cloneable {
      *     new ArrayList<>(Arrays.asList(25, 30))
      * );
      * RowDataset dataset = new RowDataset(columnNames, columns);
-     * System.out.println(dataset.size());          // 2
-     * System.out.println(dataset.columnCount());   // 3
-     * System.out.println(dataset.get(0, 1));       // "Alice"
+     * System.out.println(dataset.size());            // 2
+     * System.out.println(dataset.columnCount());     // 3
+     * System.out.println(dataset.<String>get(0, 1)); // "Alice"
      * }</pre>
      *
      * @param columnNameList the ordered list of column names. Must not be {@code null},
@@ -333,6 +417,15 @@ public final class RowDataset implements Dataset, Cloneable {
         return columnIndex;
     }
 
+    /**
+     * Returns the index of {@code columnName}, failing fast if this dataset has no such column.
+     * A synonym of {@link #getColumnIndex(String)} used at the head of the methods that take a single
+     * column name, so that the name is validated before any other work is done.
+     *
+     * @param columnName the column name to resolve
+     * @return the zero-based index of the column
+     * @throws IllegalArgumentException if {@code columnName} is not a column of this dataset
+     */
     int checkColumnName(final String columnName) throws IllegalArgumentException {
         return getColumnIndex(columnName);
     }
@@ -386,12 +479,26 @@ public final class RowDataset implements Dataset, Cloneable {
         return columnIndexes;
     }
 
+    /**
+     * Resolves a required column selection to column indexes, failing fast on an unusable selection.
+     * Unlike {@link #getColumnIndexes(Collection)}, which maps a {@code null}/empty selection to an empty
+     * result, this method rejects a {@code null} selection outright and rejects an empty one unless this
+     * dataset itself has no columns (where the empty list <i>is</i> the full column set).
+     *
+     * <p>When {@code columnNames} is this dataset's own column-name list the returned array is a cached
+     * internal array rather than a fresh copy; callers must not modify it.</p>
+     *
+     * @param columnNames the column selection to resolve
+     * @return the zero-based indexes of the selected columns, in selection order
+     * @throws IllegalArgumentException if {@code columnNames} is {@code null}, if it is empty while this
+     *         dataset has at least one column, or if it names a column this dataset does not have
+     */
     int[] checkColumnNames(final Collection<String> columnNames) throws IllegalArgumentException {
         // A null selection is always invalid for the strict column-selection methods. Previously the guard only
         // fired when _columnNameList was non-empty, so on a zero-column Dataset a null selection slipped through
         // and NPE'd in getColumnIndexes (e.g. copy(null)); it now fails with the documented IllegalArgumentException.
         // An EMPTY (non-null) selection is still allowed on a zero-column Dataset: there the empty list is the full
-        // (empty) column set, so no-arg operations that delegate via columnNameList() (e.g. toList()) keep working.
+        // (empty) column set, so no-arg operations that delegate via columnNames() (e.g. toList()) keep working.
         if (columnNames == null || (columnNames.isEmpty() && N.notEmpty(_columnNameList))) {
             throw new IllegalArgumentException("The specified columnNames is null or empty");
         }
@@ -412,6 +519,15 @@ public final class RowDataset implements Dataset, Cloneable {
         return getColumnIndexes(columnNames);
     }
 
+    /**
+     * Returns {@code true} if {@code columnNames} <i>is</i> this dataset's own column-name list — either that
+     * list itself, or the {@link ImmutableList} view of it returned by {@link #columnNames()}. The check is by
+     * reference identity, not by content: an equal-but-distinct list returns {@code false}. It is used only to
+     * take a fast path (all columns, in declaration order) and never changes the result of an operation.
+     *
+     * @param columnNames the column selection to test; may be {@code null}
+     * @return {@code true} if {@code columnNames} is this dataset's own column-name list
+     */
     boolean isColumnNameList(final Collection<String> columnNames) {
         if (columnNames == _columnNameList) {
             return true;
@@ -1216,6 +1332,8 @@ public final class RowDataset implements Dataset, Cloneable {
         _columnNameList.remove(columnIndex);
         final List<Object> removedColumn = _columnList.remove(columnIndex);
 
+        normalizeCurrentRowIndex();
+
         modCount++;
 
         return (List) removedColumn;
@@ -1241,6 +1359,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
         _columnIndexMap = null;
         _columnIndexes = null;
+
+        normalizeCurrentRowIndex();
 
         modCount++;
     }
@@ -1333,6 +1453,10 @@ public final class RowDataset implements Dataset, Cloneable {
     public void combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnType) {
         checkFrozen();
 
+        if (N.isEmpty(columnNames)) {
+            throw new IllegalArgumentException("Column names to be combined cannot be null or empty");
+        }
+
         // Snapshot: columnNames may be the live column-name view, which addColumn mutates;
         // re-reading it in removeColumns would then also remove the just-added combined column.
         final List<String> columnNamesToCombine = new ArrayList<>(columnNames);
@@ -1349,6 +1473,10 @@ public final class RowDataset implements Dataset, Cloneable {
     @Override
     public void combineColumns(final Collection<String> columnNames, final String newColumnName, final Function<? super DisposableObjArray, ?> combineFunc) {
         checkFrozen();
+
+        if (N.isEmpty(columnNames)) {
+            throw new IllegalArgumentException("Column names to be combined cannot be null or empty");
+        }
 
         // Snapshot: columnNames may be the live column-name view, which addColumn mutates;
         // re-reading it in removeColumns would then also remove the just-added combined column.
@@ -1388,6 +1516,10 @@ public final class RowDataset implements Dataset, Cloneable {
     private int checkColumnNamesForCombination(final Collection<String> columnNames, final String newColumnName) {
         if (N.isEmpty(columnNames)) {
             throw new IllegalArgumentException("Column names to be combined cannot be null or empty");
+        }
+
+        if (Strings.isEmpty(newColumnName)) {
+            throw new IllegalArgumentException("The new column name can not be null or empty");
         }
 
         final int[] columnIndexes = checkColumnNames(columnNames);
@@ -1737,6 +1869,8 @@ public final class RowDataset implements Dataset, Cloneable {
             objects.remove(rowIndex);
         }
 
+        normalizeCurrentRowIndex();
+
         modCount++;
     }
 
@@ -1752,6 +1886,8 @@ public final class RowDataset implements Dataset, Cloneable {
             N.removeAt(element, rowIndexesToRemove);
         }
 
+        normalizeCurrentRowIndex();
+
         modCount++;
     }
 
@@ -1764,6 +1900,8 @@ public final class RowDataset implements Dataset, Cloneable {
         for (final List<Object> objects : _columnList) {
             objects.subList(inclusiveFromRowIndex, exclusiveToRowIndex).clear();
         }
+
+        normalizeCurrentRowIndex();
 
         modCount++;
     }
@@ -1813,6 +1951,8 @@ public final class RowDataset implements Dataset, Cloneable {
             _columnList.get(i).clear();
             _columnList.get(i).addAll(newColumnList.get(i));
         }
+
+        normalizeCurrentRowIndex();
 
         modCount++;
     }
@@ -1896,7 +2036,19 @@ public final class RowDataset implements Dataset, Cloneable {
             _columnList.get(i).addAll(newColumnList.get(i));
         }
 
+        normalizeCurrentRowIndex();
+
         modCount++;
+    }
+
+    private void normalizeCurrentRowIndex() {
+        final int rowCount = size();
+
+        if (rowCount == 0) {
+            _currentRowIndex = 0;
+        } else if (_currentRowIndex >= rowCount) {
+            _currentRowIndex = rowCount - 1;
+        }
     }
 
     @Override
@@ -2202,6 +2354,12 @@ public final class RowDataset implements Dataset, Cloneable {
         final int[] columnIndexes = checkColumnNames(columnNames);
         final int columnCount = columnIndexes.length;
 
+        if (rowClass == null) {
+            N.checkArgNotNull(rowSupplier, "rowSupplier");
+        } else {
+            checkSupportedRowType(rowClass, "rowType");
+        }
+
         return getRow(rowIndex, columnNames, columnIndexes, columnCount, null, null, rowClass, null, rowSupplier);
     }
 
@@ -2212,7 +2370,7 @@ public final class RowDataset implements Dataset, Cloneable {
         Object rowOutput = null;
 
         if (rowClass == null && rowSupplier != null) {
-            rowOutput = rowSupplier.apply(columnCount);
+            rowOutput = checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
             rowClass = (Class<T>) rowOutput.getClass();
             rowType = Type.of(rowClass);
         }
@@ -2227,19 +2385,19 @@ public final class RowDataset implements Dataset, Cloneable {
 
         if (rowSupplier == null && !rowType.isBean()) {
             rowSupplier = this.createRowSupplier(rowClass, rowType);
-            rowOutput = rowSupplier.apply(columnCount);
+            rowOutput = checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
         }
 
         if (beanInfo == null && rowType.isBean()) {
             beanInfo = ParserUtil.getBeanInfo(rowClass);
         }
 
-        if (rowOutput == null && rowSupplier != null && (beanInfo == null || !rowType.isBean())) {
-            rowOutput = rowSupplier.apply(columnCount);
+        if (rowOutput == null && rowSupplier != null) {
+            rowOutput = checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
         }
 
         if (rowType.isObjectArray()) {
-            final Object[] result = (Object[]) rowOutput;
+            final Object[] result = checkObjectArrayCapacity((Object[]) rowOutput, columnCount, "rowSupplier");
 
             for (int i = 0; i < columnCount; i++) {
                 result[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
@@ -2376,6 +2534,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public <T> Optional<T> firstRow(final Collection<String> columnNames, final Class<? extends T> rowType) {
+        checkColumnNames(columnNames);
+        checkSupportedRowType(rowType, "rowType");
+
         return size() == 0 ? (Optional<T>) Optional.empty() : Optional.of(getRow(0, columnNames, rowType));
     }
 
@@ -2386,6 +2547,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public <T> Optional<T> firstRow(final Collection<String> columnNames, final IntFunction<? extends T> rowSupplier) {
+        checkColumnNames(columnNames);
+        N.checkArgNotNull(rowSupplier, "rowSupplier");
+
         if (size() == 0) {
             return Optional.empty();
         }
@@ -2407,6 +2571,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public <T> Optional<T> lastRow(final Collection<String> columnNames, final Class<? extends T> rowType) {
+        checkColumnNames(columnNames);
+        checkSupportedRowType(rowType, "rowType");
+
         return size() == 0 ? (Optional<T>) Optional.empty() : Optional.of(getRow(size() - 1, columnNames, rowType));
     }
 
@@ -2417,6 +2584,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
     @Override
     public <T> Optional<T> lastRow(final Collection<String> columnNames, final IntFunction<? extends T> rowSupplier) {
+        checkColumnNames(columnNames);
+        N.checkArgNotNull(rowSupplier, "rowSupplier");
+
         if (size() == 0) {
             return Optional.empty();
         }
@@ -2650,13 +2820,18 @@ public final class RowDataset implements Dataset, Cloneable {
             final Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowClass, IntFunction<? extends T> rowSupplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
         final int[] columnIndexes = checkColumnNames(columnNames);
+        final int columnCount = columnIndexes.length;
+
+        if (rowClass == null) {
+            N.checkArgNotNull(rowSupplier, "rowSupplier");
+        } else {
+            checkSupportedRowType(rowClass, "rowType");
+        }
 
         if (rowClass == null && rowSupplier != null) {
-            final T temp = rowSupplier.apply(0);
-            if (temp == null) {
-                throw new IllegalArgumentException("rowSupplier returned null");
-            }
+            final T temp = checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
             rowClass = (Class<T>) temp.getClass();
+            rowSupplier = reuseFirstSuppliedRow(temp, rowSupplier);
         }
         final Type<?> rowType = Type.of(rowClass);
 
@@ -2668,7 +2843,6 @@ public final class RowDataset implements Dataset, Cloneable {
         // rowType.isBean() is always false here: the bean case already returned above.
         rowSupplier = rowSupplier == null ? this.createRowSupplier(rowClass, rowType) : rowSupplier;
 
-        final int columnCount = columnIndexes.length;
         final int rowCount = toRowIndex - fromRowIndex;
 
         final List<Object> rowList = new ArrayList<>(rowCount);
@@ -2678,7 +2852,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 //noinspection DataFlowIssue
-                row = (Object[]) rowSupplier.apply(columnCount);
+                row = checkObjectArrayCapacity((Object[]) checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier"), columnCount, "rowSupplier");
 
                 for (int i = 0; i < columnCount; i++) {
                     row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
@@ -2691,7 +2865,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 //noinspection DataFlowIssue
-                row = (Collection<Object>) rowSupplier.apply(columnCount);
+                row = (Collection<Object>) checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
 
                 for (final int columnIndex : columnIndexes) {
                     row.add(_columnList.get(columnIndex).get(rowIndex));
@@ -2710,7 +2884,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 //noinspection DataFlowIssue
-                row = (Map<String, Object>) rowSupplier.apply(columnCount);
+                row = (Map<String, Object>) checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
 
                 for (int i = 0; i < columnCount; i++) {
                     row.put(mapKeyNames[i], _columnList.get(columnIndexes[i]).get(rowIndex));
@@ -2965,7 +3139,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         if (N.isEmpty(idColumnIndexes)) {
             for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
-                resultEntities[i] = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
+                resultEntities[i] = rowSupplier == null ? beanInfo.createBeanResult() : checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
             }
         } else if (idColumnIndexes.length == 1) {
             final List<Object> idColumn = _columnList.get(idColumnIndexes[0]);
@@ -2983,7 +3157,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 bean = idBeanMap.get(rowKey);
 
                 if (bean == null) {
-                    bean = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
+                    bean = rowSupplier == null ? beanInfo.createBeanResult() : checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
                     idBeanMap.put(rowKey, bean);
                 }
 
@@ -3014,7 +3188,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 bean = idBeanMap.get(keyRowWrapper);
 
                 if (bean == null) {
-                    bean = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
+                    bean = rowSupplier == null ? beanInfo.createBeanResult() : checkSupplierResult(rowSupplier.apply(columnCount), "rowSupplier");
                     idBeanMap.put(keyRowWrapper, bean);
 
                     keyRow = Objectory.createObjectArray(idColumnCount);
@@ -3285,7 +3459,8 @@ public final class RowDataset implements Dataset, Cloneable {
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int valueColumnIndex = checkColumnName(valueColumnName);
 
-        final M resultMap = supplier.apply(toRowIndex - fromRowIndex);
+        N.checkArgNotNull(supplier, "supplier");
+        final M resultMap = checkSupplierResult(supplier.apply(toRowIndex - fromRowIndex), "supplier");
 
         for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
             resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (V) _columnList.get(valueColumnIndex).get(rowIndex));
@@ -3322,7 +3497,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
         final Type<?> valueType = Type.of(rowType);
         final int valueColumnCount = valueColumnIndexes.length;
-        final Map<Object, Object> resultMap = (Map<Object, Object>) supplier.apply(toRowIndex - fromRowIndex);
+        N.checkArgNotNull(supplier, "supplier");
+        final Map<Object, Object> resultMap = (Map<Object, Object>) checkSupplierResult(supplier.apply(toRowIndex - fromRowIndex), "supplier");
 
         if (valueType.isObjectArray()) {
             Object[] value = null;
@@ -3344,8 +3520,8 @@ public final class RowDataset implements Dataset, Cloneable {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = valueSupplier.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.add(_columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.add(_columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -3358,8 +3534,8 @@ public final class RowDataset implements Dataset, Cloneable {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = valueSupplier.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.put(_columnNameList.get(columIndex), _columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.put(_columnNameList.get(columnIndex), _columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -3373,9 +3549,9 @@ public final class RowDataset implements Dataset, Cloneable {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = beanInfo.createBeanResult();
 
-                for (final int columIndex : valueColumnIndexes) {
-                    propName = _columnNameList.get(columIndex);
-                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                for (final int columnIndex : valueColumnIndexes) {
+                    propName = _columnNameList.get(columnIndex);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columnIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 value = beanInfo.finishBeanResult(value);
@@ -3415,16 +3591,21 @@ public final class RowDataset implements Dataset, Cloneable {
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int[] valueColumnIndexes = checkColumnNames(valueColumnNames);
 
-        final Class<V> rowClass = (Class<V>) rowSupplier.apply(0).getClass();
-        final Type<?> valueType = Type.of(rowClass);
         final int valueColumnCount = valueColumnIndexes.length;
-        final Map<Object, Object> resultMap = (Map<Object, Object>) supplier.apply(toRowIndex - fromRowIndex);
+        N.checkArgNotNull(rowSupplier, "rowSupplier");
+        N.checkArgNotNull(supplier, "supplier");
+        final V firstRow = checkSupplierResult(rowSupplier.apply(valueColumnCount), "rowSupplier");
+
+        final Class<V> rowClass = (Class<V>) firstRow.getClass();
+        final Type<?> valueType = Type.of(rowClass);
+        final IntFunction<? extends V> rowSupplierToUse = reuseFirstSuppliedRow(firstRow, rowSupplier);
+        final Map<Object, Object> resultMap = (Map<Object, Object>) checkSupplierResult(supplier.apply(toRowIndex - fromRowIndex), "supplier");
 
         if (valueType.isObjectArray()) {
             Object[] value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = (Object[]) rowSupplier.apply(valueColumnCount);
+                value = checkObjectArrayCapacity((Object[]) rowSupplierToUse.apply(valueColumnCount), valueColumnCount, "rowSupplier");
 
                 for (int i = 0; i < valueColumnCount; i++) {
                     value[i] = _columnList.get(valueColumnIndexes[i]).get(rowIndex);
@@ -3436,10 +3617,10 @@ public final class RowDataset implements Dataset, Cloneable {
             Collection<Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = (Collection<Object>) rowSupplier.apply(valueColumnCount);
+                value = (Collection<Object>) rowSupplierToUse.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.add(_columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.add(_columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -3448,10 +3629,10 @@ public final class RowDataset implements Dataset, Cloneable {
             Map<String, Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = (Map<String, Object>) rowSupplier.apply(valueColumnCount);
+                value = (Map<String, Object>) rowSupplierToUse.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.put(_columnNameList.get(columIndex), _columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.put(_columnNameList.get(columnIndex), _columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -3463,11 +3644,11 @@ public final class RowDataset implements Dataset, Cloneable {
             String propName = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = rowSupplier.apply(valueColumnCount);
+                value = rowSupplierToUse.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    propName = _columnNameList.get(columIndex);
-                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                for (final int columnIndex : valueColumnIndexes) {
+                    propName = _columnNameList.get(columnIndex);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columnIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -3501,10 +3682,10 @@ public final class RowDataset implements Dataset, Cloneable {
             final String valueColumnName, final IntFunction<? extends M> supplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
 
-        final M resultMap = supplier.apply(toRowIndex - fromRowIndex);
-
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int valueColumnIndex = checkColumnName(valueColumnName);
+        N.checkArgNotNull(supplier, "supplier");
+        final M resultMap = checkSupplierResult(supplier.apply(toRowIndex - fromRowIndex), "supplier");
 
         for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
             resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (T) _columnList.get(valueColumnIndex).get(rowIndex));
@@ -3542,7 +3723,8 @@ public final class RowDataset implements Dataset, Cloneable {
         final Type<?> valueType = Type.of(rowType);
         final int valueColumnCount = valueColumnIndexes.length;
 
-        final M resultMap = supplier.apply(toRowIndex - fromRowIndex);
+        N.checkArgNotNull(supplier, "supplier");
+        final M resultMap = checkSupplierResult(supplier.apply(toRowIndex - fromRowIndex), "supplier");
 
         if (valueType.isObjectArray()) {
             Object[] value = null;
@@ -3564,8 +3746,8 @@ public final class RowDataset implements Dataset, Cloneable {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = valueSupplier.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.add(_columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.add(_columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (T) value);
@@ -3578,8 +3760,8 @@ public final class RowDataset implements Dataset, Cloneable {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = valueSupplier.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.put(_columnNameList.get(columIndex), _columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.put(_columnNameList.get(columnIndex), _columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (T) value);
@@ -3593,9 +3775,9 @@ public final class RowDataset implements Dataset, Cloneable {
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
                 value = beanInfo.createBeanResult();
 
-                for (final int columIndex : valueColumnIndexes) {
-                    propName = _columnNameList.get(columIndex);
-                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                for (final int columnIndex : valueColumnIndexes) {
+                    propName = _columnNameList.get(columnIndex);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columnIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 value = beanInfo.finishBeanResult(value);
@@ -3636,17 +3818,22 @@ public final class RowDataset implements Dataset, Cloneable {
         final int keyColumnIndex = checkColumnName(keyColumnName);
         final int[] valueColumnIndexes = checkColumnNames(valueColumnNames);
 
-        final Class<?> rowClass = rowSupplier.apply(0).getClass();
-        final Type<?> valueType = Type.of(rowClass);
         final int valueColumnCount = valueColumnIndexes.length;
+        N.checkArgNotNull(rowSupplier, "rowSupplier");
+        N.checkArgNotNull(supplier, "supplier");
+        final T firstRow = checkSupplierResult(rowSupplier.apply(valueColumnCount), "rowSupplier");
 
-        final M resultMap = supplier.apply(toRowIndex - fromRowIndex);
+        final Class<?> rowClass = firstRow.getClass();
+        final Type<?> valueType = Type.of(rowClass);
+        final IntFunction<? extends T> rowSupplierToUse = reuseFirstSuppliedRow(firstRow, rowSupplier);
+
+        final M resultMap = checkSupplierResult(supplier.apply(toRowIndex - fromRowIndex), "supplier");
 
         if (valueType.isObjectArray()) {
             Object[] value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = (Object[]) rowSupplier.apply(valueColumnCount);
+                value = checkObjectArrayCapacity((Object[]) rowSupplierToUse.apply(valueColumnCount), valueColumnCount, "rowSupplier");
 
                 for (int i = 0; i < valueColumnCount; i++) {
                     value[i] = _columnList.get(valueColumnIndexes[i]).get(rowIndex);
@@ -3658,10 +3845,10 @@ public final class RowDataset implements Dataset, Cloneable {
             Collection<Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = (Collection<Object>) rowSupplier.apply(valueColumnCount);
+                value = (Collection<Object>) rowSupplierToUse.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.add(_columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.add(_columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (T) value);
@@ -3670,10 +3857,10 @@ public final class RowDataset implements Dataset, Cloneable {
             Map<String, Object> value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = (Map<String, Object>) rowSupplier.apply(valueColumnCount);
+                value = (Map<String, Object>) rowSupplierToUse.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    value.put(_columnNameList.get(columIndex), _columnList.get(columIndex).get(rowIndex));
+                for (final int columnIndex : valueColumnIndexes) {
+                    value.put(_columnNameList.get(columnIndex), _columnList.get(columnIndex).get(rowIndex));
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (T) value);
@@ -3685,11 +3872,11 @@ public final class RowDataset implements Dataset, Cloneable {
             T value = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = rowSupplier.apply(valueColumnCount);
+                value = rowSupplierToUse.apply(valueColumnCount);
 
-                for (final int columIndex : valueColumnIndexes) {
-                    propName = _columnNameList.get(columIndex);
-                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                for (final int columnIndex : valueColumnIndexes) {
+                    propName = _columnNameList.get(columnIndex);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columnIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), value);
@@ -4029,6 +4216,9 @@ public final class RowDataset implements Dataset, Cloneable {
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotEmpty(rowElementName, cs.rowElementName);
 
+        final Document document = XmlUtil.createDOMParser().newDocument();
+        checkXmlElementName(document, rowElementName, cs.rowElementName);
+
         if (N.isEmpty(columnNames)) {
             try {
                 IOUtil.write(XmlConstants.DATASET_ELE_START, output);
@@ -4050,7 +4240,9 @@ public final class RowDataset implements Dataset, Cloneable {
         final char[][] charArrayOfColumnNames = new char[columnCount][];
 
         for (int i = 0; i < columnCount; i++) {
-            charArrayOfColumnNames[i] = _columnNameList.get(columnIndexes[i]).toCharArray();
+            final String columnName = _columnNameList.get(columnIndexes[i]);
+            checkXmlElementName(document, columnName, cs.columnName);
+            charArrayOfColumnNames[i] = columnName.toCharArray();
         }
 
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
@@ -5403,6 +5595,7 @@ public final class RowDataset implements Dataset, Cloneable {
         checkFrozen();
 
         final int[] columnIndexes = checkColumnNames(columnNames);
+        N.checkArgNotNull(keyExtractor, "keyExtractor");
         final int size = size();
 
         if (size == 0) {
@@ -5547,6 +5740,7 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         final int[] columnIndexes = checkColumnNames(columnNames);
+        N.checkArgNotNull(keyExtractor, "keyExtractor");
         final int size = size();
 
         if (n >= size) {
@@ -6951,7 +7145,7 @@ public final class RowDataset implements Dataset, Cloneable {
         checkJoinOnColumnNames(right, onColumnNames);
         checkNewColumnName(newColumnName);
         checkNewColumnType(newColumnType);
-        N.checkArgNotNull(collSupplier);
+        N.checkArgNotNull(collSupplier, "collSupplier");
 
         if (onColumnNames.size() == 1) {
             final Map.Entry<String, String> onColumnEntry = onColumnNames.entrySet().iterator().next();
@@ -7063,7 +7257,7 @@ public final class RowDataset implements Dataset, Cloneable {
         }
 
         if (N.notEmpty(rightRowIndexList)) {
-            final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
+            final Collection<Object> coll = checkSupplierResult(collSupplier.apply(rightRowIndexList.size()), "collSupplier");
 
             for (final int rightRowIndex : rightRowIndexList) {
                 coll.add(right.getRow(rightRowIndex, newColumnType));
@@ -7394,7 +7588,7 @@ public final class RowDataset implements Dataset, Cloneable {
         checkJoinOnColumnNames(right, onColumnNames);
         checkNewColumnName(newColumnName);
         checkNewColumnType(newColumnType);
-        N.checkArgNotNull(collSupplier);
+        N.checkArgNotNull(collSupplier, "collSupplier");
 
         if (onColumnNames.size() == 1) {
             final Map.Entry<String, String> onColumnEntry = onColumnNames.entrySet().iterator().next();
@@ -7533,7 +7727,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     newColumnList.get(i).add(this.get(leftRowIndex, leftColumnIndexes[i]));
                 }
 
-                final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
+                final Collection<Object> coll = checkSupplierResult(collSupplier.apply(rightRowIndexList.size()), "collSupplier");
 
                 for (final int rightRowIndex : rightRowIndexList) {
                     coll.add(right.getRow(rightRowIndex, newColumnType));
@@ -7546,7 +7740,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 newColumnList.get(i).add(null);
             }
 
-            final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
+            final Collection<Object> coll = checkSupplierResult(collSupplier.apply(rightRowIndexList.size()), "collSupplier");
 
             for (final int rightRowIndex : rightRowIndexList) {
                 coll.add(right.getRow(rightRowIndex, newColumnType));
@@ -7887,7 +8081,7 @@ public final class RowDataset implements Dataset, Cloneable {
         checkJoinOnColumnNames(right, onColumnNames);
         checkNewColumnName(newColumnName);
         checkNewColumnType(newColumnType);
-        N.checkArgNotNull(collSupplier);
+        N.checkArgNotNull(collSupplier, "collSupplier");
 
         if (onColumnNames.size() == 1) {
             final Map.Entry<String, String> onColumnEntry = onColumnNames.entrySet().iterator().next();
@@ -8015,7 +8209,7 @@ public final class RowDataset implements Dataset, Cloneable {
             newColumnList.get(i).add(null);
         }
 
-        final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
+        final Collection<Object> coll = checkSupplierResult(collSupplier.apply(rightRowIndexList.size()), "collSupplier");
 
         for (final int rightRowIndex : rightRowIndexList) {
             coll.add(right.getRow(rightRowIndex, newColumnType));
@@ -8032,7 +8226,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 newColumnList.get(i).add(_columnList.get(i).get(leftRowIndex));
             }
 
-            final Collection<Object> coll = collSupplier.apply(rightRowIndexList.size());
+            final Collection<Object> coll = checkSupplierResult(collSupplier.apply(rightRowIndexList.size()), "collSupplier");
 
             for (final int rightRowIndex : rightRowIndexList) {
                 coll.add(right.getRow(rightRowIndex, newColumnType));
@@ -8647,7 +8841,8 @@ public final class RowDataset implements Dataset, Cloneable {
         Dataset ds = null;
 
         if (N.isEmpty(columnNames)) {
-            ds = N.newEmptyDataset();
+            // Keep the dataset properties, matching the non-empty selection path below.
+            ds = new RowDataset(new ArrayList<>(), new ArrayList<>(), _properties);
         } else {
             final int[] columnIndexes = checkColumnNames(columnNames);
             final List<String> newColumnNames = new ArrayList<>(columnNames);
@@ -8772,12 +8967,23 @@ public final class RowDataset implements Dataset, Cloneable {
             throw new IllegalArgumentException("Either inputRowClass or inputRowSupplier must be non-null");
         }
 
-        final Class<? extends T> rowClass = inputRowClass == null ? (Class<T>) inputRowSupplier.apply(0).getClass() : inputRowClass;
+        final T firstRow = inputRowSupplier == null ? null : checkSupplierResult(inputRowSupplier.apply(columnCount), "rowSupplier");
+
+        final Class<? extends T> rowClass = inputRowClass == null ? (Class<T>) firstRow.getClass() : inputRowClass;
         final Type<T> rowType = Type.of(rowClass);
         final BeanInfo beanInfo = rowType.isBean() ? ParserUtil.getBeanInfo(rowClass) : null;
 
-        final IntFunction<? extends T> rowSupplier = inputRowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowClass, rowType)
-                : inputRowSupplier;
+        if (firstRow != null && rowType.isObjectArray()) {
+            checkObjectArrayCapacity((Object[]) firstRow, columnCount, "rowSupplier");
+        }
+
+        final IntFunction<? extends T> rowSupplier;
+
+        if (inputRowSupplier == null) {
+            rowSupplier = rowType.isBean() ? null : this.createRowSupplier(rowClass, rowType);
+        } else {
+            rowSupplier = reuseFirstSuppliedRow(firstRow, inputRowSupplier);
+        }
 
         return Stream.of(new ObjIteratorEx<T>() {
             private final int expectedModCount = modCount;
@@ -8863,6 +9069,7 @@ public final class RowDataset implements Dataset, Cloneable {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         final int[] columnIndexes = checkColumnNames(columnNames);
+        N.checkArgNotNull(rowMapper, "rowMapper");
 
         final int columnCount = columnIndexes.length;
 
@@ -8931,6 +9138,8 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Tuple2<String, String> columnNames,
             final BiFunction<?, ?, ? extends T> rowMapper) {
         checkRowIndex(fromRowIndex, toRowIndex);
+        N.checkArgNotNull(columnNames, "columnNames");
+        N.checkArgNotNull(rowMapper, "rowMapper");
 
         final BiFunction<Object, Object, ? extends T> rowMapperToUse = (BiFunction<Object, Object, ? extends T>) rowMapper;
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
@@ -8997,6 +9206,8 @@ public final class RowDataset implements Dataset, Cloneable {
     public <T> Stream<T> stream(final int fromRowIndex, final int toRowIndex, final Tuple3<String, String, String> columnNames,
             final TriFunction<?, ?, ?, ? extends T> rowMapper) {
         checkRowIndex(fromRowIndex, toRowIndex);
+        N.checkArgNotNull(columnNames, "columnNames");
+        N.checkArgNotNull(rowMapper, "rowMapper");
 
         final TriFunction<Object, Object, Object, ? extends T> rowMapperToUse = (TriFunction<Object, Object, Object, ? extends T>) rowMapper;
         final List<Object> column1 = _columnList.get(checkColumnName(columnNames._1));
@@ -9125,6 +9336,8 @@ public final class RowDataset implements Dataset, Cloneable {
         for (final List<Object> column : _columnList) {
             column.clear();
         }
+
+        normalizeCurrentRowIndex();
 
         modCount++;
     }
@@ -9511,6 +9724,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 @Override
                 public boolean hasNext() {
+                    checkConcurrentModification();
+
                     return cursor < totalPages;
                 }
 
@@ -9622,6 +9837,12 @@ public final class RowDataset implements Dataset, Cloneable {
             return Stream.of(iterator());
         }
 
+        /**
+         * Verifies that the outer dataset has not been structurally modified since this
+         * paginated view was created.
+         *
+         * @throws ConcurrentModificationException if the outer dataset was structurally modified
+         */
         final void checkConcurrentModification() {
             if (modCount != expectedModCount) {
                 throw new ConcurrentModificationException();

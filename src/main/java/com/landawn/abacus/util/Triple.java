@@ -119,7 +119,6 @@ public final class Triple<L, M, R> implements Mutable {
      * triple.setMiddle(42);
      * triple.setRight(true);
      * }</pre>
-     *
      */
     public Triple() {
     }
@@ -248,6 +247,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
+     * @SuppressWarnings("deprecation")
      * String left = triple.getLeft();   // returns "Hello"
      * }</pre>
      *
@@ -285,6 +285,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
+     * @SuppressWarnings("deprecation")
      * Integer middle = triple.getMiddle();   // returns 42
      * }</pre>
      *
@@ -322,6 +323,7 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
+     * @SuppressWarnings("deprecation")
      * Boolean right = triple.getRight();   // returns true
      * }</pre>
      *
@@ -774,9 +776,10 @@ public final class Triple<L, M, R> implements Mutable {
             a = N.copyOf(a, 3);
         }
 
-        a[0] = (A) left;
-        a[1] = (A) middle;
-        a[2] = (A) right;
+        final Object[] result = a;
+        result[0] = left;
+        result[1] = middle;
+        result[2] = right;
 
         return a;
     }
@@ -800,8 +803,11 @@ public final class Triple<L, M, R> implements Mutable {
      * @param consumer the consumer function to apply to each element; must accept
      *                 a common supertype of L, M, and R; must not be {@code null}.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws ClassCastException if the consumer's accepted type is not a common supertype of
+     *         the runtime types of all three elements
      * @throws E if the consumer throws an exception.
      */
+    @SuppressWarnings("unchecked")
     public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer);
 
@@ -952,18 +958,20 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Converts this Triple to a Tuple3 with the same elements.
-     * Tuple3 is another three-element container type that may have different
-     * characteristics or API compared to Triple.
+     * Returns a new {@link Tuple3} holding the same three element references, in the order
+     * left, middle, right. The returned tuple is structurally immutable and is a snapshot:
+     * later changes to this Triple are not reflected in it. See the class-level
+     * "{@code Triple} vs {@code Tuple3}" comparison for when to prefer each type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
-     * Tuple3<String, Integer, Boolean> tuple = triple.toTuple();
+     * Tuple.Tuple3<String, Integer, Boolean> tuple = triple.toTuple();
      * // tuple contains the same elements as triple
      * }</pre>
      *
      * @return a new Tuple3 instance containing the same elements as this Triple.
+     * @see Tuple3#toTriple()
      */
     public Tuple3<L, M, R> toTuple() {
         return Tuple.of(left, middle, right);
@@ -1048,6 +1056,6 @@ public final class Triple<L, M, R> implements Mutable {
      */
     @Override
     public String toString() {
-        return "(" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + ")"; // To align with Triple.toString() in Apache Commons Lang
+        return "(" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + ")"; // Same "(l,m,r)" shape as Apache Commons Lang's Triple, but with a space after each comma.
     }
 }

@@ -49,22 +49,18 @@ import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * A utility class providing advanced CSV (Comma-Separated Values) data processing
- * capabilities including high-performance parsing, streaming operations, type-safe conversions, and seamless
- * integration with Dataset objects for efficient data manipulation and analysis. This class serves as a powerful
- * toolkit for ETL (Extract, Transform, Load) operations, data import/export scenarios, and bulk data processing
- * commonly encountered in enterprise data management, analytics, and reporting applications.
- *
- * <p>The {@code CsvUtil} class addresses critical challenges in enterprise CSV data processing by providing
- * optimized, scalable solutions for handling large CSV files efficiently while maintaining data integrity
- * and type safety. It supports various data sources, custom parsing configurations, and flexible output
- * formats, offering configurable options for memory management, custom transformations, and filtering
- * operations suitable for production environments with strict performance and reliability requirements.</p>
+ * Utilities for loading CSV records into a {@link Dataset}, mapping them lazily into a stream, and
+ * converting between CSV and JSON arrays of objects. Overloads support column selection, raw-row
+ * filtering, pagination, and optional type inference from a bean or an explicit type map.
  *
  * <p><b>Note (RFC 4180 divergence):</b> the {@code load}/{@code stream}/{@code csvToJson} methods read CSV
  * input line by line, so quoted fields containing literal line breaks (which RFC 4180 permits) are not
  * supported and will be split across records. Field-level quoting/escaping follows the opencsv-style
  * dialect of {@link CsvParser} (see its class documentation for details).</p>
+ *
+ * <p><b>Resource ownership:</b> overloads accepting a {@link Reader} or {@link Writer} do not close
+ * that caller-owned object. Reader-backed stream overloads expose an explicit close flag; file-backed
+ * streams own their reader and close it when the stream is closed.</p>
  *
  * <p><b>Column-selection convention:</b> a {@code null} {@code selectColumnNames}/{@code selectCsvHeaders} means &quot;not specified&quot; and selects ALL columns; an empty collection is an explicit selection of NO columns (a zero-column result). See the library null/empty selection convention.</p>
  *
@@ -81,15 +77,18 @@ public final class CsvUtil {
     }
 
     /** JSON parser used for parsing JSON data within CSV operations. */
-    public static final JsonParser jsonParser = ParserFactory.createJsonParser();
+    static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
     /** JSON deserialization configuration for deserializing String element types. */
     static final JsonDeserConfig jdc = JsonDeserConfig.create().setElementType(String.class);
 
+    /** Comma splitter with trimmed results, backing the {@code *_BY_SPLITTER} parsers. */
     static final Splitter lineSplitter = Splitter.with(',').trimResults();
 
+    /** Shared stateless parser backing {@link #CSV_HEADER_PARSER} and {@link #CSV_LINE_PARSER}. */
     static final CsvParser csvParser = new CsvParser();
 
+    /** Number of written rows between intermediate writer flushes. */
     static final int BATCH_SIZE_FOR_FLUSH = 1000;
 
     /**
@@ -391,7 +390,7 @@ public final class CsvUtil {
      * <pre>{@code
      * CsvUtil.setEscapeCharToBackSlashForWrite();
      * try {
-     *     // ... write with backslash escaping
+     *     CsvUtil.jsonToCsv(new File("data.json"), new File("data.csv"));
      * } finally {
      *     CsvUtil.resetEscapeCharForWrite();   // Back to default
      * }
@@ -403,12 +402,21 @@ public final class CsvUtil {
         isBackSlashEscapeCharForWrite_TL.set(false);
     }
 
+    /**
+     * Returns whether CSV writing in the current thread escapes with a backslash instead of the
+     * default RFC 4180 quote-doubling.
+     *
+     * @return {@code true} if {@link #setEscapeCharToBackSlashForWrite()} is in effect for this thread
+     */
     static boolean isBackSlashEscapeCharForWrite() {
         return isBackSlashEscapeCharForWrite_TL.get();
     }
 
+    /** Serialization settings shared by all field writes: ISO-8601 timestamps and double-quoted strings. */
     @SuppressWarnings("deprecation")
     static final JsonSerConfig config = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP).setStringQuotation(SK._DOUBLE_QUOTE);
+
+    /** Cached {@code String} type handle, used as the default/fallback column type. */
     static final Type<String> strType = Type.of(String.class);
 
     /**
@@ -417,10 +425,15 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedCsvWriter writer = new BufferedCsvWriter(outputWriter);
-     * CsvUtil.writeField(writer, Type.of(String.class), "Hello, World");
-     * CsvUtil.writeField(writer, Type.of(Integer.class), 42);
-     * CsvUtil.writeField(writer, null, null);   // Writes the literal text "null"
+     * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(outputWriter);
+     * try {
+     *     CsvUtil.writeField(writer, Type.of(String.class), "Hello, World");
+     *     CsvUtil.writeField(writer, Type.of(Integer.class), 42);
+     *     CsvUtil.writeField(writer, null, null);   // Writes the literal text "null"
+     *     writer.flush();
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      * @param writer the BufferedCsvWriter to write to
@@ -773,7 +786,12 @@ public final class CsvUtil {
      *     private String name;
      *     private int age;
      *     private Date birthDate;
-     *     // getters and setters...
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public Date getBirthDate() { return birthDate; }
+     *     public void setBirthDate(Date birthDate) { this.birthDate = birthDate; }
      * }
      *
      * Dataset ds = CsvUtil.load(new File("people.csv"), Person.class);
@@ -1376,7 +1394,7 @@ public final class CsvUtil {
             final List<List<Object>> columnList = new ArrayList<>(selectColumnCount);
             // final boolean[] isColumnSelected = noSelectColumnNamesSpecified ? null : new boolean[columnCount];
             final Type<?>[] columnTypes = new Type<?>[columnCount];
-            final Map<String, Type<?>> columnTypeMapToUse = columnTypeMap == null ? N.emptyMap() : (Map<String, Type<?>>) columnTypeMap;
+            final Map<String, Type<?>> columnTypeMapToUse = (Map<String, Type<?>>) columnTypeMap; // non-null: checked at the top of the method
 
             if (noSelectColumnNamesSpecified) {
                 columnNameList.addAll(Arrays.asList(titles));
@@ -1570,8 +1588,8 @@ public final class CsvUtil {
      *        The first parameter is the selected column names, the second is the disposable row data array,
      *        and the third is the output array to populate
      * @return a Dataset containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if {@code rowExtractor}
+     *         is {@code null}, or if any name in {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
@@ -1593,12 +1611,13 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("data.csv");
-     * Dataset result = CsvUtil.load(reader, (columnNames, rowData, output) -> {
-     *     // Custom extraction logic
-     *     output[0] = Integer.parseInt(rowData.get(0));
-     *     output[1] = rowData.get(1).toUpperCase();
-     * });
+     * try (Reader reader = new FileReader("data.csv")) {
+     *     Dataset result = CsvUtil.load(reader, (columnNames, rowData, output) -> {
+     *         // Custom extraction logic
+     *         output[0] = Integer.parseInt(rowData.get(0));
+     *         output[1] = rowData.get(1).toUpperCase();
+     *     });
+     * }
      * }</pre>
      *
      * @param source the Reader source to read CSV data from
@@ -1622,13 +1641,14 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("employees.csv");
-     * List<String> columns = Arrays.asList("name", "department", "salary");
-     * Dataset result = CsvUtil.load(reader, columns, (columnNames, rowData, output) -> {
-     *     output[0] = rowData.get(0);                       // name
-     *     output[1] = rowData.get(1);                       // department
-     *     output[2] = Double.parseDouble(rowData.get(2));   // salary as double
-     * });
+     * try (Reader reader = new FileReader("employees.csv")) {
+     *     List<String> columns = Arrays.asList("name", "department", "salary");
+     *     Dataset result = CsvUtil.load(reader, columns, (columnNames, rowData, output) -> {
+     *         output[0] = rowData.get(0);                       // name
+     *         output[1] = rowData.get(1);                       // department
+     *         output[2] = Double.parseDouble(rowData.get(2));   // salary as double
+     *     });
+     * }
      * }</pre>
      *
      * @param source the Reader source to read CSV data from
@@ -1655,14 +1675,15 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("large-dataset.csv");
-     * // Load rows 101-200 (skip first 100, load next 100)
-     * Dataset result = CsvUtil.load(reader, 100, 100, (columnNames, rowData, output) -> {
-     *     // Custom extraction for each row
-     *     for (int i = 0; i < rowData.size(); i++) {
-     *         output[i] = rowData.get(i);
-     *     }
-     * });
+     * try (Reader reader = new FileReader("large-dataset.csv")) {
+     *     // Load rows 101-200 (skip first 100, load next 100)
+     *     Dataset result = CsvUtil.load(reader, 100, 100, (columnNames, rowData, output) -> {
+     *         // Custom extraction for each row
+     *         for (int i = 0; i < rowData.length(); i++) {
+     *             output[i] = rowData.get(i);
+     *         }
+     *     });
+     * }
      * }</pre>
      *
      * @param source the Reader source to read CSV data from
@@ -2009,12 +2030,14 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Stream selected columns from a Reader
+     * // Stream selected columns from a Reader as Map rows.
+     * // Clazz.ofMap() supplies the parameterized Class token; the raw Map.class would not
+     * // infer T = Map<String, Object>.
      * try (Reader reader = new FileReader("employees.csv");
      *      Stream<Map<String, Object>> stream = CsvUtil.stream(
      *          reader,
      *          Arrays.asList("name", "department"),
-     *          Map.class,
+     *          Clazz.<String, Object> ofMap(),
      *          true)) {
      *     stream.limit(10).forEach(System.out::println);
      * }
@@ -2068,6 +2091,9 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
+     * <p>The header and line parsers active in the calling thread are captured when this method is
+     * invoked. Source opening and row reading remain lazy.</p>
+     *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from, must not be {@code null}
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
@@ -2092,6 +2118,10 @@ public final class CsvUtil {
             throws IllegalArgumentException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(targetType, cs.targetType);
+        // Parser selection is part of this stream's configuration. Capture it now so resetting a
+        // thread-local parser before a terminal operation cannot change an already-created stream.
+        final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
+        final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
         //noinspection resource
         return Stream.defer(() -> {
 
@@ -2100,9 +2130,6 @@ public final class CsvUtil {
             boolean noException = false;
 
             try {
-                final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
-                final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
-
                 final String line = br.readLine();
 
                 if (line == null) {
@@ -2552,6 +2579,9 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
+     * <p>The header and line parsers active in the calling thread are captured when this method is
+     * invoked. Source opening and row reading remain lazy.</p>
+     *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from, must not be {@code null}
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
@@ -2564,8 +2594,8 @@ public final class CsvUtil {
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed,
      *        {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if {@code rowMapper}
+     *         is {@code null}, or if any name in {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, BiFunction, boolean)
@@ -2576,6 +2606,9 @@ public final class CsvUtil {
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
             final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
+        N.checkArgNotNull(rowMapper, cs.rowMapper);
+        final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
+        final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
         //noinspection resource
         return Stream.defer(() -> {
             final boolean isBufferedReader = IOUtil.isBufferedReader(source);
@@ -2583,9 +2616,6 @@ public final class CsvUtil {
             boolean noException = false;
 
             try {
-                final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
-                final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
-
                 final String line = br.readLine();
 
                 if (line == null) {
@@ -2782,11 +2812,16 @@ public final class CsvUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * public class Employee {
+     * class Employee {
      *     private String name;
      *     private Integer age;
      *     private String department;
-     *     // getters and setters...
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public Integer getAge() { return age; }
+     *     public void setAge(Integer age) { this.age = age; }
+     *     public String getDepartment() { return department; }
+     *     public void setDepartment(String department) { this.department = department; }
      * }
      *
      * // Convert with type conversion - age will be numeric in JSON
@@ -2850,11 +2885,13 @@ public final class CsvUtil {
      * {@code beanClassForColumnTypeInference} is provided, values are converted to their
      * appropriate types as defined by the bean class properties.</p>
      *
+     * <p>An empty input (no header line) writes the valid empty JSON array {@code []} and returns zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader csvReader = new FileReader("data.csv");
      *      Writer jsonWriter = new FileWriter("data.json")) {
-     *     long rowCount      = CsvUtil.csvToJson(
+     *     long rowCount = CsvUtil.csvToJson(
      *         csvReader,
      *         Arrays.asList("name", "age"),
      *         jsonWriter,
@@ -2902,6 +2939,8 @@ public final class CsvUtil {
             String line = reader.readLine();
 
             if (line == null) {
+                bw.write("[]");
+                bw.flush();
                 return 0;
             }
 
@@ -3051,7 +3090,8 @@ public final class CsvUtil {
      *
      * @param jsonFile the source JSON file to convert
      * @param csvFile the destination CSV file to create
-     * @return the number of data rows written to the CSV file (excluding the header row)
+     * @return the number of data rows converted (excluding the header row); with an explicitly
+     *         empty column selection, rows are counted but nothing is written
      * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, Collection, File)
@@ -3099,7 +3139,8 @@ public final class CsvUtil {
      * @param selectCsvHeaders the collection of property names to include as CSV headers;
      *                        {@code null} to include all properties from the first object; an empty collection selects no columns (empty output)
      * @param csvFile the destination CSV file to create
-     * @return the number of data rows written to the CSV file (excluding the header row)
+     * @return the number of data rows converted (excluding the header row); with an explicitly
+     *         empty column selection, rows are counted but nothing is written
      * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, File)
@@ -3131,7 +3172,7 @@ public final class CsvUtil {
      * <pre>{@code
      * try (Reader jsonReader = new FileReader("data.json");
      *      Writer csvWriter = new FileWriter("data.csv")) {
-     *     long rowCount     = CsvUtil.jsonToCsv(
+     *     long rowCount = CsvUtil.jsonToCsv(
      *         jsonReader,
      *         Arrays.asList("name", "age", "department"),
      *         csvWriter
@@ -3144,7 +3185,8 @@ public final class CsvUtil {
      * @param selectCsvHeaders the collection of property names to include as CSV headers;
      *                        {@code null} to include all properties from the first object; an empty collection selects no columns (empty output)
      * @param csvWriter the Writer to write CSV output to
-     * @return the number of rows written to the CSV output (excluding header row)
+     * @return the number of rows converted (excluding the header row); with an explicitly
+     *         empty column selection, rows are counted but nothing is written
      * @throws UncheckedIOException if an I/O error occurs during reading or writing,
      *         or if the JSON format is invalid
      * @see #jsonToCsv(File, File)
@@ -3171,6 +3213,15 @@ public final class CsvUtil {
 
             @SuppressWarnings({ "deprecation" })
             final Iterator<Map<String, Object>> iter = stream.iterator();
+
+            if (selectCsvHeaders != null && selectCsvHeaders.isEmpty()) {
+                while (iter.hasNext()) {
+                    iter.next();
+                    cnt++;
+                }
+
+                return cnt;
+            }
 
             if (iter.hasNext()) {
                 cnt++;
@@ -3284,14 +3335,14 @@ public final class CsvUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert CSV to JSON with type conversion
-     * long rowCount = CsvUtil.converter()
+     * long jsonRowCount = CsvUtil.converter()
      *     .source(new File("data.csv"))
      *     .selectColumns(Arrays.asList("name", "age"))
      *     .beanClassForColumnTypeInference(Person.class)
      *     .csvToJson(new File("output.json"));
      *
      * // Convert JSON to CSV
-     * long rowCount = CsvUtil.converter()
+     * long csvRowCount = CsvUtil.converter()
      *     .source(new File("data.json"))
      *     .selectColumns(Arrays.asList("name", "department"))
      *     .jsonToCsv(new File("output.csv"));
@@ -3305,15 +3356,43 @@ public final class CsvUtil {
         return new CsvConverter();
     }
 
+    /**
+     * Shared configuration state and setters for the fluent CSV builders {@link CsvLoader} and
+     * {@link CsvConverter}. Setters return {@code This} so a concrete builder's own type is preserved
+     * across chained calls.
+     *
+     * <p>Parser and escape-character settings recorded here are thread-local in {@link CsvUtil}; they
+     * are installed only for the duration of a terminal operation by {@code apply(Callable)} and the
+     * previous values are restored afterwards.</p>
+     *
+     * @param <This> the concrete builder type, for a self-returning fluent API
+     */
     static abstract class CsvCommon<This extends CsvCommon<This>> {
+        /** Custom header-line parser to install for the terminal operation; {@code null} keeps the thread's current parser. */
         protected Function<String, String[]> headerParser;
+
+        /** Custom data-line parser to install for the terminal operation; {@code null} keeps the thread's current parser. */
         protected BiConsumer<String, String[]> lineParser;
+
+        /** {@code TRUE} to write with backslash escaping; {@code null} keeps the thread's current setting. */
         protected Boolean escapeCharToBackSlashForWrite;
+
+        /** The file source; mutually exclusive with {@code sourceReader}. */
         protected File sourceFile;
+
+        /** The reader source; mutually exclusive with {@code sourceFile}. */
         protected Reader sourceReader;
+
+        /** Columns to select; {@code null} selects all, an empty collection selects none. */
         protected Collection<String> selectColumnNames;
+
+        /** Number of data rows to skip (after the header). Defaults to 0. */
         protected long offset = 0;
+
+        /** Maximum number of data rows to process. Defaults to {@link Long#MAX_VALUE}. */
         protected long count = Long.MAX_VALUE;
+
+        /** Bean class whose property types drive column type inference; {@code null} keeps all values as {@code String}. */
         protected Class<?> beanClassForColumnTypeInference;
 
         /**
@@ -3446,7 +3525,7 @@ public final class CsvUtil {
          * // CsvUtil.loader().source((File) null);
          *
          * // Cannot set both File and Reader source
-         * // CsvUtil.loader().source(new File("data.csv")).source(new FileReader("data.csv"));
+         * // CsvUtil.loader().source(new File("data.csv")).source(new StringReader(""));
          * }</pre>
          *
          * @param source the File to read CSV/JSON data from
@@ -3664,6 +3743,16 @@ public final class CsvUtil {
             return (This) this;
         }
 
+        /**
+         * Runs a terminal builder operation with this builder's parser and escape-character settings
+         * temporarily installed as the calling thread's {@link CsvUtil} configuration, restoring the
+         * previous configuration before returning (also on failure). Settings left {@code null} on this
+         * builder are not touched.
+         *
+         * @param <T> the result type of the action
+         * @param action the terminal operation to run; must not be {@code null}
+         * @return the value returned by {@code action}
+         */
         <T> T apply(Callable<T> action) {
             final Function<String, String[]> currentHeaderParser = headerParser != null ? CsvUtil.getCurrentHeaderParser() : null;
             final BiConsumer<String, String[]> currentLineParser = lineParser != null ? CsvUtil.getCurrentLineParser() : null;
@@ -4074,78 +4163,19 @@ public final class CsvUtil {
                 final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
             N.checkArgNotNull(rowMapper, "rowMapper");
 
-            if (headerParser == null && lineParser == null && escapeCharToBackSlashForWrite == null) {
-                // No custom parsers configured, safe to use apply() directly
-                final Callable<Stream<T>> action = () -> {
-                    if (sourceFile != null) {
-                        return CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
-                    } else if (sourceReader != null) {
-                        return CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
-                    } else {
-                        throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling load().");
-                    }
-                };
-
-                return apply(action);
-            }
-
-            // Custom parsers configured: set ThreadLocals inside Stream.defer() so they're active during lazy consumption
-            final Function<String, String[]> hp = headerParser;
-            final BiConsumer<String, String[]> lp = lineParser;
-            final Boolean escBack = escapeCharToBackSlashForWrite;
-
-            //noinspection resource
-            return Stream.defer(() -> {
-                final Function<String, String[]> prevHp = hp != null ? CsvUtil.getCurrentHeaderParser() : null;
-                final BiConsumer<String, String[]> prevLp = lp != null ? CsvUtil.getCurrentLineParser() : null;
-                final Boolean prevEscBack = escBack != null ? CsvUtil.isBackSlashEscapeCharForWrite() : null;
-                final java.lang.Runnable restoreParsers = () -> {
-                    if (hp != null) {
-                        CsvUtil.setHeaderParser(prevHp);
-                    }
-                    if (lp != null) {
-                        CsvUtil.setLineParser(prevLp);
-                    }
-                    if (escBack != null) {
-                        if (Boolean.TRUE.equals(prevEscBack)) {
-                            CsvUtil.setEscapeCharToBackSlashForWrite();
-                        } else {
-                            CsvUtil.resetEscapeCharForWrite();
-                        }
-                    }
-                };
-
-                if (hp != null) {
-                    CsvUtil.setHeaderParser(hp);
+            final Callable<Stream<T>> action = () -> {
+                if (sourceFile != null) {
+                    return CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
+                } else if (sourceReader != null) {
+                    return CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
+                } else {
+                    throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling stream().");
                 }
-                if (lp != null) {
-                    CsvUtil.setLineParser(lp);
-                }
-                if (escBack != null) {
-                    if (escBack) {
-                        CsvUtil.setEscapeCharToBackSlashForWrite();
-                    } else {
-                        CsvUtil.resetEscapeCharForWrite();
-                    }
-                }
+            };
 
-                try {
-                    final Stream<T> stream;
-
-                    if (sourceFile != null) {
-                        stream = CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
-                    } else if (sourceReader != null) {
-                        stream = CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
-                    } else {
-                        throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling load().");
-                    }
-
-                    return stream.onClose(restoreParsers);
-                } catch (final RuntimeException | Error e) {
-                    restoreParsers.run();
-                    throw e;
-                }
-            });
+            // CsvUtil.stream captures the active parsers when it is created. Install the builder's
+            // thread-local configuration only for that creation call, then restore it immediately.
+            return apply(action);
         }
     }
 

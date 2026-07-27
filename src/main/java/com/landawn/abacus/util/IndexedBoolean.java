@@ -108,7 +108,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * boolean value = indexed.value();   // returns true
      * }</pre>
      *
-     * @return the boolean value
+     * @return the boolean value associated with this index
      */
     public boolean value() {
         return value;

@@ -101,7 +101,7 @@ public class URLType extends AbstractType<URL> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
-     * URL url = new URL("https://example.com/path");
+     * URL url = type.valueOf("https://example.com/path");
      * String str = type.stringOf(url);   // Returns "https://example.com/path"
      * }</pre>
      *
@@ -140,7 +140,8 @@ public class URLType extends AbstractType<URL> {
      * @param str the string to convert to a URL
      * @return a URL instance created from the string, or {@code null} if the string is {@code null} or empty
      * @throws IllegalArgumentException if the string is not a valid URI (thrown by {@link URI#create(String)})
-     * @throws RuntimeException if the URI cannot be converted to a URL (wraps {@link MalformedURLException})
+     * @throws com.landawn.abacus.exception.UncheckedIOException if the URI cannot be converted to a URL
+     *         (wraps the thrown {@link MalformedURLException})
      * @see #valueOf(Object)
      * @see #stringOf(URL)
      */
@@ -216,7 +217,7 @@ public class URLType extends AbstractType<URL> {
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO companies (website) VALUES (?)");
-     * type.set(stmt, 1, new URL("https://example.com"));   // Set URL at parameter index 1
+     * type.set(stmt, 1, type.valueOf("https://example.com"));   // Set URL at parameter index 1
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the value in
@@ -240,7 +241,7 @@ public class URLType extends AbstractType<URL> {
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
      * CallableStatement stmt = conn.prepareCall("{call update_company(?)}");
-     * type.set(stmt, "website", new URL("https://example.com"));   // Set URL by parameter name
+     * type.set(stmt, "website", type.valueOf("https://example.com"));   // Set URL by parameter name
      * }</pre>
      *
      * @param stmt the CallableStatement to set the value in

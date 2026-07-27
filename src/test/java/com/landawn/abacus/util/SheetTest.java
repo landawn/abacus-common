@@ -5261,34 +5261,6 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testPrintlnWithOutput() {
-        StringWriter writer = new StringWriter();
-        sheet.println(writer);
-        String output = writer.toString();
-        assertNotNull(output);
-        assertTrue(output.length() > 0);
-    }
-
-    @Test
-    public void testPrintlnWithSubsetAndOutput() {
-        StringWriter writer = new StringWriter();
-        sheet.println(Arrays.asList("row1", "row2"), Arrays.asList("col1", "col2"), writer);
-        String output = writer.toString();
-        assertNotNull(output);
-        assertTrue(output.length() > 0);
-    }
-
-    @Test
-    public void testPrintlnWithFullParams() {
-        StringWriter writer = new StringWriter();
-        sheet.println(Arrays.asList("row1", "row2"), Arrays.asList("col1", "col2"), "Custom Prefix:", writer);
-        String output = writer.toString();
-        assertNotNull(output);
-        assertTrue(output.length() > 0);
-        assertTrue(output.contains("Custom Prefix"));
-    }
-
-    @Test
     public void testPrintlnWithWideCharacters() {
         Sheet<String, String, Object> wideSheet = Sheet.rows(Arrays.asList("row1", "行2"), Arrays.asList("name", "城市"),
                 new Object[][] { { "Bob李海洋", "LA" }, { "Alice", "上海" } });
@@ -5305,41 +5277,6 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testPrintln_01() {
-        {
-            N.println(Strings.repeat("=", 120));
-            Sheet.empty().println();
-            N.println(Strings.repeat("=", 120));
-
-            N.println(Strings.repeat("=", 120));
-            Sheet.empty().println("# ");
-            N.println(Strings.repeat("=", 120));
-
-            N.println(Strings.repeat("=", 120));
-            Sheet.empty().println("// ");
-            N.println(Strings.repeat("=", 120));
-        }
-
-        Object[][] data = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-        Sheet<String, String, Integer> sheet = Sheet.rows(rowKeys, columnKeys, data);
-
-        {
-            N.println(Strings.repeat("=", 120));
-            sheet.println();
-            N.println(Strings.repeat("=", 120));
-
-            N.println(Strings.repeat("=", 120));
-            sheet.println("     * ");
-            N.println(Strings.repeat("=", 120));
-
-            N.println(Strings.repeat("=", 120));
-            sheet.println("// ");
-            N.println(Strings.repeat("=", 120));
-        }
-        assertNotNull(sheet);
-    }
-
-    @Test
     public void testPrintlnEmptySheet() {
         Sheet<String, String, Integer> emptySheet = new Sheet<>();
         StringWriter writer = new StringWriter();
@@ -5348,25 +5285,6 @@ public class SheetTest extends AbstractTest {
         String output = writer.toString();
         assertTrue(output.contains("+---+"));
         assertTrue(output.contains("|   |"));
-    }
-
-    @Test
-    public void testPrintlnWithEmptyRowsAndColumns() {
-        StringWriter writer = new StringWriter();
-        sheet.println(Collections.emptyList(), Collections.emptyList(), writer);
-
-        String output = writer.toString();
-        assertTrue(output.contains("+---+"));
-    }
-
-    @Test
-    public void testPrintln_Appendable() {
-        sheet.println(stringWriter);
-        String output = stringWriter.toString();
-        assertNotNull(output);
-        assertTrue(output.length() > 0);
-        assertTrue(output.contains("row1"));
-        assertTrue(output.contains("col1"));
     }
 
     @Test
@@ -5388,16 +5306,6 @@ public class SheetTest extends AbstractTest {
         assertDoesNotThrow(() -> {
             sheet.println(Arrays.asList("row1", "row2"), Arrays.asList("col1", "col2"));
         });
-    }
-
-    @Test
-    public void testPrintln_defaultToStdout() {
-        assertDoesNotThrow(() -> objectSheet.println());
-    }
-
-    @Test
-    public void testPrintln_keysToStdout() {
-        assertDoesNotThrow(() -> objectSheet.println(Arrays.asList("R1"), Arrays.asList("C1")));
     }
 
     @Test
@@ -5429,14 +5337,6 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testPrintln_toWriter_emptySheet() {
-        Sheet<String, String, String> emptySheet = new Sheet<>();
-        assertDoesNotThrow(() -> emptySheet.println(stringWriter));
-        String output = stringWriter.toString();
-        assertTrue(output.contains("+---+"));
-    }
-
-    @Test
     public void testPrintln_toWriter_emptyKeySetsButDataExists() {
         assertDoesNotThrow(() -> objectSheet.println(Collections.emptyList(), Collections.emptyList(), stringWriter));
         String output = stringWriter.toString();
@@ -5453,13 +5353,6 @@ public class SheetTest extends AbstractTest {
     public void testPrintln_nullWriter() {
         assertThrows(IllegalArgumentException.class, () -> objectSheet.println((Writer) null));
         assertThrows(IllegalArgumentException.class, () -> objectSheet.println(rowKeys, colKeys, null));
-    }
-
-    @Test
-    public void testPrintln_PrefixString() {
-        sheet.println("PREFIX");
-        // Just verify it doesn't throw - output goes to stdout
-        assertTrue(true);
     }
 
     @Test

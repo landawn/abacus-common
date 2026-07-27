@@ -268,6 +268,10 @@ public final class MapEntity implements Serializable {
 
     /**
      * Removes all specified properties from this entity.
+     * Property names may be simple or canonical (e.g., "EntityName.propertyName").
+     *
+     * <p>The collection may be a live view of this entity, such as {@link #keySet()}; it is
+     * snapshotted before any removal so that such a view is not modified while it is being read.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -275,8 +279,6 @@ public final class MapEntity implements Serializable {
      * user.set("temp1", "value1").set("temp2", "value2");
      * user.removeAll(Arrays.asList("temp1", "temp2"));
      * }</pre>
-     *
-     * <p>The collection may be a live view of this entity, such as {@link #keySet()}.</p>
      *
      * @param propNames a collection of property names to remove
      * @throws NullPointerException if {@code propNames} is {@code null}

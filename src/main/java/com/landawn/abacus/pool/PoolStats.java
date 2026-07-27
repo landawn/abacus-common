@@ -31,16 +31,13 @@ package com.landawn.abacus.pool;
  * <pre>{@code
  * PoolStats stats = pool.stats();
  *
- * // Calculate hit rate
- * double hitRate = stats.getCount() > 0 ?
- *     (double) stats.hitCount() / stats.getCount() : 0.0;
- * System.out.println("Cache hit rate: " + (hitRate * 100) + "%");
+ * // Cache hit rate - hitRate() already returns 0.0 when no get/poll has happened
+ * System.out.println("Cache hit rate: " + (stats.hitRate() * 100) + "%");
  *
- * // Monitor pool utilization
- * double utilization = (double) stats.size() / stats.capacity();
- * System.out.println("Pool utilization: " + (utilization * 100) + "%");
+ * // Monitor pool utilization - utilization() already guards a 0 capacity
+ * System.out.println("Pool utilization: " + (stats.utilization() * 100) + "%");
  *
- * // Check memory usage
+ * // Check memory usage (maxMemory() is -1 when no memory limit is configured)
  * if (stats.maxMemory() > 0) {
  *     double memoryUsage = (double) stats.dataSize() / stats.maxMemory();
  *     System.out.println("Memory usage: " + (memoryUsage * 100) + "%");
@@ -49,8 +46,7 @@ package com.landawn.abacus.pool;
  * // Analyze pool efficiency
  * System.out.println("Total operations: " + (stats.putCount() + stats.getCount()));
  * System.out.println("Objects evicted: " + stats.evictionCount());
- * System.out.println("Miss rate: " +
- *     (stats.getCount() > 0 ? (double) stats.missCount() / stats.getCount() * 100 : 0) + "%");
+ * System.out.println("Miss rate: " + (stats.missRate() * 100) + "%");
  * }</pre>
  *
  * <p><b>Accessor naming:</b> Because {@code PoolStats} is a {@code record}, its accessors are the

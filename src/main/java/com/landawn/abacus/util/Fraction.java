@@ -21,20 +21,20 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
- * An immutable, high-precision representation of rational numbers stored as integer fractions,
- * providing exact arithmetic operations without the precision loss inherent in floating-point
- * representations. This class is designed for applications requiring precise fractional calculations
- * such as financial computations, mathematical operations, and any scenario where decimal precision
- * is critical and rounding errors are unacceptable.
+ * An immutable representation of rational numbers stored as integer fractions. Arithmetic remains
+ * exact while all intermediate and final numerator and denominator values fit in {@code int}; operations
+ * that exceed that range throw {@link ArithmeticException}. Conversions to or from floating-point values
+ * are necessarily approximate, so decimal-based financial calculations may be better represented by
+ * {@link java.math.BigDecimal}.
  *
  * <p>Unlike floating-point numbers ({@code float}, {@code double}) which use binary approximations
- * that can introduce rounding errors, {@code Fraction} maintains exact precision by storing the
- * numerator and denominator as separate integers. This approach ensures that operations like
+ * that can introduce rounding errors, {@code Fraction} stores the numerator and denominator as
+ * separate integers. Subject to the integer range limitation, this ensures that operations like
  * 1/3 + 1/3 + 1/3 = 1 are computed exactly, without accumulating floating-point errors.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Exact Precision:</b> No rounding errors or precision loss in fractional arithmetic</li>
+ *   <li><b>Exact Rational Arithmetic:</b> No rounding in fraction-to-fraction arithmetic while terms fit in {@code int}</li>
  *   <li><b>Immutable Design:</b> All instances are immutable, ensuring thread safety and preventing accidental modification</li>
  *   <li><b>Integer-Based Storage:</b> Uses {@code int} numerator and denominator for optimal performance</li>
  *   <li><b>Optional Reduction:</b> Factory methods document whether they reduce the fraction; {@link #of(int, int)} preserves the supplied terms</li>
@@ -179,8 +179,9 @@ import java.math.BigInteger;
  * <ul>
  *   <li><b>Immutable Fields:</b> Numerator and denominator are final and never modified</li>
  *   <li><b>Concurrent Access:</b> Safe for concurrent read access from multiple threads</li>
- *   <li><b>Cached Values:</b> String representations use lazy initialization with proper visibility</li>
- *   <li><b>No Synchronization:</b> No locks needed due to immutable design</li>
+ *   <li><b>Cached Values:</b> String representations are cached lazily; concurrent callers may
+ *       harmlessly compute the same value more than once</li>
+ *   <li><b>No Synchronization:</b> No locks are needed because the represented value is immutable</li>
  * </ul>
  *
  * <p><b>Number Interface Implementation:</b>
@@ -204,7 +205,8 @@ import java.math.BigInteger;
  *   <li><b>ArithmeticException:</b> Thrown for division by zero or integer overflow</li>
  *   <li><b>NumberFormatException:</b> Thrown for invalid string formats in parsing</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid construction parameters</li>
- *   <li><b>Null Safety:</b> Appropriate {@code null} checks with {@code NullPointerException}</li>
+ *   <li><b>Null Safety:</b> {@code null} arguments are rejected with {@code IllegalArgumentException}
+ *       (only {@link #compareTo(Fraction)} surfaces a {@code NullPointerException})</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
@@ -231,7 +233,7 @@ import java.math.BigInteger;
  * <p><b>Comparison with Alternative Approaches:</b>
  * <ul>
  *   <li><b>vs. double/float:</b> Fraction provides exact precision vs. floating-point approximations</li>
- *   <li><b>vs. BigDecimal:</b> Fraction represents {@code true} fractions vs. decimal approximations</li>
+ *   <li><b>vs. BigDecimal:</b> Fraction represents true fractions vs. decimal approximations</li>
  *   <li><b>vs. BigFraction:</b> This class is faster but limited to int range vs. unlimited precision</li>
  *   <li><b>vs. Rational Libraries:</b> Optimized for common use cases vs. comprehensive mathematical features</li>
  * </ul>
@@ -667,6 +669,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @throws IllegalArgumentException if {@code str} is {@code null}
      * @throws NumberFormatException if the string is not in a recognized format, or if
      *         an integer component is out of range, or if the decimal form cannot be parsed
+     * @throws ArithmeticException if the parsed fraction is invalid (e.g. a zero denominator or a
+     *         negative numerator in the mixed {@code "X Y/Z"} form), or if the decimal form is
+     *         outside the representable range
      */
     public static Fraction of(String str) {
         if (str == null) {
@@ -1029,7 +1034,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction r4 = f4.reduce();   // returns 3/5
      * }</pre>
      *
-     * @return a new reduced fraction instance, or this instance if already in simplest form
+     * @return this instance if it is already in lowest terms, {@link #ZERO} if the numerator is zero,
+     *         otherwise a new fraction holding the reduced terms
      */
     public Fraction reduce() {
         if (numerator == 0) {
@@ -1143,8 +1149,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Raises this fraction to the specified integer power.
-     * The result is automatically reduced to its simplest form.
+     * Raises this fraction to the specified integer power. Multiplication steps reduce their results,
+     * but powers of {@code 1} and {@code -1} can preserve unreduced terms (inverted for {@code -1});
+     * call {@link #reduce()} when a canonical representation is required.
      *
      * <p>Special cases:</p>
      * <ul>
@@ -1357,7 +1364,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param fraction the fraction to add to this fraction (must not be {@code null})
-     * @return a new {@code Fraction} instance with the sum in reduced form
+     * @return the sum; it is in reduced form when both operands are in reduced form
      * @throws IllegalArgumentException if the fraction parameter is {@code null}
      * @throws ArithmeticException if the calculation results in integer overflow
      */
@@ -1389,7 +1396,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param fraction the fraction to subtract from this fraction (must not be {@code null})
-     * @return a new {@code Fraction} instance with the difference in reduced form
+     * @return the difference; it is in reduced form when both operands are in reduced form
      * @throws IllegalArgumentException if the fraction parameter is {@code null}
      * @throws ArithmeticException if the calculation results in integer overflow
      */
@@ -1619,8 +1626,18 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
 
     /**
      * Returns whether this fraction represents zero.
+     * Because the denominator is never zero, this holds for every unreduced form of zero as well.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fraction.of(0, 5).isZero();    // returns true
+     * Fraction.ZERO.isZero();        // returns true
+     * Fraction.of(-1, 2).isZero();   // returns false
+     * }</pre>
      *
      * @return {@code true} if the numerator is zero; otherwise {@code false}
+     * @see #isPositive()
+     * @see #isNegative()
      */
     public boolean isZero() {
         return numerator == 0;
@@ -1628,8 +1645,19 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
 
     /**
      * Returns whether this fraction represents a positive value.
+     * Zero is neither positive nor negative, so both {@code isPositive()} and {@link #isNegative()}
+     * return {@code false} for it.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fraction.of(3, 4).isPositive();    // returns true
+     * Fraction.of(-3, 4).isPositive();   // returns false
+     * Fraction.ZERO.isPositive();        // returns false
+     * }</pre>
      *
      * @return {@code true} if the numerator is positive; otherwise {@code false}
+     * @see #isNegative()
+     * @see #isZero()
      */
     public boolean isPositive() {
         return numerator > 0;
@@ -1637,17 +1665,37 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
 
     /**
      * Returns whether this fraction represents a negative value.
+     * The sign is always carried by the numerator, so a negative denominator never occurs.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fraction.of(-3, 4).isNegative();   // returns true
+     * Fraction.of(3, -4).isNegative();   // returns true (stored as -3/4)
+     * Fraction.ZERO.isNegative();        // returns false
+     * }</pre>
      *
      * @return {@code true} if the numerator is negative; otherwise {@code false}
+     * @see #isPositive()
+     * @see #isZero()
      */
     public boolean isNegative() {
         return numerator < 0;
     }
 
     /**
-     * Returns whether this fraction represents an integer value.
+     * Returns whether this fraction represents an integer value, that is, whether it has no
+     * fractional part. This does not require the fraction to be stored in reduced form.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fraction.of(8, 4).isInteger();    // returns true (equals 2)
+     * Fraction.of(0, 5).isInteger();    // returns true
+     * Fraction.of(7, 4).isInteger();    // returns false
+     * }</pre>
      *
      * @return {@code true} if the numerator is evenly divisible by the denominator; otherwise {@code false}
+     * @see #properWhole()
+     * @see #properNumerator()
      */
     public boolean isInteger() {
         return numerator % denominator == 0;
@@ -1698,13 +1746,13 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <pre>{@code
      * Fraction f1 = Fraction.of(3, 4);
      * Fraction f2 = Fraction.of(3, 4);
-     * f1.hashCode() == f2.hashCode();    // returns true (same state)
+     * boolean sameHash = f1.hashCode() == f2.hashCode();    // true (same state)
      *
      * Fraction f3 = Fraction.of(5, 8);
-     * f1.hashCode() != f3.hashCode();    // returns true (different state)
+     * boolean differentHash = f1.hashCode() != f3.hashCode();    // true for these values
      *
      * Fraction f4 = Fraction.of(0, 1);
-     * f4.hashCode() != 0;                // returns true (hash is non-zero even for zero fraction)
+     * boolean nonZeroHash = f4.hashCode() != 0;    // true (the cached sentinel value is never returned)
      * }</pre>
      *
      * @return a hash code value for this fraction

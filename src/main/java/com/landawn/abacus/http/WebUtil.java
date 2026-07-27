@@ -250,6 +250,7 @@ public final class WebUtil {
      *   <li>{@code RequestBody} creation with appropriate {@code MediaType} extracted from headers</li>
      *   <li>OkHttpRequest builder chain with URL, headers, and body</li>
      *   <li>Appropriate HTTP method call ({@code get()}, {@code post()}, {@code put()}, {@code delete()}, or {@code execute()})</li>
+     *   <li>A try-with-resources block that closes the returned OkHttp {@code Response}</li>
      * </ul>
      *
      * <p>HTTP Method Detection follows the same rules as {@link #curlToHttpRequestCode(String)}:</p>
@@ -385,7 +386,7 @@ public final class WebUtil {
                     .append(IOUtil.LINE_SEPARATOR_UNIX);
         }
 
-        sb.append("  OkHttpRequest.url(\"").append(escapeJava(url)).append("\")");
+        sb.append("  Response response = OkHttpRequest.url(\"").append(escapeJava(url)).append("\")");
 
         if (Strings.isNotEmpty(headers.toString())) {
             sb.append(headers);
@@ -407,6 +408,13 @@ public final class WebUtil {
             sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name()).append(");");
         }
 
+        sb.append(IOUtil.LINE_SEPARATOR_UNIX)
+                .append("  try (response) {")
+                .append(IOUtil.LINE_SEPARATOR_UNIX)
+                .append("      // Consume the response here.")
+                .append(IOUtil.LINE_SEPARATOR_UNIX)
+                .append("  }");
+
         return sb.toString();
     }
 
@@ -425,6 +433,8 @@ public final class WebUtil {
         } else if (Strings.startsWith(token, dataPrefix)) {
             return token.substring(dataPrefix.length());
         } else if (Strings.startsWith(token, shortDataPrefix)) {
+            // Lenient on purpose: real curl reads "-d=foo" as the attached value "=foo"; the "="
+            // here is almost always a typo for "--data=foo", so the "=" is stripped.
             return token.substring(shortDataPrefix.length());
         } else if (Strings.startsWith(token, "-d") && token.length() > 2) {
             return token.substring(2);
@@ -553,7 +563,7 @@ public final class WebUtil {
                             i++;
                         }
                     } else if (next == '"') {
-                        token.append(ch).append(next);
+                        token.append(next);
                         i++;
                     } else if (next == '\\' || next == '$' || next == '`') {
                         token.append(next);
@@ -656,6 +666,8 @@ public final class WebUtil {
      * @param logHandler consumer that receives the generated cURL command string
      *                   for each request, must not be {@code null}
      * @return an OkHttpRequest configured with cURL logging interceptor
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or if
+     *         {@code logHandler} is {@code null}
      * @see #createCurlLoggingOkHttpRequest(String, char, Consumer)
      * @see CurlInterceptor
      * @see <a href="https://github.com/mrmike/Ok2Curl">Ok2Curl - OkHttp to cURL converter</a>
@@ -709,6 +721,8 @@ public final class WebUtil {
      *                   for each request, must not be {@code null}
      * @return an OkHttpRequest configured with cURL logging interceptor using the
      *         specified quote character
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or if
+     *         {@code logHandler} is {@code null}
      * @see #createCurlLoggingOkHttpRequest(String, Consumer)
      * @see CurlInterceptor
      */
@@ -738,8 +752,9 @@ public final class WebUtil {
      * <ul>
      *   <li>If {@code body} is not empty but Content-Type header is not present in {@code headers},
      *       and {@code bodyContentType} is specified, the Content-Type header is automatically added</li>
-     *   <li>Header values are read using {@link HttpUtil#readHttpHeaderValue(Object)} to handle
-     *       various value types (String, List, etc.)</li>
+     *   <li>Header values are converted using {@link HttpHeaders#valueOf(Object)}, including its
+     *       handling of {@link java.util.Collection} (joined with {@code ", "}) and
+     *       {@link java.util.Date}/{@link java.time.Instant} (HTTP-date formatted) values</li>
      *   <li>URLs, header names and values, and bodies are escaped for the chosen {@code quoteChar}:
      *       inside single quotes each {@code '} becomes {@code '\''}; inside double quotes
      *       {@code \ " $ `} are backslash-escaped</li>
@@ -769,8 +784,8 @@ public final class WebUtil {
      *
      * @param httpMethod the HTTP method (e.g., {@link HttpMethod#GET}, {@link HttpMethod#POST}), must not be {@code null}
      * @param url the target URL, must not be {@code null} or empty
-     * @param headers map of HTTP headers where values can be String or other types that
-     *                {@link HttpUtil#readHttpHeaderValue(Object)} can handle (can be {@code null} or empty)
+     * @param headers map of HTTP headers whose values are converted by
+     *                {@link HttpHeaders#valueOf(Object)} (can be {@code null} or empty)
      * @param body the request body string (can be {@code null} or empty for requests without a body)
      * @param bodyContentType the MIME type of the body (e.g., "application/json"), used to add
      *                 Content-Type header if not already present in headers (can be null)
@@ -778,7 +793,7 @@ public final class WebUtil {
      *                  typically single quote (') or double quote (")
      * @return a formatted cURL command string with line separators, ready for execution
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null} or {@code url} is {@code null} or empty
-     * @see HttpUtil#readHttpHeaderValue(Object)
+     * @see HttpHeaders#valueOf(Object)
      * @see Strings#quoteEscaped(String, char)
      */
     public static String buildCurl(final HttpMethod httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
@@ -807,7 +822,7 @@ public final class WebUtil {
                 String headerValue = null;
 
                 for (final Map.Entry<String, ?> e : headers.entrySet()) {
-                    headerValue = HttpUtil.readHttpHeaderValue(e.getValue());
+                    headerValue = HttpHeaders.valueOf(e.getValue());
 
                     sb.append(" -H ")
                             .append(quoteChar)

@@ -46,6 +46,7 @@ import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
+import com.landawn.abacus.util.function.IntObjFunction;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
@@ -2800,7 +2801,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     public void testGetRow_RowSupplierReturningNull() {
-        assertThrows(NullPointerException.class, () -> dataset.getRow(0, size -> null));
+        assertThrows(IllegalArgumentException.class, () -> dataset.getRow(0, size -> null));
     }
 
     @Test
@@ -7815,6 +7816,124 @@ public class RowDatasetTest extends TestBase {
         assertEquals(Arrays.asList(1, 2, 3), ds.getColumn("id"));
         assertEquals(Arrays.asList("a", "b", "c"), ds.getColumn("name"));
         assertThrows(IllegalArgumentException.class, () -> ds.addRows(Arrays.asList(new Object[] { 4 })));
+    }
+
+    @Test
+    public void testRowRemovalClampsOrResetsCurrentRowIndex() {
+        dataset.moveToRow(4);
+        dataset.removeRow(4);
+
+        assertEquals(3, dataset.currentRowIndex());
+        assertEquals(4, dataset.<Integer> get("id"));
+
+        dataset.removeRows(0, dataset.size());
+        assertEquals(0, dataset.currentRowIndex());
+        assertEquals(0, dataset.size());
+
+        dataset.addRow(new Object[] { 6, "Frank", 40, 80000.0 });
+        assertEquals(6, dataset.<Integer> get("id"));
+
+        dataset.clear();
+        assertEquals(0, dataset.currentRowIndex());
+
+        final RowDataset oneColumn = new RowDataset(new ArrayList<>(Arrays.asList("value")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2)))));
+        oneColumn.moveToRow(1);
+        oneColumn.removeColumn("value");
+        assertEquals(0, oneColumn.size());
+        assertEquals(0, oneColumn.currentRowIndex());
+    }
+
+    @Test
+    public void testRemoveDuplicateRowsClampsCurrentRowIndex() {
+        final RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 2)))));
+        ds.moveToRow(2);
+
+        ds.removeDuplicateRowsBy("id");
+
+        assertEquals(2, ds.size());
+        assertEquals(1, ds.currentRowIndex());
+        assertEquals(2, ds.<Integer> get("id"));
+
+        final RowDataset multiKey = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 2)), new ArrayList<>(Arrays.asList("a", "a", "b")))));
+        multiKey.moveToRow(2);
+        multiKey.removeDuplicateRowsBy(Arrays.asList("id", "name"));
+        assertEquals(1, multiKey.currentRowIndex());
+        assertEquals("b", multiKey.<String> get("name"));
+    }
+
+    @Test
+    public void testRowSuppliersRejectNullAndShortResults() {
+        assertThrows(IllegalArgumentException.class, () -> dataset.getRow(0, (IntFunction<Object[]>) columnCount -> null));
+        assertThrows(IllegalArgumentException.class, () -> dataset.getRow(0, (IntFunction<Object[]>) columnCount -> new Object[columnCount - 1]));
+
+        final int[] listSupplierCalls = { 0 };
+        final IntFunction<Object[]> listRowSupplier = columnCount -> listSupplierCalls[0]++ == 0 ? new Object[columnCount] : null;
+        assertThrows(IllegalArgumentException.class, () -> dataset.toList(listRowSupplier));
+
+        final int[] streamSupplierCalls = { 0 };
+        final IntFunction<Object[]> streamRowSupplier = columnCount -> streamSupplierCalls[0]++ == 0 ? new Object[columnCount] : null;
+        assertThrows(IllegalArgumentException.class, () -> dataset.stream(streamRowSupplier).toList());
+    }
+
+    @Test
+    public void testMapAndMultimapSuppliersRejectNullResults() {
+        final IntFunction<Map<Integer, String>> nullMapSupplier = ignored -> null;
+        final IntFunction<ListMultimap<Integer, String>> nullMultimapSupplier = ignored -> null;
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.toMap("id", "name", nullMapSupplier));
+        assertThrows(IllegalArgumentException.class, () -> dataset.toMultimap("id", "name", nullMultimapSupplier));
+    }
+
+    @Test
+    @SuppressWarnings("rawtypes")
+    public void testJoinCollectionSuppliersRejectNullResults() {
+        final RowDataset left = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)))));
+        final RowDataset right = new RowDataset(new ArrayList<>(Arrays.asList("rid")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)))));
+        final Map<String, String> joinColumns = N.asMap("id", "rid");
+        final IntFunction<Collection> nullCollectionSupplier = ignored -> null;
+
+        assertThrows(IllegalArgumentException.class, () -> left.innerJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
+        assertThrows(IllegalArgumentException.class, () -> left.rightJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
+        assertThrows(IllegalArgumentException.class, () -> left.fullJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
+    }
+
+    @Test
+    public void testFirstAndLastRowValidateArgumentsWhenEmpty() {
+        final IntFunction<Object[]> nullRowSupplier = null;
+
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.firstRow(null, Object[].class));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.firstRow(Arrays.asList("col1"), String.class));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.firstRow(Arrays.asList("col1"), nullRowSupplier));
+
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.lastRow(null, Object[].class));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.lastRow(Arrays.asList("col1"), String.class));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.lastRow(Arrays.asList("col1"), nullRowSupplier));
+    }
+
+    @Test
+    @SuppressWarnings("rawtypes")
+    public void testEmptyDatasetStillValidatesEagerCallbacks() {
+        final Function<DisposableObjArray, Comparable> nullKeyExtractor = null;
+        final IntObjFunction<DisposableObjArray, Object> nullRowMapper = null;
+        final BiFunction<Object, Object, Object> nullBiMapper = null;
+        final TriFunction<Object, Object, Object, Object> nullTriMapper = null;
+
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.sortBy(emptyDs.columnNames(), nullKeyExtractor));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.topBy(emptyDs.columnNames(), 1, nullKeyExtractor));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.stream(emptyDs.columnNames(), nullRowMapper));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.stream(new Tuple2<>("col1", "col2"), nullBiMapper));
+        assertThrows(IllegalArgumentException.class, () -> emptyDs.stream(new Tuple3<>("col1", "col2", "col1"), nullTriMapper));
+    }
+
+    @Test
+    public void testCombineColumnsValidatesBeforeMappingRows() {
+        final int[] mapperCalls = { 0 };
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.combineColumns((Collection<String>) null, "combined", arr -> mapperCalls[0]++));
+        assertThrows(IllegalArgumentException.class, () -> dataset.combineColumns(Arrays.asList("id", "age"), "", arr -> mapperCalls[0]++));
+        assertEquals(0, mapperCalls[0]);
     }
 
 }

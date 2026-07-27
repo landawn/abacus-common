@@ -72,7 +72,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         declaringName = getTypeName(typeClass, parameterTypeName, true);
         elementType = TypeFactory.getType(parameterTypeName);
         parameterTypes = List.of(elementType);
-        isOrdered = LinkedHashMultiset.class.isAssignableFrom(typeClass) || TreeMultiset.class.isAssignableFrom(typeClass);
+        isOrdered = LinkedHashMultiset.class.isAssignableFrom(typeClass) || SortedMultiset.class.isAssignableFrom(typeClass);
 
         jdc = JsonDeserConfig.create().setMapKeyType(elementType).setMapValueType(Integer.class).setElementType(elementType);
     }
@@ -147,7 +147,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * Serializes a multiset to its JSON string representation.
      * The multiset is serialized as a JSON object where each element maps to its count
      * (e.g., {@code {"apple":3,"banana":2}}).
-     * For ordered multisets ({@link LinkedHashMultiset}, {@link TreeMultiset}), insertion or sort order is preserved.
+     * For ordered multisets ({@link LinkedHashMultiset} and {@link SortedMultiset} implementations), insertion or sort order is preserved.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
@@ -165,7 +165,8 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
             return null;
         }
 
-        final Map<E, Integer> map = isOrdered ? N.newLinkedHashMap(x.size()) : N.newHashMap(x.size());
+        final int distinctElementCount = x.elementSet().size();
+        final Map<E, Integer> map = isOrdered ? N.newLinkedHashMap(distinctElementCount) : N.newHashMap(distinctElementCount);
 
         for (final E e : x.elementSet()) {
             map.put(e, x.count(e));
@@ -208,7 +209,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
             multiset.add(entry.getKey(), entry.getValue());
         }
 
-        // Immutable targets are abstract, so newInstance() built a mutable HashMultiset: convert
+        // Immutable targets are abstract, so newInstance() built a mutable multiset: convert
         // (like the GuavaMultimapType sibling) instead of returning the wrong runtime type.
         if (ImmutableSortedMultiset.class.isAssignableFrom(typeClass)) {
             return (T) ImmutableSortedMultiset.copyOf((Multiset) multiset);

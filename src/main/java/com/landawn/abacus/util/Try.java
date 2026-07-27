@@ -14,6 +14,10 @@
 
 package com.landawn.abacus.util;
 
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -36,24 +40,27 @@ import java.util.function.Supplier;
  * });
  *
  * // Call code with return value and default on exception
- * String result = Try.call(() -> readFile("config.txt"), "default content");
+ * String result = Try.call(() -> Files.readString(Path.of("config.txt")), "default content");
  *
  * // Handle exceptions with custom logic
- * Try.run(() -> riskyOperation(), ex -> logger.error("Operation failed", ex));
+ * Try.run(() -> Files.readString(Path.of("missing.txt")),
+ *     ex -> System.err.println("Operation failed: " + ex.getMessage()));
  * }</pre>
  *
  * <p><b>Resource management examples:</b></p>
  * <pre>{@code
  * // Basic try-with-resources
- * Try.with(new FileInputStream("file.txt"))
- *    .run(stream -> processStream(stream));
+ * Try.with(new ByteArrayInputStream("data".getBytes(StandardCharsets.UTF_8)))
+ *    .run(stream -> System.out.println(new String(stream.readAllBytes(), StandardCharsets.UTF_8)));
  *
  * // With final action
- * Try.with(connection, () -> connectionPool.returnConnection(connection))
- *    .call(conn -> conn.executeQuery("SELECT * FROM users"));
+ * AtomicBoolean finished = new AtomicBoolean();
+ * Try.with(new StringReader("ready"), () -> finished.set(true))
+ *    .call(Reader::read);
  *
  * // With lazy resource initialization
- * Try.with(() -> new FileWriter("output.txt"))
+ * Throwables.Supplier<java.io.StringWriter, Exception> writerSupplier = java.io.StringWriter::new;
+ * Try.with(writerSupplier)
  *    .run(writer -> writer.write("Hello, World!"));
  * }</pre>
  *
@@ -62,13 +69,23 @@ import java.util.function.Supplier;
  * operation reuses the same, already-closed object. A supplier-backed instance may be reused when
  * its supplier returns a fresh, non-null resource for every invocation.</p>
  *
+ * <p>A configured final action runs after every attempted instance operation, including when resource
+ * acquisition fails. If a resource was acquired, try-with-resources closes it before the final action.</p>
+ *
+ * <p><b>Overload note:</b> Because {@code with} accepts either a resource or a resource supplier,
+ * target an inline supplier lambda or method reference as a {@link Throwables.Supplier} (by assignment
+ * or cast). Similarly, target fallback lambdas as {@link Supplier} or {@link Function} when an immediate
+ * default-value overload would otherwise make the invocation ambiguous.</p>
+ *
  * <p>If an {@link InterruptedException} is converted, handled, or replaced with a fallback value,
- * the current thread's interrupted status is restored before control is passed to user recovery code.</p>
+ * the current thread's interrupted status is restored before control is passed to user recovery code.
+ * This also applies when the interruption is a cause or a suppressed close failure.</p>
  *
  * @param <T> the type of the resource that extends {@link AutoCloseable}
  * @see Throwables
  * @see ExceptionUtil
  */
+@SuppressWarnings("try") // InterruptedException from close() is detected and restores the thread's status below.
 public final class Try<T extends AutoCloseable> {
     private final T targetResource;
     private final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier;
@@ -79,7 +96,8 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param targetResource the pre-created resource, or {@code null} if a supplier is used
      * @param targetResourceSupplier the supplier used to lazily create the resource, or {@code null} if the resource is pre-created
-     * @param finalAction the action to execute in the {@code finally} block after the resource is closed, or {@code null} if none
+     * @param finalAction the action to execute in the outer {@code finally} block after each attempted
+     *                    operation, or {@code null} if none
      */
     Try(final T targetResource, final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction) {
         this.targetResource = targetResource;
@@ -98,6 +116,7 @@ public final class Try<T extends AutoCloseable> {
         try {
             return operation.call();
         } catch (final RuntimeException | Error e) {
+            restoreInterruptedStatusIfNeeded(e);
             primaryFailure = e;
             throw e;
         } finally {
@@ -105,6 +124,8 @@ public final class Try<T extends AutoCloseable> {
                 try {
                     finalAction.run();
                 } catch (final RuntimeException | Error finalActionFailure) {
+                    restoreInterruptedStatusIfNeeded(finalActionFailure);
+
                     if (primaryFailure == null) {
                         throw finalActionFailure;
                     }
@@ -117,9 +138,32 @@ public final class Try<T extends AutoCloseable> {
         }
     }
 
-    private static void restoreInterruptedStatusIfNeeded(final Exception e) {
-        if (e instanceof InterruptedException) {
-            Thread.currentThread().interrupt();
+    private static void restoreInterruptedStatusIfNeeded(final Throwable failure) {
+        final Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        final ArrayDeque<Throwable> pending = new ArrayDeque<>();
+        pending.add(failure);
+
+        while (!pending.isEmpty()) {
+            final Throwable current = pending.removeLast();
+
+            if (!visited.add(current)) {
+                continue;
+            }
+
+            if (current instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            final Throwable cause = current.getCause();
+
+            if (cause != null) {
+                pending.add(cause);
+            }
+
+            for (final Throwable suppressed : current.getSuppressed()) {
+                pending.add(suppressed);
+            }
         }
     }
 
@@ -131,11 +175,11 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Try.with(new FileInputStream("data.txt"))
+     * Try.with(new ByteArrayInputStream("data".getBytes(StandardCharsets.UTF_8)))
      *    .run(stream -> {
      *        // Process the stream
      *        byte[] data = stream.readAllBytes();
-     *        System.out.println(new String(data));
+     *        System.out.println(new String(data, StandardCharsets.UTF_8));
      *    });
      * }</pre>
      *
@@ -154,16 +198,14 @@ public final class Try<T extends AutoCloseable> {
      * Creates a new Try instance with the specified resource and a final action to execute after resource cleanup.
      *
      * <p>The final action is executed after the resource has been closed, regardless of whether
-     * the main operation succeeded or failed. This is useful for additional cleanup or logging.</p>
+     * the main operation succeeded or failed. If resource acquisition itself fails, the final action
+     * still runs. This is useful for additional cleanup or logging.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Connection conn = dataSource.getConnection();
-     * Try.with(conn, () -> connectionPool.releaseConnection(conn))
-     *    .run(connection -> {
-     *        // Use the connection
-     *        connection.createStatement().execute("UPDATE users SET active = true");
-     *    });
+     * AtomicBoolean finished = new AtomicBoolean();
+     * Try.with(new BufferedReader(new StringReader("database row")), () -> finished.set(true))
+     *    .run(reader -> System.out.println(reader.readLine()));
      * }</pre>
      *
      * @param <T> the type of the resource that extends AutoCloseable.
@@ -188,7 +230,8 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Try.with(() -> new FileWriter("output.txt"))
+     * Throwables.Supplier<java.io.StringWriter, Exception> writerSupplier = java.io.StringWriter::new;
+     * Try.with(writerSupplier)
      *    .run(writer -> {
      *        writer.write("Hello, World!");
      *        writer.flush();
@@ -213,14 +256,18 @@ public final class Try<T extends AutoCloseable> {
      * Creates a new Try instance with a resource supplier and a final action.
      *
      * <p>Combines lazy resource creation with a final cleanup action. The resource is created
-     * when needed, and the final action is executed after the resource is closed.</p>
+     * when needed, and the final action is executed after the resource is closed. If creation
+     * fails, the final action still runs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Try.with(
-     *     () -> openNetworkConnection(),
-     *     () -> logger.info("Connection closed")
-     * ).call(conn -> conn.sendRequest(data));
+     * AtomicBoolean finished = new AtomicBoolean();
+     * Throwables.Supplier<ByteArrayInputStream, Exception> inputSupplier =
+     *     () -> new ByteArrayInputStream("OK".getBytes(StandardCharsets.UTF_8));
+     * String response = Try.with(
+     *     inputSupplier,
+     *     () -> finished.set(true)
+     * ).call(stream -> new String(stream.readAllBytes(), StandardCharsets.UTF_8));
      * }</pre>
      *
      * @param <T> the type of the resource that extends AutoCloseable.
@@ -251,10 +298,9 @@ public final class Try<T extends AutoCloseable> {
      * Try.run(() -> Thread.sleep(1000));
      *
      * // Working with I/O operations
-     * Try.run(() -> {
-     *     Files.write(path, data);
-     *     Files.copy(source, target);
-     * });
+     * Path path = Path.of("output.txt");
+     * byte[] data = "content".getBytes(StandardCharsets.UTF_8);
+     * Try.run(() -> Files.write(path, data));
      * }</pre>
      *
      * @param cmd the runnable task that might throw an exception. Must not be {@code null}.
@@ -268,6 +314,7 @@ public final class Try<T extends AutoCloseable> {
         try {
             cmd.run();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
             throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
@@ -281,14 +328,15 @@ public final class Try<T extends AutoCloseable> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Try.run(
-     *     () -> sendEmail(recipient, message),
-     *     ex -> logger.error("Failed to send email to " + recipient, ex)
+     *     () -> { throw new IOException("mail server unavailable"); },
+     *     ex -> System.err.println("Failed to send email: " + ex.getMessage())
      * );
      *
      * // With recovery logic
+     * AtomicBoolean fallbackUsed = new AtomicBoolean();
      * Try.run(
-     *     () -> primaryService.process(data),
-     *     ex -> fallbackService.process(data)
+     *     () -> { throw new IOException("primary service unavailable"); },
+     *     ex -> fallbackUsed.set(true)
      * );
      * }</pre>
      *
@@ -321,8 +369,8 @@ public final class Try<T extends AutoCloseable> {
      * // Read file content without explicit exception handling
      * String content = Try.call(() -> Files.readString(Path.of("config.txt")));
      *
-     * // Parse JSON that might throw checked exception
-     * Config config = Try.call(() -> objectMapper.readValue(json, Config.class));
+     * // Parse a value without a checked-exception declaration at the call site
+     * Integer number = Try.call(() -> Integer.valueOf("42"));
      * }</pre>
      *
      * @param <R> the type of the result.
@@ -338,6 +386,7 @@ public final class Try<T extends AutoCloseable> {
         try {
             return cmd.call();
         } catch (final Exception e) {
+            restoreInterruptedStatusIfNeeded(e);
             throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
@@ -351,15 +400,15 @@ public final class Try<T extends AutoCloseable> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Return null on error
-     * User user = Try.call(
-     *     () -> userService.findById(userId),
-     *     ex -> null
+     * String user = Try.call(
+     *     () -> { throw new IOException("user service unavailable"); },
+     *     (java.util.function.Function<Exception, String>) ex -> null
      * );
      *
      * // Transform exception to error response
-     * Response response = Try.call(
-     *     () -> processRequest(request),
-     *     ex -> Response.error(ex.getMessage())
+     * String response = Try.call(
+     *     () -> { throw new IOException("request failed"); },
+     *     (java.util.function.Function<Exception, String>) ex -> "error: " + ex.getMessage()
      * );
      * }</pre>
      *
@@ -392,15 +441,15 @@ public final class Try<T extends AutoCloseable> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Lazy default value computation
-     * Config config = Try.call(
-     *     () -> loadConfigFromFile(),
-     *     () -> createDefaultConfig()
+     * java.util.Properties config = Try.call(
+     *     () -> { java.util.Properties p = new java.util.Properties(); p.load(new StringReader("mode=safe")); return p; },
+     *     (java.util.function.Supplier<java.util.Properties>) java.util.Properties::new
      * );
      *
      * // With expensive fallback
-     * Data data = Try.call(
-     *     () -> fetchFromCache(key),
-     *     () -> fetchFromDatabase(key)
+     * byte[] cachedData = Try.call(
+     *     () -> Files.readAllBytes(Path.of("cache.bin")),
+     *     () -> new byte[0]
      * );
      * }</pre>
      *
@@ -432,9 +481,11 @@ public final class Try<T extends AutoCloseable> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Parse with default
+     * String userInput = "not a number";
      * int value = Try.call(() -> Integer.parseInt(userInput), 0);
      *
      * // Load optional configuration
+     * java.util.Properties properties = new java.util.Properties();
      * String setting = Try.call(
      *     () -> properties.getProperty("advanced.setting"),
      *     "default-value"
@@ -471,16 +522,16 @@ public final class Try<T extends AutoCloseable> {
      * <pre>{@code
      * // Only handle specific exceptions
      * String result = Try.call(
-     *     () -> riskyOperation(),
+     *     () -> { throw new IOException("read failed"); },
      *     ex -> ex instanceof IOException,
-     *     () -> "default for IO errors"
+     *     (java.util.function.Supplier<String>) () -> "default for IO errors"
      * );
      *
      * // Retry on timeout
-     * Data data = Try.call(
-     *     () -> fetchWithTimeout(),
+     * String data = Try.call(
+     *     () -> { throw new TimeoutException("timed out"); },
      *     ex -> ex instanceof TimeoutException,
-     *     () -> fetchWithLongerTimeout()
+     *     (java.util.function.Supplier<String>) () -> "retried value"
      * );
      * }</pre>
      *
@@ -521,6 +572,7 @@ public final class Try<T extends AutoCloseable> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Return -1 only for NumberFormatException
+     * String input = "not a number";
      * int value = Try.call(
      *     () -> Integer.parseInt(input),
      *     ex -> ex instanceof NumberFormatException,
@@ -528,10 +580,10 @@ public final class Try<T extends AutoCloseable> {
      * );
      *
      * // Return null only for specific database errors
-     * User user = Try.call(
-     *     () -> userDao.findById(id),
+     * String user = Try.call(
+     *     () -> { throw new SQLException("Connection timeout"); },
      *     ex -> ex.getMessage().contains("Connection timeout"),
-     *     null
+     *     (String) null
      * );
      * }</pre>
      *
@@ -571,7 +623,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Try.with(new BufferedReader(new FileReader("data.txt")))
+     * Try.with(new BufferedReader(new StringReader("first line\nsecond line")))
      *    .run(reader -> {
      *        String line;
      *        while ((line = reader.readLine()) != null) {
@@ -611,10 +663,11 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Try.with(new Socket("server.com", 8080))
+     * byte[] data = "request".getBytes(StandardCharsets.UTF_8);
+     * Try.with(new java.io.ByteArrayOutputStream())
      *    .run(
-     *        socket -> socket.getOutputStream().write(data),
-     *        ex -> logger.error("Failed to send data", ex)
+     *        output -> output.write(data),
+     *        ex -> System.err.println("Failed to write data: " + ex.getMessage())
      *    );
      * }</pre>
      *
@@ -649,10 +702,10 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String content = Try.with(new FileInputStream("data.txt"))
-     *     .call(stream -> new String(stream.readAllBytes()));
+     * String content = Try.with(new ByteArrayInputStream("data".getBytes(StandardCharsets.UTF_8)))
+     *     .call(stream -> new String(stream.readAllBytes(), StandardCharsets.UTF_8));
      *
-     * List<String> lines = Try.with(Files.newBufferedReader(path))
+     * List<String> lines = Try.with(new BufferedReader(new StringReader("one\ntwo")))
      *     .call(reader -> reader.lines().collect(Collectors.toList()));
      * }</pre>
      *
@@ -685,10 +738,13 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonNode config = Try.with(() -> new FileInputStream("config.json"))
+     * Throwables.Supplier<ByteArrayInputStream, Exception> inputSupplier =
+     *     () -> new ByteArrayInputStream("mode=safe".getBytes(StandardCharsets.UTF_8));
+     * java.util.Properties config = Try.with(inputSupplier)
      *     .call(
-     *         stream -> objectMapper.readTree(stream),
-     *         ex -> objectMapper.createObjectNode() // returns empty config on error
+     *         stream -> { java.util.Properties p = new java.util.Properties(); p.load(stream); return p; },
+     *         (java.util.function.Function<Exception, java.util.Properties>) ex -> new java.util.Properties()
+     *             // returns an empty configuration on error
      *     );
      * }</pre>
      *
@@ -722,10 +778,12 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Properties props = Try.with(() -> new FileInputStream("app.properties"))
+     * Throwables.Supplier<FileInputStream, Exception> inputSupplier =
+     *     () -> new FileInputStream("app.properties");
+     * java.util.Properties props = Try.with(inputSupplier)
      *     .call(
-     *         stream -> { Properties p = new Properties(); p.load(stream); return p; },
-     *         () -> loadDefaultProperties()
+     *         stream -> { java.util.Properties p = new java.util.Properties(); p.load(stream); return p; },
+     *         (java.util.function.Supplier<java.util.Properties>) java.util.Properties::new
      *     );
      * }</pre>
      *
@@ -757,7 +815,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int lineCount = Try.with(Files.newBufferedReader(path))
+     * int lineCount = Try.with(new BufferedReader(new StringReader("one\ntwo")))
      *     .call(
      *         reader -> (int) reader.lines().count(),
      *         0
@@ -795,11 +853,14 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = Try.with(databaseConnection)
+     * Throwables.Supplier<ByteArrayInputStream, Exception> inputSupplier =
+     *     () -> new ByteArrayInputStream(new byte[0]);
+     * String user = Try.with(inputSupplier)
      *     .call(
-     *         conn -> userDao.findById(conn, userId),
-     *         ex -> ex instanceof SQLException && ex.getMessage().contains("timeout"),
-     *         () -> User.guest() // returns guest user only for timeout errors
+     *         stream -> { throw new SQLTimeoutException("query timeout"); },
+     *         ex -> ex instanceof SQLTimeoutException,
+     *         (java.util.function.Supplier<String>) () -> "guest"
+     *             // returns a guest user only for timeout errors
      *     );
      * }</pre>
      *
@@ -841,9 +902,12 @@ public final class Try<T extends AutoCloseable> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String content = Try.with(new FileInputStream(file))
+     * Path file = Path.of("missing.txt");
+     * Throwables.Supplier<FileInputStream, Exception> inputSupplier =
+     *     () -> new FileInputStream(file.toFile());
+     * String content = Try.with(inputSupplier)
      *     .call(
-     *         stream -> new String(stream.readAllBytes()),
+     *         stream -> new String(stream.readAllBytes(), StandardCharsets.UTF_8),
      *         ex -> ex instanceof FileNotFoundException,
      *         "" // returns empty string only if file not found
      *     );

@@ -31,8 +31,8 @@ import java.io.Writer;
  *   <li>Tabs, newlines, carriage returns, backspaces, and form-feeds are passed
  *       through literally (they are part of the quoted field's value per RFC 4180)</li>
  *   <li>Control characters (U+0000 through U+001F, except those listed above, plus U+007F) are escaped as
- *       {@code &#92;uXXXX} Unicode escapes (e.g. {@code \u0000})</li>
- *   <li>Special Unicode line separators (U+2028, U+2029) are escaped as {@code \u2028} and {@code \u2029}</li>
+ *       <code>&#92;uXXXX</code> Unicode escapes (e.g. <code>&#92;u0000</code>)</li>
+ *   <li>Special Unicode line separators (U+2028, U+2029) are escaped as <code>&#92;u2028</code> and <code>&#92;u2029</code></li>
  * </ul>
  *
  * <p>The escape mode (double-quote vs backslash) is determined by the
@@ -44,12 +44,15 @@ import java.io.Writer;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * try (BufferedCsvWriter writer = new BufferedCsvWriter()) {
+ * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter();
+ * try {
  *     writer.write("Name,Description\r\n");
  *     writer.write("Product A,\"");
  *     writer.writeCharacter("Contains a \"quoted\" value");
  *     writer.write("\"\r\n");
  *     String csv = writer.toString();
+ * } finally {
+ *     Objectory.recycle(writer);
  * }
  * }</pre>
  *
@@ -79,7 +82,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * Double quotes are escaped as {@code ""}, while backslashes, tabs, newlines, carriage returns,
      * backspaces, and form-feeds are passed through literally; other control characters (U+0000 through
      * U+001F and U+007F) and the line/paragraph separators (U+2028, U+2029) are escaped as
-     * {@code &#92;uXXXX} sequences.
+     * <code>&#92;uXXXX</code> sequences.
      */
     static final char[][] REPLACEMENT_CHARS;
 
@@ -117,7 +120,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
         REPLACEMENT_CHARS['\r'] = null;
         REPLACEMENT_CHARS['\f'] = null;
 
-        // ...
+        // Escape Unicode line and paragraph separators as explicit code points.
         REPLACEMENT_CHARS['\u2028'] = "\\u2028".toCharArray();
         REPLACEMENT_CHARS['\u2029'] = "\\u2029".toCharArray();
 
@@ -148,10 +151,14 @@ public final class BufferedCsvWriter extends CharacterWriter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedCsvWriter writer = new BufferedCsvWriter();
-     * writer.write("field1,field2\n");
-     * writer.write("\"quoted value\",normal value\n");
-     * String csv = writer.toString();
+     * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter();
+     * try {
+     *     writer.write("field1,field2\n");
+     *     writer.write("\"quoted value\",normal value\n");
+     *     String csv = writer.toString();
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      */
@@ -165,12 +172,23 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * JVM's platform-default charset.
      * The escape mode is determined by the current CsvUtil configuration.
      *
+     * <p>The {@code writeCharacter(...)} methods escape CSV special characters; the ordinary
+     * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
+     * {@code OutputStream}.</p>
+     *
+     * <p>This constructor is package-private. Outside this package, obtain an
+     * instance from the pool via {@link Objectory#createBufferedCsvWriter(OutputStream)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (FileOutputStream fos = new FileOutputStream("data.csv");
-     *      BufferedCsvWriter writer = new BufferedCsvWriter(fos)) {
-     *     writer.write("Name,Age,City\n");
-     *     writer.write("John Doe,30,New York\n");
+     * try (FileOutputStream fos = new FileOutputStream("data.csv")) {
+     *     BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(fos);
+     *     try {
+     *         writer.write("Name,Age,City\n");
+     *         writer.write("John Doe,30,New York\n");
+     *     } finally {
+     *         Objectory.recycle(writer);
+     *     }
      * }
      * }</pre>
      *
@@ -184,12 +202,23 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * Creates a new BufferedCsvWriter that writes to the specified Writer.
      * The escape mode is determined by the current CsvUtil configuration.
      *
+     * <p>The {@code writeCharacter(...)} methods escape CSV special characters; the ordinary
+     * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
+     * {@code Writer}.</p>
+     *
+     * <p>This constructor is package-private. Outside this package, obtain an
+     * instance from the pool via {@link Objectory#createBufferedCsvWriter(Writer)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (FileWriter fw = new FileWriter("data.csv");
-     *      BufferedCsvWriter writer = new BufferedCsvWriter(fw)) {
-     *     writer.write("Product,Price,Description\n");
-     *     writer.write("Widget,19.99,\"A useful widget\"\n");
+     * try (FileWriter fw = new FileWriter("data.csv")) {
+     *     BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(fw);
+     *     try {
+     *         writer.write("Product,Price,Description\n");
+     *         writer.write("Widget,19.99,\"A useful widget\"\n");
+     *     } finally {
+     *         Objectory.recycle(writer);
+     *     }
      * }
      * }</pre>
      *
@@ -208,11 +237,15 @@ public final class BufferedCsvWriter extends CharacterWriter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedCsvWriter writer = new BufferedCsvWriter();
-     * if (writer.isBackSlash()) {
-     *     // Double quotes will be escaped as \"
-     * } else {
-     *     // Double quotes will be escaped as ""
+     * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter();
+     * try {
+     *     if (writer.isBackSlash()) {
+     *         // Double quotes will be escaped as \"
+     *     } else {
+     *         // Double quotes will be escaped as ""
+     *     }
+     * } finally {
+     *     Objectory.recycle(writer);
      * }
      * }</pre>
      *

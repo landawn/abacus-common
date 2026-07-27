@@ -13,9 +13,11 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
@@ -77,6 +79,48 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testRunRejectsNullCommand() {
         assertThrows(IllegalArgumentException.class, () -> Profiler.run(1, 1, 1, (Throwables.Runnable<Exception>) null));
+    }
+
+    @Test
+    public void testThreadAndLoopDelaysAreNotAppliedAfterTheLastExecution() {
+        final AtomicLong commandCompletedAt = new AtomicLong();
+
+        Profiler.run(1, 800, 1, 800, 1, "noTrailingDelay", () -> commandCompletedAt.set(System.nanoTime()));
+
+        final long returnDelayInMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - commandCompletedAt.get());
+        assertTrue(returnDelayInMillis < 600, "unexpected trailing delay: " + returnDelayInMillis + " ms");
+    }
+
+    @Test
+    public void testMethodStatisticsNormalizesNullMethodName() {
+        final Profiler.MethodStatistics stats = new Profiler.MethodStatistics(null);
+
+        assertEquals("null", stats.getMethodName());
+    }
+
+    @Test
+    public void testMachineReadableNumbersAreLocaleIndependent() throws InterruptedException {
+        final Locale originalLocale = Locale.getDefault();
+        final AtomicReference<String> xml = new AtomicReference<>();
+
+        try {
+            Locale.setDefault(Locale.FRANCE);
+
+            final Thread renderingThread = new Thread(() -> {
+                final Profiler.SingleLoopStatistics loop = new Profiler.SingleLoopStatistics();
+                loop.addMethodStatistics(new Profiler.MethodStatistics("sample", 0, 1, 0, 1_500_000));
+                final Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 0, 1_500_000, 1, N.asList(loop));
+                final StringWriter writer = new StringWriter();
+                stats.writeXmlResult(writer);
+                xml.set(writer.toString());
+            });
+            renderingThread.start();
+            renderingThread.join();
+        } finally {
+            Locale.setDefault(originalLocale);
+        }
+
+        assertTrue(xml.get().contains("<avgTime>1.500</avgTime>"), xml.get());
     }
 
     @Test

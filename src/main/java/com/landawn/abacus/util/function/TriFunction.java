@@ -34,6 +34,9 @@ import com.landawn.abacus.util.cs;
  * @param <B> the type of the second argument to the function
  * @param <C> the type of the third argument to the function
  * @param <R> the type of the result of the function
+ * @see java.util.function.Function
+ * @see java.util.function.BiFunction
+ * @see QuadFunction
  */
 @FunctionalInterface
 public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C, R, RuntimeException> { //NOSONAR

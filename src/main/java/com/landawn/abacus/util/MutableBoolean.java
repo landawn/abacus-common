@@ -69,7 +69,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBoolean flag = new MutableBoolean();
+     * MutableBoolean flag = MutableBoolean.of(false);
      * }</pre>
      *
      */
@@ -81,7 +81,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBoolean flag = new MutableBoolean(true);
+     * MutableBoolean flag = MutableBoolean.of(true);
      * }</pre>
      *
      * @param value the initial value to store
@@ -124,7 +124,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     //-----------------------------------------------------------------------
 
     /**
-     * Gets the value as a boolean primitive.
+     * Gets the value as a primitive boolean.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -134,7 +134,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * flag.setFalse();
      * val = flag.getValue();           // returns false, value is unchanged
      *
-     * MutableBoolean def = new MutableBoolean();
+     * MutableBoolean def = MutableBoolean.of(false);
      * val = def.getValue();            // returns false (the default value)
      * }</pre>
      *
@@ -235,7 +235,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>

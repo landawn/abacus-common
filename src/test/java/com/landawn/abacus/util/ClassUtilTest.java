@@ -545,6 +545,11 @@ public class ClassUtilTest extends TestBase {
     }
 
     @Test
+    public void testFindClassesInPackage_rejectsNullPredicateBeforeScanning() {
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.findClassesInPackage("com.landawn.abacus.util", false, true, null));
+    }
+
+    @Test
     public void testFindClassesInPackage_recursive() {
         List<Class<?>> classes = ClassUtil.findClassesInPackage("com.landawn.abacus.util", true, true);
         assertNotNull(classes);
@@ -1009,6 +1014,12 @@ public class ClassUtilTest extends TestBase {
         String input = "java.util.ArrayList";
         String result = ClassUtil.formatParameterizedTypeName(input);
         assertEquals("java.util.ArrayList", result);
+    }
+
+    @Test
+    public void testFormatParameterizedTypeName_doesNotStripEmbeddedJavaLangSegment() {
+        assertEquals("com.java.lang.StringThing", ClassUtil.formatParameterizedTypeName("com.java.lang.StringThing"));
+        assertEquals("java.util.List<String>", ClassUtil.formatParameterizedTypeName("java.util.List<java.lang.String>"));
     }
 
     @Test

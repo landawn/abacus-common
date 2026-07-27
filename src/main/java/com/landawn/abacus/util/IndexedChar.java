@@ -85,7 +85,7 @@ public final class IndexedChar extends AbstractIndexed {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IndexedChar indexed = IndexedChar.of('Z', 1000000000L);
+     * IndexedChar indexed = IndexedChar.of('Z', 5_000_000_000L);
      * }</pre>
      *
      * @param value the char value to be associated with the index

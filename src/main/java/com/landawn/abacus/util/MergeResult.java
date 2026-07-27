@@ -300,8 +300,8 @@ public enum MergeResult {
      *
      * @param <T> the type of the values (not used in the decision)
      * @return a stateful BiFunction that alternates between merge results
-     * @deprecated use {@link Fn#alternate()} instead
      * @see Fn#alternate()
+     * @deprecated use {@link Fn#alternate()} instead
      */
     @Deprecated
     @Beta

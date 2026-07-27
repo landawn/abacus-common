@@ -34,6 +34,8 @@ import com.landawn.abacus.util.cs;
  *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
+ * @see LongPredicate
+ * @see LongTriPredicate
  */
 @FunctionalInterface
 public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeException> { //NOSONAR
@@ -109,6 +111,13 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *
      * <p>If this predicate returns {@code true} for given inputs, the negated
      * predicate will return {@code false}, and vice versa.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongBiPredicate equal = LongBiPredicate.EQUAL;
+     * LongBiPredicate notEqual = equal.negate();
+     * boolean result = notEqual.test(3L, 7L);   // Returns true
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */

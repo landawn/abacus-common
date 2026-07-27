@@ -45,7 +45,7 @@ import com.landawn.abacus.util.IOUtil;
 @SuppressWarnings("java:S2160")
 public class InputStreamType extends AbstractType<InputStream> {
 
-    /** The type name constant for InputStream type identification. */
+    /** The type name constant for InputStream type identification, equal to {@code "InputStream"}. */
     public static final String INPUT_STREAM = InputStream.class.getSimpleName();
 
     private final Class<InputStream> typeClass;
@@ -128,6 +128,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      *
      * @param x the {@link InputStream} to read; may be {@code null}
      * @return the stream contents as a string, or {@code null} if {@code x} is {@code null}
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading the stream
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -253,12 +254,12 @@ public class InputStreamType extends AbstractType<InputStream> {
 
     /**
      * Sets an {@link InputStream} value as a binary-stream parameter in a {@link PreparedStatement},
-     * reading at most {@code sqlTypeOrLength} bytes from the stream.
+     * declaring that the stream contains exactly {@code sqlTypeOrLength} bytes.
      *
      * @param stmt the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x the {@link InputStream} to set; may be {@code null}
-     * @param sqlTypeOrLength the maximum number of bytes to read from the stream
+     * @param sqlTypeOrLength the declared number of bytes in the stream
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
@@ -268,12 +269,12 @@ public class InputStreamType extends AbstractType<InputStream> {
 
     /**
      * Sets an {@link InputStream} value as a named binary-stream parameter in a {@link CallableStatement},
-     * reading at most {@code sqlTypeOrLength} bytes from the stream.
+     * declaring that the stream contains exactly {@code sqlTypeOrLength} bytes.
      *
      * @param stmt the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@link InputStream} to set; may be {@code null}
-     * @param sqlTypeOrLength the maximum number of bytes to read from the stream
+     * @param sqlTypeOrLength the declared number of bytes in the stream
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override

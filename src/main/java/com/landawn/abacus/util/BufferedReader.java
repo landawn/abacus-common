@@ -41,9 +41,9 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * String line2 = reader.readLine();   // "World"
  *
  * // Reading from an InputStream
- * BufferedReader reader2 = new BufferedReader(new FileInputStream("file.txt"));
- * String firstLine = reader2.readLine();
- * reader2.close();
+ * try (BufferedReader reader2 = new BufferedReader(new FileInputStream("file.txt"))) {
+ *     String firstLine = reader2.readLine();
+ * }
  * }</pre>
  *
  * @see java.io.BufferedReader
@@ -51,24 +51,61 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 @SuppressFBWarnings
 final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
+    /**
+     * Shared placeholder passed to the {@link java.io.BufferedReader} superclass constructor in
+     * string mode, where there is no real source. All of its operations throw
+     * {@link UnsupportedOperationException}, so it must never actually be read from.
+     */
     static final Reader DUMMY_READER = new DummyReader();
 
+    /**
+     * The character buffer holding data read from {@link #in}, or {@code null} in string mode
+     * and before the first fill. Allocated lazily from and recycled to {@link Objectory}.
+     */
     char[] _cbuf; //NOSONAR
 
+    /**
+     * The number of valid characters currently in {@link #_cbuf}. Unused in string mode.
+     */
     int nChars = 0;
 
+    /**
+     * The index of the next character to consume — from {@link #_cbuf} in reader mode,
+     * or from {@link #strValue} in string mode.
+     */
     int nextChar = 0;
 
+    /**
+     * {@code true} when the previous read ended on a {@code '\r'}, so an immediately
+     * following {@code '\n'} must be swallowed as part of the same line terminator.
+     */
     boolean skipLF = false;
 
+    /**
+     * The string being read in string mode, or {@code null} when reading from {@link #in}.
+     * This field is what distinguishes the two modes.
+     */
     String str;
 
+    /**
+     * A read-only view of the characters of {@link #str}, or {@code null} in reader mode.
+     * Must never be modified.
+     */
     char[] strValue;
 
+    /**
+     * The length of {@link #str}, or {@code 0} in reader mode.
+     */
     int strLength;
 
+    /**
+     * The underlying reader in reader mode, or {@code null} in string mode.
+     */
     Reader in;
 
+    /**
+     * Indicates whether this reader has been closed.
+     */
     boolean isClosed;
 
     /**
@@ -87,7 +124,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }
      * }</pre>
      *
-     * @param st the string to read from
+     * @param st the string to read from; must not be {@code null}
+     * @throws NullPointerException if {@code st} is {@code null}
      */
     BufferedReader(final String st) {
         super(DUMMY_READER, 1);
@@ -117,10 +155,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileReader fileReader = new FileReader("data.txt");
-     * BufferedReader reader = new BufferedReader(fileReader);
-     * String content = reader.readLine();
-     * reader.close();
+     * try (BufferedReader reader = new BufferedReader(new FileReader("data.txt"))) {
+     *     String content = reader.readLine();
+     * }
      * }</pre>
      *
      * @param reader the reader to read from
@@ -667,7 +704,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * System.out.println(reader.readLine());   // "Second"
      * }</pre>
      *
-     * @param st the new string to read from
+     * @param st the new string to read from; must not be {@code null}
+     * @throws NullPointerException if {@code st} is {@code null}
      */
     @SuppressWarnings("deprecation")
     void reinit(final String st) {
@@ -690,11 +728,12 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedReader reader = new BufferedReader("Initial");
-     * System.out.println(reader.readLine());   // "Initial"
+     * try (BufferedReader reader = new BufferedReader("Initial")) {
+     *     System.out.println(reader.readLine());   // "Initial"
      *
-     * reader.reinit(new FileInputStream("another.txt"));
-     * System.out.println(reader.readLine());   // line is the first line of another.txt
+     *     reader.reinit(new FileInputStream("another.txt"));
+     *     System.out.println(reader.readLine()); // first line of another.txt
+     * }                                          // closes the current source (another.txt)
      * }</pre>
      *
      * @param is the new input stream to read from

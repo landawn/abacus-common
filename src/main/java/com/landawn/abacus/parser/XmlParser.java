@@ -60,7 +60,11 @@ import com.landawn.abacus.type.Type;
  * Map<String, Type<?>> nodeTypes = new HashMap<>();
  * nodeTypes.put("person", Type.of(Person.class));
  * nodeTypes.put("company", Type.of(Company.class));
- * Object result = parser.deserialize(xmlStream, config, nodeTypes);
+ *
+ * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
+ * try (InputStream xmlStream = new FileInputStream("data.xml")) {
+ *     Object result = parser.deserialize(xmlStream, config, nodeTypes);
+ * }
  * }</pre>
  *
  * @see Parser
@@ -231,8 +235,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * nodeTypes.put("item", Type.of(Item.class));
      * nodeTypes.put("order", Type.of(Order.class));
      *
-     * InputStream inputStream = new FileInputStream("data.xml");
-     * Object result = parser.deserialize(inputStream, config, nodeTypes);
+     * try (InputStream inputStream = new FileInputStream("data.xml")) {
+     *     Object result = parser.deserialize(inputStream, config, nodeTypes);
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -267,8 +272,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * nodeTypes.put("employee", Type.of(Employee.class));
      * nodeTypes.put("department", Type.of(Department.class));
      *
-     * Reader reader = new FileReader("data.xml");
-     * Object result = parser.deserialize(reader, config, nodeTypes);
+     * try (Reader reader = new FileReader("data.xml")) {
+     *     Object result = parser.deserialize(reader, config, nodeTypes);
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object

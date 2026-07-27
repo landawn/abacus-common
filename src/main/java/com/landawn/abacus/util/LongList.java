@@ -124,7 +124,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
- *   <li><b>Storage:</b> 8 bytes per element (64 bits) with no object overhead</li>
+ *   <li><b>Storage:</b> 8 bytes of primitive payload per occupied element, plus the list and backing-array overhead and any unused capacity</li>
  *   <li><b>vs List&lt;Long&gt;:</b> Avoids per-element {@code Long} references and wrapper allocation; actual memory savings are JVM-dependent</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
@@ -178,7 +178,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Capacity:</b> The no-argument constructor starts with no allocation; the first growth allocates at least 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
  *   <li><b>Manual Control:</b> specify the initial capacity via the {@code LongList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
@@ -211,7 +211,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
- *   <li><b>Central Tendency:</b> Lower-median calculation through selection</li>
+ *   <li><b>Central Tendency:</b> Lower-median calculation</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
@@ -247,7 +247,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * <ul>
  *   <li><b>Timestamp Collections:</b> {@code LongList timestamps = new LongList(expectedEvents);}</li>
  *   <li><b>ID Management:</b> {@code LongList userIds = LongList.range(1L, maxUsers + 1L);}</li>
- *   <li><b>Financial Data:</b> {@code LongList amounts = prices.stream().mapToLong(p -> p * 100).collect(...);}</li>
+ *   <li><b>Financial Data:</b> {@code LongList cents = DoubleList.of(1.25, 2.50).stream().mapToLong(price -> Math.round(price * 100)).toLongList();}</li>
  *   <li><b>Performance Monitoring:</b> {@code LongList timings = LongList.of(System.nanoTime());}</li>
  * </ul>
  *
@@ -267,7 +267,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * // Record events with nanosecond precision
  * systemEvents.add(System.nanoTime());
- * // ... record more events
+ * systemEvents.add(System.nanoTime());
  *
  * // Analyze timing data
  * systemEvents.sort();                               // Sort chronologically
@@ -279,7 +279,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * long totalDuration = lastEvent.orElse(0L) - firstEvent.orElse(0L);
  * // Each interval is the gap between consecutive (sorted) events; index by position, not value,
  * // because indexOf would return the first occurrence and break on duplicate timestamps.
- * LongList intervals = IntStream.range(1, systemEvents.size())
+ * LongList intervals = com.landawn.abacus.util.stream.IntStream.range(1, systemEvents.size())
  *     .mapToLong(i -> systemEvents.get(i) - systemEvents.get(i - 1))
  *     .toLongList();
  *
@@ -306,6 +306,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     @Serial
     private static final long serialVersionUID = -7764836427712181163L;
 
+    /** Shared random number generator used by {@link #random(int)}. */
     static final Random RAND = new SecureRandom();
 
     /**
@@ -370,9 +371,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * long[] a = {1L, 2L, 3L};
      * LongList list = new LongList(a);
-     * list.size();   // returns 3
-     * list.get(0);   // returns 1
-     * a[0] = 99L;          // backing array is shared
+     * list.size();          // returns 3
+     * list.get(0);          // returns 1
+     * a[0] = 99L;           // backing array is shared
      * list.get(0);          // returns 99
      * new LongList(null);   // throws NullPointerException
      * }</pre>
@@ -998,7 +999,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             N.copy(elementData, index + 1, elementData, index, numMoved);
         }
 
-        elementData[--size] = 0; // clear to let GC do its work
+        elementData[--size] = 0; // clear the now-unused slot
     }
 
     /**
@@ -2722,6 +2723,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     @Override
     public LongList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
+
+        if (size == 0) {
+            return new LongList(N.copyOfRange(elementData, 0, 0, step));
+        }
 
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.

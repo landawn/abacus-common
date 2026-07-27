@@ -30,20 +30,23 @@ package com.landawn.abacus.parser;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Using constants for XML serialization
+ * java.io.StringWriter writer = new java.io.StringWriter();
  * writer.write(XmlConstants.ARRAY_ELE_START);
- * // ... write array elements
+ * writer.write(XmlConstants.E_ELE_START);
+ * writer.write("1");
+ * writer.write(XmlConstants.E_ELE_END);
  * writer.write(XmlConstants.ARRAY_ELE_END);
+ * String xml = writer.toString();   // returns "<array><e>1</e></array>"
  * }</pre>
  *
  */
 public class XmlConstants {
 
     /**
-     * Protected constructor to prevent direct instantiation of this utility class.
+     * Protected constructor for subclasses.
      */
     protected XmlConstants() {
-        // Utility class - prevent instantiation
+        // For subclasses.
     }
 
     /**

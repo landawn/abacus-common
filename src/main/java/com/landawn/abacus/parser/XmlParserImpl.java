@@ -370,7 +370,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     break;
 
                 default:
-                    if (config == null || config.isFailOnEmptyBean()) {
+                    if (configToUse.isFailOnEmptyBean()) {
                         throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
                                 + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
                     } else {
@@ -616,8 +616,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         for (final Map.Entry<Object, Object> entry : ((Map<Object, Object>) m).entrySet()) {
             key = entry.getKey();
 
-            //noinspection SuspiciousMethodCalls
-            if ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(key)) {
+            if (ignoredClassPropNames != null && ignoredClassPropNames.contains(key == null ? null : key.toString())) {
                 continue;
             }
 
@@ -1226,7 +1225,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * }
      *
      * // With configuration
-     * try (InputStream in = new URL("http://api.example.com/user.xml").openStream()) {
+     * try (InputStream in = java.net.URI.create("http://api.example.com/user.xml").toURL().openStream()) {
      *     XmlDeserConfig config = new XmlDeserConfig()
      *         .setIgnoreUnmatchedProperty(true);
      *     User user = parser.deserialize(in, config, Type.of(User.class));
@@ -1881,12 +1880,12 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                         if (attrCount == 1) {
                                             if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
-                                                propType = Type.of(xmlReader.getAttributeValue(0));
+                                                propType = resolveTypeAttribute(xmlReader.getAttributeValue(0));
                                             }
                                         } else if (attrCount > 1) {
                                             for (int i = 0; i < attrCount; i++) {
                                                 if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
-                                                    propType = Type.of(xmlReader.getAttributeValue(i));
+                                                    propType = resolveTypeAttribute(xmlReader.getAttributeValue(i));
 
                                                     break;
                                                 }
@@ -2075,12 +2074,12 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                     if (attrCount == 1) {
                                         if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
-                                            propType = Type.of(xmlReader.getAttributeValue(0));
+                                            propType = resolveTypeAttribute(xmlReader.getAttributeValue(0));
                                         }
                                     } else if (attrCount > 1) {
                                         for (int i = 0; i < attrCount; i++) {
                                             if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
-                                                propType = Type.of(xmlReader.getAttributeValue(i));
+                                                propType = resolveTypeAttribute(xmlReader.getAttributeValue(i));
 
                                                 break;
                                             }
@@ -2252,12 +2251,12 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                     if (attrCount == 1) {
                                         if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
-                                            propType = Type.of(xmlReader.getAttributeValue(0));
+                                            propType = resolveTypeAttribute(xmlReader.getAttributeValue(0));
                                         }
                                     } else if (attrCount > 1) {
                                         for (int i = 0; i < attrCount; i++) {
                                             if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
-                                                propType = Type.of(xmlReader.getAttributeValue(i));
+                                                propType = resolveTypeAttribute(xmlReader.getAttributeValue(i));
 
                                                 break;
                                             }
@@ -2668,7 +2667,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     @SuppressWarnings({ "deprecation", "null" })
     protected <T> T readByDOMParserBody(final Node node, final XmlDeserConfig config, Type<?> propType, boolean checkedAttr, boolean isTagByPropertyName,
             boolean ignoreTypeInfo, final boolean isFirstCall, Type<? extends T> inputType) {
-        if (node.getNodeType() == Node.TEXT_NODE) {
+        if (node.getNodeType() != Node.ELEMENT_NODE) {
             return null;
         }
 
@@ -2738,6 +2737,12 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         switch (deserializationType) {
             case ENTITY: {
+                if (!checkedAttr) {
+                    isTagByPropertyName = Strings.isEmpty(XmlUtil.getAttribute(node, XmlConstants.NAME));
+                    ignoreTypeInfo = Strings.isEmpty(XmlUtil.getAttribute(node, XmlConstants.TYPE));
+                    checkedAttr = true;
+                }
+
                 final boolean ignoreUnmatchedProperty = configToUse.isIgnoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(targetClass);
                 final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
@@ -2746,20 +2751,19 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
 
-                    if (propNode.getNodeType() == Node.TEXT_NODE) {
+                    if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
 
-                    if (!checkedAttr) {
-                        isTagByPropertyName = Strings.isEmpty(XmlUtil.getAttribute(propNode, XmlConstants.NAME));
-                        ignoreTypeInfo = Strings.isEmpty(XmlUtil.getAttribute(propNode, XmlConstants.TYPE));
-                        checkedAttr = true;
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XmlConstants.NAME); //NOSONAR
+
+                    if (propName == null) {
+                        throw new ParsingException("Missing '" + XmlConstants.NAME + "' attribute on XML element: " + propNode.getNodeName());
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XmlConstants.NAME); //NOSONAR
                     propInfo = beanInfo.getPropInfo(propName);
 
-                    if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
                     }
 
@@ -2830,7 +2834,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
 
-                    if (propNode.getNodeType() == Node.TEXT_NODE) {
+                    if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
 
@@ -2842,7 +2846,11 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                     propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XmlConstants.NAME); //NOSONAR
 
-                    if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                    if (propName == null) {
+                        throw new ParsingException("Missing '" + XmlConstants.NAME + "' attribute on XML element: " + propNode.getNodeName());
+                    }
+
+                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
                     }
 
@@ -2893,7 +2901,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
 
-                    if (propNode.getNodeType() == Node.TEXT_NODE) {
+                    if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
 
@@ -2904,6 +2912,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
 
                     propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XmlConstants.NAME); //NOSONAR
+
+                    if (propName == null) {
+                        throw new ParsingException("Missing '" + XmlConstants.NAME + "' attribute on XML element: " + propNode.getNodeName());
+                    }
 
                     if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
@@ -2961,7 +2973,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     for (int i = 0; i < eleNodes.getLength(); i++) {
                         eleNode = eleNodes.item(i);
 
-                        if (eleNode.getNodeType() == Node.TEXT_NODE) {
+                        if (eleNode.getNodeType() != Node.ELEMENT_NODE) {
                             continue;
                         }
 
@@ -3026,7 +3038,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int i = 0; i < eleNodes.getLength(); i++) {
                     eleNode = eleNodes.item(i);
 
-                    if (eleNode.getNodeType() == Node.TEXT_NODE) {
+                    if (eleNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
 
@@ -3092,7 +3104,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 Node subPropNode = null;
                 for (int k = 0; k < subPropNodeLength; k++) {
                     subPropNode = subPropNodes.item(k);
-                    if (subPropNode.getNodeType() == Node.TEXT_NODE) {
+                    if (subPropNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
 

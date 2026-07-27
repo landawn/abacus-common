@@ -136,6 +136,7 @@ public final class HARUtil {
      * HARUtil.resetThreadLocalHeaderFilter();
      * }</pre>
      *
+     * @see #setThreadLocalHeaderFilter(BiPredicate)
      */
     public static void resetThreadLocalHeaderFilter() {
         httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
@@ -216,8 +217,8 @@ public final class HARUtil {
      * HARUtil.configureCurlLoggingForCurrentThread(true, '"', curl -> {
      *     try {
      *         Files.write(Paths.get("curl-commands.txt"),
-     *                 (curl + "\n").getBytes(),
-     *                 StandardOpenOption.APPEND);
+     *                 (curl + System.lineSeparator()).getBytes(StandardCharsets.UTF_8),
+     *                 StandardOpenOption.CREATE, StandardOpenOption.APPEND);
      *     } catch (IOException e) {
      *         throw new java.io.UncheckedIOException(e);
      *     }
@@ -226,7 +227,8 @@ public final class HARUtil {
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable.
      * @param quoteChar the character to use for quoting in curl commands.
-     * @param logHandler the consumer that will handle the generated curl command strings.
+     * @param logHandler the consumer that will handle the generated curl command strings, must not be {@code null}.
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}.
      * @see #configureCurlLoggingForCurrentThread(boolean)
      * @see #configureCurlLoggingForCurrentThread(boolean, char)
      */
@@ -249,7 +251,10 @@ public final class HARUtil {
      * <pre>{@code
      * HARUtil.configureCurlLoggingForCurrentThread(true);
      * try {
-     *     // ... replay HAR requests with curl logging ...
+     *     String response = HARUtil.sendRequest(
+     *         new File("capture.har"),
+     *         "http://localhost:18080/data"
+     *     );
      * } finally {
      *     HARUtil.resetCurlLoggingForCurrentThread();
      * }
@@ -407,7 +412,9 @@ public final class HARUtil {
      *
      * @param har the HAR file containing captured HTTP requests.
      * @param filterForTargetUrl predicate to test URLs; all matching URLs' requests will be sent.
-     * @return a list of response bodies as strings, in the order they appear in the HAR file.
+     * @return a list of response bodies as strings, in the order they appear in the HAR file;
+     *         an empty list if the HAR has no entries or none of them match
+     * @throws com.landawn.abacus.exception.UncheckedIOException if the HAR file cannot be read
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -428,7 +435,8 @@ public final class HARUtil {
      *
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs; all matching URLs' requests will be sent.
-     * @return a list of response bodies as strings, in the order they appear in the HAR content.
+     * @return a list of response bodies as strings, in the order they appear in the HAR content;
+     *         an empty list if the HAR has no entries under {@code log.entries} or none of them match
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -473,7 +481,9 @@ public final class HARUtil {
      *
      * @param har the HAR file containing captured HTTP requests.
      * @param filterForTargetUrl predicate to test URLs; only matching URLs will be included in the stream.
-     * @return a stream of tuples where the first element is the request entry map and the second is the {@code HttpResponse}.
+     * @return a stream of tuples where the first element is the request entry map and the second is the
+     *         {@code HttpResponse}; an empty stream if the HAR has no entries or none of them match
+     * @throws com.landawn.abacus.exception.UncheckedIOException if the HAR file cannot be read
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -496,7 +506,9 @@ public final class HARUtil {
      *
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs; only matching URLs will be included in the stream.
-     * @return a stream of tuples where the first element is the request entry map and the second is the {@code HttpResponse}.
+     * @return a stream of tuples where the first element is the request entry map and the second is the
+     *         {@code HttpResponse}; an empty stream if the HAR has no entries under {@code log.entries}
+     *         or none of them match
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -621,7 +633,8 @@ public final class HARUtil {
      * requestOpt.ifPresent(request -> {
      *     String method = HARUtil.getHttpMethodByRequestEntry(request).name();
      *     com.landawn.abacus.http.HttpHeaders headers = HARUtil.getHeadersByRequestEntry(request);
-     *     // Process request details...
+     *     System.out.println("Method: " + method);
+     *     headers.forEach((name, value) -> System.out.println(name + ": " + value));
      * });
      * }</pre>
      *
@@ -656,7 +669,8 @@ public final class HARUtil {
      * }</pre>
      *
      * @param requestEntry the HAR request entry map.
-     * @return the URL string from the request entry.
+     * @return the URL string from the request entry, or {@code null} if the entry has no {@code url} field
+     * @throws ClassCastException if the {@code url} field is present but is not a {@code String}
      */
     public static String getRequestUrl(final Map<String, Object> requestEntry) {
         return (String) requestEntry.get("url");
@@ -704,7 +718,9 @@ public final class HARUtil {
      * }</pre>
      *
      * @param requestEntry the HAR request entry map containing a "headers" array.
-     * @return an {@code HttpHeaders} object containing the filtered headers.
+     * @return a new {@code HttpHeaders} object containing the filtered headers; empty (never
+     *         {@code null}) if the entry has no {@code headers} array or nothing passes the filter
+     * @see #setThreadLocalHeaderFilter(BiPredicate)
      */
     public static HttpHeaders getHeadersByRequestEntry(final Map<String, Object> requestEntry) {
         final BiPredicate<? super String, String> httpHeaderValidatorForHARRequest = httpHeaderFilterForHARRequest_TL.get();
@@ -784,6 +800,10 @@ public final class HARUtil {
         final List<Object> pairs = new ArrayList<>(params.size() * 2);
 
         for (final Map<String, ?> param : params) {
+            if (param == null) {
+                continue;
+            }
+
             final Object name = param.get("name");
 
             if (name == null) {

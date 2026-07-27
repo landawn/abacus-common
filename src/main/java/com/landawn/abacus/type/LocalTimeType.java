@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Numbers;
  *
  * <p>String representations follow the ISO-8601 standard (e.g., {@code "10:30:00"} or
  * {@code "10:30:00.123456789"} when sub-second precision is present).
+ * Values produced by {@link #stringOf(LocalTime)} omit a zero seconds field (for example, {@code 10:30}).
  * Database columns are read and written using JDBC's native {@code LocalTime} support with a
  * {@link java.sql.Time} fallback for older drivers.</p>
  *
@@ -97,13 +98,16 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
     /**
      * Converts an Object to a LocalTime.
      * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalTime using the default zone ID.
+     * A {@link java.util.Date} (including its SQL subclasses) or {@link java.util.Calendar} is converted the same
+     * way from its epoch-millisecond value.
      * Otherwise, the object is converted to a string and parsed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LocalTime> type = TypeFactory.getType(LocalTime.class);
      * LocalTime time1 = type.valueOf(1609459200000L);
-     * LocalTime time2 = type.valueOf("10:30:00");
+     * LocalTime time2 = type.valueOf(new java.util.Date());
+     * LocalTime time3 = type.valueOf("10:30:00");
      * }</pre>
      *
      * @param obj The object to convert to LocalTime
@@ -113,6 +117,10 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
     public LocalTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return LocalTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Date) {
+            return LocalTime.ofInstant(Instant.ofEpochMilli(((java.util.Date) obj).getTime()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Calendar) {
+            return LocalTime.ofInstant(Instant.ofEpochMilli(((java.util.Calendar) obj).getTimeInMillis()), DEFAULT_ZONE_ID);
         }
 
         return obj == null ? null : valueOf(N.stringOf(obj));
@@ -123,7 +131,7 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * The method supports multiple formats:
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
-     *   <li>{@code "SYS_TIME"} returns the current {@code LocalTime}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code LocalTime}</li>
      *   <li>Numeric strings are treated as milliseconds since the epoch</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalTime#parse(CharSequence)}</li>
      * </ul>

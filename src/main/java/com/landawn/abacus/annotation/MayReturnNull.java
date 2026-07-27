@@ -55,10 +55,12 @@ import java.lang.annotation.Target;
  *         return database.query("SELECT * FROM users WHERE username = ?", username);
  *     }
  *
- *     // Caller must check for null:
- *     User user = repository.findByUsername("john");
- *     if (user != null) {
- *         // Safe to use user
+ *     public void greet(String username) {
+ *         // Callers must check for null.
+ *         User user = findByUsername(username);
+ *         if (user != null) {
+ *             System.out.println("Hello, " + user.getName());
+ *         }
  *     }
  * }
  * }</pre>

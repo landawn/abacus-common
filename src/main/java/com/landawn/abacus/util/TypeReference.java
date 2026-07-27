@@ -47,8 +47,8 @@ import com.landawn.abacus.type.TypeFactory;
  * // Capture type information for Map<String, Integer>
  * TypeReference<Map<String, Integer>> mapType = new TypeReference<Map<String, Integer>>() {};
  *
- * // Use with JSON parsing or other frameworks
- * List<String> list = jsonParser.parse(json, listType);
+ * // Pass listType.javaType() or listType.type() to an API that accepts runtime type metadata.
+ * java.lang.reflect.Type captured = listType.javaType();
  * }</pre>
  *
  * <p>Note: The generic type parameter {@code T} must be concrete; it cannot itself be
@@ -295,7 +295,15 @@ public abstract class TypeReference<T> {
 
         @Override
         public String getTypeName() {
-            final StringBuilder result = new StringBuilder(rawType.getTypeName()).append('<');
+            final StringBuilder result;
+
+            if (ownerType != null && rawType instanceof Class<?> rawClass) {
+                result = new StringBuilder(ownerType.getTypeName()).append('$').append(rawClass.getSimpleName());
+            } else {
+                result = new StringBuilder(rawType.getTypeName());
+            }
+
+            result.append('<');
 
             for (int i = 0; i < typeArguments.length; i++) {
                 if (i > 0) {
@@ -423,10 +431,7 @@ public abstract class TypeReference<T> {
      *
      * java.lang.reflect.Type type = complexType.javaType();
      *
-     * // Use with serialization framework
-     * Object result = deserializer.deserialize(data, type);
-     *
-     * // Or inspect the type structure
+     * // Inspect the type structure
      * if (type instanceof ParameterizedType) {
      *     ParameterizedType pt = (ParameterizedType) type;
      *     System.out.println("Raw type: " + pt.getRawType());
@@ -480,6 +485,7 @@ public abstract class TypeReference<T> {
      * Type<List<Map<String, Integer>>> type = complexType.type();
      *
      * // Use with abacus framework operations
+     * List<Map<String, Integer>> data = List.of(Map.of("one", 1));
      * String json = N.toJson(data);
      * List<Map<String, Integer>> result = N.fromJson(json, type);
      *
@@ -535,6 +541,7 @@ public abstract class TypeReference<T> {
      * java.lang.reflect.Type rawType = token.javaType();
      *
      * // Use with framework operations
+     * String json = "[\"alpha\",\"beta\"]";
      * List<String> result = N.fromJson(json, type);
      * }</pre>
      *

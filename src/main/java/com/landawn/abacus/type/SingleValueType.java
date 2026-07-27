@@ -54,27 +54,54 @@ import com.landawn.abacus.util.TypeAttrParser;
  *       publicly accessible field for value extraction.</li>
  * </ol>
  * If neither pattern is detected and the type is not an enum, the handler falls back to a generic
- * object handling mode in which {@link #stringOf(Object)} delegates to the value's runtime type
- * and {@link #valueOf(String)} returns the input string unchanged (cast to {@code T}).
+ * object handling mode in which {@link #stringOf(Object)} delegates to the value's runtime type.
+ * That fallback has no way to reconstruct the declared type: {@link #valueOf(String)} returns the
+ * input string through an unchecked cast, so callers must not assume round-trip conversion.
  *
  * @param <T> the type being handled
  */
 abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
+    /** The class handled by this type. */
     final Class<T> typeClass;
+
+    /** {@code true} if the type name carries generic parameters (i.e. contains {@code '<'} and {@code '>'}). */
     final boolean isGenericType;
+
+    /** Immutable list of the type parameters parsed from the type name; empty when the type is not generic. */
     final List<Type<?>> parameterTypes;
 
+    /** The {@code @JsonXmlValue}/{@code @JsonValue} annotated field, or {@code null} if none was found. */
     final Field jsonValueField;
+
+    /** The {@code @JsonXmlValue}/{@code @JsonValue} annotated accessor method, or {@code null} if none was found. */
     final Method jsonValueMethod;
+
+    /** The static {@code @JsonXmlCreator}/{@code @JsonCreator} factory method, or {@code null} if none was found. */
     final Method jsonCreatorMethod;
 
+    /**
+     * The type handler for the annotated JSON value (the field or method return type),
+     * or {@code null} when no annotation pair was found.
+     */
     final Type<Object> jsonValueType;
+
+    /** Cached result of {@link #isSerializable()}: {@code true} if the wrapped value's type is serializable. */
     final boolean isSerializable;
 
+    /** The type handler for the auto-detected single value field, or {@code null} if none was detected. */
     final Type<Object> valueType;
+
+    /**
+     * Auto-detected factory that builds an instance from its string form, or {@code null} when no
+     * factory method or single-argument constructor was found.
+     */
     final Function<String, T> creator;
+
+    /** Auto-detected accessor that extracts the wrapped value, or {@code null} when none was found. */
     final Function<T, Object> valueExtractor;
+
+    /** Cached result of {@link #isObject()}: {@code true} when neither annotations nor a value pattern were detected. */
     final boolean isObjectType;
 
     /**
@@ -299,10 +326,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * value's runtime {@link Type} (falling back to {@link Object#toString()} when that runtime
      * type resolves to a generic {@link ObjectType}).
      *
-     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * <p>When an annotated or auto-detected creator/extractor pair is available, this representation is designed
+     * to round-trip through {@link #valueOf(String)}. Generic object-mode values have no creator and therefore do
+     * not have that guarantee.</p>
      *
      * @param x the object to convert
      * @return the string representation, or {@code null} if {@code x} is {@code null}
@@ -339,9 +365,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Uses the JSON creator method (paired with the JSON value type) if available, otherwise the
      * auto-detected factory-method/constructor creator.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method is the inverse of {@code stringOf} when an annotated or auto-detected creator/extractor pair
+     * is available. In generic object mode no creator exists, so the input string is returned through an unchecked
+     * cast and is not a reconstructed instance of the declared type.</p>
      *
      * @param str the string to parse; may be {@code null}
      * @return an instance of type T, {@code null} when {@code str} is {@code null}, or the string itself

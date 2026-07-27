@@ -21,9 +21,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for NCharacterStream (National Character Stream) objects, providing
- * database interaction capabilities for handling Unicode character streams in SQL operations.
- * This type is specifically designed for databases that support national character sets.
+ * Type handler for national-character-stream ({@link java.io.Reader}) values registered under the
+ * type name {@code "NCharacterStream"}.
+ *
+ * <p>This class extends {@link ReaderType} and overrides the JDBC accessors so that values are
+ * transferred with {@link ResultSet#getNCharacterStream(int) getNCharacterStream} and
+ * {@link PreparedStatement#setNCharacterStream(int, Reader) setNCharacterStream} instead of the
+ * non-national variants. It is intended for SQL {@code NCHAR}, {@code NVARCHAR}, and
+ * {@code LONGNVARCHAR} columns on databases that support national character sets.</p>
+ *
+ * @see ReaderType
+ * @see CharacterStreamType
+ * @see java.io.Reader
  */
 public class NCharacterStreamType extends ReaderType {
 
@@ -100,12 +109,12 @@ public class NCharacterStreamType extends ReaderType {
 
     /**
      * Sets a national character stream parameter in a {@link PreparedStatement} at the specified index,
-     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
+     * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the Unicode character stream to set
-     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @param sqlTypeOrLength the declared number of characters in the stream
      * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
@@ -115,12 +124,12 @@ public class NCharacterStreamType extends ReaderType {
 
     /**
      * Sets a national character stream parameter in a {@link CallableStatement} by name,
-     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
+     * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the Unicode character stream to set
-     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @param sqlTypeOrLength the declared number of characters in the stream
      * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override

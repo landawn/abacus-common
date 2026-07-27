@@ -23,8 +23,8 @@ import java.io.InputStream;
  * Xerial Snappy implementation while providing a consistent API.
  *
  * <p>Snappy is a fast compression/decompression algorithm developed by Google, optimized for
- * speed rather than compression ratio. This input stream automatically decompresses data
- * that was compressed using Snappy compression.</p>
+ * speed rather than compression ratio. This wrapper reads the Xerial Snappy stream format emitted
+ * by {@link SnappyOutputStream}; it is not a decoder for every raw or framed Snappy representation.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -45,14 +45,18 @@ public final class SnappyInputStream extends InputStream {
 
     private final org.xerial.snappy.SnappyInputStream in;
 
+    private volatile boolean closed;
+
     /**
      * Creates a new SnappyInputStream that decompresses data from the specified input stream.
      * The input stream should contain data that was compressed using Snappy compression.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * InputStream compressedStream = new FileInputStream("compressed.snappy");
-     * SnappyInputStream snappyStream = new SnappyInputStream(compressedStream);
+     * try (InputStream source = new FileInputStream("compressed.snappy");
+     *      SnappyInputStream snappyStream = new SnappyInputStream(source)) {
+     *     int firstByte = snappyStream.read();   // -1 if the decompressed stream is empty
+     * }
      * }</pre>
      *
      * @param is the input stream containing Snappy-compressed data; must not be {@code null}
@@ -87,6 +91,7 @@ public final class SnappyInputStream extends InputStream {
      */
     @Override
     public int read() throws IOException {
+        ensureOpen();
         return in.read();
     }
 
@@ -109,6 +114,7 @@ public final class SnappyInputStream extends InputStream {
      */
     @Override
     public int read(final byte[] b) throws IOException {
+        ensureOpen();
         return in.read(b);
     }
 
@@ -134,6 +140,8 @@ public final class SnappyInputStream extends InputStream {
      */
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
+        ensureOpen();
+
         // Enforce InputStream.read(byte[], int, int) contract: org.xerial.snappy.SnappyInputStream
         // does not validate bounds and silently returns 0 for negative len, so we validate here.
         if (off < 0 || len < 0 || len > b.length - off) {
@@ -160,6 +168,7 @@ public final class SnappyInputStream extends InputStream {
      */
     @Override
     public long skip(final long n) throws IllegalArgumentException, IOException {
+        ensureOpen();
         N.checkArgNotNegative(n, cs.n);
 
         return in.skip(n);
@@ -187,6 +196,7 @@ public final class SnappyInputStream extends InputStream {
      */
     @Override
     public int available() throws IOException {
+        ensureOpen();
         return in.available();
     }
 
@@ -219,6 +229,7 @@ public final class SnappyInputStream extends InputStream {
      */
     @Override
     public synchronized void reset() throws IOException {
+        ensureOpen();
         in.reset();
     }
 
@@ -239,7 +250,8 @@ public final class SnappyInputStream extends InputStream {
      * Closes this input stream and releases any system resources associated with the stream.
      * Read operations attempted after the stream has been closed typically fail with an exception.
      *
-     * <p>Closing a previously closed stream has no effect.</p>
+     * <p>Closing a previously closed stream has no effect, including when the first close reported
+     * an exception after cleanup began.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -254,7 +266,16 @@ public final class SnappyInputStream extends InputStream {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void close() throws IOException {
-        in.close();
+    public synchronized void close() throws IOException {
+        if (!closed) {
+            closed = true;
+            in.close();
+        }
+    }
+
+    private void ensureOpen() throws IOException {
+        if (closed) {
+            throw new IOException("Stream is closed");
+        }
     }
 }

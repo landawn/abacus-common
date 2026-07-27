@@ -109,14 +109,11 @@ import com.landawn.abacus.util.TypeReference;
  * Collection<Integer> list = arrayType.arrayToCollection(array, ArrayList.class);   // Array to collection
  *
  * // Type checking and metadata
- * if (type.isNumber()) {
- *     // Handle numeric types
- *     int comparison = type.compare(value1, value2);
+ * Type<Integer> intType = Type.of(Integer.class);
+ * if (intType.isNumber()) {
+ *     int comparison = intType.compare(1, 2);   // negative
  * }
- * if (type.isSerializable()) {
- *     // Direct serialization possible
- *     type.serializeTo(writer, value, config);
- * }
+ * boolean serializable = stringType.isSerializable();   // true
  * }</pre>
  *
  * <p><b>Type Categories:</b>
@@ -246,9 +243,9 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
-     * @param typeName the type name string
+     * @param typeName the type name string; must not be {@code null} or empty
      * @return the corresponding Type instance
-     * @throws IllegalArgumentException if {@code typeName} is {@code null}
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty
      */
     static <T> Type<T> of(final String typeName) {
         return TypeFactory.getType(typeName);
@@ -287,7 +284,7 @@ public interface Type<T> {
      * List<Type<Object>> types = Type.ofAll(classList);
      *
      * // Process types from a set
-     * Set<Class<Number>> numberClasses = new HashSet<>(Arrays.asList(Integer.class, Long.class));
+     * Set<Class<? extends Number>> numberClasses = new HashSet<>(Arrays.asList(Integer.class, Long.class));
      * List<Type<Number>> numberTypes = Type.ofAll(numberClasses);
      * }</pre>
      *
@@ -406,7 +403,7 @@ public interface Type<T> {
      *
      * // Parse JSON into Set (duplicates removed)
      * Set<Integer> numbers = Type.ofSet(Integer.class).valueOf("[1, 2, 2, 3]");
-     * // numbers: [1, 2, 3]
+     * numbers.equals(Set.of(1, 2, 3));   // true; iteration order is unspecified
      * }</pre>
      *
      * @param <T> the element type
@@ -419,6 +416,11 @@ public interface Type<T> {
 
     /**
      * Returns a Set of Map type with the specified key and value types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Set<Map<String, Integer>>> setMapType = Type.ofSetOfMap(String.class, Integer.class);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -433,6 +435,11 @@ public interface Type<T> {
     /**
      * Returns a Set of LinkedHashMap type with the specified key and value types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Set<Map<String, Integer>>> setMapType = Type.ofSetOfLinkedHashMap(String.class, Integer.class);
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
@@ -446,6 +453,11 @@ public interface Type<T> {
     /**
      * Returns a LinkedHashSet type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<LinkedHashSet<String>> setType = Type.ofLinkedHashSet(String.class);
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for LinkedHashSet of the specified element type
@@ -456,6 +468,11 @@ public interface Type<T> {
 
     /**
      * Returns a SortedSet type with the specified element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<SortedSet<Integer>> setType = Type.ofSortedSet(Integer.class);
+     * }</pre>
      *
      * @param <T> the element type
      * @param eleClass the element class
@@ -468,6 +485,11 @@ public interface Type<T> {
     /**
      * Returns a NavigableSet type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<NavigableSet<Integer>> setType = Type.ofNavigableSet(Integer.class);
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for NavigableSet of the specified element type
@@ -478,6 +500,11 @@ public interface Type<T> {
 
     /**
      * Returns a TreeSet type with the specified element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<TreeSet<String>> setType = Type.ofTreeSet(String.class);
+     * }</pre>
      *
      * @param <T> the element type
      * @param eleClass the element class
@@ -490,6 +517,11 @@ public interface Type<T> {
     /**
      * Returns a Queue type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Queue<String>> queueType = Type.ofQueue(String.class);
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for Queue of the specified element type
@@ -500,6 +532,11 @@ public interface Type<T> {
 
     /**
      * Returns a Deque type with the specified element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Deque<String>> dequeType = Type.ofDeque(String.class);
+     * }</pre>
      *
      * @param <T> the element type
      * @param eleClass the element class
@@ -512,6 +549,11 @@ public interface Type<T> {
     /**
      * Returns an ArrayDeque type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ArrayDeque<String>> dequeType = Type.ofArrayDeque(String.class);
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for ArrayDeque of the specified element type
@@ -522,6 +564,11 @@ public interface Type<T> {
 
     /**
      * Returns a LinkedBlockingQueue type with the specified element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<LinkedBlockingQueue<String>> queueType = Type.ofLinkedBlockingQueue(String.class);
+     * }</pre>
      *
      * @param <T> the element type
      * @param eleClass the element class
@@ -534,6 +581,11 @@ public interface Type<T> {
     /**
      * Returns a ConcurrentLinkedQueue type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ConcurrentLinkedQueue<String>> queueType = Type.ofConcurrentLinkedQueue(String.class);
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for ConcurrentLinkedQueue of the specified element type
@@ -544,6 +596,11 @@ public interface Type<T> {
 
     /**
      * Returns a PriorityQueue type with the specified element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<PriorityQueue<Integer>> queueType = Type.ofPriorityQueue(Integer.class);
+     * }</pre>
      *
      * @param <T> the element type
      * @param eleClass the element class
@@ -606,6 +663,11 @@ public interface Type<T> {
     /**
      * Returns a LinkedHashMap type with the specified key and value types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<LinkedHashMap<String, Integer>> mapType = Type.ofLinkedHashMap(String.class, Integer.class);
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
@@ -618,6 +680,11 @@ public interface Type<T> {
 
     /**
      * Returns a SortedMap type with the specified key and value types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<SortedMap<String, Integer>> mapType = Type.ofSortedMap(String.class, Integer.class);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -632,6 +699,11 @@ public interface Type<T> {
     /**
      * Returns a NavigableMap type with the specified key and value types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<NavigableMap<String, Integer>> mapType = Type.ofNavigableMap(String.class, Integer.class);
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
@@ -644,6 +716,11 @@ public interface Type<T> {
 
     /**
      * Returns a TreeMap type with the specified key and value types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<TreeMap<String, Integer>> mapType = Type.ofTreeMap(String.class, Integer.class);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -658,6 +735,11 @@ public interface Type<T> {
     /**
      * Returns a ConcurrentMap type with the specified key and value types.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ConcurrentMap<String, Integer>> mapType = Type.ofConcurrentMap(String.class, Integer.class);
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
@@ -670,6 +752,11 @@ public interface Type<T> {
 
     /**
      * Returns a ConcurrentHashMap type with the specified key and value types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ConcurrentHashMap<String, Integer>> mapType = Type.ofConcurrentHashMap(String.class, Integer.class);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -684,6 +771,11 @@ public interface Type<T> {
     /**
      * Returns a Multiset type with the specified element type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<Multiset<String>> multisetType = Type.ofMultiset(String.class);
+     * }</pre>
+     *
      * @param <T> the element type
      * @param eleClass the element class
      * @return Type instance for Multiset of the specified element type
@@ -694,6 +786,11 @@ public interface Type<T> {
 
     /**
      * Returns a ListMultimap type with the specified key and element types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<ListMultimap<String, Integer>> multimapType = Type.ofListMultimap(String.class, Integer.class);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <E> the element type
@@ -707,6 +804,11 @@ public interface Type<T> {
 
     /**
      * Returns a SetMultimap type with the specified key and element types.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<SetMultimap<String, Integer>> multimapType = Type.ofSetMultimap(String.class, Integer.class);
+     * }</pre>
      *
      * @param <K> the key type
      * @param <E> the element type

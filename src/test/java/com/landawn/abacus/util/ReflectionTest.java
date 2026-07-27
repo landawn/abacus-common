@@ -14,6 +14,11 @@ import com.landawn.abacus.util.stream.IntStream;
 public class ReflectionTest extends TestBase {
 
     @Test
+    public void testOnClassRejectsNull() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Reflection.on((Class<Object>) null));
+    }
+
+    @Test
     public void testMetadataCachesDoNotUseStrongClassKeyMaps() {
         Assertions.assertInstanceOf(ClassValue.class, Reflection.clsFieldPool);
         Assertions.assertInstanceOf(ClassValue.class, Reflection.clsConstructorPool);

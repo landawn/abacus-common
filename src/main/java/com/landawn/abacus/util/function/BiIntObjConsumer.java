@@ -29,7 +29,7 @@ import com.landawn.abacus.util.cs;
  * @param <T> the type of the object argument to the operation
  */
 @FunctionalInterface
-public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, RuntimeException> { // NOSONAR //NOSONAR
+public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
      *

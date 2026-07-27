@@ -27,6 +27,9 @@ import com.landawn.abacus.util.cs;
  *
  * @param <T> the type of the first argument to the predicate
  * @param <U> the type of the second argument to the predicate
+ * @see java.util.function.Predicate
+ * @see java.util.function.BiPredicate
+ * @see TriPredicate
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
@@ -123,8 +126,9 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiPredicate<String, String> fileExists = (dir, name) -> Files.exists(Paths.get(dir, name));
-     * var throwablePredicate = fileExists.toThrowable();
+     * BiPredicate<String, Integer> lengthEquals = (str, len) -> str.length() == len;
+     * Throwables.BiPredicate<String, Integer, RuntimeException> throwablePredicate = lengthEquals.toThrowable();
+     * boolean result = throwablePredicate.test("hello", 5);
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.BiPredicate}

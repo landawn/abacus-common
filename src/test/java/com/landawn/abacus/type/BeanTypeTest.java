@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -59,6 +60,14 @@ public class BeanTypeTest extends TestBase {
     @Test
     public void testClazz() {
         assertEquals(TestBean.class, beanType.javaType());
+    }
+
+    @Test
+    public void testXmlNameUsesCanonicalBeanName() {
+        assertEquals(TestBean.class.getCanonicalName(), beanType.xmlName());
+
+        final Type<?> registeredType = Type.of(TestBean.class);
+        assertSame(registeredType, TypeFactory.getTypeIfPresent(TestBean.class.getCanonicalName()));
     }
 
     @Test

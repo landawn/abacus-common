@@ -41,9 +41,9 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *
  * <p>Example of name structures:</p>
  * <pre>{@code
- * Canonical name: "com.example.Person.firstName"
- * Parent name: "com.example.Person"
- * Simple name: "firstName"
+ * String canonicalName = "com.example.Person.firstName";
+ * String parentName = "com.example.Person";
+ * String simpleName = "firstName";
  * }</pre>
  *
  * @see ObjectPool

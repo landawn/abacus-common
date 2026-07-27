@@ -20,7 +20,7 @@ package com.landawn.abacus.type;
 public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
 
     /**
-     * The type name identifier for StringBuffer type.
+     * The type name identifier for StringBuffer type, equal to the simple class name {@code "StringBuffer"}.
      */
     public static final String STRING_BUFFER = StringBuffer.class.getSimpleName();
 

@@ -78,10 +78,11 @@ public interface EntityId {
      * EntityId accountId = EntityId.of("Account", "accountNumber", "AC-12345");
      * }</pre>
      *
-     * @param entityName the name of the entity
+     * @param entityName the name of the entity; if {@code null}, an empty entity name is used
      * @param propName the property name
      * @param propValue the property value
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     @SuppressWarnings("deprecation")
     static EntityId of(final String entityName, final String propName, final Object propValue) {
@@ -102,6 +103,7 @@ public interface EntityId {
      * @param propName2 the second property name, optionally including the entity name prefix
      * @param propValue2 the second property value
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}
      */
     static EntityId of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         return Seid.of(propName1, propValue1, propName2, propValue2);
@@ -121,6 +123,7 @@ public interface EntityId {
      * @param propName2 the second property name
      * @param propValue2 the second property value
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}
      */
     @SuppressWarnings("deprecation")
     static EntityId of(final String entityName, final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
@@ -147,6 +150,7 @@ public interface EntityId {
      * @param propName3 the third property name, optionally including the entity name prefix
      * @param propValue3 the third property value
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if any of {@code propName1}, {@code propName2}, or {@code propName3} is {@code null}
      */
     static EntityId of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
             final Object propValue3) {
@@ -173,6 +177,7 @@ public interface EntityId {
      * @param propName3 the third property name
      * @param propValue3 the third property value
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if any of {@code propName1}, {@code propName2}, or {@code propName3} is {@code null}
      */
     @SuppressWarnings("deprecation")
     static EntityId of(final String entityName, final String propName1, final Object propValue1, final String propName2, final Object propValue2,
@@ -194,7 +199,7 @@ public interface EntityId {
      *
      * @param nameValues a map of property names to their values
      * @return a new EntityId instance
-     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null} property name
      */
     static EntityId create(final Map<String, Object> nameValues) {
         return Seid.create(nameValues);
@@ -212,9 +217,13 @@ public interface EntityId {
      * EntityId id = EntityId.create("Person", props);
      * }</pre>
      *
-     * @param entityName the name of the entity
-     * @param nameValues a map of property names to their values
+     * <p>Unlike {@link #create(Map)}, a {@code null} or empty {@code nameValues} map is accepted here
+     * and yields an empty {@code EntityId} carrying only the entity name.</p>
+     *
+     * @param entityName the name of the entity; if {@code null}, an empty entity name is used
+     * @param nameValues a map of property names to their values; may be {@code null} or empty
      * @return a new EntityId instance
+     * @throws IllegalArgumentException if {@code nameValues} contains a {@code null} property name
      */
     @SuppressWarnings("deprecation")
     static EntityId create(final String entityName, final Map<String, Object> nameValues) {
@@ -235,9 +244,10 @@ public interface EntityId {
      * EntityId id = EntityId.create(user);   // creates ID from userId if marked as @Id
      * }</pre>
      *
-     * @param entity the entity object to extract ID from
+     * @param entity the entity object to extract ID from; must not be {@code null}
      * @return a new EntityId instance
      * @throws IllegalArgumentException if no ID property is defined in the entity class
+     * @throws NullPointerException if {@code entity} is {@code null}
      */
     static EntityId create(final Object entity) {
         return Seid.create(entity);
@@ -257,10 +267,12 @@ public interface EntityId {
      * // Creates ID with only productCode and warehouseId
      * }</pre>
      *
-     * @param entity the entity object to extract properties from
+     * @param entity the entity object to extract properties from; must not be {@code null}
      * @param idPropNames the collection of property names to use as ID
      * @return a new EntityId instance
-     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty, or if a named
+     *         property does not exist on the entity type
+     * @throws NullPointerException if {@code entity} is {@code null}
      */
     static EntityId create(final Object entity, final Collection<String> idPropNames) {
         return Seid.create(entity, idPropNames);

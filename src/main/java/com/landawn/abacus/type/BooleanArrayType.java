@@ -30,6 +30,8 @@ import com.landawn.abacus.util.Strings;
  * <p>String representation: a bracket-enclosed, comma-separated list of boolean values,
  * e.g. {@code "[true, false, null, true]"}. The empty array is represented as {@code "[]"}.
  * Individual {@code null} elements are represented as the literal string {@code "null"}.</p>
+ *
+ * @see ObjectArrayType
  */
 public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 

@@ -65,6 +65,14 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiObjPredicate<List<String>, String> isValidIndex =
+     *     (index, list, value) -> index >= 0 && index < list.size();
+     * IntBiObjPredicate<List<String>, String> isInvalidIndex = isValidIndex.negate();
+     * boolean result = isInvalidIndex.test(5, List.of("a", "b"), "x");   // returns true
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default IntBiObjPredicate<T, U> negate() {
@@ -78,6 +86,16 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiObjPredicate<List<String>, String> isValidIndex =
+     *     (index, list, value) -> index >= 0 && index < list.size();
+     * IntBiObjPredicate<List<String>, String> isNonNullValue =
+     *     (index, list, value) -> value != null;
+     * IntBiObjPredicate<List<String>, String> canUpdate = isValidIndex.and(isNonNullValue);
+     * boolean result = canUpdate.test(1, List.of("a", "b"), "x");   // returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
@@ -96,6 +114,16 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiObjPredicate<List<String>, String> isEmptyList =
+     *     (index, list, value) -> list.isEmpty();
+     * IntBiObjPredicate<List<String>, String> isNullValue =
+     *     (index, list, value) -> value == null;
+     * IntBiObjPredicate<List<String>, String> skip = isEmptyList.or(isNullValue);
+     * boolean result = skip.test(0, List.of("a"), null);   // returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -81,7 +82,7 @@ import com.landawn.abacus.util.function.DoubleTriPredicate;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Subclasses implement concrete stream behavior
- * DoubleStream stream = new ArrayDoubleStream(new double[] {1.0, 2.0, 3.0});
+ * DoubleStream stream = DoubleStream.of(1.0, 2.0, 3.0);
  * stream.filter(d -> d > 1.5).forEach(System.out::println);
  * }</pre>
  *
@@ -108,7 +109,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().onEach(action).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().onEach(action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return onEach(action);
         }
@@ -137,7 +138,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().onEach(action).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().onEach(action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return onEach(action);
         }
@@ -157,7 +158,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new DoubleIteratorEx() { //NOSONAR
-            private final long durationMillis = duration.toMillis();
+            private final long durationNanos = TimeUnit.MILLISECONDS.toNanos(duration.toMillis());
             private double prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
             private long prevTime = 0;
@@ -172,13 +173,13 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
                 while (iter.hasNext()) {
                     final double val = iter.nextDouble();
-                    final long now = System.currentTimeMillis();
+                    final long now = System.nanoTime();
 
                     if (!hasPrev) {
                         prev = val;
                         prevTime = now;
                         hasPrev = true;
-                    } else if (now - prevTime >= durationMillis) {
+                    } else if (now - prevTime >= durationNanos) {
                         // prev was followed by a quiet gap >= duration -> emit it; val starts the next burst.
                         next = prev;
                         hasNext = true;
@@ -787,7 +788,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return elements[((start + cnt++) % len) + fromIndex];
+                return elements[(int) (((long) start + cnt++) % len) + fromIndex];
             }
 
             @Override
@@ -823,7 +824,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
                 final double[] a = new double[len - cnt];
 
                 for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
+                    a[i - cnt] = elements[(int) (((long) start + i) % len) + fromIndex];
                 }
 
                 cnt = len;
@@ -1163,7 +1164,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
         assertNotClosed();
 
         if (isParallel()) {
-            return DoubleStream.concat(stream, this).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return DoubleStream.concat(stream, this).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return DoubleStream.concat(stream, this);
         }
@@ -1189,7 +1190,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
         assertNotClosed();
 
         if (isParallel()) {
-            return DoubleStream.concat(this, stream).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return DoubleStream.concat(this, stream).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return DoubleStream.concat(this, stream);
         }
@@ -1215,7 +1216,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
         assertNotClosed();
 
         if (isParallel()) {
-            return DoubleStream.merge(this, b, nextSelector).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return DoubleStream.merge(this, b, nextSelector).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return DoubleStream.merge(this, b, nextSelector);
         }
@@ -1450,20 +1451,18 @@ abstract class AbstractDoubleStream extends DoubleStream {
             if (N.isEmpty(a)) {
                 return Pair.of(new DoubleSummaryStatistics(), Optional.empty());
             } else {
-                // For NaN-aware semantics consistent with DoubleSummaryStatistics.accept
-                // (which uses Math.min/Math.max so any NaN propagates to both min and max),
-                // detect NaN in the sorted array. With Double.compare ordering used by sort,
-                // After sorting, NaN sorts to the end; guard both ends defensively.
-                final double min;
-                final double max;
-                if (Double.isNaN(a[0]) || Double.isNaN(a[a.length - 1])) {
-                    min = Double.NaN;
-                    max = Double.NaN;
-                } else {
-                    min = a[0];
-                    max = a[a.length - 1];
+                // Accumulate through accept rather than the 4-arg constructor: that constructor
+                // rejects a "some, but not all, NaN" combination, which is exactly what a stream
+                // containing both +Infinity and -Infinity produces (finite min/max, NaN sum).
+                // Going through accept also gives the Math.min/Math.max NaN propagation for free,
+                // so this matches summaryStatistics() exactly for every input.
+                final DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
+
+                for (final double e : a) {
+                    stats.accept(e);
                 }
-                return Pair.of(new DoubleSummaryStatistics(a.length, min, max, sum(a)), Optional.of(N.percentilesOfSorted(a)));
+
+                return Pair.of(stats, Optional.of(N.percentilesOfSorted(a)));
             }
         } finally {
             close();

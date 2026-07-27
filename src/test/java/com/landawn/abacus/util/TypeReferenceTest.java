@@ -34,6 +34,16 @@ public class TypeReferenceTest extends TestBase {
         // Exercises a type variable used as a wildcard bound.
     }
 
+    private static class GenericOwner<T> {
+        class Member<U> {
+            // Used only as a reflection type with a parameterized owner.
+        }
+    }
+
+    private abstract static class OwnerTypeReference<T> extends TypeReference<GenericOwner<T>.Member<String>> {
+        // Exercises substitution in both a member type and its owner type.
+    }
+
     public static class TestBean {
         private String value;
 
@@ -152,6 +162,16 @@ public class TypeReferenceTest extends TestBase {
         final java.lang.reflect.WildcardType wildcard = (java.lang.reflect.WildcardType) listType.getActualTypeArguments()[0];
         Assertions.assertArrayEquals(new java.lang.reflect.Type[] { Number.class }, wildcard.getUpperBounds());
         Assertions.assertEquals(List.class, wildcardRef.type().javaType());
+    }
+
+    @Test
+    public void testResolvedMemberTypeNameIncludesParameterizedOwner() {
+        final TypeReference<GenericOwner<Integer>.Member<String>> ref = new OwnerTypeReference<Integer>() {
+        };
+        final String typeName = ref.javaType().getTypeName();
+
+        Assertions.assertTrue(typeName.contains("GenericOwner<java.lang.Integer>"), typeName);
+        Assertions.assertTrue(typeName.endsWith("$Member<java.lang.String>"), typeName);
     }
 
     @Test

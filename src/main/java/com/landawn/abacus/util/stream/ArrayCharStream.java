@@ -63,25 +63,54 @@ import com.landawn.abacus.util.function.ObjCharConsumer;
  * <li>Support for partial array ranges via fromIndex and toIndex</li>
  * <li>Optimized implementations of filter, map, flatMap, and terminal operations</li>
  * <li>Efficient sorted stream handling with specialized algorithms</li>
+ * <li>Type conversion support to other primitive stream types</li>
  * </ul>
+ *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public CharStream factory methods rather than instantiating this class directly.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * char[] data = {'a', 'b', 'c', 'd', 'e'};
  * CharStream stream = CharStream.of(data);
  * char max = stream.max().orElse('\0');
+ *
+ * // Filtering and mapping
+ * CharStream uppercased = CharStream.of(data)
+ *     .filter(c -> c != 'c')
+ *     .map(Character::toUpperCase);
+ *
+ * // Statistical operations
+ * CharStream stats = CharStream.of(data);
+ * CharSummaryStatistics summary = stats.summaryStatistics();
+ * System.out.println("Average: " + summary.getAverage());
  * }</pre>
  *
+ * @see CharStream
  */
 class ArrayCharStream extends AbstractCharStream {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final char[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
      * Constructs an ArrayCharStream from the entire char array.
+     * This constructor creates a stream that processes all elements in the provided array
+     * from index 0 to the end of the array.
      *
-     * @param values the char array to stream
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] data = {'a', 'b', 'c', 'd', 'e'};
+     * CharStream stream = new ArrayCharStream(data);
+     * }</pre>
+     *
+     * @param values the char array to stream over
      */
     ArrayCharStream(final char[] values) {
         this(values, 0, values.length);
@@ -89,9 +118,19 @@ class ArrayCharStream extends AbstractCharStream {
 
     /**
      * Constructs an ArrayCharStream from the entire char array with close handlers.
+     * The close handlers will be executed when the stream is closed, allowing for
+     * resource cleanup or other post-processing operations.
      *
-     * @param values the char array to stream
-     * @param closeHandlers handlers to execute when the stream is closed
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] data = {'a', 'b', 'c', 'd', 'e'};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * CharStream stream = new ArrayCharStream(data, handlers);
+     * }</pre>
+     *
+     * @param values the char array to stream over
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      */
     ArrayCharStream(final char[] values, final Collection<LocalRunnable> closeHandlers) {
         this(values, 0, values.length, closeHandlers);
@@ -99,10 +138,19 @@ class ArrayCharStream extends AbstractCharStream {
 
     /**
      * Constructs an ArrayCharStream from the entire char array with sorting state and close handlers.
+     * The sorted flag indicates whether the array is already in sorted order, which can be used
+     * to optimize certain stream operations.
      *
-     * @param values the char array to stream
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] sortedData = {'a', 'b', 'c', 'd', 'e'};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * CharStream stream = new ArrayCharStream(sortedData, true, handlers);
+     * }</pre>
+     *
+     * @param values the char array to stream over
      * @param sorted whether the array elements are in sorted order
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      */
     ArrayCharStream(final char[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
         this(values, 0, values.length, sorted, closeHandlers);
@@ -110,10 +158,19 @@ class ArrayCharStream extends AbstractCharStream {
 
     /**
      * Constructs an ArrayCharStream from a range within the char array.
+     * This allows streaming over a subset of the array elements, from the specified
+     * start index (inclusive) to the end index (exclusive).
      *
-     * @param values the char array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+     * // Stream over elements from index 2 to 5 (exclusive): {'c', 'd', 'e'}
+     * CharStream stream = new ArrayCharStream(data, 2, 5);
+     * }</pre>
+     *
+     * @param values the char array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
@@ -123,11 +180,21 @@ class ArrayCharStream extends AbstractCharStream {
 
     /**
      * Constructs an ArrayCharStream from a range within the char array with close handlers.
+     * Combines range specification with close handler support for resource management.
      *
-     * @param values the char array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
-     * @param closeHandlers handlers to execute when the stream is closed
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] data = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * // Stream over elements from index 2 to 5 with close handlers
+     * CharStream stream = new ArrayCharStream(data, 2, 5, handlers);
+     * }</pre>
+     *
+     * @param values the char array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
@@ -137,13 +204,23 @@ class ArrayCharStream extends AbstractCharStream {
 
     /**
      * Constructs an ArrayCharStream from a range within the char array with all configuration options.
-     * This is the primary constructor that all other constructors delegate to.
+     * This is the primary constructor that all other constructors delegate to. It provides full
+     * control over the stream configuration including range, sorting state, and close handlers.
      *
-     * @param values the char array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] sortedData = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * // Stream over sorted elements from index 2 to 6 with close handlers
+     * CharStream stream = new ArrayCharStream(sortedData, 2, 6, true, handlers);
+     * }</pre>
+     *
+     * @param values the char array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
      * @param sorted whether the array elements in the range are in sorted order
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed, can be null
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
@@ -1364,7 +1441,7 @@ class ArrayCharStream extends AbstractCharStream {
      * accumulator, and combiner functions, and returns the resulting container. Closes the stream.
      *
      * <pre>{@code
-     * CharList list = stream.collect(CharList::new, CharList::add, CharList::addAll);
+     * CharList list = CharStream.of('a', 'b', 'c').collect(CharList::new, CharList::add, CharList::addAll);
      * }</pre>
      *
      * @param <R> the type of the mutable result container
@@ -1919,17 +1996,18 @@ class ArrayCharStream extends AbstractCharStream {
      * range in parallel using the specified configuration.
      *
      * @param maxThreadNum the maximum number of threads to use
-     * @param splitor the strategy for splitting the work among threads
+     * @param splitStrategy the strategy for splitting the work among threads
      * @param asyncExecutor the executor for asynchronous parallel tasks
      * @param cancelUncompletedThreads whether to cancel incomplete threads when the stream is closed
      * @return a parallel {@code CharStream} backed by the same array range
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected CharStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected CharStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayCharStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelArrayCharStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 

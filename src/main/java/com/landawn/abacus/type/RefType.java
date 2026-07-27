@@ -46,14 +46,15 @@ import java.sql.SQLException;
  *         Ref personRef = type.get(rs, 1);
  *         String baseTypeName = personRef.getBaseTypeName();
  *         Object referencedObject = personRef.getObject();
+ *
+ *         // Use the Ref while it is in scope
+ *         try (PreparedStatement updateStmt = conn.prepareStatement("UPDATE employees SET person_ref = ? WHERE id = ?")) {
+ *             type.set(updateStmt, 1, personRef);
+ *             updateStmt.setInt(2, employeeId);
+ *             updateStmt.executeUpdate();
+ *         }
  *     }
  * }
- *
- * // Using Ref in PreparedStatement
- * PreparedStatement updateStmt = conn.prepareStatement("UPDATE employees SET person_ref = ? WHERE id = ?");
- * type.set(updateStmt, 1, personRef);
- * updateStmt.setInt(2, employeeId);
- * updateStmt.executeUpdate();
  *
  * // Note: These operations are NOT supported
  * // String str = type.stringOf(ref);   // Throws UnsupportedOperationException
@@ -119,11 +120,11 @@ public class RefType extends AbstractType<Ref> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * Ref ref = Mockito.mock(Ref.class);
+     * Ref ref = rs.getRef("person_ref");
      * try {
      *     String str = type.stringOf(ref);
      * } catch (UnsupportedOperationException e) {
-     *     System.out.println("Cannot convert Ref to string");   // This will execute
+     *     System.out.println("Cannot convert Ref to string");   // This branch always runs
      * }
      * }</pre>
      *
@@ -147,7 +148,7 @@ public class RefType extends AbstractType<Ref> {
      * try {
      *     Ref ref = type.valueOf("some_string");
      * } catch (UnsupportedOperationException e) {
-     *     System.out.println("Cannot create Ref from string");   // This will execute
+     *     System.out.println("Cannot create Ref from string");   // This branch always runs
      * }
      * }</pre>
      *
@@ -217,11 +218,11 @@ public class RefType extends AbstractType<Ref> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
-     * Ref ref = Mockito.mock(Ref.class);
-     * type.set(stmt, 1, ref);
-     * stmt.setInt(2, 123);
-     * stmt.executeUpdate();
+     * try (PreparedStatement stmt = conn.prepareStatement("UPDATE employees SET person_ref = ? WHERE id = ?")) {
+     *     type.set(stmt, 1, personRef);
+     *     stmt.setInt(2, 123);
+     *     stmt.executeUpdate();
+     * }
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -237,16 +238,18 @@ public class RefType extends AbstractType<Ref> {
     /**
      * Sets a Ref parameter in a CallableStatement.
      * The Ref represents a reference to an SQL structured type value in the database.
-     * Note: This method uses setObject instead of setRef as CallableStatement may not support setRef with parameter names.
+     * Note: this method uses {@link CallableStatement#setObject(String, Object)} rather than {@code setRef},
+     * because JDBC declares {@code setRef} only for the positional
+     * {@link PreparedStatement#setRef(int, Ref)} form; there is no name-based overload.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
-     * Ref ref = Mockito.mock(Ref.class);
-     * type.set(stmt, "ref_param", ref);
-     * stmt.setInt("id_param", 123);
-     * stmt.execute();
+     * try (CallableStatement stmt = conn.prepareCall("{call update_employee(?, ?)}")) {
+     *     type.set(stmt, "ref_param", personRef);
+     *     stmt.setInt("id_param", 123);
+     *     stmt.execute();
+     * }
      * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on

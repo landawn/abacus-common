@@ -91,6 +91,20 @@ public class MoreExecutorsTest extends TestBase {
     }
 
     @Test
+    public void testDaemonThreadFactoryPreservesNullFromDelegate() {
+        final ThreadFactory decliningFactory = runnable -> null;
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), decliningFactory);
+        final ExecutorService exitingService = MoreExecutors.getExitingExecutorService(executor);
+
+        try {
+            Assertions.assertNull(executor.getThreadFactory().newThread(() -> {
+            }));
+        } finally {
+            exitingService.shutdownNow();
+        }
+    }
+
+    @Test
     public void testExecutorServiceMethods() throws Exception {
         ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 4, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 

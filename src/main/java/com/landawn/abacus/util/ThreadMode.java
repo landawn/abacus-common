@@ -21,13 +21,21 @@ package com.landawn.abacus.util;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Deliver events on the posting thread (default)
- * @Subscribe(threadMode = ThreadMode.DEFAULT)
- * public void onEvent(MyEvent event) { ... }
+ * class SynchronousSubscriber {
+ *     // Deliver events on the posting thread (default).
+ *     @com.landawn.abacus.eventbus.Subscribe(threadMode = ThreadMode.DEFAULT)
+ *     public void onEvent(Object event) {
+ *         System.out.println(event);
+ *     }
+ * }
  *
- * // Deliver events asynchronously on a background thread pool
- * @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
- * public void onEvent(MyEvent event) { ... }
+ * class AsynchronousSubscriber {
+ *     // Deliver events asynchronously on a background thread pool.
+ *     @com.landawn.abacus.eventbus.Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
+ *     public void onEvent(Object event) {
+ *         System.out.println(event);
+ *     }
+ * }
  * }</pre>
  *
  * @see com.landawn.abacus.eventbus.EventBus

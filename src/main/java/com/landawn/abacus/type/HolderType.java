@@ -22,8 +22,8 @@ import com.landawn.abacus.util.SK;
  * package, providing serialization, deserialization, and database interaction capabilities for
  * Holder values of any type.
  * <p>
- * Note: this handles the abacus-specific {@code Holder<T>}, not {@code java.util.Optional<T>}
- * (which is handled by {@link JdkOptionalType}).
+ * A {@code Holder} is a plain mutable single-value container, not an optional wrapper; the JDK's
+ * {@code java.util.Optional<T>} is handled by {@link JdkOptionalType} instead.
  * <p>
  * Unlike {@link com.landawn.abacus.util.u.Optional Optional} (which disallows {@code null} values),
  * a {@code Holder} may hold {@code null} as its current value. SQL {@code NULL} columns are

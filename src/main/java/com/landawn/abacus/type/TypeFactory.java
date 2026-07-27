@@ -581,8 +581,13 @@ public final class TypeFactory {
                 rawTypeName = getJavaTypeName(rawType, false);
             }
 
-            final StringBuilder name = new StringBuilder(rawTypeName).append('<');
             final java.lang.reflect.Type[] arguments = parameterizedType.getActualTypeArguments();
+
+            if (arguments.length == 0) {
+                return rawTypeName;
+            }
+
+            final StringBuilder name = new StringBuilder(rawTypeName).append('<');
 
             for (int i = 0; i < arguments.length; i++) {
                 if (i > 0) {
@@ -1423,9 +1428,9 @@ public final class TypeFactory {
      * This method never returns {@code null}: an unrecognized or unresolvable name does <b>not</b> throw —
      * it fabricates and caches an {@link com.landawn.abacus.type.ObjectType ObjectType} fallback
      * (a usable, generic {@code Object}-backed {@code Type}) and returns it. An
-     * {@link IllegalArgumentException} is thrown only for a {@code null} name or for structurally malformed
-     * generic/parameter syntax (for example, a type-parameter count that does not match the container, such
-     * as {@code "Map<String>"} or {@code "Pair<String>"}).
+     * {@link IllegalArgumentException} is thrown only for a {@code null} or empty name, or for structurally
+     * malformed generic/parameter syntax (for example, a type-parameter count that does not match the container,
+     * such as {@code "Map<String>"} or {@code "Pair<String>"}).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1434,20 +1439,22 @@ public final class TypeFactory {
      * t1.javaType();                  // returns String.class
      *
      * Type<List<String>> t2 = TypeFactory.getType("List<String>");
-     * t2.name();       // returns "List<String>"
-     * t2.javaType();   // returns List.class
+     * t2.name();            // returns "java.util.List<java.lang.String>"
+     * t2.declaringName();   // returns "List<String>"
+     * t2.javaType();        // returns List.class
      *
      * Type<?> t3 = TypeFactory.getType("CompletelyUnknownName");
      * t3.isObject();                        // returns true (ObjectType fallback, not an exception)
      *
      * TypeFactory.getType((String) null);   // throws IllegalArgumentException
+     * TypeFactory.getType("");              // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the Java type represented by the requested {@code Type} object
-     * @param typeName the name of the type to retrieve, with optional type parameters
+     * @param typeName the name of the type to retrieve, with optional type parameters; must not be {@code null} or empty
      * @return the Type object corresponding to the type name (never {@code null}; an
      *         {@link com.landawn.abacus.type.ObjectType ObjectType} is returned for unresolvable names)
-     * @throws IllegalArgumentException if {@code typeName} is {@code null}, or if the type name format is structurally invalid (e.g., a mismatched type-parameter count)
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if the type name format is structurally invalid (e.g., a mismatched type-parameter count)
      * @see #getType(Class)
      * @see #registerType(String, Type)
      */
@@ -1457,6 +1464,20 @@ public final class TypeFactory {
         N.checkArgNotEmpty(typeName, cs.typeName);
 
         return getType(typeName, null, null);
+    }
+
+    /**
+     * Returns an already registered type without attempting to load or derive a class from the supplied name.
+     *
+     * <p>This non-creating lookup is useful when a name comes from an untrusted source and class loading must
+     * not be triggered as a side effect. It observes the same concurrent registry used by {@link #getType(String)}.</p>
+     *
+     * @param typeName the exact registered type name; may be {@code null} or empty
+     * @return the registered type, or {@code null} when {@code typeName} is {@code null} or empty, or when
+     *         the exact name has not been registered
+     */
+    public static Type<?> getTypeIfPresent(final String typeName) {
+        return Strings.isEmpty(typeName) ? null : typePool.get(typeName);
     }
 
     /**
@@ -1480,7 +1501,7 @@ public final class TypeFactory {
      * @param targetClass the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
-     * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, or if a type is already registered for {@code targetClass}
+     * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, if a type is already registered for {@code targetClass}, or if a type with the same name (the canonical class name of {@code targetClass}) already exists
      * @see #registerType(Class, Function, Function)
      * @see #registerType(Class, Type)
      */
@@ -1528,7 +1549,7 @@ public final class TypeFactory {
      * @param cls the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
-     * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, or if a type is already registered for {@code cls}
+     * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, if a type is already registered for {@code cls}, or if a type with the same name (the canonical class name of {@code cls}) already exists
      * @see #registerType(Class, BiFunction, BiFunction)
      * @see #registerType(Class, Type)
      */
@@ -1783,9 +1804,7 @@ public final class TypeFactory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<MyClass> customType = new AbstractType<MyClass>("MyClass") {
-     *     // implementation
-     * };
+     * Type<MyClass> customType = new MyCustomType();
      * TypeFactory.registerType(customType);
      * Type<MyClass> retrieved = TypeFactory.getType("MyClass");
      * }</pre>

@@ -31,8 +31,8 @@ import com.landawn.abacus.util.function.LongPredicate;
 import com.landawn.abacus.util.function.LongTernaryOperator;
 import com.landawn.abacus.util.function.LongToFloatFunction;
 import com.landawn.abacus.util.function.LongUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelIteratorLongStreamTest extends TestBase {
 
@@ -44,7 +44,7 @@ public class ParallelIteratorLongStreamTest extends TestBase {
     private LongStream parallelStream;
 
     protected LongStream createLongStream(long... elements) {
-        return LongStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
+        return LongStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ParallelIteratorLongStreamTest extends TestBase {
 
     // Single-thread parallel (sequential fallback) tests to cover the canBeSequential branches.
     protected LongStream createSingleThreadLongStream(long... elements) {
-        return LongStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1));
+        return LongStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test
@@ -945,7 +945,7 @@ public class ParallelIteratorLongStreamTest extends TestBase {
     public void testZipWithBinaryDefaults_singleThread_UnevenLengths() {
         List<Long> result = LongStream.of(1L, 2L, 3L)
                 .map(e -> e + 0)
-                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
                 .zipWith(LongStream.of(10L), 0L, -1L, Long::sum)
                 .toList();
 
@@ -988,8 +988,8 @@ public class ParallelIteratorLongStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ITERATOR, ((ParallelIteratorLongStream) createLongStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ITERATOR, ((ParallelIteratorLongStream) createLongStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

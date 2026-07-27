@@ -67,11 +67,16 @@ import com.landawn.abacus.util.Strings;
  */
 public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
+    /** The array class handled by this type (e.g., {@code String[].class}). */
     protected final Class<T[]> typeClass;
 
+    /** The type handler for the array's component type. */
     protected final Type<T> elementType;
+
+    /** Immutable single-element list holding {@code elementType}, returned by {@link #parameterTypes()}. */
     protected final List<Type<?>> parameterTypes;
 
+    /** JSON deserialization configuration preconfigured with {@code elementType} as the element type. */
     protected final JsonDeserConfig jdc;
 
     /**
@@ -369,6 +374,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      *
      * @param c the collection to convert
      * @return an array containing all elements from the collection, or {@code null} if the collection is null
+     * @throws ArrayStoreException if any element in the collection is not assignable to the array's component type
      */
     @Override
     public T[] collectionToArray(final Collection<?> c) {
@@ -389,9 +395,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Converts an array to a Collection by adding all array elements to the provided collection.
+     * Does nothing if the input array is {@code null} or empty.
      *
      * @param x the array to convert
      * @param output the collection to add elements to
+     * @throws ClassCastException if the output collection cannot accept the array's elements
      */
     @Override
     public void arrayToCollection(final T[] x, final Collection<?> output) {

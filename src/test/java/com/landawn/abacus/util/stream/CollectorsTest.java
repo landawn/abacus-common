@@ -4700,6 +4700,42 @@ public class CollectorsTest extends TestBase {
     }
 
     @Test
+    public void testMoreCollectorsCollectionCombineSnapshotsRotatingTraversalOrder() {
+        final List<Collector<? super Integer, ?, ?>> components = new ArrayList<>();
+        components.add(Collectors.counting());
+        components.add(Collectors.summingInt(Integer::intValue));
+        components.add(Collectors.mapping(Object::toString, Collectors.joining(",")));
+
+        final class RotatingDownstreams extends java.util.AbstractCollection<Collector<? super Integer, ?, ?>> {
+            private int traversalCount;
+
+            @Override
+            public java.util.Iterator<Collector<? super Integer, ?, ?>> iterator() {
+                final int offset = traversalCount++ % components.size();
+                final List<Collector<? super Integer, ?, ?>> rotated = new ArrayList<>(components.size());
+
+                for (int i = 0; i < components.size(); i++) {
+                    rotated.add(components.get((i + offset) % components.size()));
+                }
+
+                return rotated.iterator();
+            }
+
+            @Override
+            public int size() {
+                return components.size();
+            }
+        }
+
+        final RotatingDownstreams downstreams = new RotatingDownstreams();
+        final Collector<Integer, ?, Object[]> combined = MoreCollectors.combine(downstreams, values -> values);
+        final Object[] result = java.util.stream.Stream.of(1, 2, 3, 4, 5, 6).parallel().collect(combined);
+
+        assertEquals(1, downstreams.traversalCount);
+        assertArrayEquals(new Object[] { 6L, 21, "1,2,3,4,5,6" }, result);
+    }
+
+    @Test
     public void testFlatMappingClosesMappedStreams() {
         final java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
 

@@ -41,7 +41,11 @@ import com.landawn.abacus.util.Numbers;
  */
 public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
-    /** The type name constant for Joda-Time {@link Instant} type identification. */
+    /**
+     * The type name constant for Joda-Time {@link Instant} type identification, equal to
+     * {@code "JodaInstant"} &mdash; deliberately <i>not</i> the simple class name, so that this type
+     * does not collide with the registered name of {@code java.time.Instant}.
+     */
     public static final String INSTANT = "JodaInstant";
 
     /**
@@ -86,7 +90,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * Converts a string representation to a Joda {@link Instant} instance.
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
-     *   <li>{@code "sysTime"} (case-insensitive): returns {@link Instant#now()}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns {@link Instant#now()}</li>
      *   <li>Numeric strings: parsed as milliseconds since the epoch</li>
      *   <li>20-character strings: parsed as ISO-8601 date-time ({@code "yyyy-MM-dd'T'HH:mm:ss'Z'"})</li>
      *   <li>24-character strings: parsed as ISO-8601 timestamp ({@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"})</li>

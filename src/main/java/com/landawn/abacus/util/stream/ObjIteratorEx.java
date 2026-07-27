@@ -281,31 +281,30 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example: Lazy file loading - file is only opened when iteration starts
+     * // The file is read only when iteration starts. Files.readAllLines closes the file itself.
      * ObjIteratorEx<String> iter = ObjIteratorEx.defer(() -> {
      *     try {
-     *         return Files.lines(Paths.get("large-file.txt")).iterator();
+     *         return Files.readAllLines(Paths.get("data.txt")).iterator();
      *     } catch (IOException e) {
      *         throw new UncheckedIOException(e);
      *     }
      * });
      * // File is not opened yet, no I/O has occurred
      *
-     * // Later, when iteration begins...
-     * if (someCondition) {
-     *     iter.hasNext();   // creates the iterator and opens the file here
+     * // Later, when iteration begins:
+     * boolean shouldRead = true;
+     * if (shouldRead) {
+     *     iter.hasNext();   // reads the file and creates the iterator here
      *     while (iter.hasNext()) {
-     *         process(iter.next());
+     *         System.out.println(iter.next());
      *     }
-     *     iter.closeResource();   // closes the underlying iterator if it implements IteratorEx or AutoCloseable
      * }
-     * // If someCondition is false, file is never opened
+     * // If shouldRead is false, the file is never read.
      * }</pre>
      *
      * <p>Note: {@code closeResource()} closes the supplied iterator only when that iterator implements
-     * {@link IteratorEx} or {@link AutoCloseable}. A plain {@code java.util.stream.Stream.iterator()} (such as
-     * {@code Files.lines(...).iterator()}) is neither; to release its resource, supply an iterator that
-     * closes the stream (or close the stream yourself).</p>
+     * {@link IteratorEx} or {@link AutoCloseable}. A plain {@code java.util.stream.Stream.iterator()} is neither;
+     * retain and close the stream itself instead of passing such an iterator to this method.</p>
      *
      * <p>Calling {@link #closeResource()} before any traversal request is a no-op and does not invoke the supplier.</p>
      *
@@ -412,6 +411,16 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
         };
     }
 
+    /**
+     * Releases the resources held by the given object, if it is closeable.
+     * If {@code iter} implements {@link IteratorEx}, its {@link IteratorEx#closeResource()} method is
+     * invoked; otherwise, if it implements {@link AutoCloseable}, its {@code close()} method is invoked.
+     * Anything else (including {@code null}) is ignored.
+     *
+     * @param iter the object whose resources should be released; may be {@code null}
+     * @throws RuntimeException if {@link AutoCloseable#close()} throws a checked exception, it is
+     *         wrapped and rethrown as an unchecked exception
+     */
     static void closeResource(final Object iter) {
         if (iter instanceof IteratorEx) {
             ((IteratorEx<?>) iter).closeResource();

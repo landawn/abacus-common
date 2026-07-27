@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -169,6 +170,21 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         when(clob.length()).thenThrow(new SQLException("Test exception"));
 
         assertThrows(Exception.class, () -> type.valueOf(clob));
+    }
+
+    @Test
+    public void testValueOfObjectClobPreservesPrimaryErrorWhenFreeFails() throws SQLException {
+        Clob clob = mock(Clob.class);
+        AssertionError primaryFailure = new AssertionError();
+        RuntimeException cleanupFailure = new IllegalStateException();
+        when(clob.length()).thenThrow(primaryFailure);
+        org.mockito.Mockito.doThrow(cleanupFailure).when(clob).free();
+
+        AssertionError thrown = assertThrows(AssertionError.class, () -> type.valueOf(clob));
+
+        assertSame(primaryFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
     }
 
     // Covers valueOf(Object) with Reader input

@@ -45,8 +45,16 @@ import java.util.logging.LogRecord;
  */
 class JdkLogger extends AbstractLogger {
 
+    /**
+     * Fully qualified name of this class; stack frames with this class name are treated as logging
+     * framework frames and skipped when inferring the caller location.
+     */
     static final String SELF = JdkLogger.class.getName();
 
+    /**
+     * Fully qualified name of {@link AbstractLogger}; stack frames with this class name are treated as
+     * logging framework frames and skipped when inferring the caller location.
+     */
     static final String SUPER = AbstractLogger.class.getName();
 
     private final java.util.logging.Logger loggerImpl;

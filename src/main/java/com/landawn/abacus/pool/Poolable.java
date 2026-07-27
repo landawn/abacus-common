@@ -50,7 +50,7 @@ package com.landawn.abacus.pool;
  *         try {
  *             connection.close();
  *         } catch (SQLException e) {
- *             // log error
+ *             System.err.println("Failed to close pooled connection: " + e.getMessage());
  *         }
  *     }
  * }

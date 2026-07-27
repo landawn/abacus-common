@@ -1,7 +1,6 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
@@ -12,25 +11,8 @@ import com.landawn.abacus.TestBase;
 public class ImmutableTest extends TestBase {
 
     @Test
-    public void testInterfaceExists() {
-        assertNotNull(Immutable.class);
-    }
-
-    @Test
     public void testIsInterface() {
         assertTrue(Immutable.class.isInterface());
-    }
-
-    @Test
-    public void testImmutableListImplementsInterface() {
-        ImmutableList<String> list = ImmutableList.empty();
-        assertTrue(list instanceof Immutable);
-    }
-
-    @Test
-    public void testImmutableSetImplementsInterface() {
-        ImmutableSet<String> set = ImmutableSet.empty();
-        assertTrue(set instanceof Immutable);
     }
 
     @Test

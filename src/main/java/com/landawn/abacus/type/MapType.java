@@ -81,8 +81,11 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         Class<? extends Map> deserializationClass = typeClass;
 
         if (isSpringMultiValueMap) {
-            parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName));
-            mapValueType = TypeFactory.getType("List<" + valueTypeName + ">");
+            // A MultiValueMap<K, V> is a Map<K, List<V>>, so the map's value type -- which is what
+            // Type.parameterTypes() describes and what JsonParserImpl reads for map-typed bean
+            // properties -- is List<V>, not V.
+            parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType("List<" + valueTypeName + ">"));
+            mapValueType = parameterTypes.get(1);
 
             if (typeClass.isInterface() || Modifier.isAbstract(typeClass.getModifiers())) {
                 final Class<? extends Map> linkedMultiValueMapClass = ClassUtil.forName("org.springframework.util.LinkedMultiValueMap");
@@ -127,9 +130,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     /**
      * Returns the parameter types for this generic {@code Map} type.
-     * The list always contains exactly two elements: the declared key type at index 0 and the declared value type at index 1.
-     * For Spring's {@code MultiValueMap<K, V>}, the second parameter is {@code V}; its internal
-     * {@code Map<K, List<V>>} storage is a deserialization detail, not a declared type argument.
+     * The list always contains exactly two elements: the declared key type at index 0 and the value type at index 1.
+     * For Spring's {@code MultiValueMap<K, V>}, the second parameter is {@code List<V>}, matching
+     * the map's internal {@code Map<K, List<V>>} structure.
      *
      * @return an immutable two-element list containing the key type and the value type
      */

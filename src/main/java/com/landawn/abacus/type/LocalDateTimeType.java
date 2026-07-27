@@ -31,6 +31,8 @@ import com.landawn.abacus.util.Numbers;
  * supporting conversions to and from strings, milliseconds since the epoch, and SQL timestamps.
  *
  * <p>String representations follow the ISO-8601 standard (e.g., {@code "2024-03-15T10:30:00"}).
+ * Values produced by {@link #stringOf(LocalDateTime)} omit a zero seconds field (for example,
+ * {@code 2024-03-15T10:30}).
  * Database columns are read and written using JDBC's native {@code LocalDateTime} support with a
  * {@link java.sql.Timestamp} fallback for older drivers.</p>
  *
@@ -103,6 +105,8 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * supporting numeric timestamps and string representations.
      *
      * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalDateTime using the default zone ID.
+     * A {@link java.util.Date} (including its SQL subclasses) or {@link java.util.Calendar} is converted the same
+     * way from its epoch-millisecond value.
      * Otherwise, the object is converted to a string and parsed.
      *
      * <p><b>Usage Examples:</b></p>
@@ -112,8 +116,11 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * // From Number (milliseconds since epoch)
      * LocalDateTime dt1 = type.valueOf(1609459200000L);
      *
+     * // From java.util.Date
+     * LocalDateTime dt2 = type.valueOf(new java.util.Date());
+     *
      * // From String
-     * LocalDateTime dt2 = type.valueOf("2021-01-01T10:30:00");
+     * LocalDateTime dt3 = type.valueOf("2021-01-01T10:30:00");
      * }</pre>
      *
      * @param obj The object to convert to LocalDateTime
@@ -123,6 +130,10 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
     public LocalDateTime valueOf(final Object obj) {
         if (obj instanceof Number) {
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Date) {
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(((java.util.Date) obj).getTime()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Calendar) {
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(((java.util.Calendar) obj).getTimeInMillis()), DEFAULT_ZONE_ID);
         }
 
         return obj == null ? null : valueOf(N.stringOf(obj));
@@ -133,7 +144,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * This method supports multiple string formats with intelligent format detection:
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
-     *   <li>{@code "SYS_TIME"} returns the current {@code LocalDateTime}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code LocalDateTime}</li>
      *   <li>Numeric strings are treated as milliseconds since the epoch</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalDateTime#parse(CharSequence)}</li>
      * </ul>

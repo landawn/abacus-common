@@ -282,7 +282,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Zip operations for map creation
  * List<String> keys = Arrays.asList("a", "b", "c");
  * List<Integer> nums = Arrays.asList(1, 2, 3);
- * Map<String, Integer> zipped = Maps.zip(keys, nums);           // returns {a=1, b=2, c=3}
+ * Map<String, Integer> zipped = Maps.zip(keys, nums);           // contains a=1, b=2, and c=3 (iteration order is unspecified)
  *
  * // Existence-aware access (distinguishes null-value from missing-key)
  * Nullable<Integer> nullable = Maps.getIfExists(map, "key");   // returns Nullable.of(42)
@@ -343,15 +343,16 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All methods are static and hold no shared mutable state of their own</li>
+ *   <li><b>Static Design:</b> All operations are exposed as static methods. The only shared mutable
+ *       state is an internal concurrent cache of map classes that cannot be reflectively constructed.</li>
  *   <li><b>Mutating vs. Non-mutating:</b> Many methods (e.g.&nbsp;{@code zip}, {@code filter},
  *       {@code invert}, {@code difference}) return a new map and do not modify their inputs;
  *       others (e.g.&nbsp;{@code putIfAbsent}, {@code putAllIf}, {@code removeIf}, {@code replace},
  *       {@code replaceAll}, {@code replaceKeys}, {@code getOrPut*IfAbsent}) modify the supplied
  *       map in place. Consult each method's documentation</li>
- *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
  *   <li><b>Caller Responsibility:</b> Thread safety of an individual call depends on the thread
- *       safety of the supplied map; concurrent access must be coordinated by the caller</li>
+ *       safety of the supplied map. Multi-step helpers are not made atomic merely because the map
+ *       is concurrent, so compound access must be coordinated by the caller.</li>
  * </ul>
  *
  * <p><b>Integration with Java Maps:</b>
@@ -393,7 +394,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li>Choose appropriate Map implementations based on access patterns</li>
  *   <li>Use bulk operations for better performance with large maps</li>
  *   <li>Consider memory implications when transforming large maps</li>
- *   <li>Leverage lazy evaluation patterns for chained operations</li>
  *   <li>Use primitive-specific methods when working with numeric values</li>
  * </ul>
  *
@@ -426,11 +426,11 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * // Filtering
  * Map<String, Double> highPerformance = Maps.filter(salesData,
- *     (quarter, amount) -> amount > 1200.0);   // returns {Q1=1200.5, Q2=1450.75, Q4=1350.0}
+ *     (quarter, amount) -> amount > 1200.0);   // contains Q1=1200.5, Q2=1450.75, and Q4=1350.0
  *
  * // Filtering by value only
  * Map<String, Double> belowTarget = Maps.filterByValue(salesData,
- *     amount -> amount < 1000.0);              // returns {Q3=980.25}
+ *     amount -> amount < 1000.0);              // contains Q3=980.25
  *
  * // Inversion (swap keys and values)
  * Map<Double, String> byAmount = Maps.invert(salesData);
@@ -556,11 +556,34 @@ public final class Maps {
 
     private static final Set<Class<?>> UNABLE_CREATED_MAP_CLASSES = N.newConcurrentHashSet();
 
+    /**
+     * Creates an empty map of the same kind as {@code m}, sized for {@code m}'s current entry count.
+     * Equivalent to {@code newTargetMap(m, m == null ? 0 : m.size())}.
+     *
+     * @param m the template map whose runtime type should be mirrored, may be {@code null}
+     * @return a new, empty map of the same kind as {@code m}, or a new {@code HashMap} if {@code m} is
+     *         {@code null} or its type cannot be instantiated
+     */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(final Map<?, ?> m) {
         return newTargetMap(m, m == null ? 0 : m.size());
     }
 
+    /**
+     * Creates an empty map that mirrors the runtime type of {@code m}, so transformation methods can
+     * return a result of the same kind as their input.
+     *
+     * <p>A {@code null} template yields a {@code HashMap}. A {@link SortedMap} template yields a
+     * {@link TreeMap} using the template's comparator (the {@code size} hint does not apply to it).
+     * Otherwise the template's own class is instantiated with the given expected size; if that class
+     * cannot be constructed reflectively, a {@code HashMap} is returned instead and the class is
+     * remembered so later calls skip the failing attempt.</p>
+     *
+     * @param m the template map whose runtime type should be mirrored, may be {@code null}
+     * @param size the expected number of entries, used as the initial capacity hint
+     * @return a new, empty map of the same kind as {@code m}, or a new {@code HashMap} if {@code m} is
+     *         {@code null} or its type cannot be instantiated
+     */
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(final Map<?, ?> m, final int size) {
         if (m == null) {
@@ -590,6 +613,19 @@ public final class Maps {
         }
     }
 
+    /**
+     * Creates an empty, encounter-order-preserving map for results whose keys come from {@code m}'s
+     * <i>values</i> (such as {@link #invert(Map)} and {@link #flatInvert(Map)}).
+     *
+     * <p>A {@code null} template yields a {@code HashMap}. A {@link SortedMap} template yields a
+     * {@link LinkedHashMap} rather than a {@code TreeMap}, because the template's comparator applies to
+     * its keys and cannot be reused for the new keys. Otherwise the template's own class is
+     * instantiated; if that class cannot be constructed reflectively, a {@code LinkedHashMap} is
+     * returned instead and the class is remembered so later calls skip the failing attempt.</p>
+     *
+     * @param m the template map whose runtime type should be mirrored, may be {@code null}
+     * @return a new, empty map suitable for holding entries rekeyed from {@code m}'s values
+     */
     @SuppressWarnings("rawtypes")
     static Map newOrderingMap(final Map<?, ?> m) {
         if (m == null) {
@@ -690,11 +726,12 @@ public final class Maps {
      * Otherwise, an empty immutable set is returned.
      * This is a convenience method that avoids {@code null} checks and provides a guaranteed {@code non-null} Set result.
      *
-     * <p><b>Note:</b> The returned set is always <em>unmodifiable</em>; structural mutation attempts
+     * <p><b>Note:</b> The returned set is always <em>structurally unmodifiable</em>; structural mutation attempts
      * (add/remove/clear) throw {@link UnsupportedOperationException}. For a non-empty map it is a
-     * live read-only view over {@link Map#entrySet()} (later changes to the underlying map are
-     * reflected through it); for a {@code null} or empty map a shared immutable empty set is
-     * returned.</p>
+     * live view over {@link Map#entrySet()} (later changes to the underlying map are reflected
+     * through it); for a {@code null} or empty map a shared immutable empty set is returned.
+     * Entries obtained from a non-empty view are the backing map's entries, so
+     * {@link Map.Entry#setValue(Object)} may still update that map.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -732,11 +769,11 @@ public final class Maps {
      * List<String> keys = Arrays.asList("name", "age", "city");
      * List<String> values = Arrays.asList("John", "25", "New York");
      * // result: {name=John, age=25, city=New York}
-     * Map<String, String> result = zip(keys, values);
+     * Map<String, String> result = Maps.zip(keys, values);
      * // Example 2: Different length iterables (keys shorter)
      * List<Integer> ids = Arrays.asList(1, 2);
      * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
-     * Map<Integer, String> userMap = zip(ids, names);
+     * Map<Integer, String> userMap = Maps.zip(ids, names);
      * // userMap: {1=Alice, 2=Bob}
      * }</pre>
      *
@@ -774,14 +811,16 @@ public final class Maps {
      * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
      * @return a Map where each key from {@code keys} is associated with the corresponding value from {@code values};
      *         an empty map (from {@code mapSupplier.apply(0)}) if either input is {@code null} or empty.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null}.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
+        N.requireNonNull(mapSupplier, "mapSupplier");
+
         if (N.isEmptyCollection(keys) || N.isEmptyCollection(values)) {
-            return mapSupplier.apply(0);
+            return N.requireNonNull(mapSupplier.apply(0), "mapSupplier returned null");
         }
 
         final Iterator<? extends K> keyIter = keys.iterator();
@@ -790,7 +829,7 @@ public final class Maps {
         final int keysSize = keys instanceof Collection ? ((Collection<K>) keys).size() : 0;
         final int valuesSize = values instanceof Collection ? ((Collection<V>) values).size() : 0;
         final int minLen = N.min(keysSize, valuesSize);
-        final M result = mapSupplier.apply(minLen);
+        final M result = N.requireNonNull(mapSupplier.apply(minLen), "mapSupplier returned null");
 
         while (keyIter.hasNext() && valueIter.hasNext()) {
             result.put(keyIter.next(), valueIter.next());
@@ -826,14 +865,18 @@ public final class Maps {
      * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
      * @return a Map where each key from {@code keys} is associated with the corresponding value from {@code values};
      *         an empty map (from {@code mapSupplier.apply(0)}) if either input is {@code null} or empty.
-     * @throws NullPointerException if {@code mergeFunction} or {@code mapSupplier} is {@code null}.
+     * @throws NullPointerException if {@code mergeFunction} or {@code mapSupplier} is {@code null},
+     *         or if {@code mapSupplier} returns {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+        N.requireNonNull(mergeFunction, "mergeFunction");
+        N.requireNonNull(mapSupplier, "mapSupplier");
+
         if (N.isEmptyCollection(keys) || N.isEmptyCollection(values)) {
-            return mapSupplier.apply(0);
+            return N.requireNonNull(mapSupplier.apply(0), "mapSupplier returned null");
         }
 
         final Iterator<? extends K> keyIter = keys.iterator();
@@ -842,7 +885,7 @@ public final class Maps {
         final int keysSize = keys instanceof Collection ? ((Collection<K>) keys).size() : 0;
         final int valuesSize = values instanceof Collection ? ((Collection<V>) values).size() : 0;
         final int minLen = N.min(keysSize, valuesSize);
-        final M result = mapSupplier.apply(minLen);
+        final M result = N.requireNonNull(mapSupplier.apply(minLen), "mapSupplier returned null");
 
         while (keyIter.hasNext() && valueIter.hasNext()) {
             result.merge(keyIter.next(), valueIter.next(), mergeFunction);
@@ -1050,7 +1093,8 @@ public final class Maps {
      * Resolves a value from a nested map/collection structure using a dot-separated path.
      *
      * <p>The path supports dot-separated keys and optional {@code [index]} segments to access
-     * list/array elements (for example: {@code "user.addresses[0].city"}). If the path cannot
+     * {@link Collection} elements (for example: {@code "user.addresses[0].city"}). Java arrays
+     * are not supported by the index syntax. If the path cannot
      * be resolved (missing key, index out of bounds, or root map is {@code null}/empty),
      * this method returns {@code null}.</p>
      *
@@ -2804,6 +2848,8 @@ public final class Maps {
      * @see N#convert(Object, Type)
      */
     public static <K, T> Optional<T> getAs(final Map<K, ?> map, final K key, final Class<? extends T> targetType) {
+        N.requireNonNull(targetType);
+
         if (N.isEmpty(map)) {
             return Optional.empty();
         }
@@ -2849,6 +2895,8 @@ public final class Maps {
      * @see N#convert(Object, Type)
      */
     public static <K, T> Optional<T> getAs(final Map<K, ?> map, final K key, final Type<? extends T> targetType) {
+        N.requireNonNull(targetType);
+
         if (N.isEmpty(map)) {
             return Optional.empty();
         }
@@ -3434,7 +3482,9 @@ public final class Maps {
      * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
      * @param keyFilter a predicate that filters keys to be added to the target map; must not be {@code null}.
-     * @return {@code true} if any entries were added, {@code false} otherwise.
+     * @return {@code true} if any source entry passed the filter and was put into the target map,
+     *         {@code false} otherwise. A {@code true} result does not necessarily mean that the
+     *         target map's contents changed (an equal existing mapping may have been replaced).
      * @throws IllegalArgumentException if {@code keyFilter} is {@code null}.
      */
     @Beta
@@ -3483,7 +3533,9 @@ public final class Maps {
      * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
      * @param entryFilter a predicate that filters keys and values to be added to the target map; must not be {@code null}.
-     * @return {@code true} if any entries were added, {@code false} otherwise.
+     * @return {@code true} if any source entry passed the filter and was put into the target map,
+     *         {@code false} otherwise. A {@code true} result does not necessarily mean that the
+     *         target map's contents changed (an equal existing mapping may have been replaced).
      * @throws IllegalArgumentException if {@code entryFilter} is {@code null}.
      */
     @Beta
@@ -3577,9 +3629,7 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      * Map.Entry<String, Integer> entry = N.newEntry("a", 1);
-     * // map: {b=2}
      * boolean removed = Maps.removeEntry(map, entry);   // returns true; map is {b=2}
-     *
      * }</pre>
      *
      * @param map the map from which the entry is to be removed.
@@ -3607,10 +3657,8 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      *
-     * // map: {b=2}
      * boolean removed1 = Maps.removeEntry(map, "a", 1);   // returns true; map is {b=2}
      * boolean removed2 = Maps.removeEntry(map, "b", 3);   // returns false; value does not match
-     *
      * }</pre>
      *
      * @param map the map from which the entry is to be removed.
@@ -4004,10 +4052,8 @@ public final class Maps {
      * map.put("a", 1);
      * map.put("b", 2);
      *
-     * // map: {a=10, b=2}
      * boolean replaced1 = Maps.replace(map, "a", 1, 10);   // returns true; map is {a=10, b=2}
      * boolean replaced2 = Maps.replace(map, "b", 3, 20);   // returns false; old value does not match
-     *
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map.
@@ -4205,17 +4251,19 @@ public final class Maps {
      * @return a new map (created by {@code mapSupplier}) containing only the entries that match the predicate;
      *         an empty map (from {@code mapSupplier.apply(0)}) if {@code map} is {@code null}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
      * @see #filter(Map, BiPredicate)
      */
     public static <K, V, M extends Map<K, V>> M filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate,
             final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
+        N.requireNonNull(mapSupplier, "mapSupplier");
 
         if (map == null) {
-            return mapSupplier.apply(0);
+            return N.requireNonNull(mapSupplier.apply(0), "mapSupplier returned null");
         }
 
-        final M result = mapSupplier.apply(0);
+        final M result = N.requireNonNull(mapSupplier.apply(map.size()), "mapSupplier returned null");
 
         for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
@@ -4536,6 +4584,8 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
      * Note: This method does not modify the original map.
+     * Empty nested maps do not produce an entry. For a reversible flatten/unflatten round trip,
+     * choose a delimiter that does not occur in any input key; delimiters are not escaped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4553,6 +4603,8 @@ public final class Maps {
      *
      * @param map the map to be flattened.
      * @return a new map which is the flattened version of the input map.
+     * @throws IllegalArgumentException if a key (at any level) is {@code null}, a cyclic map structure
+     *         is encountered, or two input paths produce the same flattened key.
      */
     public static Map<String, Object> flatten(final Map<String, Object> map) {
         return flatten(map, IntFunctions.ofMap());
@@ -4563,6 +4615,8 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
      * Note: This method does not modify the original map.
+     * Empty nested maps do not produce an entry. For a reversible flatten/unflatten round trip,
+     * choose a delimiter that does not occur in any input key; delimiters are not escaped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4579,8 +4633,12 @@ public final class Maps {
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the map to be flattened.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}
+     *        and must return a distinct map on every invocation.
      * @return a new map which is the flattened version of the input map.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if a key (at any level) is {@code null}, a cyclic map structure
+     *         is encountered, or two input paths produce the same flattened key.
      */
     public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier) {
         return flatten(map, ".", mapSupplier);
@@ -4591,6 +4649,8 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a provided delimiter.
      * Note: This method does not modify the original map.
+     * Empty nested maps do not produce an entry. For a reversible flatten/unflatten round trip,
+     * {@code delimiter} must not occur in any input key; delimiters are not escaped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4607,46 +4667,85 @@ public final class Maps {
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the map to be flattened.
-     * @param delimiter the delimiter to be used when concatenating keys.
+     * @param delimiter the non-empty delimiter to be used when concatenating keys.
      * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
      * @return a new map which is the flattened version of the input map.
+     * @throws IllegalArgumentException if {@code delimiter} is {@code null} or empty, a key (at any level)
+     *         is {@code null}, {@code mapSupplier} returns the input map, a cyclic map structure is
+     *         encountered, or two input paths produce the same flattened key.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
      */
     public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final String delimiter, final IntFunction<? extends M> mapSupplier) {
-        final M result = mapSupplier.apply(N.size(map));
+        N.checkArgNotEmpty(delimiter, "delimiter");
+        N.requireNonNull(mapSupplier, "mapSupplier");
 
-        flatten(map, null, delimiter, result);
+        final M result = N.requireNonNull(mapSupplier.apply(N.size(map)), "mapSupplier returned null");
+
+        if (result == map) {
+            throw new IllegalArgumentException("mapSupplier must create a new map");
+        }
+
+        flatten(map, null, delimiter, result, new IdentityHashMap<>());
 
         return result;
     }
 
-    private static void flatten(final Map<String, Object> map, final String prefix, final String delimiter, final Map<String, Object> output) {
+    private static void flatten(final Map<String, Object> map, final String prefix, final String delimiter, final Map<String, Object> output,
+            final IdentityHashMap<Map<?, ?>, Boolean> ancestors) {
         if (N.isEmpty(map)) {
             return;
         }
 
-        if (Strings.isEmpty(prefix)) {
-            for (final Map.Entry<String, Object> entry : map.entrySet()) {
-                if (entry.getValue() instanceof Map) {
-                    flatten((Map<String, Object>) entry.getValue(), entry.getKey(), delimiter, output);
-                } else {
-                    output.put(entry.getKey(), entry.getValue());
-                }
-            }
-        } else {
-            for (final Map.Entry<String, Object> entry : map.entrySet()) {
-                if (entry.getValue() instanceof Map) {
-                    flatten((Map<String, Object>) entry.getValue(), prefix + delimiter + entry.getKey(), delimiter, output);
-                } else {
-                    output.put(prefix + delimiter + entry.getKey(), entry.getValue());
-                }
-            }
+        if (ancestors.put(map, Boolean.TRUE) != null) {
+            throw new IllegalArgumentException("Cyclic map structure cannot be flattened");
         }
+
+        try {
+            // null is the root sentinel. An empty string is a valid nested key and must retain its
+            // path segment (for example, {"": {"a": 1}} flattens to {".a": 1}).
+            if (prefix == null) {
+                for (final Map.Entry<String, Object> entry : map.entrySet()) {
+                    if (entry.getKey() == null) {
+                        throw new IllegalArgumentException("Map keys must not be null");
+                    }
+
+                    if (entry.getValue() instanceof Map) {
+                        flatten((Map<String, Object>) entry.getValue(), entry.getKey(), delimiter, output, ancestors);
+                    } else {
+                        putFlattened(output, entry.getKey(), entry.getValue());
+                    }
+                }
+            } else {
+                for (final Map.Entry<String, Object> entry : map.entrySet()) {
+                    if (entry.getKey() == null) {
+                        throw new IllegalArgumentException("Map keys must not be null");
+                    }
+
+                    if (entry.getValue() instanceof Map) {
+                        flatten((Map<String, Object>) entry.getValue(), prefix + delimiter + entry.getKey(), delimiter, output, ancestors);
+                    } else {
+                        putFlattened(output, prefix + delimiter + entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        } finally {
+            ancestors.remove(map);
+        }
+    }
+
+    private static void putFlattened(final Map<String, Object> output, final String key, final Object value) {
+        if (output.containsKey(key)) {
+            throw new IllegalArgumentException("Duplicate flattened key: " + key);
+        }
+
+        output.put(key, value);
     }
 
     /**
      * Unflattens the given map.
      * This method takes a flattened map where keys are concatenated with a dot and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
+     * Delimiters in keys are always interpreted as path separators; there is no escape syntax.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4662,6 +4761,8 @@ public final class Maps {
      *
      * @param map the flattened map to be unflattened.
      * @return a new map which is the unflattened version of the input map.
+     * @throws IllegalArgumentException if a key is {@code null} or flat keys conflict (for example,
+     *         both {@code "a"} and {@code "a.b"} are present).
      */
     public static Map<String, Object> unflatten(final Map<String, Object> map) {
         return unflatten(map, IntFunctions.ofMap());
@@ -4671,6 +4772,7 @@ public final class Maps {
      * Unflattens the given map using a provided map supplier.
      * This method takes a flattened map where keys are concatenated with a delimiter and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
+     * Delimiters in keys are always interpreted as path separators; there is no escape syntax.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4685,8 +4787,13 @@ public final class Maps {
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the flattened map to be unflattened.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}
+     *        and must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if a key is {@code null}, flat keys conflict (for example,
+     *         both {@code "a"} and {@code "a.b"} are present), or {@code mapSupplier} returns the
+     *         input map or reuses a map instance.
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier) {
         return unflatten(map, ".", mapSupplier);
@@ -4696,6 +4803,7 @@ public final class Maps {
      * Unflattens the given map using a provided map supplier and a delimiter.
      * This method takes a flattened map where keys are concatenated with a specified delimiter and returns a new map where all keys are nested as per their original structure.
      * Note: This method does not modify the original map.
+     * Delimiters in keys are always interpreted as path separators; there is no escape syntax.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4710,41 +4818,89 @@ public final class Maps {
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the flattened map to be unflattened.
-     * @param delimiter the delimiter that was used in the flattening process to concatenate keys.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @param delimiter the non-empty delimiter that was used in the flattening process to concatenate keys.
+     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}
+     *        and must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map. Keys without the delimiter
      *         are copied as-is; no error is raised when the delimiter is absent.
+     * @throws IllegalArgumentException if {@code delimiter} is {@code null} or empty, a key is
+     *         {@code null}, flat keys conflict (for example, both {@code "a"} and
+     *         {@code "a.b"} are present), or {@code mapSupplier} returns the input map or reuses a
+     *         map instance.
+     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter,
             final IntFunction<? extends M> mapSupplier) {
-        final M result = mapSupplier.apply(N.size(map));
+        N.checkArgNotEmpty(delimiter, "delimiter");
+        N.requireNonNull(mapSupplier, "mapSupplier");
+
+        final IdentityHashMap<Map<String, Object>, Boolean> suppliedMaps = new IdentityHashMap<>();
+
+        if (map != null) {
+            suppliedMaps.put(map, Boolean.TRUE);
+        }
+
+        final M result = newUnflattenMap(mapSupplier, N.size(map), suppliedMaps);
+
         final Splitter keySplitter = Splitter.with(delimiter);
 
         if (N.notEmpty(map)) {
             for (final Map.Entry<String, Object> entry : map.entrySet()) {
-                if (entry.getKey().contains(delimiter)) {
-                    final String[] keys = keySplitter.splitToArray(entry.getKey());
+                final String flatKey = entry.getKey();
+
+                if (flatKey == null) {
+                    throw new IllegalArgumentException("Map keys must not be null");
+                }
+
+                if (flatKey.contains(delimiter)) {
+                    final String[] keys = keySplitter.splitToArray(flatKey);
                     Map<String, Object> lastMap = result;
 
                     for (int i = 0, to = keys.length - 1; i < to; i++) {
-                        Map<String, Object> tmp = (Map<String, Object>) lastMap.get(keys[i]);
+                        final Object existingValue = lastMap.get(keys[i]);
+                        Map<String, Object> tmp;
 
-                        if (tmp == null) {
-                            tmp = mapSupplier.apply(0);
+                        if (existingValue == null && !lastMap.containsKey(keys[i])) {
+                            tmp = newUnflattenMap(mapSupplier, 0, suppliedMaps);
                             lastMap.put(keys[i], tmp);
+                        } else if (existingValue instanceof Map) {
+                            tmp = (Map<String, Object>) existingValue;
+                        } else {
+                            throw new IllegalArgumentException("Conflicting flat key prefix: " + keys[i]);
                         }
 
                         lastMap = tmp;
                     }
 
-                    lastMap.put(keys[keys.length - 1], entry.getValue());
+                    final String lastKey = keys[keys.length - 1];
+
+                    if (lastMap.get(lastKey) instanceof Map) {
+                        throw new IllegalArgumentException("Conflicting flat key: " + flatKey);
+                    }
+
+                    lastMap.put(lastKey, entry.getValue());
                 } else {
-                    result.put(entry.getKey(), entry.getValue());
+                    if (result.get(flatKey) instanceof Map) {
+                        throw new IllegalArgumentException("Conflicting flat key: " + flatKey);
+                    }
+
+                    result.put(flatKey, entry.getValue());
                 }
             }
         }
 
         return result;
+    }
+
+    private static <M extends Map<String, Object>> M newUnflattenMap(final IntFunction<? extends M> mapSupplier, final int expectedSize,
+            final IdentityHashMap<Map<String, Object>, Boolean> suppliedMaps) {
+        final M newMap = N.requireNonNull(mapSupplier.apply(expectedSize), "mapSupplier returned null");
+
+        if (suppliedMaps.put(newMap, Boolean.TRUE) != null) {
+            throw new IllegalArgumentException("mapSupplier must return a distinct new map on every invocation and must not return the input map");
+        }
+
+        return newMap;
     }
 
     /**
@@ -4807,32 +4963,27 @@ public final class Maps {
         }
 
         final List<K> keys = new ArrayList<>(map.keySet());
-        final Set<K> newKeySet = new LinkedHashSet<>(map.size());
-        K newKey = null;
-
-        for (K key : keys) {
-            newKey = keyConverter.apply(key);
-
-            if (!newKeySet.add(newKey)) {
-                throw new IllegalStateException("Duplicate new Keys: " + Joiner.withDefault().appendAll(newKeySet).append(newKey));
-            }
-        }
-
         final Map<K, Object> mapToUse = (Map<K, Object>) map;
 
-        // Rebuild into a same-kind temporary map first. This validates converted keys against
-        // the target map's null/comparator constraints before the original map is mutated.
+        // Rebuild into a same-kind temporary map first. Besides validating converted keys before
+        // the original map is mutated, using the target map itself for duplicate detection honors
+        // comparator-based and identity-based key equivalence rather than assuming equals semantics.
         final List<Object> values = new ArrayList<>(keys.size());
         for (final K key : keys) {
             values.add(mapToUse.get(key));
         }
 
-        final Iterator<K> newKeyIter = newKeySet.iterator();
         final Map<K, Object> newMap = newTargetMap(map, map.size());
-        int idx = 0;
+        K newKey = null;
 
-        while (newKeyIter.hasNext()) {
-            newMap.put(newKeyIter.next(), values.get(idx++));
+        for (int i = 0, size = keys.size(); i < size; i++) {
+            newKey = keyConverter.apply(keys.get(i));
+
+            if (newMap.containsKey(newKey)) {
+                throw new IllegalStateException("Duplicate new key: " + newKey);
+            }
+
+            newMap.put(newKey, values.get(i));
         }
 
         mapToUse.clear();
@@ -4843,15 +4994,13 @@ public final class Maps {
      * Replaces (renames) keys in the specified map by applying the given converter, merging values when
      * multiple original keys map to the same converted key.
      *
-     * <p>This method operates in two phases. First, it iterates over a snapshot of the current
-     * {@link Map#keySet()}, computes the new key for each entry using {@code keyConverter}, and removes
-     * every entry whose new key differs from its original key (via {@link N#equals(Object, Object)});
-     * entries whose key converts to itself are left unchanged. Second, the removed entries are re-inserted
-     * under their new keys: if the map does not already contain the new key, the value is simply moved;
-     * if it does (either an entry that kept its key, or an entry re-inserted earlier in this phase),
-     * {@code mergeFunction} is used to combine the existing value (first argument) and the moved value (second
-     * argument). Because all new keys are computed against the original map state, chained renames
-     * (e.g. {@code "a" -> "b"} while {@code "b" -> "c"}) do not cascade.</p>
+     * <p>The method takes a snapshot of the current entries and rebuilds them in the original
+     * {@link Map#keySet()} encounter order. For each entry, its converted key is inserted into a
+     * compatible temporary map. If that map already contains the converted key (according to the
+     * map implementation's own key semantics), {@code mergeFunction} combines the existing value
+     * (first argument) and incoming value (second argument). Because every converted key is computed
+     * from the original snapshot, chained renames (e.g. {@code "a" -> "b"} while {@code "b" -> "c"})
+     * do not cascade.</p>
      *
      * <p><b>Difference from {@link #replaceKeys(Map, Function)}:</b> This method allows duplicate converted
      * keys by merging their values, whereas the single-argument version throws {@link IllegalStateException}
@@ -4892,11 +5041,11 @@ public final class Maps {
      * Maps.replaceKeys(data, k -> k.split("_")[0], (v1, v2) -> v1 + ", " + v2);
      * // data now contains: {user="John, Jane", admin="Bob"}
      * // Keep only the first value on collision
-     * Maps.replaceKeys(someMap, keyConverter, (existing, incoming) -> existing);
+     * // Use (existing, incoming) -> existing to keep the first value on a collision.
      * // Keep only the last value on collision
-     * Maps.replaceKeys(someMap, keyConverter, (existing, incoming) -> incoming);
+     * // Use (existing, incoming) -> incoming to keep the last value on a collision.
      * // Remove entries that would collide (mergeFunction returns null)
-     * Maps.replaceKeys(someMap, keyConverter, (existing, incoming) -> null);
+     * // Return null from the merger to remove the collided entry.
      * }</pre>
      *
      * @param <K> the key type
@@ -4908,7 +5057,7 @@ public final class Maps {
      *        the entry is removed. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code keyConverter} or {@code mergeFunction} is {@code null}.
      * @throws NullPointerException if the map implementation does not support {@code null} keys and {@code keyConverter} returns {@code null}.
-     * @see #replaceKeys(Map, Function) for a version that throws on duplicate keys instead of merging
+     * @see #replaceKeys(Map, Function)
      */
     public static <K, V> void replaceKeys(final Map<K, V> map, final Function<? super K, ? extends K> keyConverter,
             final BiFunction<? super V, ? super V, ? extends V> mergeFunction) throws IllegalArgumentException {
@@ -4919,39 +5068,38 @@ public final class Maps {
             return;
         }
 
-        // Two-phase (drain then re-insert), like the single-arg sibling: renaming while iterating a
-        // key snapshot would let later iterations see (and corrupt) earlier renames - chained renames
-        // merged spuriously and removed entries were resurrected as phantom null-valued entries.
         final List<K> keys = new ArrayList<>(map.keySet());
-        final List<K> newKeys = new ArrayList<>();
-        final List<V> movedValues = new ArrayList<>();
-        K newKey = null;
+        final List<V> values = new ArrayList<>(keys.size());
 
         for (final K key : keys) {
-            newKey = keyConverter.apply(key);
-
-            if (!N.equals(key, newKey)) {
-                newKeys.add(newKey);
-                movedValues.add(map.remove(key));
-            }
+            values.add(map.get(key));
         }
 
-        for (int i = 0, size = newKeys.size(); i < size; i++) {
-            newKey = newKeys.get(i);
-            final V value = movedValues.get(i);
+        // Rebuilding in encounter order is important: an unchanged target must not be seeded ahead
+        // of an earlier entry that converts to that target. The temporary map also applies the same
+        // comparator/identity key semantics as the original map and validates keys before mutation.
+        final Map<K, V> newMap = newTargetMap(map, map.size());
+        K newKey = null;
 
-            if (map.containsKey(newKey)) {
-                final V merged = mergeFunction.apply(map.get(newKey), value);
+        for (int i = 0, size = keys.size(); i < size; i++) {
+            newKey = keyConverter.apply(keys.get(i));
+            final V value = values.get(i);
+
+            if (newMap.containsKey(newKey)) {
+                final V merged = mergeFunction.apply(newMap.get(newKey), value);
 
                 if (merged == null) {
-                    map.remove(newKey);
+                    newMap.remove(newKey);
                 } else {
-                    map.put(newKey, merged);
+                    newMap.put(newKey, merged);
                 }
             } else {
-                map.put(newKey, value);
+                newMap.put(newKey, value);
             }
         }
+
+        map.clear();
+        map.putAll(newMap);
     }
 
     /**
@@ -4970,6 +5118,7 @@ public final class Maps {
      *   <li>{@code "USER_NAME"} -&gt; {@code "userName"}</li>
      *   <li>{@code "user-name"} -&gt; {@code "userName"}</li>
      *   <li>{@code "userName"} -&gt; {@code "userName"} (already camelCase, unchanged)</li>
+     *   <li>{@code "XMLParser"} -&gt; {@code "xmlParser"} (split at the case boundary)</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4990,8 +5139,9 @@ public final class Maps {
      * <p><b>Notes:</b></p>
      * <ul>
      *   <li>If the map is {@code null} or empty, this method returns immediately without any action.</li>
-     *   <li>Keys that are already in camelCase (containing no {@code _}, {@code -}, or whitespace delimiter)
-     *       are left unchanged.</li>
+     *   <li>Keys that are already in camelCase are left unchanged. A delimiter-free key is not automatically
+     *       left alone, though: it is still split at case boundaries and lowercased, so
+     *       {@code "XMLParser"} becomes {@code "xmlParser"} and {@code "UserName"} becomes {@code "userName"}.</li>
      *   <li>If multiple keys convert to the same camelCase key, an {@link IllegalStateException} is thrown
      *       before any modifications are made (e.g., {@code "user_name"} and {@code "USER_NAME"} both
      *       convert to {@code "userName"}).</li>

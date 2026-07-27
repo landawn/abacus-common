@@ -38,8 +38,9 @@ import com.landawn.abacus.type.Type;
  * </ul>
  *
  * <p>These principles can't be broken by any change or reason. Programmability is
- * prioritized over configurability. There is no extra support for configuration files
- * or annotations beyond {@link JsonXmlField}.</p>
+ * prioritized over configurability. Configuration is supplied programmatically, and
+ * implementations also honor supported annotations such as {@link JsonXmlField} and
+ * {@link com.landawn.abacus.annotation.JsonXmlConfig}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -233,7 +234,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = parser.deserialize(jsonString, Type.of(MyClass.class));
-     * List<String> list = parser.deserialize(jsonArray, Type.of(new TypeReference<List<String>>() {}));
+     * List<String> list = parser.deserialize(jsonArray, Type.of(new com.landawn.abacus.util.TypeReference<List<String>>() {}));
      * }</pre>
      *
      * @param <T> the target type
@@ -277,7 +278,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * JsonDeserConfig config = new JsonDeserConfig()
      *     .setIgnoreUnmatchedProperty(true)
      *     .setElementType(String.class);
-     * List<String> list = parser.deserialize(jsonArray, config, Type.of(new TypeReference<List<String>>() {}));
+     * List<String> list = parser.deserialize(jsonArray, config, Type.of(new com.landawn.abacus.util.TypeReference<List<String>>() {}));
      * }</pre>
      *
      * @param <T> the target type
@@ -323,7 +324,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MyClass obj = parser.deserialize(new File("input.json"), Type.of(MyClass.class));
-     * List<String> list = parser.deserialize(new File("input.json"), Type.of(new TypeReference<List<String>>() {}));
+     * List<String> list = parser.deserialize(new File("input.json"), Type.of(new com.landawn.abacus.util.TypeReference<List<String>>() {}));
      * }</pre>
      *
      * @param <T> the target type

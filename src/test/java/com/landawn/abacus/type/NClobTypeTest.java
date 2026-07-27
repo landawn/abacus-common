@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.sql.CallableStatement;
@@ -206,5 +207,19 @@ public class NClobTypeTest extends TestBase {
         assertNotNull(thrown.getSuppressed());
         assertEquals(1, thrown.getSuppressed().length);
         Assertions.assertInstanceOf(UncheckedSQLException.class, thrown.getSuppressed()[0]);
+    }
+
+    @Test
+    public void testStringOfPreservesPrimaryErrorWhenFreeFailsUnchecked() throws SQLException {
+        AssertionError primaryFailure = new AssertionError();
+        RuntimeException cleanupFailure = new IllegalStateException();
+        Mockito.when(mockNClob.length()).thenThrow(primaryFailure);
+        Mockito.doThrow(cleanupFailure).when(mockNClob).free();
+
+        AssertionError thrown = assertThrows(AssertionError.class, () -> nClobType.stringOf(mockNClob));
+
+        assertSame(primaryFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
     }
 }

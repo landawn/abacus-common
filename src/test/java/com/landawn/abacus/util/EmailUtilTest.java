@@ -8,15 +8,20 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import com.landawn.abacus.TestBase;
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 public class EmailUtilTest extends TestBase {
+
+    private static final String SMTP_TIMEOUT_MILLIS = "2000";
 
     private Properties props;
     private File tempFile;
@@ -27,6 +32,7 @@ public class EmailUtilTest extends TestBase {
         props.put("mail.smtp.host", "localhost");
         props.put("mail.smtp.port", "25");
         props.put("mail.smtp.auth", "false");
+        configureSmtpTimeouts(props);
 
         tempFile = File.createTempFile("email_test_", ".txt");
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
@@ -118,6 +124,7 @@ public class EmailUtilTest extends TestBase {
         authProps.put("mail.smtp.port", "587");
         authProps.put("mail.smtp.auth", "true");
         authProps.put("mail.smtp.starttls.enable", "true");
+        configureSmtpTimeouts(authProps);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with Auth", "Testing SMTP authentication", "real_username",
@@ -134,6 +141,7 @@ public class EmailUtilTest extends TestBase {
         sslProps.put("mail.smtp.auth", "true");
         sslProps.put("mail.smtp.socketFactory.port", "465");
         sslProps.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        configureSmtpTimeouts(sslProps);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with SSL", "Testing SSL connection", "username", "password",
@@ -448,6 +456,12 @@ public class EmailUtilTest extends TestBase {
         } catch (RuntimeException e) {
             Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
         }
+    }
+
+    private static void configureSmtpTimeouts(final Properties smtpProps) {
+        smtpProps.put("mail.smtp.connectiontimeout", SMTP_TIMEOUT_MILLIS);
+        smtpProps.put("mail.smtp.timeout", SMTP_TIMEOUT_MILLIS);
+        smtpProps.put("mail.smtp.writetimeout", SMTP_TIMEOUT_MILLIS);
     }
 
 }

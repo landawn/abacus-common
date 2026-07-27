@@ -44,10 +44,10 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.Splitter.MapSplitter;
 
 /**
- * A comprehensive utility class providing high-performance, thread-safe methods for URL encoding and decoding
+ * Utility methods for URL encoding and decoding
  * operations, including query parameter encoding, form data processing, and URL component manipulation.
  * This class combines the robustness of Apache HttpComponents with enhanced functionality for modern Java
- * applications, offering both RFC-compliant URL encoding and convenient object-to-query-string conversions.
+ * applications, offering component-specific percent encoding and convenient object-to-query-string conversions.
  *
  * <p>This utility addresses common challenges in web development by providing null-safe operations, flexible
  * charset handling, customizable naming policies, and seamless integration with Java objects. It supports
@@ -56,20 +56,20 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>RFC Compliance:</b> Fully compliant with RFC 3986 and HTML form encoding standards</li>
+ *   <li><b>Encoding modes:</b> HTML form encoding plus URI-component safe sets derived from RFC 2396</li>
  *   <li><b>Object Serialization:</b> Automatic conversion of Java objects to URL-encoded query strings</li>
  *   <li><b>Flexible Parsing:</b> Support for both Map-based and object-based parameter decoding</li>
  *   <li><b>Charset Support:</b> Full Unicode support with configurable character encoding</li>
  *   <li><b>Naming Policies:</b> Customizable field naming strategies for object serialization</li>
  *
- *   <li><b>Thread Safety:</b> All methods are thread-safe and suitable for concurrent usage</li>
+ *   <li><b>Stateless operation:</b> Separate calls share no mutable encoding state</li>
  *   <li><b>Performance Optimized:</b> BitSet-based encoding tables and efficient string processing</li>
  *   <li><b>Null Safety:</b> Comprehensive {@code null} handling with predictable behavior</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
  * <ul>
- *   <li><b>Standards Compliance:</b> Strict adherence to web standards and RFCs</li>
+ *   <li><b>Explicit rules:</b> Form data and URI components use distinct documented safe-character sets</li>
  *   <li><b>Developer Productivity:</b> Simplified API that handles complex encoding scenarios</li>
  *   <li><b>Performance First:</b> Optimized algorithms and pre-computed lookup tables</li>
  *   <li><b>Flexibility:</b> Support for various input types and output formats</li>
@@ -94,6 +94,8 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
+ * // SearchCriteria and Person below are conventional JavaBeans with public no-arg constructors
+ * // and standard property accessors.
  * // Basic object to query string encoding
  * SearchCriteria criteria = new SearchCriteria("java", "programming", 10);
  * String queryString = URLEncodedUtil.encode(criteria);
@@ -118,14 +120,14 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Complex object encoding with nested properties
+ * // Bean property values are encoded as strings; nested objects are not flattened into paths
  * UserPreferences prefs = new UserPreferences();
  * prefs.setTheme("dark");
  * prefs.setLanguage("en");
  * prefs.getNotifications().setEmail(true);
  *
  * String encoded = URLEncodedUtil.encode(prefs, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE);
- * // Handles nested objects and collections appropriately
+ * // The notifications property is represented by its normal string form
  *
  * // Multimap decoding for duplicate parameter names
  * ListMultimap<String, String> params = URLEncodedUtil.decodeToMultimap("tag=java&tag=web&tag=api");
@@ -136,10 +138,10 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *     "c=3&a=1&b=2", StandardCharsets.UTF_8, TreeMap::new);
  * // Result: Sorted map with natural key ordering
  *
- * // Servlet parameter processing
- * HttpServletRequest request = getRequest();
+ * // Servlet-style parameter processing
+ * Map<String, String[]> requestParameters = getRequestParameters();
  * UserProfile profile = URLEncodedUtil.convertToBean(
- *     request.getParameterMap(), UserProfile.class);
+ *     requestParameters, UserProfile.class);
  * }</pre>
  *
  * <p><b>Method Categories:</b>
@@ -154,9 +156,9 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * <p><b>Object Serialization Support:</b>
  * <ul>
  *   <li><b>Bean Properties:</b> Automatic discovery and encoding of JavaBean properties</li>
- *   <li><b>Field Access:</b> Direct field access for objects without getters/setters</li>
- *   <li><b>Collection Handling:</b> Special processing for arrays, Lists, and Sets</li>
- *   <li><b>Null Values:</b> Configurable behavior for {@code null} property values</li>
+ *   <li><b>Bean Access:</b> Properties are discovered through the library's JavaBean metadata</li>
+ *   <li><b>Value Handling:</b> Map values, array-pair values, and bean property values are converted with their normal string representation</li>
+ *   <li><b>Null Values:</b> Null bean properties are omitted; explicit null Map/array values are encoded as {@code "null"}</li>
  *   <li><b>Type Conversion:</b> Automatic conversion of primitive and wrapper types</li>
  * </ul>
  *
@@ -176,7 +178,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>Query Parameters:</b> Standard form field encoding with '+' for spaces</li>
  *   <li><b>Path Components:</b> Path-specific encoding preserving directory structure</li>
  *   <li><b>User Info:</b> Encoding for username:password components in URLs</li>
- *   <li><b>Generic URI:</b> RFC 3986 compliant encoding for URI components</li>
+ *   <li><b>Generic URI:</b> Component encoding using the documented RFC 2396-era safe sets</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
@@ -190,23 +192,21 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * <p><b>Thread Safety and Concurrency:</b>
  * <ul>
- *   <li><b>Static Methods:</b> All utility methods are static and inherently thread-safe</li>
- *   <li><b>Immutable Constants:</b> All public constants are immutable and thread-safe</li>
- *   <li><b>No Shared State:</b> No mutable static variables that could cause race conditions</li>
- *   <li><b>Concurrent Processing:</b> Safe for use in multi-threaded web applications</li>
+ *   <li><b>Internal State:</b> Encoding tables are initialized once and are not mutated afterward</li>
+ *   <li><b>Caller State:</b> A caller must not concurrently mutate an input Map/bean or a supplied Appendable</li>
  * </ul>
  *
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li><b>UncheckedIOException:</b> Wraps IOException from Appendable operations</li>
- *   <li><b>IllegalArgumentException:</b> Thrown for invalid parameters or malformed input</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown for invalid argument shapes or unsupported target types</li>
  *   <li><b>NullPointerException:</b> Appropriate {@code null} checks with descriptive messages</li>
  *   <li><b>Charset Fallback:</b> A {@code null} charset is handled gracefully with a fallback to UTF-8</li>
  * </ul>
  *
- * <p><b>RFC Compliance and Standards:</b>
+ * <p><b>Encoding Standards:</b>
  * <ul>
- *   <li><b>RFC 3986:</b> URI Generic Syntax compliance for percent-encoding</li>
+ *   <li><b>URI components:</b> Percent encoding with safe sets inherited from Apache HttpComponents and RFC 2396</li>
  *   <li><b>HTML Forms:</b> application/x-www-form-urlencoded format support</li>
  *   <li><b>Query Parameters:</b> Standard web form parameter encoding/decoding</li>
  *   <li><b>Character Encoding:</b> Proper Unicode support with configurable charsets</li>
@@ -214,7 +214,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * <p><b>Integration with Web Frameworks:</b>
  * <ul>
- *   <li><b>Servlet API:</b> Direct support for HttpServletRequest parameter maps</li>
+ *   <li><b>Servlet API:</b> Conversion from the {@code Map<String, String[]>} shape returned by servlet requests</li>
  *   <li><b>Spring Framework:</b> Compatible with Spring's parameter binding mechanisms</li>
  *   <li><b>JAX-RS:</b> Suitable for REST client parameter encoding</li>
  *   <li><b>HTTP Clients:</b> Integration with Apache HttpClient, OkHttp, and others</li>
@@ -224,9 +224,9 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * <ul>
  *   <li>Always specify charset explicitly for cross-platform compatibility</li>
  *   <li>Use UTF-8 encoding for modern web applications to ensure Unicode support</li>
- *   <li>Prefer object-based encoding for complex parameter sets over manual string building</li>
+ *   <li>Use Map or flat JavaBean inputs for structured parameter sets</li>
  *   <li>Use appropriate naming policies to match API expectations</li>
- *   <li>Cache BeanInfo objects when repeatedly encoding objects of the same type</li>
+ *   <li>Bean metadata is cached internally for repeated processing of the same type</li>
  *   <li>Use streaming methods (Appendable) for very large parameter sets</li>
  *   <li>Validate decoded objects to ensure data integrity and security</li>
  * </ul>
@@ -244,41 +244,20 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  * <p><b>Security Considerations:</b>
  * <ul>
  *   <li><b>Input Validation:</b> Always validate decoded parameters before use</li>
- *   <li><b>Injection Prevention:</b> Proper encoding prevents URL injection attacks</li>
- *   <li><b>Character Set Attacks:</b> Explicit charset specification prevents encoding-based attacks</li>
+ *   <li><b>Context:</b> Percent encoding is not a substitute for validating schemes, hosts, paths, or redirect targets</li>
+ *   <li><b>Character Sets:</b> Use the same explicit charset at both ends to avoid ambiguous decoding</li>
  *   <li><b>Length Limits:</b> Consider implementing parameter length limits for DoS prevention</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * public class ApiClient {
- *     private static final String BASE_URL = "https://api.example.com";
+ * Map<String, Object> parameters = new LinkedHashMap<>();
+ * parameters.put("searchTerm", "Java & XML");
+ * parameters.put("page", 2);
  *
- *     public <T> List<T> search(SearchRequest request, Class<T> responseType) {
- *         String url = URLEncodedUtil.encode(BASE_URL + "/search", request,
- *             StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
- *
- *         // Use url with HTTP client
- *         String response = httpClient.get(url);
- *         return parseResponse(response, responseType);
- *     }
- *
- *     public void submitForm(FormData formData) {
- *         String encoded = URLEncodedUtil.encode(formData, StandardCharsets.UTF_8);
- *
- *         HttpRequest request = HttpRequest.newBuilder()
- *             .uri(URI.create(BASE_URL + "/submit"))
- *             .header("Content-Type", "application/x-www-form-urlencoded")
- *             .POST(HttpRequest.BodyPublishers.ofString(encoded))
- *             .build();
- *
- *         httpClient.send(request, HttpResponse.BodyHandlers.ofString());
- *     }
- *
- *     public SearchRequest parseQueryString(String queryString) {
- *         return URLEncodedUtil.decode(queryString, StandardCharsets.UTF_8, SearchRequest.class);
- *     }
- * }
+ * String url = URLEncodedUtil.encode("https://api.example.com/search", parameters,
+ *         StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
+ * // url: "https://api.example.com/search?search_term=Java+%26+XML&page=2"
  * }</pre>
  *
  * <p><b>Comparison with Alternative Approaches:</b>
@@ -286,7 +265,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>vs. URLEncoder/URLDecoder:</b> More features and object support vs. basic string encoding</li>
  *   <li><b>vs. Spring UriComponentsBuilder:</b> Lightweight and focused vs. comprehensive URI building</li>
  *   <li><b>vs. Apache HttpClient:</b> Specialized for URL encoding vs. full HTTP client functionality</li>
- *   <li><b>vs. Manual String Building:</b> Type-safe and robust vs. error-prone manual concatenation</li>
+ *   <li><b>vs. Manual String Building:</b> Centralized percent-encoding instead of ad hoc concatenation</li>
  * </ul>
  *
  * <p><b>Attribution:</b>
@@ -471,6 +450,11 @@ public final class URLEncodedUtil {
      * // query: "name=John+Doe&age=30"
      * }</pre>
      *
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
+     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
+     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
+     * {@link #encode(Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
+     *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @return a URL-encoded query string (e.g., "name=John+Doe&amp;age=30"); returns empty string if {@code parameters} is {@code null}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
@@ -532,8 +516,9 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class User { String firstName; int userAge; }
-     * User user = new User("John", 30);
+     * Map<String, Object> user = new LinkedHashMap<>();
+     * user.put("firstName", "John");
+     * user.put("userAge", 30);
      * String query = URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
      * // query: "first_name=John&user_age=30"
      * }</pre>
@@ -571,7 +556,8 @@ public final class URLEncodedUtil {
      * identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
-     * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
+     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, or an empty Object array,
+     * the original URL is returned unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -583,10 +569,16 @@ public final class URLEncodedUtil {
      * // fullUrl: "http://search.example.com?q=java+url+encoding&page=1"
      * }</pre>
      *
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
+     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
+     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
+     * {@link #encode(String, Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
+     *
      * @param url the base URL to which the query string will be appended (e.g., "http://example.com/path").
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
      * @return the URL with the encoded query string appended (e.g., "http://example.com/path?name=value");
-     *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
+     *         returns the original URL if {@code parameters} is {@code null}, an empty {@code Map},
+     *         an empty {@code CharSequence}, or an empty {@code Object[]}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws NullPointerException if {@code url} is {@code null}
      * @see #encode(String, Object, Charset)
@@ -605,7 +597,8 @@ public final class URLEncodedUtil {
      * fragment identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
-     * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
+     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, or an empty Object array,
+     * the original URL is returned unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -615,11 +608,17 @@ public final class URLEncodedUtil {
      * // fullUrl: "http://example.com?name=%E4%B8%AD%E6%96%87"
      * }</pre>
      *
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
+     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
+     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
+     * {@link #encode(String, Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
+     *
      * @param url the base URL to which the query string will be appended.
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @return the URL with the encoded query string appended;
-     *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
+     *         returns the original URL if {@code parameters} is {@code null}, an empty {@code Map},
+     *         an empty {@code CharSequence}, or an empty {@code Object[]}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws NullPointerException if {@code url} is {@code null}
      * @see #encode(String, Object)
@@ -640,13 +639,15 @@ public final class URLEncodedUtil {
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved;
      * the naming policy is not applied).
-     * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
+     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, or an empty Object array,
+     * the original URL is returned unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class User { String firstName; }
-     * String url = URLEncodedUtil.encode("http://api.com/users", new User("John"),
+     * Map<String, Object> user = new LinkedHashMap<>();
+     * user.put("firstName", "John");
+     * String url = URLEncodedUtil.encode("http://api.com/users", user,
      *                                     StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
      * // url: "http://api.com/users?first_name=John"
      * }</pre>
@@ -657,7 +658,8 @@ public final class URLEncodedUtil {
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return the URL with the encoded query string appended;
-     *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
+     *         returns the original URL if {@code parameters} is {@code null}, an empty {@code Map},
+     *         an empty {@code CharSequence}, or an empty {@code Object[]}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws NullPointerException if {@code url} is {@code null}
      * @see #encode(String, Object, Charset)
@@ -666,7 +668,8 @@ public final class URLEncodedUtil {
     public static String encode(final String url, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
         Objects.requireNonNull(url, "url");
 
-        if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
+        if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty()) || (parameters instanceof CharSequence seq && seq.isEmpty())
+                || (parameters instanceof Object[] a && a.length == 0)) {
             return url;
         }
 
@@ -720,6 +723,11 @@ public final class URLEncodedUtil {
      * // sb: "http://example.com?key=value"
      * }</pre>
      *
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
+     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
+     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
+     * {@link #encode(Object, Charset, NamingPolicy, Appendable)} with {@link NamingPolicy#NO_CHANGE}.
+     *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param output the {@code Appendable} (e.g., {@code StringBuilder}, {@code Writer}) to which the encoded query string will be appended.
      * @throws NullPointerException if {@code output} is {@code null}
@@ -741,9 +749,10 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Writer writer = new FileWriter("query.txt");
-     * URLEncodedUtil.encode(Map.of("name", "中文"), StandardCharsets.UTF_8, writer);
-     * // writer content: "name=%E4%B8%AD%E6%96%87"
+     * try (Writer writer = new FileWriter("query.txt")) {
+     *     URLEncodedUtil.encode(Map.of("name", "中文"), StandardCharsets.UTF_8, writer);
+     * }
+     * // query.txt contains: "name=%E4%B8%AD%E6%96%87"
      * }</pre>
      *
      * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
@@ -782,9 +791,11 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class User { String firstName; int age; }
+     * Map<String, Object> user = new LinkedHashMap<>();
+     * user.put("firstName", "John");
+     * user.put("age", 30);
      * StringBuilder sb = new StringBuilder();
-     * URLEncodedUtil.encode(new User("John", 30), StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE, sb);
+     * URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE, sb);
      * // sb: "first_name=John&age=30"
      * }</pre>
      *
@@ -984,7 +995,8 @@ public final class URLEncodedUtil {
      *
      * @param urlQuery the URL query string to decode (e.g., "key1=value1&amp;key2=value2"), may be {@code null} or empty.
      * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
-     *         returns an empty map if {@code urlQuery} is {@code null} or empty.
+     *         returns an empty map if {@code urlQuery} is {@code null} or empty. A token without
+     *         {@code '='} is stored with a {@code null} value.
      * @see #decode(String, Charset)
      * @see #decodeToMultimap(String)
      * @see URLDecoder#decode(String, String)
@@ -1015,7 +1027,8 @@ public final class URLEncodedUtil {
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
      * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
-     *         returns an empty map if {@code urlQuery} is {@code null} or empty.
+     *         returns an empty map if {@code urlQuery} is {@code null} or empty. A token without
+     *         {@code '='} is stored with a {@code null} value.
      * @see #decode(String)
      * @see #decode(String, Charset, Supplier)
      * @see URLDecoder#decode(String, Charset)
@@ -1048,7 +1061,8 @@ public final class URLEncodedUtil {
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
      * @param mapSupplier a supplier that provides an instance of the desired Map implementation; must not be {@code null}.
      * @return a Map of type M containing parameter names as keys and decoded parameter values as values;
-     *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty.
+     *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty. A token
+     *         without {@code '='} is stored with a {@code null} value.
      * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
      * @see #decode(String, Charset)
      */
@@ -1113,7 +1127,8 @@ public final class URLEncodedUtil {
      *
      * @param urlQuery the URL query string to decode (e.g., "color=red&amp;color=blue&amp;size=L"), may be {@code null} or empty.
      * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
-     *         returns an empty multimap if {@code urlQuery} is {@code null} or empty.
+     *         returns an empty multimap if {@code urlQuery} is {@code null} or empty. A token without
+     *         {@code '='} is stored with a {@code null} value.
      * @see #decodeToMultimap(String, Charset)
      * @see #decode(String)
      */
@@ -1143,7 +1158,8 @@ public final class URLEncodedUtil {
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
      * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
-     *         returns an empty multimap if {@code urlQuery} is {@code null} or empty.
+     *         returns an empty multimap if {@code urlQuery} is {@code null} or empty. A token without
+     *         {@code '='} is stored with a {@code null} value.
      * @see #decodeToMultimap(String)
      * @see #decode(String, Charset)
      */
@@ -1202,9 +1218,9 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class User { String name; int age; }
+     * // Given a public User JavaBean with a no-arg constructor and name/age accessors:
      * User user = URLEncodedUtil.decode("name=John&age=30", User.class);
-     * // user: {name="John", age=30}
+     * // user.getName() returns "John" and user.getAge() returns 30
      * }</pre>
      *
      * @param <T> the type of the object to decode into (JavaBean or Map).
@@ -1238,9 +1254,9 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class Product { String name; double price; }
+     * // Given a public Product JavaBean with a no-arg constructor and name/price accessors:
      * Product p = URLEncodedUtil.decode("name=Laptop&price=999.99", StandardCharsets.UTF_8, Product.class);
-     * // p: {name="Laptop", price=999.99}
+     * // p.getName() returns "Laptop" and p.getPrice() returns 999.99
      * }</pre>
      *
      * @param <T> the type of the object to decode into (JavaBean or Map).

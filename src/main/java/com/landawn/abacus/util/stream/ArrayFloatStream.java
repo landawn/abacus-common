@@ -68,7 +68,11 @@ import com.landawn.abacus.util.function.ObjFloatConsumer;
  * <li>Optimized implementations of filter, map, flatMap, and terminal operations</li>
  * <li>Efficient sorted stream handling with specialized algorithms</li>
  * <li>Type conversion support to other primitive stream types</li>
+ * <li>Inherits Kahan-summation-based {@code sum()} and {@code average()} from {@link AbstractFloatStream} for numerical stability</li>
  * </ul>
+ *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public FloatStream factory methods rather than instantiating this class directly.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -87,10 +91,17 @@ import com.landawn.abacus.util.function.ObjFloatConsumer;
  * System.out.println("Average: " + summary.getAverage());
  * }</pre>
  *
+ * @see FloatStream
  */
 class ArrayFloatStream extends AbstractFloatStream {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final float[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
@@ -1791,7 +1802,7 @@ class ArrayFloatStream extends AbstractFloatStream {
      * This is a terminal operation. Closes the stream.
      *
      * <pre>{@code
-     * FloatList list = stream.collect(FloatList::new, FloatList::add, FloatList::addAll);
+     * FloatList list = FloatStream.of(1f, 2f, 3f).collect(FloatList::new, FloatList::add, FloatList::addAll);
      * }</pre>
      *
      * @param <R> the type of the mutable result container
@@ -2198,10 +2209,11 @@ class ArrayFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    protected FloatStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected FloatStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayFloatStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelArrayFloatStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 

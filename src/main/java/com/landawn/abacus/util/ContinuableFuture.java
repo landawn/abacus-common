@@ -39,7 +39,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * A powerful and flexible asynchronous computation framework that extends the standard {@link Future} interface
  * with advanced functional composition capabilities, recursive cancellation support, and fluent chaining operations.
  * This class provides a more intuitive and feature-rich alternative to {@link CompletableFuture} for building
- * complex asynchronous workflows with enhanced control over execution, error handling, and resource management.
+ * complex asynchronous workflows with enhanced control over execution, error handling, and cancellation.
  *
  * <p>{@code ContinuableFuture} represents an asynchronous computation that can be seamlessly chained with other
  * computations, allowing developers to construct sophisticated asynchronous pipelines using a fluent API that
@@ -50,7 +50,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * <ul>
  *   <li><b>Simplicity Over Complexity:</b> Streamlined API focused on common asynchronous patterns</li>
  *   <li><b>Fluent Composition:</b> Method chaining enables readable asynchronous workflow construction</li>
- *   <li><b>Recursive Control:</b> Advanced cancellation and resource management throughout execution chains</li>
+ *   <li><b>Recursive Control:</b> Cancellation can be propagated throughout execution chains</li>
  *   <li><b>Error Propagation:</b> Consistent exception handling and error recovery mechanisms</li>
  *   <li><b>Executor Flexibility:</b> Fine-grained control over thread pool usage and execution contexts</li>
  * </ul>
@@ -64,7 +64,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Executor Flexibility:</b> Per-operation executor configuration with {@code thenUse()} methods</li>
  *   <li><b>Multiple Combination Patterns:</b> Support for both/either completion scenarios with various callback types</li>
  *   <li><b>Type Safety:</b> Strong generic typing throughout the composition chain</li>
- *   <li><b>Memory Efficiency:</b> Optimized internal structure for minimal overhead in chained operations</li>
+ *   <li><b>Explicit Dependencies:</b> Chained futures retain upstream references to support recursive cancellation</li>
  * </ul>
  *
  * <p><b>Core Composition Methods:</b>
@@ -268,7 +268,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     .call(() -> downloadData())
  *     .map(data -> processData(data))
  *     .thenDelay(1, TimeUnit.SECONDS)
- *     .thenCallAsync(() -> saveToDatabase());
+ *     .thenCallAsync(data -> saveToDatabase(data));
  *
  * // Parallel execution with combination
  * ContinuableFuture<String> userFuture = ContinuableFuture.call(() -> fetchUser(userId));
@@ -288,10 +288,16 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     });
  *
  * // Custom executor usage
- * ContinuableFuture<String> customExecutorFuture = ContinuableFuture
- *     .call(() -> cpuIntensiveTask())
- *     .thenUse(Executors.newCachedThreadPool())
- *     .thenCallAsync(() -> ioIntensiveTask());
+ * ExecutorService customExecutor = Executors.newCachedThreadPool();
+ * try {
+ *     String result = ContinuableFuture
+ *         .call(() -> cpuIntensiveTask())
+ *         .thenUse(customExecutor)
+ *         .thenCallAsync(() -> ioIntensiveTask())
+ *         .get();
+ * } finally {
+ *     customExecutor.shutdown();
+ * }
  * }</pre>
  *
  * <p><b>Advanced Composition Examples:</b>
@@ -331,16 +337,17 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Default Executor:</b> Uses the shared {@code N.ASYNC_EXECUTOR} thread pool unless an executor is supplied explicitly</li>
  *   <li><b>Custom Executors:</b> Per-operation executor specification via {@code thenUse()}</li>
  *   <li><b>Async Variants:</b> Methods ending with "Async" for explicit asynchronous execution</li>
- *   <li><b>Thread Safety:</b> All operations are thread-safe and can be called from any thread</li>
- *   <li><b>Resource Management:</b> Automatic cleanup of resources when futures are cancelled</li>
+ *   <li><b>Thread Safety:</b> Future state and built-in coordination are thread-safe; callbacks supplied by callers
+ *       must themselves be safe if they can be invoked concurrently (for example, by concurrent {@code map().get()} calls)</li>
+ *   <li><b>Executor Ownership:</b> Custom executors remain owned by the caller and must be shut down by the caller</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li><b>Chaining Overhead:</b> Minimal per-operation overhead comparable to CompletableFuture</li>
- *   <li><b>Memory Usage:</b> Efficient internal structure with optional upstream future tracking</li>
+ *   <li><b>Chaining Overhead:</b> Each asynchronous stage submits a task that may occupy an executor thread while waiting for its upstream stage</li>
+ *   <li><b>Memory Usage:</b> Chained stages retain upstream references so that {@code cancelAll()} can traverse the dependency graph</li>
  *   <li><b>Cancellation Cost:</b> O(n) where n is the length of the execution chain</li>
- *   <li><b>Combination Efficiency:</b> Optimized algorithms for multi-future coordination</li>
+ *   <li><b>Combination Cost:</b> Coordination methods may use executor tasks that block while waiting for their input futures</li>
  *   <li><b>Delay Implementation:</b> Lazily applied when {@code get()} is called on the delayed future, using an interruptible wait</li>
  * </ul>
  *
@@ -348,7 +355,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * <ul>
  *   <li><b>Immutable Chains:</b> Each composition operation creates a new ContinuableFuture instance</li>
  *   <li><b>Safe Publication:</b> Results are safely published through happens-before relationships</li>
- *   <li><b>Concurrent Access:</b> All methods can be safely called from multiple threads simultaneously</li>
+ *   <li><b>Concurrent Access:</b> Future state can be queried concurrently; a lazy {@code map()} function can run once per caller and must be thread-safe</li>
  *   <li><b>Executor Isolation:</b> Different stages can run on different thread pools safely</li>
  *   <li><b>Cancellation Coordination:</b> Thread-safe cancellation propagation throughout chains</li>
  * </ul>
@@ -376,17 +383,17 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * <p><b>Best Practices and Recommendations:</b>
  * <ul>
  *   <li>Use method chaining to build readable asynchronous workflows</li>
- *   <li>Prefer {@code map()} over {@code thenCallAsync()} for simple transformations</li>
- *   <li>Use {@code cancelAll()} to ensure complete resource cleanup</li>
+ *   <li>Use {@code map()} when a lazy caller-thread transformation is intended; use {@code thenCallAsync()} for an executor-backed stage</li>
+ *   <li>Use {@code cancelAll()} when cancellation should propagate to upstream futures</li>
  *   <li>Specify appropriate executors for CPU-bound vs I/O-bound operations</li>
  *   <li>Use {@code getAsResult()} methods for result retrieval that wraps exceptions in {@link Result}</li>
- *   <li>Implement timeouts using {@code thenDelay()} or combination patterns</li>
+ *   <li>Use timed {@code get()} methods for wait budgets; {@code thenDelay()} adds a pause and is not a timeout mechanism</li>
  *   <li>Use {@code thenCallAsync(BiFunction)}/{@code thenRunAsync(BiConsumer)} for unified success/error processing</li>
  * </ul>
  *
  * <p><b>Common Anti-Patterns to Avoid:</b>
  * <ul>
- *   <li>Blocking on {@code get()} in callback methods (causes deadlocks)</li>
+ *   <li>Blocking on work queued to the same bounded executor from a callback, which can cause starvation or deadlock</li>
  *   <li>Creating deeply nested callback chains instead of using flat composition</li>
  *   <li>Ignoring cancellation propagation requirements in complex workflows</li>
  *   <li>Using default executor for both CPU-bound and I/O-bound operations</li>
@@ -399,7 +406,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Propagation:</b> Exceptions automatically propagate through the chain unless handled</li>
  *   <li><b>Recovery:</b> Use {@code thenCallAsync(BiFunction)} (or the BiConsumer overload of {@code thenRunAsync})
  *       to handle and recover from upstream exceptions</li>
- *   <li><b>Timeout Handling:</b> Combine with delayed futures for timeout management</li>
+ *   <li><b>Timeout Handling:</b> Use timed {@code get()} methods or an external scheduler; {@code thenDelay()} only postpones the next stage</li>
  *   <li><b>Validation:</b> Use {@code getAsResult()} methods to safely retrieve results without exceptions</li>
  * </ul>
  *
@@ -520,10 +527,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService customExecutor = Executors.newFixedThreadPool(4);
-     * ContinuableFuture<Void> future = ContinuableFuture.run(() -> {
-     *     // Heavy computation
-     *     performComplexCalculation();
-     * }, customExecutor);
+     * try {
+     *     ContinuableFuture.run(() -> {
+     *         // Heavy computation
+     *         performComplexCalculation();
+     *     }, customExecutor).get();
+     * } finally {
+     *     customExecutor.shutdown();
+     * }
      * }</pre>
      *
      * @param action the action to be executed asynchronously; must not be {@code null}.
@@ -578,9 +589,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-     * ContinuableFuture<String> future = ContinuableFuture.call(() -> {
-     *     return fetchDataFromService();
-     * }, scheduler);
+     * try {
+     *     String result = ContinuableFuture.call(() -> fetchDataFromService(), scheduler).get();
+     * } finally {
+     *     scheduler.shutdown();
+     * }
      * }</pre>
      *
      * @param <T> the type of the result returned by the callable.
@@ -671,14 +684,19 @@ public class ContinuableFuture<T> implements Future<T> {
      * <pre>{@code
      * // Working with ExecutorService that returns Future
      * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * Future<String> standardFuture = executor.submit(() -> "Hello");
+     * try {
+     *     Future<String> standardFuture = executor.submit(() -> "Hello");
      *
-     * // Wrap it to use ContinuableFuture features
-     * ContinuableFuture<String> continuable = ContinuableFuture.wrap(standardFuture);
+     *     // Wrap it to use ContinuableFuture features
+     *     ContinuableFuture<String> continuable = ContinuableFuture.wrap(standardFuture);
      *
-     * // Now can use chaining methods
-     * continuable.thenRunAsync(result -> System.out.println("Got: " + result))
-     *            .thenCallAsync(() -> processNextStep());
+     *     // Wait for the terminal stage before shutting down its executor.
+     *     continuable.thenRunAsync(result -> System.out.println("Got: " + result))
+     *                .thenCallAsync(() -> processNextStep())
+     *                .get();
+     * } finally {
+     *     executor.shutdown();
+     * }
      * }</pre>
      *
      * @param <T> the type of the value returned by the future.
@@ -1592,7 +1610,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * The action is executed asynchronously using the configured executor.
      *
      * <p>The returned future completes when the action completes.
-     * If either future fails, the returned future completes exceptionally with the first exception encountered.
+     * If either future fails, the action is not executed and the returned future completes exceptionally with
+     * this future's exception when this future failed (the other future's exception, if any, is attached to it
+     * as a suppressed exception); otherwise it completes exceptionally with the other future's exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1611,8 +1631,10 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
         return execute(() -> {
-            get();
-            other.get();
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<?, Exception> result2 = awaitResult(other);
+
+            throwIfEitherFailed(result, result2);
             action.run();
             return null;
         }, other);
@@ -1624,7 +1646,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * the configured executor.
      *
      * <p>The returned future completes when the consumer completes.
-     * If either future fails, the returned future completes exceptionally with the first exception encountered.
+     * If either future fails, the consumer is not executed and the returned future completes exceptionally with
+     * this future's exception when this future failed (the other future's exception, if any, is attached to it
+     * as a suppressed exception); otherwise it completes exceptionally with the other future's exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1645,7 +1669,11 @@ public class ContinuableFuture<T> implements Future<T> {
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> action) {
         return execute(() -> {
-            action.accept(get(), other.get());
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<U, Exception> result2 = awaitResult(other);
+
+            throwIfEitherFailed(result, result2);
+            action.accept(result.orElseIfFailure(null), result2.orElseIfFailure(null));
             return null;
         }, other);
     }
@@ -1741,8 +1769,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * The callable is executed asynchronously using the configured executor of this future.
      *
      * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
-     * with the result of the callable. If either input future fails, the returned future
-     * completes exceptionally with the first exception encountered, without executing the callable.
+     * with the result of the callable. If either input future fails, the callable is not executed and the
+     * returned future completes exceptionally with this future's exception when this future failed (the other
+     * future's exception, if any, is attached to it as a suppressed exception); otherwise it completes
+     * exceptionally with the other future's exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1762,8 +1792,10 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<? extends R> action) {
         return execute(() -> {
-            get();
-            other.get();
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<?, Exception> result2 = awaitResult(other);
+
+            throwIfEitherFailed(result, result2);
             return action.call();
         }, other);
     }
@@ -1775,8 +1807,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
      * with the result of the bi-function. This enables combining the results of two independent
-     * asynchronous computations. If either future fails, the returned future completes exceptionally
-     * with the first exception encountered, without executing the bi-function.
+     * asynchronous computations. If either future fails, the bi-function is not executed and the returned
+     * future completes exceptionally with this future's exception when this future failed (the other future's
+     * exception, if any, is attached to it as a suppressed exception); otherwise it completes exceptionally
+     * with the other future's exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1795,7 +1829,13 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action) {
-        return execute(() -> action.apply(get(), other.get()), other);
+        return execute(() -> {
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<U, Exception> result2 = awaitResult(other);
+
+            throwIfEitherFailed(result, result2);
+            return action.apply(result.orElseIfFailure(null), result2.orElseIfFailure(null));
+        }, other);
     }
 
     /**
@@ -1931,8 +1971,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Weather> remoteWeather = ContinuableFuture.call(() -> getRemoteWeather());
      *
      * localWeather.runAsyncAfterEither(remoteWeather, weather -> {
-     *     displayWeather(weather);
-     *     logSource(weather.getSource());
+     *     if (weather != null) {
+     *         displayWeather(weather);
+     *         logSource(weather.getSource());
+     *     } else {
+     *         showWeatherUnavailable(); // the first completion failed
+     *     }
      * });
      * }</pre>
      *
@@ -2036,8 +2080,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Price> vendorB = ContinuableFuture.call(() -> getPriceFromVendorB());
      *
      * ContinuableFuture<Order> order = vendorA.callAsyncAfterEither(vendorB, price -> {
-     *     // Process the first available price
-     *     return createOrder(price);
+     *     // A failed first completion is represented by null in this overload.
+     *     return price == null ? createFallbackOrder() : createOrder(price);
      * });
      * }</pre>
      *
@@ -2102,7 +2146,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided Runnable action asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. If both futures fail, the action is not executed and the returned
-     * future completes exceptionally with the first exception.
+     * future completes exceptionally with the exception of the first future to complete, with the other
+     * failure attached to it as a suppressed exception.
      *
      * <p>This method waits for at least one successful completion before executing the action,
      * making it useful when you need a successful result from at least one source.
@@ -2131,7 +2176,15 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<Object, Exception> secondResult = iter.next();
 
                 if (secondResult.isFailure()) {
-                    throw firstResult.getException();
+                    final Exception firstException = firstResult.getException();
+
+                    // Keep the second failure visible as a suppressed exception, matching the
+                    // AfterBoth family's throwIfEitherFailed.
+                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
+                        firstException.addSuppressed(secondResult.getException());
+                    }
+
+                    throw firstException;
                 }
             }
 
@@ -2145,7 +2198,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * and the other ContinuableFuture. The Consumer receives the result of the first future that completes successfully.
      *
      * <p>If both futures fail, the action is not executed and the returned future completes exceptionally
-     * with the exception from the first future that completed.
+     * with the exception of the first future to complete, with the other failure attached to it as a
+     * suppressed exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2174,7 +2228,15 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<T, Exception> secondResult = iter.next();
 
                 if (secondResult.isFailure()) {
-                    throw firstResult.getException();
+                    final Exception firstException = firstResult.getException();
+
+                    // Keep the second failure visible as a suppressed exception, matching the
+                    // AfterBoth family's throwIfEitherFailed.
+                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
+                        firstException.addSuppressed(secondResult.getException());
+                    }
+
+                    throw firstException;
                 } else {
                     ret = secondResult.orElseIfFailure(null);
                 }
@@ -2202,8 +2264,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>Support for more than two futures may be added</li>
      * </ul>
      *
-     * <p>If the first future to complete succeeds, the BiConsumer receives (result, null).
-     * If both futures fail, the BiConsumer receives (null, firstException).
+     * <p>If either future completes successfully, the BiConsumer receives {@code (firstSuccessfulResult, null)}.
+     * Only if both futures fail does it receive {@code (null, exception)}, where the exception is the failure of
+     * the first future to complete. Unlike the other {@code runAsyncAfterFirstSuccess} overloads, this one never
+     * completes the returned future exceptionally because of an upstream failure.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2252,7 +2316,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Executes the provided Callable action asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. If both futures fail, the callable is not executed and the returned
-     * future completes exceptionally with the first exception.
+     * future completes exceptionally with the exception of the first future to complete, with the other
+     * failure attached to it as a suppressed exception.
      *
      * <p>This method ensures that the callable is only executed if at least one of the futures succeeds,
      * making it useful for dependent operations that require a successful prerequisite.
@@ -2282,7 +2347,15 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<Object, Exception> secondResult = iter.next();
 
                 if (secondResult.isFailure()) {
-                    throw firstResult.getException();
+                    final Exception firstException = firstResult.getException();
+
+                    // Keep the second failure visible as a suppressed exception, matching the
+                    // AfterBoth family's throwIfEitherFailed.
+                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
+                        firstException.addSuppressed(secondResult.getException());
+                    }
+
+                    throw firstException;
                 }
             }
 
@@ -2295,7 +2368,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * and the other ContinuableFuture. The function transforms the result of the first future that completes successfully.
      *
      * <p>If both futures fail, the function is not executed and the returned future completes exceptionally
-     * with the exception from the first future that completed.
+     * with the exception of the first future to complete, with the other failure attached to it as a
+     * suppressed exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2325,7 +2399,15 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<T, Exception> secondResult = iter.next();
 
                 if (secondResult.isFailure()) {
-                    throw firstResult.getException();
+                    final Exception firstException = firstResult.getException();
+
+                    // Keep the second failure visible as a suppressed exception, matching the
+                    // AfterBoth family's throwIfEitherFailed.
+                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
+                        firstException.addSuppressed(secondResult.getException());
+                    }
+
+                    throw firstException;
                 } else {
                     ret = secondResult.orElseIfFailure(null);
                 }
@@ -2341,9 +2423,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * Executes the provided BiFunction asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. The BiFunction receives the result and the exception.
      *
-     * <p>If the first future to complete succeeds, the BiFunction receives (result, null).
-     * If both futures fail, the BiFunction receives (null, firstException).
-     * This allows the BiFunction to handle both cases and produce an appropriate result.
+     * <p>If either future completes successfully, the BiFunction receives {@code (firstSuccessfulResult, null)}.
+     * Only if both futures fail does it receive {@code (null, exception)}, where the exception is the failure of
+     * the first future to complete. This allows the BiFunction to handle both cases and produce an appropriate
+     * result; unlike the other {@code callAsyncAfterFirstSuccess} overloads, this one never completes the
+     * returned future exceptionally because of an upstream failure.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2390,6 +2474,31 @@ public class ContinuableFuture<T> implements Future<T> {
         }, other);
     }
 
+    private static <V> Result<V, Exception> awaitResult(final ContinuableFuture<? extends V> continuableFuture) throws InterruptedException {
+        try {
+            return Result.of(continuableFuture.get(), null);
+        } catch (final InterruptedException e) {
+            throw e;
+        } catch (final Exception e) {
+            return Result.of(null, Futures.convertException(e));
+        }
+    }
+
+    private static void throwIfEitherFailed(final Result<?, Exception> result, final Result<?, Exception> result2) throws Exception {
+        final Exception exception = result.getException();
+        final Exception exception2 = result2.getException();
+
+        if (exception != null) {
+            if (exception2 != null && exception2 != exception) {
+                exception.addSuppressed(exception2);
+            }
+
+            throw exception;
+        } else if (exception2 != null) {
+            throw exception2;
+        }
+    }
+
     private <R> ContinuableFuture<R> execute(final Callable<? extends R> command) {
         return execute(command, null);
     }
@@ -2410,8 +2519,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * Configures this ContinuableFuture to delay the execution of the next chained action.
      * The delay is applied before the next action in the chain is executed.
      *
-     * <p>This method is useful for implementing timeouts, rate limiting, or introducing
-     * deliberate pauses in asynchronous workflows.
+     * <p>This method is useful for retry backoff, rate limiting, or introducing deliberate
+     * pauses in asynchronous workflows. It does not impose a timeout on the upstream operation.
      * The shared delay window begins after upstream completion (successful, exceptional, or
      * cancelled) is observed. Delay precision is retained in the supplied {@link TimeUnit}, and
      * concurrent callers wait independently on that same window so one caller cannot prevent
@@ -2453,11 +2562,17 @@ public class ContinuableFuture<T> implements Future<T> {
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
      * ExecutorService cpuExecutor = Executors.newFixedThreadPool(4);
      *
-     * ContinuableFuture.call(() -> readFromFile())        // Runs on default executor
-     *     .thenUse(cpuExecutor)
-     *     .thenCallAsync(() -> processData())             // CPU-intensive processing
-     *     .thenUse(ioExecutor)
-     *     .thenRunAsync(result -> writeToFile(result));   // I/O operation
+     * try {
+     *     ContinuableFuture.call(() -> readFromFile())        // Runs on default executor
+     *         .thenUse(cpuExecutor)
+     *         .thenCallAsync(() -> processData())             // CPU-intensive processing
+     *         .thenUse(ioExecutor)
+     *         .thenRunAsync(result -> writeToFile(result))    // I/O operation
+     *         .get();
+     * } finally {
+     *     ioExecutor.shutdown();
+     *     cpuExecutor.shutdown();
+     * }
      * }</pre>
      *
      * @param executor the executor to use for subsequent actions in the chain; must not be {@code null}.
@@ -2530,6 +2645,8 @@ public class ContinuableFuture<T> implements Future<T> {
                 T result = null;
                 CancellationException cancellationException = null;
                 ExecutionException executionException = null;
+                RuntimeException runtimeException = null;
+                Error error = null;
 
                 try {
                     result = future.get();
@@ -2537,6 +2654,10 @@ public class ContinuableFuture<T> implements Future<T> {
                     cancellationException = e;
                 } catch (final ExecutionException e) {
                     executionException = e;
+                } catch (final RuntimeException e) {
+                    runtimeException = e;
+                } catch (final Error e) {
+                    error = e;
                 }
 
                 startDelayIfNeeded();
@@ -2546,6 +2667,10 @@ public class ContinuableFuture<T> implements Future<T> {
                     throw cancellationException;
                 } else if (executionException != null) {
                     throw executionException;
+                } else if (runtimeException != null) {
+                    throw runtimeException;
+                } else if (error != null) {
+                    throw error;
                 }
 
                 return result;
@@ -2558,6 +2683,8 @@ public class ContinuableFuture<T> implements Future<T> {
                 T result = null;
                 CancellationException cancellationException = null;
                 ExecutionException executionException = null;
+                RuntimeException runtimeException = null;
+                Error error = null;
 
                 try {
                     // Future.get permits non-positive timeouts. Normalize them to zero so broken
@@ -2567,6 +2694,10 @@ public class ContinuableFuture<T> implements Future<T> {
                     cancellationException = e;
                 } catch (final ExecutionException e) {
                     executionException = e;
+                } catch (final RuntimeException e) {
+                    runtimeException = e;
+                } catch (final Error e) {
+                    error = e;
                 }
 
                 startDelayIfNeeded();
@@ -2585,6 +2716,10 @@ public class ContinuableFuture<T> implements Future<T> {
                     throw cancellationException;
                 } else if (executionException != null) {
                     throw executionException;
+                } else if (runtimeException != null) {
+                    throw runtimeException;
+                } else if (error != null) {
+                    throw error;
                 }
 
                 return result;
@@ -2766,8 +2901,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * <pre>{@code
      * // Use a custom executor for the conversion
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
-     * ContinuableFuture<Data> dataFuture = ContinuableFuture.call(() -> loadData());
-     * CompletableFuture<Data> completable = dataFuture.toCompletableFuture(ioExecutor);
+     * try {
+     *     ContinuableFuture<Data> dataFuture = ContinuableFuture.call(() -> loadData());
+     *     Data data = dataFuture.toCompletableFuture(ioExecutor).get();
+     * } finally {
+     *     ioExecutor.shutdown();
+     * }
      *
      * // Integrate with framework-specific executors
      * Executor springTaskExecutor = applicationContext.getBean("taskExecutor", Executor.class);
@@ -2776,9 +2915,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * // Use different executors for different conversion stages
      * ExecutorService cpuExecutor = Executors.newFixedThreadPool(4);
-     * ContinuableFuture<ProcessedData> processed = ContinuableFuture.call(() -> process());
-     * processed.toCompletableFuture(cpuExecutor)
-     *     .thenApplyAsync(data -> furtherProcessing(data), cpuExecutor);
+     * try {
+     *     ContinuableFuture<ProcessedData> processed = ContinuableFuture.call(() -> process());
+     *     processed.toCompletableFuture(cpuExecutor)
+     *         .thenApplyAsync(data -> furtherProcessing(data), cpuExecutor)
+     *         .get();
+     * } finally {
+     *     cpuExecutor.shutdown();
+     * }
      * }</pre>
      *
      * <p><b>Exception Handling:</b>

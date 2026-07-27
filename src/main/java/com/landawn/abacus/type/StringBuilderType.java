@@ -20,7 +20,7 @@ package com.landawn.abacus.type;
 public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
     /**
-     * The type name identifier for StringBuilder type.
+     * The type name identifier for StringBuilder type, equal to the simple class name {@code "StringBuilder"}.
      */
     public static final String STRING_BUILDER = StringBuilder.class.getSimpleName();
 

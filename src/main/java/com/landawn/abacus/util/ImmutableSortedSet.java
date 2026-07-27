@@ -64,6 +64,13 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     private final SortedSet<E> sortedSet;
 
+    /**
+     * Constructs an ImmutableSortedSet backed by the provided sorted set.
+     * The backing set is always exposed through an unmodifiable view; its concrete class name
+     * is not treated as evidence that it is immutable.
+     *
+     * @param sortedSet the sorted set whose elements are to be included in this ImmutableSortedSet.
+     */
     ImmutableSortedSet(final SortedSet<? extends E> sortedSet) {
         super(sortedSet);
         this.sortedSet = (SortedSet<E>) sortedSet;
@@ -343,10 +350,18 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing the elements of the specified array in natural order.
      * Duplicate elements are removed. If the array is {@code null} or empty, the cached empty set is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(new String[] { "charlie", "alpha", "beta", "alpha" });
+     * System.out.println(set);   // prints [alpha, beta, charlie]
+     * }</pre>
+     *
      * @param <E> the type of elements, which must be mutually comparable
      * @param a the array whose elements are to be copied
      * @return an ImmutableSortedSet containing the array elements
      * @throws NullPointerException if the array contains a {@code null} element
+     * @throws ClassCastException if the elements are not mutually comparable
+     * @see #copyOf(Collection)
      */
     public static <E> ImmutableSortedSet<E> copyOf(final E[] a) {
         return N.isEmpty(a) ? empty() : new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(a)));

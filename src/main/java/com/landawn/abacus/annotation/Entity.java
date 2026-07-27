@@ -81,7 +81,7 @@ public @interface Entity {
     /**
      * Deprecated alias for {@link #name()}.
      *
-     * @return the entity name
+     * @return the entity name, or an empty string if not specified
      * @deprecated Use {@link #name()} to specify the entity name explicitly.
      */
     @Deprecated
@@ -91,12 +91,17 @@ public @interface Entity {
      * The name of the entity, which typically maps to the database table name.
      * If not specified (empty string), the simple class name is used as the entity name.
      *
-     * <p>The entity name is used in:</p>
+     * <p>Persistence integrations that consume this metadata use the entity name for:</p>
      * <ul>
      *   <li>SQL generation for table references</li>
      *   <li>Query generation to reference the entity</li>
      *   <li>Cache keys and other framework internals</li>
      * </ul>
+     *
+     * <p><b>Note:</b> {@code abacus-core} itself only tests for the <i>presence</i> of
+     * {@code @Entity} (that is how {@link com.landawn.abacus.util.Beans#isBeanClass(Class)} and the
+     * parser's bean introspection recognize an entity class); it never reads this element. Table-name
+     * resolution inside {@code abacus-core} is driven by {@link Table} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -70,8 +70,10 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p>The {@code Iterables} class is a final utility class that provides aggregation (min, max, sum,
  * average, median, k-th largest), searching (indexOf, findFirstOrLast, findFirstAndLast), set views
  * (union, intersection, difference, symmetric difference), and combinatorial helpers (power set,
- * permutations, cartesian product). All methods are static, stateless, and thread-safe, and are
- * designed to handle {@code null} and empty inputs gracefully.</p>
+ * permutations, cartesian product). The methods have no shared mutable state. Operations that return
+ * views or mutate caller-supplied collections inherit the thread-safety characteristics of those
+ * collections. Many aggregation methods accept {@code null} and empty inputs, while methods with
+ * required collaborators (for example, comparators or suppliers) validate those arguments.</p>
  *
  * <p>Direct null-selection helpers such as {@link Nulls#firstNonNull(Object...)} and
  * {@link Nulls#lastNonNull(Object...)} are provided by {@link Nulls}.</p>
@@ -83,7 +85,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Null-Safe Design:</b> Methods handle {@code null} and empty inputs gracefully, typically
  *       returning an empty {@code Optional}/{@code Nullable} rather than throwing</li>
  *   <li><b>Statistical Functions:</b> Mathematical operations like sum, average, min, max, median, kthLargest</li>
- *   <li><b>Set Views:</b> Lazy, unmodifiable views for union, intersection, and difference of sets</li>
+ *   <li><b>Set Views:</b> Lazy, unmodifiable views for union, intersection, difference, and symmetric difference of sets</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
  * </ul>
  *
@@ -170,12 +172,13 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Intersection:</b> {@code intersection()} returns a {@code SetView} of common elements</li>
  *   <li><b>Difference:</b> {@code difference()}, {@code symmetricDifference()}</li>
  *   <li><b>Power Set:</b> {@code powerSet()} returns all subsets (limited to 30 input elements)</li>
- *   <li><b>View Semantics:</b> Returned views are unmodifiable and backed by the input sets</li>
+ *   <li><b>View Semantics:</b> The {@link SetView} results are unmodifiable and backed by the input sets;
+ *       {@link #subSet(NavigableSet, Range)} is a mutable range view, while {@link #powerSet(Set)} copies its input</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Stateless Design:</b> The utility itself has no shared mutable state</li>
  *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
  *   <li><b>Caller Responsibility:</b> Set views and {@code fill}/{@code copy} mutators are only as
  *       thread-safe as the underlying collections supplied by the caller</li>
@@ -285,8 +288,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * projects under the Apache License 2.0. Methods from these libraries may have been modified for
  * consistency, performance optimization, and enhanced null-safety within the Abacus framework.</p>
  *
- * <p><b>{@code Iterables} vs. related APIs:</b> {@code Iterables} eagerly computes a result <em>from</em> an
- * existing collection; pick a sibling when you need lazy iteration or a multi-step pipeline instead.</p>
+ * <p><b>{@code Iterables} vs. related APIs:</b> Most aggregation and search methods eagerly compute a result
+ * from an existing collection. Set operations, reversed/subset views, and combinatorial collections may
+ * instead return lazy or backed views. Pick a sibling when you need a multi-step transformation pipeline.</p>
  * <table border="1">
  *   <caption>When to use Iterables versus Iterators, N, and Stream</caption>
  *   <tr>
@@ -298,7 +302,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <tr>
  *     <td>{@code Iterables}</td>
  *     <td>an {@link Iterable} / {@link java.util.Collection}</td>
- *     <td>concrete values, {@code Optional}/{@code OptionalInt}, or new collections (eager)</td>
+ *     <td>concrete values, optional results, or collection views</td>
  *     <td>you need a one-shot aggregate or lookup — {@code min}/{@code max}/{@code sum}, {@code indexOf},
  *         set operations, {@code powerSet} — over an existing collection</td>
  *   </tr>
@@ -3026,7 +3030,7 @@ public final class Iterables {
     /**
      * Returns the average of the BigInteger values of the provided numbers as an {@code Optional<BigDecimal>}.
      * The average is computed with {@link java.math.MathContext#DECIMAL128} precision.
-     * {@code null} elements returned by the extractor are skipped and not counted in the divisor.
+     * {@code null} elements are skipped and not counted in the divisor.
      * <p>The two "no values to average" cases are encoded differently: a {@code null} or empty iterable
      * yields {@code Optional.empty()}, whereas a non-empty iterable whose values are all {@code null}
      * (so the divisor would be {@code 0}) yields {@code Optional[0]}.</p>
@@ -3165,7 +3169,8 @@ public final class Iterables {
      * <p>Note: this is a convenience delegate to {@link Index#of(Object[], Object)}; {@link Index} is the canonical home of
      * index-search operations and also offers {@code fromIndex}, primitive-array and {@code Iterator} variants.
      * The same-named {@link N#indexOf(Object[], Object)} returns a primitive {@code int} with {@code -1} as the not-found
-     * sentinel, and {@link Iterators#indexOf(Iterator, Object)} returns a {@code long} sentinel.</p>
+     * sentinel, and {@link Iterators#indexOf(Iterator, Object)} returns a {@code long} with {@code -1} as the
+     * not-found sentinel.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3195,7 +3200,8 @@ public final class Iterables {
      * <p>Note: this is a convenience delegate to {@link Index#of(Collection, Object)}; {@link Index} is the canonical home of
      * index-search operations and also offers {@code fromIndex}, primitive-array and {@code Iterator} variants.
      * The same-named {@link N#indexOf(Collection, Object)} returns a primitive {@code int} with {@code -1} as the not-found
-     * sentinel, and {@link Iterators#indexOf(Iterator, Object)} returns a {@code long} sentinel.</p>
+     * sentinel, and {@link Iterators#indexOf(Iterator, Object)} returns a {@code long} with {@code -1} as the
+     * not-found sentinel.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3674,7 +3680,8 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param a the array to be filled. If {@code null} or empty, no action is taken.
-     * @param supplier the provider of the value to fill each slot; called once per element.
+     * @param supplier the non-null provider of the value to fill each slot; called once per element.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see Arrays#fill(Object[], Object)
      * @see N#setAll(Object[], IntFunction)
      * @see N#replaceAll(Object[], UnaryOperator)
@@ -3687,6 +3694,8 @@ public final class Iterables {
      */
     @Beta
     public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (N.isEmpty(a)) {
             return;
         }
@@ -3712,7 +3721,8 @@ public final class Iterables {
      * @param a the array to be filled.
      * @param fromIndex the start index of the range to fill (inclusive).
      * @param toIndex the end index of the range to fill (exclusive).
-     * @param supplier the provider of the value to fill each slot; called once per element.
+     * @param supplier the non-null provider of the value to fill each slot; called once per element.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}.
      * @see Arrays#fill(Object[], int, int, Object)
      * @see N#fill(Object[], Object)
@@ -3725,6 +3735,7 @@ public final class Iterables {
     @Beta
     public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        N.checkArgNotNull(supplier, cs.supplier);
 
         if (fromIndex == toIndex) {
             return;
@@ -3752,8 +3763,8 @@ public final class Iterables {
      *
      * @param <T> the type of elements in the list.
      * @param list the list to be filled. Must not be {@code null}.
-     * @param supplier the provider of the value to fill each slot; called once per element.
-     * @throws IllegalArgumentException if {@code list} is {@code null}.
+     * @param supplier the non-null provider of the value to fill each slot; called once per element.
+     * @throws IllegalArgumentException if {@code list} or {@code supplier} is {@code null}.
      * @see N#fill(List, Object)
      * @see N#fill(List, int, int, Object)
      * @see N#setAll(List, java.util.function.IntFunction)
@@ -3768,6 +3779,7 @@ public final class Iterables {
     @Beta
     public static <T> void fill(final List<? super T> list, final Supplier<? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(list, cs.list);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         fill(list, 0, list.size(), supplier);
     }
@@ -3797,8 +3809,8 @@ public final class Iterables {
      * @param list the list to be filled. Must not be {@code null}.
      * @param fromIndex the starting index (inclusive) to begin filling.
      * @param toIndex the ending index (exclusive) to stop filling. May exceed {@code list.size()}, in which case the list is extended.
-     * @param supplier the provider of the value to fill each slot; called once per element.
-     * @throws IllegalArgumentException if {@code list} is {@code null}.
+     * @param supplier the non-null provider of the value to fill each slot; called once per element.
+     * @throws IllegalArgumentException if {@code list} or {@code supplier} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || fromIndex > toIndex}.
      * @see N#fill(List, Object)
      * @see N#fill(List, int, int, Object)
@@ -3816,6 +3828,7 @@ public final class Iterables {
             throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(list, cs.list);
         N.checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         final int size = list.size();
 
@@ -4179,6 +4192,13 @@ public final class Iterables {
         }
     }
 
+    /**
+     * Verifies that an iterator is in a state where {@code remove()} is legal, that is, that
+     * {@code next()} (or {@code previous()}) has been called since the last {@code remove()}.
+     *
+     * @param canRemove {@code true} if the iterator has produced an element that has not yet been removed.
+     * @throws IllegalStateException if {@code canRemove} is {@code false}.
+     */
     static void checkRemove(final boolean canRemove) {
         N.checkState(canRemove, "no calls to next() since the last call to remove()");
     }
@@ -4188,6 +4208,12 @@ public final class Iterables {
      * @param <T> the type of the elements.
      */
     public abstract static class SetView<T> extends ImmutableSet<T> {
+        /**
+         * Creates a view backed by the specified set. The set is not copied, so later changes to it
+         * are visible through this view.
+         *
+         * @param set the backing set; must not be {@code null}.
+         */
         SetView(final Set<? extends T> set) {
             super(set);
         }
@@ -4244,10 +4270,7 @@ public final class Iterables {
      * @param set2 the second set. May be {@code null} or empty.
      * @return an unmodifiable {@code SetView} containing all elements from both sets; never {@code null}.
      */
-    public static <T> SetView<T> union(final Set<? extends T> set1, final Set<? extends T> set2) throws IllegalArgumentException {
-        // N.checkArgNotNull(set1, "set1");
-        // N.checkArgNotNull(set2, "set2");
-
+    public static <T> SetView<T> union(final Set<? extends T> set1, final Set<? extends T> set2) {
         Set<? extends T> tmp = null;
 
         if (set1 == null) {
@@ -4387,10 +4410,7 @@ public final class Iterables {
      * @see Collection#retainAll(Collection)
      * @see Maps#intersection(Map, Map)
      */
-    public static <T> SetView<T> intersection(final Set<T> set1, final Set<?> set2) throws IllegalArgumentException {
-        // N.checkArgNotNull(set1, "set1");
-        // N.checkArgNotNull(set2, "set2");
-
+    public static <T> SetView<T> intersection(final Set<T> set1, final Set<?> set2) {
         Set<T> tmp = null;
 
         if (set1 == null || set2 == null) {
@@ -4516,10 +4536,7 @@ public final class Iterables {
      * @see Difference#of(Collection, Collection)
      * @see Maps#difference(Map, Map)
      */
-    public static <T> SetView<T> difference(final Set<T> set1, final Set<?> set2) throws IllegalArgumentException {
-        // N.checkArgNotNull(set1, "set1");
-        // N.checkArgNotNull(set2, "set2");
-
+    public static <T> SetView<T> difference(final Set<T> set1, final Set<?> set2) {
         Set<T> tmp = null;
 
         if (set1 == null) {
@@ -4634,10 +4651,7 @@ public final class Iterables {
      * @see #union(Set, Set)
      * @see Maps#symmetricDifference(Map, Map)
      */
-    public static <T> SetView<T> symmetricDifference(final Set<? extends T> set1, final Set<? extends T> set2) throws IllegalArgumentException {
-        // N.checkArgNotNull(set1, "set1");
-        // N.checkArgNotNull(set2, "set2");
-
+    public static <T> SetView<T> symmetricDifference(final Set<? extends T> set1, final Set<? extends T> set2) {
         Set<? extends T> tmp = null;
 
         if (set1 == null) {
@@ -4749,18 +4763,22 @@ public final class Iterables {
      *
      * @param <T> the type of the elements, which must implement {@link Comparable}.
      * @param set the original {@code NavigableSet} from which to derive the subset. May be {@code null} or empty.
-     * @param range the {@code Range} that defines the lower and upper bounds of the subset (inclusive/exclusive per bound type).
+     * @param range the non-null {@code Range} that defines the lower and upper bounds of the subset (inclusive/exclusive per bound type).
      * @return a {@code NavigableSet} view of the elements within the specified range; a detached empty {@code NavigableSet} only if {@code set} is {@code null}.
-     * @throws IllegalArgumentException if the set uses a custom comparator inconsistent with the natural ordering and {@code range.lowerEndpoint()} compares greater than {@code range.upperEndpoint()} under that comparator.
+     * @throws IllegalArgumentException if {@code range} is {@code null}, or if its endpoints are ordered oppositely by the set's comparator.
      */
     public static <T extends Comparable<? super T>> NavigableSet<T> subSet(final NavigableSet<T> set, final Range<T> range) throws IllegalArgumentException {
+        N.checkArgNotNull(range, "range");
+
         if (set == null) {
             return N.emptyNavigableSet();
         }
 
-        if (set.comparator() != null && set.comparator() != N.NATURAL_COMPARATOR) { // NOSONAR
-            N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
-                    "set is using a custom comparator which is inconsistent with the natural ordering.");
+        final Comparator<? super T> comparator = set.comparator();
+
+        if (comparator != null && comparator != N.NATURAL_COMPARATOR) { // NOSONAR
+            N.checkArgument(comparator.compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
+                    "Range endpoints are ordered oppositely by the set comparator: %s, %s", range.lowerEndpoint(), range.upperEndpoint());
         }
 
         return set.subSet(range.lowerEndpoint(), range.boundType() == BoundType.CLOSED_OPEN || range.boundType() == BoundType.CLOSED_CLOSED,
@@ -4874,7 +4892,7 @@ public final class Iterables {
      *
      * Iterables.permutations(new ArrayList<Integer>()).size();     // 1 (the single empty permutation)
      * Iterables.permutations(Arrays.asList(1, 1)).size();          // 2 (equal elements still permuted)
-     * Iterables.permutations((Collection<Integer>) null).size();   // 1 ({@code null} treated as empty)
+     * Iterables.permutations((Collection<Integer>) null).size();   // 1 (null treated as empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -4936,8 +4954,8 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *   for (List<String> perm : orderedPermutations(asList("b", "c", "a"))) {
-     *     println(perm);
+     *   for (List<String> perm : Iterables.orderedPermutations(Arrays.asList("b", "c", "a"))) {
+     *     System.out.println(perm);
      *   }
      *   // -> ["a", "b", "c"]
      *   // -> ["a", "c", "b"]
@@ -4946,8 +4964,8 @@ public final class Iterables {
      *   // -> ["c", "a", "b"]
      *   // -> ["c", "b", "a"]
      *
-     *   for (List<Integer> perm : orderedPermutations(asList(1, 2, 2, 1))) {
-     *     println(perm);
+     *   for (List<Integer> perm : Iterables.orderedPermutations(Arrays.asList(1, 2, 2, 1))) {
+     *     System.out.println(perm);
      *   }
      *   // -> [1, 1, 2, 2]
      *   // -> [1, 2, 1, 2]
@@ -4976,10 +4994,10 @@ public final class Iterables {
      * @param elements the original collection whose elements have to be permuted. A {@code null} collection is treated as empty.
      * @param comparator the comparator that establishes the lexicographic ordering for the permutations. Must not be {@code null}.
      * @return an unmodifiable {@code Collection} containing all distinct permutations of the original collection, in lexicographic order as defined by {@code comparator}.
-     * @throws NullPointerException if {@code comparator} is {@code null} and {@code elements} contains more than one element.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     public static <T> Collection<List<T>> orderedPermutations(final Collection<T> elements, final Comparator<? super T> comparator) {
-        return new OrderedPermutationCollection<>(N.nullToEmpty(elements), comparator);
+        return new OrderedPermutationCollection<>(N.nullToEmpty(elements), N.checkArgNotNull(comparator, "comparator"));
     }
 
     /**
@@ -5137,9 +5155,13 @@ public final class Iterables {
         /** The input set. */
         final ImmutableMap<T, Integer> inputSet;
 
+        /** The input elements in iteration order, built once and shared by all subset views. */
+        final ImmutableList<T> elements;
+
         PowerSet(final Set<T> input) {
             inputSet = indexMap(input);
             N.checkArgument(inputSet.size() <= 30, "Too many elements to create power set: %s > 30", inputSet.size());
+            elements = ImmutableList.copyOf(inputSet.keySet());
         }
 
         @Override
@@ -5169,7 +5191,7 @@ public final class Iterables {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    return new SubSet<>(inputSet, position++);
+                    return new SubSet<>(inputSet, elements, position++);
                 }
 
                 @Override
@@ -5242,9 +5264,9 @@ public final class Iterables {
         /** The mask. */
         private final int mask;
 
-        SubSet(final ImmutableMap<T, Integer> inputSet, final int mask) {
+        SubSet(final ImmutableMap<T, Integer> inputSet, final ImmutableList<T> elements, final int mask) {
             this.inputSet = inputSet;
-            elements = ImmutableList.copyOf(inputSet.keySet());
+            this.elements = elements;
             this.mask = mask;
         }
 
@@ -5319,7 +5341,7 @@ public final class Iterables {
 
         @Override
         public boolean contains(final Object obj) {
-            if (obj instanceof Collection) {
+            if (obj instanceof List) {
                 return isPermutations(inputList, (Collection<?>) obj);
             }
 
@@ -5372,7 +5394,7 @@ public final class Iterables {
 
         @Override
         public boolean contains(final Object obj) {
-            if (obj instanceof Collection) {
+            if (obj instanceof List) {
                 return isPermutations(inputList, (Collection<?>) obj);
             }
             return false;
@@ -5492,7 +5514,7 @@ public final class Iterables {
 
         @Override
         public boolean contains(final Object obj) {
-            if (!(obj instanceof final Collection<?> c) || (c.size() != axes.length)) {
+            if (!(obj instanceof final List<?> c) || (c.size() != axes.length)) {
                 return false;
             }
 
@@ -5534,16 +5556,41 @@ public final class Iterables {
         /** The to index. */
         private final int toIndex;
 
+        /**
+         * Creates a slice over the {@code [fromIndex, toIndex)} range of the specified array.
+         * The array is wrapped, not copied, so later changes to it are visible through this slice.
+         *
+         * @param a the backing array.
+         * @param fromIndex the start index of the slice, inclusive.
+         * @param toIndex the end index of the slice, exclusive.
+         */
         Slice(final T[] a, final int fromIndex, final int toIndex) {
             this(Array.asList(a), fromIndex, toIndex);
         }
 
+        /**
+         * Creates a slice over the {@code [fromIndex, toIndex)} range of the specified list.
+         * The list is wrapped, not copied, so later changes to it are visible through this slice.
+         *
+         * @param c the backing list.
+         * @param fromIndex the start index of the slice, inclusive.
+         * @param toIndex the end index of the slice, exclusive.
+         */
         Slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
             super(fromIndex == 0 && toIndex == c.size() ? c : c.subList(fromIndex, toIndex));
             this.fromIndex = 0;
             this.toIndex = toIndex - fromIndex;
         }
 
+        /**
+         * Creates a slice over the {@code [fromIndex, toIndex)} range of the specified collection.
+         * The collection is wrapped, not copied, so later changes to it are visible through this slice.
+         * When {@code c} is not a {@code List} the range is applied by skipping/limiting during iteration.
+         *
+         * @param c the backing collection.
+         * @param fromIndex the start index of the slice, inclusive.
+         * @param toIndex the end index of the slice, exclusive.
+         */
         Slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
             super(c instanceof List ? ((List<T>) c).subList(fromIndex, toIndex) : c);
             this.fromIndex = c instanceof List ? 0 : fromIndex;

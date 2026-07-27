@@ -75,6 +75,7 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a parallel stream from an iterator
+ * Iterator<String> iterator = java.util.Arrays.asList("alpha", "parallel").iterator();
  * Stream<String> stream = Stream.of(iterator).parallel();
  *
  * // Process elements in parallel
@@ -84,6 +85,9 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p><b>Thread Safety:</b> A parallel operation synchronizes its own worker threads while they
  * consume the underlying iterator. The stream instance itself is not intended to be driven
  * concurrently by multiple callers or reused for independent operations.
+ *
+ * <p><b>Encounter Order:</b> Unless an operation explicitly states otherwise, parallel intermediate
+ * operations may emit elements in a different order from the source iterator.
  *
  * <p><b>Failure Handling:</b> Terminal operations wait for every submitted worker before closing
  * the stream or a temporary executor. Partial results are finished before cleanup; the primary
@@ -96,7 +100,7 @@ import com.landawn.abacus.util.function.TriFunction;
 @SuppressFBWarnings("NM_WRONG_PACKAGE")
 final class ParallelIteratorStream<T> extends IteratorStream<T> {
     private final int maxThreadNum;
-    private final Splitor splitor;
+    private final SplitStrategy splitStrategy;
     private final AsyncExecutor asyncExecutor;
     private final boolean cancelUncompletedThreads;
     private volatile IteratorStream<T> sequential;
@@ -105,41 +109,46 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * Constructs a ParallelIteratorStream from an Iterator with the specified configuration for parallel processing.
      * This constructor initializes all parameters for controlling parallel execution behavior.
      *
-     * @param values the Iterator to stream from
+     * @param values the Iterator to stream from; must not be {@code null}
      * @param sorted whether the iterator elements are in sorted order
      * @param comparator the comparator used to order elements, or {@code null} if using natural ordering
-     * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitor the strategy for dividing work among threads (null uses default)
-     * @param asyncExecutor the executor for running parallel tasks (null uses default)
+     * @param maxThreadNum the maximum number of threads to use for parallel operations ({@code 0} uses the default)
+     * @param splitStrategy the strategy for dividing work among threads ({@code null} uses the default)
+     * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed, may be {@code null}
+     * @throws IllegalArgumentException if {@code values} is {@code null}
      */
     ParallelIteratorStream(final Iterator<? extends T> values, final boolean sorted, final Comparator<? super T> comparator, final int maxThreadNum,
-            final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Collection<LocalRunnable> closeHandlers) {
+            final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
+            final Collection<LocalRunnable> closeHandlers) {
         super(values, sorted, comparator, closeHandlers);
 
         this.maxThreadNum = maxThreadNum == 0 ? DEFAULT_MAX_THREAD_NUM : maxThreadNum;
-        this.splitor = splitor == null ? DEFAULT_SPLITOR : splitor;
+        this.splitStrategy = splitStrategy == null ? DEFAULT_SPLIT_STRATEGY : splitStrategy;
         this.asyncExecutor = asyncExecutor == null ? DEFAULT_ASYNC_EXECUTOR : asyncExecutor;
         this.cancelUncompletedThreads = cancelUncompletedThreads;
     }
 
     /**
      * Constructs a ParallelIteratorStream from a Stream with the specified configuration for parallel processing.
-     * The stream is converted to an iterator internally.
+     * The source stream's iterator is adopted, and the source stream's own close handlers are merged
+     * with the specified ones, so closing this stream also closes the source stream.
      *
-     * @param stream the Stream to convert and stream from
+     * @param stream the source stream to iterate over; a {@code null} stream is treated as empty
      * @param sorted whether the stream elements are in sorted order
      * @param comparator the comparator used to order elements, or {@code null} if using natural ordering
-     * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitor the strategy for dividing work among threads (null uses default)
-     * @param asyncExecutor the executor for running parallel tasks (null uses default)
+     * @param maxThreadNum the maximum number of threads to use for parallel operations ({@code 0} uses the default)
+     * @param splitStrategy the strategy for dividing work among threads ({@code null} uses the default)
+     * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers additional close handlers to execute when the stream is closed, may be {@code null}
      */
-    ParallelIteratorStream(final Stream<T> stream, final boolean sorted, final Comparator<? super T> comparator, final int maxThreadNum, final Splitor splitor,
-            final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
-        this(iterate(stream), sorted, comparator, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, mergeCloseHandlers(closeHandlers, stream));
+    ParallelIteratorStream(final Stream<T> stream, final boolean sorted, final Comparator<? super T> comparator, final int maxThreadNum,
+            final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
+            final Deque<LocalRunnable> closeHandlers) {
+        this(iterate(stream), sorted, comparator, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
+                mergeCloseHandlers(closeHandlers, stream));
     }
 
     /**
@@ -421,7 +430,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * iterator via a shared synchronized cursor. The {@code increment} parameter controls how many
      * positions the window advances between successive invocations. If {@code ignoreNotPaired} is
      * {@code true}, an incomplete final window (where the second element is absent) is silently
-     * dropped; otherwise it is passed to the mapper with a {@code null} second argument.
+     * dropped; otherwise missing positions are passed as {@code null}. A partial pair is emitted only
+     * when it is the initial window or introduces a source element not present in the preceding window.
      *
      * @param <R> the type of the elements in the returned stream
      * @param increment the number of positions to advance the window between applications; must be
@@ -439,8 +449,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorStream<>(sequential().slidingMap(increment, ignoreNotPaired, mapper).iteratorEx(), false, null, maxThreadNum, splitor,
-                    asyncExecutor, cancelUncompletedThreads, closeHandlers());
+            return new ParallelIteratorStream<>(sequential().slidingMap(increment, ignoreNotPaired, mapper).iteratorEx(), false, null, maxThreadNum,
+                    splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
         }
 
         final int windowSize = 2;
@@ -515,7 +525,9 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * iterator via a shared synchronized cursor. The {@code increment} parameter controls how many
      * positions the window advances between successive invocations. If {@code ignoreNotPaired} is
      * {@code true}, an incomplete final window (where the third element is absent) is silently
-     * dropped; otherwise missing trailing elements are passed as {@code null} to the mapper.
+     * dropped; otherwise missing trailing elements are passed as {@code null} to the mapper. A partial
+     * triple is emitted only when it is the initial window or introduces a source element not present
+     * in the preceding window.
      *
      * @param <R> the type of the elements in the returned stream
      * @param increment the number of positions to advance the window between applications; must be
@@ -533,8 +545,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorStream<>(sequential().slidingMap(increment, ignoreNotPaired, mapper).iteratorEx(), false, null, maxThreadNum, splitor,
-                    asyncExecutor, cancelUncompletedThreads, closeHandlers());
+            return new ParallelIteratorStream<>(sequential().slidingMap(increment, ignoreNotPaired, mapper).iteratorEx(), false, null, maxThreadNum,
+                    splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
         }
 
         final int windowSize = 3;
@@ -762,7 +774,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         return new ParallelIteratorCharStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -816,7 +828,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         return new ParallelIteratorByteStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -870,7 +882,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         return new ParallelIteratorShortStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -924,7 +936,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         return new ParallelIteratorIntStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -978,7 +990,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         return new ParallelIteratorLongStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -1032,7 +1044,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         return new ParallelIteratorFloatStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -1086,7 +1098,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         return new ParallelIteratorDoubleStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -1108,7 +1120,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorStream<>(sequential().flatMap(mapper), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+            return new ParallelIteratorStream<>(sequential().flatMap(mapper), false, null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                     null);
         }
 
@@ -1175,7 +1187,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorStream<>(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1197,7 +1209,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorStream<>(sequential().flatmap(mapper), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+            return new ParallelIteratorStream<>(sequential().flatmap(mapper), false, null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                     null);
         }
 
@@ -1281,8 +1293,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorCharStream(sequential().flatMapToChar(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorCharStream(sequential().flatMapToChar(mapper), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         final List<ObjIteratorEx<Character>> iters = new ArrayList<>(maxThreadNum);
@@ -1348,7 +1360,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorCharStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1370,8 +1382,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorByteStream(sequential().flatMapToByte(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorByteStream(sequential().flatMapToByte(mapper), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         final List<ObjIteratorEx<Byte>> iters = new ArrayList<>(maxThreadNum);
@@ -1437,7 +1449,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorByteStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1459,8 +1471,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorShortStream(sequential().flatMapToShort(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorShortStream(sequential().flatMapToShort(mapper), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         final List<ObjIteratorEx<Short>> iters = new ArrayList<>(maxThreadNum);
@@ -1526,7 +1538,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorShortStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1548,7 +1560,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorIntStream(sequential().flatMapToInt(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+            return new ParallelIteratorIntStream(sequential().flatMapToInt(mapper), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                     null);
         }
 
@@ -1615,7 +1627,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorIntStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1637,8 +1649,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorLongStream(sequential().flatMapToLong(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorLongStream(sequential().flatMapToLong(mapper), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         final List<ObjIteratorEx<Long>> iters = new ArrayList<>(maxThreadNum);
@@ -1704,7 +1716,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorLongStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1726,8 +1738,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorFloatStream(sequential().flatMapToFloat(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorFloatStream(sequential().flatMapToFloat(mapper), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         final List<ObjIteratorEx<Float>> iters = new ArrayList<>(maxThreadNum);
@@ -1793,7 +1805,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorFloatStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1815,8 +1827,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
-            return new ParallelIteratorDoubleStream(sequential().flatMapToDouble(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                    null);
+            return new ParallelIteratorDoubleStream(sequential().flatMapToDouble(mapper), false, maxThreadNum, splitStrategy, asyncExecutor,
+                    cancelUncompletedThreads, null);
         }
 
         final List<ObjIteratorEx<Double>> iters = new ArrayList<>(maxThreadNum);
@@ -1882,7 +1894,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<LocalRunnable> newCloseHandlers = mergeCloseHandler(iters);
 
         return new ParallelIteratorDoubleStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -1991,16 +2003,37 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             });
         }
 
+        Throwable failure = null;
+
         try {
             complete(futureList, eHolder, (E) null);
-
             onComplete.run();
-        } finally {
-            try {
-                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
-            } finally {
-                close();
+        } catch (final Throwable e) { // NOSONAR
+            failure = e;
+        }
+
+        try {
+            shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
+        } catch (final Throwable e) { // NOSONAR
+            if (failure == null) {
+                failure = e;
+            } else if (failure != e) {
+                failure.addSuppressed(e);
             }
+        }
+
+        try {
+            close();
+        } catch (final Throwable e) { // NOSONAR
+            if (failure == null) {
+                failure = e;
+            } else if (failure != e) {
+                failure.addSuppressed(e);
+            }
+        }
+
+        if (failure != null) {
+            throwException(Holder.of(failure), (E) null);
         }
     }
 
@@ -2148,7 +2181,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * Performs the given action for each overlapping or sliding pair of consecutive elements, in
      * parallel. The window size is 2 and the window advances by {@code increment} positions between
      * invocations. Elements are consumed from the underlying iterator via a shared synchronized
-     * cursor. When the second element of a pair is absent, {@code null} is passed for that position.
+     * cursor. Missing positions are passed as {@code null}; a partial pair is emitted only when it is
+     * the initial window or introduces a source element not present in the preceding window.
      *
      * @param <E> the type of exception that {@code action} may throw
      * @param increment the number of positions to advance the window between consecutive pairs; must
@@ -2232,8 +2266,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * Performs the given action for each overlapping or sliding triple of consecutive elements, in
      * parallel. The window size is 3 and the window advances by {@code increment} positions between
      * invocations. Elements are consumed from the underlying iterator via a shared synchronized
-     * cursor. When the second or third element of a triple is absent, {@code null} is passed for
-     * the missing positions.
+     * cursor. Missing positions are passed as {@code null}; a partial triple is emitted only when it
+     * is the initial window or introduces a source element not present in the preceding window.
      *
      * @param <E> the type of exception that {@code action} may throw
      * @param increment the number of positions to advance the window between consecutive triples;
@@ -2425,6 +2459,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if the key mapper returns {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -2522,7 +2557,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     /**
      * Groups the elements of this stream in parallel using a flat key extractor and a downstream
      * {@link Collector}. For each element, {@code flatKeyExtractor} may return multiple keys; the
-     * element is accumulated into the group for each key. Each thread builds its own partial grouping
+     * element is accumulated into the group for each key. A {@code null} or empty key collection is
+     * treated as containing no keys. Each thread builds its own partial grouping
      * map, and the partial maps are merged by combining per-key downstream containers. The downstream
      * finisher is applied at the end.
      *
@@ -2539,6 +2575,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if a returned key is {@code null}
      * @throws E if the flat key extractor throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -3484,7 +3521,9 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * Returns a parallel stream consisting of the elements of this stream whose mapped key is
      * contained in collection {@code c}, considering multiplicity. Each key occurrence is matched
      * and consumed from the collection at most once. The mapper is applied in parallel; access to
-     * the shared {@link Multiset} tracking remaining candidates is synchronized.
+     * the shared {@link Multiset} tracking remaining candidates is synchronized. When multiple source
+     * elements map to the same key, which occurrences are retained is nondeterministic because workers
+     * compete for the available key occurrences.
      *
      * @param <U> the type of the key used for matching
      * @param mapper a function to extract the key from each element
@@ -3502,29 +3541,18 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         final Multiset<?> multiset = Multiset.create(c);
 
-        if (this.isParallel()) {
-            return filter(value -> {
-                final Object key = mapper.apply(value);
+        // This class is always parallel, so the shared multiset access must be synchronized.
+        return filter(value -> {
+            final Object key = mapper.apply(value);
 
-                synchronized (multiset) {
-                    if (multiset.isEmpty()) {
-                        return false;
-                    }
-
-                    return multiset.remove(key);
-                }
-            });
-        } else {
-            return filter(value -> {
-                final Object key = mapper.apply(value);
-
+            synchronized (multiset) {
                 if (multiset.isEmpty()) {
                     return false;
                 }
 
                 return multiset.remove(key);
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -3532,7 +3560,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * <em>not</em> contained in collection {@code c}, considering multiplicity. Each key occurrence
      * is matched and consumed from the collection at most once so that only the "extra" occurrences
      * remain in the output. The mapper is applied in parallel; access to the shared {@link Multiset}
-     * is synchronized.
+     * is synchronized. When multiple source elements map to the same key, which occurrences are
+     * excluded is nondeterministic because workers compete for the available exclusions.
      *
      * @param <U> the type of the key used for matching
      * @param mapper a function to extract the key from each element
@@ -3550,64 +3579,56 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         final Multiset<?> multiset = Multiset.create(c);
 
-        if (this.isParallel()) {
-            return filter(value -> {
-                final Object key = mapper.apply(value);
+        // This class is always parallel, so the shared multiset access must be synchronized.
+        return filter(value -> {
+            final Object key = mapper.apply(value);
 
-                synchronized (multiset) {
-                    if (multiset.isEmpty()) {
-                        return true;
-                    }
-
-                    return !multiset.remove(key);
-                }
-            });
-        } else {
-            return filter(value -> {
-                final Object key = mapper.apply(value);
-
+            synchronized (multiset) {
                 if (multiset.isEmpty()) {
                     return true;
                 }
 
                 return !multiset.remove(key);
-
-            });
-        }
+            }
+        });
     }
 
     /**
      * Returns a new parallel stream that consists of the elements of this stream followed by the
      * elements of the given stream. The resulting stream preserves the parallel configuration
-     * ({@code maxThreadNum}, {@code splitor}, {@code asyncExecutor}, {@code cancelUncompletedThreads})
-     * of this stream.
+     * ({@code maxThreadNum}, {@code splitStrategy}, {@code asyncExecutor}, {@code cancelUncompletedThreads})
+     * of this stream. This defines the logical concatenation order; downstream parallel operations
+     * may emit elements in a different order.
      *
      * @param stream the stream to append after this stream
-     * @return a new parallel stream containing the elements of both streams in order
+     * @return a new parallel stream representing this stream followed by the provided stream
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> append(final Stream<T> stream) throws IllegalStateException {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(Stream.concat(this, stream), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorStream<>(Stream.concat(this, stream), false, null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
+                null);
     }
 
     /**
      * Returns a new parallel stream that consists of the elements of the given stream followed by
      * the elements of this stream. The resulting stream preserves the parallel configuration
-     * ({@code maxThreadNum}, {@code splitor}, {@code asyncExecutor}, {@code cancelUncompletedThreads})
-     * of this stream.
+     * ({@code maxThreadNum}, {@code splitStrategy}, {@code asyncExecutor}, {@code cancelUncompletedThreads})
+     * of this stream. This defines the logical concatenation order; downstream parallel operations
+     * may emit elements in a different order.
      *
      * @param stream the stream to prepend before this stream
-     * @return a new parallel stream containing the elements of both streams in order
+     * @return a new parallel stream representing the provided stream followed by this stream
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
     public Stream<T> prepend(final Stream<T> stream) throws IllegalStateException {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(Stream.concat(stream, this), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorStream<>(Stream.concat(stream, this), false, null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
+                null);
     }
 
     /**
@@ -3627,7 +3648,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     public Stream<T> mergeWith(final Collection<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalStateException {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(Stream.merge(iteratorEx(), N.iterate(b), nextSelector), false, null, maxThreadNum, splitor, asyncExecutor,
+        return new ParallelIteratorStream<>(Stream.merge(iteratorEx(), N.iterate(b), nextSelector), false, null, maxThreadNum, splitStrategy, asyncExecutor,
                 cancelUncompletedThreads, closeHandlers());
     }
 
@@ -3648,8 +3669,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     public Stream<T> mergeWith(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalStateException {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(Stream.merge(this, b, nextSelector), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
-                null);
+        return new ParallelIteratorStream<>(Stream.merge(this, b, nextSelector), false, null, maxThreadNum, splitStrategy, asyncExecutor,
+                cancelUncompletedThreads, null);
     }
 
     /**
@@ -3669,7 +3690,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     public <T2, R> Stream<R> zipWith(final Collection<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), zipFunction, maxThreadNum), false, null, maxThreadNum, splitor,
+        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy,
                 asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
@@ -3694,7 +3715,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         assertNotClosed();
 
         return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction, maxThreadNum), false,
-                null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -3717,7 +3738,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         assertNotClosed();
 
         return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), zipFunction, maxThreadNum), false, null, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -3745,7 +3766,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         return new ParallelIteratorStream<>(
                 Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, maxThreadNum), false,
-                null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**
@@ -3765,7 +3786,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     public <T2, R> Stream<R> zipWith(final Stream<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, zipFunction, maxThreadNum), false, null, maxThreadNum, splitor, asyncExecutor,
+        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy, asyncExecutor,
                 cancelUncompletedThreads, null);
     }
 
@@ -3790,7 +3811,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         assertNotClosed();
 
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, valueForNoneA, valueForNoneB, zipFunction, maxThreadNum), false, null, maxThreadNum,
-                splitor, asyncExecutor, cancelUncompletedThreads, null);
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -3812,7 +3833,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             throws IllegalStateException {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, zipFunction, maxThreadNum), false, null, maxThreadNum, splitor, asyncExecutor,
+        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy, asyncExecutor,
                 cancelUncompletedThreads, null);
     }
 
@@ -3841,7 +3862,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         assertNotClosed();
 
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, maxThreadNum), false, null,
-                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -3856,8 +3877,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     /**
      * Returns a sequential {@link IteratorStream} view backed by the same underlying iterator and
-     * close handlers as this stream. The sequential stream is lazily created and cached; subsequent
-     * calls return the same instance.
+     * close handlers as this stream. Before either view is terminated, subsequent calls return the
+     * same lazily created instance.
      *
      * @return a sequential stream over the same elements
      * @throws IllegalStateException if the stream is already closed
@@ -3889,10 +3910,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     }
 
     @Override
-    protected BaseStream.Splitor splitor() {
+    protected BaseStream.SplitStrategy splitStrategy() {
         //  assertNotClosed();
 
-        return splitor;
+        return splitStrategy;
     }
 
     @Override

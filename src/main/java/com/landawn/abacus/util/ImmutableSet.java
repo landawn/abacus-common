@@ -237,7 +237,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(dice.size());   // prints 6
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <E> the type of elements.
      * @param e1 the first element.
      * @param e2 the second element.
      * @param e3 the third element.
@@ -261,7 +261,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(week.size());   // prints 7
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <E> the type of elements.
      * @param e1 the first element.
      * @param e2 the second element.
      * @param e3 the third element.
@@ -286,7 +286,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(octave.size());   // prints 8
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <E> the type of elements.
      * @param e1 the first element.
      * @param e2 the second element.
      * @param e3 the third element.
@@ -312,7 +312,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(digits.size());   // prints 9
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <E> the type of elements.
      * @param e1 the first element.
      * @param e2 the second element.
      * @param e3 the third element.
@@ -339,7 +339,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * System.out.println(digits.size());   // prints 10
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <E> the type of elements.
      * @param e1 the first element.
      * @param e2 the second element.
      * @param e3 the third element.

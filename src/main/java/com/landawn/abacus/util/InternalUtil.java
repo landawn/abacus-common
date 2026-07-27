@@ -72,7 +72,7 @@ public final class InternalUtil {
         POOL_SIZE = Math.max(1000, Math.min(1000 * multi, 8192));
     }
 
-    // ...
+    // Optional reflective access to ArrayList's backing array for allocation-free fast paths.
     static final Field listElementDataField;
 
     static volatile boolean isListElementDataFieldGettable = true;

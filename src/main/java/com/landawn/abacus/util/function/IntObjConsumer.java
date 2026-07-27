@@ -57,6 +57,14 @@ public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeE
      * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntObjConsumer<StringBuilder> appender = (value, sb) -> sb.append(value);
+     * IntObjConsumer<StringBuilder> logger = (value, sb) -> System.out.println(sb);
+     * IntObjConsumer<StringBuilder> combined = appender.andThen(logger);
+     * combined.accept(42, new StringBuilder("Value: "));   // Appends then prints "Value: 42"
+     * }</pre>
+     *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntObjConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation

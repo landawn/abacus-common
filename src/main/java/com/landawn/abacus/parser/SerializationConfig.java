@@ -25,7 +25,7 @@ import com.landawn.abacus.util.N;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * SerializationConfig config = new MySerializationConfig()
+ * JsonSerConfig config = new JsonSerConfig()
  *     .setExclusion(Exclusion.NULL)
  *     .setSkipTransientField(true);
  * }</pre>
@@ -53,8 +53,10 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     /** Default value for {@link #isSkipTransientField()} ({@code true}). */
     protected static final boolean defaultSkipTransientField = true;
 
+    /** The strategy deciding which bean properties are excluded from the output; {@code null} means none is set here. */
     Exclusion exclusion = defaultExclusion;
 
+    /** Whether {@code transient} / {@code @Transient} fields are omitted from the output. */
     boolean skipTransientField = defaultSkipTransientField;
 
     /**

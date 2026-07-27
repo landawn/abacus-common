@@ -62,6 +62,7 @@ import com.landawn.abacus.util.function.ObjCharConsumer;
  * @see CharIteratorEx
  */
 class IteratorCharStream extends AbstractCharStream {
+    /** The backing iterator supplying this stream's elements; it is consumed lazily as the stream is traversed. */
     final CharIteratorEx elements;
 
     //    OptionalChar head;
@@ -74,6 +75,13 @@ class IteratorCharStream extends AbstractCharStream {
      * Constructs an IteratorCharStream from a CharIterator.
      * Creates an unsorted stream with no close handlers.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharIterator iterator = CharIterator.of('a', 'b', 'c', 'd', 'e');
+     * IteratorCharStream stream = new IteratorCharStream(iterator);
+     * stream.forEach(System.out::println);   // prints a, b, c, d, e
+     * }</pre>
+     *
      * @param values the char iterator to wrap as a stream
      */
     IteratorCharStream(final CharIterator values) {
@@ -83,6 +91,21 @@ class IteratorCharStream extends AbstractCharStream {
     /**
      * Constructs an IteratorCharStream from a CharIterator with close handlers.
      * Creates an unsorted stream that will execute the provided close handlers when closed.
+     * The close handlers are invoked in order when the stream's close() method is called,
+     * ensuring proper resource cleanup.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharIterator iterator = CharIterator.of('a', 'b', 'c', 'd', 'e');
+     * List<LocalRunnable> closeHandlers = new ArrayList<>();
+     * closeHandlers.add(() -> System.out.println("Stream closed"));
+     * IteratorCharStream stream = new IteratorCharStream(iterator, closeHandlers);
+     * try {
+     *     stream.forEach(System.out::println);
+     * } finally {
+     *     stream.close();   // invokes all close handlers
+     * }
+     * }</pre>
      *
      * @param values the char iterator to wrap as a stream
      * @param closeHandlers collection of close handlers to execute when the stream is closed, may be null
@@ -93,7 +116,25 @@ class IteratorCharStream extends AbstractCharStream {
 
     /**
      * Constructs an IteratorCharStream from a CharIterator with sorting and close handlers.
-     * This is the primary constructor that all other constructors delegate to.
+     * This is the primary constructor that all other constructors delegate to. The sorted flag
+     * allows optimization of operations like min(), max(), and distinct() when elements are
+     * known to be in natural ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a sorted stream with close handlers
+     * CharIterator sortedIterator = CharIterator.of('a', 'b', 'c', 'd', 'e');
+     * List<LocalRunnable> closeHandlers = new ArrayList<>();
+     * closeHandlers.add(() -> System.out.println("Cleanup complete"));
+     *
+     * IteratorCharStream stream = new IteratorCharStream(sortedIterator, true, closeHandlers);
+     * try {
+     *     OptionalChar min = stream.min();            // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.get());    // prints a
+     * } finally {
+     *     stream.close();
+     * }
+     * }</pre>
      *
      * @param values the char iterator to wrap as a stream
      * @param sorted {@code true} if the elements are already sorted in natural order, {@code false} otherwise
@@ -1191,7 +1232,7 @@ class IteratorCharStream extends AbstractCharStream {
      * Consumes the entire underlying iterator. Closes the stream.
      *
      * <pre>{@code
-     * CharList list = stream.collect(CharList::new, CharList::add, CharList::addAll);
+     * CharList list = CharStream.of('a', 'b', 'c').collect(CharList::new, CharList::add, CharList::addAll);
      * }</pre>
      *
      * @param <R> the type of the mutable result container
@@ -1360,6 +1401,7 @@ class IteratorCharStream extends AbstractCharStream {
      *
      * @return the integer sum of all elements in this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws ArithmeticException if the sum overflows an {@code int}
      */
     @Override
     public int sum() throws IllegalStateException {
@@ -1796,17 +1838,18 @@ class IteratorCharStream extends AbstractCharStream {
      * in parallel using the specified configuration.
      *
      * @param maxThreadNum the maximum number of threads to use
-     * @param splitor the strategy for splitting the work among threads
+     * @param splitStrategy the strategy for splitting the work among threads
      * @param asyncExecutor the executor for asynchronous parallel tasks
      * @param cancelUncompletedThreads whether to cancel incomplete threads when the stream is closed
      * @return a parallel {@code CharStream} backed by the same iterator
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected CharStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected CharStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorCharStream(elements, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorCharStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**

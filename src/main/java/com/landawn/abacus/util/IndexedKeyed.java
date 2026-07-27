@@ -22,10 +22,13 @@ package com.landawn.abacus.util;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * IndexedKeyed<String, User> indexed = IndexedKeyed.of("user123", new User("John"), 0);
+ * IndexedKeyed<String, Integer> indexed = IndexedKeyed.of("user123", 42, 0);
  * System.out.println(indexed.index()); // prints 0
  * System.out.println(indexed.key());   // prints user123
- * System.out.println(indexed.val());   // prints User("John")
+ * System.out.println(indexed.val());   // prints 42
+ *
+ * // val is excluded from equality: these two are equal
+ * IndexedKeyed.of("user123", 42, 0).equals(IndexedKeyed.of("user123", 99, 0)); // true
  * }</pre>
  *
  * @param <K> the type of the key component

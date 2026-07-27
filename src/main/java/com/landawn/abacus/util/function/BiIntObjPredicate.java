@@ -27,9 +27,11 @@ import com.landawn.abacus.util.cs;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the object argument to the predicate
+ * @see java.util.function.Predicate
+ * @see java.util.function.BiPredicate
  */
 @FunctionalInterface
-public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, RuntimeException> { // NOSONAR //NOSONAR
+public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, RuntimeException> { //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
      *

@@ -292,12 +292,16 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
+    /** Supplier used by {@link #copy()} and {@link #inverse()} to recreate an empty key-to-value backing map of the same kind. */
     final Supplier<? extends Map<K, V>> keyMapSupplier;
 
+    /** Supplier used by {@link #copy()} and {@link #inverse()} to recreate an empty value-to-key backing map of the same kind. */
     final Supplier<? extends Map<V, K>> valueMapSupplier;
 
+    /** The forward backing map holding the key-to-value mappings. */
     final Map<K, V> keyMap;
 
+    /** The reverse backing map holding the value-to-key mappings; always the exact inverse of {@link #keyMap}. */
     final Map<V, K> valueMap;
 
     private transient BiMap<V, K> invertedView; //NOSONAR
@@ -1568,10 +1572,20 @@ public final class BiMap<K, V> implements Map<K, V> {
     public static final class Builder<K, V> {
         private final BiMap<K, V> biMap;
 
+        /**
+         * Creates a Builder backed by a new, empty {@link HashMap}-based BiMap.
+         */
         Builder() {
             biMap = new BiMap<>();
         }
 
+        /**
+         * Creates a Builder backed by a new BiMap pre-populated with the entries of {@code backedMap}.
+         *
+         * @param backedMap the map whose entries seed the BiMap being built; it is copied, not wrapped.
+         * @throws IllegalArgumentException if any key or value in {@code backedMap} is {@code null},
+         *         or if {@code backedMap} contains a duplicated value (bound to more than one key).
+         */
         Builder(final Map<K, V> backedMap) {
             biMap = BiMap.copyOf(backedMap);
         }
@@ -1591,7 +1605,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          * @param key the key with which the specified value is to be associated.
          * @param value the value to be associated with the specified key.
          * @return This Builder instance to allow for chaining of calls to builder methods.
-         * @throws IllegalArgumentException if the key or value is {@code null}, or if the given value is already bound to a different key in this BiMap. The BiMap will remain unmodified in this event.
+         * @throws IllegalArgumentException if the key or value is {@code null}, or if the given value is already bound to a different key in the BiMap being built. The BiMap being built will remain unmodified in this event.
          * @see #forcePut(Object, Object)
          */
         public Builder<K, V> put(final K key, final V value) {
@@ -1601,13 +1615,13 @@ public final class BiMap<K, V> implements Map<K, V> {
         }
 
         /**
-         * Associates the specified value with the specified key in this BiMap, forcefully removing any existing mapping with the same value.
-         * If the BiMap previously contained a mapping for the key or value, the old value or key is replaced.
+         * Associates the specified value with the specified key in the BiMap being built, forcefully removing any existing mapping with the same value.
+         * If the BiMap being built previously contained a mapping for the key or value, the old value or key is replaced.
          *
          * <p>This method is an alternate form of put that silently removes any existing entry with the value before proceeding with the put operation.
-         * If the BiMap previously contained the provided key-value mapping, this method has no effect.
+         * If the BiMap being built previously contained the provided key-value mapping, this method has no effect.
          *
-         * <p>Note that a successful call to this method could cause the size of the BiMap to increase by one, stay the same, or even decrease by one.
+         * <p>Note that a successful call to this method could cause the size of the BiMap being built to increase by one, stay the same, or even decrease by one.
          *
          * <p>Warning: If an existing entry with this value is removed, the key for that entry is discarded and not returned.
          *
@@ -1661,6 +1675,9 @@ public final class BiMap<K, V> implements Map<K, V> {
         /**
          * Returns the BiMap instance that has been built up by the builder's methods.
          * This finalizes the construction and returns the completed BiMap.
+         *
+         * <p>The returned BiMap is the builder's own mutable instance, not a defensive copy: it can be
+         * modified afterwards, and any further calls on this builder are reflected in it.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

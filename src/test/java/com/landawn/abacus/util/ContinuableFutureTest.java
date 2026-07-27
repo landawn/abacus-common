@@ -98,6 +98,37 @@ public class ContinuableFutureTest extends AbstractTest {
     }
 
     @Test
+    @Timeout(3)
+    public void testRunAfterBothWithRunnable_waitsForOtherAfterFirstFailure() throws Exception {
+        final ContinuableFuture<String> failed = ContinuableFuture.call(() -> {
+            throw new IllegalStateException("first failed");
+        });
+        assertThrows(ExecutionException.class, failed::get); // make the first failure deterministic
+
+        final CountDownLatch secondStarted = new CountDownLatch(1);
+        final CountDownLatch releaseSecond = new CountDownLatch(1);
+        final AtomicBoolean actionExecuted = new AtomicBoolean();
+        final ContinuableFuture<String> second = ContinuableFuture.call(() -> {
+            secondStarted.countDown();
+            releaseSecond.await();
+            return "second";
+        });
+        final ContinuableFuture<Void> combined = failed.runAsyncAfterBoth(second, () -> actionExecuted.set(true));
+
+        assertTrue(secondStarted.await(1, TimeUnit.SECONDS));
+
+        try {
+            assertThrows(TimeoutException.class, () -> combined.get(50, TimeUnit.MILLISECONDS));
+        } finally {
+            releaseSecond.countDown();
+        }
+
+        final ExecutionException exception = assertThrows(ExecutionException.class, combined::get);
+        assertEquals("first failed", exception.getCause().getMessage());
+        assertFalse(actionExecuted.get());
+    }
+
+    @Test
     public void testRunAfterBothWithBiConsumer_success() throws Exception {
         AtomicReference<String> ref = new AtomicReference<>();
         ContinuableFuture<String> future1 = ContinuableFuture.completed("Hello");
@@ -803,6 +834,36 @@ public class ContinuableFutureTest extends AbstractTest {
     }
 
     @Test
+    @Timeout(3)
+    public void testCallAfterBothWithBiFunction_waitsForOtherAfterFirstFailure() throws Exception {
+        final ContinuableFuture<String> failed = ContinuableFuture.call(() -> {
+            throw new IllegalArgumentException("first failed");
+        });
+        assertThrows(ExecutionException.class, failed::get);
+
+        final CountDownLatch releaseSecond = new CountDownLatch(1);
+        final ContinuableFuture<String> second = ContinuableFuture.call(() -> {
+            releaseSecond.await();
+            return "second";
+        });
+        final AtomicBoolean functionExecuted = new AtomicBoolean();
+        final ContinuableFuture<String> combined = failed.callAsyncAfterBoth(second, (firstValue, secondValue) -> {
+            functionExecuted.set(true);
+            return firstValue + secondValue;
+        });
+
+        try {
+            assertThrows(TimeoutException.class, () -> combined.get(50, TimeUnit.MILLISECONDS));
+        } finally {
+            releaseSecond.countDown();
+        }
+
+        final ExecutionException exception = assertThrows(ExecutionException.class, combined::get);
+        assertEquals("first failed", exception.getCause().getMessage());
+        assertFalse(functionExecuted.get());
+    }
+
+    @Test
     public void testCallAfterBothWithBiFunction_differentTypes() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("Count:");
         ContinuableFuture<Integer> future2 = ContinuableFuture.completed(42);
@@ -1373,25 +1434,6 @@ public class ContinuableFutureTest extends AbstractTest {
         assertFalse(future.cancel(true));
         assertFalse(future.cancel(false));
         assertFalse(future.isCancelled());
-    }
-
-    @Test
-    public void testAllPublicMethodsCovered() {
-        ContinuableFuture<String> f = ContinuableFuture.completed("test");
-
-        assertNotNull(ContinuableFuture.run(() -> {
-        }));
-        assertNotNull(ContinuableFuture.call(() -> "test"));
-        assertNotNull(ContinuableFuture.completed("value"));
-        assertNotNull(ContinuableFuture.wrap(CompletableFuture.completedFuture("test")));
-
-        f.cancel(true);
-        f.isCancelled();
-        f.cancelAll(true);
-        f.isAllCancelled();
-        f.isDone();
-
-        assertTrue(true);
     }
 
     @Test
@@ -2539,6 +2581,21 @@ public class ContinuableFutureTest extends AbstractTest {
 
         assertEquals("failed", exception.getCause().getMessage());
         assertTrue(elapsedMillis >= 220, "Failure should be exposed after the post-completion delay; elapsedMillis=" + elapsedMillis);
+    }
+
+    @Test
+    @Timeout(value = 2, unit = TimeUnit.SECONDS)
+    public void testThenDelay_appliesAfterUncheckedFailureFromMappedFuture() {
+        final ContinuableFuture<String> delayed = ContinuableFuture.completed("value").<String> map(value -> {
+            throw new IllegalStateException("mapped failure");
+        }).thenDelay(120, TimeUnit.MILLISECONDS);
+        final long startNanos = System.nanoTime();
+
+        final IllegalStateException exception = assertThrows(IllegalStateException.class, delayed::get);
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+
+        assertEquals("mapped failure", exception.getMessage());
+        assertTrue(elapsedMillis >= 80, "Unchecked failure should be exposed after the post-completion delay; elapsedMillis=" + elapsedMillis);
     }
 
     @Test

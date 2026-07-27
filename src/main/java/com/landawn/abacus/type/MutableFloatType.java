@@ -35,9 +35,8 @@ public class MutableFloatType extends NumberType<MutableFloat> {
     public static final String MUTABLE_FLOAT = MutableFloat.class.getSimpleName();
 
     /**
-     * Protected constructor for MutableFloatType.
-     * This constructor is invoked by the type system (typically via {@link TypeFactory})
-     * when registering the {@link MutableFloat} type handler.
+     * Constructor for {@code MutableFloatType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     protected MutableFloatType() {
         super(MUTABLE_FLOAT);
@@ -62,7 +61,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * into the original value.</p>
      *
      * @param x the {@code MutableFloat} object to convert, may be {@code null}
-     * @return the string representation of the float value, or {@code null} if the input is {@code null}
+     * @return the decimal string representation of the float value, or {@code null} if the input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */

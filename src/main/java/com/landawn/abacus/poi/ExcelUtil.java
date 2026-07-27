@@ -105,16 +105,19 @@ import lombok.Data;
  * resulting CSV to a {@link File} or a {@link Writer}. {@code File}/{@code Path} writers infer the workbook
  * format (XLS vs XLSX) from the filename extension (anything other than {@code .xls} produces an
  * XLSX/XSSF workbook), whereas the {@code OutputStream} writers require the format to be passed
- * explicitly. {@code InputStream}/{@code OutputStream} overloads do not close the supplied stream;
- * the caller owns it. {@code File}/{@code Path} overloads manage their own file resources internally.
+ * explicitly. {@code InputStream}/{@code OutputStream} overloads do not close the supplied stream,
+ * and {@code OutputStream} overloads do not flush it; the caller owns those operations.
+ * {@code File}/{@code Path} overloads manage their own file resources internally.
  *
  * <p><b>Header-handling divergence between read families:</b> the {@code readDatasetFromSheet}
- * family always consumes row 0 as the header row and uses those cell values as the {@link Dataset}
+ * family always consumes the first physically defined row returned by the sheet iterator as the
+ * header row and uses those cell values as the {@link Dataset}
  * column names (synthesizing a unique {@code "Column_i"}, with a numeric suffix if needed, for
  * blank/empty header cells), and therefore has no
  * {@code skipFirstRow} parameter. In contrast, the {@code readRowsFromSheet} and
- * {@code streamRowsFromSheet} families never interpret row 0 as headers; they expose a raw
- * {@code skipFirstRow} boolean and simply discard the first row when it is {@code true}. Choose
+ * {@code streamRowsFromSheet} families never interpret a row as headers; they expose a raw
+ * {@code skipFirstRow} boolean and simply discard the first physically defined row when it is
+ * {@code true}. Choose
  * {@code readDatasetFromSheet} when the first row holds column names, and the row/stream families
  * for header-agnostic row processing.
  *
@@ -182,7 +185,9 @@ public final class ExcelUtil {
      * This function provides automatic type-preserving extraction, returning appropriate Java
      * objects based on the cell's actual type: {@code String} for STRING cells, {@code Double} for
      * NUMERIC cells, {@code Boolean} for BOOLEAN cells, {@code String} for FORMULA cells (returns
-     * formula text), and an empty {@code String} for BLANK and ERROR cells.
+     * formula text), and an empty {@code String} for BLANK and ERROR cells. Any other cell type
+     * (currently only {@code CellType._NONE}) causes a {@link RuntimeException}. The cell itself must
+     * not be {@code null}.
      *
      * <p>This extractor is commonly used as the default cell processor for reading Excel data
      * when you want to preserve the original cell types without conversion. It's ideal for
@@ -218,7 +223,9 @@ public final class ExcelUtil {
      *
      * <p>Numeric values are converted using {@code String.valueOf()}, boolean values are converted
      * to "true" or "false", formula cells return the formula text (not the evaluated result), and
-     * blank and error cells return an empty string. This converter is ideal for export operations and
+     * blank and error cells return an empty string. Any other cell type (currently only
+     * {@code CellType._NONE}) causes a {@link RuntimeException}, and the cell itself must not be
+     * {@code null}. This converter is ideal for export operations and
      * text-based data processing where type information is not critical.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -256,12 +263,13 @@ public final class ExcelUtil {
      * <p>The method automatically handles Excel file format detection and resource cleanup.
      * The resulting Dataset provides column-based access to the data with type preservation.</p>
      *
-     * <p><b>Header handling:</b> the {@code readDatasetFromSheet} family always consumes row 0 as the
-     * header row and uses those cell values as column names (synthesizing a unique {@code "Column_i"},
+     * <p><b>Header handling:</b> the {@code readDatasetFromSheet} family always consumes the first
+     * physically defined row returned by the sheet iterator as the header row and uses those cell
+     * values as column names (synthesizing a unique {@code "Column_i"},
      * with a numeric suffix if needed, for blank/empty header cells); it has no {@code skipFirstRow}
      * parameter. This differs from the
      * {@link #readRowsFromSheet(File, int, boolean, Function)} and
-     * {@link #streamRowsFromSheet(File, int, boolean)} families, which never interpret row 0 as
+     * {@link #streamRowsFromSheet(File, int, boolean)} families, which never interpret a row as
      * headers and instead expose a raw {@code skipFirstRow} boolean. See the class-level
      * documentation for details.</p>
      *
@@ -547,9 +555,10 @@ public final class ExcelUtil {
      * including conditional processing based on cell types or values.</p>
      *
      * <p><b>Header handling:</b> unlike the {@link #readDatasetFromSheet(File, int, TriConsumer)}
-     * family (which always treats row 0 as headers and derives column names from it), this family
-     * never interprets row 0 as headers. The {@code skipFirstRow} flag merely discards the first row
-     * when {@code true}; its cell values are not used as names. See the class-level documentation for
+     * family (which always treats the first physically defined row as headers and derives column
+     * names from it), this family never interprets a row as headers. The {@code skipFirstRow} flag
+     * merely discards the first physically defined row when {@code true}; its cell values are not
+     * used as names. See the class-level documentation for
      * details.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -586,8 +595,9 @@ public final class ExcelUtil {
      * file, or an in-memory {@code byte[]}) instead of a {@link File}. The stream is read fully but
      * <b>not closed</b> by this method; the caller retains ownership of it.
      *
-     * <p>Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row;
-     * the {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
+     * <p>Unlike the {@code readDatasetFromSheet} family, no row is interpreted as a header row;
+     * the {@code skipFirstRow} flag simply discards the first physically defined row when
+     * {@code true}.</p>
      *
      * @param <T> the type of objects to map rows to.
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by this method.
@@ -672,8 +682,9 @@ public final class ExcelUtil {
      * file, or an in-memory {@code byte[]}) instead of a {@link File}. The stream is read fully but
      * <b>not closed</b> by this method; the caller retains ownership of it.
      *
-     * <p>Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row;
-     * the {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
+     * <p>Unlike the {@code readDatasetFromSheet} family, no row is interpreted as a header row;
+     * the {@code skipFirstRow} flag simply discards the first physically defined row when
+     * {@code true}.</p>
      *
      * @param <T> the type of objects to map rows to.
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by this method.
@@ -786,8 +797,9 @@ public final class ExcelUtil {
      * <p><strong>Important:</strong> The returned Stream must be closed after use. Closing the Stream
      * closes the underlying workbook but <b>does not</b> close the supplied {@code excelInputStream};
      * the caller retains ownership of the stream and must close it (typically after the Stream).
-     * Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row; the
-     * {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
+     * Unlike the {@code readDatasetFromSheet} family, no row is interpreted as a header row; the
+     * {@code skipFirstRow} flag simply discards the first physically defined row when
+     * {@code true}.</p>
      *
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by the returned Stream.
      * @param sheetIndex the zero-based index of the sheet to stream (0 for first sheet)
@@ -872,8 +884,9 @@ public final class ExcelUtil {
      * <p><strong>Important:</strong> The returned Stream must be closed after use. Closing the Stream
      * closes the underlying workbook but <b>does not</b> close the supplied {@code excelInputStream};
      * the caller retains ownership of the stream and must close it (typically after the Stream).
-     * Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row; the
-     * {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
+     * Unlike the {@code readDatasetFromSheet} family, no row is interpreted as a header row; the
+     * {@code skipFirstRow} flag simply discards the first physically defined row when
+     * {@code true}.</p>
      *
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by the returned Stream.
      * @param sheetName the name of the sheet to stream, case-sensitive
@@ -1099,8 +1112,9 @@ public final class ExcelUtil {
      * {@code HttpServletResponse} output stream or an in-memory {@code ByteArrayOutputStream}) and
      * choose the workbook format explicitly instead of relying on filename-extension inference.
      *
-     * <p>The supplied {@code outputStream} is flushed (via {@code workbook.write}) but <b>not closed</b>
-     * by this method; the caller retains ownership of it.</p>
+     * <p>The supplied {@code outputStream} is never closed by this method. Whether it is flushed
+     * depends on the POI workbook implementation writing it, so do not rely on either behaviour:
+     * flush and close the stream yourself.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1245,9 +1259,8 @@ public final class ExcelUtil {
      * <pre>{@code
      * Dataset dataset = CsvUtil.load(new File("data.csv"));
      * Consumer<Sheet> formatter = sheet -> {
-     *     // Apply conditional formatting
-     *     SheetConditionalFormatting sheetCF = sheet.getSheetConditionalFormatting();
-     *     // ... configure conditional formatting
+     *     sheet.createFreezePane(0, 1);       // keep the header row visible
+     *     sheet.setColumnWidth(0, 20 * 256);  // make the first column 20 characters wide
      * };
      *
      * ExcelUtil.writeDatasetToSheet("FormattedData", dataset, formatter, new File("formatted.xlsx"));
@@ -1275,8 +1288,9 @@ public final class ExcelUtil {
      * choose the workbook format explicitly instead of relying on filename-extension inference.
      * The Dataset's column names are used as the header row.
      *
-     * <p>The supplied {@code outputStream} is flushed (via {@code workbook.write}) but <b>not closed</b>
-     * by this method; the caller retains ownership of it.</p>
+     * <p>The supplied {@code outputStream} is never closed by this method. Whether it is flushed
+     * depends on the POI workbook implementation writing it, so do not rely on either behaviour:
+     * flush and close the stream yourself.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1382,6 +1396,11 @@ public final class ExcelUtil {
      * workbook written under that name — a file whose extension does not match its actual content. To
      * control the format independently of the filename, use an {@code OutputStream} write overload and
      * pass the desired {@link ExcelFormat} explicitly.
+     *
+     * @param outputExcelFile the target file whose name is inspected; {@code null} is treated as a name
+     *                        without an extension and therefore maps to {@link ExcelFormat#XLSX}
+     * @return {@link ExcelFormat#XLS} if the file name ends with {@code .xls} (case-insensitive),
+     *         otherwise {@link ExcelFormat#XLSX}
      */
     static ExcelFormat formatOf(final File outputExcelFile) {
         final String name = outputExcelFile == null ? "" : outputExcelFile.getName();
@@ -1692,7 +1711,7 @@ public final class ExcelUtil {
 
         /**
          * Default row mapper that converts each Excel row to a {@code List<Object>} with type preservation.
-         * This mapper uses {@link #CELL_GETTER} to extract cell values while maintaining their original
+         * This mapper uses {@link ExcelUtil#CELL_GETTER} to extract cell values while maintaining their original
          * data types: {@code String} for text cells, {@code Double} for numeric cells, {@code Boolean}
          * for boolean cells, etc. This is the recommended mapper for general-purpose data extraction
          * when you need to preserve Excel cell types in your Java objects.
@@ -1752,11 +1771,11 @@ public final class ExcelUtil {
 
         /**
          * Creates a row mapper that converts rows to delimited strings with a custom separator.
-         * Each cell is converted to its string representation using the default {@link #CELL_TO_STRING}
+         * Each cell is converted to its string representation using the default {@link ExcelUtil#CELL_TO_STRING}
          * mapper and the resulting strings are joined together with the specified separator. Useful for
          * creating custom text representations of Excel rows.
          *
-         * <p>This method uses {@link #CELL_TO_STRING} for cell conversion, which handles all cell types
+         * <p>This method uses {@link ExcelUtil#CELL_TO_STRING} for cell conversion, which handles all cell types
          * (STRING, NUMERIC, BOOLEAN, FORMULA, BLANK, ERROR) and converts them to appropriate string
          * representations.</p>
          *
@@ -1764,7 +1783,7 @@ public final class ExcelUtil {
          * <pre>{@code
          * Function<Row, String> pipeMapper = RowMappers.toDelimitedString("|");
          * List<String> rows = ExcelUtil.readRowsFromSheet(file, 0, true, pipeMapper);
-         * // Results in rows like: "John|30|New York"
+         * // Results in rows like: "John|30.0|New York" (numeric cells render as double values)
          * }</pre>
          *
          * @param cellSeparator the string to use as separator between cell values
@@ -1918,7 +1937,7 @@ public final class ExcelUtil {
 
         /**
          * Default row extractor that extracts cell values while preserving their original data types.
-         * This extractor uses {@link #CELL_GETTER} to extract values from each cell, maintaining
+         * This extractor uses {@link ExcelUtil#CELL_GETTER} to extract values from each cell, maintaining
          * the Excel cell's native type: {@code String} for text, {@code Double} for numbers,
          * {@code Boolean} for boolean values, etc. This is the recommended extractor for standard
          * Dataset creation when type preservation is desired.
@@ -2192,9 +2211,15 @@ public final class ExcelUtil {
      *                 after this many columns, so {@code colSplit=1} freezes column A (index 0).
      * @param rowSplit the number of rows to freeze from the top (0 for none). The freeze occurs
      *                 after this many rows, so {@code rowSplit=1} freezes row 1 (index 0).
-     * @throws IllegalArgumentException if either split is negative
      */
     public record FreezePane(int colSplit, int rowSplit) {
+        /**
+         * Creates a {@code FreezePane} with the specified column and row splits.
+         *
+         * @param colSplit the number of columns to freeze from the left (0 for none)
+         * @param rowSplit the number of rows to freeze from the top (0 for none)
+         * @throws IllegalArgumentException if either split is negative
+         */
         public FreezePane {
             N.checkArgNotNegative(colSplit, "colSplit");
             N.checkArgNotNegative(rowSplit, "rowSplit");

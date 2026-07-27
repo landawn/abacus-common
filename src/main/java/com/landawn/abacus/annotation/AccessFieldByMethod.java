@@ -105,7 +105,7 @@ public @interface AccessFieldByMethod {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @AccessFieldByMethod              // uses the default empty value; equivalent to @AccessFieldByMethod("").
-     * public class User { ... }
+     * public class User { }
      * }</pre>
      *
      * @return the (currently unused) configuration value; defaults to an empty string

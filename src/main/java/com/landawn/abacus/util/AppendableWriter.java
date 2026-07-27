@@ -211,7 +211,8 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * writer.write("Hello, World!");
      * }</pre>
      *
-     * @param str the string to write
+     * @param str the string to write; unlike {@code java.io.Writer}, a {@code null} string is
+     *            accepted and written as the four characters {@code "null"} (Appendable semantics)
      * @throws IOException if an I/O error occurs or if the writer has been closed
      */
     @Override
@@ -229,7 +230,8 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * writer.write("Hello, World!", 7, 5);   // Writes "World"
      * }</pre>
      *
-     * @param str a string
+     * @param str a string; unlike {@code java.io.Writer}, a {@code null} string is accepted and
+     *            treated as the four characters {@code "null"} (Appendable semantics)
      * @param off the offset from which to start writing characters
      * @param len the number of characters to write
      * @throws IOException if an I/O error occurs or if the writer has been closed

@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  * A generic Properties class that implements the Map interface.
- * This class provides a type-safe wrapper around a Map with additional convenience methods
+ * This class provides a generic wrapper around a Map with additional convenience methods
  * for retrieving values with type conversion and default values.
  *
  * <p>Unlike {@link java.util.Properties}, this class is generic and can store any type of objects,
@@ -34,7 +34,7 @@ import java.util.Set;
  * props.set("timeout", 30);
  * props.set("url", "https://example.com");
  *
- * // Type-safe retrieval
+ * // Runtime conversion using an explicit target class
  * int timeout = props.get("timeout", Integer.class);
  * String url = props.get("url", String.class);
  *
@@ -54,6 +54,11 @@ import java.util.Set;
  */
 public class Properties<K, V> implements Map<K, V> {
 
+    /**
+     * The current non-{@code null} backing map. Replacing this volatile reference is visible across threads,
+     * but operations performed on the referenced map have that map's own concurrency guarantees. Subclasses
+     * that assign this field directly must preserve the non-{@code null} invariant.
+     */
     protected volatile Map<K, V> values;
 
     /**
@@ -76,8 +81,15 @@ public class Properties<K, V> implements Map<K, V> {
         this(new LinkedHashMap<>());
     }
 
-    Properties(final Map<? extends K, ? extends V> valueMap) {
-        values = (Map<K, V>) Objects.requireNonNull(valueMap, "valueMap");
+    /**
+     * Constructs a Properties instance backed directly by the specified map, without copying it.
+     * Subsequent changes made through either this instance or the supplied map are visible to both.
+     *
+     * @param valueMap the map to use as the backing storage; must not be {@code null}
+     * @throws NullPointerException if {@code valueMap} is {@code null}
+     */
+    Properties(final Map<K, V> valueMap) {
+        values = Objects.requireNonNull(valueMap, "valueMap");
     }
 
     /**
@@ -128,6 +140,8 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Retrieves the value associated with the specified property name and converts it to the specified target type.
      * This method helps avoid {@code NullPointerException} for primitive types if the target property is {@code null} or not set.
+     * Conversion behavior, including closure of consumed resource-backed values, is defined by
+     * {@link N#convert(Object, Class)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -147,9 +161,12 @@ public class Properties<K, V> implements Map<K, V> {
      * @return the value associated with the specified property name, converted to the specified target type;
      *         if the property is not found or its value is {@code null}, returns the default value of {@code targetType}
      *         (e.g. {@code 0} for primitive numeric types, {@code false} for {@code boolean}, {@code null} for reference types)
+     * @throws ArithmeticException if a numeric value overflows the requested integer type
      * @throws IllegalArgumentException if the stored value cannot be converted to {@code targetType}
      * @throws NumberFormatException if the stored value is a string that cannot be parsed to the target numeric type
      * @throws NullPointerException if {@code targetType} is {@code null}
+     * @throws RuntimeException if another conversion error occurs
+     * @see N#convert(Object, Class)
      * @see #get(Object)
      * @see #getOrDefault(Object, Object)
      * @see #getOrDefault(Object, Object, Class)
@@ -162,7 +179,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Retrieves the value associated with the specified property name, or returns the default value
      * if the property is not found. In accordance with {@link Map#getOrDefault(Object, Object)}, a
-     * present mapping to {@code null} returns {@code null}, not the default value.</p>
+     * present mapping to {@code null} returns {@code null}, not the default value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -183,19 +200,13 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public V getOrDefault(final Object propName, final V defaultValue) {
-        @SuppressWarnings("SuspiciousMethodCalls")
-        final V result = values.get(propName);
-
-        if (result == null && !values.containsKey(propName)) {
-            return defaultValue;
-        }
-
-        return result;
+        return values.getOrDefault(propName, defaultValue);
     }
 
     /**
      * Retrieves the value associated with the specified property name or returns the default value if the property is not found.
-     * Converts the value to the specified target type.
+     * Converts the value to the specified target type using {@link N#convert(Object, Class)}; that method's
+     * resource-ownership rules apply to consumed resource-backed values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -212,10 +223,13 @@ public class Properties<K, V> implements Map<K, V> {
      * @param targetType the class of the type to which a found, non-{@code null} value should be converted
      * @return the value associated with the specified property name, converted to the specified target type;
      *         or {@code defaultValue} (returned as-is, without conversion) if the property is not found or its value is {@code null}
+     * @throws ArithmeticException if a found numeric value overflows the requested integer type
      * @throws IllegalArgumentException if a found, non-{@code null} value cannot be converted to {@code targetType}
      * @throws NumberFormatException if a found value is a string that cannot be parsed to the target numeric type
      * @throws NullPointerException if {@code targetType} is {@code null} and a non-{@code null}
      *         stored value must be converted
+     * @throws RuntimeException if another conversion error occurs
+     * @see N#convert(Object, Class)
      * @see #get(Object)
      * @see #get(Object, Class)
      * @see #getOrDefault(Object, Object)
@@ -238,7 +252,7 @@ public class Properties<K, V> implements Map<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Properties<String, Object> props = new Properties<>()
+     * Properties<String, Object> props = new Properties<String, Object>()
      *     .set("host", "localhost")
      *     .set("port", 8080)
      *     .set("debug", true);
@@ -303,8 +317,8 @@ public class Properties<K, V> implements Map<K, V> {
      * Associates the specified value with the specified key in this map only if the key is not already
      * associated with a non-{@code null} value.
      *
-     * <p>Note: this implementation checks for a {@code null} result from {@link #get(Object)}, so it
-     * will also insert when the key is present but mapped to {@code null}.</p>
+     * <p>Note: a key that is present but mapped to {@code null} is treated as absent, so
+     * {@code propValue} replaces that {@code null} mapping.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -322,13 +336,7 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public V putIfAbsent(final K propName, final V propValue) {
-        V v = get(propName);
-
-        if (v == null) {
-            put(propName, propValue);
-        }
-
-        return v;
+        return values.putIfAbsent(propName, propValue);
     }
 
     /**
@@ -368,15 +376,7 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public boolean remove(final Object propName, final Object propValue) {
-        final Object curValue = get(propName);
-
-        if (!Objects.equals(curValue, propValue) || (curValue == null && !containsKey(propName))) {
-            return false;
-        }
-
-        remove(propName);
-
-        return true;
+        return values.remove(propName, propValue);
     }
 
     /**
@@ -399,13 +399,7 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public V replace(final K propName, final V propValue) {
-        V curValue = null;
-
-        if (((curValue = get(propName)) != null) || containsKey(propName)) {
-            curValue = put(propName, propValue);
-        }
-
-        return curValue;
+        return values.replace(propName, propValue);
     }
 
     /**
@@ -428,15 +422,7 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public boolean replace(final K propName, final V oldPropValue, final V newPropValue) {
-        final Object curValue = get(propName);
-
-        if (!Objects.equals(curValue, oldPropValue) || (curValue == null && !containsKey(propName))) {
-            return false;
-        }
-
-        put(propName, newPropValue);
-
-        return true;
+        return values.replace(propName, oldPropValue, newPropValue);
     }
 
     /**
@@ -488,7 +474,7 @@ public class Properties<K, V> implements Map<K, V> {
      * Properties<String, Object> props = new Properties<>();
      * props.put("name", "John");
      * props.put("age", 30);
-     * Set<String> keys = props.keySet();   // returns ["name", "age"]
+     * Set<String> keys = props.keySet();   // iteration order is [name, age]
      * }</pre>
      *
      * @return a set view of the keys contained in this map
@@ -680,9 +666,11 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Resets the internal map with new values.
-     * This is an internal method used for auto-refresh functionality.
+     * This is an internal method used for auto-refresh functionality. The supplied map becomes the backing
+     * map directly; existing collection views continue to refer to the previous map.
      *
      * @param newValues the new map to use as the internal storage
+     * @throws NullPointerException if {@code newValues} is {@code null}
      */
     void reset(final Map<K, V> newValues) {
         values = Objects.requireNonNull(newValues, "newValues");

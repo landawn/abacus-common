@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -140,6 +141,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param str the string to parse
      * @return the parsed byte array; {@code null} if input is {@code null}, empty, or blank;
      *         or an empty array if input is {@code "[]"}
+     * @throws NumberFormatException if any element in the string cannot be parsed as a byte
      * @see #valueOf(Object)
      * @see #stringOf(byte[])
      */
@@ -173,6 +175,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param obj the object to convert (can be an {@link InputStream}, {@link Blob}, or any other type)
      * @return the byte array representation of the object, or {@code null} if input is null
+     * @throws UncheckedIOException if an I/O error occurs while reading an {@link InputStream}
      * @throws UnsupportedOperationException if the input is a {@link Blob} whose length exceeds {@link Integer#MAX_VALUE}
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Blob
      */
@@ -184,7 +187,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         } else if (obj instanceof InputStream is) {
             return IOUtil.readAllBytes(is);
         } else if (obj instanceof Blob blob) {
-            RuntimeException primaryException = null;
+            Throwable primaryException = null;
 
             try {
                 final long len = blob.length();
@@ -195,11 +198,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
 
                 return blob.getBytes(1, (int) len);
             } catch (final SQLException e) {
-                primaryException = new UncheckedSQLException(e);
-                throw primaryException;
-            } catch (final RuntimeException e) {
+                final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
+                primaryException = uncheckedException;
+                throw uncheckedException;
+            } catch (final RuntimeException | Error e) {
                 primaryException = e;
-                throw primaryException;
+                throw e;
             } finally {
                 try {
                     blob.free();
@@ -209,6 +213,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                         primaryException.addSuppressed(freeException);
                     } else {
                         throw freeException; //NOSONAR
+                    }
+                } catch (final RuntimeException | Error e) {
+                    if (primaryException == null) {
+                        throw e;
+                    } else if (primaryException != e) {
+                        primaryException.addSuppressed(e);
                     }
                 }
             }
@@ -386,6 +396,8 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param c the Collection of Byte objects to convert
      * @return a byte array containing the unboxed values, or {@code null} if input is null
+     * @throws ClassCastException if any element in the collection is not a Byte
+     * @throws NullPointerException if any element in the collection is {@code null}
      */
     @Override
     public byte[] collectionToArray(final Collection<?> c) {
@@ -411,6 +423,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param x the byte array to convert
      * @param output the Collection to add the boxed Byte values to
+     * @throws ClassCastException if the output collection cannot accept Byte objects
      */
     @Override
     public void arrayToCollection(final byte[] x, final Collection<?> output) {
@@ -428,7 +441,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Uses the standard Arrays.hashCode algorithm for consistency.
      *
      * @param x the byte array to hash
-     * @return the hash code of the array
+     * @return the hash code of the array, or 0 if the array is null
      */
     @Override
     public int hashCode(final byte[] x) {

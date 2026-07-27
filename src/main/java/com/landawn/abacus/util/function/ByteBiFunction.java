@@ -27,6 +27,10 @@ import com.landawn.abacus.util.cs;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
+ *
+ * @see java.util.function.BiFunction
+ * @see ByteFunction
+ * @see ByteTriFunction
  */
 @FunctionalInterface
 public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeException> { //NOSONAR
@@ -49,6 +53,14 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.
      * If evaluation of either function throws an exception, it is relayed to the caller of the composed function.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBiFunction<Integer> sum = (a, b) -> a + b;
+     * Function<Integer, String> toString = Object::toString;
+     * ByteBiFunction<String> combined = sum.andThen(toString);
+     * String result = combined.apply((byte) 5, (byte) 3);   // Returns "8"
+     * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.

@@ -41,6 +41,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.guava.Files;
 import com.landawn.abacus.util.ByteArrayOutputStream;
 import com.landawn.abacus.util.Dataset;
@@ -3544,6 +3546,38 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
+    public void testPersistClosesSourceWhenOutputCannotBeOpened() {
+        final File directory = tempFolder.toFile();
+
+        final AtomicInteger persistCloseCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(1).onClose(persistCloseCount::incrementAndGet);
+        assertThrows(UncheckedIOException.class, () -> source.persist(directory));
+        assertEquals(1, persistCloseCount.get());
+
+        final AtomicInteger csvCloseCount = new AtomicInteger();
+        final Stream<Map<String, Integer>> csvSource = Stream.of(List.of(Map.of("value", 1))).onClose(csvCloseCount::incrementAndGet);
+        assertThrows(UncheckedIOException.class, () -> csvSource.persistToCsv(directory));
+        assertEquals(1, csvCloseCount.get());
+
+        final AtomicInteger jsonCloseCount = new AtomicInteger();
+        final Stream<Integer> jsonSource = Stream.of(1).onClose(jsonCloseCount::incrementAndGet);
+        assertThrows(UncheckedIOException.class, () -> jsonSource.persistToJson(directory));
+        assertEquals(1, jsonCloseCount.get());
+    }
+
+    @Test
+    public void testPersistClosesSourceWhenStatementPreparationFails() throws SQLException {
+        final Connection conn = mock(Connection.class);
+        when(conn.prepareStatement(anyString())).thenThrow(new SQLException("prepare failed"));
+
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(1).onClose(closeCount::incrementAndGet);
+
+        assertThrows(SQLException.class, () -> source.persist(conn, "INSERT INTO test VALUES (?)", 1, 0, (value, stmt) -> stmt.setInt(1, value)));
+        assertEquals(1, closeCount.get());
+    }
+
+    @Test
     public void testPersistToConnection() throws SQLException {
         Connection conn = mock(Connection.class);
         PreparedStatement stmt = mock(PreparedStatement.class);
@@ -4291,6 +4325,24 @@ public class AbstractStreamTest extends TestBase {
         Map<Integer, Long> map = result.toMap(Pair::getLeft, Pair::getRight);
         assertEquals(2L, (long) map.get(1));
         assertEquals(3L, (long) map.get(2));
+    }
+
+    @Test
+    public void testGroupJoinPreservesNullDownstreamResult() {
+        final Collector<Integer, List<Integer>, String> downstream = Collector.of(ArrayList::new, List::add, (left, right) -> {
+            left.addAll(right);
+            return left;
+        }, values -> values.isEmpty() ? "empty" : null);
+
+        List<Pair<Integer, String>> result = Stream.of(1, 2).groupJoin(List.of(1), Fn.identity(), Fn.identity(), downstream, Pair::of).toList();
+
+        assertEquals(Pair.of(1, null), result.get(0));
+        assertEquals(Pair.of(2, "empty"), result.get(1));
+
+        result = Stream.of(1, 2).groupJoin(Stream.of(1), Fn.identity(), Fn.identity(), downstream, Pair::of).toList();
+
+        assertEquals(Pair.of(1, null), result.get(0));
+        assertEquals(Pair.of(2, "empty"), result.get(1));
     }
 
     @Test

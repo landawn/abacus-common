@@ -28,6 +28,9 @@ import com.landawn.abacus.util.cs;
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
  * @param <R> the type of the result of the function
+ * @see java.util.function.Function
+ * @see java.util.function.BiFunction
+ * @see TriFunction
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
@@ -85,8 +88,8 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<String, String, String> joiner = (s1, s2) -> s1 + " " + s2;
-     * var throwableFunction = joiner.toThrowable();
-     * // Can now be used in a context whose callback declares an exception type
+     * Throwables.BiFunction<String, String, String, RuntimeException> throwableFunction = joiner.toThrowable();
+     * String result = throwableFunction.apply("Hello", "World");   // Returns "Hello World"
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.BiFunction}

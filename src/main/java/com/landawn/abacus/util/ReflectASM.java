@@ -54,22 +54,24 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     public int calculateBirthYear(int currentYear) {
  *         return currentYear - age;
  *     }
+ *
+ *     public static void main(String[] args) {
+ *         // Using ReflectASM
+ *         Person person = ReflectASM.on(Person.class).newInstance().instance();
+ *
+ *         // Set fields
+ *         ReflectASM.on(person)
+ *             .set("name", "John")
+ *             .set("age", 30);
+ *
+ *         // Get field value
+ *         String name = ReflectASM.on(person).get("name");
+ *
+ *         // Invoke methods
+ *         ReflectASM.on(person).call("sayHello");
+ *         int birthYear = ReflectASM.on(person).invoke("calculateBirthYear", 2024);
+ *     }
  * }
- *
- * // Using ReflectASM
- * Person person = ReflectASM.on(Person.class).newInstance().instance();
- *
- * // Set fields
- * ReflectASM.on(person)
- *     .set("name", "John")
- *     .set("age", 30);
- *
- * // Get field value
- * String name = ReflectASM.on(person).get("name");
- *
- * // Invoke methods
- * ReflectASM.on(person).call("sayHello");
- * int birthYear = ReflectASM.on(person).invoke("calculateBirthYear", 2024);
  * }</pre>
  *
  * @param <T> the type of the target class or object being reflected upon
@@ -79,6 +81,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  */
 final class ReflectASM<T> {
 
+    /** Shared empty parameter-type array used for no-argument lookups. */
     @SuppressWarnings("rawtypes")
     static final Class[] EMPTY_CLASSES = {};
 
@@ -107,6 +110,12 @@ final class ReflectASM<T> {
 
     private final T instance;
 
+    /**
+     * Creates a wrapper for a target class and, optionally, an existing instance.
+     *
+     * @param cls the target class
+     * @param instance the wrapped instance, or {@code null} when operating on the class
+     */
     ReflectASM(final Class<T> cls, final T instance) {
         this.cls = cls;
         this.instance = instance;
@@ -127,7 +136,7 @@ final class ReflectASM<T> {
      *
      * // With known type
      * ReflectASM<MyClass> typedReflect = ReflectASM.on("com.example.MyClass");
-     * MyClass instance = typedReflect.newInstance().instance();
+     * MyClass typedInstance = typedReflect.newInstance().instance();
      * }</pre>
      *
      * @param <T> the type of the class
@@ -272,20 +281,22 @@ final class ReflectASM<T> {
      *     public String name;
      *     public double price;
      *     public List<String> tags;
+     *
+     *     public static void main(String[] args) {
+     *         Product product = new Product();
+     *         product.name = "Laptop";
+     *         product.price = 999.99;
+     *         product.tags = Arrays.asList("electronics", "computers");
+     *
+     *         // Get field values with automatic casting
+     *         String name = ReflectASM.on(product).get("name");
+     *         Double price = ReflectASM.on(product).get("price");
+     *         List<String> tags = ReflectASM.on(product).get("tags");
+     *
+     *         // Can also get as Object
+     *         Object priceObj = ReflectASM.on(product).get("price");
+     *     }
      * }
-     *
-     * Product product = new Product();
-     * product.name = "Laptop";
-     * product.price = 999.99;
-     * product.tags = Arrays.asList("electronics", "computers");
-     *
-     * // Get field values with automatic casting
-     * String name = ReflectASM.on(product).get("name");
-     * Double price = ReflectASM.on(product).get("price");
-     * List<String> tags = ReflectASM.on(product).get("tags");
-     *
-     * // Can also get as Object
-     * Object priceObj = ReflectASM.on(product).get("price");
      * }</pre>
      *
      * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created
@@ -319,23 +330,25 @@ final class ReflectASM<T> {
      *     public int port;
      *     public boolean ssl;
      *     public Map<String, String> properties;
+     *
+     *     public static void main(String[] args) {
+     *         Configuration config = new Configuration();
+     *
+     *         // Chain multiple field assignments
+     *         ReflectASM.on(config)
+     *             .set("host", "api.example.com")
+     *             .set("port", 443)
+     *             .set("ssl", true)
+     *             .set("properties", new HashMap<>());
+     *
+     *         // Can be used after instantiation
+     *         Configuration newConfig = ReflectASM.on(Configuration.class)
+     *             .newInstance()
+     *             .set("host", "localhost")
+     *             .set("port", 8080)
+     *             .instance();
+     *     }
      * }
-     *
-     * Configuration config = new Configuration();
-     *
-     * // Chain multiple field assignments
-     * ReflectASM.on(config)
-     *     .set("host", "api.example.com")
-     *     .set("port", 443)
-     *     .set("ssl", true)
-     *     .set("properties", new HashMap<>());
-     *
-     * // Can be used after instantiation
-     * Configuration newConfig = ReflectASM.on(Configuration.class)
-     *     .newInstance()
-     *     .set("host", "localhost")
-     *     .set("port", 8080)
-     *     .instance();
      * }</pre>
      *
      * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created
@@ -378,17 +391,23 @@ final class ReflectASM<T> {
      *     public List<Integer> range(int start, int end) {
      *         return IntStream.range(start, end).boxed().collect(Collectors.toList());
      *     }
+     *
+     *     public String description() {
+     *         return "calculator";
+     *     }
+     *
+     *     public static void main(String[] args) {
+     *         Calculator calc = new Calculator();
+     *
+     *         // Invoke with return value
+     *         Integer sum = ReflectASM.on(calc).invoke("add", 5, 3);
+     *         String formatted = ReflectASM.on(calc).invoke("format", "Result: %d", new Object[] { sum });
+     *         List<Integer> numbers = ReflectASM.on(calc).invoke("range", 1, 10);
+     *
+     *         // Method with no arguments
+     *         String result = ReflectASM.on(calc).invoke("description");
+     *     }
      * }
-     *
-     * Calculator calc = new Calculator();
-     *
-     * // Invoke with return value
-     * Integer sum = ReflectASM.on(calc).invoke("add", 5, 3);
-     * String formatted = ReflectASM.on(calc).invoke("format", "Result: %d", sum);
-     * List<Integer> numbers = ReflectASM.on(calc).invoke("range", 1, 10);
-     *
-     * // Method with no arguments
-     * String result = ReflectASM.on(calc).invoke("toString");
      * }</pre>
      *
      * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created
@@ -419,29 +438,35 @@ final class ReflectASM<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * public class Service {
-     *     public void initialize() { ... }
-     *     public void configure(String config) { ... }
-     *     public void start() { ... }
-     *     public void process(String data) { ... }
+     *     public int timeout;
+     *     public int maxRetries;
+     *
+     *     public void initialize() {}
+     *     public void configure(String config) {}
+     *     public void start() {}
+     *     public void process(String data) {}
+     *
+     *     public static void main(String[] args) {
+     *         Service service = new Service();
+     *
+     *         // Chain multiple method calls
+     *         ReflectASM.on(service)
+     *             .call("initialize")
+     *             .call("configure", "production.conf")
+     *             .call("start");
+     *
+     *         // Combined with field access
+     *         ReflectASM.on(service)
+     *             .set("timeout", 5000)
+     *             .call("initialize")
+     *             .set("maxRetries", 3)
+     *             .call("start");
+     *
+     *         // Process data
+     *         String jsonData = "{}";
+     *         ReflectASM.on(service).call("process", jsonData);
+     *     }
      * }
-     *
-     * Service service = new Service();
-     *
-     * // Chain multiple method calls
-     * ReflectASM.on(service)
-     *     .call("initialize")
-     *     .call("configure", "production.conf")
-     *     .call("start");
-     *
-     * // Combined with field access
-     * ReflectASM.on(service)
-     *     .set("timeout", 5000)
-     *     .call("initialize")
-     *     .set("maxRetries", 3)
-     *     .call("start");
-     *
-     * // Process data
-     * ReflectASM.on(service).call("process", jsonData);
      * }</pre>
      *
      * <p>Note: this method operates on the wrapped instance. If this {@code ReflectASM} was created

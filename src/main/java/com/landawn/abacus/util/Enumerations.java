@@ -47,8 +47,9 @@ import java.util.function.Supplier;
  * // Convert Enumeration to List
  * List<String> result = Enumerations.toList(enum1);
  *
- * // Concatenate multiple Enumerations
- * Enumeration<String> combined = Enumerations.concat(enum1, enum2, enum3);
+ * // Concatenate multiple fresh Enumerations
+ * Enumeration<String> combined = Enumerations.concat(
+ *     Enumerations.of("a"), Enumerations.of("b"), Enumerations.of("c"));
  * }</pre>
  *
  * @see com.landawn.abacus.util.ObjIterator
@@ -208,15 +209,15 @@ public final class Enumerations {
      * <p>Note: The returned Enumeration is backed by the Iterator, so any modifications
      * to the underlying collection during enumeration may cause undefined behavior.</p>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Iterator<String> iter = list.iterator();
-     * Enumeration<String> enum1 = Enumerations.create(iter);
-     * }</pre>
-     *
      * <p>Note: The iterator is not validated when this method is called. If {@code iter} is
      * {@code null}, a {@link NullPointerException} is thrown lazily on the first call to
      * {@code hasMoreElements()} or {@code nextElement()} on the returned Enumeration.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * Enumeration<String> enum1 = Enumerations.create(list.iterator());
+     * }</pre>
      *
      * @param <T> the type of elements
      * @param iter the iterator to wrap as an Enumeration; should not be {@code null}
@@ -423,7 +424,7 @@ public final class Enumerations {
      * LinkedList<String> list = Enumerations.toCollection(enum1, LinkedList::new);
      *
      * // Convert to TreeSet
-     * TreeSet<String> sorted = Enumerations.toCollection(enum1, TreeSet::new);
+     * TreeSet<String> sorted = Enumerations.toCollection(Enumerations.of("a", "b", "c"), TreeSet::new);
      * }</pre>
      *
      * @param <T> the type of elements

@@ -231,7 +231,6 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * Connection connection = Mockito.mock(Connection.class);
      * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalDouble opt = OptionalDouble.of(99.99);
@@ -264,7 +263,6 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * Connection connection = Mockito.mock(Connection.class);
      * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalDouble opt = OptionalDouble.of(149.99);

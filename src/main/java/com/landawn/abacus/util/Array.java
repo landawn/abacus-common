@@ -124,7 +124,9 @@ import com.landawn.abacus.annotation.NullSafe;
  * <ul>
  *   <li><b>Transpose:</b> Matrix transposition for all primitive and object types</li>
  *   <li><b>Validation:</b> Automatic validation of matrix structure (rectangular arrays)</li>
- *   <li><b>Null Safety:</b> Graceful handling of {@code null} or malformed matrices</li>
+ *   <li><b>Null and Shape Handling:</b> A {@code null} matrix produces {@code null}; ragged
+ *       matrices ({@code null} rows or rows of differing lengths) are rejected. A rectangular
+ *       matrix whose rows are all empty is accepted and transposes to an empty array</li>
  *   <li><b>Generic Support:</b> Type-safe transposition for object arrays</li>
  * </ul>
  *
@@ -137,12 +139,12 @@ import com.landawn.abacus.annotation.NullSafe;
  *   <li><b>Bulk Processing:</b> Optimized for large array operations</li>
  * </ul>
  *
- * <p><b>Thread Safety:</b>
+ * <p><b>Concurrency:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
- *   <li><b>Immutable Operations:</b> Methods create new arrays rather than modifying inputs</li>
- *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>Stateless Utility:</b> The class has no per-operation instance state</li>
+ *   <li><b>Caller-Owned State:</b> Reflective setters and backed views such as {@code asList(...)}
+ *       can modify or expose the supplied array</li>
+ *   <li><b>Coordination:</b> Callers must coordinate concurrent reads and writes to the same array</li>
  * </ul>
  *
  * <p><b>Index Range Conventions:</b>
@@ -155,8 +157,8 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * <p><b>Error Handling Strategy:</b>
  * <ul>
- *   <li><b>Graceful Degradation:</b> Methods handle edge cases gracefully</li>
- *   <li><b>Null Tolerance:</b> Comprehensive {@code null} input handling throughout the API</li>
+ *   <li><b>Contract Validation:</b> Invalid ranges, lengths, component types, and matrix shapes are rejected</li>
+ *   <li><b>Null Handling:</b> Null behavior is method-specific; conversion and reflection methods differ</li>
  *   <li><b>Index Validation:</b> Clear IndexOutOfBoundsException for invalid ranges</li>
  *   <li><b>Matrix Validation:</b> Validation of array structure for matrix operations</li>
  * </ul>
@@ -228,8 +230,7 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * // Multi-dimensional processing
  * Double[][][] cube = new Double[2][3][4];
- *
- * // Fill with some data...
+ * cube[0][0][0] = 1.5;
  * double[][][] processedCube = Array.unbox(cube, 0.0);
  * }</pre>
  *
@@ -1042,7 +1043,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>For element types not covered by any {@code of(...)} overload (e.g., {@code UUID}, {@code BigDecimal}), use {@link N#asArray(Object...)}.
      *
-     * @param <T> the type of the elements in the array.
+     * @param <T> the type of the elements, which must extend {@code java.util.Date}.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
@@ -1064,7 +1065,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>For element types not covered by any {@code of(...)} overload (e.g., {@code UUID}, {@code BigDecimal}), use {@link N#asArray(Object...)}.
      *
-     * @param <T> the type of the elements in the array.
+     * @param <T> the type of the elements, which must extend {@code java.util.Calendar}.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
@@ -1086,7 +1087,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>For element types not covered by any {@code of(...)} overload (e.g., {@code UUID}, {@code BigDecimal}), use {@link N#asArray(Object...)}.
      *
-     * @param <T> the type of the elements in the array.
+     * @param <T> the type of the elements, which must implement {@code java.time.temporal.Temporal}.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
@@ -1108,7 +1109,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>For element types not covered by any {@code of(...)} overload (e.g., {@code UUID}, {@code BigDecimal}), use {@link N#asArray(Object...)}.
      *
-     * @param <T> the type of the elements in the array.
+     * @param <T> the type of the elements, which must be an enum type.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
@@ -2652,9 +2653,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] words = Array.repeat("hello", 3);               // returns ["hello", "hello", "hello"]
      * Integer[] nums = Array.repeat(Integer.valueOf(42), 5);   // returns [42, 42, 42, 42, 42]
-     * String[] empty = Array.repeat("x", 0);                   // returns empty String[]
+     * LocalDate[] dates = Array.repeat(LocalDate.now(), 3);    // returns [today, today, today]
+     * Integer[] empty = Array.repeat(Integer.valueOf(7), 0);   // returns empty Integer[]
      * Array.repeat((Object) null, 3);                          // throws IllegalArgumentException
      * }</pre>
      *
@@ -2663,8 +2664,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param n the length of the array to be generated.
      * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if <i>element</i> is {@code null} or {@code n} is negative.
-     * @deprecated prefer {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)}
-     *  because this method throws IllegalArgumentException when element is {@code null}
+     * @deprecated the array's component type is derived from {@code element.getClass()}, so a {@code null}
+     *  element is rejected with an {@link IllegalArgumentException}. Prefer {@link Array#repeatNonNull(Object, int)},
+     *  which states that requirement in its name, or {@link Array#repeat(Object, int, Class)}, which takes an
+     *  explicit element class and therefore accepts a {@code null} element.
      * @see #repeat(Object, int, Class)
      * @see #repeatNonNull(Object, int)
      * @see N#repeat(Object, int)
@@ -2766,8 +2769,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The type of the array is determined by the type of <i>element</i>.
      *
      * <p>This method provides a clearer alternative to the deprecated {@link Array#repeat(Object, int)} method
-     * by explicitly indicating in its name that {@code null} elements are not allowed. Unlike the deprecated method which
-     * may throw an exception, this method makes it explicit in its name that {@code null} elements are not allowed.</p>
+     * by explicitly indicating in its name that {@code null} elements are not allowed. Both methods behave
+     * identically and reject a {@code null} element with an {@link IllegalArgumentException}; only the name differs.
+     * Use {@link Array#repeat(Object, int, Class)} if the element may be {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2863,12 +2867,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
             }
         } else {
             for (int i = 0; i < len; i++) {
-                long random = N.RAND.nextLong();
-                long result = random % mod;
-                if (result < 0) {
-                    result += mod;
-                }
-                a[i] = (int) (result + startInclusive);
+                a[i] = (int) (N.RAND.nextLong(mod) + startInclusive);
             }
         }
 
@@ -3964,10 +3963,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the component type of the elements in the arrays.
      * @param a the first two-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned
-     *           when {@code b} is non-{@code null}, or a new empty array when {@code b} is {@code null}.
+     *           when {@code b} is non-{@code null}, or an empty array when {@code b} is {@code null}.
      * @param b the second two-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned
      *           when {@code a} is non-{@code null} and non-empty.
-     * @return
+     * @return a new two-dimensional array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      *         Returns {@code null} only when both {@code a} and {@code b} are {@code null}.
      *
@@ -4047,10 +4046,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the component type of the elements in the arrays.
      * @param a the first three-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned
-     *           when {@code b} is non-{@code null}, or a new empty array when {@code b} is {@code null}.
+     *           when {@code b} is non-{@code null}, or an empty array when {@code b} is {@code null}.
      * @param b the second three-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned
      *           when {@code a} is non-{@code null} and non-empty.
-     * @return
+     * @return a new three-dimensional array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      *         Returns {@code null} only when both {@code a} and {@code b} are {@code null}.
      *
@@ -4093,6 +4092,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive booleans to be converted. May be {@code null}.
      * @return an array of Boolean objects, or {@code null} if the input array is {@code null}.
+     * @see #box(boolean[], int, int)
      */
     @MayReturnNull
     public static Boolean[] box(final boolean... a) {
@@ -4118,6 +4118,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Boolean objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(boolean[])
      */
     @MayReturnNull
     public static Boolean[] box(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4153,6 +4154,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive chars to be converted. May be {@code null}.
      * @return an array of Character objects, or {@code null} if the input array is {@code null}.
+     * @see #box(char[], int, int)
      */
     @MayReturnNull
     public static Character[] box(final char... a) {
@@ -4178,6 +4180,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(char[])
      */
     @MayReturnNull
     public static Character[] box(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4213,6 +4216,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive bytes to be converted. May be {@code null}.
      * @return an array of Byte objects, or {@code null} if the input array is {@code null}.
+     * @see #box(byte[], int, int)
      */
     @MayReturnNull
     public static Byte[] box(final byte... a) {
@@ -4238,6 +4242,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(byte[])
      */
     @MayReturnNull
     public static Byte[] box(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4273,6 +4278,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive shorts to be converted. May be {@code null}.
      * @return an array of Short objects, or {@code null} if the input array is {@code null}.
+     * @see #box(short[], int, int)
      */
     @MayReturnNull
     public static Short[] box(final short... a) {
@@ -4298,6 +4304,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(short[])
      */
     @MayReturnNull
     public static Short[] box(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4333,6 +4340,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive integers to be converted. May be {@code null}.
      * @return an array of Integer objects, or {@code null} if the input array is {@code null}.
+     * @see #box(int[], int, int)
      */
     @MayReturnNull
     public static Integer[] box(final int... a) {
@@ -4358,6 +4366,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Integer objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(int[])
      */
     @MayReturnNull
     public static Integer[] box(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4393,6 +4402,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive longs to be converted. May be {@code null}.
      * @return an array of Long objects, or {@code null} if the input array is {@code null}.
+     * @see #box(long[], int, int)
      */
     @MayReturnNull
     public static Long[] box(final long... a) {
@@ -4418,6 +4428,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(long[])
      */
     @MayReturnNull
     public static Long[] box(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4453,6 +4464,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive floats to be converted. May be {@code null}.
      * @return an array of Float objects, or {@code null} if the input array is {@code null}.
+     * @see #box(float[], int, int)
      */
     @MayReturnNull
     public static Float[] box(final float... a) {
@@ -4478,6 +4490,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(float[])
      */
     @MayReturnNull
     public static Float[] box(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4513,6 +4526,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the array of primitive doubles to be converted. May be {@code null}.
      * @return an array of Double objects, or {@code null} if the input array is {@code null}.
+     * @see #box(double[], int, int)
      */
     @MayReturnNull
     public static Double[] box(final double... a) {
@@ -4538,6 +4552,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @see #box(double[])
      */
     @MayReturnNull
     public static Double[] box(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -5634,7 +5649,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive floats, or {@code null} if the input array is {@code null}.
+     * @return an array of primitive floats, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Float[], float)
      * @see #unbox(Float...)
@@ -5723,7 +5738,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the starting index (inclusive) in the array to be converted.
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return an array of primitive doubles, or {@code null} if the input array is {@code null}.
+     * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
      * @see #unbox(Double[], double)
      * @see #unbox(Double...)
@@ -6180,6 +6195,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][][], boolean)
+     * @see #unbox(Boolean[][])
      */
     @MayReturnNull
     public static boolean[][][] unbox(final Boolean[][][] a) {
@@ -6231,6 +6247,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Character objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][][], char)
+     * @see #unbox(Character[][])
      */
     @MayReturnNull
     public static char[][][] unbox(final Character[][][] a) {
@@ -6282,6 +6299,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Byte objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][][], byte)
+     * @see #unbox(Byte[][])
      */
     @MayReturnNull
     public static byte[][][] unbox(final Byte[][][] a) {
@@ -6333,6 +6351,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Short objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][][], short)
+     * @see #unbox(Short[][])
      */
     @MayReturnNull
     public static short[][][] unbox(final Short[][][] a) {
@@ -6384,6 +6403,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Integer objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][][], int)
+     * @see #unbox(Integer[][])
      */
     @MayReturnNull
     public static int[][][] unbox(final Integer[][][] a) {
@@ -6435,6 +6455,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Long objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][][], long)
+     * @see #unbox(Long[][])
      */
     @MayReturnNull
     public static long[][][] unbox(final Long[][][] a) {
@@ -6486,6 +6507,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Float objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][][], float)
+     * @see #unbox(Float[][])
      */
     @MayReturnNull
     public static float[][][] unbox(final Float[][][] a) {
@@ -6537,6 +6559,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the three-dimensional array of Double objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][][], double)
+     * @see #unbox(Double[][])
      */
     @MayReturnNull
     public static double[][][] unbox(final Double[][][] a) {
@@ -6579,6 +6602,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6634,6 +6658,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6686,6 +6711,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6738,6 +6764,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6789,6 +6816,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6840,6 +6868,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6891,6 +6920,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6942,6 +6972,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6989,9 +7020,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     }
 
     /**
-     * Transposes the given two-dimensional array.
-     * The original two-dimensional array is unchanged; a new two-dimensional array representing the transposed matrix is returned.
-     * This method can be used to interchange the rows and columns of the two-dimensional array.
+     * Transposes the input two-dimensional array.
+     *
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * The input array is not modified; a new array is returned.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7005,8 +7039,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the elements in the two-dimensional array.
-     * @param a the original two-dimensional array to be transposed.
-     * @return a new two-dimensional array representing the transposed matrix, or {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array to be transposed. May be {@code null}.
+     * @return the transposed two-dimensional array, whose component type is the component type of {@code a},
+     *         or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull

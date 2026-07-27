@@ -42,17 +42,21 @@ import com.landawn.abacus.util.Password;
  * <pre>{@code
  * // Storing a password (automatically hashed before being bound)
  * String plainPassword = "mySecretPassword";
- * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)");
- * stmt.setString(1, "john");
- *
  * Type<String> passwordType = TypeFactory.getType("Password");
- * passwordType.set(stmt, 2, plainPassword);   // Password is hashed before storage
- * stmt.executeUpdate();
+ * try (PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)")) {
+ *     insertStmt.setString(1, "john");
+ *     passwordType.set(insertStmt, 2, plainPassword);   // Password is hashed before storage
+ *     insertStmt.executeUpdate();
+ * }
  *
  * // Retrieving a password (returns the stored hashed form)
- * ResultSet rs = stmt.executeQuery("SELECT password FROM users WHERE username = 'john'");
- * if (rs.next()) {
- *     String hashedPassword = passwordType.get(rs, 1);   // Returns the hashed value
+ * try (PreparedStatement selectStmt = conn.prepareStatement("SELECT password FROM users WHERE username = ?")) {
+ *     selectStmt.setString(1, "john");
+ *     try (ResultSet rs = selectStmt.executeQuery()) {
+ *         if (rs.next()) {
+ *             String hashedPassword = passwordType.get(rs, 1);   // Returns the hashed value
+ *         }
+ *     }
  * }
  * }</pre>
  *

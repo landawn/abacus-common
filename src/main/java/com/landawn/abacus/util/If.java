@@ -121,18 +121,20 @@ import com.landawn.abacus.annotation.Beta;
  *   .orElse(() -> handleEmptyData());
  *
  * // Chaining multiple conditions
- * public void processUser(User user) {
- *     If.notNull(user)
- *       .then(() -> validateUser(user))
- *       .orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
+ * class UserProcessor {
+ *     public void processUser(User user) {
+ *         If.notNull(user)
+ *           .then(() -> validateUser(user))
+ *           .orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
  *
- *     If.notBlank(user.getEmail())
- *       .then(() -> sendEmail(user.getEmail()))
- *       .orElse(() -> logEmailMissing(user.getId()));
+ *         If.notBlank(user.getEmail())
+ *           .then(() -> sendEmail(user.getEmail()))
+ *           .orElse(() -> logEmailMissing(user.getId()));
  *
- *     If.notEmpty(user.getPreferences())
- *       .then(() -> applyPreferences(user.getPreferences()))
- *       .orElse(() -> setDefaultPreferences(user));
+ *         If.notEmpty(user.getPreferences())
+ *           .then(() -> applyPreferences(user.getPreferences()))
+ *           .orElse(() -> setDefaultPreferences(user));
+ *     }
  * }
  *
  * // Exception handling patterns
@@ -235,7 +237,8 @@ import com.landawn.abacus.annotation.Beta;
  *   <li><b>{@link N#ifOrEmpty}:</b> Alternative conditional execution utilities</li>
  *   <li><b>{@link N#ifOrElse}:</b> Simple if-else utility methods</li>
  *   <li><b>{@link N#ifNotNull}:</b> Null-safe conditional execution</li>
- *   <li><b>{@link N#ifNotEmpty}:</b> Emptiness-aware conditional execution</li>
+ *   <li><b>{@link N#ifNotEmpty(Collection, Throwables.Consumer) N.ifNotEmpty}:</b> Emptiness-aware conditional execution
+ *       (also overloaded for {@code CharSequence} and {@code Map})</li>
  * </ul>
  *
  * <p><b>Usage Examples: User Validation Workflow</b></p>
@@ -295,7 +298,7 @@ public final class If {
     private static final If FALSE = new If(false);
 
     /** The evaluated condition result. Package-private to allow access from test code. */
-    final boolean b; // change to package-private for testing purposes
+    final boolean b;
 
     private If(final boolean b) {
         this.b = b;
@@ -1232,10 +1235,12 @@ public final class If {
          *   .then(() -> loadFromCache())
          *   .orElse(() -> loadFromDatabase());
          *
-         * // Example 3: Default value assignment
+         * // Example 3: Store either a preference or a default
+         * String userPreference = loadUserPreference();
+         * Holder<String> setting = Holder.of(null);
          * If.notNull(userPreference)
-         *   .then(() -> setting = userPreference)
-         *   .orElse(() -> setting = DEFAULT_VALUE);
+         *   .then(() -> setting.setValue(userPreference))
+         *   .orElse(() -> setting.setValue("default"));
          * }</pre>
          *
          * @param <E> the type of exception that the runnable may throw
@@ -1263,9 +1268,12 @@ public final class If {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Example 1: Fallback with parameter
+         * String key = "user:42";
+         * String cachedValue = findInCache(key);
+         * Holder<String> value = Holder.of(null);
          * If.notNull(cachedValue)
-         *   .then(() -> value = cachedValue)
-         *   .orElse(key, k -> value = loadFromDatabase(k));
+         *   .then(() -> value.setValue(cachedValue))
+         *   .orElse(key, k -> value.setValue(loadFromDatabase(k)));
          *
          * // Example 2: Context-based fallback
          * ProcessingContext context = new ProcessingContext();

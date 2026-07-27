@@ -20,8 +20,8 @@ import com.landawn.abacus.util.function.ShortConsumer;
  * This class is designed to work with streams of short values, providing a way to compute
  * multiple statistics in a single pass.
  *
- * <p>This class is mutable and not thread-safe. It's designed to be used with sequential streams
- * or with proper synchronization in parallel contexts.</p>
+ * <p>This class is mutable and not thread-safe. A parallel computation can accumulate into
+ * thread-confined instances and merge them with {@link #combine(ShortSummaryStatistics)}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -79,7 +79,9 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * @param min the minimum {@code short} value
      * @param max the maximum {@code short} value
      * @param sum the sum of all values as a {@code long}
-     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
+     * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state does not use
+     *         {@link Short#MAX_VALUE}, {@link Short#MIN_VALUE}, and zero for its min, max, and sum;
+     *         or if a non-empty state has {@code min} greater than {@code max}
      */
     public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {
         if (count < 0) {
@@ -142,7 +144,8 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * // stats1 now contains statistics for all four values
      * }</pre>
      *
-     * @param other another {@code ShortSummaryStatistics} to be combined with this one
+     * @param other another {@code ShortSummaryStatistics} to be combined with this one; must not be {@code null}
+     * @throws NullPointerException if {@code other} is {@code null}
      * @see #accept(short)
      */
     public void combine(final ShortSummaryStatistics other) {
@@ -245,7 +248,9 @@ public class ShortSummaryStatistics implements ShortConsumer {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {min=10, max=50, count=5, sum=150, average=30.000000}
+     * ShortSummaryStatistics stats = new ShortSummaryStatistics(5, (short) 10, (short) 50, 150);
+     * String text = stats.toString();
+     * // text is "{min=10, max=50, count=5, sum=150, average=30.000000}"
      * }</pre>
      *
      * @return a string representation of this object

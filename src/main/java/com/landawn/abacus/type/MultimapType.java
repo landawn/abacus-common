@@ -60,6 +60,9 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *        when the value collection type is specified instead
      * @param valueTypeName the name of the value collection type parameter; may be empty
      *        when the element type is specified instead
+     * @throws IllegalArgumentException if a supplied value collection type is not a collection type, or if
+     *         only the element type is given and {@code typeClass} is neither a {@link ListMultimap} nor a
+     *         {@link SetMultimap}
      */
     MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, false));

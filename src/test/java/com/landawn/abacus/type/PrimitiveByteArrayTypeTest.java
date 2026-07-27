@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -184,6 +185,22 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         assertEquals(getBytesException, thrown.getCause());
         // The free exception should be suppressed
         assertEquals(1, thrown.getSuppressed().length);
+    }
+
+    @Test
+    public void testValueOfObjectBlobPreservesPrimaryRuntimeFailureWhenFreeFails() throws SQLException {
+        Blob blob = mock(Blob.class);
+        RuntimeException primaryFailure = new IllegalArgumentException();
+        RuntimeException cleanupFailure = new IllegalStateException();
+        when(blob.length()).thenReturn(1L);
+        when(blob.getBytes(1, 1)).thenThrow(primaryFailure);
+        org.mockito.Mockito.doThrow(cleanupFailure).when(blob).free();
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> type.valueOf(blob));
+
+        assertSame(primaryFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
     }
 
     @Test

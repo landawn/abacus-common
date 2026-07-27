@@ -34,11 +34,12 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *       {@link Iterator} and return the first (respectively last) element that is not {@code null}. They
  *       return {@code null} when every candidate is {@code null}, or when the source is {@code null} or
  *       empty.</li>
- *   <li><b>Positional first element</b> &mdash; {@link #firstElement firstElement} returns the element at
- *       position&nbsp;0 of an array, {@link Iterable}, or {@link Iterator}, or {@code null} when the source
- *       is {@code null} or empty. Unlike {@code firstNonNull}, it does <em>not</em> skip {@code null}: a
- *       present first element that happens to be {@code null} is returned as {@code null}, which is then
- *       indistinguishable from the "empty source" case.</li>
+ *   <li><b>Positional first/last element</b> &mdash; {@link #firstElement firstElement} /
+ *       {@link #lastElement lastElement} return the element at position&nbsp;0 (respectively the last
+ *       position) of an array, {@link Iterable}, or {@link Iterator}, or {@code null} when the source
+ *       is {@code null} or empty. Unlike {@code firstNonNull}/{@code lastNonNull}, they do <em>not</em>
+ *       skip {@code null}: a present first/last element that happens to be {@code null} is returned as
+ *       {@code null}, which is then indistinguishable from the "empty source" case.</li>
  * </ul>
  *
  * <p><b>Relationship to {@link N}:</b> the {@link N} facade exposes same-named {@code firstNonNull} /
@@ -136,10 +137,15 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.firstNonNull("a", "b", "c");           // returns "a"
-     * String result2 = Nulls.firstNonNull(null, null, "c", "d");   // returns "c"
-     * String result3 = Nulls.firstNonNull(null, null, null);       // returns null
+     * String result = Nulls.firstNonNull("a", "b", "c", "d");            // returns "a"
+     * String result2 = Nulls.firstNonNull(null, null, "c", "d");         // returns "c"
+     * String result3 = Nulls.firstNonNull(new String[] {null, null});    // returns null
+     * String result4 = Nulls.firstNonNull(new String[0]);                // returns null
      * }</pre>
+     *
+     * <p>Note: a call with exactly two or three arguments binds to the fixed-arity
+     * {@link #firstNonNull(Object, Object)} / {@link #firstNonNull(Object, Object, Object)} overloads
+     * rather than to this one; pass four or more arguments, or an explicit array, to select this method.</p>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -305,10 +311,15 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.lastNonNull("a", "b", "c");       // returns "c"
-     * String result2 = Nulls.lastNonNull("a", "b", null);     // returns "b"
-     * String result3 = Nulls.lastNonNull(null, null, null);   // returns null
+     * String result = Nulls.lastNonNull("a", "b", "c", "d");           // returns "d"
+     * String result2 = Nulls.lastNonNull("a", "b", "c", null);         // returns "c"
+     * String result3 = Nulls.lastNonNull(new String[] {null, null});   // returns null
+     * String result4 = Nulls.lastNonNull(new String[0]);               // returns null
      * }</pre>
+     *
+     * <p>Note: a call with exactly two or three arguments binds to the fixed-arity
+     * {@link #lastNonNull(Object, Object)} / {@link #lastNonNull(Object, Object, Object)} overloads
+     * rather than to this one; pass four or more arguments, or an explicit array, to select this method.</p>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -543,10 +554,19 @@ public final class Nulls {
      * <p>Unlike {@link #lastNonNull(Object[])}, this method does <em>not</em> skip trailing
      * {@code null} elements; it always returns the element at the last index.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Nulls.lastElement(new String[] {"a", "b"});    // returns "b"
+     * Nulls.lastElement(new String[] {"a", null});   // returns null (last index holds null)
+     * Nulls.lastElement(new String[0]);              // returns null (empty)
+     * Nulls.lastElement((String[]) null);            // returns null
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array to read.
      * @return the last element, which may itself be {@code null}, or {@code null} if the array is {@code null} or empty.
      * @see #lastNonNull(Object[])
+     * @see N#lastOrNullIfEmpty(Object[])
      */
     @MayReturnNull
     @Beta
@@ -564,10 +584,18 @@ public final class Nulls {
      * <p>Unlike {@link #lastNonNull(Iterable)}, this method does <em>not</em> skip trailing
      * {@code null} elements. Non-random-access iterables are traversed once to their end.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Nulls.lastElement(Arrays.asList("a", "b"));    // returns "b"
+     * Nulls.lastElement(Arrays.asList("a", null));   // returns null (last element is null)
+     * Nulls.lastElement(Collections.emptyList());    // returns null (empty)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param c the iterable to read.
      * @return the last element, which may itself be {@code null}, or {@code null} if the iterable is {@code null} or empty.
      * @see #lastNonNull(Iterable)
+     * @see N#lastOrNullIfEmpty(Iterable)
      */
     @MayReturnNull
     @Beta
@@ -594,10 +622,18 @@ public final class Nulls {
      * <p>Unlike {@link #lastNonNull(Iterator)}, this method does <em>not</em> skip trailing
      * {@code null} elements. It consumes the iterator fully.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Nulls.lastElement(Arrays.asList("a", "b").iterator());    // returns "b"
+     * Nulls.lastElement(Arrays.asList("a", null).iterator());   // returns null (last element is null)
+     * Nulls.lastElement(Collections.emptyIterator());           // returns null (empty)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param iter the iterator to read.
      * @return the last element, which may itself be {@code null}, or {@code null} if the iterator is {@code null} or empty.
      * @see #lastNonNull(Iterator)
+     * @see N#lastOrNullIfEmpty(Iterator)
      */
     @MayReturnNull
     @Beta

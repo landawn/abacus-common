@@ -203,9 +203,9 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * Converts a string representation to an instance of the number type.
      * This method uses the discovered factory method or constructor to create instances.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>For number classes whose discovered creator accepts the class's {@link Object#toString()} format,
+     * this method round-trips with {@link #stringOf(Number)}. Custom {@link Number} subclasses define their
+     * own parsing contract and may use a different textual format.</p>
      *
      * @param str the string to convert, may be {@code null} or empty
      * @return an instance of the number type, or {@code null} if the input string is {@code null} or empty
@@ -222,10 +222,8 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Converts a number object to its string representation.
      *
-     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * <p>This method uses {@link Object#toString()}. It round-trips through {@link #valueOf(String)} only when
+     * the target number class's discovered creator accepts that format.</p>
      *
      * @param x the number object to convert, may be {@code null}
      * @return the string representation using {@code toString()}, or {@code null} if the input is {@code null}

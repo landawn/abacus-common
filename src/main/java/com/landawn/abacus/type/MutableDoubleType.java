@@ -61,7 +61,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
      * into the original value.</p>
      *
      * @param x the {@code MutableDouble} object to convert, may be {@code null}
-     * @return the string representation of the double value, or {@code null} if the input is {@code null}
+     * @return the decimal string representation of the double value, or {@code null} if the input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */

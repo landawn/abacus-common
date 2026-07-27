@@ -27,8 +27,10 @@ import com.landawn.abacus.util.stream.IntStream;
  * A specialized iterator for primitive int values, providing better performance than Iterator&lt;Integer&gt;
  * by avoiding boxing/unboxing overhead. This abstract class provides various utility methods for
  * creating, transforming, and consuming int iterators.
- * Instances are mutable traversal cursors and are not safe for concurrent consumption unless a
- * particular implementation explicitly documents stronger guarantees.
+ *
+ * <p>Instances are mutable traversal cursors and are not safe for concurrent consumption unless a
+ * particular implementation explicitly documents stronger guarantees. Transformation methods return
+ * wrappers over this same source iterator; consuming a wrapper also advances the source.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -186,8 +188,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntIterator iter = IntIterator.defer(() -> IntIterator.of(computeExpensiveArray()));
-     * // Array computation happens only when iter is first used
+     * IntIterator iter = IntIterator.defer(() -> IntIterator.of(1, 2, 3));
+     * // The supplier is invoked only when iter is first used
      * if (condition) {
      *     iter.hasNext();   // Triggers computation
      * }
@@ -696,7 +698,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) throws IllegalArgumentException {
+    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) {
         super.forEachRemaining(action);
     }
 
@@ -749,8 +751,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each index-value pair, must not be null
      * @throws IllegalArgumentException if action is null
-     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
-     *         causing the index to overflow
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntIntConsumer<E> action) throws IllegalArgumentException, E {

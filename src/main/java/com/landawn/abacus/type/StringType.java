@@ -51,7 +51,7 @@ package com.landawn.abacus.type;
 public class StringType extends AbstractStringType {
 
     /**
-     * The type name identifier for String type.
+     * The type name identifier for String type, equal to the simple class name {@code "String"}.
      */
     public static final String STRING = String.class.getSimpleName();
 

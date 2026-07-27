@@ -79,11 +79,12 @@ public class ClazzType extends AbstractType<Class> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ClazzType type = (ClazzType) TypeFactory.getType("Clazz<java.lang.Integer>");
+     * Type<?> registered = TypeFactory.getType("Clazz<java.lang.Integer>");
+     * ClazzType type = (ClazzType) registered;
      * type.parameterClass();   // returns Integer.class
      * }</pre>
      *
-     * @return the parameter class
+     * @return the parameter class of this {@code Clazz<T>} type; never {@code null}
      */
     public Class parameterClass() {
         return clazz;

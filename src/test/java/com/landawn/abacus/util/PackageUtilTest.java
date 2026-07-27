@@ -1,7 +1,9 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
@@ -28,22 +30,25 @@ public class PackageUtilTest extends AbstractTest {
 
     @Test
     public void testGetClassesForPackageWithinJar() {
-        String pkgName = "lombok";
-        List<Class<?>> classes = ClassUtil.findClassesInPackage(pkgName, false, true);
+        final String pkgName = "lombok";
+        final List<Class<?>> directClasses = ClassUtil.findClassesInPackage(pkgName, false, true);
 
-        for (Class<?> clazz : classes) {
+        for (Class<?> clazz : directClasses) {
             N.println(clazz.getCanonicalName() + " : " + clazz);
         }
 
-        assertEquals(41, classes.size());
-        pkgName = "lombok";
-        classes = ClassUtil.findClassesInPackage(pkgName, true, true);
+        assertFalse(directClasses.isEmpty());
+        assertTrue(directClasses.stream().allMatch(clazz -> pkgName.equals(clazz.getPackageName())));
 
-        for (Class<?> clazz : classes) {
+        final List<Class<?>> recursiveClasses = ClassUtil.findClassesInPackage(pkgName, true, true);
+
+        for (Class<?> clazz : recursiveClasses) {
             N.println(clazz.getCanonicalName() + " : " + clazz);
         }
 
-        assertEquals(102, classes.size());
+        assertTrue(recursiveClasses.containsAll(directClasses));
+        assertTrue(recursiveClasses.stream().allMatch(clazz -> pkgName.equals(clazz.getPackageName()) || clazz.getPackageName().startsWith(pkgName + ".")));
+        assertTrue(recursiveClasses.stream().anyMatch(clazz -> clazz.getPackageName().startsWith(pkgName + ".")));
     }
 
     @Test

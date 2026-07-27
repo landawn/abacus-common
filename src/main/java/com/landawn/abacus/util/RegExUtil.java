@@ -75,7 +75,9 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * <p><b>Method Categories:</b>
  * <ul>
  *   <li><b>Pattern Matching:</b> {@code find()}, {@code matches()}, {@code countMatches()}</li>
+ *   <li><b>Match Extraction:</b> {@code findFirst()}, {@code findLast()}, {@code findAll()}</li>
  *   <li><b>String Replacement:</b> {@code replaceFirst()}, {@code replaceLast()}, {@code replaceAll()}</li>
+ *   <li><b>String Removal:</b> {@code removeFirst()}, {@code removeLast()}, {@code removeAll()} (replacement with {@code ""})</li>
  *   <li><b>String Splitting:</b> {@code split()}, {@code splitToLines()}</li>
  *   <li><b>Stream Operations:</b> {@code matchResults()}, {@code matchIndices()}</li>
  *   <li><b>Functional Replacement:</b> Methods accepting {@code Function} and {@code IntBiFunction} parameters</li>
@@ -97,7 +99,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * String[] emails = RegExUtil.split("user1@a.com;user2@b.com", ";");
  *
  * // Functional replacement with transformations
- * String uppercased = RegExUtil.replaceAll("hello world", "\\w+", String::toUpperCase);
+ * String uppercased = RegExUtil.replaceAll("hello world", "\\w+", (String match) -> match.toUpperCase());
  * // The IntBiFunction replacer receives the (start, end) indices of each match
  * String indexed = RegExUtil.replaceAll("a b c", "\\w", (start, end) -> "[" + start + "]");
  * }</pre>
@@ -110,12 +112,12 @@ import com.landawn.abacus.util.function.IntBiFunction;
  *     .collect(Collectors.toList());
  *
  * // Complex replacement with context
- * String processed = RegExUtil.replaceAll(sourceCode, RegExUtil.JAVA_IDENTIFIER_FINDER,
+ * String escapedSource = RegExUtil.replaceAll(sourceCode, RegExUtil.JAVA_IDENTIFIER_FINDER,
  *     identifier -> isReservedWord(identifier) ? escapeIdentifier(identifier) : identifier);
  *
  * // Line-by-line processing
  * String[] lines = RegExUtil.splitToLines(multilineText);
- * String processed = Arrays.stream(lines)
+ * String processedLines = Arrays.stream(lines)
  *     .map(line -> RegExUtil.replaceAll(line, "\\btodo\\b", "DONE"))
  *     .collect(Collectors.joining("\n"));
  *
@@ -265,7 +267,7 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * <p><b>Compatibility and Migration:</b>
  * <ul>
  *   <li><b>Apache Commons:</b> Drop-in replacement for most Apache Commons Lang regex utilities</li>
- *   <li><b>JDK Compatibility:</b> Works with Java 8+ features including streams and lambdas</li>
+ *   <li><b>JDK Compatibility:</b> Uses modern JDK stream and matcher APIs (Java 9+)</li>
  *   <li><b>Backward Compatibility:</b> Method signatures designed for easy migration from raw regex usage</li>
  *   <li><b>Future-Proof:</b> Designed to accommodate future Java regex enhancements</li>
  * </ul>
@@ -866,9 +868,9 @@ public final class RegExUtil {
      *   <li>{@code :\\/\\/} — separator</li>
      *   <li>{@code (?:[-\\w.])+} — host/domain with word characters, hyphens, and dots</li>
      *   <li>{@code (?:\\:[0-9]+)?} — optional port number</li>
-     *   <li>{@code (?:\\/(?:[\\w\\/_.])*} — optional path</li>
+     *   <li>{@code (?:\\/(?:[\\w\\/_.])*)?} — optional path</li>
      *   <li>{@code (?:\\?(?:[\\w&=%.])*)?} — optional query string</li>
-     *   <li>{@code (?:\\#(?:[\\w.])*)?)?} — optional fragment/anchor</li>
+     *   <li>{@code (?:\\#(?:[\\w.])*)?} — optional fragment/anchor</li>
      * </ul>
      *
      * <p>Example matches:</p>
@@ -876,12 +878,13 @@ public final class RegExUtil {
      *   <li>{@code "http://www.example.com"}</li>
      *   <li>{@code "https://api.example.com:8443/v1/users?id=123&name=test"}</li>
      *   <li>{@code "http://localhost:3000/path/to/resource#section"}</li>
+     *   <li>{@code "https://example.com?view=compact#summary"}</li>
      * </ul>
      *
      * @see java.util.regex.Pattern
      */
     public static final Pattern HTTP_URL_FINDER = Pattern
-            .compile("https?:\\/\\/(?:[-\\w.])+(?:\\:[0-9]+)?(?:\\/(?:[\\w\\/_.])*(?:\\?(?:[\\w&=%.])*)?(?:\\#(?:[\\w.])*)?)?", Pattern.CASE_INSENSITIVE);
+            .compile("https?:\\/\\/(?:[-\\w.])+(?:\\:[0-9]+)?(?:\\/(?:[\\w\\/_.])*)?(?:\\?(?:[\\w&=%.])*)?(?:\\#(?:[\\w.])*)?", Pattern.CASE_INSENSITIVE);
 
     /**
      * A regular expression {@link Pattern} that matches alphanumeric strings without spaces.
@@ -938,7 +941,7 @@ public final class RegExUtil {
      * <p>Regex breakdown:</p>
      * <ul>
      *   <li>{@code (\\b\\w+\\b)} — captures a complete word</li>
-     *   <li>{@code (?=.*\\b\\1\\b)} — lookahead to check if the same word appears again later</li>
+     *   <li>{@code (?=[\\s\\S]*\\b\\1\\b)} — lookahead to check if the same word appears again later</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1930,7 +1933,7 @@ public final class RegExUtil {
      */
     public static String replaceFirst(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
-        N.checkArgNotNull(replacer, cs.function);
+        N.checkArgNotNull(replacer, cs.replacer);
 
         if (Strings.isEmpty(source)) {
             return Strings.EMPTY;
@@ -1967,7 +1970,7 @@ public final class RegExUtil {
      */
     public static String replaceFirst(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
-        N.checkArgNotNull(replacer, cs.function);
+        N.checkArgNotNull(replacer, cs.replacer);
 
         if (Strings.isEmpty(source)) {
             return Strings.EMPTY;
@@ -2008,6 +2011,8 @@ public final class RegExUtil {
     /**
      * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
      * The replacer function receives the matched substring and returns the replacement string.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2033,6 +2038,8 @@ public final class RegExUtil {
     /**
      * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
      * The replacer function receives the start and end indices of the match and returns the replacement string.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2104,6 +2111,9 @@ public final class RegExUtil {
 
     /**
      * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * The replacer function receives the matched substring and returns the replacement string.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2123,7 +2133,7 @@ public final class RegExUtil {
     @Beta
     public static String replaceLast(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
-        N.checkArgNotNull(replacer, cs.function);
+        N.checkArgNotNull(replacer, cs.replacer);
 
         if (Strings.isEmpty(source)) {
             return Strings.EMPTY;
@@ -2148,6 +2158,9 @@ public final class RegExUtil {
 
     /**
      * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacer}.
+     * The replacer function receives the start and end indices of the match and returns the replacement string.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2167,7 +2180,7 @@ public final class RegExUtil {
     @Beta
     public static String replaceLast(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
-        N.checkArgNotNull(replacer, cs.function);
+        N.checkArgNotNull(replacer, cs.replacer);
 
         if (Strings.isEmpty(source)) {
             return Strings.EMPTY;
@@ -2321,7 +2334,7 @@ public final class RegExUtil {
      */
     public static String replaceAll(final String source, final Pattern pattern, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
-        N.checkArgNotNull(replacer, cs.function);
+        N.checkArgNotNull(replacer, cs.replacer);
 
         if (Strings.isEmpty(source)) {
             return Strings.EMPTY;
@@ -2356,7 +2369,7 @@ public final class RegExUtil {
      */
     public static String replaceAll(final String source, final Pattern pattern, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
-        N.checkArgNotNull(replacer, cs.function);
+        N.checkArgNotNull(replacer, cs.replacer);
 
         if (Strings.isEmpty(source)) {
             return Strings.EMPTY;

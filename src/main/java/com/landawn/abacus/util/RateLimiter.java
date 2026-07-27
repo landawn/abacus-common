@@ -49,22 +49,23 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *  final RateLimiter rateLimiter = RateLimiter.create(2.0);   // rate is "2 permits per second"
- *  void submitTasks(List<Runnable> tasks, Executor executor) {
- *    for (Runnable task : tasks) {
- *      rateLimiter.acquire();   // may wait
- *      executor.execute(task);
- *    }
- *  }}</pre>
+ * RateLimiter rateLimiter = RateLimiter.create(2.0);   // rate is "2 permits per second"
+ * List<Runnable> tasks = List.of(() -> System.out.println("task completed"));
+ * Executor executor = Runnable::run;
+ * for (Runnable task : tasks) {
+ *     rateLimiter.acquire();   // may wait
+ *     executor.execute(task);
+ * }
+ * }</pre>
  *
- * <p>As another example, imagine that we produce a stream of data, and we want to cap it at 5kb per
+ * <p>As another example, imagine that we produce a stream of data, and we want to cap it at 5 kB per
  * second. This could be accomplished by requiring a permit per byte, and specifying a rate of 5000
  * permits per second: <pre>   {@code
- *  final RateLimiter rateLimiter = RateLimiter.create(5000.0);   // rate = 5000 permits per second
- *  void submitPacket(byte[] packet) {
- *    rateLimiter.acquire(packet.length);
- *    networkService.send(packet);
- *  }
+ * RateLimiter rateLimiter = RateLimiter.create(5000.0);   // rate = 5000 permits per second
+ * Consumer<byte[]> networkSender = bytes -> System.out.println("Sending " + bytes.length + " bytes");
+ * byte[] packet = "payload".getBytes(StandardCharsets.UTF_8);
+ * rateLimiter.acquire(packet.length);
+ * networkSender.accept(packet);
  * }</pre>
  *
  * <p>It is important to note that the number of permits requested <i>never</i> affects the
@@ -237,6 +238,11 @@ public abstract class RateLimiter {
         return result;
     }
 
+    /**
+     * Creates a rate limiter that uses the supplied time source.
+     *
+     * @param stopwatch the time source and sleeper used by this limiter
+     */
     RateLimiter(final SleepingStopwatch stopwatch) {
         this.stopwatch = N.checkArgNotNull(stopwatch);
     }
@@ -746,25 +752,25 @@ public abstract class RateLimiter {
         protected abstract void sleepMicrosUninterruptibly(long micros);
 
         /**
-        * Creates a {@code SleepingStopwatch} instance that uses the system timer for time measurement
-        * and {@link N#sleepUninterruptibly} for sleeping. This is the standard implementation used by
-        * {@code RateLimiter} for production use.
-        *
-        * <p>The returned stopwatch starts measuring elapsed time immediately from the moment of creation.
-        * Time is measured in microseconds using a {@link Stopwatch} instance.
-        *
-        * <p><b>Usage Examples:</b></p>
-        * <pre>{@code
-        * SleepingStopwatch stopwatch = SleepingStopwatch.createFromSystemTimer();
-        * long micros = stopwatch.readMicros();         // Elapsed microseconds since creation
-        * stopwatch.sleepMicrosUninterruptibly(1000);   // Sleep for 1 millisecond
-        *
-        * // Used internally by RateLimiter.factory methods
-        * RateLimiter.create(10.0);                     // limiter with system timer stopwatch
-        * }</pre>
-        *
-        * @return a new {@code SleepingStopwatch} instance based on the system timer
-        */
+         * Creates a {@code SleepingStopwatch} instance that uses the system timer for time measurement
+         * and {@link N#sleepUninterruptibly} for sleeping. This is the standard implementation used by
+         * {@code RateLimiter} for production use.
+         *
+         * <p>The returned stopwatch starts measuring elapsed time immediately from the moment of creation.
+         * Time is measured in microseconds using a {@link Stopwatch} instance.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * SleepingStopwatch stopwatch = SleepingStopwatch.createFromSystemTimer();
+         * long micros = stopwatch.readMicros();         // Elapsed microseconds since creation
+         * stopwatch.sleepMicrosUninterruptibly(1000);   // Sleep for 1 millisecond
+         *
+         * // Used internally by the RateLimiter factory methods
+         * RateLimiter.create(10.0);                     // limiter with system timer stopwatch
+         * }</pre>
+         *
+         * @return a new {@code SleepingStopwatch} instance based on the system timer
+         */
         public static SleepingStopwatch createFromSystemTimer() {
             return new SleepingStopwatch() {
                 final Stopwatch stopwatch = Stopwatch.createStarted();

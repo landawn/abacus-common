@@ -51,7 +51,8 @@ import java.security.SecureRandom;
  * byte[] nonce = WSSecurityUtil.generateNonce(16);
  *
  * // Create WS-Security password digest
- * String timestamp = getCurrentTimestamp();
+ * String timestamp = Instant.now().toString();
+ * String password = "secretPassword";
  * String passwordDigest = WSSecurityUtil.computePasswordDigest(
  *     nonce, timestamp.getBytes(StandardCharsets.UTF_8), password.getBytes(StandardCharsets.UTF_8)
  * );
@@ -119,8 +120,7 @@ public final class WSSecurityUtil {
 
     /**
      * Generates a SHA-1 digest (hash) of the input bytes. This method allocates a fresh
-     * {@link MessageDigest} instance per call to avoid lock contention; the JCE provider's
-     * own implementation cache makes {@code MessageDigest.getInstance} cheap.
+     * {@link MessageDigest} instance per call so no mutable digest state is shared between callers.
      *
      * <p>The SHA-1 algorithm produces a 160-bit (20-byte) hash value. While SHA-1 is considered
      * cryptographically weak for collision resistance in some contexts (such as digital signatures),
@@ -151,9 +151,8 @@ public final class WSSecurityUtil {
         }
 
         try {
-            // Allocate a fresh MessageDigest per call. The cached instance + class-wide lock
-            // serialized every hashing call across the process and made generateNonce a DoS
-            // amplifier. SunJCE's MessageDigest implementation cache makes getInstance cheap.
+            // Allocate a fresh MessageDigest per call. A shared instance would require a lock and
+            // would serialize every hashing call across the process.
             final MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
             return md.digest(inputBytes);
         } catch (final NoSuchAlgorithmException e) {
@@ -364,6 +363,7 @@ public final class WSSecurityUtil {
      *         nonceBytes, created.getBytes(StandardCharsets.UTF_8), "secretPassword".getBytes(StandardCharsets.UTF_8));
      *
      * // This string overload is for text nonces only (it hashes the nonce text as-is):
+     * String textNonce = "text-nonce";
      * String textDigest = WSSecurityUtil.computePasswordDigest(textNonce, created, "secretPassword");
      * }</pre>
      *
@@ -402,6 +402,16 @@ public final class WSSecurityUtil {
      * convenience method that converts the string parameters to bytes using UTF-8 before
      * computing the digest.
      *
+     * <p>This method internally calls {@link #computePasswordDigest(byte[], byte[], byte[], String)}
+     * after converting all string parameters to byte arrays using UTF-8.</p>
+     *
+     * <p><b>Important — nonce encoding:</b> This overload hashes the {@code nonce} <i>string's</i> UTF-8 bytes
+     * verbatim; it does <b>not</b> Base64-decode it. The WS-Security UsernameToken digest is defined over the
+     * <i>raw</i> nonce bytes, so passing a Base64-encoded nonce string here produces a digest that a
+     * spec-compliant peer (which Base64-decodes the nonce before hashing) will not match. For interoperable
+     * digests, use {@link #computePasswordDigest(byte[], byte[], byte[], String)} with the raw nonce bytes.
+     * This string overload is a convenience for callers whose nonce is genuinely text.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String nonce = "text-nonce"; // This overload hashes the nonce text verbatim.
@@ -420,6 +430,8 @@ public final class WSSecurityUtil {
      * @return a Base64-encoded string of the hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available
      * @see #computePasswordDigest(byte[], byte[], byte[], String)
+     * @see #computePasswordDigest(String, String, String)
+     * @see #generateNonce(int)
      */
     public static String computePasswordDigest(final String nonce, final String created, final String password, final String algorithm) {
         if (nonce == null) {

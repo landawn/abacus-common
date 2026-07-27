@@ -62,6 +62,7 @@ import com.landawn.abacus.util.function.ObjByteConsumer;
  * @see ByteIteratorEx
  */
 class IteratorByteStream extends AbstractByteStream {
+    /** The backing iterator supplying this stream's elements; it is consumed lazily as the stream is traversed. */
     final ByteIteratorEx elements;
 
     //    OptionalByte head;
@@ -74,6 +75,13 @@ class IteratorByteStream extends AbstractByteStream {
      * Constructs an IteratorByteStream from a ByteIterator.
      * Creates an unsorted stream with no close handlers.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteIterator iterator = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
+     * IteratorByteStream stream = new IteratorByteStream(iterator);
+     * stream.forEach(System.out::println);   // prints 1, 2, 3, 4, 5
+     * }</pre>
+     *
      * @param values the byte iterator to wrap as a stream
      */
     IteratorByteStream(final ByteIterator values) {
@@ -83,6 +91,21 @@ class IteratorByteStream extends AbstractByteStream {
     /**
      * Constructs an IteratorByteStream from a ByteIterator with close handlers.
      * Creates an unsorted stream that will execute the provided close handlers when closed.
+     * The close handlers are invoked in order when the stream's close() method is called,
+     * ensuring proper resource cleanup.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteIterator iterator = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
+     * List<LocalRunnable> closeHandlers = new ArrayList<>();
+     * closeHandlers.add(() -> System.out.println("Stream closed"));
+     * IteratorByteStream stream = new IteratorByteStream(iterator, closeHandlers);
+     * try {
+     *     stream.forEach(System.out::println);
+     * } finally {
+     *     stream.close();   // invokes all close handlers
+     * }
+     * }</pre>
      *
      * @param values the byte iterator to wrap as a stream
      * @param closeHandlers collection of close handlers to execute when the stream is closed, may be null
@@ -93,7 +116,25 @@ class IteratorByteStream extends AbstractByteStream {
 
     /**
      * Constructs an IteratorByteStream from a ByteIterator with sorting and close handlers.
-     * This is the primary constructor that all other constructors delegate to.
+     * This is the primary constructor that all other constructors delegate to. The sorted flag
+     * allows optimization of operations like min(), max(), and distinct() when elements are
+     * known to be in natural ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Create a sorted stream with close handlers
+     * ByteIterator sortedIterator = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
+     * List<LocalRunnable> closeHandlers = new ArrayList<>();
+     * closeHandlers.add(() -> System.out.println("Cleanup complete"));
+     *
+     * IteratorByteStream stream = new IteratorByteStream(sortedIterator, true, closeHandlers);
+     * try {
+     *     OptionalByte min = stream.min();            // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.get());    // prints 1
+     * } finally {
+     *     stream.close();
+     * }
+     * }</pre>
      *
      * @param values the byte iterator to wrap as a stream
      * @param sorted {@code true} if the elements are already sorted in natural order, {@code false} otherwise
@@ -1801,17 +1842,18 @@ class IteratorByteStream extends AbstractByteStream {
      * Returns a {@link ParallelIteratorByteStream} wrapping the same iterator.
      *
      * @param maxThreadNum the maximum number of threads to use for parallel execution
-     * @param splitor the strategy for splitting work across threads
+     * @param splitStrategy the strategy for splitting work across threads
      * @param asyncExecutor the executor to use for parallel tasks
      * @param cancelUncompletedThreads whether to cancel incomplete threads when the stream is closed
      * @return a parallel {@code ByteStream} wrapping the same iterator
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected ByteStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected ByteStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorByteStream(elements, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorByteStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**

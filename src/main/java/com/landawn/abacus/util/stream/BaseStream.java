@@ -46,7 +46,8 @@ import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -56,14 +57,16 @@ import lombok.experimental.Accessors;
  *
  * <p>BaseStream represents a sequence of elements supporting sequential and parallel aggregate operations.
  * Stream operations are divided into <em>intermediate</em> operations (which return a new stream) and
- * <em>terminal</em> operations (which produce a result or side-effect). Intermediate operations are always
- * lazy; executing an intermediate operation such as {@code filter()} does not actually perform any filtering,
- * but instead creates a new stream that, when traversed, contains the elements of the initial stream that
- * match the given predicate.
+ * <em>terminal</em> operations (which produce a result or side-effect). Most intermediate operations are
+ * lazy; executing an operation such as {@code filter()} does not actually perform any filtering, but instead
+ * creates a new stream that applies the filter when traversed. Operations marked with
+ * {@link TerminalOpTriggered} are the exception: they may consume and materialize the upstream while creating
+ * the returned stream.
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Lazy Evaluation:</b> Operations are not executed until a terminal operation is invoked</li>
+ *   <li><b>Lazy Evaluation:</b> Most intermediate operations are deferred until traversal; materializing
+ *       operations are identified by {@link TerminalOpTriggered}</li>
  *   <li><b>Auto-closeable:</b> Streams are automatically closed after terminal operations complete</li>
  *   <li><b>Parallel Support:</b> Supports both sequential and parallel execution modes</li>
  *   <li><b>Resource Management:</b> Proper resource cleanup through close handlers</li>
@@ -116,9 +119,17 @@ import lombok.experimental.Accessors;
  *   <li>Operations should be non-interfering and stateless for predictable behavior</li>
  * </ul>
  *
+ * <p><b>Reading the per-operation characteristics:</b> each operation below carries a one-line
+ * <i>Operation characteristics</i> summary. Its classification terms link to the annotations that
+ * define them &mdash; {@link TerminalOp}, {@link IntermediateOp}, {@link TerminalOpTriggered},
+ * {@link ParallelSupported} and {@link SequentialOnly} &mdash; which are also rendered on the
+ * operation's own declaration. The closing clause states whether the operation buffers all elements
+ * of the stream in memory in order to produce its result; that is the one characteristic not already
+ * implied by the annotations.</p>
+ *
  * <p><b>How selected operations differ from the JDK ({@code java.util.stream}):</b> beyond the larger operation
  * set, a few <i>same-named</i> operations behave differently from the JDK; each point where the {@code JDK}
- * differs is flagged with {@code &#9888;&#65039;}:</p>
+ * differs is flagged with &#9888;&#65039;:</p>
  * <table border="1">
  *   <caption>How selected {@code BaseStream} operations differ from JDK</caption>
  *   <thead>
@@ -131,7 +142,7 @@ import lombok.experimental.Accessors;
  *     </tr>
  *     <tr>
  *       <td>{@code count()}</td>
- *       <td><b><i>abacus</i></b>: always traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
+ *       <td><b><i>abacus</i></b>: does not elide upstream stages such as {@code peek}/{@code filter} when counting their output &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversing such stages when the element count is already known</td>
  *     </tr>
  *     <tr>
  *       <td>{@code peek}/{@code onEach}</td>
@@ -192,17 +203,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p>In parallel streams, filtering operations may be performed concurrently.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
@@ -237,17 +238,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();   // returns ["apple", "banana", "cherry"], with dropped.get() == 2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @param onDrop the action to perform on elements that don't match the predicate;
@@ -313,17 +304,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();   // returns [] - stops immediately
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element
@@ -388,17 +369,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();   // returns [5, 6, 1, 2, 3, 4] - predicate is false for first element
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
@@ -464,17 +435,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();   // returns [5, 6, 3, 4], and prints "Dropped: 1", "Dropped: 2"
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @param onDrop the action to perform on elements that are dropped;
@@ -540,17 +501,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();   // returns [] - no elements match the predicate
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to start including elements
      * @return a new stream consisting of the elements starting from the first element
@@ -597,17 +548,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. The internal state required to track duplicates
      * makes this operation less suitable for parallel processing.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a new stream consisting of the distinct elements of this stream
      * @throws IllegalStateException if the stream is already closed
@@ -635,17 +576,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p>The order of elements in the resulting stream is determined by their order in the original stream.
      * This method only runs sequentially, even in a parallel stream.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param c the collection to find common elements with this stream
      * @return a new stream containing elements present in both this stream and the specified collection,
@@ -678,17 +609,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // No '2' appears in the result because collection2 has more occurrences than stream2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param c the collection to compare against this stream
      * @return a new stream containing the elements that are present in this stream but not in the specified collection,
@@ -734,17 +655,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // - 3: one occurrence in common, but collection has two instances, so one remains
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param c the collection to compare with this stream for symmetric difference
      * @return a new stream containing elements that are present in either this stream or the collection,
@@ -786,17 +697,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. Additionally, it triggers a terminal operation
      * internally to collect all elements before reversing them.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a new stream consisting of the elements of this stream in reverse order
      * @throws IllegalStateException if the stream is already closed
@@ -840,17 +741,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. Additionally, it triggers a terminal operation
      * internally to collect all elements before rotating them.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param distance the number of positions to rotate the elements; positive values rotate
      *                 elements to the right, negative values rotate elements to the left
@@ -891,17 +782,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. Additionally, it triggers a terminal operation
      * internally to collect all elements before shuffling them.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a new stream consisting of the elements of this stream in a random order
      * @throws IllegalStateException if the stream is already closed
@@ -943,17 +824,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. Additionally, it triggers a terminal operation
      * internally to collect all elements before shuffling them.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param rnd the Random instance to use for shuffling elements
      * @return a new stream consisting of the elements of this stream in a random order determined by the provided Random
@@ -994,17 +865,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Although this method is marked as {@code @ParallelSupported}, the sorting operation itself
      * may not be performed in parallel depending on the stream implementation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @return a new stream consisting of the elements of this stream in sorted order
      * @throws IllegalStateException if the stream is already closed
@@ -1043,17 +904,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Although this method is marked as {@code @ParallelSupported}, the sorting operation itself
      * may not be performed in parallel depending on the stream implementation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
      * @return a new stream consisting of the elements of this stream in reverse sorted order
      * @throws IllegalStateException if the stream is already closed
@@ -1093,17 +944,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. The stream produced is infinite unless limited
      * by operations like {@code limit()} or {@code takeWhile()}.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a new stream consisting of the elements of this stream repeated indefinitely
      * @throws IllegalStateException if the stream is already closed
@@ -1142,17 +983,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * a finite stream with the exact number of elements equal to the original count multiplied
      * by the specified number of rounds.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param rounds the number of times to repeat the elements of this stream; must be non-negative.
      *               A value of {@code 0} produces an empty stream.
@@ -1198,17 +1029,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. The indexing operation requires maintaining order
      * and cannot be effectively parallelized.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a new stream consisting of the elements of this stream paired with their indices
      * @throws IllegalStateException if the stream is already closed
@@ -1247,17 +1068,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. Skipping requires processing elements in order from
      * the beginning of the stream.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param n the number of leading elements to skip
      * @return a new stream consisting of the remaining elements of this stream after discarding
@@ -1302,17 +1113,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * performed concurrently for multiple skipped elements when used in a parallel stream.
      * The implementation should ensure the action is thread-safe in such cases.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param n the number of leading elements to skip
      * @param onSkip the action to perform on each skipped element
@@ -1361,17 +1162,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. Limiting requires processing elements in order from
      * the beginning of the stream.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param maxSize the maximum number of elements to include in the new stream
      * @return a new stream consisting of at most maxSize elements from this stream
@@ -1421,17 +1212,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * as noted by the {@code @SequentialOnly} annotation. Both skipping and limiting require
      * processing elements in order from the beginning of the stream.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param offset the number of leading elements to skip before starting to include elements
      * @param maxSize the maximum number of elements to include in the new stream
@@ -1478,17 +1259,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code @SequentialOnly} annotation. Stepping through elements requires processing
      * them in order, which is inherently sequential.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param step the interval between selected elements; must be positive (greater than 0)
      * @return a new stream consisting of every 'step'th element of this stream
@@ -1554,17 +1325,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   </tr>
      * </table>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param permitsPerSecond the rate limit, specified as permits per second. Must be positive.
      * @return a new stream with the rate limit applied.
@@ -1635,17 +1396,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   </tr>
      * </table>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param rateLimiter the RateLimiter instance to use for controlling the rate of element emission
      * @return a new stream with the rate limit applied.
@@ -1738,17 +1489,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   </tr>
      * </table>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param duration the duration to delay each element in the stream (except the first element).
      *                 Must not be {@code null}.
@@ -1777,17 +1518,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p>This method only runs sequentially, even in parallel streams, as noted by the
      * {@code @SequentialOnly} annotation.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param duration the duration to delay each element in the stream (except the first element). Must not be {@code null}.
      * @return a new stream with the delay applied to each element.
@@ -1814,7 +1545,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code duration} after the previous one &mdash; all but the most recent element of the burst are
      * discarded; the most recent element survives. It is emitted when a later pull observes a gap of at least
      * {@code duration}, or when the upstream is exhausted. The final element of the stream is always emitted
-     * without waiting for an additional timer. Arrival time is measured with {@link System#currentTimeMillis()}
+     * without waiting for an additional timer. Arrival time is measured with {@link System#nanoTime()}
      * at the moment each element is pulled from the upstream, so this operator is only meaningful for streams
      * whose upstream produces elements over time. For a stream that produces all of its elements immediately
      * (e.g. a stream over an in-memory collection), every gap is effectively zero, so only the single last
@@ -1840,7 +1571,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   <li>Within a burst (consecutive elements less than {@code duration} apart), only the most recent
      *       element survives; the earlier ones are silently discarded.</li>
      *   <li>The relative order of the surviving elements is preserved.</li>
-     *   <li>Arrival time is tracked with {@link System#currentTimeMillis()} at pull time.</li>
+     *   <li>Arrival time is tracked with the monotonic {@link System#nanoTime()} clock at pull time.</li>
      * </ul>
      *
      * <p>Only the debounce step itself is forced sequential, as noted by the {@code @SequentialOnly} annotation.
@@ -1874,17 +1605,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   </tr>
      * </table>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param duration the quiet period used to decide whether a pending element has been superseded.
      *                 Must not be {@code null} and must have a positive millisecond value.
@@ -1925,17 +1646,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();   // count is 2 after processing
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new stream consisting of the elements of this stream with the provided action applied to each element.
@@ -1984,17 +1695,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // count.get() == 2 (only even numbers passed)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new stream consisting of the elements of this stream with the provided action applied to each element.
@@ -2024,17 +1725,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns [99, 100, 1, 2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param stream the stream whose elements should be prepended to this stream.
      * @return a new stream consisting of the elements of the provided stream followed by the elements of this stream.
@@ -2063,17 +1754,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns [1, 2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param op the optional whose element should be prepended to this stream.
      * @return a new stream consisting of the element of the provided optional (if present) followed by the elements of this stream.
@@ -2102,17 +1783,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns [1, 2, 3, 4, 5, 6]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param stream the stream whose elements should be appended to this stream.
      * @return a new stream consisting of the elements of this stream followed by the elements of the provided stream.
@@ -2141,17 +1812,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns [1, 2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param op the optional whose element should be appended to this stream.
      * @return a new stream consisting of the elements of this stream followed by the element of the provided optional (if present).
@@ -2188,17 +1849,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns [0]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param supplier the supplier that provides an alternative stream if this stream is empty.
      * @return a new stream consisting of the elements of this stream if not empty, or the elements from the supplied stream if this stream was empty.
@@ -2261,17 +1912,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns Electronics products if available, otherwise default product
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param supplier the supplier that provides an alternative stream if this stream is empty.
      *                 Must not be {@code null}.
@@ -2303,17 +1944,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();       // returns [2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a stream with the same elements as this stream, which throws if it turns out to be
      *         empty when a terminal operation is executed.
@@ -2342,17 +1973,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .forEach(this::processOrder);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param exceptionSupplier the supplier of the exception to be thrown if this stream is empty.
      * @return a stream with the same elements as this stream, which throws if it turns out to be
@@ -2384,17 +2005,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // isEmpty.get() == true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param action the action to be executed if the stream is empty
      * @return a stream with the same elements as this stream, which executes the action if it
@@ -2424,17 +2035,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns ""
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param delimiter the sequence of characters to be used as a delimiter between each element in the resulting String.
      * @return a String consisting of the elements of this stream, separated by the specified delimiter.
@@ -2465,17 +2066,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns "IN ('a', 'b', 'c')"
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param delimiter the sequence of characters to be used as a delimiter between each element in the resulting String.
      * @param prefix the sequence of characters to be added at the beginning of the resulting String.
@@ -2508,17 +2099,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // sharedJoiner.toString() returns "first; second; third; fourth"
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param joiner the Joiner specifying how to join the elements of the stream.
      * @return the provided Joiner after appending all elements of the stream.
@@ -2565,17 +2146,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       });
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return an Optional containing a Map of Percentages to elements if the stream is not empty, otherwise an empty Optional.
      * @throws IllegalStateException if the stream is already closed
@@ -2598,24 +2169,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <pre>{@code
      * long count = Stream.of(1, 2, 3, 4, 5).count();   // returns 5
      *
-     * // ❌ Inefficient - processes entire stream
-     * if (stream.count() > 0) { ... }
+     * // Inefficient: processes the entire stream.
+     * boolean hasElements = Stream.of(1, 2, 3).count() > 0;
      *
-     * // ✅ Efficient - stops at first element
-     * if (stream.first().isPresent()) { ... }
+     * // Efficient: stops after the first element.
+     * boolean hasElementsEfficiently = Stream.of(1, 2, 3).first().isPresent();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return the count of elements in the stream as a long value. Returns 0 if the stream is empty.
      * @throws IllegalStateException if the stream is already closed
@@ -2626,79 +2187,76 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     long count();
 
     /**
-     * Returns the first element of the stream.
+     * Returns the first element of this stream wrapped in an {@code Optional}, or an empty
+     * {@code Optional} if this stream is empty.
+     *
+     * <p>This is a short-circuiting terminal operation: it stops at the first element without
+     * processing the rest of the stream, which is then closed. That also makes it the cheapest
+     * way to test whether a stream is non-empty — prefer {@code stream.first().isPresent()}
+     * over {@code stream.count() > 0}.</p>
+     *
+     * <p><b>Null elements:</b> primitive streams are unaffected, but for object streams
+     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} cannot hold {@code null},
+     * so a {@link NullPointerException} is thrown if the first element is {@code null}. {@code null}
+     * elements elsewhere in the stream are harmless — only the one actually returned matters.</p>
+     *
+     * <p>The concrete return type follows the stream type: {@link Stream} returns {@code Optional<T>},
+     * while the primitive streams return their specialized {@code Optional}, e.g. {@code OptionalInt}
+     * for {@link IntStream} and {@code OptionalDouble} for {@link DoubleStream}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get first element from non-empty stream
-     * Optional<String> first = Stream.of("apple", "banana", "cherry").first();
-     * // first.get() returns "apple"
+     * Optional<String> first = Stream.of("apple", "banana", "cherry").first();   // returns Optional.of("apple")
+     * Optional<Integer> empty = Stream.<Integer>empty().first();                 // returns Optional.empty()
+     * boolean hasElements = Stream.of(1, 2, 3).first().isPresent();              // efficient non-empty check
      *
-     * // Empty stream returns empty Optional
-     * Optional<Integer> empty = Stream.<Integer>empty().first();
-     * // empty.isEmpty() is true
-     *
-     * // Find first matching element (more efficient than filter + first)
-     * Optional<Integer> firstEven = Stream.of(1, 3, 4, 5, 6).filter(n -> n % 2 == 0).first();
-     * // firstEven.get() returns 4
-     *
-     * // Check if stream has elements (efficient alternative to count() > 0)
-     * boolean hasElements = Stream.of(data).first().isPresent();
+     * OptionalInt firstInt = IntStream.of(1, 2, 3).first();                      // returns OptionalInt.of(1)
+     * OptionalInt noInt = IntStream.empty().first();                             // returns OptionalInt.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @return an Optional containing the first element of the stream if it exists, otherwise an empty Optional.
+     * @return an {@code Optional} containing the first element of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the first element is {@code null} (object streams only)
      * @see #last()
      * @see #elementAt(long)
+     * @see #count()
      */
     @SequentialOnly
     @TerminalOp
     OT first();
 
     /**
-     * Returns the last element of the stream.
+     * Returns the last element of this stream wrapped in an {@code Optional}, or an empty {@code Optional} if this stream is empty.
+     *
+     * <p>This is a terminal operation: unlike {@link #first()}, it cannot short-circuit — every element must be processed,
+     * because the last element is only known when the stream is exhausted. Only the latest element is retained while
+     * scanning, so memory usage stays constant. The stream is then closed.</p>
+     *
+     * <p><b>Null elements:</b> primitive streams are unaffected, but for object streams
+     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} cannot hold {@code null},
+     * so a {@link NullPointerException} is thrown if the last element is {@code null}. {@code null}
+     * elements elsewhere in the stream are harmless — only the one actually returned matters.</p>
+     *
+     * <p>The concrete return type follows the stream type: {@link Stream} returns {@code Optional<T>},
+     * while the primitive streams return their specialized {@code Optional}, e.g. {@code OptionalInt}
+     * for {@link IntStream} and {@code OptionalDouble} for {@link DoubleStream}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Get last element from non-empty stream
-     * Optional<String> last = Stream.of("apple", "banana", "cherry").last();
-     * // last.get() returns "cherry"
+     * Optional<String> last = Stream.of("apple", "banana", "cherry").last();   // returns Optional.of("cherry")
+     * Optional<Integer> empty = Stream.<Integer>empty().last();               // returns Optional.empty()
      *
-     * // Empty stream returns empty Optional
-     * Optional<Integer> empty = Stream.<Integer>empty().last();
-     * // empty.isEmpty() is true
-     *
-     * // Find last matching element
-     * Optional<Integer> lastEven = Stream.of(1, 2, 3, 4, 5, 6).filter(n -> n % 2 == 0).last();
-     * // lastEven.get() returns 6
+     * OptionalInt lastInt = IntStream.of(1, 2, 3).last();                     // returns OptionalInt.of(3)
+     * OptionalInt noInt = IntStream.empty().last();                           // returns OptionalInt.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @return an Optional containing the last element of the stream if it exists, otherwise an empty Optional.
+     * @return an {@code Optional} containing the last element of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the last element is {@code null} (object streams only)
      * @see #first()
      * @see #elementAt(long)
      */
@@ -2727,17 +2285,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // result.get() returns 4
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param position the zero-based position of the element to return; must be non-negative.
      * @return an Optional containing the element at the specified position in this stream if it exists, otherwise an empty Optional.
@@ -2781,17 +2329,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .onlyOne();   // gets at most one user with that ID
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the only element of this stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
@@ -2809,7 +2347,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p>This is a terminal operation that closes the stream after execution.
      * For primitive streams (IntStream, LongStream, etc.), this returns a primitive array.
      * For object streams ({@link Stream}), this returns an {@code Object[]} array.
-     * Use {@code Stream#toArray(IntFunction)} to get a typed array for object streams.
+     * Use {@link Stream#toArray(java.util.function.IntFunction)} to get a typed array for object streams.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2822,17 +2360,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // objs = ["ab", "abc"]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return an array containing the elements of this stream; the concrete type depends on the stream type
      *         (e.g., {@code int[]} for {@link IntStream}, {@code Object[]} for {@link Stream})
@@ -2866,17 +2394,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // empty.isEmpty() is true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a modifiable List containing the elements of this stream.
      * @throws IllegalStateException if the stream is already closed
@@ -2908,17 +2426,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * boolean containsDuplicates = unique.size() != data.size();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a modifiable Set containing the unique elements of this stream.
      * @throws IllegalStateException if the stream is already closed
@@ -2961,17 +2469,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // empty.isEmpty() is true, empty is immutable
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return an ImmutableList containing the elements of this stream.
      * @throws IllegalStateException if the stream is already closed
@@ -3018,17 +2516,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // empty.isEmpty() is true, empty is immutable
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return an ImmutableSet containing the unique elements of this stream.
      * @throws IllegalStateException if the stream is already closed
@@ -3058,19 +2546,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toCollection(ArrayDeque::new);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
-     * @param <CC> The type of Collection to create.
+     * @param <CC> the type of Collection to create
      * @param supplier a supplier function that provides a new, empty Collection of the desired type.
      * @return a Collection of the desired type containing the elements of this stream.
      * @throws IllegalStateException if the stream is already closed
@@ -3102,17 +2580,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // numbers.getCount(3) returns 3 - most frequent
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a Multiset containing the elements of this stream with their occurrence counts.
      * @throws IllegalStateException if the stream is already closed
@@ -3154,17 +2622,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // filteredCounts: {apple=2, banana=2}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param supplier a supplier function that provides a new, empty Multiset of the desired type.
      * @return a Multiset of the desired type containing the elements of this stream.
@@ -3193,17 +2651,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Output: [1, 2, 3, 4]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @throws IllegalStateException if the stream is already closed
      * @see #join(CharSequence, CharSequence, CharSequence)
@@ -3242,17 +2690,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * } // closes the stream automatically
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an iterator for the elements of this stream.
      * @throws IllegalStateException if the stream is already closed
@@ -3328,17 +2766,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // stream.isParallel() is false
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a new stream that is identical to this stream, but in sequential mode.
      * @throws IllegalStateException if the stream is already closed
@@ -3353,17 +2781,30 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Switches the stream to parallel mode.
      * This is an intermediate operation.
      *
-     * <br />
-     * Consider using {@code sps(int, Function)} if only the next operation needs to be parallelized. For example:
+     * <p>Consider using {@code sps(Function)} if only the next operation needs to be
+     * parallelized. For example:
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stream.parallel(maxThreadNum).map(f).filter(p)...;
+     * List<Integer> allParallel = Stream.of(1, 2, 3, 4)
+     *         .parallel()
+     *         .map(n -> n * 2)
+     *         .filter(n -> n > 4)
+     *         .toList();
      *
-     * // Replace above line of code with "sps" if only "f" needs to be parallelized, and "p" is fast enough to be executed in sequential Stream.
-     * stream.sps(maxThreadNum, s -> s.map(f)).filter(p)...;
-     * // Or switch the stream back to sequential stream by sequential().
-     * stream.parallel(maxThreadNum).map(f).sequential().filter(p)...;
+     * // Parallelize map only; filter runs sequentially.
+     * List<Integer> mapOnly = Stream.of(1, 2, 3, 4)
+     *         .sps(s -> s.map(n -> n * 2))
+     *         .filter(n -> n > 4)
+     *         .toList();
+     *
+     * // The same transition can be expressed explicitly with sequential().
+     * List<Integer> switchedBack = Stream.of(1, 2, 3, 4)
+     *         .parallel()
+     *         .map(n -> n * 2)
+     *         .sequential()
+     *         .filter(n -> n > 4)
+     *         .toList();
      * }</pre>
      *
      * When to use parallel Streams?
@@ -3375,8 +2816,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Profiler.run(1, 1, 3, "sequential", () -> Stream.of(list).operation(F)...).printResult();
-     * Profiler.run(1, 1, 3, "parallel", () -> Stream.of(list).parallel().operation(F)...).printResult();
+     * Profiler.run(1, 1, 3, "sequential",
+     *         () -> Stream.of("a", "bb", "ccc").map(String::length).count()).printResult();
+     * Profiler.run(1, 1, 3, "parallel",
+     *         () -> Stream.of("a", "bb", "ccc").parallel().map(String::length).count()).printResult();
      * }</pre>
      *
      * Here is a sample performance test with computer: CPU Intel i7-3520M 4-cores 2.9 GHz, JDK 1.8.0_101, Windows 7:
@@ -3478,17 +2921,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <br />
      * <i>splitXXX/splitAt/splitBy/slidingXXX/collapse, distinct, reverse, rotate, shuffle, indexed, cached, top, kthLargest, count, toArray, toList, toSet, toMultiset...</i>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a new stream that is identical to this stream but configured for parallel execution
      *         using the default thread count ({@code min(cpu_cores, 64)}, i.e. the CPU core count capped by the maximum allowed thread number per operation)
@@ -3511,17 +2944,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Switches the stream to parallel mode with a specified maximum thread number.
      * This is an intermediate operation that enables parallel processing with control over thread count.
      *
-     * <p>Consider using {@code sps(int, Function)} if only the next operation needs to be parallelized. For example:
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * stream.parallel(maxThreadNum).map(f).filter(p)...;
-     *
-     * // Replace above line of code with "sps" if only "f" needs to be parallelized, and "p" is fast enough to be executed in sequential Stream.
-     * stream.sps(maxThreadNum, s -> s.map(f)).filter(p)...;
-     * // Or switch the stream back to sequential stream by sequential().
-     * stream.parallel(maxThreadNum).map(f).sequential().filter(p)...;
-     * }</pre>
+     * <p>Consider using {@code sps(int, Function)} if only the next operation needs to be
+     * parallelized, or call {@link #sequential()} after that operation.
      *
      * <p>The actual number of threads used may be limited by the system. If the specified value is bigger than
      * the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}), the maximum allowed
@@ -3544,17 +2968,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param maxThreadNum the maximum number of threads to use for parallel operations. If the specified value is
      *        bigger than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}),
@@ -3575,49 +2989,38 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Switches the stream to parallel mode with a specified Executor.
      * This is an intermediate operation that enables parallel processing using a custom thread pool.
      *
-     * <p>Consider using {@code sps(int, Function)} if only the next operation needs to be parallelized. For example:
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * stream.parallel(executor).map(f).filter(p)...;
-     *
-     * // Replace above line of code with "sps" if only "f" needs to be parallelized, and "p" is fast enough to be executed in sequential Stream.
-     * stream.sps(maxThreadNum, s -> s.map(f)).filter(p)...;
-     * // Or switch the stream back to sequential stream by sequential().
-     * stream.parallel(executor).map(f).sequential().filter(p)...;
-     * }</pre>
+     * <p>Consider using {@code sps(int, Executor, Function)} if only the next operation needs
+     * to be parallelized, or call {@link #sequential()} after that operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use a custom thread pool
      * ExecutorService customExecutor = Executors.newFixedThreadPool(10);
-     * Stream.of(data)
-     *       .parallel(customExecutor)
-     *       .map(expensiveOperation)
-     *       .toList();
+     * try {
+     *     Stream.of(data)
+     *           .parallel(customExecutor)
+     *           .map(expensiveOperation)
+     *           .toList();
+     * } finally {
+     *     customExecutor.shutdown();
+     * }
      *
      * // Use a cached thread pool for IO operations
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
-     * Stream.of(files)
-     *       .parallel(ioExecutor)
-     *       .map(file -> readFile(file))
-     *       .toList();
+     * try {
+     *     Stream.of(files)
+     *           .parallel(ioExecutor)
+     *           .map(file -> readFile(file))
+     *           .toList();
+     * } finally {
+     *     ioExecutor.shutdown();
+     * }
      * }</pre>
      *
      * <p><b>&#9888;&#65039;</b> The call could hang if this executor is created by
      * {@code Executors.newVirtualThreadPerTaskExecutor()} and used by multiple calls in this stream.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param executor the Executor to use for parallel operations.
      *          {@code Executor} can be specified for bigger thread number than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}) or virtual thread.
@@ -3637,17 +3040,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Switches the stream to parallel mode with specified maximum thread number and Executor.
      * This is an intermediate operation that enables parallel processing with control over both thread count and thread pool.
      *
-     * <p>Consider using {@code sps(int, Function)} if only the next operation needs to be parallelized. For example:
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * stream.parallel(maxThreadNum, executor).map(f).filter(p)...;
-     *
-     * // Replace above line of code with "sps" if only "f" needs to be parallelized, and "p" is fast enough to be executed in sequential Stream.
-     * stream.sps(maxThreadNum, s -> s.map(f)).filter(p)...;
-     * // Or switch the stream back to sequential stream by sequential().
-     * stream.parallel(maxThreadNum, executor).map(f).sequential().filter(p)...;
-     * }</pre>
+     * <p>Consider using {@code sps(int, Executor, Function)} if only the next operation needs
+     * to be parallelized, or call {@link #sequential()} after that operation.
      *
      * <p>If the specified maxThreadNum is bigger than the maximum allowed thread number per operation
      * ({@code min(64, cpu_cores * 8)}) and {@code executor} is not specified with a {@code non-null} value,
@@ -3658,26 +3052,20 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <pre>{@code
      * // Use a custom executor with limited parallelism
      * ExecutorService executor = Executors.newFixedThreadPool(20);
-     * Stream.of(data)
-     *       .parallel(10, executor)  // uses at most 10 threads from the pool
-     *       .map(expensiveOperation)
-     *       .toList();
+     * try {
+     *     Stream.of(data)
+     *           .parallel(10, executor)  // uses at most 10 threads from the pool
+     *           .map(expensiveOperation)
+     *           .toList();
+     * } finally {
+     *     executor.shutdown();
+     * }
      * }</pre>
      *
      * <p><b>&#9888;&#65039;</b> The call could hang if this executor is created by
      * {@code Executors.newVirtualThreadPerTaskExecutor()} and used by multiple calls in this stream.
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param maxThreadNum the maximum number of threads to use for parallel operations. If the specified value
      *        is bigger than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)})
@@ -3701,43 +3089,26 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Switches the stream to parallel mode with the specified parallel settings.
      * This is an intermediate operation that enables parallel processing with fine-grained control over parallelization parameters.
      *
-     * <p>Consider using {@code sps(int, Function)} if only the next operation needs to be parallelized. For example:
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * stream.parallel(ps).map(f).filter(p)...;
-     *
-     * // Replace above line of code with "sps" if only "f" needs to be parallelized, and "p" is fast enough to be executed in sequential Stream.
-     * stream.sps(maxThreadNum, s -> s.map(f)).filter(p)...;
-     * // Or switch the stream back to sequential stream by sequential().
-     * stream.parallel(ps).map(f).sequential().filter(p)...;
-     * }</pre>
+     * <p>Use one of the {@code sps} overloads if only the next operation needs to be parallelized,
+     * or call {@link #sequential()} after that operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Configure parallel execution with specific settings
-     * ParallelSettings ps = ParallelSettings.PS.create(10)
-     *                                          .executor(customExecutor);
+     * ParallelSettings ps = ParallelSettings.builder()
+     *                                       .maxThreadNum(10)
+     *                                       .executor(customExecutor)
+     *                                       .build();
      * Stream.of(data)
      *       .parallel(ps)
      *       .map(expensiveOperation)
      *       .toList();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param ps the ParallelSettings object containing configuration for parallel execution,
-     *        including maximum thread number, splitor strategy, and executor
+     *        including maximum thread number, split strategy and executor
      * @return a new stream configured for parallel execution with the specified settings
      * @throws IllegalStateException if the stream is already closed
      * @see #sps(Function)
@@ -3769,17 +3140,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <SS> the type of the stream returned by the operation
      * @param ops the function that defines the operations to be performed in parallel mode
@@ -3815,17 +3176,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <SS> the type of the stream returned by the operation
      * @param maxThreadNum the maximum number of threads to use for the parallel operation
@@ -3856,24 +3207,18 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <pre>{@code
      * // Parallelize only the IO operation with custom executor
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
-     * Stream.of(urls)
-     *       .filter(url -> url.startsWith("https"))
-     *       .sps(20, ioExecutor, s -> s.map(url -> fetchData(url)))  // processes only this part in parallel
-     *       .map(data -> parseData(data))                            // switches back to sequential
-     *       .toList();
+     * try {
+     *     Stream.of(urls)
+     *           .filter(url -> url.startsWith("https"))
+     *           .sps(20, ioExecutor, s -> s.map(url -> fetchData(url)))  // processes only this part in parallel
+     *           .map(data -> parseData(data))                            // switches back to sequential
+     *           .toList();
+     * } finally {
+     *     ioExecutor.shutdown();
+     * }
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <SS> the type of the stream returned by the operation
      * @param maxThreadNum the maximum number of threads to use for the parallel operation
@@ -3896,10 +3241,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
 
     /**
      * Temporarily switches the stream to sequential mode for the specified operation and then switches back to
-     * parallel mode with the same configuration (maxThreadNum/splitor/executor).
+     * parallel mode with the same configuration (maxThreadNum/splitStrategy/executor).
      * This is useful when you have a parallel stream but want to execute a specific operation sequentially.
      *
-     * <p>This method is equivalent to: {@code stream.sequential().ops(map/filter/...).parallel(sameMaxThreadNum, sameSplitor, sameExecutor)}
+     * <p>This method is equivalent to: {@code stream.sequential().ops(map/filter/...).parallel(sameMaxThreadNum, sameSplitStrategy, sameExecutor)}
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3912,17 +3257,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       .toList();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <SS> the type of the stream returned by the operation
      * @param ops the function that defines the operations to be performed in sequential mode
@@ -3949,7 +3284,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p>To avoid eager loading by terminal operations invoked in the transfer function, use deferred execution:
      * <pre>{@code
-     * stream.transform(s -> Stream.defer(() -> s.someTerminalOperation()));
+     * Stream<List<Integer>> deferred = Stream.of(1, 2, 3)
+     *     .transform(s -> Stream.defer(() -> Stream.just(s.toList())));
+     * List<Integer> values = deferred.first().orElseThrow();
      * }</pre>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3965,17 +3302,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *     .transform(s -> Stream.of(s.collect(Collectors.partitioningBy(n -> n % 2 == 0))));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <RS> the type of the new stream
      * @param transfer the transformation function that takes the current stream and returns a new stream
@@ -4009,17 +3336,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Returns Optional.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <R> the return type of the function
      * @param <E> the type of exception that the function can throw
@@ -4056,17 +3373,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // Prints: No data to process
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <E> the type of exception that the consumer can throw
      * @param action the consumer to be applied to the stream if it's not empty
@@ -4103,17 +3410,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // All close handlers are invoked after toList() completes
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b></p>
-     * <table border="1">
-     *   <caption>Operation characteristics</caption>
-     *   <tr><th></th><th>Yes/No</th><th>Meaning when Yes</th></tr>
-     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
-     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
-     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
-     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
-     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
-     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
-     * </table>
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param closeHandler the Runnable to be invoked when the stream is closed
      * @return a stream with the close handler registered. This may be the same stream instance.
@@ -4175,16 +3472,23 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stream.split(chunkSize).parallel(...).map/filter/flatMap...(sliceList -> process(sliceList));
-     * // Or
-     * stream.split(chunkSize).sps(maxThreadNum, op)
+     * List<Integer> chunkSizes = Stream.of(1, 2, 3, 4)
+     *         .split(2)
+     *         .parallel(2)
+     *         .map(List::size)
+     *         .toList();
+     *
+     * List<Integer> chunkSizesWithSps = Stream.of(1, 2, 3, 4)
+     *         .split(2)
+     *         .sps(2, s -> s.map(List::size))
+     *         .toList();
      * }</pre>
      *
      * @see BaseStream#parallel(ParallelSettings)
      * @see Stream#sps(Function)
      * @see Stream#sps(int, Function)
      */
-    enum Splitor {
+    enum SplitStrategy {
         /**
          * Elements are fetched and processed by parallel threads one by one.
          * This strategy provides fine-grained work distribution but requires synchronization.
@@ -4194,12 +3498,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * Iterator<String> elements = List.of("alpha", "beta").iterator();
+         * String next = null;
          * synchronized (elements) {
          *    if (elements.hasNext()) {
          *       next = elements.next();
          *    }
          * }
-         * // Process the element...
+         * System.out.println(next);
          * }</pre>
          *
          * <p>This approach ensures good load balancing as threads that finish processing
@@ -4255,19 +3561,22 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Configuration class for parallel stream execution.
      * This class provides fine-grained control over how streams are parallelized.
      *
-     * <p>Use the {@link PS} factory class to create instances:
+     * <p>Use {@code ParallelSettings.builder()} to create instances:
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ParallelSettings settings = PS.create(8)
-     *                               .executor(customExecutor);
+     * ParallelSettings settings = ParallelSettings.builder()
+     *                                             .maxThreadNum(8)
+     *                                             .executor(customExecutor)
+     *                                             .build();
      * }</pre>
      *
      * @see BaseStream#parallel(ParallelSettings)
-     * @see PS
      */
-    @Data
+    @Builder
+    @Value
     @Accessors(fluent = true)
+    @AllArgsConstructor
     final class ParallelSettings {
         private int maxThreadNum;
         //    /**
@@ -4285,130 +3594,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
          * @deprecated by design — discouraged internal tuning hint; prefer {@code maxThreadNum}/{@code executor}.
          */
         @Deprecated
-        private Splitor splitor;
+        private SplitStrategy splitStrategy;
         private Executor executor;
-        // private boolean cancelUncompletedThreads = false;
-
-        /**
-         * Constructs a new ParallelSettings instance with default values.
-         * Use the {@link PS} factory class methods to create properly configured instances.
-         *
-         * @see PS#create(int)
-         * @see PS#create(Executor)
-         */
-        public ParallelSettings() {
-            // Default constructor for Lombok @Data annotation
-        }
-
-        /**
-         * Factory class for creating {@link ParallelSettings} instances.
-         * Provides convenient static factory methods for common parallel configurations.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * // Create with just thread count
-         * ParallelSettings ps1 = PS.create(8);
-         *
-         * // Create with executor
-         * ParallelSettings ps2 = PS.create(executorService);
-         *
-         * // Create with all parameters
-         * ParallelSettings ps3 = PS.create(8, Splitor.ARRAY, executorService);
-         * }</pre>
-         *
-         */
-        @Beta
-        public static final class PS {
-            private PS() {
-                // utility class;
-            }
-
-            /**
-             * Creates a ParallelSettings instance with the specified maximum thread number.
-             *
-             * @param maxThreadNum the maximum number of threads to use for parallel operations
-             * @return a new ParallelSettings instance configured with the specified thread count
-             */
-            public static ParallelSettings create(final int maxThreadNum) {
-                return new ParallelSettings().maxThreadNum(maxThreadNum);
-            }
-
-            /**
-             * Creates a ParallelSettings instance with the specified splitor strategy.
-             *
-             * @param splitor the strategy for splitting work among parallel threads
-             * @return a new ParallelSettings instance configured with the specified splitor
-             * @deprecated by design — the {@code splitor} hint is a discouraged tuning knob; prefer
-             *             {@link #create(int)} / {@link #create(Executor)}.
-             */
-            @Deprecated
-            public static ParallelSettings create(final Splitor splitor) {
-                return new ParallelSettings().splitor(splitor);
-            }
-
-            /**
-             * Creates a ParallelSettings instance with the specified executor.
-             *
-             * @param executor the executor to use for parallel operations
-             * @return a new ParallelSettings instance configured with the specified executor
-             */
-            public static ParallelSettings create(final Executor executor) {
-                return new ParallelSettings().executor(executor);
-            }
-
-            /**
-             * Creates a ParallelSettings instance with the specified maximum thread number and splitor strategy.
-             *
-             * @param maxThreadNum the maximum number of threads to use for parallel operations
-             * @param splitor the strategy for splitting work among parallel threads
-             * @return a new ParallelSettings instance configured with the specified parameters
-             * @deprecated by design — the {@code splitor} hint is a discouraged tuning knob; prefer
-             *             {@link #create(int)} / {@link #create(int, Executor)}.
-             */
-            @Deprecated
-            public static ParallelSettings create(final int maxThreadNum, final Splitor splitor) {
-                return new ParallelSettings().maxThreadNum(maxThreadNum).splitor(splitor);
-            }
-
-            /**
-             * Creates a ParallelSettings instance with the specified maximum thread number and executor.
-             *
-             * @param maxThreadNum the maximum number of threads to use for parallel operations
-             * @param executor the executor to use for parallel operations
-             * @return a new ParallelSettings instance configured with the specified parameters
-             */
-            public static ParallelSettings create(final int maxThreadNum, final Executor executor) {
-                return new ParallelSettings().maxThreadNum(maxThreadNum).executor(executor);
-            }
-
-            /**
-             * Creates a ParallelSettings instance with the specified splitor strategy and executor.
-             *
-             * @param splitor the strategy for splitting work among parallel threads
-             * @param executor the executor to use for parallel operations
-             * @return a new ParallelSettings instance configured with the specified parameters
-             * @deprecated by design — the {@code splitor} hint is a discouraged tuning knob; prefer
-             *             {@link #create(Executor)} / {@link #create(int, Executor)}.
-             */
-            @Deprecated
-            public static ParallelSettings create(final Splitor splitor, final Executor executor) {
-                return new ParallelSettings().splitor(splitor).executor(executor);
-            }
-
-            /**
-             * Creates a ParallelSettings instance with all configuration parameters.
-             *
-             * @param maxThreadNum the maximum number of threads to use for parallel operations
-             * @param splitor the strategy for splitting work among parallel threads
-             * @param executor the executor to use for parallel operations
-             * @return a new ParallelSettings instance configured with all specified parameters
-             * @deprecated by design — the {@code splitor} hint is a discouraged tuning knob; prefer
-             *             {@link #create(int, Executor)}.
-             */
-            @Deprecated
-            public static ParallelSettings create(final int maxThreadNum, final Splitor splitor, final Executor executor) {
-                return new ParallelSettings().maxThreadNum(maxThreadNum).splitor(splitor).executor(executor);
-            }
-        }
+        // private boolean cancelUncompletedThreads = false;   
     }
 }

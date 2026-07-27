@@ -76,8 +76,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -7434,6 +7436,15 @@ public class NTest extends AbstractParserTest {
         Set<String> actualLinked = N.commonSet(listOfLinked);
         assertEquals(expectedLinked, actualLinked);
         assertTrue(actualLinked instanceof LinkedHashSet);
+
+        List<Integer> first = Arrays.asList(3, 2, 1, 4);
+        List<Integer> smaller = Arrays.asList(1, 2, 3);
+        Set<Integer> ordered = N.commonSet(Arrays.asList(first, smaller));
+        assertEquals(Arrays.asList(3, 2, 1), new ArrayList<>(ordered));
+
+        Set<Integer> orderedSingle = N.commonSet(Collections.singletonList(first));
+        assertTrue(orderedSingle instanceof LinkedHashSet);
+        assertEquals(first, new ArrayList<>(orderedSingle));
     }
 
     @Test
@@ -10437,6 +10448,37 @@ public class NTest extends AbstractParserTest {
         assertFalse(N.removeAll(coll, "x", "y"));
         assertFalse(N.removeAll(new ArrayList<String>(), "a"));
         assertFalse(N.removeAll(coll));
+    }
+
+    @Test
+    public void testRemoveAllPreservesArgumentMembershipSemantics() {
+        // removeAll must snapshot valuesToRemove (it may be backed by the receiver) without
+        // discarding how that collection decides membership. Copying a sorted set into a list
+        // silently switched it from its comparator to equals.
+        final TreeSet<String> caseInsensitive = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        caseInsensitive.add("ABC");
+
+        final List<String> coll = new ArrayList<>(Arrays.asList("abc", "xyz"));
+        assertTrue(N.removeAll(coll, caseInsensitive));
+        assertEquals(Arrays.asList("xyz"), coll);
+
+        // ...and a plain hash set still matches by equals.
+        final List<String> coll2 = new ArrayList<>(Arrays.asList("abc", "xyz"));
+        assertTrue(N.removeAll(coll2, new HashSet<>(Arrays.asList("abc"))));
+        assertEquals(Arrays.asList("xyz"), coll2);
+    }
+
+    @Test
+    public void testRemoveAllAcceptsArgumentsBackedByTheReceiver() {
+        // Both overloads must tolerate being handed the receiver itself: r9240 threw
+        // ConcurrentModificationException for the iterator form.
+        final List<String> selfList = new ArrayList<>(Arrays.asList("a", "b"));
+        assertTrue(N.removeAll(selfList, selfList));
+        assertTrue(selfList.isEmpty());
+
+        final Set<String> selfSet = new LinkedHashSet<>(Arrays.asList("a", "b"));
+        assertTrue(N.removeAll(selfSet, selfSet.iterator()));
+        assertTrue(selfSet.isEmpty());
     }
 
     @Test
@@ -20866,6 +20908,49 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void parallelForEach_waitsForAcceptedWorkerWhenLaterSubmissionIsRejected() {
+        for (final boolean indexed : Arrays.asList(false, true)) {
+            final CountDownLatch actionStarted = new CountDownLatch(1);
+            final AtomicBoolean actionFinished = new AtomicBoolean();
+            final AtomicInteger submissionCount = new AtomicInteger();
+            final Executor partiallyRejectingExecutor = command -> {
+                if (submissionCount.getAndIncrement() == 0) {
+                    final Thread worker = new Thread(command, "NTest-partially-accepted-worker");
+                    worker.setDaemon(true);
+                    worker.start();
+
+                    try {
+                        assertTrue(actionStarted.await(5, TimeUnit.SECONDS));
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new AssertionError(e);
+                    }
+                } else {
+                    throw new RejectedExecutionException("reject later worker");
+                }
+            };
+
+            assertThrows(RejectedExecutionException.class, () -> {
+                if (indexed) {
+                    N.forEachIndexedInParallel(Arrays.asList(1, 2).iterator(), (idx, value) -> {
+                        actionStarted.countDown();
+                        N.sleepUninterruptibly(25);
+                        actionFinished.set(true);
+                    }, 2, partiallyRejectingExecutor);
+                } else {
+                    N.forEachInParallel(Arrays.asList(1, 2).iterator(), value -> {
+                        actionStarted.countDown();
+                        N.sleepUninterruptibly(25);
+                        actionFinished.set(true);
+                    }, 2, partiallyRejectingExecutor);
+                }
+            });
+
+            assertTrue(actionFinished.get(), "The accepted worker must finish before the submission failure is rethrown");
+        }
+    }
+
+    @Test
     public void forEach_array_flatMap_biConsumer() throws Exception {
         String[] array = { "a", "b" };
         List<Tuple.Tuple2<String, Integer>> result = new ArrayList<>();
@@ -25013,16 +25098,28 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_registerPropertyAccessor() {
-        Beans.registerPropertyAccessor("a", ClassUtil.getDeclaredMethod(Account.class, "getFirstName"));
+        class AccessorProbe {
+            private String value;
 
-        Method method = Beans.getPropGetter(Account.class, "a");
-        N.println(method);
-        assertEquals(ClassUtil.getDeclaredMethod(Account.class, "getFirstName"), method);
+            public String getValue() {
+                return value;
+            }
 
-        Beans.registerPropertyAccessor("b", ClassUtil.getDeclaredMethod(Account.class, "setFirstName", String.class));
-        method = Beans.getPropSetter(Account.class, "b");
+            public void setValue(final String value) {
+                this.value = value;
+            }
+        }
+
+        Beans.registerPropertyAccessor("a", ClassUtil.getDeclaredMethod(AccessorProbe.class, "getValue"));
+
+        Method method = Beans.getPropGetter(AccessorProbe.class, "a");
         N.println(method);
-        assertEquals(ClassUtil.getDeclaredMethod(Account.class, "setFirstName", String.class), method);
+        assertEquals(ClassUtil.getDeclaredMethod(AccessorProbe.class, "getValue"), method);
+
+        Beans.registerPropertyAccessor("b", ClassUtil.getDeclaredMethod(AccessorProbe.class, "setValue", String.class));
+        method = Beans.getPropSetter(AccessorProbe.class, "b");
+        N.println(method);
+        assertEquals(ClassUtil.getDeclaredMethod(AccessorProbe.class, "setValue", String.class), method);
     }
 
     @Test

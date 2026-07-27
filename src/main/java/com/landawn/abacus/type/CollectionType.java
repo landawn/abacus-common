@@ -410,9 +410,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     /**
      * Writes the JSON array representation of a collection to a {@link CharacterWriter}.
-     * Each element is written using its own type's {@code serializeTo} method, so element-level
-     * quotation and escaping are applied correctly. If {@code x} is {@code null}, the literal
-     * {@code null} is written.
+     * Each element &mdash; including a {@code null} element &mdash; is written using its own type's
+     * {@code serializeTo} method, so element-level quotation and escaping are applied correctly.
+     * If {@code x} itself is {@code null}, the literal {@code null} is written.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization

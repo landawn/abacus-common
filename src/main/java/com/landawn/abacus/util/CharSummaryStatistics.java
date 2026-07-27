@@ -77,8 +77,10 @@ public class CharSummaryStatistics implements CharConsumer {
      * @param count the count of values; must be non-negative
      * @param min the minimum {@code char} value
      * @param max the maximum {@code char} value
-     * @param sum the sum of the Unicode code point values of all recorded chars
-     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
+     * @param sum the sum of the numeric UTF-16 code-unit values of all recorded chars
+     * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state does not use
+     *         {@link Character#MAX_VALUE}, {@link Character#MIN_VALUE}, and zero for min, max, and sum;
+     *         or if a non-empty state has {@code min} greater than {@code max}
      */
     public CharSummaryStatistics(final long count, final char min, final char max, final long sum) {
         if (count < 0) {
@@ -147,7 +149,8 @@ public class CharSummaryStatistics implements CharConsumer {
      * System.out.println(stats1.getMax());     // prints Z
      * }</pre>
      *
-     * @param other another {@code CharSummaryStatistics} to combine with this one
+     * @param other another {@code CharSummaryStatistics} to combine with this one; must not be {@code null}
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     public void combine(final CharSummaryStatistics other) {
         count += other.count;
@@ -216,14 +219,14 @@ public class CharSummaryStatistics implements CharConsumer {
      * Returns the sum of values recorded.
      *
      * <p>Note that the sum is maintained as a {@code long} to avoid overflow.
-     * The sum represents the total of the Unicode code point values of all recorded chars.</p>
+     * The sum represents the total of the numeric UTF-16 code-unit values of all recorded chars.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
-     * stats.accept('A');                    // Unicode code point 65
-     * stats.accept('B');                    // Unicode code point 66
-     * stats.accept('C');                    // Unicode code point 67
+     * stats.accept('A');                    // UTF-16 code-unit value 65
+     * stats.accept('B');                    // UTF-16 code-unit value 66
+     * stats.accept('C');                    // UTF-16 code-unit value 67
      * System.out.println(stats.getSum());   // prints 198
      * }</pre>
      *
@@ -238,18 +241,18 @@ public class CharSummaryStatistics implements CharConsumer {
      * have been recorded.
      *
      * <p>The average is calculated as a {@code double} to preserve precision.
-     * The average represents the mean of the Unicode code point values of all recorded chars.</p>
+     * The average represents the mean of the numeric UTF-16 code-unit values of all recorded chars.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
-     * stats.accept('A');                        // Unicode code point 65
-     * stats.accept('B');                        // Unicode code point 66
-     * stats.accept('C');                        // Unicode code point 67
+     * stats.accept('A');                        // UTF-16 code-unit value 65
+     * stats.accept('B');                        // UTF-16 code-unit value 66
+     * stats.accept('C');                        // UTF-16 code-unit value 67
      * System.out.println(stats.getAverage());   // prints 66.0
      * }</pre>
      *
-     * @return the arithmetic mean of Unicode code point values as a {@code double}, or {@code 0.0} if none
+     * @return the arithmetic mean of numeric UTF-16 code-unit values as a {@code double}, or {@code 0.0} if none
      */
     public final double getAverage() {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;

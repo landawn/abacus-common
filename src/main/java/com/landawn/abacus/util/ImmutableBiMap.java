@@ -39,8 +39,9 @@ import com.landawn.abacus.annotation.Internal;
  * </ul>
  *
  * <p>Unlike regular maps, {@code BiMap}s enforce that values are unique in
- * addition to keys. If duplicate values are provided when populating the
- * underlying {@code BiMap}, an exception may be thrown.</p>
+ * addition to keys. The {@code of(...)} factory methods reject {@code null} keys and
+ * values and reject a value that is already bound to a different key, throwing
+ * {@link IllegalArgumentException}.</p>
  *
  * <p><b>Usage examples:</b></p>
  * <pre>{@code
@@ -123,9 +124,7 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k1 the key to be included in the map
      * @param v1 the value to be associated with {@code k1}
      * @return an {@code ImmutableBiMap} containing the provided key-value pair
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         does not accept the provided key or value (for example, due to
-     *         nulls or duplicates)
+     * @throws IllegalArgumentException if {@code k1} or {@code v1} is {@code null}
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1);
@@ -151,9 +150,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k2 the second key
      * @param v2 the value associated with {@code k2}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2);
@@ -180,9 +178,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k3 the third key
      * @param v3 the value associated with {@code k3}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3);
@@ -211,9 +208,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k4 the fourth key
      * @param v4 the value associated with {@code k4}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final BiMap<K, V> biMap = BiMap.of(k1, v1, k2, v2, k3, v3, k4, v4);
@@ -244,9 +240,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k5 the fifth key
      * @param v5 the value associated with {@code k5}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -280,9 +275,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k6 the sixth key
      * @param v6 the value associated with {@code k6}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -318,9 +312,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k7 the seventh key
      * @param v7 the value associated with {@code k7}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -359,9 +352,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k8 the eighth key
      * @param v8 the value associated with {@code k8}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -402,9 +394,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k9 the ninth key
      * @param v9 the value associated with {@code k9}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -447,9 +438,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param k10 the tenth key
      * @param v10 the value associated with {@code k10}
      * @return an {@code ImmutableBiMap} containing the provided key-value pairs
-     * @throws IllegalArgumentException if the underlying {@code BiMap} implementation
-     *         rejects the provided keys or values (for example, due to nulls or
-     *         duplicates)
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if a value
+     *         is duplicated (bound to more than one key)
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -504,7 +494,7 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * {@link #empty()}.</p>
      *
      * <p>The returned object is a read-only view, not a deeply immutable snapshot. Use
-     * {@link #copyOf(Map)} when subsequent changes to the source must not be visible.</p>
+     * {@link #copyOf(BiMap)} when subsequent changes to the source must not be visible.</p>
      *
      * <p><b>Usage example:</b></p>
      * <pre>{@code
@@ -669,10 +659,20 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     public static final class Builder<K, V> {
         private final BiMap<K, V> map;
 
+        /**
+         * Creates a builder that accumulates entries into a newly allocated {@link BiMap}.
+         */
         Builder() {
             map = new BiMap<>();
         }
 
+        /**
+         * Creates a builder that accumulates entries into the given {@link BiMap}.
+         * The map is used as-is (not copied), so entries already present in it are
+         * part of the built result.
+         *
+         * @param backedMap the {@code BiMap} used as backing storage for this builder
+         */
         Builder(final BiMap<K, V> backedMap) {
             map = backedMap;
         }
@@ -717,6 +717,9 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
          *
          * @param m the map whose mappings are to be added; may be {@code null} or empty
          * @return this builder instance, for method chaining
+         * @throws IllegalArgumentException if any key or value in {@code m} is {@code null},
+         *         or if a value is already bound to a different key in the map being built.
+         *         Entries added before the failing one remain in the map being built
          */
         public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
             if (N.notEmpty(m)) {

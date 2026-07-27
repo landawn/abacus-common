@@ -742,6 +742,66 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
+    public void testRepeatedShutdownDoesNotReportTerminatedWhileTaskRunning() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor(1, 1, 60L, TimeUnit.SECONDS);
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+
+        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> {
+            started.countDown();
+            release.await(5, TimeUnit.SECONDS);
+        });
+
+        Assertions.assertTrue(started.await(1, TimeUnit.SECONDS));
+
+        try {
+            executor.shutdown();
+            // A second shutdown() must stay idempotent: it must not wipe the pending-termination
+            // tracker and flip isTerminated() to true while the task is still running.
+            executor.shutdown();
+            Assertions.assertFalse(executor.isTerminated());
+        } finally {
+            release.countDown();
+        }
+
+        future.get(2, TimeUnit.SECONDS);
+        awaitTerminated(executor);
+    }
+
+    @Test
+    public void testShutdownAndAwaitAfterShutdownStillWaits() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor(1, 1, 60L, TimeUnit.SECONDS);
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+
+        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> {
+            started.countDown();
+            release.await(5, TimeUnit.SECONDS);
+        });
+
+        Assertions.assertTrue(started.await(1, TimeUnit.SECONDS));
+
+        executor.shutdown();
+
+        Thread releaser = new Thread(() -> {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            release.countDown();
+        });
+        releaser.start();
+
+        // Called after a prior shutdown(), this must still wait for the draining tasks.
+        executor.shutdownAndAwait(3, TimeUnit.SECONDS);
+        Assertions.assertTrue(executor.isTerminated());
+
+        future.get(2, TimeUnit.SECONDS);
+        releaser.join(2000);
+    }
+
+    @Test
     public void testIsTerminatedBeforeShutdown() {
         AsyncExecutor executor = new AsyncExecutor();
         executor.execute((Throwables.Runnable<Exception>) () -> {

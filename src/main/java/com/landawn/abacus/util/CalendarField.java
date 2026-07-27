@@ -244,7 +244,7 @@ public enum CalendarField {
      * CalendarField field = CalendarField.valueOf(Calendar.MONTH);
      *
      * // Preferred way
-     * CalendarField field = CalendarField.of(Calendar.MONTH);
+     * CalendarField preferredField = CalendarField.of(Calendar.MONTH);
      * }</pre>
      *
      * @param intValue the Calendar field constant value to convert

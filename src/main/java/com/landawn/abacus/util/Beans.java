@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -101,8 +102,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Bean validation and introspection
- * boolean isBean = Beans.isBeanClass(User.class);                // returns true for a standard bean class
- * List<String> properties = Beans.getPropNameList(User.class);   // returns cached property names
+ * boolean isBean = Beans.isBeanClass(User.class);                     // returns true for a standard bean class
+ * List<String> properties = Beans.getPropNameList(User.class);        // returns cached property names
  * Beans.BuilderInfo builderInfo = Beans.getBuilderInfo(User.class);   // returns null if User has no builder pattern
  *
  * // Property access operations
@@ -122,14 +123,14 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Map to Bean conversion
  * Map<String, Object> userData = Map.of("name", "Jane", "age", 25, "email", "jane@example.com");
- * User userFromMap = Beans.mapToBean(userData, User.class);                             // returns a populated User
+ * User userFromMap = Beans.mapToBean(userData, User.class);                      // returns a populated User
  * User userFromMapIgnoreUnknown = Beans.mapToBean(userData, true, User.class);   // treats unknown properties as ignored
  *
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
  * User target = new User("Jane", 25, null);
- * Beans.mergeInto(source, target);                                        // target is updated from source
- * Beans.mergeInto(source, target, (sourceVal, targetVal) -> sourceVal);   // uses source values
+ * Beans.mergeInto(source, target);                                              // target is updated from source
+ * Beans.mergeInto(source, target, Fn.o((sourceVal, targetVal) -> sourceVal));   // uses source values
  *
  * // Object comparison operations
  * User user1 = new User("John", 30);
@@ -144,7 +145,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Bean-to-Map Conversion Options:</b>
  * <ul>
- *   <li><b>Flat Conversion:</b> {@code beanToFlatMap()} - Flat map representation with dot notation</li>
+ *   <li><b>Flat Conversion:</b> {@code beanToFlatMap(bean)} - Flat map representation with dot notation</li>
  *   <li><b>Deep Conversion:</b> {@code deepBeanToMap(bean)} - Recursive nested object conversion</li>
  *   <li><b>Selected Conversion:</b> {@code beanToMap(bean, selectPropNames)} - Specific property selection</li>
  * </ul>
@@ -175,7 +176,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Shared Metadata:</b> Reflection metadata and explicit registrations are cached globally;
+ *       cache updates are synchronized internally</li>
  *   <li><b>Concurrent Caching:</b> Thread-safe caching using ConcurrentHashMap</li>
  *   <li><b>Immutable Operations:</b> Conversion and copy methods create new objects; merge/fill methods
  *       ({@code mergeInto}, {@code clearProps}, {@code randomize}, output-map overloads) modify the supplied target in place</li>
@@ -200,8 +202,9 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Error Handling Strategy:</b>
  * <ul>
- *   <li><b>Graceful Degradation:</b> Methods handle edge cases without throwing exceptions</li>
- *   <li><b>Null Tolerance:</b> Comprehensive {@code null} input handling throughout the API</li>
+ *   <li><b>Contract Validation:</b> Invalid property names, incompatible values, and unsupported
+ *       bean shapes may result in documented exceptions</li>
+ *   <li><b>Null Handling:</b> Null behavior is method-specific; consult the individual method contract</li>
  *   <li><b>Type Safety:</b> Runtime type validation with clear error messages</li>
  *   <li><b>Exception Wrapping:</b> Reflection exceptions wrapped in clear, actionable messages</li>
  * </ul>
@@ -235,7 +238,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Common Patterns:</b>
  * <ul>
- *   <li><b>Bean Validation:</b> {@code if (Beans.isBeanClass(clazz)) { ... }}</li>
+ *   <li><b>Bean Validation:</b> {@code boolean isBeanType = Beans.isBeanClass(User.class);}</li>
  *   <li><b>Safe Property Access:</b> {@code Object value = Beans.getPropValue(bean, propName);}</li>
  *   <li><b>DTO Conversion:</b> {@code DTO dto = Beans.copyAs(entity, DTO.class);}</li>
  *   <li><b>Configuration Mapping:</b> {@code Config config = Beans.mapToBean(properties, Config.class);}</li>
@@ -256,13 +259,53 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples: Complex Object Processing</b></p>
  * <pre>{@code
  * // Complex bean processing example
+ * class Address {
+ *     private String street;
+ *     private String city;
+ *     private String zipCode;
+ *     public Address() {}
+ *     public Address(String street, String city, String zipCode) {
+ *         this.street = street;
+ *         this.city = city;
+ *         this.zipCode = zipCode;
+ *     }
+ *     public String getStreet() { return street; }
+ *     public void setStreet(String street) { this.street = street; }
+ *     public String getCity() { return city; }
+ *     public void setCity(String city) { this.city = city; }
+ *     public String getZipCode() { return zipCode; }
+ *     public void setZipCode(String zipCode) { this.zipCode = zipCode; }
+ * }
+ *
  * @Entity
- * public class User {
+ * class User {
  *     private String name;
  *     private int age;
  *     private Address address;
  *     private List<String> roles;
- *     // getters and setters...
+ *     public String getName() { return name; }
+ *     public void setName(String name) { this.name = name; }
+ *     public int getAge() { return age; }
+ *     public void setAge(int age) { this.age = age; }
+ *     public Address getAddress() { return address; }
+ *     public void setAddress(Address address) { this.address = address; }
+ *     public List<String> getRoles() { return roles; }
+ *     public void setRoles(List<String> roles) { this.roles = roles; }
+ * }
+ *
+ * class UserDTO {
+ *     private String name;
+ *     private int age;
+ *     private Address address;
+ *     private List<String> roles;
+ *     public String getName() { return name; }
+ *     public void setName(String name) { this.name = name; }
+ *     public int getAge() { return age; }
+ *     public void setAge(int age) { this.age = age; }
+ *     public Address getAddress() { return address; }
+ *     public void setAddress(Address address) { this.address = address; }
+ *     public List<String> getRoles() { return roles; }
+ *     public void setRoles(List<String> roles) { this.roles = roles; }
  * }
  *
  * // Comprehensive bean operations
@@ -290,8 +333,8 @@ import com.landawn.abacus.util.stream.Stream;
  * updates.setName("Jane Doe");
  *
  * Beans.mergeInto(updates, user);   // user is updated from updates
- * Beans.mergeInto(updates, user, (source, target) ->
- *     source != null && !source.equals("") ? source : target);
+ * Beans.mergeInto(updates, user, Fn.o((source, target) ->
+ *     source != null && !source.equals("") ? source : target));
  *
  * // Validation and comparison
  * boolean isValid = Beans.isBeanClass(User.class);
@@ -301,14 +344,25 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples: Configuration Management</b></p>
  * <pre>{@code
  * // Configuration bean processing
- * public class DatabaseConfig {
+ * class DatabaseConfig {
  *     private String host = "localhost";
  *     private int port = 5432;
  *     private String database;
  *     private String username;
  *     private String password;
  *     private boolean ssl = false;
- *     // getters and setters...
+ *     public String getHost() { return host; }
+ *     public void setHost(String host) { this.host = host; }
+ *     public int getPort() { return port; }
+ *     public void setPort(int port) { this.port = port; }
+ *     public String getDatabase() { return database; }
+ *     public void setDatabase(String database) { this.database = database; }
+ *     public String getUsername() { return username; }
+ *     public void setUsername(String username) { this.username = username; }
+ *     public String getPassword() { return password; }
+ *     public void setPassword(String password) { this.password = password; }
+ *     public boolean isSsl() { return ssl; }
+ *     public void setSsl(boolean ssl) { this.ssl = ssl; }
  * }
  *
  * // Load configuration from multiple sources
@@ -379,13 +433,13 @@ public final class Beans {
 
     private static final Logger logger = LoggerFactory.getLogger(Beans.class);
 
-    // ...
+    // Nested property-path syntax and parser.
     private static final String PROP_NAME_SEPARATOR = ".";
 
     // Shared, stateless splitter for nested property paths (e.g. "address.city"); reused to avoid per-call allocation.
     private static final Splitter PROP_NAME_SPLITTER = Splitter.with(PROP_NAME_SEPARATOR);
 
-    // ...
+    // Conventional JavaBean accessor prefixes.
     private static final String GET = "get";
 
     private static final String SET = "set";
@@ -406,6 +460,10 @@ public final class Beans {
     private static final Map<Class<?>, Boolean> registeredXmlBindingClassList = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, Set<String>> registeredNonPropGetSetMethodPool = new ObjectPool<>(POOL_SIZE);
+
+    private static final Map<Class<?>, Map<String, Method>> registeredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+
+    private static final Map<Class<?>, Map<String, Method>> registeredPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, ImmutableList<String>> beanDeclaredPropNameListPool = new ObjectPool<>(POOL_SIZE);
 
@@ -428,12 +486,12 @@ public final class Beans {
     //    /** The Constant beanInlinePropSetMethodPool. */
     //    private static final Map<Class<?>, Map<String, List<Method>>> beanInlinePropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    // ...
+    // Normalized property names and reflected method-name metadata.
     private static final Map<String, String> formalizedPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
     private static final Map<Method, String> methodPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    // reserved words.
+    // Java keywords mapped to legal property identifiers.
     private static final Map<String, String> keyWordMapper = new HashMap<>(16);
 
     static {
@@ -569,6 +627,8 @@ public final class Beans {
      *
      * @param beanType the bean type to get bean information for.
      * @return a {@link BeanInfo} instance containing metadata about the specified type.
+     * @throws IllegalArgumentException if the specified type is not a bean class (no property getter/setter
+     *         method or public field found).
      * @see ParserUtil#getBeanInfo(Class)
      */
     public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
@@ -611,12 +671,24 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * class Person {
+     *     private final String name;
+     *     private Person(String name) { this.name = name; }
+     *     public static Builder builder() { return new Builder(); }
+     *     static class Builder {
+     *         private String name;
+     *         public Builder name(String name) { this.name = name; return this; }
+     *         public Person build() { return new Person(name); }
+     *     }
+     * }
+     * class User {}
+     *
      * // Person has a static builder() method returning a Builder with a build() method
      * Beans.BuilderInfo info = Beans.getBuilderInfo(Person.class);   // returns a non-null BuilderInfo
      * if (info != null) {
-     *     Object builder = info.newBuilder();      // returns a new builder
-     *     // ... populate the builder ...
-     *     Object instance = info.build(builder);   // returns the built instance
+     *     Person.Builder builder = (Person.Builder) info.newBuilder();
+     *     builder.name("Ada");
+     *     Person instance = (Person) info.build(builder);
      * }
      *
      * Beans.getBuilderInfo(User.class);   // returns null (no builder pattern detected)
@@ -847,15 +919,45 @@ public final class Beans {
      *
      * @param cls the class for which the non-property get/set method is to be registered.
      * @param propName the name of the property to be registered as a non-property get/set method.
+     * @throws IllegalArgumentException if {@code cls} is {@code null} or {@code propName} is empty
      */
     @SuppressWarnings("deprecation")
     public static void registerNonPropertyAccessor(final Class<?> cls, final String propName) {
-        synchronized (registeredNonPropGetSetMethodPool) {
-            Set<String> set = registeredNonPropGetSetMethodPool.computeIfAbsent(cls, k -> N.newHashSet());
+        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotEmpty(propName, "propName");
 
-            set.add(propName);
+        final Set<Class<?>> classesToRefresh = N.newLinkedHashSet();
 
-            ParserUtil.refreshBeanPropInfo(cls);
+        synchronized (beanDeclaredPropGetMethodPool) {
+            synchronized (registeredNonPropGetSetMethodPool) {
+                final Set<String> set = registeredNonPropGetSetMethodPool.computeIfAbsent(cls, k -> N.newHashSet());
+
+                set.add(propName);
+            }
+
+            classesToRefresh.add(cls);
+
+            // A registration for a base type also applies to already-introspected subtypes.
+            for (final Class<?> cachedClass : new ArrayList<>(beanDeclaredPropGetMethodPool.keySet())) {
+                if (cls.isAssignableFrom(cachedClass)) {
+                    classesToRefresh.add(cachedClass);
+                }
+            }
+
+            for (final Class<?> classToRefresh : classesToRefresh) {
+                beanDeclaredPropNameListPool.remove(classToRefresh);
+                beanDeclaredPropFieldPool.remove(classToRefresh);
+                beanDeclaredPropGetMethodPool.remove(classToRefresh);
+                beanDeclaredPropSetMethodPool.remove(classToRefresh);
+                beanPropFieldPool.remove(classToRefresh);
+                beanPropGetMethodPool.remove(classToRefresh);
+                beanPropSetMethodPool.remove(classToRefresh);
+                beanInlinePropGetMethodPool.remove(classToRefresh);
+            }
+        }
+
+        for (final Class<?> classToRefresh : classesToRefresh) {
+            ParserUtil.refreshBeanPropInfo(classToRefresh);
         }
     }
 
@@ -863,6 +965,7 @@ public final class Beans {
      * Registers a getter or setter method as the property accessor for the specified property name.
      * The method must be recognized as a getter (starts with {@code get}, {@code is}, or {@code has},
      * or matches a field name) or a setter (starts with {@code set}, or matches a field name).
+     * The registration applies to the method's declaring class and all assignable subclasses.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -877,12 +980,17 @@ public final class Beans {
      *
      * @param propName the name of the property to associate with the method.
      * @param method the getter or setter method to register as the property accessor.
-     * @throws IllegalArgumentException if the method is not a valid getter or setter,
+     * @throws IllegalArgumentException if {@code propName} is empty, {@code method} is {@code null},
+     *         the method is not a valid getter or setter,
      *         or if {@code propName} is already registered with a different method.
      */
     @SuppressWarnings("deprecation")
     public static void registerPropertyAccessor(final String propName, final Method method) {
+        N.checkArgNotEmpty(propName, "propName");
+        N.checkArgNotNull(method, "method");
+
         final Class<?> cls = method.getDeclaringClass();
+        final Set<Class<?>> classesToRefresh = N.newLinkedHashSet();
 
         synchronized (beanDeclaredPropGetMethodPool) {
             if (isGetMethod(method)) {
@@ -893,14 +1001,9 @@ public final class Beans {
                     propMethodMap = beanPropGetMethodPool.get(cls);
                 }
 
-                if (propMethodMap.containsKey(propName)) {
-                    if (!method.equals(propMethodMap.get(propName))) {
-                        throw new IllegalArgumentException(
-                                propName + " has already been registered with different method: " + propMethodMap.get(propName).getName());
-                    }
-                } else {
-                    propMethodMap.put(propName, method);
-                }
+                checkPropertyAccessorConflict(propName, method, cls, propMethodMap, registeredPropGetMethodPool);
+
+                registeredPropGetMethodPool.computeIfAbsent(cls, k -> new ObjectPool<>(16)).put(propName, method);
             } else if (isSetMethod(method)) {
                 Map<String, Method> propMethodMap = beanPropSetMethodPool.get(cls);
 
@@ -909,20 +1012,70 @@ public final class Beans {
                     propMethodMap = beanPropSetMethodPool.get(cls);
                 }
 
-                if (propMethodMap.containsKey(propName)) {
-                    if (!method.equals(propMethodMap.get(propName))) {
-                        throw new IllegalArgumentException(
-                                propName + " has already been registered with different method: " + propMethodMap.get(propName).getName());
-                    }
-                } else {
-                    propMethodMap.put(propName, method);
-                }
+                checkPropertyAccessorConflict(propName, method, cls, propMethodMap, registeredPropSetMethodPool);
+
+                registeredPropSetMethodPool.computeIfAbsent(cls, k -> new ObjectPool<>(16)).put(propName, method);
             } else {
                 throw new IllegalArgumentException("The name of property getter/setter method must start with 'get/is/has' or 'set': " + method.getName());
             }
 
-            ParserUtil.refreshBeanPropInfo(cls);
+            classesToRefresh.add(cls);
+
+            // A registration for a base type also applies to already-introspected subtypes.
+            for (final Class<?> cachedClass : new ArrayList<>(beanDeclaredPropGetMethodPool.keySet())) {
+                if (cls.isAssignableFrom(cachedClass)) {
+                    classesToRefresh.add(cachedClass);
+                }
+            }
+
+            for (final Class<?> classToRefresh : classesToRefresh) {
+                beanDeclaredPropNameListPool.remove(classToRefresh);
+                beanDeclaredPropFieldPool.remove(classToRefresh);
+                beanDeclaredPropGetMethodPool.remove(classToRefresh);
+                beanDeclaredPropSetMethodPool.remove(classToRefresh);
+                beanPropFieldPool.remove(classToRefresh);
+                beanPropGetMethodPool.remove(classToRefresh);
+                beanPropSetMethodPool.remove(classToRefresh);
+                beanInlinePropGetMethodPool.remove(classToRefresh);
+            }
         }
+
+        for (final Class<?> classToRefresh : classesToRefresh) {
+            ParserUtil.refreshBeanPropInfo(classToRefresh);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void checkPropertyAccessorConflict(final String propName, final Method method, final Class<?> cls, final Map<String, Method> propMethodMap,
+            final Map<Class<?>, Map<String, Method>> registeredMethodPool) {
+        final Map<String, Method> directlyRegisteredMethodMap = registeredMethodPool.get(cls);
+        final Method directlyRegisteredMethod = directlyRegisteredMethodMap == null ? null : directlyRegisteredMethodMap.get(propName);
+
+        if (directlyRegisteredMethod != null) {
+            if (!method.equals(directlyRegisteredMethod)) {
+                throw new IllegalArgumentException(propName + " has already been registered with different method: " + directlyRegisteredMethod.getName());
+            }
+
+            return;
+        }
+
+        final Method existingMethod = propMethodMap.get(propName);
+
+        if (existingMethod != null && existingMethod != ClassUtil.SENTINEL_METHOD && !method.equals(existingMethod)
+                && !hasInheritedPropertyAccessor(propName, cls, registeredMethodPool)) {
+            throw new IllegalArgumentException(propName + " has already been registered with different method: " + existingMethod.getName());
+        }
+    }
+
+    private static boolean hasInheritedPropertyAccessor(final String propName, final Class<?> cls,
+            final Map<Class<?>, Map<String, Method>> registeredMethodPool) {
+        for (final Map.Entry<Class<?>, Map<String, Method>> entry : registeredMethodPool.entrySet()) {
+            if (entry.getKey() != cls && entry.getKey().isAssignableFrom(cls) && entry.getValue().containsKey(propName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1093,7 +1246,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String name; int age; Boolean active; ...accessors... }
+     * class User {
+     *     private String name;
+     *     private int age;
+     *     private Boolean active;
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public Boolean getActive() { return active; }
+     *     public void setActive(Boolean active) { this.active = active; }
+     * }
      * Beans.getPropNameList(User.class);   // returns ["name", "age", "active"] (field-declaration order)
      * Beans.getPropNameList(null);         // throws IllegalArgumentException
      * }</pre>
@@ -1120,7 +1283,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String name; int age; Boolean active; ... }
+     * class User {
+     *     private String name;
+     *     private int age;
+     *     private Boolean active;
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public Boolean getActive() { return active; }
+     *     public void setActive(Boolean active) { this.active = active; }
+     * }
      * Beans.getPropNames(User.class, Arrays.asList("age"));             // returns ["name", "active"]
      * Beans.getPropNames(User.class, Arrays.asList("age", "active"));   // returns ["name"]
      * Beans.getPropNames(User.class, (Collection<String>) null);        // returns ["name", "age", "active"]
@@ -1158,7 +1331,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String name; int age; Boolean active; ... }
+     * class User {
+     *     private String name;
+     *     private int age;
+     *     private Boolean active;
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public Boolean getActive() { return active; }
+     *     public void setActive(Boolean active) { this.active = active; }
+     * }
      * Beans.getPropNames(User.class, Set.of("age", "active"));   // returns ["name"]
      * Beans.getPropNames(User.class, Set.of());                  // returns ["name", "age", "active"]
      * Beans.getPropNames(User.class, (Set<String>) null);        // returns ["name", "age", "active"]
@@ -1301,14 +1484,20 @@ public final class Beans {
      *     private String name;
      *     @DiffIgnore
      *     private Date lastModified;
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public Date getLastModified() { return lastModified; }
+     *     public void setLastModified(Date lastModified) { this.lastModified = lastModified; }
      * }
      *
      * Beans.getIgnoredPropNamesForDiff(User.class);      // returns ["lastModified"]
      * Beans.getIgnoredPropNamesForDiff(Address.class);   // returns [] (no @DiffIgnore properties)
      * }</pre>
      *
-     * @param cls the class for which the diff-ignored property names are to be retrieved.
+     * @param cls the class for which the diff-ignored property names are to be retrieved; must be a bean class.
      * @return an immutable set of property names excluded from diff operations; never {@code null}.
+     * @throws IllegalArgumentException if {@code cls} is not a bean class (no property getter/setter method
+     *         or public field found).
      * @see com.landawn.abacus.util.Difference.MapDifference
      * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
      */
@@ -1654,19 +1843,24 @@ public final class Beans {
                 }
             }
 
-            for (final Map.Entry<Class<?>, Set<String>> entry : registeredNonPropGetSetMethodPool.entrySet()) { //NOSONAR
-                if (entry.getKey().isAssignableFrom(cls)) {
-                    final Set<String> set = entry.getValue();
-                    final List<String> methodNames = new ArrayList<>(propGetMethodMap.keySet());
+            applyRegisteredPropertyAccessors(cls, propGetMethodMap, registeredPropGetMethodPool);
+            applyRegisteredPropertyAccessors(cls, propSetMethodMap, registeredPropSetMethodPool);
 
-                    for (final String nonPropName : set) {
-                        for (final String propName : methodNames) {
-                            if (propName.equalsIgnoreCase(nonPropName)) {
-                                propFieldMap.remove(propName);
-                                propGetMethodMap.remove(propName);
-                                propSetMethodMap.remove(propName);
+            synchronized (registeredNonPropGetSetMethodPool) {
+                for (final Map.Entry<Class<?>, Set<String>> entry : registeredNonPropGetSetMethodPool.entrySet()) { //NOSONAR
+                    if (entry.getKey().isAssignableFrom(cls)) {
+                        final Set<String> set = entry.getValue();
+                        final Set<String> propertyNames = new LinkedHashSet<>(propFieldMap.keySet());
+                        propertyNames.addAll(propGetMethodMap.keySet());
+                        propertyNames.addAll(propSetMethodMap.keySet());
 
-                                break;
+                        for (final String nonPropName : set) {
+                            for (final String propName : propertyNames) {
+                                if (propName.equalsIgnoreCase(nonPropName)) {
+                                    propFieldMap.remove(propName);
+                                    propGetMethodMap.remove(propName);
+                                    propSetMethodMap.remove(propName);
+                                }
                             }
                         }
                     }
@@ -1745,6 +1939,62 @@ public final class Beans {
                 beanPropSetMethodPool.put(builderClass, tmp);
             }
         }
+    }
+
+    private static void applyRegisteredPropertyAccessors(final Class<?> cls, final Map<String, Method> propMethodMap,
+            final Map<Class<?>, Map<String, Method>> registeredMethodPool) {
+        final List<Map.Entry<Class<?>, Map<String, Method>>> applicableRegistrations = new ArrayList<>();
+        final Set<String> registeredPropNames = new LinkedHashSet<>();
+
+        for (final Map.Entry<Class<?>, Map<String, Method>> entry : registeredMethodPool.entrySet()) {
+            if (entry.getKey().isAssignableFrom(cls)) {
+                applicableRegistrations.add(entry);
+                registeredPropNames.addAll(entry.getValue().keySet());
+            }
+        }
+
+        for (final String propName : registeredPropNames) {
+            Method selectedMethod = null;
+
+            for (final Map.Entry<Class<?>, Map<String, Method>> candidateEntry : applicableRegistrations) {
+                final Method candidateMethod = candidateEntry.getValue().get(propName);
+
+                if (candidateMethod == null || isShadowedPropertyAccessor(propName, candidateEntry.getKey(), applicableRegistrations)) {
+                    continue;
+                }
+
+                if (selectedMethod != null && !areCompatiblePropertyAccessors(selectedMethod, candidateMethod)) {
+                    throw new IllegalArgumentException("Ambiguous registered property accessor for property '" + propName + "' in class "
+                            + ClassUtil.getCanonicalClassName(cls) + ": " + selectedMethod + " and " + candidateMethod);
+                }
+
+                if (selectedMethod == null || candidateMethod.getDeclaringClass().getName().compareTo(selectedMethod.getDeclaringClass().getName()) < 0) {
+                    selectedMethod = candidateMethod;
+                }
+            }
+
+            if (selectedMethod != null) {
+                propMethodMap.put(propName, selectedMethod);
+            }
+        }
+    }
+
+    private static boolean isShadowedPropertyAccessor(final String propName, final Class<?> candidateClass,
+            final List<Map.Entry<Class<?>, Map<String, Method>>> applicableRegistrations) {
+        for (final Map.Entry<Class<?>, Map<String, Method>> otherEntry : applicableRegistrations) {
+            final Class<?> otherClass = otherEntry.getKey();
+
+            if (candidateClass != otherClass && candidateClass.isAssignableFrom(otherClass) && otherEntry.getValue().containsKey(propName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean areCompatiblePropertyAccessors(final Method left, final Method right) {
+        return left.getName().equals(right.getName()) && left.getReturnType().equals(right.getReturnType())
+                && Arrays.equals(left.getParameterTypes(), right.getParameterTypes());
     }
 
     private static Method getSetMethod(final Method getMethod) {
@@ -2562,11 +2812,15 @@ public final class Beans {
         final Object rt = ClassUtil.invokeMethod(bean, propGetMethod);
 
         if (rt instanceof Collection<?> c) {
-            c.clear();
-            c.addAll((Collection) propValue);
+            if (rt != propValue) {
+                c.clear();
+                c.addAll((Collection) propValue);
+            }
         } else if (rt instanceof Map<?, ?> m) {
-            m.clear();
-            m.putAll((Map) propValue);
+            if (rt != propValue) {
+                m.clear();
+                m.putAll((Map) propValue);
+            }
         } else {
             throw new IllegalArgumentException("Failed to set property value by getter method '" + propGetMethod.getName() + "'");
         }
@@ -2748,7 +3002,25 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String name; int age; Address address; ... }  class Address { String city; String zipCode; }
+     * class Address {
+     *     private String city;
+     *     private String zipCode;
+     *     public String getCity() { return city; }
+     *     public void setCity(String city) { this.city = city; }
+     *     public String getZipCode() { return zipCode; }
+     *     public void setZipCode(String zipCode) { this.zipCode = zipCode; }
+     * }
+     * class User {
+     *     private String name;
+     *     private int age;
+     *     private Address address;
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public Address getAddress() { return address; }
+     *     public void setAddress(Address address) { this.address = address; }
+     * }
      * Map<String, Object> userMap = new HashMap<>();
      * userMap.put("name", "John");
      * userMap.put("age", 25);
@@ -2815,7 +3087,7 @@ public final class Beans {
      *        (and cannot be resolved as a dotted nested-property path) are silently ignored; if {@code false},
      *        an {@link IllegalArgumentException} is thrown.
      * @param targetType the class of the bean to create; must be a valid bean class.
-     * @return
+     * @return a new bean of the specified type with properties populated from the map,
      *         or {@code null} if {@code map} is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if
      *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched key is encountered.
@@ -2885,7 +3157,7 @@ public final class Beans {
      *        all properties are considered. If empty, no properties are set. Properties not in this
      *        collection are left at their default values.
      * @param targetType the class of the bean to create; must be a valid bean class.
-     * @return
+     * @return a new bean of the specified type with the selected properties populated from the map,
      *         or {@code null} if {@code map} is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is not a valid bean class,
      *         or if a selected property does not exist in the target bean class.
@@ -3190,7 +3462,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String firstName; String lastName; ... }
+     * class User {
+     *     private String firstName;
+     *     private String lastName;
+     *     public String getFirstName() { return firstName; }
+     *     public void setFirstName(String firstName) { this.firstName = firstName; }
+     *     public String getLastName() { return lastName; }
+     *     public void setLastName(String lastName) { this.lastName = lastName; }
+     * }
      * User user = new User();
      * user.setFirstName("John");
      * user.setLastName("Doe");
@@ -3294,7 +3573,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String firstName; String lastName; ... }
+     * class User {
+     *     private String firstName;
+     *     private String lastName;
+     *     public String getFirstName() { return firstName; }
+     *     public void setFirstName(String firstName) { this.firstName = firstName; }
+     *     public String getLastName() { return lastName; }
+     *     public void setLastName(String lastName) { this.lastName = lastName; }
+     * }
      * User user = new User();
      * user.setFirstName("John");
      * user.setLastName("Doe");
@@ -3467,7 +3753,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a map, selecting only the properties specified.
+     * Converts a bean object into a map with optional {@code null} property filtering, property exclusion, and key naming policy.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * Properties can be filtered based on {@code null} values, excluded by name, and keys can be transformed using a naming policy.
      *
@@ -3568,7 +3854,7 @@ public final class Beans {
     }
 
     /**
-     * Converts a bean object into a map, selecting only the properties specified.
+     * Converts a bean object into a map and stores the result in the provided map with optional {@code null} property filtering and property exclusion.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      * The keys are named according to the provided naming policy.
      * The output map is provided as a parameter and will be filled with the bean's properties.
@@ -3810,7 +4096,7 @@ public final class Beans {
      *        If {@code null}, all non-{@code null} properties are included. If empty, no properties
      *        are included. In selection mode, selected top-level properties are included even when
      *        {@code null}, while {@code null} properties inside nested beans are always omitted.
-     * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a supplier function to create the Map instance into which the bean properties will be put.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
@@ -3936,7 +4222,7 @@ public final class Beans {
      *        If {@code null}, all non-{@code null} properties are included. If empty, no properties
      *        are included. In selection mode, selected top-level properties are included even when
      *        {@code null}, while {@code null} properties inside nested beans are always omitted.
-     * @param keyNamingPolicy the naming policy to be used for the keys in the resulting Map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param output the map into which the bean's properties will be put.
      * @throws IllegalArgumentException if a selected property does not exist
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
@@ -4090,7 +4376,7 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not matched.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @return a {@link java.util.LinkedHashMap} representation of the bean with keys transformed according to the naming policy; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -4121,7 +4407,7 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not matched.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting Map. If {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a Map of the specified type with full customization applied; never {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
@@ -4217,7 +4503,7 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties of the bean with {@code null} values will not be included in the output Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not matched.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the output Map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param output the Map instance into which the bean properties will be put.
      */
     public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -4435,7 +4721,7 @@ public final class Beans {
      *        If {@code null}, all non-{@code null} properties are included. If empty, no properties
      *        are included. In selection mode, selected top-level properties are included
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
-     * @param keyNamingPolicy the naming policy for the keys in the resulting map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that generates a new map instance. The function argument is the initial map capacity.
      * @return a map of the specified type with the bean's (selected) properties flattened using dot notation for nested beans; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
@@ -4536,7 +4822,7 @@ public final class Beans {
      *        If {@code null}, all non-{@code null} properties are included. If empty, no properties
      *        are included. In selection mode, selected top-level properties are included
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
-     * @param keyNamingPolicy the naming policy to apply to the keys in the output map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param output the Map instance into which the flattened bean properties will be put.
      * @throws IllegalArgumentException if a selected property does not exist
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
@@ -4691,7 +4977,7 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be excluded from the resulting map.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not
      *        matched (dotted names such as {@code "address.city"} are not supported).
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @return a flat map with comprehensive customization applied; never {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -4726,7 +5012,7 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be excluded from the resulting map.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not
      *        matched (dotted names such as {@code "address.city"} are not supported).
-     * @param keyNamingPolicy the naming policy to apply to the keys in the resulting map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a fully customized flat map representation of the bean; never {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
@@ -4830,7 +5116,7 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be excluded from the output map.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not
      *        matched (dotted names such as {@code "address.city"} are not supported).
-     * @param keyNamingPolicy the naming policy to apply to the keys in the output map.
+     * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param output the map into which the flattened bean properties will be put.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -5333,7 +5619,7 @@ public final class Beans {
      *
      * @param <T> the type of the source bean.
      * @param sourceBean the source bean to copy; may be {@code null}.
-     * @return
+     * @return a new instance of the same class as {@code sourceBean} with all properties copied,
      *         or {@code null} if {@code sourceBean} is {@code null}.
      */
     @MayReturnNull
@@ -5368,7 +5654,7 @@ public final class Beans {
      * @param sourceBean the source bean to copy; may be {@code null}.
      * @param selectPropNames the property names to copy; unselected properties retain their default values.
      *        If {@code null}, all properties are copied; an empty collection copies no properties.
-     * @return
+     * @return a new instance of the same class as {@code sourceBean} with the selected properties copied,
      *         or {@code null} if {@code sourceBean} is {@code null}.
      * @throws IllegalArgumentException if a selected property is not found in the bean class.
      */
@@ -5402,8 +5688,8 @@ public final class Beans {
      * @param sourceBean the source bean to copy; may be {@code null}.
      * @param propFilter a predicate receiving the property name and value; returns {@code true} to include
      *        the property in the copy.
-     * @return
-     *         or {@code null} if {@code sourceBean} is {@code null}.
+     * @return a new instance of the same class as {@code sourceBean} with the properties that pass
+     *         {@code propFilter} copied, or {@code null} if {@code sourceBean} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -5794,13 +6080,15 @@ public final class Beans {
      * User source = new User("A", 5);
      * User target = new User("B", 10);
      *
-     * // Sum numeric properties; otherwise keep the source value
-     * Beans.mergeInto(source, target, (sourceVal, targetVal) -> {
+     * // Sum numeric properties; otherwise keep the source value.
+     * // Wrap the lambda with Fn.o(...) so it resolves to this BinaryOperator overload rather than
+     * // the same-arity mergeInto(Object, Object, BiPredicate) overload.
+     * Beans.mergeInto(source, target, Fn.o((sourceVal, targetVal) -> {
      *     if (sourceVal instanceof Integer && targetVal instanceof Integer) {
      *         return ((Integer) sourceVal) + ((Integer) targetVal);
      *     }
      *     return sourceVal;
-     * });
+     * }));
      * // target.getName() returns "A"; target.getAge() returns 15 (5 + 10)
      * }</pre>
      *
@@ -6235,10 +6523,12 @@ public final class Beans {
      * User source = new User("John", 0, null);
      * User target = new User("Jane", 25, "jane@example.com");
      *
-     * // Only merge non-null and non-zero values
+     * // Only merge non-null and non-zero values.
+     * // Wrap the lambda with Fn.p(...) so it resolves to this BiPredicate overload rather than
+     * // the same-arity mergeInto(Object, Object, BinaryOperator) overload.
      * Beans.mergeInto(source, target,
-     *     (propName, propValue) -> propValue != null &&
-     *         !(propValue instanceof Number && ((Number) propValue).intValue() == 0));
+     *     Fn.p((propName, propValue) -> propValue != null &&
+     *         !(propValue instanceof Number && ((Number) propValue).intValue() == 0)));
      * // target keeps age=25 and email="jane@example.com" but name becomes "John"
      * }</pre>
      *
@@ -6491,8 +6781,8 @@ public final class Beans {
      * User user = new User("John", 25);
      * user.setActive(true);
      *
-     * // user.getName() returns null; user.getAge() returns 0; user.getActive() still true
      * Beans.clearProps(user, Arrays.asList("name", "age"));
+     * // user.getName() returns null; user.getAge() returns 0; user.getActive() still true
      *
      * Beans.clearProps(user, Collections.emptyList());   // no change
      * Beans.clearProps(null, Arrays.asList("name"));     // no change
@@ -6529,8 +6819,8 @@ public final class Beans {
      * User user = new User("John", 25);
      * user.setActive(true);
      *
-     * // user.getName() returns null; user.getAge() returns 0; user.getActive() returns null
      * Beans.clearAllProps(user);
+     * // user.getName() returns null; user.getAge() returns 0; user.getActive() returns null
      *
      * Beans.clearAllProps(null);   // no change
      * }</pre>
@@ -6569,9 +6859,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
+     * Beans.randomize(user);
      * // every property is now filled with a random value
      * // user.getName() is a non-null random String (e.g. a 16-char UUID fragment)
-     * Beans.randomize(user);
      *
      * Beans.randomize((Object) null);   // throws IllegalArgumentException
      * }</pre>
@@ -6604,7 +6894,7 @@ public final class Beans {
      * @param bean the bean object to populate; must not be {@code null} and must be a valid bean class.
      * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
      * @throws IllegalArgumentException if {@code bean} is {@code null} or not a valid bean class,
-     *         or if a property name is not found in the bean.
+     *         if {@code propNamesToFill} is {@code null}, or if a property name is not found in the bean.
      */
     public static void randomize(final Object bean, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
@@ -6645,7 +6935,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String name; int age; Boolean active; ... }
+     * class User {
+     *     private String name;
+     *     private int age;
+     *     private Boolean active;
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public Boolean getActive() { return active; }
+     *     public void setActive(Boolean active) { this.active = active; }
+     * }
      * User user = Beans.newRandomBean(User.class, Arrays.asList("name"));
      *
      * // user.getName() is a non-null random value; user.getAge() stays 0; active stays null
@@ -6656,7 +6956,7 @@ public final class Beans {
      * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
      * @return a new instance with the specified properties filled with random values; never {@code null}.
      * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class,
-     *         or if a property name is not found in the class.
+     *         if {@code propNamesToFill} is {@code null}, or if a property name is not found in the class.
      */
     public static <T> T newRandomBean(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
@@ -6721,7 +7021,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // class User { String name; int age; Boolean active; ... }
+     * class User {
+     *     private String name;
+     *     private int age;
+     *     private Boolean active;
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public Boolean getActive() { return active; }
+     *     public void setActive(Boolean active) { this.active = active; }
+     * }
      * // users.size() == 2; each user has a random name but age stays 0 and active stays null
      * List<User> users = Beans.newRandomBeanList(User.class, Arrays.asList("name"), 2);
      *
@@ -6735,7 +7045,8 @@ public final class Beans {
      * @return a list containing exactly {@code count} newly created bean instances with the specified
      *         properties filled; never {@code null}.
      * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class,
-     *         {@code count} is negative, or a property name is not found in the class.
+     *         {@code count} is negative, {@code propNamesToFill} is {@code null}, or a property name is
+     *         not found in the class.
      */
     public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {

@@ -25,10 +25,10 @@ import com.landawn.abacus.util.SK;
 /**
  * The abstract base class for array types in the type system.
  * <p>
- * This class provides common functionality for handling object array types,
+ * This class provides common functionality for handling primitive and object array types,
  * including serialization, conversion, and collection interoperability operations.
  * Concrete subclasses handle specific array element types
- * (e.g., {@code String[]}, {@code Integer[]}, {@code Object[]}).
+ * (e.g., {@code int[]}, {@code String[]}, {@code Integer[]}, {@code Object[]}).
  * </p>
  *
  * @param <T> the array type this handler represents (e.g., {@code String[]}, {@code Integer[]})

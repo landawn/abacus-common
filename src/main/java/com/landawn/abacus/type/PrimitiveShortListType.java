@@ -156,7 +156,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed ShortList, or {@code null} if the input string is {@code null} or empty
+     * @return the parsed ShortList, or {@code null} if the input string is {@code null} or blank
      * @throws NumberFormatException if any element in the string cannot be parsed as a short
      * @see #valueOf(Object)
      * @see #stringOf(ShortList)
@@ -227,14 +227,19 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter nullWriter = Objectory.createBufferedJsonWriter();
      * JsonXmlSerConfig<?> config = null;
-     * type.serializeTo(writer, list, config);
-     * System.out.println(writer.toString());   // Output: [100, 200, 300]
+     * try {
+     *     type.serializeTo(writer, list, config);
+     *     System.out.println(writer.toString());   // Output: [100, 200, 300]
      *
-     * BufferedJsonWriter nullWriter = new BufferedJsonWriter();
-     * type.serializeTo(nullWriter, null, config);
-     * System.out.println(nullWriter.toString());   // Output: null
+     *     type.serializeTo(nullWriter, null, config);
+     *     System.out.println(nullWriter.toString());   // Output: null
+     * } finally {
+     *     Objectory.recycle(writer);
+     *     Objectory.recycle(nullWriter);
+     * }
      * }</pre>
      *
      * <p>

@@ -56,7 +56,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
  * </table>
  *
- * <p>Note: {@code poll()} <em>removes</em> the object from the pool, so its {@code true} keyed mirror is
+ * <p>Note: {@code poll()} <em>removes</em> the object from the pool, so its true keyed mirror is
  * {@link KeyedObjectPool#remove(Object)} (which also removes). {@link KeyedObjectPool#get(Object)}
  * returns the value <em>without</em> removing it and therefore has no unkeyed analog (a
  * non-removing {@code peek()} on an unkeyed pool would be ambiguous over interchangeable objects).</p>
@@ -68,7 +68,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * // Add object to pool
  * MyPoolable obj = new MyPoolable();
  * if (!pool.add(obj)) {
- *     obj.destroy(Caller.PUT_ADD_FAILURE);
+ *     obj.destroy(Poolable.Caller.PUT_ADD_FAILURE);
  * }
  *
  * // Poll object from pool
@@ -92,11 +92,12 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * Adds a new object to the pool.
      * The object will only be added if the pool has capacity and the object has not expired.
      *
-     * <p>This method will fail if:</p>
+     * <p>The add operation returns {@code false} (does not insert) if:</p>
      * <ul>
-     *   <li>The pool is at capacity and auto-balancing is disabled</li>
      *   <li>The object has already expired</li>
-     *   <li>The object would exceed memory constraints</li>
+     *   <li>The pool is at capacity and either auto-balancing is disabled, or balancing did not free a slot</li>
+     *   <li>The object would exceed memory constraints (when a memory measure is configured) and balancing did not free enough memory</li>
+     *   <li>The memory measure returns a negative size or throws an exception</li>
      * </ul>
      *
      * @param element the object to be added to the pool, must not be {@code null}
@@ -146,7 +147,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     // Successfully added
      * } else {
      *     // Timeout - handle the object
-     *     obj.destroy(Caller.PUT_ADD_FAILURE);
+     *     obj.destroy(Poolable.Caller.PUT_ADD_FAILURE);
      * }
      * }</pre>
      *
@@ -154,9 +155,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param timeout the maximum time to wait for space to become available
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return {@code true} if successful, {@code false} if timeout elapsed before space was available
-     * @throws InterruptedException if interrupted while waiting
      * @throws IllegalArgumentException if the element or unit is null
      * @throws IllegalStateException if the pool has been closed
+     * @throws InterruptedException if interrupted while waiting
      */
     boolean add(E element, long timeout, TimeUnit unit) throws InterruptedException;
 
@@ -179,9 +180,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if timeout elapsed or add failed
-     * @throws InterruptedException if interrupted while waiting
      * @throws IllegalArgumentException if the element or unit is null
      * @throws IllegalStateException if the pool has been closed
+     * @throws InterruptedException if interrupted while waiting
      */
     boolean add(E element, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
 
@@ -241,9 +242,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param timeout the maximum time to wait for an object to become available
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return an object from the pool, or {@code null} if the timeout elapsed before an object was available
-     * @throws InterruptedException if interrupted while waiting
-     * @throws IllegalArgumentException if the unit is null
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the unit is null
+     * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull
     E poll(long timeout, TimeUnit unit) throws InterruptedException;
@@ -272,7 +273,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     @Override public void destroy(Poolable.Caller caller) {}   // release resources here
      * }
      *
-     * MemoryMeasure<PooledBuffer> measure = buffer -> buffer.capacity();
+     * ObjectPool.MemoryMeasure<PooledBuffer> measure = buffer -> buffer.capacity();
      * ObjectPool<PooledBuffer> pool = PoolFactory.createObjectPool(
      *     100, 3000, EvictionPolicy.LAST_ACCESS_TIME,
      *     1024 * 1024 * 100, // 100MB max

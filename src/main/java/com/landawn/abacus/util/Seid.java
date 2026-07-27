@@ -147,7 +147,7 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param nameValues a map of property names to their values
-     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or its first property name is {@code null}
+     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null} property name
      */
     public Seid(final Map<String, Object> nameValues) {
         this(extractEntityName(nameValues));
@@ -158,7 +158,7 @@ public class Seid implements EntityId {
     private static String extractEntityName(final Map<String, Object> nameValues) {
         N.checkArgNotEmpty(nameValues, "nameValues");
 
-        return NameUtil.getParentName(N.checkArgNotNull(nameValues.keySet().iterator().next(), "property name"));
+        return NameUtil.getParentName(N.checkArgNotNull(nameValues.keySet().iterator().next(), "propName"));
     }
 
     /**
@@ -191,9 +191,10 @@ public class Seid implements EntityId {
      * Seid userId = Seid.of("User.id", 123);
      * }</pre>
      *
-     * @param propName the property name
+     * @param propName the property name (can be canonical like "Entity.property" or simple like "property")
      * @param propValue the property value
      * @return a new Seid instance
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     public static Seid of(final String propName, final Object propValue) {
         return new Seid(propName, propValue);
@@ -213,6 +214,7 @@ public class Seid implements EntityId {
      * @param propName2 the second property name
      * @param propValue2 the second property value
      * @return a new Seid instance
+     * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}
      */
     public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         final Seid result = new Seid(propName1, propValue1);
@@ -236,6 +238,7 @@ public class Seid implements EntityId {
      * @param propName3 the third property name
      * @param propValue3 the third property value
      * @return a new Seid instance
+     * @throws IllegalArgumentException if any of {@code propName1}, {@code propName2} or {@code propName3} is {@code null}
      */
     public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
             final Object propValue3) {
@@ -257,7 +260,7 @@ public class Seid implements EntityId {
      *
      * @param nameValues a map of property names to their values
      * @return a new Seid instance
-     * @throws IllegalArgumentException if nameValues is {@code null} or empty
+     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null} property name
      */
     public static Seid create(final Map<String, Object> nameValues) throws IllegalArgumentException {
         N.checkArgNotEmpty(nameValues, "nameValues");
@@ -276,7 +279,14 @@ public class Seid implements EntityId {
      *     @Id
      *     private Long id;
      *     private String name;
-     *     // getters/setters...
+     *
+     *     public User(Long id, String name) {
+     *         this.id = id;
+     *         this.name = name;
+     *     }
+     *
+     *     public Long getId() { return id; }
+     *     public String getName() { return name; }
      * }
      *
      * User user = new User(123L, "John");
@@ -304,6 +314,7 @@ public class Seid implements EntityId {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * record User(Long id, String email, String name) {}
      * User user = new User(123L, "john@example.com", "John");
      * Seid emailId = Seid.create(user, Arrays.asList("email"));
      * }</pre>
@@ -534,7 +545,7 @@ public class Seid implements EntityId {
         newValues.putAll(values);
 
         for (final Map.Entry<String, Object> entry : nameValues.entrySet()) {
-            final String propName = N.checkArgNotNull(entry.getKey(), "property name");
+            final String propName = N.checkArgNotNull(entry.getKey(), "propName");
             final String simplePropName = NameUtil.isCanonicalName(entityName, propName) ? NameUtil.getSimpleName(propName) : propName;
             newValues.put(simplePropName, entry.getValue());
         }

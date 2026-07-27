@@ -208,7 +208,7 @@ public class HttpSettingsTest extends TestBase {
     @Test
     public void testSetProxy() {
         HttpSettings settings = HttpSettings.create();
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8080));
 
         HttpSettings result = settings.setProxy(proxy);
         assertEquals(proxy, settings.getProxy());
@@ -718,7 +718,7 @@ public class HttpSettingsTest extends TestBase {
     @Test
     public void testCopyWithProxy() {
         HttpSettings original = HttpSettings.create();
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.example.com", 8080));
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8080));
         original.setProxy(proxy);
 
         HttpSettings copy = original.copy();

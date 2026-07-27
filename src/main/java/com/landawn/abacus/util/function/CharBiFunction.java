@@ -58,6 +58,14 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
      * If evaluation of either function throws an exception, it is relayed to
      * the caller of the composed function.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharBiFunction<String> concat = (c1, c2) -> "" + c1 + c2;
+     * Function<String, Integer> length = String::length;
+     * CharBiFunction<Integer> concatAndGetLength = concat.andThen(length);
+     * Integer result = concatAndGetLength.apply('a', 'b');   // Returns 2
+     * }</pre>
+     *
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the

@@ -342,7 +342,8 @@ public final class FilenameUtil {
      * FilenameUtil.concat("/foo/", "../../bar");   // returns null
      * }</pre>
      *
-     * @param basePath the base path to attach to, always treated as a path, {@code null} returns {@code null}
+     * @param basePath the base path to attach to, always treated as a path; {@code null} returns
+     *        {@code null} unless {@code fullFilenameToAdd} already has an absolute/prefixed path
      * @param fullFilenameToAdd the filename (or path) to attach to the base, {@code null} returns {@code null}
      * @return the concatenated and normalized path, or {@code null} if the result is invalid
      * @throws IllegalArgumentException if either argument contains a {@code null} byte
@@ -496,6 +497,12 @@ public final class FilenameUtil {
      * <p>This method handles files in either Unix or Windows format.
      * The prefix length includes the first slash in the full filename if applicable.</p>
      *
+     * <p>For a filename that consists solely of a home-directory reference and has no
+     * separator (for example {@code "~"} or {@code "~user"}), the returned length is
+     * deliberately one greater than the input length, because the prefix conceptually
+     * ends with a separator that is not present in the input. Callers must therefore not
+     * assume the result is a valid index into the filename.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Windows:
@@ -564,7 +571,18 @@ public final class FilenameUtil {
                 }
                 posUnix = posUnix == NOT_FOUND ? posWin : posUnix;
                 posWin = posWin == NOT_FOUND ? posUnix : posWin;
-                return Math.min(posUnix, posWin) + 1;
+
+                final int pos = Math.min(posUnix, posWin);
+                final String hostnamePart = filename.substring(2, pos);
+
+                // A UNC "hostname" of "." or ".." is a path-traversal vector, not a host
+                // (CVE-2021-29425 in the upstream Commons IO copy): treat the filename as invalid
+                // so normalize("//../foo") returns null per its documented contract.
+                if (".".equals(hostnamePart) || "..".equals(hostnamePart)) {
+                    return NOT_FOUND;
+                }
+
+                return pos + 1;
             } else {
                 return isSeparator(ch0) ? 1 : 0;
             }
@@ -832,10 +850,13 @@ public final class FilenameUtil {
     }
 
     /**
-     * Checks the input for {@code null} bytes, a sign of unsanitized data being passed to file level functions.
+     * Checks the input for {@code null} bytes, a sign of unsanitized data being passed to file-level functions.
      *
-     * This may be used for poison byte attacks.
-     * @param path the path to check
+     * <p>An embedded {@code null} byte has no legitimate use in a path and is a known vector
+     * for poison-byte injection attacks, so its presence is rejected outright.</p>
+     *
+     * @param path the path to check, must not be {@code null}
+     * @throws IllegalArgumentException if {@code path} contains a {@code null} byte
      */
     private static void failIfNullBytePresent(final String path) {
         final int len = path.length();
@@ -1286,7 +1307,7 @@ public final class FilenameUtil {
      *
      * <p>Wildcard semantics:</p>
      * <ul>
-     * <li>'?' matches exactly one character</li>
+     * <li>'?' matches exactly one UTF-16 {@code char} (one code unit)</li>
      * <li>'*' matches zero or more characters</li>
      * <li>All other characters match themselves</li>
      * </ul>
@@ -1301,7 +1322,8 @@ public final class FilenameUtil {
      * @param filename the filename to match on, {@code null} returns {@code true} only if wildcardMatcher is also {@code null}
      * @param wildcardMatcher the wildcard string to match against, {@code null} returns {@code true} only if filename is also {@code null}
      * @param caseSensitivity what case sensitivity rule to use, {@code null} means case-sensitive
-     * @return {@code true} if the filename matches the wildcard string, both {@code null} returns {@code true}
+     * @return {@code true} if the filename matches the wildcard string; two {@code null} values are considered a match
+     * @see IOCase
      */
     public static boolean wildcardMatch(final String filename, final String wildcardMatcher, IOCase caseSensitivity) {
         if (filename == null && wildcardMatcher == null) {

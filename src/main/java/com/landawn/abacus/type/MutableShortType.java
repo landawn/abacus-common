@@ -19,10 +19,12 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link com.landawn.abacus.util.MutableShort} objects, providing
- * serialization, deserialization, and database interaction capabilities for
- * mutable {@code short} wrapper objects. Values are serialized as the unwrapped
- * numeric short (identical to {@link ShortType}).
+ * Type handler for {@link com.landawn.abacus.util.MutableShort} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * {@code MutableShort} instances, which are mutable wrappers around primitive
+ * {@code short} values. Values are serialized as the unwrapped numeric short
+ * (identical to {@link ShortType}).
  *
  * @see com.landawn.abacus.util.MutableShort
  * @see NumberType
@@ -33,9 +35,8 @@ public class MutableShortType extends NumberType<MutableShort> {
     public static final String MUTABLE_SHORT = MutableShort.class.getSimpleName();
 
     /**
-     * Protected constructor for MutableShortType.
-     * This constructor is invoked by the type system (typically via {@link TypeFactory})
-     * when registering the {@link MutableShort} type handler.
+     * Constructor for {@code MutableShortType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     protected MutableShortType() {
         super(MUTABLE_SHORT);
@@ -60,7 +61,7 @@ public class MutableShortType extends NumberType<MutableShort> {
      * into the original value.</p>
      *
      * @param x the {@code MutableShort} object to convert, may be {@code null}
-     * @return the string representation of the short value, or {@code null} if the input is {@code null}
+     * @return the decimal string representation of the short value, or {@code null} if the input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */

@@ -28,7 +28,7 @@ import com.landawn.abacus.util.N;
  * Type handler for {@link java.util.Date} objects.
  * This class provides serialization, deserialization, and database access capabilities for
  * {@code java.util.Date} instances. Database columns are read and written as
- * {@link java.sql.Timestamp} values. The special string {@code "sysTime"} resolves to the
+ * {@link java.sql.Timestamp} values. The special strings {@code "sysTime"} and {@code "SYS_TIME"} (case-insensitive) resolve to the
  * current system time, and numeric strings are interpreted as milliseconds since the epoch.
  *
  * <p>The type name used in the type system is {@code "JUDate"} (to avoid ambiguity with
@@ -108,7 +108,7 @@ public class JUDateType extends AbstractDateType<Date> {
      * Converts a string representation to a {@link java.util.Date} instance.
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
-     *   <li>{@code "sysTime"} (case-insensitive): returns the current system time</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns the current system time</li>
      *   <li>All other values: parsed via {@link Dates#parseJUDate(String)}</li>
      * </ul>
      *

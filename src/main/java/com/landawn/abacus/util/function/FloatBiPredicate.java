@@ -114,6 +114,12 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *   <li>Validating constraints on pairs of measurements</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatBiPredicate areClose = (a, b) -> Math.abs(a - b) < 0.001f;
+     * boolean result = areClose.test(1.0001f, 1.0002f);   // Returns true
+     * }</pre>
+     *
      * @param a the first float argument to test
      * @param b the second float argument to test
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
@@ -157,7 +163,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * boolean result = combined.test(3.0f, 4.0f);   // true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      * @throws IllegalArgumentException if {@code other} is null
      */
@@ -184,7 +190,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * boolean result = combined.test(-1.0f, -2.0f);   // true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      * @throws IllegalArgumentException if {@code other} is null
      */

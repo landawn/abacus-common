@@ -463,7 +463,11 @@ public final class HttpHeaders {
         /** The GIF image content type: {@code image/gif}. */
         public static final String IMAGE_GIF = "image/gif";
 
-        /** The JPEG image content type: {@code image/jpg}. */
+        /**
+         * The JPEG image content type: {@code image/jpg}.
+         * Note: the IANA-registered type for JPEG is {@code image/jpeg}; this constant keeps the
+         * widely-tolerated legacy alias for compatibility.
+         */
         public static final String IMAGE_JPG = "image/jpg";
 
         /** The UTF-8 character encoding: {@code utf-8}. */
@@ -513,10 +517,22 @@ public final class HttpHeaders {
 
     final Map<String, Object> map;
 
+    /**
+     * Constructs an empty {@code HttpHeaders} backed by a new {@link HashMap}.
+     * This constructor is package-private; use {@link #create()} to obtain an empty instance.
+     */
     HttpHeaders() {
         map = new HashMap<>();
     }
 
+    /**
+     * Constructs an {@code HttpHeaders} backed directly by the supplied map, without copying it.
+     * Subsequent changes to either the map or this instance are visible to the other.
+     * This constructor is package-private; use {@link #wrap(Map)} to share a map or
+     * {@link #copyOf(Map)} to take an independent snapshot.
+     *
+     * @param headers the map to use as the backing store; must not be {@code null}
+     */
     @SuppressWarnings("rawtypes")
     HttpHeaders(final Map<String, ?> headers) {
         map = (Map) headers;
@@ -615,6 +631,11 @@ public final class HttpHeaders {
      *
      * <p>This method is named {@code wrap} (rather than {@code of}) to signal that it shares the
      * caller's map by reference; {@link #copyOf(Map)} is the defensive-copy counterpart.</p>
+     *
+     * <p>The supplied map is used as-is, without the case-insensitive name normalization that
+     * {@link #set(String, Object)} performs. Header names in the map should therefore be unique
+     * case-insensitively; if the map contains case-duplicate names (e.g. both {@code "Accept"}
+     * and {@code "accept"}), lookup results for those names are unspecified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1112,8 +1133,10 @@ public final class HttpHeaders {
      * headers.setAll(extraHeaders);
      * }</pre>
      *
-     * @param m The map of header names to values
+     * @param m The map of header names to values; must not be {@code null}
      * @return This HttpHeaders instance for method chaining
+     * @throws NullPointerException if {@code m} is {@code null}
+     * @throws IllegalArgumentException if any key in {@code m} is {@code null}
      */
     public HttpHeaders setAll(final Map<String, ?> m) {
         for (final Map.Entry<String, ?> entry : m.entrySet()) {
@@ -1124,15 +1147,20 @@ public final class HttpHeaders {
     }
 
     /**
-     * Gets the value of a header.
+     * Gets the raw stored value of a header.
+     * The name is matched case-insensitively, as required by HTTP. The value is returned exactly as
+     * it was stored (it may be a {@code Collection}, {@code Date}, {@code Instant}, or any object);
+     * use {@link #getFirst(String)} for the coerced {@code String} form.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object contentType = headers.get("Content-Type");
+     * Object same = headers.get("content-type");   // same value: lookup is case-insensitive
      * }</pre>
      *
-     * @param headerName The name of the header to retrieve
-     * @return The header value, or {@code null} if not present
+     * @param headerName The name of the header to retrieve; a {@code null} name never matches
+     * @return The header value, or {@code null} if not present (or if the header is stored with a {@code null} value)
+     * @see #getFirst(String)
      */
     public Object get(final String headerName) {
         final String storedName = findHeaderName(headerName);
@@ -1180,14 +1208,15 @@ public final class HttpHeaders {
 
     /**
      * Removes a header.
-     * This method removes the specified header from the HttpHeaders instance.
+     * The name is matched case-insensitively, so the header is removed regardless of the casing it
+     * was stored with. Removing an absent header is a no-op.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object oldValue = headers.remove("X-Custom-Header");
      * }</pre>
      *
-     * @param headerName The name of the header to remove
+     * @param headerName The name of the header to remove; a {@code null} name never matches
      * @return The previous value associated with the header, or {@code null} if there was no mapping
      */
     public Object remove(final String headerName) {
@@ -1242,7 +1271,9 @@ public final class HttpHeaders {
      *     System.out.println(name + ": " + value));
      * }</pre>
      *
-     * @param action The action to be performed for each header
+     * @param action The action to be performed for each header; must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
+     * @throws java.util.ConcurrentModificationException if a header is added or removed while iterating
      */
     public void forEach(final BiConsumer<? super String, ? super Object> action) {
         map.forEach(action);
@@ -1281,8 +1312,11 @@ public final class HttpHeaders {
 
     /**
      * Returns a new map containing all headers.
-     * LinkedHashMap or SortedMap instances preserve their ordering in the returned map.
-     * For other map types, a HashMap is returned.
+     * The returned map is a snapshot: later changes to it do not affect this {@code HttpHeaders},
+     * and vice versa. If the backing map is a {@link LinkedHashMap} or a {@link SortedMap}, its
+     * current iteration order is preserved in the returned {@code LinkedHashMap} (which is not
+     * itself sorted, so later insertions are appended); for other backing map types a
+     * {@link HashMap} with no order guarantee is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1298,7 +1332,9 @@ public final class HttpHeaders {
 
     /**
      * Creates a copy of this HttpHeaders instance.
-     * The copy contains the same headers but is independent of the original.
+     * The copy contains the same headers but has its own backing map, so adding, replacing or
+     * removing headers on either instance leaves the other unchanged. This is a shallow copy:
+     * the header <i>values</i> are the same object references in both instances.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1356,6 +1392,14 @@ public final class HttpHeaders {
 
         for (final Map.Entry<String, Object> entry : map.entrySet()) {
             if (!other.containsHeader(entry.getKey()) || !Objects.equals(entry.getValue(), other.get(entry.getKey()))) {
+                return false;
+            }
+        }
+
+        // The forward scan alone is not symmetric when a wrapped map holds case-duplicate names
+        // (reachable only via wrap(Map), which shares the caller's map without normalization).
+        for (final Map.Entry<String, Object> entry : other.map.entrySet()) {
+            if (!containsHeader(entry.getKey()) || !Objects.equals(entry.getValue(), get(entry.getKey()))) {
                 return false;
             }
         }

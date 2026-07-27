@@ -33,11 +33,16 @@ import com.landawn.abacus.TestBase;
 public class GenericObjectPoolTest extends TestBase {
 
     private static final class SpuriousWakeupCondition implements Condition {
+        private final int spuriousWakeups;
         private int awaitCount;
+
+        private SpuriousWakeupCondition(final int spuriousWakeups) {
+            this.spuriousWakeups = spuriousWakeups;
+        }
 
         @Override
         public long awaitNanos(final long nanosTimeout) {
-            return ++awaitCount <= 10_000 ? 1 : 0;
+            return ++awaitCount <= spuriousWakeups ? 1 : 0;
         }
 
         @Override
@@ -68,6 +73,25 @@ public class GenericObjectPoolTest extends TestBase {
         @Override
         public void signalAll() {
             // no-op for this deterministic test condition
+        }
+    }
+
+    private static final class AtomicEvictPool extends GenericObjectPool<TestPoolable> {
+        private final AtomicBoolean vacateDispatched;
+
+        private AtomicEvictPool(final AtomicBoolean vacateDispatched) {
+            super(8, 0, EvictionPolicy.FIFO, true, 0.5f);
+            this.vacateDispatched = vacateDispatched;
+        }
+
+        @Override
+        protected void vacate(final int numberToEvict) {
+            // Legacy evict() computed numberToEvict, released the lock, and only then dispatched
+            // here; a mutation in that gap made the count stale and removed three of four objects.
+            // evict() now counts and detaches inside one critical section, so it must not route
+            // through this overridable hook at all -- reintroducing the call would reopen the gap.
+            vacateDispatched.set(true);
+            super.vacate(numberToEvict);
         }
     }
 
@@ -1763,16 +1787,16 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTimedAddHonorsTimeoutAcrossMoreThanTenThousandWakeups() throws Exception {
+    public void testTimedAddStopsWhenConditionReportsTimeoutAfterSpuriousWakeups() throws Exception {
         final GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
         assertTrue(p.add(new TestPoolable("existing")));
 
-        final SpuriousWakeupCondition condition = new SpuriousWakeupCondition();
+        final SpuriousWakeupCondition condition = new SpuriousWakeupCondition(3);
         p.notFull = condition;
 
         try {
-            assertFalse(p.add(new TestPoolable("new"), 1, TimeUnit.MILLISECONDS));
-            assertEquals(10_001, condition.awaitCount);
+            assertFalse(p.add(new TestPoolable("new"), 1, TimeUnit.SECONDS));
+            assertEquals(4, condition.awaitCount);
         } finally {
             p.close();
         }
@@ -1803,32 +1827,8 @@ public class GenericObjectPoolTest extends TestBase {
 
     @Test
     public void testEvictSelectsCountAndVictimsInSingleCriticalSection() {
-        final AtomicReference<TestPoolable> removedDuringFormerGap = new AtomicReference<>();
-
-        class AtomicEvictPool extends GenericObjectPool<TestPoolable> {
-            AtomicEvictPool() {
-                super(8, 0, EvictionPolicy.FIFO, true, 0.5f);
-            }
-
-            @Override
-            protected void vacate(final int numberToEvict) {
-                // Legacy evict() computed numberToEvict, unlocked, and then dispatched here.
-                // Mutating in that gap made its count stale and removed three of four objects.
-                final Thread interloper = new Thread(() -> removedDuringFormerGap.set(poll()), "evict-gap-interloper");
-                interloper.start();
-
-                try {
-                    interloper.join(2_000);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new AssertionError(e);
-                }
-
-                super.vacate(numberToEvict);
-            }
-        }
-
-        final AtomicEvictPool p = new AtomicEvictPool();
+        final AtomicBoolean vacateDispatched = new AtomicBoolean();
+        final AtomicEvictPool p = new AtomicEvictPool(vacateDispatched);
 
         try {
             assertTrue(p.add(new TestPoolable("one")));
@@ -1838,7 +1838,8 @@ public class GenericObjectPoolTest extends TestBase {
 
             p.evict();
 
-            assertNull(removedDuringFormerGap.get(), "evict must not expose a mutation gap between counting and detaching victims");
+            assertFalse(vacateDispatched.get(),
+                    "evict must not dispatch through the overridable vacate(int) hook: doing so reopens the unlocked gap between counting and detaching victims");
             assertEquals(2, p.size(), "a 0.5 balance factor must atomically remove two of four objects");
         } finally {
             p.close();

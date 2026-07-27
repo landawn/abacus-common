@@ -26,7 +26,7 @@ import com.landawn.abacus.util.CharacterWriter;
 /**
  * Type handler for {@link Boolean} values that are stored as integers ({@code 1}/{@code 0})
  * in the database.
- * Maps {@code Boolean.TRUE} to {@code 1} and {@code Boolean.FALSE} / {@code null} to {@code 0},
+ * Text conversion maps {@code Boolean.TRUE} to {@code 1} and {@code Boolean.FALSE} or {@code null} to {@code 0},
  * providing compatibility with database schemas that represent boolean flags as integer columns.
  *
  * <p>JDBC mapping: values are stored via {@link java.sql.PreparedStatement#setInt} and

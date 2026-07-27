@@ -32,6 +32,10 @@ import com.landawn.abacus.util.stream.ByteStream;
  * transformation methods like {@code skip()}, {@code limit()}, {@code filter()},
  * and utility methods like {@code toArray()} and {@code stream()}.</p>
  *
+ * <p>Instances are mutable traversal cursors and are not safe for concurrent consumption unless a
+ * particular implementation explicitly documents stronger guarantees. Transformation methods return
+ * wrappers over this same source iterator; consuming a wrapper also advances the source.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
@@ -121,7 +125,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -713,7 +718,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) throws IllegalArgumentException {
+    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) {
         super.forEachRemaining(action);
     }
 
@@ -756,8 +761,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)10, (byte)20, (byte)30);
      * iter.foreachIndexed((index, b) ->
-     *     System.out.println("Position " + index + ": " + b)
-     * );
+     *     System.out.println("Position " + index + ": " + b));
      * // Output:
      * // Position 0: 10
      * // Position 1: 20
@@ -767,7 +771,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element and its index (must not be {@code null})
      * @throws IllegalArgumentException if action is {@code null}
-     * @throws IllegalStateException if the iterator has more than {@code Integer.MAX_VALUE} elements (index overflow)
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntByteConsumer<E> action) throws IllegalArgumentException, E {

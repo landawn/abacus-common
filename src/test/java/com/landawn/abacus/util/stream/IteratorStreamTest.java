@@ -710,6 +710,17 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testSkipAdvanceWithNonPositiveDistanceDoesNotConsumeSource() {
+        final AtomicInteger consumed = new AtomicInteger();
+        final ObjIteratorEx<Integer> iter = createStream(Arrays.asList(1, 2, 3, 4)).onEach(e -> consumed.incrementAndGet()).skip(2).iteratorEx();
+
+        iter.advance(-1);
+        assertEquals(0, consumed.get());
+        assertEquals(3, iter.next());
+        assertEquals(3, consumed.get());
+    }
+
+    @Test
     public void testTop() {
         {
             Stream<Integer> stream = createStream(Arrays.asList(5, 2, 8, 1, 9, 3));

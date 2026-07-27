@@ -1958,6 +1958,12 @@ public class JsonParserImplTest extends TestBase {
     }
 
     @Test
+    public void testDeserializeDatasetRejectsTruncatedArrayAtEof() {
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[", Dataset.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[{\"a\":1}", Dataset.class));
+    }
+
+    @Test
     public void testDeserializeRejectsMalformedObjectSeparators() {
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"a\":{} \"b\"}", null, Map.class));
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"a\" \"b\":1}", null, Map.class));
@@ -1991,6 +1997,11 @@ public class JsonParserImplTest extends TestBase {
     public void testStream_UnsupportedNonArray_Throws() {
         // A bean-typed stream over object JSON: only Collection/Array JSON supported by stream methods.
         Assertions.assertThrows(Exception.class, () -> parser.stream("{\"a\":1}", null, Type.of(StringBuilder.class)).toList());
+    }
+
+    @Test
+    public void testStreamRejectsNullElementType() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.stream("[]", null, (Type<Object>) null));
     }
 
     // --- regression tests for 2026-06-11 deep-review fixes ---

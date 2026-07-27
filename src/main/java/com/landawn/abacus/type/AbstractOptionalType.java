@@ -19,13 +19,13 @@ import java.util.Map;
  */
 public abstract class AbstractOptionalType<T> extends AbstractType<T> {
 
-    /** Standard field name for the presence indicator in serialized form */
+    /** Standard field name for the presence indicator in serialized form. */
     protected static final String IS_PRESENT = "isPresent";
 
-    /** Standard field name for the actual value in serialized form */
+    /** Standard field name for the actual value in serialized form. */
     protected static final String VALUE = "value";
 
-    /** Lazily-initialized cached instance of the {@code Map<Object, Object>} type used for internal serialization operations */
+    /** Lazily-initialized cached instance of the {@code Map<Object, Object>} type used for internal serialization operations. */
     private static volatile Type<Map<Object, Object>> mapType = null;
 
     /**

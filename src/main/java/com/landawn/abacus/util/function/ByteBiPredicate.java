@@ -24,6 +24,10 @@ import com.landawn.abacus.util.cs;
  * <p>This is a functional interface whose functional method is {@link #test(byte, byte)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Predicate
+ * @see BytePredicate
+ * @see ByteTriPredicate
  */
 @FunctionalInterface
 public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeException> { //NOSONAR

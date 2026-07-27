@@ -77,6 +77,12 @@ final class Utils {
     /**
      * Opens a binary stream and transfers ownership of the supplied {@link Blob} locator
      * to the returned stream. Closing the stream closes the delegate and releases the locator.
+     * If opening fails, the locator is freed before the failure propagates.
+     *
+     * @param blob the {@link Blob} whose binary stream to open; may be {@code null}
+     * @return an owning {@link InputStream} over the Blob's content, or {@code null} if {@code blob}
+     *         is {@code null} or exposes no binary stream (in which case the locator is freed)
+     * @throws SQLException if the binary stream cannot be obtained
      */
     static InputStream openBinaryStream(final Blob blob) throws SQLException {
         if (blob == null) {
@@ -113,6 +119,12 @@ final class Utils {
     /**
      * Opens an ASCII stream and transfers ownership of the supplied {@link Clob} locator
      * to the returned stream. Closing the stream closes the delegate and releases the locator.
+     * If opening fails, the locator is freed before the failure propagates.
+     *
+     * @param clob the {@link Clob} whose ASCII stream to open; may be {@code null}
+     * @return an owning {@link InputStream} over the Clob's content, or {@code null} if {@code clob}
+     *         is {@code null} or exposes no ASCII stream (in which case the locator is freed)
+     * @throws SQLException if the ASCII stream cannot be obtained
      */
     static InputStream openAsciiStream(final Clob clob) throws SQLException {
         if (clob == null) {
@@ -149,6 +161,12 @@ final class Utils {
     /**
      * Opens a character stream and transfers ownership of the supplied {@link Clob} locator
      * to the returned reader. Closing the reader closes the delegate and releases the locator.
+     * If opening fails, the locator is freed before the failure propagates.
+     *
+     * @param clob the {@link Clob} whose character stream to open; may be {@code null}
+     * @return an owning {@link Reader} over the Clob's content, or {@code null} if {@code clob}
+     *         is {@code null} or exposes no character stream (in which case the locator is freed)
+     * @throws SQLException if the character stream cannot be obtained
      */
     static Reader openCharacterStream(final Clob clob) throws SQLException {
         if (clob == null) {
@@ -186,6 +204,12 @@ final class Utils {
      * Recycles a temporary buffered writer without masking a failure from the write operation.
      * If recycling is the only failing operation, an underlying checked I/O cause is rethrown as
      * {@link IOException}; otherwise the recycle failure is suppressed on {@code primaryFailure}.
+     *
+     * @param writer the temporary buffered writer to recycle
+     * @param primaryFailure the failure already raised by the write operation, or {@code null} if the
+     *                       write succeeded
+     * @throws IOException if recycling fails with an underlying checked I/O cause and
+     *                     {@code primaryFailure} is {@code null}
      */
     static void recycle(final BufferedWriter writer, final Throwable primaryFailure) throws IOException {
         try {
@@ -215,6 +239,10 @@ final class Utils {
      * Recycles an in-memory JSON writer without masking a failure from serialization.
      * A cleanup failure is rethrown when it is the only failure, or suppressed on the
      * serialization failure otherwise.
+     *
+     * @param writer the in-memory JSON writer to recycle
+     * @param primaryFailure the failure already raised by serialization, or {@code null} if
+     *                       serialization succeeded
      */
     static void recycle(final BufferedJsonWriter writer, final Throwable primaryFailure) {
         try {
@@ -239,9 +267,15 @@ final class Utils {
 
         try {
             freeAction.free();
-        } catch (final SQLException | RuntimeException | Error e) {
+        } catch (final SQLException e) {
             if (failure == null) {
                 failure = new IOException("Failed to release " + lobType + " resources", e);
+            } else {
+                failure.addSuppressed(e);
+            }
+        } catch (final RuntimeException | Error e) {
+            if (failure == null) {
+                failure = e;
             } else if (failure != e) {
                 failure.addSuppressed(e);
             }

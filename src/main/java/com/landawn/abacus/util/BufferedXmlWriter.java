@@ -45,12 +45,15 @@ import java.io.Writer;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * try (BufferedXmlWriter writer = new BufferedXmlWriter()) {
+ * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
+ * try {
  *     writer.write("<root><item>");
  *     writer.writeCharacter("Value with & special < > characters");
  *     writer.write("</item></root>");
  *     String xml = writer.toString();
  *     // Result: <root><item>Value with &amp; special &lt; &gt; characters</item></root>
+ * } finally {
+ *     Objectory.recycle(writer);
  * }
  * }</pre>
  *
@@ -58,11 +61,6 @@ import java.io.Writer;
  */
 public final class BufferedXmlWriter extends CharacterWriter {
 
-    /**
-     * XML character replacement mappings. Contains escape sequences for XML special characters
-     * ({@code &}, {@code <}, {@code >}, {@code "}, {@code '}) and numeric character references
-     * for control characters (U+0000–U+001F and U+007F).
-     */
     // start
     // ======================================================================================================>>>
     /*
@@ -85,7 +83,7 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * XML character replacement mappings.
      * The predefined XML entities are used for quotes, apostrophes, angle brackets, and ampersands.
      * Other control characters (U+0000 through U+001F and U+007F) are escaped as XML numeric character
-     * references of the form {@code &amp;#xNN;} (for example U+001F becomes {@code &amp;#x1f;}).
+     * references of the form <code>&amp;#xNN;</code> (for example U+001F becomes <code>&amp;#x1f;</code>).
      */
     private static final char[][] REPLACEMENT_CHARS;
 
@@ -125,9 +123,13 @@ public final class BufferedXmlWriter extends CharacterWriter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedXmlWriter writer = new BufferedXmlWriter();
-     * writer.write("<element>content</element>");
-     * String xml = writer.toString();
+     * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
+     * try {
+     *     writer.write("<element>content</element>");
+     *     String xml = writer.toString();
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      */
@@ -144,12 +146,19 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
      * {@code OutputStream}.</p>
      *
+     * <p>This constructor is package-private. Outside this package, obtain an
+     * instance from the pool via {@link Objectory#createBufferedXmlWriter(OutputStream)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (FileOutputStream fos = new FileOutputStream("output.xml");
-     *      BufferedXmlWriter writer = new BufferedXmlWriter(fos)) {
-     *     writer.write("<?xml version=\"1.0\"?>");
-     *     writer.write("<root>content</root>");
+     * try (FileOutputStream fos = new FileOutputStream("output.xml")) {
+     *     BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(fos);
+     *     try {
+     *         writer.write("<?xml version=\"1.0\"?>");
+     *         writer.write("<root>content</root>");
+     *     } finally {
+     *         Objectory.recycle(writer);
+     *     }
      * }
      * }</pre>
      *
@@ -166,12 +175,19 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
      * {@code Writer}.</p>
      *
+     * <p>This constructor is package-private. Outside this package, obtain an
+     * instance from the pool via {@link Objectory#createBufferedXmlWriter(Writer)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (FileWriter fw = new FileWriter("output.xml");
-     *      BufferedXmlWriter writer = new BufferedXmlWriter(fw)) {
-     *     writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-     *     writer.write("<root>content</root>");
+     * try (FileWriter fw = new FileWriter("output.xml")) {
+     *     BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(fw);
+     *     try {
+     *         writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+     *         writer.write("<root>content</root>");
+     *     } finally {
+     *         Objectory.recycle(writer);
+     *     }
      * }
      * }</pre>
      *

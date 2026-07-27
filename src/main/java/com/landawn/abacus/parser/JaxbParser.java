@@ -47,8 +47,9 @@ import jakarta.xml.bind.Unmarshaller;
  * XML parser implementation using JAXB (Jakarta XML Binding) for serialization and deserialization.
  *
  * <p>This class provides XML parsing capabilities using the JAXB framework, which maps Java objects
- * to XML representations and vice versa. It extends {@link AbstractXmlParser} and implements
- * all the required serialization and deserialization methods.</p>
+ * to XML representations and vice versa. It extends {@link AbstractXmlParser} and supports the
+ * {@code String}/{@code File}/{@code InputStream}/{@code Reader} serialization and deserialization
+ * methods.</p>
  *
  * <p>Key features:</p>
  * <ul>
@@ -61,9 +62,19 @@ import jakarta.xml.bind.Unmarshaller;
  * <p>Note: This parser requires classes to be properly annotated with JAXB annotations
  * such as {@code @XmlRootElement}, {@code @XmlElement}, etc.</p>
  *
+ * <p><b>Limitations:</b></p>
+ * <ul>
+ *   <li>Deserializing from a DOM {@link Node}, and the {@code nodeTypes} overloads inherited from
+ *       {@link AbstractXmlParser}, are unsupported and throw {@link UnsupportedOperationException}.</li>
+ *   <li>Marshalling and unmarshalling go through the underlying JAXB runtime, so {@link XmlSerConfig} /
+ *       {@link XmlDeserConfig} settings such as {@code prettyFormat} are not applied. The only setting
+ *       acted upon is a non-empty {@code ignoredPropNames}, which is rejected with a
+ *       {@link ParsingException} because JAXB cannot honor it.</li>
+ * </ul>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * JaxbParser parser = new JaxbParser();
+ * XmlParser parser = ParserFactory.createJaxbParser();
  *
  * // Serialization
  * Person person = new Person("John", 30);

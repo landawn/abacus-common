@@ -451,7 +451,8 @@ public class ReaderType extends AbstractType<Reader> {
      * JSON/XML serializers.
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
-     * @param x the Reader whose content should be appended
+     * @param x the Reader whose content should be appended; may be {@code null}, in which case
+     *          the literal {@code "null"} is appended
      * @throws IOException if an I/O error occurs during the append operation
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -485,17 +486,22 @@ public class ReaderType extends AbstractType<Reader> {
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = new StringReader("Sample text");
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter writer2 = Objectory.createBufferedJsonWriter();
      * JsonSerConfig config = JsonSerConfig.create();
      * config.setStringQuotation('"');
-     * type.serializeTo(writer, reader, config);
-     * System.out.println(writer.toString());   // Output: "Sample text"
+     * try {
+     *     type.serializeTo(writer, reader, config);
+     *     System.out.println(writer.toString());   // Output: "Sample text"
      *
-     * // Without quotation
-     * Reader reader2 = new StringReader("No quotes");
-     * BufferedJsonWriter writer2 = new BufferedJsonWriter();
-     * type.serializeTo(writer2, reader2, null);
-     * System.out.println(writer2.toString());   // Output: No quotes
+     *     // Without quotation
+     *     Reader reader2 = new StringReader("No quotes");
+     *     type.serializeTo(writer2, reader2, null);
+     *     System.out.println(writer2.toString());   // Output: No quotes
+     * } finally {
+     *     Objectory.recycle(writer);
+     *     Objectory.recycle(writer2);
+     * }
      * }</pre>
      *
      * <p>
@@ -509,8 +515,9 @@ public class ReaderType extends AbstractType<Reader> {
      * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Reader whose content should be written
-     * @param config the serialization configuration that determines string quotation
+     * @param x the Reader whose content should be written; may be {@code null}, in which case
+     *          the literal {@code "null"} is written
+     * @param config the serialization configuration that determines string quotation; may be {@code null}
      * @throws IOException if an I/O error occurs while reading from {@code x} or writing to {@code writer}
      */
     @Override

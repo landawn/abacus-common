@@ -191,7 +191,8 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @param str the string to parse in {@code "version:value"} format; may be {@code null} or empty
      * @return the deserialized column value
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the string has no {@code ':'} separator or its version prefix is not a valid {@code long}
+     * @throws IllegalArgumentException if the string has no {@code ':'} separator
+     * @throws NumberFormatException if the version prefix before the first {@code ':'} is not a valid {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(HBaseColumn)
      */

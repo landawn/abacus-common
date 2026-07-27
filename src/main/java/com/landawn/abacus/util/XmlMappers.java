@@ -123,14 +123,32 @@ public final class XmlMappers {
         }
     }
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private XmlMappers() {
         // Utility class - prevent instantiation
     }
 
+    /**
+     * Creates an {@link XmlMapper} backed by an {@link XMLInputFactory} that rejects DTDs and
+     * external entities. Every mapper owned by this class is created this way.
+     *
+     * @return a new, security-hardened {@code XmlMapper}
+     * @throws IllegalStateException if the platform's {@code XMLInputFactory} cannot be hardened
+     */
     private static XmlMapper newSecureXmlMapper() {
         return new XmlMapper(newSecureXmlInputFactory());
     }
 
+    /**
+     * Creates an {@link XMLInputFactory} with DTD support and external-entity support disabled and a
+     * resolver installed that refuses every external entity resolution attempt.
+     *
+     * @return a new, security-hardened {@code XMLInputFactory}
+     * @throws IllegalStateException if a required security property cannot be set or is ignored by
+     *         the platform's factory, or if the factory rejects the resolver
+     */
     private static XMLInputFactory newSecureXmlInputFactory() {
         final XMLInputFactory factory = XMLInputFactory.newFactory();
 
@@ -148,6 +166,16 @@ public final class XmlMappers {
         return factory;
     }
 
+    /**
+     * Sets a security-relevant boolean property on the given factory and verifies that the factory
+     * actually honored it, so that a silently ignoring implementation cannot leave the parser open
+     * to XXE attacks.
+     *
+     * @param factory the factory to configure
+     * @param propertyName the name of the property to set
+     * @param propertyValue the required value of the property
+     * @throws IllegalStateException if the property cannot be set or the factory reports a different value
+     */
     private static void setRequiredXmlInputFactoryProperty(final XMLInputFactory factory, final String propertyName, final boolean propertyValue) {
         try {
             factory.setProperty(propertyName, propertyValue);
@@ -217,6 +245,11 @@ public final class XmlMappers {
     /**
      * Serializes the specified object to an XML string with custom serialization features.
      * This method allows fine-grained control over serialization behavior.
+     *
+     * <p>Note that each supplied feature is <i>enabled</i>; this method cannot disable a feature.
+     * To disable a feature (or otherwise customize the configuration), use
+     * {@link #toXml(Object, SerializationConfig)} with a config built via
+     * {@link #createSerializationConfig()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1441,8 +1474,10 @@ public final class XmlMappers {
      * Returns an XmlMapper to the pool for reuse after resetting it to default configuration.
      * This method resets both serialization and deserialization configs to their defaults
      * before returning the mapper to the pool. If the pool is full, the mapper is discarded.
+     * The two shared default mappers are never pooled, so passing either of them is a no-op.
      *
-     * @param mapper the XmlMapper to return to the pool, or {@code null} (which is ignored)
+     * @param mapper the XmlMapper to return to the pool; {@code null} and the shared default
+     *               mappers are ignored
      */
     private static void recycle(final XmlMapper mapper) {
         if (mapper == null || mapper == defaultXmlMapper || mapper == defaultXmlMapperForPretty) {
@@ -1520,6 +1555,7 @@ public final class XmlMappers {
          * Neither mapper's XML parser factory is security-hardened by this constructor.
          *
          * @param xmlMapper the XmlMapper to wrap; must not be {@code null}
+         * @throws NullPointerException if {@code xmlMapper} is {@code null}
          */
         One(final XmlMapper xmlMapper) {
             this.xmlMapper = xmlMapper;

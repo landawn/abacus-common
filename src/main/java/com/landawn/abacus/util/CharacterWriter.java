@@ -34,16 +34,15 @@ import java.io.Writer;
  * <p>This class is designed for high-performance output generation and is not thread-safe.
  * If multiple threads need to write concurrently, external synchronization is required.</p>
  *
- * <p>Example of how subclasses use this class:</p>
+ * <p>Example of escaping JSON characters with a concrete subclass:</p>
  * <pre>{@code
- * // In a subclass like BufferedJsonWriter:
- * char[][] replacements = new char[128][];
- * replacements['"'] = "\\\"".toCharArray();
- * replacements['\\'] = "\\\\".toCharArray();
- * // ... more replacements
- *
- * CharacterWriter writer = new BufferedJsonWriter();
- * writer.writeCharacter("Hello \"World\"");   // Outputs: Hello \"World\"
+ * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+ * try {
+ *     writer.writeCharacter("Hello \"World\"");
+ *     String escaped = writer.toString();   // returns: Hello \"World\"
+ * } finally {
+ *     Objectory.recycle(writer);
+ * }
  * }</pre>
  *
  * @see BufferedJsonWriter
@@ -308,7 +307,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     }
 
     /**
-     * Converts a character to its JSON Unicode escape sequence of the form {@code &#92;uXXXX}.
+     * Converts a character to its JSON Unicode escape sequence of the form <code>&#92;uXXXX</code>.
      *
      * <p>The result is always a six-character {@code String}: a backslash, the letter
      * {@code u}, and four lowercase hexadecimal digits zero-padded to a width of four.
@@ -321,7 +320,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * </code></pre>
      *
      * @param ch the character to convert
-     * @return the JSON Unicode escape sequence (e.g., {@code &#92;u2028})
+     * @return the JSON Unicode escape sequence (e.g., <code>&#92;u2028</code>)
      */
     static String getCharNum(final char ch) {
         return String.format("\\u%04x", (int) ch);

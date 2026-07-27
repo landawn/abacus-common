@@ -102,16 +102,10 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * UnaryOperator<String> identity = UnaryOperator.identity();
      * String result = identity.apply("hello");   // returns "hello"
      *
-     * List<UnaryOperator<Integer>> operations = Arrays.asList(
-     *     x -> x * 2,
-     *     UnaryOperator.identity(), // no-op
-     *     x -> x + 10
-     * );
-     *
-     * // Can be used in streams
-     * Stream.of("a", "b", "c")
-     *     .map(UnaryOperator.<String>identity())
-     *     .collect(Collectors.toList());   // returns ["a", "b", "c"]
+     * // Useful as a conditional no-op in a composition
+     * boolean shouldDouble = false;
+     * UnaryOperator<Integer> step = shouldDouble ? x -> x * 2 : UnaryOperator.identity();
+     * Integer value = step.apply(21);   // returns 21
      * }</pre>
      *
      * @param <T> the type of the input and output of the operator

@@ -59,7 +59,7 @@ import com.landawn.abacus.util.function.ByteBiPredicate;
 import com.landawn.abacus.util.function.ByteBinaryOperator;
 import com.landawn.abacus.util.function.ByteNFunction;
 import com.landawn.abacus.util.function.ByteTriPredicate;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
 
 public class ByteStreamTest extends TestBase {
 
@@ -3752,7 +3752,7 @@ public class ByteStreamTest extends TestBase {
     @Test
     public void testParallelSettings() {
         byteStream = createByteStream(new byte[] { 1, 2, 3 });
-        ByteStream.ParallelSettings settings = PS.create(2);
+        ByteStream.ParallelSettings settings = ParallelSettings.builder().maxThreadNum(2).build();
         ByteStream parallelStream = byteStream.parallel(settings);
         assertTrue(parallelStream.isParallel());
     }

@@ -20,10 +20,14 @@ import com.landawn.abacus.util.cs;
 /**
  * Represents an operation that accepts two {@code boolean}-valued arguments and returns no result.
  * This is the primitive type specialization of {@link BiConsumer} for {@code boolean}.
+ * Unlike most other functional interfaces, {@code BooleanBiConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(boolean, boolean)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.BiConsumer
+ * @see BooleanConsumer
  */
 @FunctionalInterface
 public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeException> { //NOSONAR

@@ -285,7 +285,30 @@ public final class EmailUtil {
         }
     }
 
-    // Package-private so message construction can be verified without contacting an SMTP server.
+    /**
+     * Builds the multipart {@link MimeMessage} that the {@code send*} methods transmit, without
+     * sending it. The message body is added as a single {@code text/html} or {@code text/plain}
+     * part encoded in UTF-8, followed by one part per entry in {@code attachedFiles}; a
+     * {@code null} {@code content} is written as an empty body.
+     *
+     * <p>This method is package-private so that message construction can be verified without
+     * contacting an SMTP server.</p>
+     *
+     * @param recipients array of email addresses to send the email to; must not be {@code null} or empty
+     * @param from the sender's email address; must not be {@code null} or empty
+     * @param subject the email subject. May be {@code null} or empty
+     * @param content the body of the email. May be {@code null} or empty
+     * @param attachedFiles array of file paths to attach, or {@code null} if no attachments.
+     *                      The file name (not full path) is used as the attachment name
+     * @param isHTML {@code true} to send {@code content} as {@code text/html}, {@code false} for {@code text/plain}
+     * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
+     * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
+     * @param props mail server properties; must not be {@code null}
+     * @return the constructed message, ready to be passed to {@link Transport#send(Message)}
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
+     *                                  {@code null} or empty, or {@code props} is {@code null}
+     * @throws MessagingException if an address is invalid or the message cannot be assembled
+     */
     static MimeMessage createMessage(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
             final boolean isHTML, final String userName, final String password, final Properties props) throws MessagingException {
         N.checkArgNotEmpty(recipients, "recipients");

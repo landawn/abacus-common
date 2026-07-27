@@ -35,12 +35,23 @@ import com.landawn.abacus.util.Strings;
 public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultimap<K, E>> {
 
     /**
-     * Constructs a new SetMultimapType with the specified type parameters.
-     * This constructor is package-private and intended to be called only by the TypeFactory.
+     * Package-private constructor for SetMultimapType.
+     * Creates a type handler for SetMultimap instances with the specified key and value types.
+     * This constructor is called by the TypeFactory to create SetMultimap&lt;K, E&gt; type instances.
      *
-     * @param typeClass the Class object representing the SetMultimap type
-     * @param keyTypeName the type name for the keys in the multimap
-     * @param valueElementTypeName the type name for the value elements in the multimap
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Obtained via TypeFactory
+     * Type<SetMultimap<String, Integer>> type = TypeFactory.getType("SetMultimap<String, Integer>");
+     * SetMultimap<String, Integer> multimap = N.newLinkedSetMultimap();
+     * multimap.put("key", 1);
+     * multimap.put("key", 2);
+     * String json = type.stringOf(multimap);  // {"key":[1,2]}
+     * }</pre>
+     *
+     * @param typeClass the Class object for SetMultimap
+     * @param keyTypeName the name of the key type
+     * @param valueElementTypeName the name of the value element type
      */
     SetMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
         super(typeClass, keyTypeName, valueElementTypeName, null);
@@ -61,7 +72,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * multimap.put("ids", 100);
      *
      * String json = type.stringOf(multimap);
-     * // Returns: {"tags":[1,2],"ids":[100]} (note: only unique values)
+     * // Returns: {"tags": [1, 2], "ids": [100]} (note: only unique values)
      *
      * json = type.stringOf(null);
      * // Returns: null
@@ -85,8 +96,8 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
     /**
      * Parses a JSON string representation and returns the corresponding SetMultimap.
      * The string should represent a map where each key maps to a collection of values.
-     * The resulting SetMultimap will use LinkedHashSet for value collections to maintain
-     * insertion order while ensuring uniqueness.
+     * The resulting SetMultimap is backed by a {@code LinkedHashMap}, so keys keep their insertion
+     * order; each key's values are stored in a {@code HashSet} (unique but unordered).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

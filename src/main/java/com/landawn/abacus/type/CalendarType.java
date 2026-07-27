@@ -32,7 +32,7 @@ import com.landawn.abacus.util.N;
  *   <li>{@link Number}: interpreted as milliseconds since the Unix epoch</li>
  *   <li>{@link java.util.Date}: converted to a {@link Calendar} with the same instant</li>
  *   <li>{@link Calendar}: cloned to a new independent instance</li>
- *   <li>{@link String}: parsed as a date-time string, or {@code "sysTime"} for the current time</li>
+ *   <li>{@link String}: parsed as a date-time string, or {@code "sysTime"}/{@code "SYS_TIME"} for the current time</li>
  * </ul>
  *
  * @see AbstractCalendarType
@@ -102,7 +102,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * Converts a string representation to a {@link Calendar} instance.
      * <ul>
      *   <li>{@code null}, empty, or the literal {@code "null"} string: returns {@code null}</li>
-     *   <li>{@code "sysTime"}: returns a {@link Calendar} for the current system time</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns a {@link Calendar} for the current system time</li>
      *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseCalendar(String)}</li>
      * </ul>
      *

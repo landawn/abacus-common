@@ -38,8 +38,8 @@ import com.landawn.abacus.util.function.IntToFloatFunction;
 import com.landawn.abacus.util.function.IntToLongFunction;
 import com.landawn.abacus.util.function.IntToShortFunction;
 import com.landawn.abacus.util.function.IntUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelArrayIntStreamTest extends TestBase {
 
@@ -51,11 +51,11 @@ public class ParallelArrayIntStreamTest extends TestBase {
     private IntStream parallelStream;
 
     protected IntStream createIntStream(int... elements) {
-        return IntStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
+        return IntStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
     }
 
-    protected IntStream createIteratorSplitorIntStream(int... elements) {
-        return new ParallelArrayIntStream(elements, 0, elements.length, false, testMaxThreadNum, Splitor.ITERATOR, null, false, new ArrayList<>());
+    protected IntStream createIteratorSplitStrategyIntStream(int... elements) {
+        return new ParallelArrayIntStream(elements, 0, elements.length, false, testMaxThreadNum, SplitStrategy.ITERATOR, null, false, new ArrayList<>());
     }
 
     @BeforeEach
@@ -109,26 +109,26 @@ public class ParallelArrayIntStreamTest extends TestBase {
 
     // Covers the iterator-based terminal-operation branch in ParallelArrayIntStream.
     @Test
-    public void testReduceAndFindMethods_IteratorSplitor() {
-        assertEquals(15, createIteratorSplitorIntStream(4, 2, 1, 3, 5).reduce(0, Integer::sum));
+    public void testReduceAndFindMethods_IteratorSplitStrategy() {
+        assertEquals(15, createIteratorSplitStrategyIntStream(4, 2, 1, 3, 5).reduce(0, Integer::sum));
 
-        OptionalInt reduced = createIteratorSplitorIntStream(4, 2, 1, 3, 5).reduce(Integer::sum);
+        OptionalInt reduced = createIteratorSplitStrategyIntStream(4, 2, 1, 3, 5).reduce(Integer::sum);
         assertTrue(reduced.isPresent());
         assertEquals(15, reduced.get());
 
-        OptionalInt firstOdd = createIteratorSplitorIntStream(4, 2, 1, 3, 5).findFirst(i -> (i & 1) == 1);
+        OptionalInt firstOdd = createIteratorSplitStrategyIntStream(4, 2, 1, 3, 5).findFirst(i -> (i & 1) == 1);
         assertTrue(firstOdd.isPresent());
         assertEquals(1, firstOdd.get());
 
-        OptionalInt anyOdd = createIteratorSplitorIntStream(4, 2, 1, 3, 5).findAny(i -> (i & 1) == 1);
+        OptionalInt anyOdd = createIteratorSplitStrategyIntStream(4, 2, 1, 3, 5).findAny(i -> (i & 1) == 1);
         assertTrue(anyOdd.isPresent());
         assertTrue(anyOdd.get() == 1 || anyOdd.get() == 3 || anyOdd.get() == 5);
 
-        OptionalInt lastOdd = createIteratorSplitorIntStream(4, 2, 1, 3, 5).findLast(i -> (i & 1) == 1);
+        OptionalInt lastOdd = createIteratorSplitStrategyIntStream(4, 2, 1, 3, 5).findLast(i -> (i & 1) == 1);
         assertTrue(lastOdd.isPresent());
         assertEquals(5, lastOdd.get());
 
-        OptionalInt notFound = createIteratorSplitorIntStream(4, 2, 1, 3, 5).findAny(i -> i > 10);
+        OptionalInt notFound = createIteratorSplitStrategyIntStream(4, 2, 1, 3, 5).findAny(i -> i > 10);
         assertFalse(notFound.isPresent());
     }
 
@@ -691,9 +691,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
     }
 
     @Test
-    public void testForEach_IteratorSplitor() {
+    public void testForEach_IteratorSplitStrategy() {
         AtomicInteger sum = new AtomicInteger(0);
-        createIteratorSplitorIntStream(1, 2, 3, 4, 5).forEach(i -> sum.addAndGet(i));
+        createIteratorSplitStrategyIntStream(1, 2, 3, 4, 5).forEach(i -> sum.addAndGet(i));
         assertEquals(15, sum.get());
     }
 
@@ -847,23 +847,18 @@ public class ParallelArrayIntStreamTest extends TestBase {
     public void testOverflowScenarios() {
         parallelStream = createIntStream(new int[] { Integer.MAX_VALUE - 1, 1, 1 });
 
-        try {
-            int sum = parallelStream.reduce(0, Integer::sum);
-            assertTrue(sum < 0 || sum == Integer.MAX_VALUE);
-        } catch (ArithmeticException e) {
-            assertTrue(true);
-        }
+        assertEquals(Integer.MIN_VALUE, parallelStream.reduce(0, Integer::sum));
     }
 
     @Test
-    public void testIteratorSplitorReduceAndFindOperations_SparseMatch() {
-        assertEquals(72, createIteratorSplitorIntStream(21, 2, 4, 7, 6, 11, 8, 13).reduce(0, Integer::sum));
+    public void testIteratorSplitStrategyReduceAndFindOperations_SparseMatch() {
+        assertEquals(72, createIteratorSplitStrategyIntStream(21, 2, 4, 7, 6, 11, 8, 13).reduce(0, Integer::sum));
 
-        OptionalInt reduced = createIteratorSplitorIntStream(21, 2, 4).reduce(Integer::sum);
+        OptionalInt reduced = createIteratorSplitStrategyIntStream(21, 2, 4).reduce(Integer::sum);
         assertTrue(reduced.isPresent());
         assertEquals(27, reduced.get());
 
-        OptionalInt firstMatch = createIteratorSplitorIntStream(21, 2, 4, 7, 6, 11, 8, 13).findFirst(i -> {
+        OptionalInt firstMatch = createIteratorSplitStrategyIntStream(21, 2, 4, 7, 6, 11, 8, 13).findFirst(i -> {
             if (i == 21) {
                 try {
                     Thread.sleep(10L);
@@ -877,11 +872,11 @@ public class ParallelArrayIntStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals(21, firstMatch.get());
 
-        OptionalInt anyMatch = createIteratorSplitorIntStream(21, 2, 4, 7, 6, 11, 8, 13).findAny(i -> i > 5 && (i & 1) == 1);
+        OptionalInt anyMatch = createIteratorSplitStrategyIntStream(21, 2, 4, 7, 6, 11, 8, 13).findAny(i -> i > 5 && (i & 1) == 1);
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21 || anyMatch.get() == 7 || anyMatch.get() == 11 || anyMatch.get() == 13);
 
-        OptionalInt lastMatch = createIteratorSplitorIntStream(21, 2, 4, 7, 6, 11, 8, 13).findLast(i -> {
+        OptionalInt lastMatch = createIteratorSplitStrategyIntStream(21, 2, 4, 7, 6, 11, 8, 13).findLast(i -> {
             if (i == 13) {
                 try {
                     Thread.sleep(10L);
@@ -904,8 +899,8 @@ public class ParallelArrayIntStreamTest extends TestBase {
     }
 
     @Test
-    public void testCollect_IteratorSplitor() {
-        List<Integer> result = createIteratorSplitorIntStream(1, 2, 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    public void testCollect_IteratorSplitStrategy() {
+        List<Integer> result = createIteratorSplitStrategyIntStream(1, 2, 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertHaveSameElements(List.of(1, 2, 3), result);
     }
 
@@ -930,31 +925,31 @@ public class ParallelArrayIntStreamTest extends TestBase {
         assertTrue(createIntStream(new int[] {}).noneMatch(i -> true));
     }
 
-    // Cover the ITERATOR splitor path for anyMatch / allMatch / noneMatch / collect / forEach
+    // Cover the ITERATOR splitStrategy path for anyMatch / allMatch / noneMatch / collect / forEach
     @Test
-    public void testAnyMatchAllMatchNoneMatch_IteratorSplitor() {
-        assertTrue(createIteratorSplitorIntStream(1, 2, 3, 4, 5).anyMatch(i -> i > 4));
-        assertFalse(createIteratorSplitorIntStream(1, 2, 3, 4, 5).anyMatch(i -> i > 10));
-        assertFalse(createIteratorSplitorIntStream(new int[0]).anyMatch(i -> true));
+    public void testAnyMatchAllMatchNoneMatch_IteratorSplitStrategy() {
+        assertTrue(createIteratorSplitStrategyIntStream(1, 2, 3, 4, 5).anyMatch(i -> i > 4));
+        assertFalse(createIteratorSplitStrategyIntStream(1, 2, 3, 4, 5).anyMatch(i -> i > 10));
+        assertFalse(createIteratorSplitStrategyIntStream(new int[0]).anyMatch(i -> true));
 
-        assertTrue(createIteratorSplitorIntStream(1, 2, 3, 4, 5).allMatch(i -> i >= 1 && i <= 5));
-        assertFalse(createIteratorSplitorIntStream(1, 2, 3, 4, 5).allMatch(i -> i < 5));
-        assertTrue(createIteratorSplitorIntStream(new int[0]).allMatch(i -> false));
+        assertTrue(createIteratorSplitStrategyIntStream(1, 2, 3, 4, 5).allMatch(i -> i >= 1 && i <= 5));
+        assertFalse(createIteratorSplitStrategyIntStream(1, 2, 3, 4, 5).allMatch(i -> i < 5));
+        assertTrue(createIteratorSplitStrategyIntStream(new int[0]).allMatch(i -> false));
 
-        assertTrue(createIteratorSplitorIntStream(1, 2, 3, 4, 5).noneMatch(i -> i > 10));
-        assertFalse(createIteratorSplitorIntStream(1, 2, 3, 4, 5).noneMatch(i -> i > 4));
-        assertTrue(createIteratorSplitorIntStream(new int[0]).noneMatch(i -> true));
+        assertTrue(createIteratorSplitStrategyIntStream(1, 2, 3, 4, 5).noneMatch(i -> i > 10));
+        assertFalse(createIteratorSplitStrategyIntStream(1, 2, 3, 4, 5).noneMatch(i -> i > 4));
+        assertTrue(createIteratorSplitStrategyIntStream(new int[0]).noneMatch(i -> true));
     }
 
-    // anyMatch/allMatch/noneMatch on ITERATOR splitor with large array
+    // anyMatch/allMatch/noneMatch on ITERATOR splitStrategy with large array
     @Test
-    public void testMatchOperations_IteratorSplitor_LargeArray() {
-        assertTrue(createIteratorSplitorIntStream(TEST_ARRAY).anyMatch(i -> i > 20));
-        assertFalse(createIteratorSplitorIntStream(TEST_ARRAY).anyMatch(i -> i > 100));
-        assertTrue(createIteratorSplitorIntStream(TEST_ARRAY).allMatch(i -> i >= 1));
-        assertFalse(createIteratorSplitorIntStream(TEST_ARRAY).allMatch(i -> i < 20));
-        assertTrue(createIteratorSplitorIntStream(TEST_ARRAY).noneMatch(i -> i > 100));
-        assertFalse(createIteratorSplitorIntStream(TEST_ARRAY).noneMatch(i -> i == 1));
+    public void testMatchOperations_IteratorSplitStrategy_LargeArray() {
+        assertTrue(createIteratorSplitStrategyIntStream(TEST_ARRAY).anyMatch(i -> i > 20));
+        assertFalse(createIteratorSplitStrategyIntStream(TEST_ARRAY).anyMatch(i -> i > 100));
+        assertTrue(createIteratorSplitStrategyIntStream(TEST_ARRAY).allMatch(i -> i >= 1));
+        assertFalse(createIteratorSplitStrategyIntStream(TEST_ARRAY).allMatch(i -> i < 20));
+        assertTrue(createIteratorSplitStrategyIntStream(TEST_ARRAY).noneMatch(i -> i > 100));
+        assertFalse(createIteratorSplitStrategyIntStream(TEST_ARRAY).noneMatch(i -> i == 1));
     }
 
     @Test
@@ -1023,18 +1018,18 @@ public class ParallelArrayIntStreamTest extends TestBase {
         assertEquals(5, result.getAsInt());
     }
 
-    // findFirst/findAny/findLast on ITERATOR splitor with large array
+    // findFirst/findAny/findLast on ITERATOR splitStrategy with large array
     @Test
-    public void testFindOperations_IteratorSplitor_LargeArray() {
-        com.landawn.abacus.util.u.OptionalInt first = createIteratorSplitorIntStream(TEST_ARRAY).findFirst(i -> i > 20);
+    public void testFindOperations_IteratorSplitStrategy_LargeArray() {
+        com.landawn.abacus.util.u.OptionalInt first = createIteratorSplitStrategyIntStream(TEST_ARRAY).findFirst(i -> i > 20);
         assertTrue(first.isPresent());
         assertEquals(21, first.get());
 
-        com.landawn.abacus.util.u.OptionalInt any = createIteratorSplitorIntStream(TEST_ARRAY).findAny(i -> i > 20);
+        com.landawn.abacus.util.u.OptionalInt any = createIteratorSplitStrategyIntStream(TEST_ARRAY).findAny(i -> i > 20);
         assertTrue(any.isPresent());
         assertTrue(any.get() > 20);
 
-        com.landawn.abacus.util.u.OptionalInt last = createIteratorSplitorIntStream(TEST_ARRAY).findLast(i -> i < 10);
+        com.landawn.abacus.util.u.OptionalInt last = createIteratorSplitStrategyIntStream(TEST_ARRAY).findLast(i -> i < 10);
         assertTrue(last.isPresent());
         assertEquals(9, last.get());
     }
@@ -1226,7 +1221,7 @@ public class ParallelArrayIntStreamTest extends TestBase {
 
     @Test
     public void testZipWithBinaryDefaults_SequentialFallback() {
-        List<Integer> result = IntStream.of(1, 2, 3).parallel(PS.create(Splitor.ARRAY).maxThreadNum(1)).zipWith(IntStream.of(10), 0, -1, Integer::sum).toList();
+        List<Integer> result = IntStream.of(1, 2, 3).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build()).zipWith(IntStream.of(10), 0, -1, Integer::sum).toList();
 
         assertEquals(Arrays.asList(11, 1, 2), result);
     }
@@ -1294,7 +1289,7 @@ public class ParallelArrayIntStreamTest extends TestBase {
 
     @Test
     public void testCancelUncompletedThreadsIsPreserved() {
-        try (ParallelArrayIntStream stream = new ParallelArrayIntStream(new int[] { 1, 2, 3 }, 0, 3, false, testMaxThreadNum, Splitor.ARRAY, null, true,
+        try (ParallelArrayIntStream stream = new ParallelArrayIntStream(new int[] { 1, 2, 3 }, 0, 3, false, testMaxThreadNum, SplitStrategy.ARRAY, null, true,
                 new ArrayList<>())) {
             assertTrue(stream.cancelUncompletedThreads());
 
@@ -1304,45 +1299,45 @@ public class ParallelArrayIntStreamTest extends TestBase {
         }
     }
 
-    // forEach with ITERATOR splitor and large array
+    // forEach with ITERATOR splitStrategy and large array
     @Test
-    public void testForEach_IteratorSplitor_LargeArray() {
+    public void testForEach_IteratorSplitStrategy_LargeArray() {
         AtomicInteger sum = new AtomicInteger(0);
-        createIteratorSplitorIntStream(TEST_ARRAY).forEach(i -> sum.addAndGet(i));
+        createIteratorSplitStrategyIntStream(TEST_ARRAY).forEach(i -> sum.addAndGet(i));
         int expected = 0;
         for (int v : TEST_ARRAY)
             expected += v;
         assertEquals(expected, sum.get());
     }
 
-    // anyMatch with ARRAY splitor and large array
+    // anyMatch with ARRAY splitStrategy and large array
     @Test
-    public void testAnyMatch_ArraySplitor_ParallelPath() {
+    public void testAnyMatch_ArraySplitStrategy_ParallelPath() {
         assertTrue(createIntStream(TEST_ARRAY).anyMatch(i -> i == 26));
         assertFalse(createIntStream(TEST_ARRAY).anyMatch(i -> i > 100));
     }
 
-    // allMatch with ARRAY splitor and large array
+    // allMatch with ARRAY splitStrategy and large array
     @Test
-    public void testAllMatch_ArraySplitor_ParallelPath() {
+    public void testAllMatch_ArraySplitStrategy_ParallelPath() {
         assertTrue(createIntStream(TEST_ARRAY).allMatch(i -> i >= 1 && i <= 26));
         assertFalse(createIntStream(TEST_ARRAY).allMatch(i -> i < 10));
     }
 
-    // reduce with identity on ITERATOR splitor with large array
+    // reduce with identity on ITERATOR splitStrategy with large array
     @Test
-    public void testReduceWithIdentity_IteratorSplitor_LargeArray() {
-        int sum = createIteratorSplitorIntStream(TEST_ARRAY).reduce(0, Integer::sum);
+    public void testReduceWithIdentity_IteratorSplitStrategy_LargeArray() {
+        int sum = createIteratorSplitStrategyIntStream(TEST_ARRAY).reduce(0, Integer::sum);
         int expected = 0;
         for (int v : TEST_ARRAY)
             expected += v;
         assertEquals(expected, sum);
     }
 
-    // reduce without identity on ITERATOR splitor with large array
+    // reduce without identity on ITERATOR splitStrategy with large array
     @Test
-    public void testReduceNoIdentity_IteratorSplitor_LargeArray() {
-        com.landawn.abacus.util.u.OptionalInt result = createIteratorSplitorIntStream(TEST_ARRAY).reduce(Integer::sum);
+    public void testReduceNoIdentity_IteratorSplitStrategy_LargeArray() {
+        com.landawn.abacus.util.u.OptionalInt result = createIteratorSplitStrategyIntStream(TEST_ARRAY).reduce(Integer::sum);
         assertTrue(result.isPresent());
         int expected = 0;
         for (int v : TEST_ARRAY)
@@ -1350,24 +1345,24 @@ public class ParallelArrayIntStreamTest extends TestBase {
         assertEquals(expected, result.getAsInt());
     }
 
-    // noneMatch with ARRAY splitor and large array
+    // noneMatch with ARRAY splitStrategy and large array
     @Test
-    public void testNoneMatch_ArraySplitor_ParallelPath() {
+    public void testNoneMatch_ArraySplitStrategy_ParallelPath() {
         assertTrue(createIntStream(TEST_ARRAY).noneMatch(i -> i > 100));
         assertFalse(createIntStream(TEST_ARRAY).noneMatch(i -> i == 1));
     }
 
-    // collect with ITERATOR splitor and large array
+    // collect with ITERATOR splitStrategy and large array
     @Test
-    public void testCollect_IteratorSplitor_LargeArray() {
-        List<Integer> result = createIteratorSplitorIntStream(TEST_ARRAY).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    public void testCollect_IteratorSplitStrategy_LargeArray() {
+        List<Integer> result = createIteratorSplitStrategyIntStream(TEST_ARRAY).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertEquals(TEST_ARRAY.length, result.size());
         assertHaveSameElements(N.toList(TEST_ARRAY), result);
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ARRAY, ((ParallelArrayIntStream) createIntStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ARRAY, ((ParallelArrayIntStream) createIntStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

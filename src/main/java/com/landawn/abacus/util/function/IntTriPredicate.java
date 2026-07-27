@@ -33,6 +33,8 @@ import com.landawn.abacus.util.cs;
  *
  * @see java.util.function.Predicate
  * @see java.util.function.BiPredicate
+ * @see IntPredicate
+ * @see IntBiPredicate
  */
 @FunctionalInterface
 public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeException> { //NOSONAR

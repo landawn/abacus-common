@@ -161,7 +161,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * boolean result = positiveAndFinite.test(5.0f);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
      * @throws IllegalArgumentException if {@code other} is null
@@ -187,7 +187,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * boolean result = nonPositive.test(0.0f);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
      * @throws IllegalArgumentException if {@code other} is null

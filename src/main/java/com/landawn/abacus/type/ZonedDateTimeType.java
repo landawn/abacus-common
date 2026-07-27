@@ -44,7 +44,7 @@ import com.landawn.abacus.util.Numbers;
  *   <li>ISO 8601 timestamp with milliseconds (e.g., "2023-10-15T10:30:00.123Z")</li>
  *   <li>Standard ZonedDateTime string format</li>
  *   <li>Epoch milliseconds as numeric string</li>
- *   <li>"SYS_TIME" keyword for current time</li>
+ *   <li>{@code "sysTime"} or {@code "SYS_TIME"} keyword (case-insensitive) for current time</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -61,7 +61,7 @@ import com.landawn.abacus.util.Numbers;
  * // Get current time
  * ZonedDateTime now = type.valueOf("SYS_TIME");
  *
- * // Convert to ISO 8601 timestamp string
+ * // Convert to ZonedDateTime's standard text form (including a region zone when present)
  * String str = type.stringOf(zdt);
  *
  * // Use with PreparedStatement
@@ -77,7 +77,8 @@ import com.landawn.abacus.util.Numbers;
 public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
     /**
-     * The type name identifier for {@link ZonedDateTime} type (the simple class name).
+     * The type name identifier for {@link ZonedDateTime} type, equal to the simple class name
+     * {@code "ZonedDateTime"}.
      */
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();
 
@@ -174,7 +175,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      * <ul>
      *   <li>{@code null}, empty string, or the literal "null" returns {@code null}</li>
-     *   <li>"SYS_TIME" returns the current ZonedDateTime</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current ZonedDateTime</li>
      *   <li>Numeric strings are interpreted as epoch milliseconds</li>
      *   <li>ISO 8601 date-time strings with 'Z' suffix (20 chars) are parsed as ISO date-time</li>
      *   <li>ISO 8601 timestamp strings with 'Z' suffix (24 chars) are parsed as ISO timestamp</li>
@@ -383,8 +384,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
     /**
      * Appends the string representation of a ZonedDateTime to an Appendable.
      * <p>
-     * This method formats the ZonedDateTime using the ISO 8601 timestamp format and appends it
-     * to the provided Appendable. If the ZonedDateTime is {@code null}, it appends the string "null".
+     * This method appends the value returned by {@link ZonedDateTime#toString()} to the provided
+     * Appendable. If the ZonedDateTime is {@code null}, it appends the string {@code "null"}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -437,9 +438,13 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
      * JsonSerConfig config = JsonSerConfig.create();
-     * type.serializeTo(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
+     * try {
+     *     type.serializeTo(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      * <p>
@@ -452,8 +457,9 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the ZonedDateTime value to write
-     * @param config the serialization configuration controlling format and quoting
+     * @param config the serialization configuration controlling format and quoting; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
+     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
      */
     @SuppressWarnings("null")
     @Override

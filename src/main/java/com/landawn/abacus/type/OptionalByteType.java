@@ -43,7 +43,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * <pre>{@code
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
      * Class<OptionalByte> clazz = type.javaType();
-     * // clazz equals OptionalByte.class
+     * // Returns: OptionalByte.class
      * }</pre>
      *
      * @return the {@link OptionalByte} class object
@@ -91,16 +91,18 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     *
      * OptionalByte opt = OptionalByte.of((byte) 42);
-     * String str = type.stringOf(opt);
-     * // str equals "42"
+     * String result = type.stringOf(opt);
+     * // Returns: "42"
+     *
+     * opt = OptionalByte.of((byte) 0);
+     * result = type.stringOf(opt);
+     * // Returns: "0"
      *
      * opt = OptionalByte.empty();
-     * str = type.stringOf(opt);
-     * // str equals null
-     *
-     * str = type.stringOf(null);
-     * // str equals null
+     * result = type.stringOf(opt);
+     * // Returns: null
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -124,17 +126,18 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
-     * OptionalByte opt = type.valueOf("127");
-     * // opt.get() equals (byte) 127
      *
-     * opt = type.valueOf("-128");
-     * // opt.get() equals (byte) -128
+     * OptionalByte result = type.valueOf("127");
+     * // Returns: OptionalByte.of((byte) 127)
      *
-     * opt = type.valueOf(null);
-     * // opt.isEmpty() returns true
+     * result = type.valueOf("-128");
+     * // Returns: OptionalByte.of((byte) -128)
      *
-     * opt = type.valueOf("");
-     * // opt.isEmpty() returns true
+     * result = type.valueOf(null);
+     * // Returns: OptionalByte.empty()
+     *
+     * result = type.valueOf("");
+     * // Returns: OptionalByte.empty()
      * }</pre>
      *
      * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
@@ -159,14 +162,17 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
-     * ResultSet rs = statement.executeQuery("SELECT status_code FROM records");
-     * if (rs.next()) {
-     *     OptionalByte statusCode = type.get(rs, 1);
-     *     if (statusCode.isPresent()) {
-     *         byte code = statusCode.get();
-     *         // Process the status code
-     *     }
-     * }
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject(1)).thenReturn((byte) 42);
+     * Mockito.when(rs.getObject(2)).thenReturn(null);
+     *
+     * // Column contains byte value 42
+     * OptionalByte opt = type.get(rs, 1);
+     * // Returns: OptionalByte.of((byte) 42)
+     *
+     * // Column contains SQL NULL
+     * opt = type.get(rs, 2);
+     * // Returns: OptionalByte.empty()
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -185,6 +191,22 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Retrieves a byte value from a ResultSet using the specified column label and wraps it in an {@link OptionalByte}.
      * Handles type conversion if the database column is not a byte type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject("status_code")).thenReturn((byte) 1);
+     * Mockito.when(rs.getObject("priority")).thenReturn(null);
+     *
+     * // Column "status_code" contains byte value 1
+     * OptionalByte opt = type.get(rs, "status_code");
+     * // Returns: OptionalByte.of((byte) 1)
+     *
+     * // Column "priority" contains SQL NULL
+     * opt = type.get(rs, "priority");
+     * // Returns: OptionalByte.empty()
+     * }</pre>
      *
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
@@ -206,19 +228,15 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
-     * PreparedStatement stmt = conn.prepareStatement("INSERT INTO records (status_code) VALUES (?)");
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
-     * OptionalByte statusCode = OptionalByte.of((byte) 1);
-     * type.set(stmt, 1, statusCode);
-     * stmt.executeUpdate();
-     * // Sets status_code to 1
+     * OptionalByte opt = OptionalByte.of((byte) 1);
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to 1
      *
-     * statusCode = OptionalByte.empty();
-     * type.set(stmt, 1, statusCode);
-     * // Sets status_code to SQL NULL
-     *
-     * type.set(stmt, 1, null);
-     * // Sets status_code to SQL NULL
+     * opt = OptionalByte.empty();
+     * type.set(stmt, 2, opt);
+     * // Sets parameter to SQL NULL
      * }</pre>
      *
      * @param stmt the PreparedStatement to set the parameter on
@@ -238,6 +256,20 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     /**
      * Sets a named parameter in a CallableStatement to the value contained in an {@link OptionalByte}.
      * If the OptionalByte is {@code null} or empty, sets the parameter to SQL NULL.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
+     *
+     * OptionalByte opt = OptionalByte.of((byte) 3);
+     * type.set(stmt, "p_status_code", opt);
+     * // Sets parameter to 3
+     *
+     * opt = OptionalByte.empty();
+     * type.set(stmt, "p_priority", opt);
+     * // Sets parameter to SQL NULL
+     * }</pre>
      *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -304,15 +336,19 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter nullWriter = Objectory.createBufferedJsonWriter();
+     * try {
+     *     OptionalByte opt = OptionalByte.of((byte) 127);
+     *     type.serializeTo(writer, opt, null);
+     *     // Writes: 127
      *
-     * OptionalByte opt = OptionalByte.of((byte) 127);
-     * type.serializeTo(writer, opt, null);
-     * // Writes: 127
-     *
-     * writer = new BufferedJsonWriter();
-     * type.serializeTo(writer, OptionalByte.empty(), null);
-     * // Writes: null
+     *     type.serializeTo(nullWriter, OptionalByte.empty(), null);
+     *     // Writes: null
+     * } finally {
+     *     Objectory.recycle(writer);
+     *     Objectory.recycle(nullWriter);
+     * }
      * }</pre>
      *
      * <p>

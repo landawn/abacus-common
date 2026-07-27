@@ -43,7 +43,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 @SuppressWarnings({ "java:S100", "java:S3878", "UnnecessaryUnicodeEscape", "SpellCheckingInspection" })
 public final class EscapeUtil {
     /**
-     * {@code \u000a} linefeed LF ('\n').
+     * The linefeed character LF, <code>&#92;u000a</code> (Java escape {@code '\n'}).
      *
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLS: Escape Sequences
      *      for Character and String Literals</a>
@@ -51,7 +51,7 @@ public final class EscapeUtil {
     static final char LF = '\n';
 
     /**
-     * {@code \u000d} carriage return CR ('\r').
+     * The carriage-return character CR, <code>&#92;u000d</code> (Java escape {@code '\r'}).
      *
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLS: Escape Sequences
      *      for Character and String Literals</a>
@@ -250,10 +250,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeJava("Hello\nWorld")     = "Hello\\nWorld"
-     * EscapeUtil.escapeJava("He said \"Hi\"")   = "He said \\\"Hi\\\""
-     * EscapeUtil.escapeJava("C:\\temp\\file")   = "C:\\\\temp\\\\file"
-     * EscapeUtil.escapeJava(null)               = null
+     * String line = EscapeUtil.escapeJava("Hello\nWorld");      // returns "Hello\\nWorld"
+     * String quote = EscapeUtil.escapeJava("He said \"Hi\"");   // returns "He said \\\"Hi\\\""
+     * String path = EscapeUtil.escapeJava("C:\\temp\\file");    // returns "C:\\\\temp\\\\file"
+     * String absent = EscapeUtil.escapeJava(null);              // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -278,10 +278,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeEcmaScript("Don't stop")       = "Don\\'t stop"
-     * EscapeUtil.escapeEcmaScript("</script>")        = "<\\/script>"
-     * EscapeUtil.escapeEcmaScript("He said \"Hi\"")   = "He said \\\"Hi\\\""
-     * EscapeUtil.escapeEcmaScript(null)               = null
+     * String apostrophe = EscapeUtil.escapeEcmaScript("Don't stop");     // returns "Don\\'t stop"
+     * String scriptEnd = EscapeUtil.escapeEcmaScript("</script>");       // returns "<\\/script>"
+     * String quote = EscapeUtil.escapeEcmaScript("He said \"Hi\"");      // returns "He said \\\"Hi\\\""
+     * String absent = EscapeUtil.escapeEcmaScript(null);                 // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -306,10 +306,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeJson("Hello\nWorld")    = "Hello\\nWorld"
-     * EscapeUtil.escapeJson("path/to/file")    = "path\\/to\\/file"
-     * EscapeUtil.escapeJson("Say \"Hello\"")   = "Say \\\"Hello\\\""
-     * EscapeUtil.escapeJson(null)              = null
+     * String line = EscapeUtil.escapeJson("Hello\nWorld");       // returns "Hello\\nWorld"
+     * String path = EscapeUtil.escapeJson("path/to/file");       // returns "path\\/to\\/file"
+     * String quote = EscapeUtil.escapeJson("Say \"Hello\"");     // returns "Say \\\"Hello\\\""
+     * String absent = EscapeUtil.escapeJson(null);               // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -332,14 +332,16 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeJava("Hello\\nWorld")                         = "Hello\nWorld"
-     * EscapeUtil.unescapeJava("He said \\\"Hi\\\"")                    = "He said \"Hi\""
-     * EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F")   = "Hello"
-     * EscapeUtil.unescapeJava(null)                                    = null
+     * String line = EscapeUtil.unescapeJava("Hello\\nWorld");                          // contains a newline
+     * String quote = EscapeUtil.unescapeJava("He said \\\"Hi\\\"");                    // returns "He said \"Hi\""
+     * String hello = EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F");   // returns "Hello"
+     * String absent = EscapeUtil.unescapeJava(null);                                   // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
+     * @throws IllegalArgumentException if the input contains a malformed Unicode escape
+     *         (fewer than 4 hex digits, or non-hex digits, after <code>&#92;u</code>)
      * @see #escapeJava(String)
      */
     public static String unescapeJava(final String input) {
@@ -356,13 +358,15 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeEcmaScript("Don\\'t stop")   = "Don't stop"
-     * EscapeUtil.unescapeEcmaScript("<\\/script>")    = "</script>"
-     * EscapeUtil.unescapeEcmaScript(null)             = null
+     * String apostrophe = EscapeUtil.unescapeEcmaScript("Don\\'t stop");   // returns "Don't stop"
+     * String scriptEnd = EscapeUtil.unescapeEcmaScript("<\\/script>");     // returns "</script>"
+     * String absent = EscapeUtil.unescapeEcmaScript(null);                 // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
+     * @throws IllegalArgumentException if the input contains a malformed Unicode escape
+     *         (fewer than 4 hex digits, or non-hex digits, after <code>&#92;u</code>)
      * @see #escapeEcmaScript(String)
      * @see #unescapeJava(String)
      */
@@ -371,24 +375,27 @@ public final class EscapeUtil {
     }
 
     /**
-     * Unescapes a string containing JSON escape sequences as defined in RFC 4627,
-     * converting them back to their original characters.
+     * Unescapes a string containing JSON-style escape sequences.
      *
      * <p>This method reverses the escaping performed by {@link #escapeJson(String)}.
      * It processes JSON escape sequences including {@code \"}, {@code \/}, {@code \\},
      * {@code \b}, {@code \f}, {@code \n}, {@code \r}, {@code \t}, and Unicode sequences
-     * ({@code \\uXXXX}).</p>
+     * ({@code \\uXXXX}). For compatibility this method shares the Java unescaper, so it is
+     * deliberately permissive and also accepts forms (including octal escapes and {@code \'})
+     * that strict JSON syntax rejects. It is a text transformation, not a JSON validator.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeJson("Hello\\nWorld")       = "Hello\nWorld"
-     * EscapeUtil.unescapeJson("path\\/to\\/file")    = "path/to/file"
-     * EscapeUtil.unescapeJson("Say \\\"Hello\\\"")   = "Say \"Hello\""
-     * EscapeUtil.unescapeJson(null)                  = null
+     * String line = EscapeUtil.unescapeJson("Hello\\nWorld");        // contains a newline
+     * String path = EscapeUtil.unescapeJson("path\\/to\\/file");     // returns "path/to/file"
+     * String quote = EscapeUtil.unescapeJson("Say \\\"Hello\\\"");   // returns "Say \"Hello\""
+     * String absent = EscapeUtil.unescapeJson(null);                 // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
+     * @throws IllegalArgumentException if the input contains a malformed Unicode escape
+     *         (fewer than 4 hex digits, or non-hex digits, after <code>&#92;u</code>)
      * @see #escapeJson(String)
      * @see #unescapeJava(String)
      */
@@ -413,10 +420,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml4("<p>Hello</p>")     = "&lt;p&gt;Hello&lt;/p&gt;"
-     * EscapeUtil.escapeHtml4("bread & butter")   = "bread &amp; butter"
-     * EscapeUtil.escapeHtml4("\"quoted\"")       = "&quot;quoted&quot;"
-     * EscapeUtil.escapeHtml4(null)               = null
+     * String element = EscapeUtil.escapeHtml4("<p>Hello</p>");       // returns "&lt;p&gt;Hello&lt;/p&gt;"
+     * String ampersand = EscapeUtil.escapeHtml4("bread & butter");   // returns "bread &amp; butter"
+     * String quote = EscapeUtil.escapeHtml4("\"quoted\"");           // returns "&quot;quoted&quot;"
+     * String absent = EscapeUtil.escapeHtml4(null);                  // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -438,9 +445,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeHtml3("<div>")   = "&lt;div&gt;"
-     * EscapeUtil.escapeHtml3("A & B")   = "A &amp; B"
-     * EscapeUtil.escapeHtml3(null)      = null
+     * String element = EscapeUtil.escapeHtml3("<div>");     // returns "&lt;div&gt;"
+     * String ampersand = EscapeUtil.escapeHtml3("A & B");   // returns "A &amp; B"
+     * String absent = EscapeUtil.escapeHtml3(null);         // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -471,11 +478,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml4("<p>Hello</p>")         = "<p>Hello</p>"
-     * EscapeUtil.unescapeHtml4("bread &amp; butter")   = "bread & butter"
-     * EscapeUtil.unescapeHtml4("&copy; 2024")          = "© 2024"
-     * EscapeUtil.unescapeHtml4("&#65;")                = "A"
-     * EscapeUtil.unescapeHtml4(null)                   = null
+     * String element = EscapeUtil.unescapeHtml4("<p>Hello</p>");           // unchanged
+     * String ampersand = EscapeUtil.unescapeHtml4("bread &amp; butter");   // returns "bread & butter"
+     * String copyright = EscapeUtil.unescapeHtml4("&copy; 2024");          // returns the copyright sign followed by 2024
+     * String letter = EscapeUtil.unescapeHtml4("&#65;");                   // returns "A"
+     * String absent = EscapeUtil.unescapeHtml4(null);                      // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -501,9 +508,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeHtml3("<div>")       = "<div>"
-     * EscapeUtil.unescapeHtml3("A &amp; B")   = "A & B"
-     * EscapeUtil.unescapeHtml3(null)          = null
+     * String element = EscapeUtil.unescapeHtml3("<div>");         // unchanged
+     * String ampersand = EscapeUtil.unescapeHtml3("A &amp; B");   // returns "A & B"
+     * String absent = EscapeUtil.unescapeHtml3(null);             // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -534,10 +541,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml10("<root>data</root>")   = "&lt;root&gt;data&lt;/root&gt;"
-     * EscapeUtil.escapeXml10("A & B")               = "A &amp; B"
-     * EscapeUtil.escapeXml10("It's \"cool\"")       = "It&apos;s &quot;cool&quot;"
-     * EscapeUtil.escapeXml10(null)                  = null
+     * String element = EscapeUtil.escapeXml10("<root>data</root>");   // returns "&lt;root&gt;data&lt;/root&gt;"
+     * String ampersand = EscapeUtil.escapeXml10("A & B");             // returns "A &amp; B"
+     * String quotes = EscapeUtil.escapeXml10("It's \"cool\"");        // returns "It&apos;s &quot;cool&quot;"
+     * String absent = EscapeUtil.escapeXml10(null);                   // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -569,9 +576,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeXml11("<tag>value</tag>")   = "&lt;tag&gt;value&lt;/tag&gt;"
-     * EscapeUtil.escapeXml11("A & B")              = "A &amp; B"
-     * EscapeUtil.escapeXml11(null)                 = null
+     * String element = EscapeUtil.escapeXml11("<tag>value</tag>");   // returns "&lt;tag&gt;value&lt;/tag&gt;"
+     * String ampersand = EscapeUtil.escapeXml11("A & B");            // returns "A &amp; B"
+     * String absent = EscapeUtil.escapeXml11(null);                  // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -594,6 +601,9 @@ public final class EscapeUtil {
      * {@code &gt;}, {@code &quot;}, {@code &amp;}, {@code &apos;}) and numeric character
      * references (decimal {@code &#65;} or hexadecimal {@code &#x41;}).</p>
      *
+     * <p>The method decodes recognized references but does not otherwise validate that the output
+     * is legal XML for a particular XML version or document context.</p>
+     *
      * <p>Note: This method does not support DTDs or external entities for security reasons.</p>
      *
      * <p><b>&#9888;&#65039; Note:</b> Numeric character references that parse to an integer above
@@ -602,11 +612,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeXml("<root>")               = "<root>"
-     * EscapeUtil.unescapeXml("A &amp; B")            = "A & B"
-     * EscapeUtil.unescapeXml("&apos;quoted&apos;")   = "'quoted'"
-     * EscapeUtil.unescapeXml("&#65;")                = "A"
-     * EscapeUtil.unescapeXml(null)                   = null
+     * String element = EscapeUtil.unescapeXml("<root>");                 // unchanged
+     * String ampersand = EscapeUtil.unescapeXml("A &amp; B");            // returns "A & B"
+     * String quoted = EscapeUtil.unescapeXml("&apos;quoted&apos;");      // returns "'quoted'"
+     * String letter = EscapeUtil.unescapeXml("&#65;");                   // returns "A"
+     * String absent = EscapeUtil.unescapeXml(null);                      // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -634,10 +644,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.escapeCsv("simple")        = "simple"
-     * EscapeUtil.escapeCsv("hello,world")   = "\"hello,world\""
-     * EscapeUtil.escapeCsv("say \"hi\"")    = "\"say \"\"hi\"\"\""
-     * EscapeUtil.escapeCsv(null)            = null
+     * String simple = EscapeUtil.escapeCsv("simple");          // returns "simple"
+     * String comma = EscapeUtil.escapeCsv("hello,world");      // returns "\"hello,world\""
+     * String quote = EscapeUtil.escapeCsv("say \"hi\"");       // returns "\"say \"\"hi\"\"\""
+     * String absent = EscapeUtil.escapeCsv(null);              // returns null
      * }</pre>
      *
      * @param input the input CSV column String, which may be null
@@ -666,11 +676,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * EscapeUtil.unescapeCsv("simple")               = "simple"
-     * EscapeUtil.unescapeCsv("\"simple\"")           = "\"simple\""
-     * EscapeUtil.unescapeCsv("\"hello,world\"")      = "hello,world"
-     * EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"")   = "say \"hi\""
-     * EscapeUtil.unescapeCsv(null)                   = null
+     * String simple = EscapeUtil.unescapeCsv("simple");                  // returns "simple"
+     * String quotedSimple = EscapeUtil.unescapeCsv("\"simple\"");        // remains quoted because no CSV special character is present
+     * String comma = EscapeUtil.unescapeCsv("\"hello,world\"");          // returns "hello,world"
+     * String quote = EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"");       // returns "say \"hi\""
+     * String absent = EscapeUtil.unescapeCsv(null);                      // returns null
      * }</pre>
      *
      * @param input the input CSV column String, which may be null
@@ -743,10 +753,10 @@ public final class EscapeUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld")   = "Hello\\nWorld"
-         * EscapeUtil.UNESCAPE_HTML4.translate("<p>")         = "<p>"
-         * EscapeUtil.ESCAPE_CSV.translate("hello,world")     = "\"hello,world\""
-         * EscapeUtil.ESCAPE_JAVA.translate(null)             = null
+         * String line = EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld");   // returns "Hello\\nWorld"
+         * String element = EscapeUtil.UNESCAPE_HTML4.translate("<p>");      // unchanged
+         * String field = EscapeUtil.ESCAPE_CSV.translate("hello,world");    // returns "\"hello,world\""
+         * String absent = EscapeUtil.ESCAPE_JAVA.translate(null);           // returns null
          * }</pre>
          *
          * @param input CharSequence to be translated, may be null
@@ -780,7 +790,7 @@ public final class EscapeUtil {
          * <pre>{@code
          * java.io.StringWriter sw = new java.io.StringWriter();
          * EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld", sw);
-         * sw.toString()         = "Hello\\nWorld"
+         * String escaped = sw.toString();   // "Hello\\nWorld"
          * }</pre>
          *
          * @param input the CharSequence to be translated; may be {@code null}, in which case nothing is written
@@ -828,11 +838,11 @@ public final class EscapeUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Chain translators: first HTML escape, then fall back to Java escape
-         * CharSequenceTranslator combined = EscapeUtil.ESCAPE_HTML4.with(EscapeUtil.ESCAPE_JAVA);
+         * EscapeUtil.CharSequenceTranslator combined = EscapeUtil.ESCAPE_HTML4.with(EscapeUtil.ESCAPE_JAVA);
          * String escaped = combined.translate("<tag>\n"); // returns "&lt;tag&gt;\\n"
          *
          * // Multiple translators can be chained in one call
-         * CharSequenceTranslator triple = EscapeUtil.ESCAPE_HTML4
+         * EscapeUtil.CharSequenceTranslator triple = EscapeUtil.ESCAPE_HTML4
          *         .with(EscapeUtil.ESCAPE_JAVA, EscapeUtil.ESCAPE_ECMASCRIPT);
          * }</pre>
          *
@@ -852,9 +862,9 @@ public final class EscapeUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CharSequenceTranslator.hex(0)     = "0"
-         * CharSequenceTranslator.hex(15)    = "F"
-         * CharSequenceTranslator.hex(255)   = "FF"
+         * String zero = EscapeUtil.CharSequenceTranslator.hex(0);      // "0"
+         * String fifteen = EscapeUtil.CharSequenceTranslator.hex(15);  // "F"
+         * String byteMax = EscapeUtil.CharSequenceTranslator.hex(255); // "FF"
          * }</pre>
          *
          * @param codepoint The codepoint to convert.
@@ -1297,7 +1307,7 @@ public final class EscapeUtil {
     /**
      * Translates escaped octal Strings back to their octal values.
      *
-     * <p>For example, {@code "\45"} should go back to being the specific value (a {@code %}).</p>
+     * <p>For example, the Java string {@code "\\45"} is translated to {@code "%"}.</p>
      *
      * <p>Note that this currently only supports the viable range of octal for Java; namely
      * 0 to 377. This is because parsing Java is the main use case.</p>
@@ -1358,8 +1368,8 @@ public final class EscapeUtil {
     }
 
     /**
-     * Translates XML numeric character references of the form {@code &#[xX]?\d+;?} back to
-     * their corresponding codepoints. Whether the trailing semicolon is required, optional,
+     * Translates decimal references such as {@code &#65;} and hexadecimal references such as
+     * {@code &#x41;} back to their corresponding code points. Whether the trailing semicolon is required, optional,
      * or causes an error is controlled by the {@link NumericBeanUnescaper.OPTION} passed to
      * the constructor; the default is {@link NumericBeanUnescaper.OPTION#semiColonRequired}.
      */
@@ -1400,9 +1410,9 @@ public final class EscapeUtil {
          * <p>Example usage:</p>
          * <pre>{@code
          * // Support numeric entities without trailing ';'
-         * new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.semiColonOptional)
+         * NumericBeanUnescaper optional = new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.semiColonOptional);
          * // Throw an exception when ';' is missing
-         * new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.errorIfNoSemiColon)
+         * NumericBeanUnescaper strict = new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.errorIfNoSemiColon);
          * }</pre>
          *
          * @param options the options to apply to this unescaper; if none are supplied,
@@ -1458,8 +1468,8 @@ public final class EscapeUtil {
 
                 int end = start;
                 // Note that this supports character codes without a ';' on the end
-                while (end < seqEnd && (input.charAt(end) >= '0' && input.charAt(end) <= '9' || input.charAt(end) >= 'a' && input.charAt(end) <= 'f'
-                        || input.charAt(end) >= 'A' && input.charAt(end) <= 'F')) {
+                while (end < seqEnd && (input.charAt(end) >= '0' && input.charAt(end) <= '9'
+                        || isHex && (input.charAt(end) >= 'a' && input.charAt(end) <= 'f' || input.charAt(end) >= 'A' && input.charAt(end) <= 'F'))) {
                     end++;
                 }
 
@@ -1524,7 +1534,10 @@ public final class EscapeUtil {
          * them to be used as keys in a {@link java.util.HashMap}.</p>
          *
          * @param lookup a two-dimensional array of {@code CharSequence} pairs of the form
-         *               {@code [n][2]}, where index 0 is the key and index 1 is the replacement value
+         *               {@code [n][2]}, where index 0 is the key and index 1 is the replacement value;
+         *               may be {@code null} or empty, producing a translator that never matches.
+         *               Each row must have at least two non-{@code null} elements, and each key must
+         *               be non-empty.
          */
         public LookupTranslator(final CharSequence[]... lookup) {
             lookupMap = new HashMap<>();
@@ -1625,7 +1638,9 @@ public final class EscapeUtil {
     //       It would handle the index checking + length returning,
 
     /**
-     * The Class CsvEscaper.
+     * Translator backing {@link EscapeUtil#ESCAPE_CSV}: quotes a single CSV field when it contains
+     * a comma, a double quote, CR, or LF, doubling any embedded double quotes. Consumes the whole
+     * input in one pass, so it must be invoked with {@code index == 0}.
      */
     //       and could also have an optimization check method.
     static class CsvEscaper extends CharSequenceTranslator {
@@ -1674,7 +1689,10 @@ public final class EscapeUtil {
     }
 
     /**
-     * The Class CsvUnescaper.
+     * Translator backing {@link EscapeUtil#UNESCAPE_CSV}: strips the surrounding double quotes of a
+     * single CSV field and collapses doubled double quotes, but only when the quoted content itself
+     * contains a comma, a double quote, CR, or LF. Consumes the whole input in one pass, so it must
+     * be invoked with {@code index == 0}.
      */
     static class CsvUnescaper extends CharSequenceTranslator {
 
@@ -1732,9 +1750,13 @@ public final class EscapeUtil {
     }
 
     /**
-     * Class holding various bean data for HTML and XML - generally for use with
-     * the LookupTranslator.
-     * All arrays are of length [*][2].
+     * Class holding the character-entity lookup tables for HTML and XML - generally for use with
+     * the {@link LookupTranslator}.
+     * All arrays are of length [*][2], where index 0 is the key and index 1 is the replacement.
+     *
+     * <p>Every accessor below returns a <i>shallow</i> copy: the outer array is new, but the
+     * two-element rows are shared with the internal constant table. Callers may reorder or drop
+     * rows, but must not modify a row in place.</p>
      */
     static class BeanArrays {
         private BeanArrays() {
@@ -1861,7 +1883,7 @@ public final class EscapeUtil {
         private static final String[][] ISO8859_1_UNESCAPE = invert(ISO8859_1_ESCAPE);
 
         /**
-         * Mapping to escape additional <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">character bean
+         * Mapping to escape additional <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">character entity
          * references</a>. Note that this must be used with {@link #iso8859_1Escape()} to get the full list of
          * HTML 4.0 character entities.
          * @return the mapping array for HTML 4.0 extended character escape sequences
@@ -2108,7 +2130,7 @@ public final class EscapeUtil {
         private static final String[][] BASIC_UNESCAPE = invert(BASIC_ESCAPE);
 
         /**
-         * Mapping to escape the apostrophe character to its XML character bean.
+         * Mapping to escape the apostrophe character to its XML character entity ({@code &apos;}).
          * @return the mapping array for apostrophe character escape sequences
          */
         public static String[][] aposEscape() {

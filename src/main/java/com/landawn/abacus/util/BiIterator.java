@@ -1460,6 +1460,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param supplier a supplier invoked twice to create the left and right lists; each call must return a {@code non-null} {@code List}
      * @return a {@code Pair} whose left list contains all first components and whose right list contains all second components
      * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call returns {@code null}
+     * @see #unzipToSets(Supplier)
      * @see #unzipToCollections(Supplier, Supplier)
      */
     public Pair<List<A>, List<B>> unzipToLists(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) throws IllegalArgumentException {
@@ -1532,6 +1533,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param supplier a supplier invoked twice to create the left and right sets; each call must return a {@code non-null} {@code Set}
      * @return a {@code Pair} whose left set contains the distinct first components and whose right set contains the distinct second components
      * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call returns {@code null}
+     * @see #unzipToLists(Supplier)
      * @see #unzipToCollections(Supplier, Supplier)
      */
     public Pair<Set<A>, Set<B>> unzipToSets(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) throws IllegalArgumentException {

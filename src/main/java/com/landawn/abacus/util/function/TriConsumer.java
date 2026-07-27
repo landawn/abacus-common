@@ -34,6 +34,9 @@ import com.landawn.abacus.util.cs;
  * @param <A> the type of the first argument to the operation
  * @param <B> the type of the second argument to the operation
  * @param <C> the type of the third argument to the operation
+ * @see java.util.function.Consumer
+ * @see java.util.function.BiConsumer
+ * @see QuadConsumer
  */
 @FunctionalInterface
 public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, RuntimeException> { //NOSONAR
@@ -42,9 +45,9 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriConsumer<String, Integer, Boolean> logger =
+     * TriConsumer<String, Integer, Long> logger =
      *     (msg, level, timestamp) -> System.out.println("[" + level + "] " + msg + " @ " + timestamp);
-     * logger.accept("Application started", 1, true);
+     * logger.accept("Application started", 1, System.currentTimeMillis());
      *
      * TriConsumer<List<String>, String, Integer> listInserter =
      *     (list, element, index) -> list.add(index, element);

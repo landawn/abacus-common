@@ -11,13 +11,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField.Direction;
+import com.landawn.abacus.parser.JsonSerConfig;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.EnumType;
+import com.landawn.abacus.util.Objectory;
 
 public class JsonXmlFieldTest extends TestBase {
     static class TestClass {
@@ -27,6 +34,19 @@ public class JsonXmlFieldTest extends TestBase {
         @JsonXmlField(name = "custom_name", aliases = { "alt1",
                 "alt2" }, type = "String", enumerated = EnumType.ORDINAL, dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#.##", ignore = true, isJsonRawValue = true, direction = Direction.SERIALIZE_ONLY)
         private String field2;
+    }
+
+    static class DocumentedDateTimeExample {
+        @JsonXmlField(dateFormat = "uuuu-MM-dd'T'HH:mm:ss.SSSXXX", timeZone = "UTC")
+        private ZonedDateTime timestamp;
+
+        public ZonedDateTime getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(final ZonedDateTime timestamp) {
+            this.timestamp = timestamp;
+        }
     }
 
     @Test
@@ -94,5 +114,23 @@ public class JsonXmlFieldTest extends TestBase {
         assertTrue(Arrays.asList(Direction.values()).contains(Direction.BOTH));
         assertTrue(Arrays.asList(Direction.values()).contains(Direction.SERIALIZE_ONLY));
         assertTrue(Arrays.asList(Direction.values()).contains(Direction.DESERIALIZE_ONLY));
+    }
+
+    @Test
+    public void testDocumentedJavaTimeFormatExample() throws Exception {
+        final PropInfo propInfo = ParserUtil.getBeanInfo(DocumentedDateTimeExample.class).getPropInfo("timestamp");
+        final String value = "2023-12-25T10:30:45.123Z";
+        final ZonedDateTime parsed = (ZonedDateTime) propInfo.readPropValue(value);
+
+        assertEquals(Instant.parse(value), parsed.toInstant());
+
+        final CharacterWriter writer = Objectory.createBufferedJsonWriter();
+
+        try {
+            propInfo.writePropValue(writer, parsed, JsonSerConfig.create());
+            assertEquals('"' + value + '"', writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
     }
 }

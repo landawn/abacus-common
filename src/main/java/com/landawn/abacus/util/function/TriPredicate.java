@@ -33,6 +33,9 @@ import com.landawn.abacus.util.cs;
  * @param <A> the type of the first argument to the predicate
  * @param <B> the type of the second argument to the predicate
  * @param <C> the type of the third argument to the predicate
+ * @see java.util.function.Predicate
+ * @see java.util.function.BiPredicate
+ * @see QuadPredicate
  */
 @FunctionalInterface
 public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, RuntimeException> { //NOSONAR

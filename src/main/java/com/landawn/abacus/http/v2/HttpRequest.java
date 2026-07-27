@@ -306,6 +306,14 @@ public final class HttpRequest {
                 withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
+    /**
+     * Records whether the {@link HttpClient} used to run this request is owned by the request and must
+     * therefore be closed once execution finishes. Clients created by the timeout-taking factory
+     * methods and by fluent client-level configuration are owned; a caller-supplied client is not.
+     *
+     * @param shouldClose {@code true} to close the client after this request completes
+     * @return this HttpRequest instance for method chaining
+     */
     HttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
         closeHttpClientAfterExecution = shouldClose;
 
@@ -497,8 +505,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param username the username for authentication
-     * @param password the password for authentication
+     * @param password the password for authentication; a {@code char[]} is converted with
+     *                 {@code new String(char[])}, any other value with {@link String#valueOf(Object)}
      * @return this HttpRequest instance for method chaining
+     * @see #basicAuth(String, String)
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -617,7 +627,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Merges the given header entries into the headers already on this settings object.
+     * Merges the given header entries into the headers already on this request.
      * For each entry in the map, a header with the same name is overwritten with the new value,
      * while any existing headers whose names are <i>not</i> present in the map are kept unchanged.
      * This is a merge, not a replace-all: headers not present in the map remain unchanged.
@@ -651,8 +661,9 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets query parameters for {@code GET} or {@code DELETE} request.
-     * The query string will be appended to the URL.
+     * Sets query parameters, typically used for {@code GET} or {@code DELETE} requests.
+     * The query string is appended to the URL for any request method (unlike
+     * {@link com.landawn.abacus.http.HttpRequest}, which rejects queries on other methods).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -671,8 +682,9 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets query parameters for {@code GET} or {@code DELETE} request.
-     * The parameters will be URL-encoded and appended to the URL.
+     * Sets query parameters, typically used for {@code GET} or {@code DELETE} requests.
+     * The parameters are URL-encoded and appended to the URL for any request method (unlike
+     * {@link com.landawn.abacus.http.HttpRequest}, which rejects queries on other methods).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -707,6 +719,7 @@ public final class HttpRequest {
      *
      * @param json the JSON string to send as the request body
      * @return this HttpRequest instance for method chaining
+     * @see #jsonBody(Object)
      */
     public HttpRequest jsonBody(final String json) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
@@ -730,6 +743,7 @@ public final class HttpRequest {
      *
      * @param obj the object to serialize to JSON and send as the request body
      * @return this HttpRequest instance for method chaining
+     * @see #jsonBody(String)
      */
     public HttpRequest jsonBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
@@ -805,6 +819,7 @@ public final class HttpRequest {
      *
      * @param formBodyByMap a map containing form field names and values
      * @return this HttpRequest instance for method chaining
+     * @see #formBody(Object)
      */
     public HttpRequest formBody(final Map<?, ?> formBodyByMap) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
@@ -831,6 +846,7 @@ public final class HttpRequest {
      *
      * @param formBodyByBean a bean object whose properties will be used as form fields
      * @return this HttpRequest instance for method chaining
+     * @see #formBody(Map)
      */
     public HttpRequest formBody(final Object formBodyByBean) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
@@ -913,6 +929,8 @@ public final class HttpRequest {
 
     /**
      * Executes a GET request and returns the response body deserialized to the specified type.
+     * This method automatically handles JSON/XML deserialization based on the response content type.
+     * An exception is thrown if the response status code indicates an error (not 2xx).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -921,7 +939,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> the type of the result
-     * @param resultClass the class of the result type
+     * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
      * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
@@ -956,6 +974,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * User requestData = new User("John", "Doe");
      * HttpResponse<InputStream> response = HttpRequest.url("http://localhost:18080/data")
      *     .jsonBody(requestData)
      *     .post(BodyHandlers.ofInputStream());
@@ -973,6 +992,8 @@ public final class HttpRequest {
 
     /**
      * Executes a POST request and returns the response body deserialized to the specified type.
+     * This method automatically handles JSON/XML deserialization based on the response content type.
+     * An exception is thrown if the response status code indicates an error (not 2xx).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -983,7 +1004,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> the type of the result
-     * @param resultClass the class of the result type
+     * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
      * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
@@ -1019,6 +1040,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * User updatedUser = new User("John", "Smith");
      * Path outputPath = Paths.get("response.json");
      * HttpResponse<Path> response = HttpRequest.url("http://localhost:18080/users/123")
      *     .jsonBody(updatedUser)
@@ -1260,6 +1282,7 @@ public final class HttpRequest {
      * @return the HTTP response with the processed body
      * @throws IllegalArgumentException if httpMethod is null
      * @throws UncheckedIOException if the request could not be executed
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     @Beta
@@ -1275,7 +1298,10 @@ public final class HttpRequest {
             final HttpResponse<T> result = prepareResponseForClientCleanup(response, httpClientToUse);
             cleanupHandled = true;
             return result;
-        } catch (IOException | InterruptedException e) {
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw ExceptionUtil.toRuntimeException(e, true);
+        } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
             if (!cleanupHandled) {
@@ -1340,6 +1366,13 @@ public final class HttpRequest {
         }
     }
 
+    /**
+     * Releases the {@link HttpClient} used for this request when that client is owned by the request.
+     * The shared default client is never closed. Closing is best effort: any exception raised while
+     * closing is swallowed. Calling this method more than once for the same client is harmless.
+     *
+     * @param httpClientUsed the client that executed the request
+     */
     void doAfterExecution(final HttpClient httpClientUsed) {
         if (closeHttpClientAfterExecution && httpClientUsed != DEFAULT_HTTP_CLIENT) {
             // Java 21+ HttpClient implements AutoCloseable; shut it down to release internal executor threads.
@@ -1400,6 +1433,8 @@ public final class HttpRequest {
 
     /**
      * Executes a GET request asynchronously and returns the response body deserialized to the specified type.
+     * This method automatically handles JSON/XML deserialization in the background.
+     * An exception is thrown if the response status code indicates an error (not 2xx).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1410,7 +1445,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param <T> the type of the result
-     * @param resultClass the class of the result type
+     * @param resultClass the class of the result type to deserialize the response body into
      * @return a CompletableFuture that will complete with the deserialized response body
      */
     public <T> CompletableFuture<T> asyncGet(final Class<T> resultClass) {
@@ -1474,6 +1509,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * ReportRequest reportRequest = new ReportRequest("monthly");
      * CompletableFuture<HttpResponse<Path>> future =
      *     HttpRequest.url("http://localhost:18080/report")
      *         .jsonBody(reportRequest)
@@ -1526,6 +1562,7 @@ public final class HttpRequest {
      *     acceptor.apply(BodyHandlers.ofString());
      * };
      *
+     * User data = new User("John", "Doe");
      * CompletableFuture<HttpResponse<String>> future =
      *     HttpRequest.url("http://localhost:18080/submit")
      *         .jsonBody(data)
@@ -1569,6 +1606,7 @@ public final class HttpRequest {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * User updatedUser = new User("John", "Smith");
      * CompletableFuture<HttpResponse<String>> future =
      *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updatedUser)
@@ -1625,6 +1663,7 @@ public final class HttpRequest {
      *     acceptor.apply(BodyHandlers.ofString());
      * };
      *
+     * User updatedUser = new User("John", "Smith");
      * CompletableFuture<HttpResponse<String>> future =
      *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updatedUser)
@@ -1735,6 +1774,7 @@ public final class HttpRequest {
      *     acceptor.apply(BodyHandlers.ofString());
      * };
      *
+     * Map<String, Object> updates = Map.of("status", "active");
      * CompletableFuture<HttpResponse<String>> future =
      *     HttpRequest.url("http://localhost:18080/users/123")
      *         .jsonBody(updates)
@@ -2182,6 +2222,9 @@ public final class HttpRequest {
     /**
      * Creates a String handler that honors the response charset and content encoding. The JDK's
      * no-argument {@link BodyHandlers#ofString()} handler always decodes with UTF-8.
+     *
+     * @return a body handler that decompresses the response body and decodes it with the charset
+     *         declared by the response {@code Content-Type}
      */
     private static BodyHandler<String> createStringResponseBodyHandler() {
         return responseInfo -> {

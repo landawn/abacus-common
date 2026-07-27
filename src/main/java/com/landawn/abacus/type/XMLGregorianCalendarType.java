@@ -41,7 +41,7 @@ import com.landawn.abacus.util.Dates;
  *   <li>ISO 8601 date-time format</li>
  *   <li>ISO 8601 timestamp format</li>
  *   <li>Epoch milliseconds (LONG format)</li>
- *   <li>"SYS_TIME" keyword for current time</li>
+ *   <li>{@code "sysTime"} or {@code "SYS_TIME"} keyword (case-insensitive) for current time</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -72,7 +72,8 @@ import com.landawn.abacus.util.Dates;
 public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar> {
 
     /**
-     * The type name identifier for {@link XMLGregorianCalendar} type (the simple class name).
+     * The type name identifier for {@link XMLGregorianCalendar} type, equal to the simple class name
+     * {@code "XMLGregorianCalendar"}.
      */
     public static final String XML_GREGORIAN_CALENDAR = XMLGregorianCalendar.class.getSimpleName();
 
@@ -111,7 +112,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * </p>
      * <ul>
      *   <li>null, empty, or the literal {@code "null"} string returns null</li>
-     *   <li>"SYS_TIME" returns the current time as XMLGregorianCalendar</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current time as XMLGregorianCalendar</li>
      *   <li>Standard date/time strings are parsed using the Dates utility</li>
      * </ul>
      *
@@ -352,9 +353,13 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
      * JsonSerConfig config = JsonSerConfig.create();
-     * type.serializeTo(writer, xmlGregorianCalendar, config);   // Writes formatted date/time
+     * try {
+     *     type.serializeTo(writer, xmlGregorianCalendar, config);   // Writes formatted date/time
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      * <p>

@@ -99,11 +99,12 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * Converts a string representation to an {@link OffsetDateTime} object.
      * Supports multiple formats:
      * <ul>
-     *   <li>Epoch milliseconds as a numeric string</li>
+     *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code OffsetDateTime}</li>
+     *   <li>Numeric strings are treated as milliseconds since the epoch</li>
      *   <li>ISO-8601 date-time format (20 characters ending with {@code 'Z'})</li>
      *   <li>ISO-8601 timestamp format (24 characters ending with {@code 'Z'})</li>
      *   <li>Any other value is parsed with the default {@link OffsetDateTime#parse(CharSequence)} parser</li>
-     *   <li>Special value {@code "SYS_TIME"} returns the current system time</li>
      * </ul>
      *
      * <p>Every string produced by {@link OffsetDateTime#toString()} can be parsed back into an equivalent value,
@@ -303,6 +304,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param x the OffsetDateTime value to write; if {@code null}, writes the literal {@code "null"}
      * @param config the serialization configuration specifying format and quoting; may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
+     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
      */
     @SuppressWarnings("null")
     @Override

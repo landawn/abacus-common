@@ -109,7 +109,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a DoubleList created from the parsed values, or {@code null} if input is {@code null} or empty
+     * @return a DoubleList created from the parsed values, or {@code null} if input is {@code null} or blank
      * @see #valueOf(Object)
      * @see #stringOf(DoubleList)
      */

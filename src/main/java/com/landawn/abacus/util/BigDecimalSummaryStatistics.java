@@ -96,9 +96,9 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * @param min the minimum value, may be {@code null} if no values were recorded
      * @param max the maximum value, may be {@code null} if no values were recorded
      * @param sum the sum of values; if {@code null}, it is treated as {@link BigDecimal#ZERO}
-     * @throws IllegalArgumentException if {@code count} is negative, or if {@code min} compares
-     *         greater than {@code max} (a non-{@code null} {@code min} with a {@code null} {@code max}
-     *         is also treated as greater)
+     * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state has non-null
+     *         min/max values or a nonzero sum; or if a non-empty state has a null min/max value or
+     *         {@code min} compares greater than {@code max}
      */
     public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) {
         if (count < 0) {
@@ -148,7 +148,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     }
 
     /**
-     * Combines the state of another BigDecimalSummaryStatistics into this one.
+     * Combines the state of another {@code BigDecimalSummaryStatistics} into this one.
      *
      * <p>This method is useful for parallel processing where multiple
      * summary statistics objects are created for different partitions
@@ -168,7 +168,8 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * // stats1 now contains combined statistics of all four values
      * }</pre>
      *
-     * @param other another BigDecimalSummaryStatistics to be combined with this one
+     * @param other another {@code BigDecimalSummaryStatistics} to be combined with this one; must not be {@code null}
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     public void combine(final BigDecimalSummaryStatistics other) {
         count += other.count;
@@ -276,10 +277,10 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      *
      * <p>The representation includes min, max, count, sum, and average formatted
      * using the {@code DecimalFormat} pattern {@code "#,##0.000000"}, which applies
-     * grouping separators for thousands and six decimal places. If min or max is
+     * locale-specific grouping and decimal separators and six decimal places. If min or max is
      * {@code null} (no values recorded), it is shown as {@code null}.</p>
      *
-     * <p>Example output:</p>
+     * <p>Example output in a locale that uses {@code ','} for grouping and {@code '.'} for decimals:</p>
      * <pre>{@code
      * {min=5.250000, max=25.750000, count=3, sum=46.500000, average=15.500000}
      * }</pre>

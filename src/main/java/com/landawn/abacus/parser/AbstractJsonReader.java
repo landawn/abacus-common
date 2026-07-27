@@ -30,7 +30,7 @@ import com.landawn.abacus.util.Strings;
  * <ul>
  *   <li><strong>Character Event Mapping:</strong> Fast lookup tables for JSON structural characters</li>
  *   <li><strong>Numeric Constants:</strong> Pre-computed powers of ten for efficient number parsing</li>
- *   <li><strong>Special Value Constants:</strong> Interned string constants for {@code null}, true, and {@code false}</li>
+ *   <li><strong>Special Value Constants:</strong> Interned string constants for {@code null}, {@code true}, and {@code false}</li>
  *   <li><strong>Alphanumeric Support:</strong> Extended character mappings for various JSON tokens</li>
  * </ul>
  *
@@ -44,16 +44,31 @@ import com.landawn.abacus.util.Strings;
  * @see Type
  */
 abstract class AbstractJsonReader implements JsonReader { //NOSONAR
+    /**
+     * Largest digit count that the fast integer path can accumulate into a {@code long} without
+     * risking overflow; longer numbers fall back to the exact parser.
+     */
     static final int MAX_PARSABLE_NUM_LEN = Long.toString(Long.MAX_VALUE, 10).length() - 1;
 
+    /** Powers of ten indexed by exponent, used to scale a decimal mantissa without string conversion. */
     static final long[] POWERS_OF_TEN = { 1L, 10L, 100L, 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L, 100_000_000L, 1_000_000_000L, 10_000_000_000L,
             100_000_000_000L, 1_000_000_000_000L, 10_000_000_000_000L, 100_000_000_000_000L, 1_000_000_000_000_000L, 10_000_000_000_000_000L,
             100_000_000_000_000_000L, 1_000_000_000_000_000_000L };
 
+    /** Interned {@code "null"} literal, returned by identity so callers can compare with {@code ==}. */
     static final String NULL = Strings.NULL;
+
+    /** Interned {@code "false"} literal, returned by identity so callers can compare with {@code ==}. */
     static final String FALSE = Boolean.FALSE.toString().intern();
+
+    /** Interned {@code "true"} literal, returned by identity so callers can compare with {@code ==}. */
     static final String TRUE = Boolean.TRUE.toString().intern();
 
+    /**
+     * Lookup table mapping an ASCII character (0-127) to its token identifier. Structural characters
+     * map to the {@link JsonReader} token constants (all below 32); value-leading characters map to
+     * themselves. A zero entry means the character is not significant on its own.
+     */
     protected static final int[] charEvents = new int[128];
 
     static {
@@ -85,6 +100,10 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
         charEvents['9'] = '9';
     }
 
+    /**
+     * Copy of {@link #charEvents} extended with the extra characters that may appear inside an
+     * unquoted numeric or literal token (sign, decimal point, exponent, radix and type-suffix letters).
+     */
     static final int[] alphanumerics = charEvents.clone();
 
     static {
@@ -131,6 +150,7 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
         eventChars[COMMA] = ',';
     }
 
+    /** Cached {@code String} type, used as the default value-type hint by {@link #nextToken()}. */
     protected static final Type<String> strType = Type.of(String.class);
 
     /**
@@ -139,9 +159,9 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonReader reader = // gets a reader instance
+     * JsonReader reader = JsonStringReader.parse("{\"name\":\"John\"}", new char[256]);
      * int token = reader.nextToken();
-     * if (token == START_BRACE) {
+     * if (token == JsonReader.START_BRACE) {
      *     // Process JSON object
      * }
      * }</pre>

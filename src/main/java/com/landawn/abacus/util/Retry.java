@@ -32,12 +32,12 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Retry a void operation up to 3 times on IOException
- * Retry<Void> retry = Retry.withFixedDelay(3, 1000, e -> e instanceof IOException);
+ * Retry<Void> retry = Retry.withFixedDelay(3, 1000, e -> e instanceof java.io.IOException);
  * retry.run(() -> sendNetworkRequest());
  *
  * // Retry a value-returning operation if result is null or a timeout occurs
  * Retry<String> retry2 = Retry.withFixedDelay(3, 500,
- *     (result, ex) -> result == null || ex instanceof TimeoutException);
+ *     (result, ex) -> result == null || ex instanceof java.util.concurrent.TimeoutException);
  * String data = retry2.call(() -> fetchDataFromServer());
  * }</pre>
  *
@@ -59,6 +59,14 @@ public final class Retry<R> {
 
     private final BiPredicate<? super R, ? super Exception> retryCondition2;
 
+    /**
+     * Creates a retry policy. Exactly one retry predicate is normally non-{@code null}.
+     *
+     * @param retryTimes the maximum number of additional attempts
+     * @param retryIntervalInMillis the fixed delay between attempts, in milliseconds
+     * @param retryCondition the exception-only predicate, or {@code null}
+     * @param retryCondition2 the result/exception predicate, or {@code null}
+     */
     Retry(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition,
             final BiPredicate<? super R, ? super Exception> retryCondition2) {
 
@@ -157,7 +165,8 @@ public final class Retry<R> {
      * is attempted again, up to {@code retryTimes} additional times. If all retries are exhausted,
      * the last exception is rethrown.</p>
      *
-     * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries.</p>
+     * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries,
+     * and the retry predicates are not evaluated.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -236,7 +245,9 @@ public final class Retry<R> {
      *       operation exception, if any, is attached as its cause for diagnostic context.</li>
      * </ul>
      *
-     * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries.</p>
+     * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries,
+     * and the retry predicates are not evaluated. Its result is returned unchanged, or its
+     * exception is rethrown directly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -248,6 +259,7 @@ public final class Retry<R> {
      *
      * @param callable the callable operation to execute; must not be {@code null}.
      * @return the result of the first invocation whose outcome does not satisfy the retry condition.
+     * @throws IllegalArgumentException if {@code callable} is {@code null}
      * @throws RuntimeException if all retry attempts are exhausted and the final invocation returned
      *                          a result that still satisfies {@code retryCondition2},
      *                          or if a configured retry predicate itself throws a runtime exception. Predicate failures

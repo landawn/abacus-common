@@ -256,6 +256,9 @@ import com.landawn.abacus.util.u.Nullable;
 @SuppressWarnings({ "java:S6539" })
 public final class Throwables {
 
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private Throwables() {
         // Singleton for utility class.
     }
@@ -435,12 +438,14 @@ public final class Throwables {
      * This method provides a safe way to handle exceptions by providing a fallback value supplier.
      * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
      * the fallback supplier is invoked.
+     * Because this method is overloaded with a direct {@link Comparable} fallback, explicitly cast an
+     * untyped supplier lambda as shown below so overload resolution selects this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = Throwables.call(
      *     () -> riskyOperation(),
-     *     () -> "default value"
+     *     (java.util.function.Supplier<String>) () -> "default value"
      * );
      * }</pre>
      *
@@ -472,10 +477,10 @@ public final class Throwables {
      * <p>This is the simplest form of error handling with a known fallback value.</p>
      * If the command throws {@link InterruptedException}, the current thread's interrupted status is restored.
      *
-     * <p><b>Note:</b> The result type {@code <R>} is bound to {@code Comparable<? super R>} solely
-     * to avoid an ambiguous overload with {@link #call(Throwables.Callable, java.util.function.Supplier)}.
-     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload
-     * (e.g. {@code Throwables.call(cmd, () -> myDefault)}) instead.</p>
+     * <p><b>Note:</b> The result type {@code <R>} is limited to {@code Comparable<? super R>}.
+     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload.
+     * An untyped supplier lambda can be ambiguous with this overload, so cast it explicitly (for example,
+     * {@code Throwables.call(cmd, (java.util.function.Supplier<MyType>) () -> myDefault)}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -499,7 +504,7 @@ public final class Throwables {
     @Beta
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final R defaultValue)
             throws IllegalArgumentException {
-        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
+        // Restrict direct fallback values to comparable result types.
         N.checkArgNotNull(cmd, "cmd");
 
         try {
@@ -519,6 +524,8 @@ public final class Throwables {
      * <p>This method enables selective exception handling based on exception type or properties.</p>
      * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
      * the predicate is evaluated.
+     * Because this method is overloaded with a direct {@link Comparable} fallback, explicitly cast
+     * untyped supplier lambdas so overload resolution selects this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -526,14 +533,14 @@ public final class Throwables {
      * String content = Throwables.call(
      *     () -> Files.readString(path),
      *     ex -> ex instanceof IOException,
-     *     () -> "default content"
+     *     (java.util.function.Supplier<String>) () -> "default content"
      * );
      *
-     * // Retry on specific errors
+     * // Fall back to the cache on specific errors
      * Data result = Throwables.call(
      *     () -> fetchFromRemote(),
-     *     ex -> ex.getMessage().contains("timeout"),
-     *     () -> fetchFromCache()
+     *     ex -> ex.getMessage() != null && ex.getMessage().contains("timeout"),
+     *     (java.util.function.Supplier<Data>) () -> fetchFromCache()
      * );
      * }</pre>
      *
@@ -576,10 +583,9 @@ public final class Throwables {
      * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
      * the predicate is evaluated.
      *
-     * <p><b>Note:</b> The result type {@code <R>} is bound to {@code Comparable<? super R>} solely
-     * to avoid an ambiguous overload with
-     * {@link #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)}.
-     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload instead.</p>
+     * <p><b>Note:</b> The result type {@code <R>} is limited to {@code Comparable<? super R>}.
+     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload instead.
+     * Cast an untyped supplier lambda explicitly because it can otherwise be ambiguous with this overload.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -590,11 +596,11 @@ public final class Throwables {
      *     -1
      * );
      *
-     * // Return null only for FileNotFoundException
+     * // Return null only when the file does not exist
      * String content = Throwables.call(
      *     () -> Files.readString(path),
-     *     ex -> ex instanceof FileNotFoundException,
-     *     null
+     *     ex -> ex instanceof NoSuchFileException,
+     *     (String) null
      * );
      * }</pre>
      *
@@ -610,7 +616,7 @@ public final class Throwables {
     @Beta
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
             final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) throws IllegalArgumentException {
-        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
+        // Restrict direct fallback values to comparable result types.
         N.checkArgNotNull(cmd, "cmd");
         N.checkArgNotNull(predicate, "predicate");
 
@@ -627,12 +633,20 @@ public final class Throwables {
         }
     }
 
+    /**
+     * Restores the current thread's interrupted status when {@code e} is an interruption signal.
+     *
+     * @param e the failure caught from a user-supplied operation
+     */
     private static void restoreInterruptedStatusIfNeeded(final Throwable e) {
         if (e instanceof InterruptedException) {
             Thread.currentThread().interrupt();
         }
     }
 
+    /**
+     * Shared stateless instance used by all empty iterators.
+     */
     @SuppressWarnings("rawtypes")
     private static final Throwables.Iterator EMPTY = new Throwables.Iterator() {
         @Override
@@ -765,7 +779,8 @@ public final class Throwables {
          * @param a the array of elements to iterate over
          * @param fromIndex the starting index (inclusive) of the range to iterate
          * @param toIndex the ending index (exclusive) of the range to iterate
-         * @return an iterator over the specified range of elements in the array
+         * @return an iterator over the specified range of elements in the array, or an empty iterator if the array
+         *         is {@code null} or empty, or {@code fromIndex} equals {@code toIndex}
          * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than the array length,
          *         or fromIndex is greater than toIndex
          */
@@ -891,26 +906,32 @@ public final class Throwables {
          * The Supplier is responsible for producing the Iterator instance when the Iterator's methods are first called.
          * This is useful for deferring expensive operations until the iterator is actually used.
          *
-         * <p>The iterator is initialized on the first call to {@code hasNext()}, {@code next()}, {@code advance()}, or {@code count()}.
+         * <p>The iterator is initialized on the first call to {@code hasNext()}, {@code next()}, a positive
+         * {@code advance(long)}, or {@code count()}. A non-positive advance remains a no-op and does not initialize it.
          * The underlying iterator is only closed if it has been initialized when {@code close()} is called.
-         * If creation fails, the exception is propagated and creation is retried on the next access.
+         * If creation fails with an unchecked exception, that exception is propagated and creation is retried on the next access.
          * Closing before initialization releases the supplier without invoking it; subsequent access
          * is rejected and can never acquire a resource after this wrapper has been closed.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, IOException> iter = Iterator.defer(() ->
-         *     Iterator.ofLines(new FileReader("large-file.txt"))
-         * );
-         * // File is not opened until iter.hasNext() or iter.next() is called
+         * try (Iterator<String, IOException> iter = Iterator.defer(() ->
+         *         Iterator.ofLines(Throwables.call(() -> new FileReader("large-file.txt"))))) {
+         *     // The file is not opened until this first access.
+         *     while (iter.hasNext()) {
+         *         System.out.println(iter.next());
+         *     }
+         * }
          * }</pre>
          *
          * @param <T> the type of the elements in the Iterator.
          * @param <E> the type of the exception that may be thrown.
          * @param iteratorSupplier a Supplier that provides the Throwables.Iterator when needed.
-         * @return a Throwables.Iterator that is initialized on the first call to {@code hasNext()}, {@code next()}, {@code advance()}, or {@code count()}.
+         * @return a Throwables.Iterator that is initialized on the first call to {@code hasNext()}, {@code next()},
+         *         a positive {@code advance(long)}, or {@code count()}
          * @throws IllegalArgumentException if iteratorSupplier is null
-         * @throws IllegalStateException if iteratorSupplier returns {@code null}
+         * @throws IllegalStateException from the returned iterator (not from this method) if it is accessed after
+         *         being closed, or if {@code iteratorSupplier} returns {@code null} when it is first accessed
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier)
                 throws IllegalArgumentException {
@@ -1273,6 +1294,7 @@ public final class Throwables {
             return result;
         }
 
+        /** Whether {@link #close()} has already been invoked. */
         private boolean isClosed = false;
 
         /**
@@ -1773,10 +1795,10 @@ public final class Throwables {
         T get() throws E;
 
         /**
-         * Returns a java.util.function.Supplier that wraps this Throwables.Supplier.
+         * Returns a {@code com.landawn.abacus.util.function.Supplier} (a {@code java.util.function.Supplier}) that wraps this Throwables.Supplier.
          * Any checked exceptions thrown by this supplier will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.Supplier that executes this supplier and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Supplier} that executes this supplier and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.Supplier<T> unchecked() {
@@ -1980,10 +2002,10 @@ public final class Throwables {
         }
 
         /**
-         * Returns a java.util.function.Predicate that wraps this Throwables.Predicate.
+         * Returns a {@code com.landawn.abacus.util.function.Predicate} (a {@code java.util.function.Predicate}) that wraps this Throwables.Predicate.
          * Any checked exceptions thrown by this predicate will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.Predicate that executes this predicate and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Predicate} that executes this predicate and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.Predicate<T> unchecked() {
@@ -2021,10 +2043,10 @@ public final class Throwables {
         boolean test(T t, U u) throws E;
 
         /**
-         * Returns a java.util.function.BiPredicate that wraps this Throwables.BiPredicate.
+         * Returns a {@code com.landawn.abacus.util.function.BiPredicate} (a {@code java.util.function.BiPredicate}) that wraps this Throwables.BiPredicate.
          * Any checked exceptions thrown by this predicate will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.BiPredicate that executes this predicate and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.BiPredicate} that executes this predicate and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.BiPredicate<T, U> unchecked() {
@@ -2111,10 +2133,10 @@ public final class Throwables {
         R apply(T t) throws E;
 
         /**
-         * Returns a java.util.function.Function that wraps this Throwables.Function.
+         * Returns a {@code com.landawn.abacus.util.function.Function} (a {@code java.util.function.Function}) that wraps this Throwables.Function.
          * Any checked exceptions thrown by this function will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.Function that executes this function and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Function} that executes this function and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.Function<T, R> unchecked() {
@@ -2153,10 +2175,10 @@ public final class Throwables {
         R apply(T t, U u) throws E;
 
         /**
-         * Returns a java.util.function.BiFunction that wraps this Throwables.BiFunction.
+         * Returns a {@code com.landawn.abacus.util.function.BiFunction} (a {@code java.util.function.BiFunction}) that wraps this Throwables.BiFunction.
          * Any checked exceptions thrown by this function will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.BiFunction that executes this function and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.BiFunction} that executes this function and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.BiFunction<T, U, R> unchecked() {
@@ -2245,10 +2267,10 @@ public final class Throwables {
         void accept(T t) throws E;
 
         /**
-         * Returns a java.util.function.Consumer that wraps this Throwables.Consumer.
+         * Returns a {@code com.landawn.abacus.util.function.Consumer} (a {@code java.util.function.Consumer}) that wraps this Throwables.Consumer.
          * Any checked exceptions thrown by this consumer will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.Consumer that executes this consumer and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Consumer} that executes this consumer and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.Consumer<T> unchecked() {
@@ -2285,10 +2307,10 @@ public final class Throwables {
         void accept(T t, U u) throws E;
 
         /**
-         * Returns a java.util.function.BiConsumer that wraps this Throwables.BiConsumer.
+         * Returns a {@code com.landawn.abacus.util.function.BiConsumer} (a {@code java.util.function.BiConsumer}) that wraps this Throwables.BiConsumer.
          * Any checked exceptions thrown by this consumer will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.BiConsumer that executes this consumer and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.BiConsumer} that executes this consumer and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.BiConsumer<T, U> unchecked() {
@@ -3162,6 +3184,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts two arguments and produces a boolean-valued result.
+     * This is the boolean-producing primitive specialization for {@code BiFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -3183,6 +3206,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts two arguments and produces a byte-valued result.
+     * This is the byte-producing primitive specialization for {@code BiFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -3204,6 +3228,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts two arguments and produces a char-valued result.
+     * This is the char-producing primitive specialization for {@code BiFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -3225,6 +3250,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts two arguments and produces a float-valued result.
+     * This is the float-producing primitive specialization for {@code BiFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -3246,6 +3272,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts two arguments and produces a short-valued result.
+     * This is the short-producing primitive specialization for {@code BiFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -3333,7 +3360,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts three arguments and produces an int-valued result.
-     * This is the int-producing primitive specialization for TriFunction.
+     * This is the int-producing primitive specialization for {@code TriFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -3357,7 +3384,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts three arguments and produces a long-valued result.
-     * This is the long-producing primitive specialization for TriFunction.
+     * This is the long-producing primitive specialization for {@code TriFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -3381,7 +3408,7 @@ public final class Throwables {
 
     /**
      * Represents a function that accepts three arguments and produces a double-valued result.
-     * This is the double-producing primitive specialization for TriFunction.
+     * This is the double-producing primitive specialization for {@code TriFunction}.
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -5317,7 +5344,7 @@ public final class Throwables {
     public interface IntObjFunction<T, R, E extends Throwable> {
 
         /**
-         * Returns the given function as is.
+         * Returns the given function instance. This is a convenience method for type inference.
          *
          * @param <T> the type of the object argument to the function
          * @param <R> the type of the result of the function
@@ -5353,7 +5380,7 @@ public final class Throwables {
     public interface IntObjPredicate<T, E extends Throwable> {
 
         /**
-         * Returns the given predicate as is.
+         * Returns the given predicate instance. This is a convenience method for type inference.
          *
          * @param <T> the type of the object argument to the predicate
          * @param <E> the type of exception that may be thrown
@@ -6083,6 +6110,7 @@ public final class Throwables {
      * Utility class containing functional interfaces that can throw two different types of exceptions.
      */
     public static final class EE {
+        /** Prevents instantiation of this utility class. */
         private EE() {
             // Utility class.
         }
@@ -6445,6 +6473,7 @@ public final class Throwables {
      */
     public static final class EEE {
 
+        /** Prevents instantiation of this utility class. */
         private EEE() {
             // Utility class.
         }
@@ -6834,10 +6863,21 @@ public final class Throwables {
      * @param <E> the type of exception that may be thrown during initialization
      */
     static final class LazyInitializer<T, E extends Throwable> implements Throwables.Supplier<T, E> {
+        /** Supplier retained until initialization succeeds. */
         private Supplier<T, E> supplier;
+
+        /** Whether a value, including {@code null}, has been initialized successfully. */
         private volatile boolean initialized = false;
+
+        /** Cached value; published by the volatile write to {@link #initialized}. */
         private volatile T value = null; //NOSONAR
 
+        /**
+         * Creates an initializer backed by {@code supplier}.
+         *
+         * @param supplier the non-null supplier to invoke on first access
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         */
         LazyInitializer(final Throwables.Supplier<T, E> supplier) {
             N.checkArgNotNull(supplier, cs.supplier);
 

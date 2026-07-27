@@ -255,9 +255,9 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
 
     /**
      * Writes a {@code Byte[]} array to a {@link CharacterWriter} in bracket-enclosed format.
-     * Uses the writer's optimized byte-write method for {@code non-null} elements.
+     * Each element is written by the {@code Byte} element type handler, so {@code null} elements
+     * are written as {@code "null"}.
      * The format is identical to {@link #appendTo(Appendable, Byte[])}.
-     * {@code config} is not used.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization

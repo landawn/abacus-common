@@ -57,6 +57,28 @@ public class FloatSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorAcceptsNaNSumFromOppositeInfinities() {
+        // accept() itself produces min=-Infinity, max=+Infinity, sum=NaN, so the constructor must be
+        // able to reconstruct that state; rejecting it made the accumulated value unrepresentable.
+        final FloatSummaryStatistics accumulated = new FloatSummaryStatistics();
+        accumulated.accept(Float.NEGATIVE_INFINITY);
+        accumulated.accept(Float.POSITIVE_INFINITY);
+
+        assertEquals(Float.NEGATIVE_INFINITY, accumulated.getMin());
+        assertEquals(Float.POSITIVE_INFINITY, accumulated.getMax());
+        assertTrue(Double.isNaN(accumulated.getSum()));
+
+        final FloatSummaryStatistics roundTripped = Assertions
+                .assertDoesNotThrow(() -> new FloatSummaryStatistics(accumulated.getCount(), accumulated.getMin(), accumulated.getMax(), accumulated.getSum()));
+
+        assertEquals(2, roundTripped.getCount());
+        assertTrue(Double.isNaN(roundTripped.getSum()));
+
+        // A NaN sum is still rejected when the min/max pair cannot have produced it.
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FloatSummaryStatistics(2, Float.NEGATIVE_INFINITY, 1.0f, Double.NaN));
+    }
+
+    @Test
     public void testZeroValue() {
         FloatSummaryStatistics stats = new FloatSummaryStatistics();
         stats.accept(0.0f);
@@ -212,6 +234,7 @@ public class FloatSummaryStatisticsTest extends TestBase {
         assertTrue(str.contains("count="));
         assertTrue(str.contains("sum="));
         assertTrue(str.contains("average="));
+        assertEquals("{min=1.000000, max=2.000000, count=2, sum=3.000000, average=1.500000}", str);
     }
 
 }

@@ -24,8 +24,9 @@ import java.lang.annotation.Target;
  * value. It does not, by itself, claim that a method is pure or that it has no other side effects.
  *
  * <p><b>Name collision:</b> this annotation is {@code com.landawn.abacus.annotation.Immutable}.
- * It is distinct from {@code com.landawn.abacus.util.Immutable}, which is a utility namespace,
- * and from similarly named static-analysis annotations such as {@code net.jcip.annotations.Immutable},
+ * It is distinct from {@link com.landawn.abacus.util.Immutable}, which is a marker <i>interface</i>
+ * that immutable collection and map types implement, and from similarly named static-analysis
+ * annotations such as {@code net.jcip.annotations.Immutable},
  * {@code javax.annotation.concurrent.Immutable}, and {@code com.google.errorprone.annotations.Immutable}.
  * Those annotations are interpreted by their own tools and are not interchangeable with this declaration;
  * check the fully qualified import when multiple immutability APIs are available.</p>

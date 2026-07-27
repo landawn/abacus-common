@@ -72,9 +72,10 @@ import java.lang.annotation.Target;
 public @interface Table {
 
     /**
-     * Deprecated alias for {@link #name()}.
+     * Deprecated alias for {@link #name()}. When both are specified, this element wins:
+     * {@link #name()} is consulted only if this one is empty.
      *
-     * @return the table name
+     * @return the table name, or an empty string if not specified
      * @deprecated Use {@link #name()} to specify the table name explicitly.
      */
     @Deprecated

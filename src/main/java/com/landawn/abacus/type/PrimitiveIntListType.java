@@ -156,7 +156,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed IntList, or {@code null} if the input string is {@code null} or empty
+     * @return the parsed IntList, or {@code null} if the input string is {@code null} or blank
      * @throws NumberFormatException if any element in the string cannot be parsed as an integer
      * @see #valueOf(Object)
      * @see #stringOf(IntList)
@@ -226,13 +226,19 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * IntList list = IntList.of(5, 10, 15);
-     * type.serializeTo(writer, list, null);
-     * // Writes: [5, 10, 15]
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter nullWriter = Objectory.createBufferedJsonWriter();
+     * try {
+     *     IntList list = IntList.of(5, 10, 15);
+     *     type.serializeTo(writer, list, null);
+     *     // Writes: [5, 10, 15]
      *
-     * type.serializeTo(writer, null, null);
-     * // Writes: null
+     *     type.serializeTo(nullWriter, null, null);
+     *     // Writes: null
+     * } finally {
+     *     Objectory.recycle(writer);
+     *     Objectory.recycle(nullWriter);
+     * }
      * }</pre>
      *
      * <p>

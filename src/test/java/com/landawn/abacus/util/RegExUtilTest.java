@@ -140,6 +140,8 @@ public class RegExUtilTest extends AbstractTest {
     public void testHttpUrlFinder() {
         assertTrue(RegExUtil.HTTP_URL_FINDER.matcher("http://www.example.com").find());
         assertTrue(RegExUtil.HTTP_URL_FINDER.matcher("https://api.example.com:8443/v1/users?id=123").find());
+        assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com?view=compact#summary").matches());
+        assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com#summary").matches());
         assertTrue(RegExUtil.HTTP_URL_FINDER.matcher("HTTP://EXAMPLE.COM").find());
         assertFalse(RegExUtil.HTTP_URL_FINDER.matcher("ftp://example.com").find());
     }
@@ -2193,6 +2195,29 @@ public class RegExUtilTest extends AbstractTest {
         assertEquals("a1b", RegExUtil.replaceLast("a1b2", "\\d", (start, end) -> null));
         assertEquals("ab", RegExUtil.replaceAll("a1b2", "\\d", match -> null));
         assertEquals("ab", RegExUtil.replaceAll("a1b2", "\\d", (start, end) -> null));
+    }
+
+    @Test
+    @DisplayName("a null replacer is reported by its own parameter name, not 'function'")
+    public void testNullReplacerIsReportedByItsOwnParameterName() {
+        final Pattern digit = Pattern.compile("\\d");
+        final Function<String, String> nullFunction = null;
+        final IntBiFunction<String> nullIntBiFunction = null;
+
+        // A validation sweep once passed cs.function here, so a null replacer reported
+        // "'function' cannot be null" for a parameter every one of these signatures calls 'replacer'.
+        assertEquals("'replacer' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("a1", digit, nullFunction)).getMessage());
+        assertEquals("'replacer' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("a1", digit, nullIntBiFunction)).getMessage());
+        assertEquals("'replacer' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("a1", digit, nullFunction)).getMessage());
+        assertEquals("'replacer' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("a1", digit, nullIntBiFunction)).getMessage());
+        assertEquals("'replacer' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("a1", digit, nullFunction)).getMessage());
+        assertEquals("'replacer' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("a1", digit, nullIntBiFunction)).getMessage());
     }
 
 }

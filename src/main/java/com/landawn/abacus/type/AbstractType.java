@@ -1496,7 +1496,8 @@ public abstract class AbstractType<T> implements Type<T> {
      * Calculates a buffer size for string operations, capped at {@link Integer#MAX_VALUE}.
      * <p>
      * Prevents integer overflow by clamping the result when {@code len * elementPlusDelimiterLen}
-     * would exceed {@link Integer#MAX_VALUE}.
+     * would exceed {@link Integer#MAX_VALUE}. Returns {@code 0} when
+     * {@code elementPlusDelimiterLen} is {@code 0}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1516,7 +1517,8 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param len the number of elements
      * @param elementPlusDelimiterLen the length of each element plus delimiter
-     * @return the calculated buffer size, capped at Integer.MAX_VALUE
+     * @return the calculated buffer size, capped at {@link Integer#MAX_VALUE}, or {@code 0} if
+     *         {@code elementPlusDelimiterLen} is {@code 0}
      */
     protected static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
         if (elementPlusDelimiterLen == 0) {

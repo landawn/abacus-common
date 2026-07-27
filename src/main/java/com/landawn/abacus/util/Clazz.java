@@ -39,7 +39,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * A specialized utility class that provides convenient typed Class references for parameterized collection types,
- * designed to work around Java's type erasure limitations while maintaining type safety and code readability.
+ * designed to work around Java's type erasure limitations while improving compile-time convenience and code readability.
  * This class serves as a bridge between Java's generic type system and APIs that require Class objects,
  * particularly useful in reflection, serialization, and framework integration scenarios.
  *
@@ -52,7 +52,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <ul>
  *   <li>The Class objects returned by all methods do NOT contain actual runtime type parameter information</li>
  *   <li>These are primarily useful for providing type hints to APIs that accept Class parameters</li>
- *   <li>For {@code true} runtime type parameter information, use {@code Type.of()} or {@code TypeReference}</li>
+ *   <li>For true runtime type parameter information, use {@code Type.of()} or {@code TypeReference}</li>
  *   <li>The generic type parameters exist only for compile-time type safety and documentation</li>
  * </ul>
  *
@@ -64,7 +64,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  *   <li><b>Predefined Constants:</b> Common collection type combinations available as static constants</li>
  *   <li><b>Comprehensive Coverage:</b> Support for all major Java collection interfaces and implementations</li>
  *   <li><b>Performance Optimized:</b> Zero runtime overhead beyond normal Class object usage</li>
- *   <li><b>Null-Safe Design:</b> Class parameters are used only for compile-time type inference and are ignored at runtime, so a {@code null} argument never causes a failure</li>
+ *   <li><b>Inference Parameters:</b> Element/key/value {@code Class} parameters are compile-time hints and may be {@code null};
+ *       the general {@link #of(Class)} method instead returns its argument directly</li>
  *   <li><b>Framework Friendly:</b> Designed for use with serialization, ORM, and dependency injection frameworks</li>
  * </ul>
  *
@@ -83,7 +84,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  *   <li><b>Sorted Collections:</b> {@code SortedSet}, {@code SortedMap}, {@code NavigableSet}, {@code NavigableMap}</li>
  *   <li><b>Concurrent Collections:</b> {@code ConcurrentMap}, {@code BlockingQueue}, {@code ConcurrentLinkedQueue}</li>
  *   <li><b>Specialized Collections:</b> {@code BiMap}, {@code Multiset}, {@code ListMultimap}, {@code SetMultimap}</li>
- *   <li><b>Implementation-Specific:</b> {@code ArrayList}, {@code LinkedList}, {@code HashSet}, {@code TreeMap}, etc.</li>
+ *   <li><b>Implementation-Specific:</b> {@code LinkedList}, {@code ArrayDeque}, {@code LinkedHashSet},
+ *       {@code TreeSet}, {@code LinkedHashMap}, {@code TreeMap}, and concurrent queue/map implementations</li>
  * </ul>
  *
  * <p><b>Method Categories:</b>
@@ -97,13 +99,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
  * // Basic collection type references
- * Class<List<String>> stringList = Clazz.ofList(String.class);
+ * Class<List<String>> stringListType = Clazz.ofList(String.class);
  * Class<Set<Integer>> integerSet = Clazz.ofSet(Integer.class);
  * Class<Map<String, Object>> stringObjectMap = Clazz.ofMap(String.class, Object.class);
  *
  * // Using predefined constants
  * Class<Map<String, Object>> propsMap = Clazz.PROPS_MAP;
- * Class<List<String>> stringList = Clazz.STRING_LIST;
+ * Class<List<String>> predefinedStringList = Clazz.STRING_LIST;
  * Class<Set<String>> stringSet = Clazz.STRING_SET;
  *
  * // Implementation-specific types
@@ -116,23 +118,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Class<BlockingQueue<String>> blockingQueue = Clazz.ofLinkedBlockingQueue(String.class);
  * }</pre>
  *
- * <p><b>Framework Integration Examples:</b>
+ * <p><b>Framework-Facing Class References:</b>
  * <pre>{@code
- * // JSON/XML serialization frameworks
- * ObjectMapper mapper = new ObjectMapper();
- * List<Person> people = mapper.readValue(json, Clazz.ofList(Person.class));
+ * Class<List<Person>> peopleListClass = Clazz.ofList(Person.class);
+ * Class<Map<String, Object>> propertiesClass = Clazz.PROPS_MAP;
  *
- * // Dependency injection frameworks
- * @Inject
- * Provider<List<Service>> serviceProvider;
- * // Can use Clazz.ofList(Service.class) for type hints
- *
- * // JSON deserialization to a typed collection
- * List<Person> people = mapper.readValue(json, Clazz.ofList(Person.class));
- *
- * // Configuration and properties handling
- * Properties props = loadProperties();
- * Map<String, Object> configMap = convertToMap(props, Clazz.PROPS_MAP);
+ * // These generic arguments help only at compile time. At runtime the first
+ * // object is List.class; use Type or TypeReference when a framework must know Person.
  * }</pre>
  *
  * <p><b>Specialized Collection Support:</b>
@@ -146,8 +138,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <p><b>Type Parameter Documentation:</b>
  * <ul>
  *   <li>All methods accepting Class parameters use {@code @SuppressWarnings("unused")} annotations</li>
- *   <li>The Class parameters serve purely as documentation and compile-time type checking</li>
- *   <li>Runtime behavior is identical whether parameters are provided or not</li>
+ *   <li>Element/key/value Class parameters serve purely as documentation and compile-time type inference</li>
+ *   <li>Parameterized and no-argument collection factory variants return the same raw Class object</li>
+ *   <li>{@link #of(Class)} is different: it returns the supplied Class reference, including {@code null}</li>
  *   <li>Method overloads exist for convenience - parameterized and non-parameterized versions</li>
  * </ul>
  *
@@ -215,12 +208,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  *   <li><b>No Runtime Exceptions:</b> All methods are guaranteed to succeed</li>
  *   <li><b>Compile-Time Safety:</b> Generic type constraints prevent most errors at compile time</li>
  *   <li><b>ClassCastException:</b> Potential only if returned Class is misused with incompatible types</li>
- *   <li><b>Parameter Validation:</b> Class parameters are ignored at runtime; passing {@code null} is harmless</li>
+ *   <li><b>Parameter Validation:</b> Element/key/value hint parameters are ignored at runtime;
+ *       {@link #of(Class)} returns the supplied reference rather than ignoring it</li>
  * </ul>
  *
  * <p><b>Use Cases and Applications:</b>
  * <ul>
- *   <li><b>JSON/XML Serialization:</b> Providing type hints to serialization frameworks</li>
+ *   <li><b>JSON/XML Serialization:</b> Selecting a raw container class when element type metadata is not required</li>
  *   <li><b>Dependency Injection:</b> Documenting generic types in injection configurations</li>
  *   <li><b>ORM Frameworks:</b> Specifying collection types for database mapping</li>
  *   <li><b>Configuration Systems:</b> Type-safe configuration property handling</li>
@@ -396,14 +390,14 @@ public final class Clazz {
      * // Instead of: Class<ArrayList<String>> cls = (Class<ArrayList<String>>) (Class<?>) ArrayList.class;
      * Class<ArrayList<String>> arrayListClass = Clazz.of(ArrayList.class);
      *
-     * // Useful for method parameters
-     * public <T> T deserialize(String json, Class<T> type) { ... }
-     * MyObject obj = deserialize(json, Clazz.of(MyObject.class));
+     * // Pass the typed Class to a generic deserialization API
+     * ArrayList<String> values = com.landawn.abacus.parser.ParserFactory.createJsonParser()
+     *     .deserialize("[\"alpha\", \"beta\"]", arrayListClass);
      * }</pre>
      *
      * @param <T> the target type parameter.
      * @param cls the class to cast.
-     * @return a typed Class reference with generic type information.
+     * @return a typed Class reference whose generic type is present only in the compile-time signature.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -454,8 +448,8 @@ public final class Clazz {
      * Class<List<String>> stringListClass = Clazz.ofList(String.class);
      * Class<List<Integer>> intListClass = Clazz.ofList(Integer.class);
      *
-     * // Common use case with serialization frameworks
-     * List<String> result = deserializer.readValue(json, Clazz.ofList(String.class));
+     * // Runtime identity is still the raw List class; no String metadata is retained
+     * assert stringListClass == (Class<?>) List.class;
      * }</pre>
      *
      * @param <T> the element type of the list.
@@ -1377,7 +1371,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<NavigableMap<String, List<String>>> treeMapClass = Clazz.ofTreeMap(String.class, List.class);
+     * Class<NavigableMap<String, Integer>> treeMapClass = Clazz.ofTreeMap(String.class, Integer.class);
      * }</pre>
      *
      * @param <K> the key type of the tree map.

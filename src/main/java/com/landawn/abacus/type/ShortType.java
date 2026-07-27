@@ -26,7 +26,7 @@ import java.sql.SQLException;
 public final class ShortType extends AbstractShortType {
 
     /**
-     * The type name constant for Short type identification.
+     * The type name constant for Short type identification, equal to {@code "Short"}.
      */
     public static final String SHORT = Short.class.getSimpleName();
 

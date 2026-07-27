@@ -32,9 +32,9 @@ import java.io.Writer;
  *       carriage return ({@code \r}), and form feed ({@code \f}) use their
  *       standard JSON escape sequences</li>
  *   <li>Control characters (U+0000 through U+001F) and U+007F are escaped
- *       as {@code &#92;uXXXX} sequences</li>
+ *       as <code>&#92;uXXXX</code> sequences</li>
  *   <li>Line separator (U+2028) and paragraph separator (U+2029) are escaped
- *       as {@code &#92;u2028} and {@code &#92;u2029} to prevent JavaScript syntax errors</li>
+ *       as <code>&#92;u2028</code> and <code>&#92;u2029</code> to prevent JavaScript syntax errors</li>
  * </ul>
  *
  * <p>An HTML-safe replacement table (with additional escaping for {@code <}, {@code >},
@@ -52,7 +52,8 @@ import java.io.Writer;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * try (BufferedJsonWriter writer = new BufferedJsonWriter()) {
+ * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+ * try {
  *     writer.write("{\"name\":\"");
  *     writer.writeCharacter("John \"Johnny\" Doe");   // Escaped: John \"Johnny\" Doe
  *     writer.write("\",\"data\":\"");
@@ -60,6 +61,8 @@ import java.io.Writer;
  *     writer.write("\"}");
  *     String json = writer.toString();
  *     // Result: {"name":"John \"Johnny\" Doe","data":"Line1\nLine2"}
+ * } finally {
+ *     Objectory.recycle(writer);
  * }
  * }</pre>
  *
@@ -114,7 +117,7 @@ public final class BufferedJsonWriter extends CharacterWriter {
             }
         }
 
-        // ...
+        // JSON escapes for quotes, backslashes, and ASCII control characters.
         REPLACEMENT_CHARS['"'] = "\\\"".toCharArray();
         // REPLACEMENT_CHARS['\''] = "\\\'".toCharArray();
         REPLACEMENT_CHARS['\\'] = "\\\\".toCharArray();
@@ -124,7 +127,7 @@ public final class BufferedJsonWriter extends CharacterWriter {
         REPLACEMENT_CHARS['\r'] = "\\r".toCharArray();
         REPLACEMENT_CHARS['\f'] = "\\f".toCharArray();
 
-        // ...
+        // Escape Unicode line and paragraph separators for JavaScript compatibility.
         REPLACEMENT_CHARS['\u2028'] = "\\u2028".toCharArray();
         REPLACEMENT_CHARS['\u2029'] = "\\u2029".toCharArray();
         HTML_SAFE_REPLACEMENT_CHARS = REPLACEMENT_CHARS.clone();
@@ -153,9 +156,13 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * writer.write("{\"key\":\"value\"}");
-     * String json = writer.toString();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * try {
+     *     writer.write("{\"key\":\"value\"}");
+     *     String json = writer.toString();
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      */
@@ -172,11 +179,18 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
      * {@code OutputStream}.</p>
      *
+     * <p>This constructor is package-private. Outside this package, obtain an
+     * instance via {@link Objectory#createBufferedJsonWriter(OutputStream)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (FileOutputStream fos = new FileOutputStream("data.json");
-     *      BufferedJsonWriter writer = new BufferedJsonWriter(fos)) {
-     *     writer.write("{\"message\":\"Hello, World!\"}");
+     * try (FileOutputStream fos = new FileOutputStream("data.json")) {
+     *     BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(fos);
+     *     try {
+     *         writer.write("{\"message\":\"Hello, World!\"}");
+     *     } finally {
+     *         Objectory.recycle(writer);   // flushes, but does not close the underlying stream
+     *     }
      * }
      * }</pre>
      *
@@ -193,11 +207,18 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * {@code write(...)} methods write verbatim. Closing this writer also closes the underlying
      * {@code Writer}.</p>
      *
+     * <p>This constructor is package-private. Outside this package, obtain an
+     * instance via {@link Objectory#createBufferedJsonWriter(Writer)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (FileWriter fw = new FileWriter("data.json");
-     *      BufferedJsonWriter writer = new BufferedJsonWriter(fw)) {
-     *     writer.write("{\"status\":\"success\",\"code\":200}");
+     * try (FileWriter fw = new FileWriter("data.json")) {
+     *     BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(fw);
+     *     try {
+     *         writer.write("{\"status\":\"success\",\"code\":200}");
+     *     } finally {
+     *         Objectory.recycle(writer);   // flushes, but does not close the underlying writer
+     *     }
      * }
      * }</pre>
      *

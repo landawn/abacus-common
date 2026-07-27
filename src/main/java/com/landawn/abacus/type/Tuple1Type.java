@@ -56,11 +56,12 @@ public class Tuple1Type<T1> extends AbstractTupleType<Tuple1<T1>> {
     }
 
     /**
-     * Generates the type name for a Tuple1 type with the specified element type.
+     * Generates the type name for a Tuple1 with the specified element type name.
      *
-     * @param t1TypeName the name of the element type
-     * @param isDeclaringName if {@code true}, uses simple class names; if {@code false}, uses canonical class names
-     * @return the generated type name for Tuple1 with the specified element type
+     * @param t1TypeName the type name of the single element
+     * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
+     *                        if {@code false}, returns the full canonical name
+     * @return the formatted type name string
      */
     protected static String getTypeName(final String t1TypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {

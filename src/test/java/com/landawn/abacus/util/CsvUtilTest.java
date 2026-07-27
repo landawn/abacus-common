@@ -1800,6 +1800,7 @@ public class CsvUtilTest extends TestBase {
         StringWriter writer = new StringWriter();
         long count = CsvUtil.csvToJson(reader, null, writer, null);
         assertEquals(0, count);
+        assertEquals("[]", writer.toString());
     }
 
     @Test
@@ -2342,17 +2343,63 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("CsvLoader stream restores custom parsers if lazy creation fails")
-    public void testCsvLoaderStreamRestoresParsersWhenLazyCreationFails() {
+    @DisplayName("CsvLoader stream restores custom parsers if creation fails")
+    public void testCsvLoaderStreamRestoresParsersWhenCreationFails() {
         Function<String, String[]> defaultHeaderParser = CsvUtil.getCurrentHeaderParser();
         Function<String, String[]> customHeaderParser = line -> line.split(";");
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0);
 
-        try (Stream<String> stream = CsvUtil.loader().setHeaderParser(customHeaderParser).stream(mapper)) {
-            assertThrows(IllegalArgumentException.class, stream::toList);
-        }
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().setHeaderParser(customHeaderParser).stream(mapper));
 
         assertSame(defaultHeaderParser, CsvUtil.getCurrentHeaderParser());
+    }
+
+    @Test
+    @DisplayName("Direct streams retain the parser configuration active at creation")
+    public void testStreamCapturesThreadLocalParsersAtCreation() {
+        CsvUtil.setHeaderParser(CsvUtil.CSV_HEADER_PARSER_IN_JSON);
+        CsvUtil.setLineParser(CsvUtil.CSV_LINE_PARSER_IN_JSON);
+
+        final Stream<String> stream = CsvUtil.stream(new StringReader("[\"id\",\"name\"]\n[\"1\",\"Ada\"]\n"), (columns, row) -> row.get(1), false);
+
+        CsvUtil.resetHeaderParser();
+        CsvUtil.resetLineParser();
+
+        try (stream) {
+            assertEquals(List.of("Ada"), stream.toList());
+        }
+    }
+
+    @Test
+    @DisplayName("CsvLoader captures custom parsers without leaking thread-local state")
+    public void testCsvLoaderStreamRestoresParsersImmediately() {
+        final Function<String, String[]> originalHeaderParser = CsvUtil.getCurrentHeaderParser();
+        final BiConsumer<String, String[]> originalLineParser = CsvUtil.getCurrentLineParser();
+        final Function<String, String[]> semicolonHeaderParser = line -> line.split(";");
+        final BiConsumer<String, String[]> semicolonLineParser = (line, output) -> {
+            final String[] values = line.split(";");
+            System.arraycopy(values, 0, output, 0, values.length);
+        };
+
+        final Stream<String> stream = CsvUtil.loader()
+                .source(new StringReader("id;name\n1;Ada\n"))
+                .setHeaderParser(semicolonHeaderParser)
+                .setLineParser(semicolonLineParser)
+                .stream((columns, row) -> row.get(1));
+
+        assertSame(originalHeaderParser, CsvUtil.getCurrentHeaderParser());
+        assertSame(originalLineParser, CsvUtil.getCurrentLineParser());
+
+        try (stream) {
+            assertEquals(List.of("Ada"), stream.toList());
+        }
+    }
+
+    @Test
+    @DisplayName("Null row mappers are rejected when the stream is created")
+    public void testStreamRejectsNullRowMapperEagerly() {
+        final BiFunction<List<String>, DisposableArray<String>, String> mapper = null;
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(new StringReader("id\n1\n"), mapper, false));
     }
 
     @Test
@@ -3081,6 +3128,20 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
+    @DisplayName("CSV stream closes an owned reader when lazy initialization fails")
+    public void testStream_ClosesOwnedReaderWhenInitializationFails() {
+        final TrackingReader reader = new TrackingReader(new StringReader("id,name\n1,John\n"));
+        final Stream<Object[]> stream = CsvUtil.stream(reader, List.of("missing"), Object[].class, true);
+
+        try {
+            assertThrows(IllegalArgumentException.class, stream::toList);
+            assertTrue(reader.closed, "an initialization failure must not strand an owned Reader");
+        } finally {
+            stream.close();
+        }
+    }
+
+    @Test
     @DisplayName("CSV stream recycles pooled reader for empty source")
     public void testStream_EmptySourceRecyclesBorrowedBufferedReader() {
         List<java.io.BufferedReader> drainedReaders = new ArrayList<>();
@@ -3329,9 +3390,7 @@ public class CsvUtilTest extends TestBase {
         StringWriter writer = new StringWriter();
         long count = CsvUtil.jsonToCsv(new StringReader(json), List.<String> of(), writer);
         assertEquals(1, count);
-        // empty selection -> zero columns -> the keys are not emitted as headers
-        assertFalse(writer.toString().contains("id"));
-        assertFalse(writer.toString().contains("name"));
+        assertEquals("", writer.toString());
     }
 
     @Test

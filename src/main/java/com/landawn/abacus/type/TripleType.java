@@ -136,7 +136,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * <pre>{@code
      * Type<Triple<String, Integer, Double>> type = TypeFactory.getType("Triple<String, Integer, Double>");
      * Triple<String, Integer, Double> triple = Triple.of("A", 1, 3.14);
-     * String str = type.stringOf(triple);   // Returns ["A", 1, 3.14]
+     * String str = type.stringOf(triple);   // Returns ["A",1,3.14]
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -144,8 +144,8 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
-     * @param x the Triple object to convert
-     * @return the JSON string representation, or {@code null} if x is null
+     * @param x the Triple object to convert, may be {@code null}
+     * @return the JSON string representation, or {@code null} if {@code x} is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -207,7 +207,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * JSON/XML serializers.
      *
      * @param appendable the Appendable to write to
-     * @param x the Triple object to append
+     * @param x the Triple object to append, may be {@code null}
      * @throws IOException if an I/O error occurs during the append operation
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -279,8 +279,8 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Triple object to write
-     * @param config the serialization configuration for formatting options
+     * @param x the Triple object to write, may be {@code null}
+     * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

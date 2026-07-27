@@ -68,12 +68,17 @@ public class MapTypeTest extends TestBase {
     }
 
     @Test
-    public void testSpringMultiValueMapUsesDeclaredValueParameter() {
+    public void testSpringMultiValueMapExposesListAsMapValueType() {
         final Type<LinkedMultiValueMap<String, Integer>> type = createType(new TypeReference<LinkedMultiValueMap<String, Integer>>() {
         });
 
+        // MultiValueMap<K, V> is a Map<K, List<V>>. parameterTypes() describes the MAP view, and
+        // JsonParserImpl reads parameterTypes().get(1) to type map-valued bean properties, so the
+        // value type must be List<Integer> -- reporting Integer here makes such properties
+        // deserialize into raw HashMaps instead of the declared element type.
         assertEquals(String.class, type.parameterTypes().get(0).javaType());
-        assertEquals(Integer.class, type.parameterTypes().get(1).javaType());
+        assertEquals(List.class, type.parameterTypes().get(1).javaType());
+        assertEquals("List<Integer>", type.parameterTypes().get(1).name());
 
         final LinkedMultiValueMap<String, Integer> result = type.valueOf("{\"a\":[1,2]}");
         assertEquals(List.of(1, 2), result.get("a"));

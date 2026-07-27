@@ -54,8 +54,10 @@ public final class LZ4BlockInputStream extends InputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileInputStream fileIn = new FileInputStream("compressed.lz4");
-     * LZ4BlockInputStream lz4In = new LZ4BlockInputStream(fileIn);
+     * try (FileInputStream fileIn = new FileInputStream("compressed.lz4");
+     *      LZ4BlockInputStream lz4In = new LZ4BlockInputStream(fileIn)) {
+     *     byte[] decompressed = lz4In.readAllBytes();
+     * }
      * }</pre>
      *
      * @param is the input stream to read compressed data from; must not be {@code null}

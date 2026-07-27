@@ -126,7 +126,7 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.QuadConsumer}
-     * @return a Throwables.QuadConsumer view of this consumer
+     * @return a {@code Throwables.QuadConsumer} view of this consumer
      */
     default <E extends Throwable> Throwables.QuadConsumer<A, B, C, D, E> toThrowable() {
         return (Throwables.QuadConsumer<A, B, C, D, E>) this;

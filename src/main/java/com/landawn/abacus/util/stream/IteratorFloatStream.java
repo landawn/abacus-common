@@ -69,6 +69,7 @@ import com.landawn.abacus.util.function.ObjFloatConsumer;
  * @see FloatIteratorEx
  */
 class IteratorFloatStream extends AbstractFloatStream {
+    /** The backing iterator supplying this stream's elements; it is consumed lazily as the stream is traversed. */
     final FloatIteratorEx elements;
 
     //    OptionalFloat head;
@@ -1665,10 +1666,11 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    protected FloatStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected FloatStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorFloatStream(elements, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorFloatStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     @Override

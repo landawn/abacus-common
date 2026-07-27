@@ -33,20 +33,9 @@ import com.landawn.abacus.util.Objectory;
  *   <li>{@code %s} - printf style placeholders</li>
  * </ul>
  *
- * <p><b>Usage Examples for implementation:</b></p>
- * <pre>{@code
- * public class MyLogger extends AbstractLogger {
- *     public MyLogger(String name) {
- *         super(name);
- *     }
- *
- *     @Override
- *     public void info(String msg) {
- *         // Implementation specific logging
- *     }
- *     // ... implement other abstract methods
- * }
- * }</pre>
+ * <p>Logging backends subclass this type and implement every abstract method inherited from
+ * {@link Logger}; application code normally obtains a ready-to-use logger from the configured
+ * logging provider rather than subclassing this type directly.</p>
  *
  * @see Logger
  */
@@ -1741,8 +1730,8 @@ public abstract class AbstractLogger implements Logger {
      * // Output: "Count: 42"
      * }</pre>
      *
-     * @param template the message template
-     * @param arg the argument to substitute
+     * @param template the message template, may be {@code null} (converted to {@code "null"})
+     * @param arg the argument to substitute; converted with {@code N.toString(Object)}, may be {@code null}
      * @return the formatted message
      */
     static String format(String template, final Object arg) {
@@ -1793,9 +1782,9 @@ public abstract class AbstractLogger implements Logger {
      * // Output: "Only one placeholder: arg1 [arg2]"
      * }</pre>
      *
-     * @param template the message template
-     * @param arg1 the first argument
-     * @param arg2 the second argument
+     * @param template the message template, may be {@code null} (converted to {@code "null"})
+     * @param arg1 the first argument; converted with {@code N.toString(Object)}, may be {@code null}
+     * @param arg2 the second argument; converted with {@code N.toString(Object)}, may be {@code null}
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2) {
@@ -1869,10 +1858,10 @@ public abstract class AbstractLogger implements Logger {
      * // Output: "Result: success [extra, args]"
      * }</pre>
      *
-     * @param template the message template
-     * @param arg1 the first argument
-     * @param arg2 the second argument
-     * @param arg3 the third argument
+     * @param template the message template, may be {@code null} (converted to {@code "null"})
+     * @param arg1 the first argument; converted with {@code N.toString(Object)}, may be {@code null}
+     * @param arg2 the second argument; converted with {@code N.toString(Object)}, may be {@code null}
+     * @param arg3 the third argument; converted with {@code N.toString(Object)}, may be {@code null}
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
@@ -1949,14 +1938,21 @@ public abstract class AbstractLogger implements Logger {
      * Formats a message template with variable number of arguments.
      *
      * <p>Substitutes each {@code {}} or {@code %s} in the template with an argument. These are matched by
-     * position: the first placeholder gets {@code args[0]}, etc. If there are more arguments than
-     * placeholders, the unmatched arguments will be appended to the end of the formatted
-     * message in square brackets.</p>
+     * position: the first placeholder gets {@code args[0]}, etc. If the template contains {@code {}},
+     * that style is used; otherwise {@code %s} is tried. The two styles cannot be mixed in a single
+     * template. If there are more arguments than placeholders, the unmatched arguments will be
+     * appended to the end of the formatted message in square brackets. An empty or {@code null}
+     * {@code args} array leaves the template unchanged.</p>
+     *
+     * <p><b>Note:</b> this overload is only selected for four or more arguments; calls with one, two
+     * or three arguments bind to the fixed-arity {@code format} overloads instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String msg = format("User {} performed {} operations in {}ms",
-     *                     username, opCount, duration);
+     * String msg = format("User {} performed {} operations on {} in {}ms",
+     *                     username, opCount, target, duration);
+     * String msg2 = format("Only one placeholder: {}", "a", "b", "c", "d");
+     * // Output: "Only one placeholder: a [b, c, d]"
      * }</pre>
      *
      * @param template the message template containing 0 or more {@code {}} or {@code %s} placeholders, may be {@code null} (converted to "null")

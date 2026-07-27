@@ -9266,11 +9266,6 @@ public class FnTest extends TestBase {
     }
 
     @Test
-    public void testClassExists() {
-        assertNotNull(Fn.TriConsumers.class);
-    }
-
-    @Test
     public void testOfAddAll_Deprecated() {
         List<String> list1 = new ArrayList<>(Arrays.asList("a", "b"));
         List<String> list2 = Arrays.asList("c", "d");

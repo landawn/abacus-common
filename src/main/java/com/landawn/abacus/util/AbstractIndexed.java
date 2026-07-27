@@ -46,6 +46,10 @@ abstract class AbstractIndexed implements Immutable {
     /**
      * Mixes both halves of a long while preserving the historical hash value for values that fit
      * in an int.
+     *
+     * @param value the {@code long} value to hash
+     * @return {@code (int) value} when the value fits in an {@code int}; otherwise a hash that
+     *         also mixes in the high 32 bits
      */
     protected static int hashLong(final long value) {
         final int lowBits = (int) value;

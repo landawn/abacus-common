@@ -1919,6 +1919,20 @@ public class ObserverTest extends TestBase {
     }
 
     @Test
+    public void testProtectedPipelineHooksRejectNullDispatchers() {
+        final Observer.Dispatcher<Object> dispatcher = new Observer.Dispatcher<>();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> dispatcher.append(null));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new Observer<Object>((Observer.Dispatcher<Object>) null) {
+            @Override
+            public void observe(final java.util.function.Consumer<? super Object> action, final java.util.function.Consumer<? super Exception> onError,
+                    final Runnable onComplete) {
+                // No-op test implementation.
+            }
+        });
+    }
+
+    @Test
     public void testObserverRejectsASecondSubscription() throws InterruptedException {
         final Observer<Integer> observer = Observer.of(Collections.singletonList(1));
         final CountDownLatch completed = new CountDownLatch(1);

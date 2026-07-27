@@ -18,7 +18,8 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts a variable number of byte-valued arguments and returns no result.
- * This is a functional interface designed to consume byte arrays of any length.
+ * This is the N-arity specialization of {@link ByteConsumer}.
+ * Unlike most other functional interfaces, {@code ByteNConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(byte...)}.
  *
@@ -26,6 +27,7 @@ import com.landawn.abacus.util.cs;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Consumer
+ * @see ByteConsumer
  */
 @FunctionalInterface
 public interface ByteNConsumer {
@@ -49,9 +51,11 @@ public interface ByteNConsumer {
     /**
      * Returns a composed {@code ByteNConsumer} that performs, in sequence, this operation
      * followed by the {@code after} operation. If performing either operation throws an
-     * exception, it is relayed to the caller of the composed operation.
+     * exception, it is relayed to the caller of the composed operation. If performing this
+     * operation throws an exception, the {@code after} operation will not be performed.
      *
-     * <p>The byte array is passed to both consumers in the same order.
+     * <p>Both operations receive the same array reference, so a modification made by one of them
+     * is visible to the other.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -15,9 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.AfterEach;
@@ -32,6 +30,7 @@ import com.landawn.abacus.util.stream.Stream;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class HARUtilTest extends TestBase {
 
@@ -55,7 +54,7 @@ public class HARUtilTest extends TestBase {
     public void tearDown() {
         // Reset to defaults after each test
         HARUtil.resetThreadLocalHeaderFilter();
-        HARUtil.configureCurlLoggingForCurrentThread(false);
+        HARUtil.resetCurlLoggingForCurrentThread();
     }
 
     // Helper methods to create test HAR data
@@ -71,6 +70,14 @@ public class HARUtilTest extends TestBase {
                 + "\"headers\": []" + "}" + "}," + "{" + "\"request\": {" + "\"method\": \"GET\"," + "\"url\": \"https://api.example.com/products\","
                 + "\"headers\": []" + "}" + "}," + "{" + "\"request\": {" + "\"method\": \"POST\"," + "\"url\": \"https://api.example.com/orders\","
                 + "\"headers\": []" + "}" + "}" + "]" + "}" + "}";
+    }
+
+    private Map<String, Object> createRequestEntry(final String url) {
+        final Map<String, Object> requestEntry = new HashMap<>();
+        requestEntry.put("method", "GET");
+        requestEntry.put("url", url);
+        requestEntry.put("headers", List.of());
+        return requestEntry;
     }
 
     @Test
@@ -91,8 +98,7 @@ public class HARUtilTest extends TestBase {
         requestEntry.put("headers", headersList);
 
         HttpHeaders headers = HARUtil.getHeadersByRequestEntry(requestEntry);
-        // After reset, should include headers again (default filter accepts valid headers)
-        assertNotNull(headers);
+        assertEquals("application/json", headers.get("Content-Type"));
     }
 
     // --- setThreadLocalHeaderFilter ---    @Test
@@ -101,89 +107,7 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testSetHttpHeaderFilterForHARRequest() {
-        HARUtil.setThreadLocalHeaderFilter((name, value) -> !"Authorization".equalsIgnoreCase(name));
-        // If we get here without exception, the filter was set successfully
-        assertNotNull(HARUtil.class);
-    } // --- resetThreadLocalHeaderFilter ---
-
-    @Test
-    public void testResetThreadLocalHeaderFilter() {
-        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
-        HARUtil.resetThreadLocalHeaderFilter();
-        // After reset, should use default filter
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
-    public void testLogRequestCurlForHARRequestWithCustomHandler() {
-        AtomicBoolean handlerCalled = new AtomicBoolean(false);
-        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', curl -> handlerCalled.set(true));
-        // The handler will only be called when actually sending a request
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
-    public void testLogRequestCurlForHARRequestWithHandler() {
-        Consumer<String> handler = curl -> System.out.println(curl);
-        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', handler);
-        HARUtil.configureCurlLoggingForCurrentThread(false, '"', handler);
-        assertNotNull(handler);
-    }
-
-    // --- configureCurlLoggingForCurrentThread(boolean) ---
-
-    @Test
-    public void testConfigureCurlLoggingForCurrentThread() {
-        assertDoesNotThrow(() -> {
-            HARUtil.configureCurlLoggingForCurrentThread(true);
-            HARUtil.configureCurlLoggingForCurrentThread(false);
-        });
-    }
-
-    @Test
-    public void testLogRequestCurlForHARRequestBoolean() {
-        HARUtil.configureCurlLoggingForCurrentThread(true);
-        // If we get here without exception, logging was enabled
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
-    public void testLogRequestCurlForHARRequestDisabled() {
-        HARUtil.configureCurlLoggingForCurrentThread(false);
-        // If we get here without exception, logging was disabled
-        assertNotNull(HARUtil.class);
-    }
-
-    // --- configureCurlLoggingForCurrentThread(boolean, char) ---
-
-    @Test
-    public void testConfigureCurlLoggingForCurrentThread_WithQuoteChar() {
-        assertDoesNotThrow(() -> {
-            HARUtil.configureCurlLoggingForCurrentThread(true, '"');
-            HARUtil.configureCurlLoggingForCurrentThread(false, '\'');
-        });
-    }
-
-    @Test
-    public void testLogRequestCurlForHARRequestWithQuoteChar() {
-        HARUtil.configureCurlLoggingForCurrentThread(true, '"');
-        // If we get here without exception, logging was enabled with custom quote char
-        assertNotNull(HARUtil.class);
-    }
-
-    // --- configureCurlLoggingForCurrentThread(boolean, char, Consumer) ---
-
-    @Test
-    public void testConfigureCurlLoggingForCurrentThread_WithHandler() {
-        AtomicReference<String> capturedCurl = new AtomicReference<>();
-        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', capturedCurl::set);
-        // If we get here without exception, logging was configured
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
-    public void testLogRequestCurlForHARRequest() {
+    public void testConfigureCurlLoggingOverloads() {
         assertDoesNotThrow(() -> {
             HARUtil.configureCurlLoggingForCurrentThread(true);
             HARUtil.configureCurlLoggingForCurrentThread(false);
@@ -191,6 +115,53 @@ public class HARUtilTest extends TestBase {
             HARUtil.configureCurlLoggingForCurrentThread(true, '"');
             HARUtil.configureCurlLoggingForCurrentThread(false, '\'');
         });
+    }
+
+    @Test
+    public void testConfigureCurlLoggingWithHandler() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("ok"));
+            final String url = server.url("/curl").toString();
+            final AtomicReference<String> capturedCurl = new AtomicReference<>();
+            HARUtil.configureCurlLoggingForCurrentThread(true, '"', capturedCurl::set);
+
+            assertEquals("ok", HARUtil.sendRequestByRequestEntry(createRequestEntry(url), String.class));
+            assertNotNull(capturedCurl.get());
+            assertTrue(capturedCurl.get().contains(url));
+        }
+    }
+
+    @Test
+    public void testConfigureCurlLoggingDisabled() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("ok"));
+            final AtomicReference<String> capturedCurl = new AtomicReference<>();
+            HARUtil.configureCurlLoggingForCurrentThread(false, '\'', capturedCurl::set);
+
+            assertEquals("ok", HARUtil.sendRequestByRequestEntry(createRequestEntry(server.url("/disabled").toString()), String.class));
+            assertNull(capturedCurl.get());
+        }
+    }
+
+    @Test
+    public void testResetCurlLoggingForCurrentThread() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("ok"));
+            final AtomicReference<String> capturedCurl = new AtomicReference<>();
+            HARUtil.configureCurlLoggingForCurrentThread(true, '\'', capturedCurl::set);
+            HARUtil.resetCurlLoggingForCurrentThread();
+
+            assertEquals("ok", HARUtil.sendRequestByRequestEntry(createRequestEntry(server.url("/reset").toString()), String.class));
+            assertNull(capturedCurl.get());
+        }
+    }
+
+    @Test
+    public void testConfigureCurlLoggingRejectsNullHandler() {
+        assertThrows(IllegalArgumentException.class, () -> HARUtil.configureCurlLoggingForCurrentThread(true, '\'', null));
     }
 
     // --- sendRequest(File, String) ---
@@ -207,9 +178,22 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testSendRequestByHARWithFileAndFilter() {
-        Predicate<String> filter = url -> url.contains("/users");
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, filter));
+    public void testSendRequestByHARWithFileAndFilter() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("users-response"));
+
+            final String url = server.url("/users").toString();
+            Files.write(tempHARFile.toPath(), createTestHarString(url, "POST").getBytes());
+
+            assertEquals("users-response", HARUtil.sendRequest(tempHARFile, candidate -> candidate.endsWith("/users")));
+
+            final RecordedRequest recordedRequest = server.takeRequest();
+            assertEquals("POST", recordedRequest.getMethod());
+            assertEquals("/users", recordedRequest.getPath());
+            assertEquals("application/json", recordedRequest.getHeader("Content-Type"));
+            assertEquals("{}", recordedRequest.getBody().readUtf8());
+        }
     }
 
     // --- sendRequest(String, String) ---
@@ -274,19 +258,29 @@ public class HARUtilTest extends TestBase {
     } // --- sendRequestByRequestEntry ---
 
     @Test
-    public void testSendRequestByRequestEntry() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("url", "https://api.example.com/test");
-        requestEntry.put("method", "GET");
+    public void testSendRequestByRequestEntry() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("direct-response"));
 
-        List<Map<String, String>> headers = new ArrayList<>();
-        Map<String, String> header = new HashMap<>();
-        header.put("name", "Accept");
-        header.put("value", "application/json");
-        headers.add(header);
-        requestEntry.put("headers", headers);
+            Map<String, Object> requestEntry = new HashMap<>();
+            requestEntry.put("url", server.url("/test?source=har").toString());
+            requestEntry.put("method", "GET");
 
-        assertThrows(Exception.class, () -> HARUtil.sendRequestByRequestEntry(requestEntry, String.class));
+            List<Map<String, String>> headers = new ArrayList<>();
+            Map<String, String> header = new HashMap<>();
+            header.put("name", "Accept");
+            header.put("value", "application/json");
+            headers.add(header);
+            requestEntry.put("headers", headers);
+
+            assertEquals("direct-response", HARUtil.sendRequestByRequestEntry(requestEntry, String.class));
+
+            final RecordedRequest recordedRequest = server.takeRequest();
+            assertEquals("GET", recordedRequest.getMethod());
+            assertEquals("/test?source=har", recordedRequest.getPath());
+            assertEquals("application/json", recordedRequest.getHeader("Accept"));
+        }
     }
 
     // --- findRequestEntry(File, Predicate) ---

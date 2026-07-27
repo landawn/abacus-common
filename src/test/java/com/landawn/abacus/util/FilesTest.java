@@ -42,7 +42,6 @@ import com.google.common.io.FileWriteMode;
 import com.google.common.io.RecursiveDeleteOption;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.guava.Files;
-import com.landawn.abacus.guava.Files.MoreFiles;
 
 public class FilesTest extends TestBase {
 
@@ -1707,11 +1706,6 @@ public class FilesTest extends TestBase {
     }
 
     @Test
-    public void testMoreFiles_ClassExists() {
-        assertNotNull(Files.MoreFiles.class);
-    }
-
-    @Test
     public void testNewReader_Directory_ThrowsException() throws IOException {
         File dir = new File(tempDir.toFile(), "directory");
         filesToCleanup.add(dir);
@@ -1851,12 +1845,6 @@ public class FilesTest extends TestBase {
         assertEquals("txt", com.landawn.abacus.guava.Files.getFileExtension(Paths.get("file.txt")));
         assertEquals("txt", com.landawn.abacus.guava.Files.getFileExtension(Paths.get("/path/to/file.txt")));
         assertEquals("", com.landawn.abacus.guava.Files.getFileExtension(Paths.get("file")));
-    }
-
-    @Test
-    public void testMoreFilesClass() {
-        assertNotNull(MoreFiles.class);
-        assertTrue(MoreFiles.class.isAssignableFrom(MoreFiles.class));
     }
 
     @Test

@@ -63,7 +63,10 @@ public interface IntNConsumer {
      *     System.out.println("Sum: " + sum);
      * };
      * IntNConsumer combined = logger.andThen(summer);
-     * combined.accept(1, 2, 3, 4);   // Prints: Count: 4 \n Sum: 10
+     * combined.accept(1, 2, 3, 4);
+     * // Prints:
+     * // Count: 4
+     * // Sum: 10
      * }</pre>
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.

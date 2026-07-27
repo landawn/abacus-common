@@ -86,7 +86,9 @@ import java.lang.annotation.Target;
  * public class AuditEntry {
  *     @Id @ReadOnly
  *     private Long id;     // id is a read-only primary key (DB-generated).
- *     ...
+ *
+ *     @Column
+ *     private String action;
  * }
  * }</pre>
  *

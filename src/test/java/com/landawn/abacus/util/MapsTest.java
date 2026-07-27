@@ -768,6 +768,17 @@ public class MapsTest extends AbstractTest {
     }
 
     @Test
+    public void testZip_validatesFunctionsAndSuppliedMapForEmptyInputs() {
+        final List<String> emptyKeys = Collections.emptyList();
+        final List<Integer> values = Arrays.asList(1, 2, 3);
+
+        assertThrows(NullPointerException.class, () -> Maps.zip(emptyKeys, values, (IntFunction<Map<String, Integer>>) null));
+        assertThrows(NullPointerException.class, () -> Maps.zip(emptyKeys, values, ignored -> (Map<String, Integer>) null));
+        assertThrows(NullPointerException.class, () -> Maps.zip(emptyKeys, values, (BiFunction<Integer, Integer, Integer>) null, HashMap::new));
+        assertThrows(NullPointerException.class, () -> Maps.zip(emptyKeys, values, Integer::sum, ignored -> (Map<String, Integer>) null));
+    }
+
+    @Test
     public void testEntrySet() {
         Set<Map.Entry<String, String>> entries = Maps.entrySet(testMap);
         assertEquals(3, entries.size());
@@ -4151,6 +4162,101 @@ public class MapsTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> Maps.merge(null, "a", 1, Integer::sum));
         assertThrows(IllegalArgumentException.class, () -> Maps.merge(map, "a", null, Integer::sum));
         assertThrows(IllegalArgumentException.class, () -> Maps.merge(map, "a", 1, null));
+    }
+
+    @Test
+    public void testFilter_validatesSupplierAndForwardsSizeHint() {
+        final Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        final int[] sizeHint = { -1 };
+
+        Maps.filter(map, (k, v) -> true, size -> {
+            sizeHint[0] = size;
+            return new LinkedHashMap<>();
+        });
+
+        assertEquals(map.size(), sizeHint[0]);
+        assertThrows(NullPointerException.class, () -> Maps.filter(map, (k, v) -> true, (IntFunction<Map<String, Integer>>) null));
+        assertThrows(NullPointerException.class, () -> Maps.filter(map, (k, v) -> true, ignored -> (Map<String, Integer>) null));
+        assertThrows(NullPointerException.class, () -> Maps.filter((Map<String, Integer>) null, (k, v) -> true, ignored -> (Map<String, Integer>) null));
+    }
+
+    @Test
+    public void testFlatten_rejectsCyclesAndFlattenedKeyCollisions() {
+        final Map<String, Object> cyclic = new HashMap<>();
+        cyclic.put("self", cyclic);
+        assertThrows(IllegalArgumentException.class, () -> Maps.flatten(cyclic));
+
+        final Map<String, Object> colliding = new LinkedHashMap<>();
+        colliding.put("a.b", 1);
+        colliding.put("a", N.asMap("b", 2));
+        assertThrows(IllegalArgumentException.class, () -> Maps.flatten(colliding));
+
+        assertThrows(IllegalArgumentException.class, () -> Maps.flatten(new HashMap<>(), "", HashMap::new));
+        assertThrows(NullPointerException.class, () -> Maps.flatten(new HashMap<>(), ".", (IntFunction<Map<String, Object>>) null));
+        assertThrows(NullPointerException.class, () -> Maps.flatten(new HashMap<>(), ".", ignored -> (Map<String, Object>) null));
+    }
+
+    @Test
+    public void testFlatten_preservesEmptyNestedKeyPathSegment() {
+        final Map<String, Object> nestedUnderEmptyKey = new LinkedHashMap<>();
+        nestedUnderEmptyKey.put("", N.asMap("a", 1));
+
+        final Map<String, Object> flattened = Maps.flatten(nestedUnderEmptyKey);
+        assertEquals(N.asMap(".a", 1), flattened);
+        assertEquals(nestedUnderEmptyKey, Maps.unflatten(flattened));
+    }
+
+    @Test
+    public void testUnflatten_rejectsConflictingPathsInEitherOrder() {
+        final Map<String, Object> scalarFirst = new LinkedHashMap<>();
+        scalarFirst.put("a", null);
+        scalarFirst.put("a.b", 2);
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(scalarFirst));
+
+        final Map<String, Object> nestedFirst = new LinkedHashMap<>();
+        nestedFirst.put("a.b", 2);
+        nestedFirst.put("a", 1);
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(nestedFirst));
+
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(new HashMap<>(), "", HashMap::new));
+        assertThrows(NullPointerException.class, () -> Maps.unflatten(new HashMap<>(), ".", (IntFunction<Map<String, Object>>) null));
+        assertThrows(NullPointerException.class, () -> Maps.unflatten(new HashMap<>(), ".", ignored -> (Map<String, Object>) null));
+    }
+
+    @Test
+    public void testUnflatten_rejectsSupplierMapIdentityReuse() {
+        final Map<String, Object> oneLevel = new LinkedHashMap<>();
+        oneLevel.put("a.b", 1);
+
+        final Map<String, Object> reusedRoot = new LinkedHashMap<>();
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(oneLevel, ignored -> reusedRoot));
+
+        final Map<String, Object> deep = new LinkedHashMap<>();
+        deep.put("a.b.c", 1);
+        final Map<String, Object> deepRoot = new LinkedHashMap<>();
+        final Map<String, Object> reusedNested = new LinkedHashMap<>();
+        final int[] deepCalls = { 0 };
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(deep, ignored -> deepCalls[0]++ == 0 ? deepRoot : reusedNested));
+
+        final Map<String, Object> siblings = new LinkedHashMap<>();
+        siblings.put("a.x", 1);
+        siblings.put("b.y", 2);
+        final Map<String, Object> siblingRoot = new LinkedHashMap<>();
+        final Map<String, Object> reusedSibling = new LinkedHashMap<>();
+        final int[] siblingCalls = { 0 };
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(siblings, ignored -> siblingCalls[0]++ == 0 ? siblingRoot : reusedSibling));
+
+        final Map<String, Object> inputRoot = new LinkedHashMap<>();
+        inputRoot.put("a.b", 1);
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(inputRoot, ignored -> inputRoot));
+        assertEquals(N.asMap("a.b", 1), inputRoot);
+
+        final Map<String, Object> separateRoot = new LinkedHashMap<>();
+        final int[] inputCalls = { 0 };
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(inputRoot, ignored -> inputCalls[0]++ == 0 ? separateRoot : inputRoot));
+        assertEquals(N.asMap("a.b", 1), inputRoot);
     }
 
 }

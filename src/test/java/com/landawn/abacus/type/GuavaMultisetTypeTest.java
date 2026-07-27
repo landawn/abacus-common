@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.SortedMultiset;
+import com.google.common.collect.TreeMultiset;
 import com.landawn.abacus.TestBase;
 
 public class GuavaMultisetTypeTest extends TestBase {
@@ -75,6 +78,30 @@ public class GuavaMultisetTypeTest extends TestBase {
         String str = multisetType.stringOf(multiset);
         assertNotNull(str);
         assertTrue(str.contains("foo") || str.length() > 0);
+    }
+
+    @Test
+    public void testStringOfSizesTemporaryMapByDistinctElements() {
+        final Multiset<String> multiset = org.mockito.Mockito.mock(Multiset.class);
+        org.mockito.Mockito.when(multiset.size()).thenThrow(new AssertionError("total occurrence count must not size the temporary map"));
+        org.mockito.Mockito.when(multiset.elementSet()).thenReturn(Set.of("x"));
+        org.mockito.Mockito.when(multiset.count("x")).thenReturn(Integer.MAX_VALUE);
+
+        final String str = multisetType.stringOf(multiset);
+
+        assertTrue(str.contains(String.valueOf(Integer.MAX_VALUE)));
+    }
+
+    @Test
+    public void testSortedMultisetSerializationPreservesSortOrder() {
+        final Type<SortedMultiset<String>> sortedType = TypeFactory.getType("com.google.common.collect.SortedMultiset<String>");
+        final SortedMultiset<String> multiset = TreeMultiset.create();
+        multiset.add("d");
+        multiset.add("a");
+
+        final String str = sortedType.stringOf(multiset);
+
+        assertTrue(str.indexOf("\"a\"") < str.indexOf("\"d\""));
     }
 
     @Test

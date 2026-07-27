@@ -36,7 +36,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  *   <li>{@link #empty()} - returns an empty list</li>
- *   <li>{@link #of(Object)} (and arity-overloads up to nine elements) - creates lists with specific elements</li>
+ *   <li>{@link #of(Object)} (and arity-overloads up to ten elements) - creates lists with specific elements</li>
  *   <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  *   <li>{@link #wrap(List)} - wraps an existing list (changes to the underlying list will be reflected)</li>
  *   <li>{@link #builder()} - provides a builder for constructing lists incrementally</li>
@@ -70,7 +70,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *
  * // Use reverse view
  * ImmutableList<Integer> reversedView = ImmutableList.of(1, 2, 3).reversed();
- * // reversed contains [3, 2, 1]
+ * // reversedView contains [3, 2, 1]
  * }</pre>
  *
  * @param <E> the type of elements in this list
@@ -84,6 +84,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     @SuppressWarnings("rawtypes")
     private static final ImmutableList EMPTY = new ImmutableList(N.emptyList(), false);
 
+    /**
+     * The unmodifiable {@code List} view that backs this instance; the same object the
+     * superclass holds as its backing collection, kept here so that list-specific operations
+     * avoid a cast on every call. Never {@code null}.
+     */
     final List<E> list;
 
     /**

@@ -121,7 +121,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *   </tr>
  *   <tr>
  *     <td>Kryo Binary</td>
- *     <td>application/kryo</td>
+ *     <td>application/kryo (recognized on responses; outgoing requests send {@code Content-Encoding: kryo} and no Content-Type)</td>
  *     <td>Kryo serialization</td>
  *     <td>None (kryo encoding only)</td>
  *   </tr>
@@ -129,13 +129,13 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *     <td>Plain Text</td>
  *     <td>text/plain</td>
  *     <td>String encoding</td>
- *     <td>GZIP, Brotli</td>
+ *     <td>GZIP (Brotli: response decompression only)</td>
  *   </tr>
  *   <tr>
  *     <td>Binary</td>
  *     <td>application/octet-stream</td>
  *     <td>Raw byte arrays</td>
- *     <td>All supported</td>
+ *     <td>GZIP, LZ4, Snappy (Brotli: response decompression only)</td>
  *   </tr>
  * </table>
  *
@@ -412,7 +412,7 @@ public final class HttpClient implements AutoCloseable {
         }
     }
 
-    // ...
+    // Default client limits and timeouts.
     /** Default maximum number of concurrent connections per HttpClient instance. */
     public static final int DEFAULT_MAX_CONNECTION = 16;
 
@@ -422,7 +422,7 @@ public final class HttpClient implements AutoCloseable {
     /** Default read timeout in milliseconds (16 seconds). */
     public static final int DEFAULT_READ_TIMEOUT = 16000;
 
-    // ...
+    // Immutable request configuration and shared concurrency state.
     private final String _url; //NOSONAR
 
     private final int _maxConnection; //NOSONAR
@@ -667,7 +667,7 @@ public final class HttpClient implements AutoCloseable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Executor customExecutor = Executors.newFixedThreadPool(4);
+     * Executor customExecutor = ForkJoinPool.commonPool();
      * HttpClient client = HttpClient.create("http://localhost:18080", 16, 5000, 10000, customExecutor);
      * client.asyncGet(User.class).thenRunAsync(user -> System.out.println(user));
      * }</pre>
@@ -694,7 +694,7 @@ public final class HttpClient implements AutoCloseable {
      * HttpSettings settings = HttpSettings.create()
      *     .setContentFormat(ContentFormat.JSON)
      *     .header("Authorization", "Bearer token");
-     * Executor executor = Executors.newCachedThreadPool();
+     * Executor executor = ForkJoinPool.commonPool();
      * HttpClient client = HttpClient.create("http://localhost:18080", 20, 5000, 15000, settings, executor);
      * }</pre>
      *
@@ -721,7 +721,7 @@ public final class HttpClient implements AutoCloseable {
      * <pre>{@code
      * AtomicInteger sharedCounter = new AtomicInteger(0);
      * HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON);
-     * Executor executor = Executors.newFixedThreadPool(10);
+     * Executor executor = ForkJoinPool.commonPool();
      * HttpClient client = HttpClient.create(
      *     "http://localhost:18080", 20, 5000, 10000, settings, sharedCounter, executor
      * );
@@ -880,7 +880,7 @@ public final class HttpClient implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * URL apiUrl = new URL("http://localhost:18080");
-     * Executor customExecutor = Executors.newFixedThreadPool(4);
+     * Executor customExecutor = ForkJoinPool.commonPool();
      * HttpClient client = HttpClient.create(apiUrl, 16, 5000, 10000, customExecutor);
      * client.asyncGet(User.class).thenRunAsync(user -> System.out.println(user));
      * }</pre>
@@ -908,7 +908,7 @@ public final class HttpClient implements AutoCloseable {
      * HttpSettings settings = HttpSettings.create()
      *     .setContentFormat(ContentFormat.JSON)
      *     .header("Authorization", "Bearer token");
-     * Executor executor = Executors.newCachedThreadPool();
+     * Executor executor = ForkJoinPool.commonPool();
      * HttpClient client = HttpClient.create(apiUrl, 20, 5000, 15000, settings, executor);
      * }</pre>
      *
@@ -936,7 +936,7 @@ public final class HttpClient implements AutoCloseable {
      * URL apiUrl = new URL("http://localhost:18080");
      * AtomicInteger sharedCounter = new AtomicInteger(0);
      * HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON);
-     * Executor executor = Executors.newFixedThreadPool(10);
+     * Executor executor = ForkJoinPool.commonPool();
      * HttpClient client = HttpClient.create(
      *     apiUrl, 20, 5000, 10000, settings, sharedCounter, executor
      * );
@@ -1593,13 +1593,13 @@ public final class HttpClient implements AutoCloseable {
     /**
      * Internal core method to execute an HTTP request with the specified parameters.
      *
+     * @param <T> the response type.
      * @param httpMethod the HTTP method to use.
      * @param request the request body.
      * @param settings the HTTP settings.
      * @param resultClass the expected response type.
      * @param outputStream the output stream to write response to, or {@code null}.
      * @param outputWriter the writer to write response to, or {@code null}.
-     * @param <T> the response type.
      * @return the response parsed as the specified result class, or {@code null} for one-way
      *         requests or when the response is written to {@code outputStream}/{@code outputWriter}.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -1616,7 +1616,7 @@ public final class HttpClient implements AutoCloseable {
         OutputStream os = null;
 
         try { //NOSONAR
-            if (request != null && requireBody(httpMethod)) {
+            if (request != null && requireBody(httpMethod) && connection.getDoOutput()) {
                 os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
 
                 final Type<Object> type = Type.of(request.getClass());
@@ -2673,9 +2673,10 @@ public final class HttpClient implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://example.com/file.zip");
-     * OutputStream out = new FileOutputStream("download.zip");
-     * ContinuableFuture<Void> future = client.asyncExecute(HttpMethod.GET, null, null, out);
-     * // future completes (with a null result) after the body is written to the stream (when executed)
+     * try (OutputStream out = new FileOutputStream("download.zip")) {
+     *     ContinuableFuture<Void> future = client.asyncExecute(HttpMethod.GET, null, null, out);
+     *     future.get(); // wait until all response bytes have been written before closing out
+     * }
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
@@ -2735,7 +2736,7 @@ public final class HttpClient implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (HttpClient client = HttpClient.create("https://example.com/api")) {
-     *     // ... use the client ...
+     *     String responseBody = client.get();
      * }   // close() is called automatically
      *
      * HttpClient client = HttpClient.create("https://example.com/api");

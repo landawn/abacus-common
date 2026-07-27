@@ -45,12 +45,14 @@ import java.io.Serial;
  * });
  *
  * // In a method that can't declare InterruptedException
- * public void process() {
- *     try {
- *         blockingQueue.take();
- *     } catch (InterruptedException e) {
- *         Thread.currentThread().interrupt();
- *         throw new UncheckedInterruptedException(e);
+ * class Worker {
+ *     public void process() {
+ *         try {
+ *             blockingQueue.take();
+ *         } catch (InterruptedException e) {
+ *             Thread.currentThread().interrupt();
+ *             throw new UncheckedInterruptedException(e);
+ *         }
  *     }
  * }
  * }</pre>
@@ -124,9 +126,8 @@ public class UncheckedInterruptedException extends UncheckedException {
      *
      * @return the wrapped {@link InterruptedException}, never {@code null}
      */
-    // NOTE: the 'synchronized' modifier is INTENTIONAL and REQUIRED — do NOT remove it. It mirrors
-    // Throwable.getCause(), which synchronizes access to the non-final 'cause' field (also assignable
-    // via initCause()), preserving that visibility/consistency contract for the covariant override.
+    // Keep 'synchronized' to mirror Throwable.getCause() in this covariant override; the call to
+    // super.getCause() performs the underlying synchronized access.
     @Override
     public synchronized InterruptedException getCause() {
         return (InterruptedException) super.getCause();

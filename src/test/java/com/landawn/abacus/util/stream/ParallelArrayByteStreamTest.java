@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalByte;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelArrayByteStreamTest extends TestBase {
 
@@ -33,11 +33,11 @@ public class ParallelArrayByteStreamTest extends TestBase {
     private static final byte[] TEST_ARRAY = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3 };
 
     private ByteStream createStream(byte... elements) {
-        return ByteStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
+        return ByteStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
     }
 
-    private ByteStream createStreamWithIteratorSplitor(byte... elements) {
-        return new ParallelArrayByteStream(elements, 0, elements.length, false, testMaxThreadNum, Splitor.ITERATOR, null, false, new ArrayList<>());
+    private ByteStream createStreamWithIteratorSplitStrategy(byte... elements) {
+        return new ParallelArrayByteStream(elements, 0, elements.length, false, testMaxThreadNum, SplitStrategy.ITERATOR, null, false, new ArrayList<>());
     }
 
     @BeforeEach
@@ -50,26 +50,26 @@ public class ParallelArrayByteStreamTest extends TestBase {
 
     // Covers the iterator-based terminal-operation branch in ParallelArrayByteStream.
     @Test
-    public void testReduceAndFindMethods_IteratorSplitor() {
-        assertEquals((byte) 15, createStreamWithIteratorSplitor((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).reduce((byte) 0, (a, b) -> (byte) (a + b)));
+    public void testReduceAndFindMethods_IteratorSplitStrategy() {
+        assertEquals((byte) 15, createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).reduce((byte) 0, (a, b) -> (byte) (a + b)));
 
-        OptionalByte reduced = createStreamWithIteratorSplitor((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).reduce((a, b) -> (byte) (a + b));
+        OptionalByte reduced = createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).reduce((a, b) -> (byte) (a + b));
         assertTrue(reduced.isPresent());
         assertEquals((byte) 15, reduced.get());
 
-        OptionalByte firstOdd = createStreamWithIteratorSplitor((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findFirst(b -> (b & 1) == 1);
+        OptionalByte firstOdd = createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findFirst(b -> (b & 1) == 1);
         assertTrue(firstOdd.isPresent());
         assertEquals((byte) 1, firstOdd.get());
 
-        OptionalByte anyOdd = createStreamWithIteratorSplitor((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findAny(b -> (b & 1) == 1);
+        OptionalByte anyOdd = createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findAny(b -> (b & 1) == 1);
         assertTrue(anyOdd.isPresent());
         assertTrue(anyOdd.get() == (byte) 1 || anyOdd.get() == (byte) 3 || anyOdd.get() == (byte) 5);
 
-        OptionalByte lastOdd = createStreamWithIteratorSplitor((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findLast(b -> (b & 1) == 1);
+        OptionalByte lastOdd = createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findLast(b -> (b & 1) == 1);
         assertTrue(lastOdd.isPresent());
         assertEquals((byte) 5, lastOdd.get());
 
-        OptionalByte notFound = createStreamWithIteratorSplitor((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findAny(b -> b > 10);
+        OptionalByte notFound = createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).findAny(b -> b > 10);
         assertFalse(notFound.isPresent());
     }
 
@@ -354,9 +354,9 @@ public class ParallelArrayByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testForEach_IteratorSplitor() {
+    public void testForEach_IteratorSplitStrategy() {
         AtomicInteger sum = new AtomicInteger(0);
-        createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).forEach(b -> sum.addAndGet(b));
+        createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).forEach(b -> sum.addAndGet(b));
         assertEquals(15, sum.get());
     }
 
@@ -532,24 +532,24 @@ public class ParallelArrayByteStreamTest extends TestBase {
 
     @Test
     public void testReduce_SequentialFallback() {
-        byte result = ByteStream.of((byte) 5).parallel(PS.create(Splitor.ARRAY).maxThreadNum(1)).reduce((byte) 0, (left, right) -> (byte) (left + right));
+        byte result = ByteStream.of((byte) 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build()).reduce((byte) 0, (left, right) -> (byte) (left + right));
         assertEquals((byte) 5, result);
 
-        OptionalByte optional = ByteStream.of((byte) 7).parallel(PS.create(Splitor.ARRAY).maxThreadNum(1)).reduce((left, right) -> (byte) (left + right));
+        OptionalByte optional = ByteStream.of((byte) 7).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build()).reduce((left, right) -> (byte) (left + right));
         assertTrue(optional.isPresent());
         assertEquals((byte) 7, optional.get());
     }
 
     @Test
-    public void testIteratorSplitorReduceAndFindOperations_SparseMatch() {
-        assertEquals((byte) 72, createStreamWithIteratorSplitor((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
+    public void testIteratorSplitStrategyReduceAndFindOperations_SparseMatch() {
+        assertEquals((byte) 72, createStreamWithIteratorSplitStrategy((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
                 .reduce((byte) 0, (left, right) -> (byte) (left + right)));
 
-        OptionalByte reduced = createStreamWithIteratorSplitor((byte) 21, (byte) 2, (byte) 4).reduce((left, right) -> (byte) (left + right));
+        OptionalByte reduced = createStreamWithIteratorSplitStrategy((byte) 21, (byte) 2, (byte) 4).reduce((left, right) -> (byte) (left + right));
         assertTrue(reduced.isPresent());
         assertEquals((byte) 27, reduced.get());
 
-        OptionalByte firstMatch = createStreamWithIteratorSplitor((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
+        OptionalByte firstMatch = createStreamWithIteratorSplitStrategy((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
                 .findFirst(b -> {
                     if (b == 21) {
                         try {
@@ -564,12 +564,12 @@ public class ParallelArrayByteStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals((byte) 21, firstMatch.get());
 
-        OptionalByte anyMatch = createStreamWithIteratorSplitor((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
+        OptionalByte anyMatch = createStreamWithIteratorSplitStrategy((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
                 .findAny(b -> b > 5 && (b & 1) == 1);
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21 || anyMatch.get() == 7 || anyMatch.get() == 11 || anyMatch.get() == 13);
 
-        OptionalByte lastMatch = createStreamWithIteratorSplitor((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
+        OptionalByte lastMatch = createStreamWithIteratorSplitStrategy((byte) 21, (byte) 2, (byte) 4, (byte) 7, (byte) 6, (byte) 11, (byte) 8, (byte) 13)
                 .findLast(b -> {
                     if (b == 13) {
                         try {
@@ -605,8 +605,8 @@ public class ParallelArrayByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testCollect_IteratorSplitor() {
-        List<Byte> result = createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    public void testCollect_IteratorSplitStrategy() {
+        List<Byte> result = createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertHaveSameElements(List.of((byte) 1, (byte) 2, (byte) 3), result);
     }
 
@@ -650,17 +650,17 @@ public class ParallelArrayByteStreamTest extends TestBase {
         stream5.close();
     }
 
-    // Cover the ITERATOR splitor path for anyMatch / allMatch / noneMatch / collect / forEach
+    // Cover the ITERATOR splitStrategy path for anyMatch / allMatch / noneMatch / collect / forEach
     @Test
-    public void testAnyMatchAllMatchNoneMatch_IteratorSplitor() {
-        assertTrue(createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).anyMatch(b -> b > 4));
-        assertFalse(createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3).anyMatch(b -> b > 10));
+    public void testAnyMatchAllMatchNoneMatch_IteratorSplitStrategy() {
+        assertTrue(createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).anyMatch(b -> b > 4));
+        assertFalse(createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3).anyMatch(b -> b > 10));
 
-        assertTrue(createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3).allMatch(b -> b >= 1 && b <= 3));
-        assertFalse(createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3).allMatch(b -> b < 3));
+        assertTrue(createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3).allMatch(b -> b >= 1 && b <= 3));
+        assertFalse(createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3).allMatch(b -> b < 3));
 
-        assertTrue(createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3).noneMatch(b -> b > 10));
-        assertFalse(createStreamWithIteratorSplitor((byte) 1, (byte) 2, (byte) 3).noneMatch(b -> b > 2));
+        assertTrue(createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3).noneMatch(b -> b > 10));
+        assertFalse(createStreamWithIteratorSplitStrategy((byte) 1, (byte) 2, (byte) 3).noneMatch(b -> b > 2));
     }
 
     @Test
@@ -885,7 +885,7 @@ public class ParallelArrayByteStreamTest extends TestBase {
     @Test
     public void testZipWithDefaultValues_SequentialFallback() {
         byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3)
-                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
                 .zipWith(ByteStream.of((byte) 10), (byte) 0, (byte) -1, (left, right) -> (byte) (left + right))
                 .toArray();
 
@@ -930,8 +930,8 @@ public class ParallelArrayByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ARRAY, ((ParallelArrayByteStream) createStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ARRAY, ((ParallelArrayByteStream) createStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

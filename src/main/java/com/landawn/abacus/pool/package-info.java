@@ -68,6 +68,21 @@
  *
  * <h2>Usage example</h2>
  * <pre>{@code
+ * class MyResource extends AbstractPoolable {
+ *     MyResource() {
+ *         super(3_600_000, 600_000);
+ *     }
+ *
+ *     void use() {
+ *         System.out.println("resource in use");
+ *     }
+ *
+ *     @Override
+ *     public void destroy(Poolable.Caller caller) {
+ *         System.out.println("destroyed by " + caller);
+ *     }
+ * }
+ *
  * // A pool of up to 100 reusable resources, background eviction every 60s, LRU balancing.
  * try (ObjectPool<MyResource> pool = PoolFactory.createObjectPool(
  *         100, 60_000, EvictionPolicy.LAST_ACCESS_TIME)) {
@@ -77,7 +92,7 @@
  *         resource = new MyResource();        // MyResource extends AbstractPoolable
  *     }
  *     try {
- *         // ... use the resource ...
+ *         resource.use();
  *     } finally {
  *         pool.add(resource);                 // return it for reuse
  *     }

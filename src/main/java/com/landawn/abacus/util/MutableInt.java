@@ -62,7 +62,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableInt num = new MutableInt();
+     * MutableInt num = MutableInt.of(0);
      * }</pre>
      *
      */
@@ -74,7 +74,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableInt num = new MutableInt(42);
+     * MutableInt num = MutableInt.of(42);
      * }</pre>
      *
      * @param value the initial value to store
@@ -195,7 +195,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Sets the value to the new value if the predicate evaluates to {@code true} when testing the current value.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>

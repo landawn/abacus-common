@@ -225,13 +225,15 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (HttpUtil.isSuccessfulResponseCode(response.getResponseCode())) {
+     * HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:18080/users").openConnection();
+     * if (HttpUtil.isSuccessfulResponseCode(connection.getResponseCode())) {
      *     // Process successful response
      * }
      * }</pre>
      *
      * @param code The HTTP response code to check
      * @return {@code true} if the code indicates success, {@code false} otherwise
+     * @see HttpResponse#isSuccessful()
      */
     public static boolean isSuccessfulResponseCode(final int code) {
         return code >= 200 && code < 300;
@@ -336,12 +338,17 @@ public final class HttpUtil {
      * String contentType = HttpUtil.getContentType(headers);  // "application/json"
      *
      * // Works with any casing
-     * headers.put("CONTENT-TYPE", "text/html");
-     * contentType = HttpUtil.getContentType(headers);  // "text/html"
+     * Map<String, String> shouty = new HashMap<>();
+     * shouty.put("CONTENT-TYPE", "text/html");
+     * contentType = HttpUtil.getContentType(shouty);  // "text/html"
      * }</pre>
      *
-     * @param httpHeaders The HTTP headers map
-     * @return The Content-Type value, or {@code null} if not found
+     * <p>If a map somehow holds the same header under several spellings, the exact canonical name
+     * ({@code "Content-Type"}) wins, then the all-lowercase spelling, and only then an arbitrary
+     * case-insensitive match.</p>
+     *
+     * @param httpHeaders The HTTP headers map; may be {@code null}
+     * @return The Content-Type value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
     public static String getContentType(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -424,12 +431,17 @@ public final class HttpUtil {
      * String encoding = HttpUtil.getContentEncoding(headers);  // "gzip"
      *
      * // Works with either case
-     * headers.put("content-encoding", "deflate");
-     * encoding = HttpUtil.getContentEncoding(headers);  // "deflate"
+     * Map<String, String> lower = new HashMap<>();
+     * lower.put("content-encoding", "deflate");
+     * encoding = HttpUtil.getContentEncoding(lower);  // "deflate"
      * }</pre>
      *
-     * @param httpHeaders The HTTP headers map
-     * @return The Content-Encoding value, or {@code null} if not found
+     * <p>If a map somehow holds the same header under several spellings, the exact canonical name
+     * ({@code "Content-Encoding"}) wins, then the all-lowercase spelling, and only then an arbitrary
+     * case-insensitive match.</p>
+     *
+     * @param httpHeaders The HTTP headers map; may be {@code null}
+     * @return The Content-Encoding value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -512,12 +524,17 @@ public final class HttpUtil {
      * String accept = HttpUtil.getAccept(headers);  // "application/json"
      *
      * // Works with either case
-     * headers.put("accept", "text/html");
-     * accept = HttpUtil.getAccept(headers);  // "text/html"
+     * Map<String, String> lower = new HashMap<>();
+     * lower.put("accept", "text/html");
+     * accept = HttpUtil.getAccept(lower);  // "text/html"
      * }</pre>
      *
-     * @param httpHeaders The HTTP headers map
-     * @return The Accept value, or {@code null} if not found
+     * <p>If a map somehow holds the same header under several spellings, the exact canonical name
+     * ({@code "Accept"}) wins, then the all-lowercase spelling, and only then an arbitrary
+     * case-insensitive match.</p>
+     *
+     * @param httpHeaders The HTTP headers map; may be {@code null}
+     * @return The Accept value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
     public static String getAccept(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -600,12 +617,17 @@ public final class HttpUtil {
      * String acceptEncoding = HttpUtil.getAcceptEncoding(headers);  // "gzip, deflate"
      *
      * // Works with either case
-     * headers.put("accept-encoding", "br");
-     * acceptEncoding = HttpUtil.getAcceptEncoding(headers);  // "br"
+     * Map<String, String> lower = new HashMap<>();
+     * lower.put("accept-encoding", "br");
+     * acceptEncoding = HttpUtil.getAcceptEncoding(lower);  // "br"
      * }</pre>
      *
-     * @param httpHeaders The HTTP headers map
-     * @return The Accept-Encoding value, or {@code null} if not found
+     * <p>If a map somehow holds the same header under several spellings, the exact canonical name
+     * ({@code "Accept-Encoding"}) wins, then the all-lowercase spelling, and only then an arbitrary
+     * case-insensitive match.</p>
+     *
+     * @param httpHeaders The HTTP headers map; may be {@code null}
+     * @return The Accept-Encoding value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -688,12 +710,17 @@ public final class HttpUtil {
      * String acceptCharset = HttpUtil.getAcceptCharset(headers);  // "utf-8"
      *
      * // Works with either case
-     * headers.put("accept-charset", "iso-8859-1");
-     * acceptCharset = HttpUtil.getAcceptCharset(headers);  // "iso-8859-1"
+     * Map<String, String> lower = new HashMap<>();
+     * lower.put("accept-charset", "iso-8859-1");
+     * acceptCharset = HttpUtil.getAcceptCharset(lower);  // "iso-8859-1"
      * }</pre>
      *
-     * @param httpHeaders The HTTP headers map
-     * @return The Accept-Charset value, or {@code null} if not found
+     * <p>If a map somehow holds the same header under several spellings, the exact canonical name
+     * ({@code "Accept-Charset"}) wins, then the all-lowercase spelling, and only then an arbitrary
+     * case-insensitive match.</p>
+     *
+     * @param httpHeaders The HTTP headers map; may be {@code null}
+     * @return The Accept-Charset value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
@@ -828,6 +855,9 @@ public final class HttpUtil {
      * {@link ContentFormat} represents only one coding, a value containing several recognized
      * codings selects one by this method's fixed priority: gzip, Brotli, Snappy, LZ4, then Kryo.
      * This method does not represent or decode a stack of content codings.
+     * Content types are matched by media subtype (including structured suffixes such as
+     * {@code application/problem+json}), rather than by an arbitrary substring; for example,
+     * {@code application/jsonp} is not treated as JSON.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -848,32 +878,24 @@ public final class HttpUtil {
             contentEncoding = Strings.EMPTY;
         }
 
-        Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(contentType);
+        final int parameterIndex = contentType.indexOf(';');
+        final String mediaType = (parameterIndex < 0 ? contentType : contentType.substring(0, parameterIndex)).trim().toLowerCase(Locale.ROOT);
+        Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(mediaType);
 
         if (contentEncoding2Format == null) {
-            if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_JSON)) {
+            if (hasMediaSubtype(mediaType, JSON)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
-            } else if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_XML)) {
+            } else if (hasMediaSubtype(mediaType, XML)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
-            } else if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_URL_ENCODED)) {
+            } else if (hasMediaSubtype(mediaType, URL_ENCODED)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_URL_ENCODED);
-            } else if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_KRYO)) {
+            } else if (hasMediaSubtype(mediaType, KRYO)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
             }
         }
 
         if (contentEncoding2Format == null) {
-            if (Strings.containsIgnoreCase(contentType, JSON)) {
-                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
-            } else if (Strings.containsIgnoreCase(contentType, XML)) {
-                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
-            } else if (Strings.containsIgnoreCase(contentType, URL_ENCODED)) {
-                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_URL_ENCODED);
-            } else if (Strings.containsIgnoreCase(contentType, KRYO)) {
-                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
-            } else {
-                contentEncoding2Format = contentTypeEncoding2Format.get(Strings.EMPTY);
-            }
+            contentEncoding2Format = contentTypeEncoding2Format.get(Strings.EMPTY);
         }
 
         ContentFormat contentFormat = contentEncoding2Format.get(contentEncoding);
@@ -895,6 +917,19 @@ public final class HttpUtil {
         }
 
         return contentFormat == null ? ContentFormat.NONE : contentFormat;
+    }
+
+    /** Returns whether the normalized media type has the requested subtype, its legacy {@code x-} alias, or a structured subtype suffix. */
+    private static boolean hasMediaSubtype(final String mediaType, final String expectedSubtype) {
+        final int slashIndex = mediaType.indexOf('/');
+
+        if (slashIndex < 0 || slashIndex == mediaType.length() - 1) {
+            return false;
+        }
+
+        final String subtype = mediaType.substring(slashIndex + 1).trim();
+
+        return subtype.equals(expectedSubtype) || subtype.equals("x-" + expectedSubtype) || subtype.endsWith("+" + expectedSubtype);
     }
 
     /**
@@ -1070,10 +1105,14 @@ public final class HttpUtil {
      * // Data written to wrapped stream will be automatically compressed
      * }</pre>
      *
-     * @param os The output stream to wrap
+     * @param os The output stream to wrap; may be {@code null}
      * @param contentFormat The content format indicating compression
-     * @return The wrapped output stream, or the original stream if no compression is needed
-     * @throws UnsupportedOperationException if Brotli compression is requested
+     * @return The wrapped output stream, or the original stream if no compression is needed.
+     *         Returns {@code null} if {@code os} is {@code null} (unlike
+     *         {@link #wrapInputStream(InputStream, ContentFormat)}, which substitutes an empty stream).
+     * @throws UnsupportedOperationException if Brotli compression is requested; there is no bundled
+     *         Brotli encoder, so {@code _BR} formats are decode-only
+     * @see #wrapInputStream(InputStream, ContentFormat)
      */
     public static OutputStream wrapOutputStream(final OutputStream os, final ContentFormat contentFormat) {
         if (contentFormat == null || contentFormat == ContentFormat.NONE || os == null) {
@@ -1155,7 +1194,9 @@ public final class HttpUtil {
      *
      * @param connection The HTTP connection
      * @param contentFormat The content format for decompression
-     * @return The input stream, possibly wrapped with decompression
+     * @return The input stream, possibly wrapped with decompression; never {@code null}
+     * @throws UncheckedIOException if the response body cannot be opened and the connection exposes
+     *         no error stream to fall back to
      */
     public static InputStream getInputStream(final HttpURLConnection connection, final ContentFormat contentFormat) {
         try {
@@ -1255,8 +1296,10 @@ public final class HttpUtil {
      * Charset blank = HttpUtil.getCharset(null);                                // returns UTF-8 (default)
      * }</pre>
      *
-     * @param contentType The Content-Type header value
-     * @return The charset, or the default charset (UTF-8) if not found
+     * @param contentType The Content-Type header value; may be {@code null} or empty
+     * @return The charset, or the default charset (UTF-8) if no {@code charset} parameter is present
+     *         or the named charset is not supported by this JVM
+     * @see #getCharset(String, Charset)
      */
     public static Charset getCharset(final String contentType) {
         return getCharset(contentType, DEFAULT_CHARSET);
@@ -1274,9 +1317,15 @@ public final class HttpUtil {
      * // Returns Charset for ISO-8859-1
      * }</pre>
      *
-     * @param contentType The Content-Type header value
-     * @param defaultIfNull The default charset to return if none is found
-     * @return The charset from the content type, or the default if not found
+     * <p>An unrecognized or unsupported charset name does not raise an exception; it falls back to
+     * {@code defaultIfNull}, as does a missing {@code charset} parameter. A quoted value
+     * ({@code charset="utf-8"}) is unquoted before it is resolved.</p>
+     *
+     * @param contentType The Content-Type header value; may be {@code null} or empty
+     * @param defaultIfNull The default charset to return if none is found; may be {@code null}, in
+     *        which case {@code null} is returned
+     * @return The charset from the content type, or {@code defaultIfNull} if no {@code charset}
+     *         parameter is present or the named charset is not supported by this JVM
      */
     public static Charset getCharset(final String contentType, final Charset defaultIfNull) {
         if (Strings.isEmpty(contentType)) {
@@ -1453,8 +1502,8 @@ public final class HttpUtil {
      *
      * <p>Copied from: <a href="https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/">disable-certificate-validation-in-java-ssl-connections</a></p>
      *
-     * @deprecated For testing only. Do not use it in production.
      * @throws RuntimeException if SSL context initialization fails
+     * @deprecated For testing only. Do not use it in production.
      */
     @Deprecated
     public static void disableCertificateValidation() {
@@ -1570,8 +1619,9 @@ public final class HttpUtil {
          * Date date = HttpDate.parse("Wed, 21 Oct 2015 07:28:00 GMT");
          * }</pre>
          *
-         * @param value The date string to parse
-         * @return The parsed Date, or {@code null} if the value couldn't be parsed
+         * @param value The date string to parse; may be {@code null} or empty
+         * @return The parsed Date, or {@code null} if {@code value} is {@code null}/empty or could not
+         *         be parsed by any supported format
          */
         public static Date parse(final String value) {
             if (value == null || value.isEmpty()) {
@@ -1619,13 +1669,17 @@ public final class HttpUtil {
          * // Returns something like "Wed, 21 Oct 2015 07:28:00 GMT"
          * }</pre>
          *
-         * @param value The date to format
-         * @return The formatted date string
+         * @param value The date to format; must not be {@code null}
+         * @return The formatted date string, always in GMT
+         * @throws NullPointerException if {@code value} is {@code null}
          */
         public static String format(final Date value) {
             return STANDARD_DATE_FORMAT.get().format(value);
         }
 
+        /**
+         * Private constructor to prevent instantiation of this utility class.
+         */
         private HttpDate() {
         }
     }

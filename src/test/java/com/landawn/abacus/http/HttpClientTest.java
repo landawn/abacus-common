@@ -3,15 +3,15 @@ package com.landawn.abacus.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,6 +48,7 @@ public class HttpClientTest extends TestBase {
 
     private MockWebServer server;
     private String baseUrl;
+    private ExecutorService executor;
 
     @Test
     public void testRequestCharsetFallsBackToClientContentTypeWhenRequestHasUnrelatedHeaders() {
@@ -71,10 +71,12 @@ public class HttpClientTest extends TestBase {
         server = new MockWebServer();
         server.start();
         baseUrl = server.url("/").toString();
+        executor = Executors.newSingleThreadExecutor();
     }
 
     @AfterEach
     public void tearDown() throws IOException {
+        executor.shutdownNow();
         server.shutdown();
     }
 
@@ -102,20 +104,30 @@ public class HttpClientTest extends TestBase {
         }
 
         private void handleConnection(Socket socket) throws IOException {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            InputStream input = socket.getInputStream();
             PrintWriter writer = new PrintWriter(socket.getOutputStream());
 
-            String requestLine = reader.readLine();
+            String requestLine = readLine(input);
             Map<String, String> headers = new HashMap<>();
             String line;
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            while ((line = readLine(input)) != null && !line.isEmpty()) {
                 String[] parts = line.split(": ", 2);
                 if (parts.length == 2) {
                     headers.put(parts[0], parts[1]);
                 }
             }
 
-            RecordedRequest request = new RecordedRequest(requestLine, headers);
+            int contentLength = 0;
+
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                if ("Content-Length".equalsIgnoreCase(entry.getKey())) {
+                    contentLength = Integer.parseInt(entry.getValue());
+                    break;
+                }
+            }
+
+            byte[] body = input.readNBytes(contentLength);
+            RecordedRequest request = new RecordedRequest(requestLine, headers, body);
             requests.offer(request);
 
             MockResponse response = responses.poll();
@@ -130,6 +142,23 @@ public class HttpClientTest extends TestBase {
             writer.flush();
 
             socket.close();
+        }
+
+        private static String readLine(InputStream input) throws IOException {
+            ByteArrayOutputStream line = new ByteArrayOutputStream();
+            int ch;
+
+            while ((ch = input.read()) != -1) {
+                if (ch == '\n') {
+                    break;
+                }
+
+                if (ch != '\r') {
+                    line.write(ch);
+                }
+            }
+
+            return ch == -1 && line.size() == 0 ? null : new String(line.toByteArray(), StandardCharsets.ISO_8859_1);
         }
 
         public URL url(String path) {
@@ -177,10 +206,12 @@ public class HttpClientTest extends TestBase {
     private static class RecordedRequest {
         private final String requestLine;
         private final Map<String, String> headers;
+        private final byte[] body;
 
-        public RecordedRequest(String requestLine, Map<String, String> headers) {
+        public RecordedRequest(String requestLine, Map<String, String> headers, byte[] body) {
             this.requestLine = requestLine;
             this.headers = headers;
+            this.body = body;
         }
 
         public String getMethod() {
@@ -189,6 +220,14 @@ public class HttpClientTest extends TestBase {
 
         public String getPath() {
             return requestLine.split(" ")[1];
+        }
+
+        public String getHeader(String name) {
+            return headers.entrySet().stream().filter(entry -> name.equalsIgnoreCase(entry.getKey())).map(Map.Entry::getValue).findFirst().orElse(null);
+        }
+
+        public byte[] getBody() {
+            return body;
         }
     }
 
@@ -233,7 +272,6 @@ public class HttpClientTest extends TestBase {
 
     @Test
     public void testCreateWithStringAndExecutor() {
-        Executor executor = Executors.newSingleThreadExecutor();
         HttpClient client = HttpClient.create("https://api.example.com", 16, 5000L, 10000L, executor);
         assertNotNull(client);
     }
@@ -241,7 +279,6 @@ public class HttpClientTest extends TestBase {
     @Test
     public void testCreateWithStringSettingsAndExecutor() {
         HttpSettings settings = HttpSettings.create();
-        Executor executor = Executors.newSingleThreadExecutor();
         HttpClient client = HttpClient.create("https://api.example.com", 16, 5000L, 10000L, settings, executor);
         assertNotNull(client);
     }
@@ -250,7 +287,6 @@ public class HttpClientTest extends TestBase {
     public void testCreateWithStringAllOptions() {
         HttpSettings settings = HttpSettings.create();
         AtomicInteger counter = new AtomicInteger(0);
-        Executor executor = Executors.newSingleThreadExecutor();
         HttpClient client = HttpClient.create("https://api.example.com", 16, 5000L, 10000L, settings, counter, executor);
         assertNotNull(client);
     }
@@ -309,7 +345,6 @@ public class HttpClientTest extends TestBase {
     @Test
     public void testCreateWithURLAndExecutor() throws MalformedURLException {
         URL url = new URL("https://api.example.com");
-        Executor executor = Executors.newSingleThreadExecutor();
         HttpClient client = HttpClient.create(url, 16, 5000L, 10000L, executor);
         assertNotNull(client);
     }
@@ -318,7 +353,6 @@ public class HttpClientTest extends TestBase {
     public void testCreateWithURLSettingsAndExecutor() throws MalformedURLException {
         URL url = new URL("https://api.example.com");
         HttpSettings settings = HttpSettings.create();
-        Executor executor = Executors.newSingleThreadExecutor();
         HttpClient client = HttpClient.create(url, 16, 5000L, 10000L, settings, executor);
         assertNotNull(client);
     }
@@ -328,7 +362,6 @@ public class HttpClientTest extends TestBase {
         URL url = new URL("https://api.example.com");
         HttpSettings settings = HttpSettings.create();
         AtomicInteger counter = new AtomicInteger(0);
-        Executor executor = Executors.newSingleThreadExecutor();
         HttpClient client = HttpClient.create(url, 16, 5000L, 10000L, settings, counter, executor);
         assertNotNull(client);
     }
@@ -631,6 +664,30 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testPostAndPutWithDoOutputFalseSuppressRequestBody() {
+        server.enqueue(new MockResponse().setBody("POST accepted"));
+        server.enqueue(new MockResponse().setBody("PUT accepted"));
+
+        HttpSettings settings = HttpSettings.create().doOutput(false);
+
+        try (HttpClient client = HttpClient.create(baseUrl)) {
+            assertEquals("POST accepted", client.post("must not be sent", settings));
+            RecordedRequest postRequest = server.takeRequest();
+            assertEquals("POST", postRequest.getMethod());
+            assertEquals(0, postRequest.getBody().length);
+            assertNull(postRequest.getHeader("Transfer-Encoding"));
+            assertTrue(postRequest.getHeader("Content-Length") == null || "0".equals(postRequest.getHeader("Content-Length")));
+
+            assertEquals("PUT accepted", client.put("must not be sent", settings));
+            RecordedRequest putRequest = server.takeRequest();
+            assertEquals("PUT", putRequest.getMethod());
+            assertEquals(0, putRequest.getBody().length);
+            assertNull(putRequest.getHeader("Transfer-Encoding"));
+            assertTrue(putRequest.getHeader("Content-Length") == null || "0".equals(putRequest.getHeader("Content-Length")));
+        }
+    }
+
+    @Test
     public void testPost_File() throws IOException {
         File tempFile = File.createTempFile("test", ".txt");
         IOUtil.write("test content", tempFile);
@@ -833,18 +890,17 @@ public class HttpClientTest extends TestBase {
     public void testExecuteHead() throws IOException {
         server.enqueue(new MockResponse().setBody(""));
         HttpClient client = HttpClient.create(baseUrl);
-        // HEAD requests return no body
         client.execute(com.landawn.abacus.http.HttpMethod.HEAD, null, String.class);
-        assertTrue(true); // no exception expected
+
+        assertEquals("HEAD", server.takeRequest().getMethod());
     }
 
     @Test
     public void testIsOneWayRequest_viaVoidResultClass() throws IOException {
         server.enqueue(new MockResponse().setBody(""));
         HttpClient client = HttpClient.create(baseUrl);
-        // Void.class as result type exercises isOneWayRequest returning true
-        client.get(Void.class);
-        assertTrue(true); // no exception expected
+        assertNull(client.get(Void.class));
+        assertEquals("GET", server.takeRequest().getMethod());
     }
 
     @Test

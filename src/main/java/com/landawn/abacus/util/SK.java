@@ -18,7 +18,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * A utility class that provides a comprehensive dictionary of commonly used characters and strings,
+ * A utility class that provides constants for commonly used characters and strings,
  * including SQL keywords, special characters, operators, and mathematical functions.
  * This class serves as a centralized repository for string constants to avoid hardcoding
  * and improve code maintainability.
@@ -48,8 +48,8 @@ public final class SK {
     }
 
     /**
-     * Represents the {@code null} character: {@code (char) 0}.
-     * This is the character with ASCII value 0, often used as a string terminator in C.
+     * Represents the null character, Unicode {@code U+0000}: {@code (char) 0}.
+     * It is often used as a string terminator in C.
      */
     public static final char CHAR_ZERO = (char) 0;
 
@@ -238,7 +238,8 @@ public final class SK {
 
     /**
      * Represents double vertical bars: {@code "||"}.
-     * Used as logical OR operator in SQL and some programming languages.
+     * Standard SQL uses this token for string concatenation; some database dialects and
+     * programming languages use it as a logical OR operator.
      */
     public static final String DOUBLE_PIPE = "||";
 
@@ -669,7 +670,7 @@ public final class SK {
 
     /**
      * SQL JOIN keyword: {@code "JOIN"}.
-     * Used to combine rows from two or more tables based on a related column.
+     * Used to combine rows from two table expressions according to a join condition or join type.
      *
      */
     public static final String JOIN = "JOIN";
@@ -697,7 +698,8 @@ public final class SK {
 
     /**
      * SQL LEFT JOIN clause: {@code "LEFT JOIN"}.
-     * Returns all rows from the left table and matching rows from the right table; unmatched rows return NULL.
+     * Returns all rows from the left table and matching rows from the right table; columns from an
+     * unmatched right-side row are null-extended.
      *
      */
     public static final String LEFT_JOIN = "LEFT JOIN";
@@ -711,7 +713,8 @@ public final class SK {
 
     /**
      * SQL RIGHT JOIN clause: {@code "RIGHT JOIN"}.
-     * Returns all rows from the right table and matching rows from the left table; unmatched rows return NULL.
+     * Returns all rows from the right table and matching rows from the left table; columns from an
+     * unmatched left-side row are null-extended.
      *
      */
     public static final String RIGHT_JOIN = "RIGHT JOIN";
@@ -725,7 +728,7 @@ public final class SK {
 
     /**
      * SQL FULL JOIN clause: {@code "FULL JOIN"}.
-     * Returns all rows from both tables; unmatched rows return NULL for missing sides.
+     * Returns all rows from both tables and null-extends the missing side of unmatched rows.
      *
      */
     public static final String FULL_JOIN = "FULL JOIN";
@@ -935,14 +938,14 @@ public final class SK {
 
     /**
      * SQL IS keyword: {@code "IS"}.
-     * Used for NULL comparisons; standard way to test for NULL values.
+     * Used in predicates such as {@code IS NULL}, {@code IS TRUE}, and dialect-specific variants.
      *
      */
     public static final String IS = "IS";
 
     /**
      * SQL IS NOT clause: {@code "IS NOT"}.
-     * Used to test for non-NULL values; returns {@code true} if the value is not NULL.
+     * Used in predicates such as {@code IS NOT NULL} and {@code IS NOT TRUE}.
      *
      */
     public static final String IS_NOT = "IS NOT";
@@ -1012,7 +1015,8 @@ public final class SK {
 
     /**
      * SQL NOT IN clause: {@code "NOT IN"}.
-     * Tests if a value is not present in a specified list or subquery.
+     * Tests a value against a list or subquery; as with other SQL predicates, null operands can
+     * make the result unknown rather than {@code true} or {@code false}.
      *
      */
     public static final String NOT_IN = "NOT IN";
@@ -1075,7 +1079,8 @@ public final class SK {
 
     /**
      * SQL UNIQUE keyword: {@code "UNIQUE"}.
-     * Constraint that ensures all values in a column are unique (no duplicates).
+     * Commonly used to declare a uniqueness constraint; exact null and multi-column semantics are
+     * database-dependent.
      *
      */
     public static final String UNIQUE = "UNIQUE";
@@ -1187,7 +1192,7 @@ public final class SK {
 
     /**
      * SQL ABS function: {@code "ABS"}.
-     * Returns the absolute (positive) value of a number, removing any negative sign.
+     * Returns the non-negative absolute value of a number.
      *
      */
     public static final String ABS = "ABS";
@@ -1306,7 +1311,8 @@ public final class SK {
 
     /**
      * SQL LENGTH function: {@code "LENGTH"}.
-     * Returns the number of characters in a string.
+     * Returns a string length according to the database dialect; some dialects count bytes while
+     * others count characters.
      *
      */
     public static final String LENGTH = "LENGTH";
@@ -1320,21 +1326,21 @@ public final class SK {
 
     /**
      * SQL TRIM function: {@code "TRIM"}.
-     * Removes leading and trailing whitespace from a string.
+     * Removes leading and/or trailing pad characters according to the function arguments and dialect.
      *
      */
     public static final String TRIM = "TRIM";
 
     /**
      * SQL LTRIM function: {@code "LTRIM"}.
-     * Removes leading (left-side) whitespace from a string.
+     * Removes leading pad characters; supported arguments and defaults are dialect-dependent.
      *
      */
     public static final String LTRIM = "LTRIM";
 
     /**
      * SQL RTRIM function: {@code "RTRIM"}.
-     * Removes trailing (right-side) whitespace from a string.
+     * Removes trailing pad characters; supported arguments and defaults are dialect-dependent.
      *
      */
     public static final String RTRIM = "RTRIM";
@@ -1389,25 +1395,25 @@ public final class SK {
     public static final String CAST = "CAST";
 
     /**
-     * SQL CURRENT_TIME function: {@code "CURRENT_TIME"}.
-     * Returns the current time (without date) from the database server.
+     * SQL CURRENT_TIME value expression: {@code "CURRENT_TIME"}.
+     * Returns the current time according to the database's evaluation and time-zone rules.
      *
      */
     public static final String CURRENT_TIME = "CURRENT_TIME";
 
     /**
-     * SQL CURRENT_DATE function: {@code "CURRENT_DATE"}.
-     * Returns the current date (without time) from the database server.
+     * SQL CURRENT_DATE value expression: {@code "CURRENT_DATE"}.
+     * Returns the current date according to the database's evaluation and time-zone rules.
      *
      */
     public static final String CURRENT_DATE = "CURRENT_DATE";
 
     /**
-     * SQL CURRENT_TIMESTAMP function: {@code "CURRENT_TIMESTAMP"}.
-     * Returns the current date and time (timestamp) from the database server.
+     * SQL CURRENT_TIMESTAMP value expression: {@code "CURRENT_TIMESTAMP"}.
+     * Returns the current timestamp according to the database's evaluation and time-zone rules.
      *
      */
     public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 
-    // --------------------SQL key words----------------------------
+    // --------------------End SQL constants------------------------
 }

@@ -1,7 +1,6 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -9,11 +8,6 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class MutableTest extends TestBase {
-
-    @Test
-    public void testInterfaceExists() {
-        assertNotNull(Mutable.class);
-    }
 
     @Test
     public void testIsInterface() {

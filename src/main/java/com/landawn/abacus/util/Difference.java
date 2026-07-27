@@ -101,6 +101,7 @@ import com.landawn.abacus.util.function.TriPredicate;
  * MapDifference<?, ?, ?> mapDiff = MapDifference.of(map1, map2);
  *
  * // Bean comparison (using specialized BeanDifference)
+ * record Person(String name, int age) {}
  * Person person1 = new Person("John", 30);
  * Person person2 = new Person("John", 31);
  * BeanDifference<?, ?, ?> beanDiff = BeanDifference.of(person1, person2);
@@ -128,28 +129,27 @@ import com.landawn.abacus.util.function.TriPredicate;
  *
  * <p><b>Comparison Algorithm:</b>
  * <ul>
- *   <li>Creates frequency maps of elements in both structures</li>
- *   <li>Identifies minimum common occurrences for shared elements</li>
- *   <li>Calculates remaining elements after removing common occurrences</li>
- *   <li>Preserves original collection types in results where possible</li>
+ *   <li>Counts occurrences in the right-hand structure</li>
+ *   <li>Consumes one right-hand occurrence for each matching left-hand element</li>
+ *   <li>Collects unmatched elements while preserving their encounter order</li>
+ *   <li>Uses {@code ArrayList} results for object arrays and collections, and the corresponding primitive-list type for primitive inputs</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
  *   <li>Time complexity: O(n + m) where n and m are the sizes of input structures</li>
  *   <li>Space complexity: O(n + m) for storing difference results</li>
- *   <li>Memory efficient: Uses primitive collections for primitive types</li>
- *   <li>Optimized: Special handling for different data structure types</li>
+ *   <li>Primitive overloads store their results in the corresponding primitive-list type</li>
  * </ul>
  *
- * <p><b>Thread Safety:</b>
- * Difference instances are <b>effectively immutable</b> and thread-safe when used as intended:
+ * <p><b>Mutability and Thread Use:</b>
+ * A {@code Difference} owns independent result containers, but those containers are mutable and are
+ * returned directly by the accessors:
  * <ul>
  *   <li>All fields are final and set during construction</li>
  *   <li>Result collections are independent copies of the input data, not views</li>
- *   <li>The accessors return the instance's internal collections directly (they are not wrapped as
- *       unmodifiable), so callers should treat the returned collections as read-only</li>
- *   <li>Safe to share between threads without synchronization, provided callers do not modify the returned collections</li>
+ *   <li>Mutating an accessor result mutates the state subsequently observed through this instance</li>
+ *   <li>Concurrent reads are safe only while no thread modifies a returned result container</li>
  *   <li>Factory methods can be called concurrently</li>
  * </ul>
  *
@@ -174,7 +174,6 @@ import com.landawn.abacus.util.function.TriPredicate;
  *   <li>Check {@link #areEqual()} for quick equality testing before accessing difference details</li>
  *   <li>Use specialized subclasses (MapDifference, BeanDifference) for advanced comparison needs</li>
  *   <li>Consider element ordering requirements when interpreting results</li>
- *   <li>Cache Difference instances for repeated equality checks</li>
  * </ul>
  *
  * <p><b>Null Handling:</b>
@@ -202,12 +201,24 @@ import com.landawn.abacus.util.function.TriPredicate;
  */
 public sealed class Difference<L, R> permits KeyValueDifference {
 
+    /** The elements/entries found in both compared structures. Never {@code null}, but may be empty. */
     final L common;
 
+    /** The elements/entries found only in the left (first) structure. Never {@code null}, but may be empty. */
     final L onlyOnLeft;
 
+    /** The elements/entries found only in the right (second) structure. Never {@code null}, but may be empty. */
     final R onlyOnRight;
 
+    /**
+     * Creates a {@code Difference} from three already-computed result containers.
+     * The containers are stored by reference; they are neither copied nor wrapped, and they are
+     * handed straight back by {@link #common()}, {@link #onlyOnLeft()} and {@link #onlyOnRight()}.
+     *
+     * @param common the elements/entries found in both structures
+     * @param onlyOnLeft the elements/entries found only in the left (first) structure
+     * @param onlyOnRight the elements/entries found only in the right (second) structure
+     */
     Difference(final L common, final L onlyOnLeft, final R onlyOnRight) {
         this.common = common;
         this.onlyOnLeft = onlyOnLeft;
@@ -537,12 +548,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * @param <T1> the element type of the first array
      * @param <T2> the element type of the second array
-     * @param <L> the type of {@code List} containing elements of type {@code T1} (the concrete result lists are {@code ArrayList} instances)
-     * @param <R> the type of {@code List} containing elements of type {@code T2} (the concrete result lists are {@code ArrayList} instances)
      * @param a the first array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second array to compare. Can be {@code null}, which is treated as an empty array.
-     * @return a non-{@code null} {@code Difference} object containing lists of common elements (type {@code L}),
-     *         elements only in the first array (type {@code L}), and elements only in the second array (type {@code R})
+     * @return a non-{@code null} {@code Difference} whose three result lists are {@code ArrayList} instances
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
@@ -551,7 +559,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      */
-    public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(final T1[] a, final T2[] b) {
+    public static <T1, T2> Difference<List<T1>, List<T2>> of(final T1[] a, final T2[] b) {
         return of(Array.asList(a), Array.asList(b));
     }
 
@@ -583,12 +591,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * @param <T1> the element type of the first collection
      * @param <T2> the element type of the second collection
-     * @param <L> the type of {@code List} containing elements of type {@code T1} (the concrete result lists are {@code ArrayList} instances)
-     * @param <R> the type of {@code List} containing elements of type {@code T2} (the concrete result lists are {@code ArrayList} instances)
      * @param a the first collection to compare. Can be {@code null} or empty.
      * @param b the second collection to compare. Can be {@code null} or empty.
-     * @return a non-{@code null} {@code Difference} object containing lists of common elements (type {@code L}),
-     *         elements only in the first collection (type {@code L}), and elements only in the second collection (type {@code R})
+     * @return a non-{@code null} {@code Difference} whose three result lists are {@code ArrayList} instances
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
@@ -598,7 +603,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see N#commonSet(Collection, Collection)
      */
     @SuppressWarnings("unlikely-arg-type")
-    public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(final Collection<? extends T1> a, final Collection<? extends T2> b) {
+    public static <T1, T2> Difference<List<T1>, List<T2>> of(final Collection<? extends T1> a, final Collection<? extends T2> b) {
         final List<T1> common = new ArrayList<>();
         final List<T1> onlyOnLeft = new ArrayList<>();
         final List<T2> onlyOnRight = new ArrayList<>();
@@ -634,7 +639,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             }
         }
 
-        return new Difference<>((L) common, (L) onlyOnLeft, (R) onlyOnRight);
+        return new Difference<>(common, onlyOnLeft, onlyOnRight);
     }
 
     /**
@@ -1486,9 +1491,21 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     static abstract sealed class KeyValueDifference<L, R, D> extends Difference<L, R> permits MapDifference, BeanDifference {
 
-        /** The different values. */
+        /**
+         * The entries/properties present in both structures whose values are not equivalent.
+         * Never {@code null}, but may be empty.
+         */
         private final D diffValues;
 
+        /**
+         * Creates a {@code KeyValueDifference} from four already-computed result containers.
+         * The containers are stored by reference; they are neither copied nor wrapped.
+         *
+         * @param common the entries/properties found in both structures with equivalent values
+         * @param onlyOnLeft the entries/properties found only in the left (first) structure
+         * @param onlyOnRight the entries/properties found only in the right (second) structure
+         * @param differentValues the entries/properties found in both structures but with non-equivalent values
+         */
         KeyValueDifference(final L common, final L onlyOnLeft, final R onlyOnRight, final D differentValues) {
             super(common, onlyOnLeft, onlyOnRight);
             diffValues = differentValues;
@@ -1703,6 +1720,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      */
     public static final class MapDifference<L, R, D> extends KeyValueDifference<L, R, D> {
 
+        /**
+         * Creates a {@code MapDifference} from four already-computed result containers.
+         * The containers are stored by reference; they are neither copied nor wrapped.
+         *
+         * @param common the entries found in both maps with equivalent values
+         * @param onlyOnLeft the entries found only in the first map
+         * @param onlyOnRight the entries found only in the second map
+         * @param differentValues the entries whose keys are present in both maps but whose values are not equivalent
+         */
         MapDifference(final L common, final L onlyOnLeft, final R onlyOnRight, final D differentValues) {
             super(common, onlyOnLeft, onlyOnRight, differentValues);
         }
@@ -2449,12 +2475,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * class Person {
-     *     private String name;
-     *     private int age;
-     *     private String email;
-     *     // getters and setters...
-     * }
+     * record Person(String name, int age, String email) {}
      *
      * Person person1 = new Person("John", 30, "john@old.com");
      * Person person2 = new Person("John", 31, "john@new.com");
@@ -2476,6 +2497,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see N#difference(Collection, Collection)
      */
     public static final class BeanDifference<L, R, D> extends KeyValueDifference<L, R, D> {
+        /**
+         * Creates a {@code BeanDifference} from four already-computed result containers.
+         * The containers are stored by reference; they are neither copied nor wrapped.
+         *
+         * @param common the properties found in both beans with equivalent values
+         * @param onlyOnLeft the properties found only in the first bean
+         * @param onlyOnRight the properties found only in the second bean
+         * @param differentValues the properties present in both beans but whose values are not equivalent
+         */
         BeanDifference(final L common, final L onlyOnLeft, final R onlyOnRight, final D differentValues) {
             super(common, onlyOnLeft, onlyOnRight, differentValues);
         }
@@ -2501,16 +2531,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class User {
-         *     private String name;
-         *     private String email;
-         *     @DiffIgnore
-         *     private Date lastModified;
-         *     // getters and setters...
-         * }
+         * record User(String name, String email, @DiffIgnore Date lastModified) {}
          *
-         * User user1 = new User("John", "john@old.com");
-         * User user2 = new User("John", "john@new.com");
+         * User user1 = new User("John", "john@old.com", new Date(1));
+         * User user2 = new User("John", "john@new.com", new Date(2));
          *
          * BeanDifference<?, ?, ?> diff = BeanDifference.of(user1, user2);
          * // Results in:
@@ -2562,13 +2586,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class Employee {
-         *     private String id;
-         *     private String name;
-         *     private Double salary;
-         *     private String department;
-         *     // getters and setters...
-         * }
+         * record Employee(String id, String name, Double salary, String department) {}
          *
          * Employee emp1 = new Employee("E001", "John", 50000.0, "Sales");
          * Employee emp2 = new Employee("E001", "John", 55000.0, "Marketing");
@@ -2624,12 +2642,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class Product {
-         *     private String name;
-         *     private Double price;
-         *     private String description;
-         *     // getters and setters...
-         * }
+         * record Product(String name, Double price, String description) {}
          *
          * Product p1 = new Product("Widget", 10.99, "A useful widget");
          * Product p2 = new Product("WIDGET", 10.991, "A USEFUL WIDGET");
@@ -2695,16 +2708,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class Account {
-         *     private String accountId;
-         *     private Double balance;
-         *     private Date lastActivity;
-         *     private String status;
-         *     // getters and setters...
-         * }
+         * record Account(String accountId, Double balance, Date lastActivity, String status) {}
          *
-         * Account acc1 = new Account("ACC001", 1000.001, date1, "ACTIVE");
-         * Account acc2 = new Account("ACC001", 1000.0, date2, "active");
+         * Account acc1 = new Account("ACC001", 1000.001, new Date(0), "ACTIVE");
+         * Account acc2 = new Account("ACC001", 1000.0, new Date(30 * 60 * 1000), "active");
          *
          * // Property-specific comparison rules
          * TriPredicate<String, Object, Object> smartEquals = (propName, v1, v2) -> {
@@ -2768,14 +2775,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class Customer {
-         *     private String id;
-         *     private String name;
-         *     private String email;
-         *     private Double creditLimit;
-         *     private String notes;
-         *     // getters and setters...
-         * }
+         * record Customer(String id, String name, String email, Double creditLimit, String notes) {}
          *
          * Customer c1 = new Customer("C001", "John Doe", "john@old.com", 5000.0, "VIP customer");
          * Customer c2 = new Customer("C001", "JOHN DOE", "john@new.com", 5000.01, "VIP Customer");
@@ -2915,10 +2915,31 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (bean2 == null) {
                         // Do nothing. All empty.
                     } else {
-                        Beans.beanToMap(bean2, propNamesToCompare, onlyOnRight);
+                        // Skip names not defined on the class, matching the two-bean path below
+                        // (the strict Beans.beanToMap would throw IllegalArgumentException for them).
+                        final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
+                        PropInfo propInfo = null;
+
+                        for (final String propName : propNamesToCompare) {
+                            propInfo = beanInfo2.getPropInfo(propName);
+
+                            if (propInfo != null) {
+                                onlyOnRight.put(propName, propInfo.getPropValue(bean2));
+                            }
+                        }
                     }
                 } else if (bean2 == null) {
-                    Beans.beanToMap(bean1, propNamesToCompare, onlyOnLeft);
+                    // Skip names not defined on the class, matching the two-bean path below.
+                    final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
+                    PropInfo propInfo = null;
+
+                    for (final String propName : propNamesToCompare) {
+                        propInfo = beanInfo1.getPropInfo(propName);
+
+                        if (propInfo != null) {
+                            onlyOnLeft.put(propName, propInfo.getPropValue(bean1));
+                        }
+                    }
                 } else {
                     final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
                     final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
@@ -2987,12 +3008,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class Employee {
-         *     private String id;
-         *     private String name;
-         *     private String department;
-         *     // getters and setters...
-         * }
+         * record Employee(String id, String name, String department) {}
          *
          * List<Employee> team1 = Arrays.asList(
          *     new Employee("E001", "John", "Sales"),
@@ -3003,7 +3019,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     new Employee("E003", "Bob", "Sales")
          * );
          *
-         * BeanDifference<?, ?, ?> diff = BeanDifference.of(team1, team2, emp -> emp.getId());
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(team1, team2, Employee::id);
          * // Results in:
          * // common: [] (empty, as E001 has different department)
          * // onlyOnLeft: [Employee E002]
@@ -3012,7 +3028,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * }</pre>
          *
          * @param <T> the type of beans in both collections
-         * @param <C> the type of the list containing beans (typically List&lt;T&gt;)
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
@@ -3021,7 +3036,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
-        public static <T, C extends List<T>, K> BeanDifference<C, C, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
+        public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor) {
             return of(a, b, null, idExtractor, idExtractor);
         }
@@ -3042,35 +3057,27 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class Product {
-         *     private String sku;
-         *     private String name;
-         *     private Double price;
-         *     private Date lastModified;
-         *     private String internalNotes;
-         *     // getters and setters...
-         * }
+         * record Product(String sku, String name, Double price, Date lastModified, String internalNotes) {}
          *
          * List<Product> catalog1 = Arrays.asList(
-         *     new Product("SKU001", "Widget", 19.99, date1, "Check supplier"),
-         *     new Product("SKU002", "Gadget", 29.99, date2, "Bestseller")
+         *     new Product("SKU001", "Widget", 19.99, new Date(1), "Check supplier"),
+         *     new Product("SKU002", "Gadget", 29.99, new Date(2), "Bestseller")
          * );
          * List<Product> catalog2 = Arrays.asList(
-         *     new Product("SKU001", "Widget", 21.99, date3, "New supplier"),
-         *     new Product("SKU003", "Tool", 39.99, date4, "New item")
+         *     new Product("SKU001", "Widget", 21.99, new Date(3), "New supplier"),
+         *     new Product("SKU003", "Tool", 39.99, new Date(4), "New item")
          * );
          *
          * // Compare only name and price, ignoring dates and notes
          * Collection<String> propsToCompare = Arrays.asList("name", "price");
          * BeanDifference<?, ?, ?> diff = BeanDifference.of(
          *     catalog1, catalog2, propsToCompare,
-         *     product -> product.getSku()
+         *     Product::sku
          * );
          * // Results show price difference for SKU001, ignoring other field changes
          * }</pre>
          *
          * @param <T> the type of beans in both collections
-         * @param <C> the type of the list containing beans (typically List&lt;T&gt;)
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
@@ -3080,7 +3087,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
-        public static <T, C extends List<T>, K> BeanDifference<C, C, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
+        public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Collection<String> propNamesToCompare,
                 final Function<? super T, K> idExtractor) {
             return of(a, b, propNamesToCompare, idExtractor, idExtractor);
@@ -3101,20 +3108,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class CustomerV1 {
-         *     private Long customerId;
-         *     private String fullName;
-         *     private String emailAddress;
-         *     // getters and setters...
-         * }
+         * record CustomerV1(Long customerId, String fullName, String emailAddress) {}
          *
-         * class CustomerV2 {
-         *     private String id;
-         *     private String fullName;  // same property name
-         *     private String email;
-         *     private String phoneNumber;
-         *     // getters and setters...
-         * }
+         * record CustomerV2(String id, String fullName, String email, String phoneNumber) {}
          *
          * List<CustomerV1> oldCustomers = Arrays.asList(
          *     new CustomerV1(101L, "John Doe", "john@example.com"),
@@ -3127,8 +3123,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * BeanDifference<?, ?, ?> diff = BeanDifference.of(
          *     oldCustomers, newCustomers,
-         *     v1 -> v1.getCustomerId().toString(),
-         *     v2 -> v2.getId()
+         *     v1 -> v1.customerId().toString(),
+         *     CustomerV2::id
          * );
          * // Results show:
          * // - Customer 101 has matching fullName but missing email/phoneNumber mappings
@@ -3138,8 +3134,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * @param <T1> the type of beans in the first collection
          * @param <T2> the type of beans in the second collection
-         * @param <L> the type of the list containing beans from the first collection
-         * @param <R> the type of the list containing beans from the second collection
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
@@ -3150,7 +3144,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *         or if the collections contain non-bean objects
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
-        public static <T1, T2, L extends List<T1>, R extends List<T2>, K> BeanDifference<L, R, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
+        public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Function<? super T1, ? extends K> idExtractor1,
                 final Function<? super T2, ? extends K> idExtractor2) {
             return of(a, b, null, idExtractor1, idExtractor2);
@@ -3177,34 +3171,20 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * class Order {
-         *     private String orderId;
-         *     private String customerName;
-         *     private Double totalAmount;
-         *     private String status;
-         *     private Date orderDate;
-         *     private String notes;
-         *     // getters and setters...
-         * }
+         * record Order(String orderId, String customerName, Double totalAmount,
+         *         String status, Date orderDate, String notes) {}
          *
-         * class OrderSummary {
-         *     private Long id;
-         *     private String customer;
-         *     private BigDecimal total;
-         *     private String status;
-         *     private LocalDate date;
-         *     private Map<String, Object> metadata;
-         *     // getters and setters...
-         * }
+         * record OrderSummary(Long id, String customer, BigDecimal total,
+         *         String status, LocalDate date, Map<String, Object> metadata) {}
          *
          * List<Order> orders = Arrays.asList(
-         *     new Order("ORD-001", "John Doe", 150.00, "SHIPPED", date1, "Rush delivery"),
-         *     new Order("ORD-002", "Jane Smith", 75.50, "PENDING", date2, "Gift wrap")
+         *     new Order("ORD-001", "John Doe", 150.00, "SHIPPED", new Date(1), "Rush delivery"),
+         *     new Order("ORD-002", "Jane Smith", 75.50, "PENDING", new Date(2), "Gift wrap")
          * );
          *
          * List<OrderSummary> summaries = Arrays.asList(
-         *     new OrderSummary(1L, "John Doe", new BigDecimal("150.00"), "DELIVERED", localDate1, metadata1),
-         *     new OrderSummary(3L, "Bob Johnson", new BigDecimal("200.00"), "PENDING", localDate3, metadata3)
+         *     new OrderSummary(1L, "John Doe", new BigDecimal("150.00"), "DELIVERED", LocalDate.of(2025, 1, 1), Map.of()),
+         *     new OrderSummary(3L, "Bob Johnson", new BigDecimal("200.00"), "PENDING", LocalDate.of(2025, 1, 3), Map.of())
          * );
          *
          * // Compare only status field (the only field with matching names)
@@ -3212,16 +3192,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * BeanDifference<?, ?, ?> diff = BeanDifference.of(
          *     orders, summaries, propsToCompare,
-         *     order -> order.getOrderId().substring(4),
-         *     summary -> summary.getId().toString()
+         *     order -> Long.parseLong(order.orderId().substring(4)),
+         *     OrderSummary::id
          * );
          * // Compares only the "status" property for matched orders
          * }</pre>
          *
          * @param <T1> the type of beans in the first collection
          * @param <T2> the type of beans in the second collection
-         * @param <L> the type of the list containing beans from the first collection
-         * @param <R> the type of the list containing beans from the second collection
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
@@ -3233,7 +3211,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *         or if the collections contain non-bean objects
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          */
-        public static <T1, T2, L extends List<T1>, R extends List<T2>, K> BeanDifference<L, R, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
+        public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,
                 final Function<? super T1, ? extends K> idExtractor1, final Function<? super T2, ? extends K> idExtractor2) throws IllegalArgumentException {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
@@ -3292,7 +3270,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 }
             }
 
-            return new BeanDifference<>((L) common, (L) onlyOnLeft, (R) onlyOnRight, differentValues);
+            return new BeanDifference<>(common, onlyOnLeft, onlyOnRight, differentValues);
 
         }
 

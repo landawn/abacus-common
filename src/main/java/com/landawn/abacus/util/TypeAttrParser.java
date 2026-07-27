@@ -30,7 +30,8 @@ import com.landawn.abacus.annotation.Internal;
  * A parser for type attribute strings that extracts class names, generic type parameters,
  * and constructor parameters from complex type declarations. This utility class supports
  * parsing of nested generic types and constructor arguments in a format similar to Java
- * type declarations.
+ * type declarations. Parsing is syntactic: names are not resolved and constructor arguments
+ * remain strings.
  *
  * <p>The parser handles three main components:
  * <ul>
@@ -44,6 +45,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>{@code "String"} - Simple class name</li>
  *   <li>{@code "List<String>"} - Generic type with one parameter</li>
  *   <li>{@code "Map<String, List<Integer>>"} - Nested generic types</li>
+ *   <li>{@code "Owner<String>.Member<Integer>"} - Member type with a parameterized owner</li>
  *   <li>{@code "HashMap<String, Object>(16, 0.75f)"} - Generic type with constructor args</li>
  * </ul>
  */
@@ -114,8 +116,9 @@ public final class TypeAttrParser {
 
     /**
      * Returns a copy of the parsed constructor parameters as an array of strings.
-     * Each parameter is trimmed of whitespace. Returns an empty array if no
-     * constructor parameters were present.
+     * The parenthesized argument list is parsed as CSV, so surrounding whitespace is stripped from
+     * each unquoted argument while whitespace inside a double-quoted argument is preserved.
+     * Returns an empty array if no constructor parameters were present.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -142,6 +145,7 @@ public final class TypeAttrParser {
      *   <li>Generic type parameters enclosed in angle brackets: {@code <...>}</li>
      *   <li>Constructor parameters enclosed in parentheses: {@code (...)}</li>
      *   <li>Nested generics with proper bracket matching</li>
+     *   <li>Qualified member types whose owner segments are parameterized</li>
      *   <li>Comma-separated lists in both contexts</li>
      *   <li>Double-quoted CSV constructor arguments whose commas, parentheses, or angle
      *       brackets are data rather than outer type delimiters. Backslash-escaped and
@@ -175,6 +179,12 @@ public final class TypeAttrParser {
      * @see #getParameters()
      */
     public static TypeAttrParser parse(final String attr) {
+        final String normalizedMemberType = normalizeQualifiedMemberType(attr);
+
+        if (normalizedMemberType != null) {
+            return parse(normalizedMemberType);
+        }
+
         String className = null;
         String[] typeParameters = null;
         String[] parameters = null;
@@ -311,6 +321,101 @@ public final class TypeAttrParser {
     }
 
     /**
+     * Removes generic clauses from owner segments while retaining the final member's own generic
+     * clause. For example, {@code Owner<String>.Member<Integer>} becomes
+     * {@code Owner.Member<Integer>}. The original owner arguments are still validated before they
+     * are removed; callers that need them retain them in the original reflection type or type name.
+     */
+    private static String normalizeQualifiedMemberType(final String attr) {
+        final int firstParenthesisIndex = attr.indexOf(_PARENTHESIS_L);
+        final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attr.length() : firstParenthesisIndex;
+        final int firstGenericStart = attr.substring(0, classSyntaxEndIndex).indexOf('<');
+
+        if (firstGenericStart < 0) {
+            return null;
+        }
+
+        final int firstGenericEnd = findClosingGeneric(attr, firstGenericStart);
+        int cursor = skipWhitespace(attr, firstGenericEnd + 1);
+
+        if (cursor >= attr.length() || (attr.charAt(cursor) != '.' && attr.charAt(cursor) != '$')) {
+            return null;
+        }
+
+        final String ownerName = attr.substring(0, firstGenericStart).trim();
+
+        if (Strings.isEmpty(ownerName)) {
+            throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attr);
+        }
+
+        // Validate the owner's generic clause before removing it from the parser-facing name.
+        parse(ownerName + attr.substring(firstGenericStart, firstGenericEnd + 1));
+
+        final StringBuilder normalized = new StringBuilder(ownerName);
+
+        while (cursor < attr.length() && (attr.charAt(cursor) == '.' || attr.charAt(cursor) == '$')) {
+            cursor = skipWhitespace(attr, cursor + 1);
+            final int memberNameStart = cursor;
+
+            while (cursor < attr.length()) {
+                final char ch = attr.charAt(cursor);
+
+                if (ch == '<' || ch == '.' || ch == '$' || ch == _PARENTHESIS_L || ch == _PARENTHESIS_R || ch == '>' || Character.isWhitespace(ch)) {
+                    break;
+                }
+
+                cursor++;
+            }
+
+            if (memberNameStart == cursor) {
+                throw new IllegalArgumentException("Malformed type attribute: missing member class name in: " + attr);
+            }
+
+            final String memberName = attr.substring(memberNameStart, cursor);
+            normalized.append('.').append(memberName);
+            cursor = skipWhitespace(attr, cursor);
+
+            if (cursor < attr.length() && attr.charAt(cursor) == '<') {
+                final int genericEnd = findClosingGeneric(attr, cursor);
+                final String genericClause = attr.substring(cursor, genericEnd + 1);
+                cursor = skipWhitespace(attr, genericEnd + 1);
+
+                if (cursor < attr.length() && (attr.charAt(cursor) == '.' || attr.charAt(cursor) == '$')) {
+                    // This member is itself an owner. Validate its generic arguments, then continue
+                    // with the next member segment without exposing those arguments as the final
+                    // member's own type parameters.
+                    parse(memberName + genericClause);
+                    continue;
+                }
+
+                normalized.append(genericClause);
+            }
+
+            if (cursor == attr.length()) {
+                return normalized.toString();
+            }
+
+            if (attr.charAt(cursor) == _PARENTHESIS_L) {
+                return normalized.append(attr.substring(cursor)).toString();
+            }
+
+            if (attr.charAt(cursor) != '.' && attr.charAt(cursor) != '$') {
+                throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attr);
+            }
+        }
+
+        throw new IllegalArgumentException("Malformed type attribute: missing member class name in: " + attr);
+    }
+
+    private static int skipWhitespace(final String str, int index) {
+        while (index < str.length() && Character.isWhitespace(str.charAt(index))) {
+            index++;
+        }
+
+        return index;
+    }
+
+    /**
      * Finds the closing angle bracket paired with {@code beginIndex}. Angle brackets inside a
      * nested type's parenthesized, double-quoted CSV constructor arguments are treated as data.
      * Backslash-escaped and doubled double quotes follow {@link CsvParser}'s default rules.
@@ -421,9 +526,9 @@ public final class TypeAttrParser {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Resolves the class from the attribute string and invokes a constructor that accepts
-     * // the parsed parameters as String values (here a constructor taking a single String).
-     * MyType obj = TypeAttrParser.newInstance(null, "com.example.MyType(value)");
+     * // Resolve java.lang.StringBuilder and invoke its String constructor.
+     * StringBuilder builder = TypeAttrParser.newInstance(
+     *     null, "java.lang.StringBuilder(initial text)");
      * }</pre>
      *
      * <p>All parsed type parameters and constructor parameters are passed to the constructor
@@ -455,7 +560,7 @@ public final class TypeAttrParser {
         int parameterLength = attrTypeParameters.length + attrParameters.length;
 
         if (parameterLength > 0) {
-            Class<?>[] parameterTypes = new Class[parameterLength];
+            Class<?>[] parameterTypes = new Class<?>[parameterLength];
             Object[] parameters = new Object[parameterLength];
 
             for (int i = 0; i < attrTypeParameters.length; i++) {
@@ -474,7 +579,7 @@ public final class TypeAttrParser {
                 parameterLength = attrTypeParameters.length + 1;
 
                 if (parameterLength > 0) {
-                    parameterTypes = new Class[parameterLength];
+                    parameterTypes = new Class<?>[parameterLength];
                     parameters = new Object[parameterLength];
 
                     for (int i = 0; i < attrTypeParameters.length; i++) {
@@ -513,9 +618,9 @@ public final class TypeAttrParser {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a custom class, prepending one explicit (Class, value) argument pair
-     * // ahead of the type parameters and constructor parameters parsed from attr.
-     * TypeAttrParser.newInstance(MyClass.class, "MyClass<A, B>(x, y)", String.class, "extra");
+     * // Select StringBuilder(CharSequence) with one explicit (Class, value) pair.
+     * StringBuilder builder = TypeAttrParser.newInstance(
+     *     StringBuilder.class, "StringBuilder", CharSequence.class, "initial text");
      * }</pre>
      *
      * @param <T> the type of object to create
@@ -531,6 +636,7 @@ public final class TypeAttrParser {
      * @throws RuntimeException if the class cannot be resolved or instantiation fails
      * @see #parse(String)
      */
+    @SuppressWarnings("unchecked")
     public static <T> T newInstance(Class<?> cls, final String attr, final Object... args) {
         Objects.requireNonNull(args, "args");
 
@@ -556,7 +662,7 @@ public final class TypeAttrParser {
         int parameterLength = attrTypeParameters.length + attrParameters.length + (args.length / 2);
 
         if (parameterLength > 0) {
-            Class<?>[] parameterTypes = new Class[parameterLength];
+            Class<?>[] parameterTypes = new Class<?>[parameterLength];
             Object[] parameters = new Object[parameterLength];
 
             for (int i = 0; i < args.length; i += 2) {
@@ -580,7 +686,7 @@ public final class TypeAttrParser {
                 parameterLength = attrTypeParameters.length + 1 + (args.length / 2);
 
                 if (parameterLength > 0) {
-                    parameterTypes = new Class[parameterLength];
+                    parameterTypes = new Class<?>[parameterLength];
                     parameters = new Object[parameterLength];
 
                     for (int i = 0; i < args.length; i += 2) {

@@ -266,7 +266,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * otherwise delegates to the runtime type handler of the contained value.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes {@code null} for an empty or null-valued
-     * {@code nullable}, or delegates the contained value to its runtime type handler with the supplied serialization config.
+     * {@code Nullable}, or delegates the contained value to its runtime type handler with the supplied serialization config.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the contained
      * value's serializer, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering.

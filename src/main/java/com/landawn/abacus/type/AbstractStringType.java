@@ -132,13 +132,15 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <ul>
      *   <li>{@code null} — returns {@code null}</li>
      *   <li>{@link java.io.Reader} — reads all content and returns it as a {@code String}</li>
-     *   <li>{@link java.sql.Clob} — extracts character data via {@link java.sql.Clob#getSubString}</li>
+     *   <li>{@link java.sql.Clob} — extracts character data via {@link java.sql.Clob#getSubString} and always calls
+     *       {@link java.sql.Clob#free()}; supplying a {@code Clob} transfers ownership to this method</li>
      *   <li>All other types — uses the type-specific {@code stringOf} conversion</li>
      * </ul>
      *
      * @param obj the object to convert, may be {@code null}
      * @return the {@code String} representation of the object, or {@code null} if {@code obj} is {@code null}
-     * @throws UncheckedSQLException if a SQL error occurs while reading from a {@code Clob}
+     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading a {@code Reader}
+     * @throws UncheckedSQLException if a SQL error occurs while reading or freeing a {@code Clob}
      * @throws UnsupportedOperationException if a {@code Clob} is too large to convert (exceeds {@link Integer#MAX_VALUE} characters)
      */
     @SuppressFBWarnings
@@ -149,7 +151,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
         } else if (obj instanceof Reader reader) {
             return IOUtil.readAllToString(reader);
         } else if (obj instanceof Clob clob) {
-            RuntimeException primaryException = null;
+            Throwable primaryException = null;
 
             try {
                 final long len = clob.length();
@@ -158,11 +160,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
                 }
                 return clob.getSubString(1, (int) len);
             } catch (final SQLException e) {
-                primaryException = new UncheckedSQLException(e);
-                throw primaryException;
-            } catch (final RuntimeException e) {
+                final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
+                primaryException = uncheckedException;
+                throw uncheckedException;
+            } catch (final RuntimeException | Error e) {
                 primaryException = e;
-                throw primaryException;
+                throw e;
             } finally {
                 try {
                     clob.free();
@@ -173,6 +176,12 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
                         primaryException.addSuppressed(freeException);
                     } else {
                         throw freeException; //NOSONAR
+                    }
+                } catch (final RuntimeException | Error e) {
+                    if (primaryException == null) {
+                        throw e;
+                    } else if (primaryException != e) {
+                        primaryException.addSuppressed(e);
                     }
                 }
             }

@@ -2497,16 +2497,6 @@ public class IntListTest extends TestBase {
     }
 
     @Test
-    public void testMaxArraySize() {
-        try {
-            IntList largeList = new IntList(Integer.MAX_VALUE - 8);
-            assertTrue(largeList.isEmpty());
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
     public void test_median() {
         IntList list = IntList.of(3, 1, 4, 1, 5);
         OptionalInt median = list.median();
@@ -3860,19 +3850,6 @@ public class IntListTest extends TestBase {
         for (int i = 0; i < 20; i++)
             a.add(i);
         assertEquals(20, a.size());
-    }
-
-    @Test
-    public void testEnsureCapacityOverflow() {
-        list.add(1);
-        try {
-            for (int i = 0; i < 100; i++) {
-                list.add(i);
-            }
-            assertTrue(list.size() > 1);
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---

@@ -81,6 +81,23 @@ public class HttpResponse {
 
     private final Charset respCharset;
 
+    /**
+     * Constructs an {@code HttpResponse} from the raw pieces of a completed HTTP exchange.
+     * This constructor is package-private; instances are created by the HTTP clients in this package.
+     *
+     * <p>The supplied {@code headers} map and {@code body} array are defensively copied, so later
+     * changes to the caller's structures are not visible through this response.</p>
+     *
+     * @param requestUrl the URL of the request that produced this response
+     * @param requestSentAtMillis the time the request was sent, in milliseconds since the epoch
+     * @param responseReceivedAtMillis the time the response was received, in milliseconds since the epoch
+     * @param statusCode the HTTP status code of the response
+     * @param message the HTTP status message of the response; may be {@code null}
+     * @param headers the response headers; may be {@code null}, in which case {@link #headers()} returns an empty map
+     * @param body the raw response body bytes; may be {@code null}, in which case {@link #body()} returns an empty array
+     * @param bodyFormat the content format of the body; {@code null} is normalized to {@link ContentFormat#NONE}
+     * @param respCharset the charset used to decode the body; {@code null} is normalized to {@link HttpUtil#DEFAULT_CHARSET}
+     */
     HttpResponse(final String requestUrl, final long requestSentAtMillis, final long responseReceivedAtMillis, final int statusCode, final String message,
             final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset) {
         this.requestUrl = requestUrl;
@@ -311,15 +328,15 @@ public class HttpResponse {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Deserialize to a list of users
-     * Type<List<User>> listType = Type.of("List<User>");
+     * Type<List<User>> listType = Type.of(new TypeReference<List<User>>() {});
      * List<User> users = response.body(listType);
      *
      * // Deserialize to a map
-     * Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
+     * Type<Map<String, Object>> mapType = Type.of(new TypeReference<Map<String, Object>>() {});
      * Map<String, Object> data = response.body(mapType);
      *
      * // Alternative: pass the Type inline instead of via a local variable
-     * List<User> users2 = response.body(Type.of("List<User>"));
+     * List<User> users2 = response.body(Type.of(new TypeReference<List<User>>() {}));
      * }</pre>
      *
      * @param <T> The type to deserialize to

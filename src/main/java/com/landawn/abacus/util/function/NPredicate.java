@@ -172,7 +172,7 @@ public interface NPredicate<T> {
      *     }
      *     return false;
      * };
-     * NPredicate<String> anyInvalid = anyEmpty.or(anyNull);
+     * NPredicate<String> anyInvalid = anyNull.or(anyEmpty);
      * anyInvalid.test("hello", "", "world");   // returns true (one is empty)
      * }</pre>
      *

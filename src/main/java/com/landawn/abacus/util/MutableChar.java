@@ -59,12 +59,12 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     private char value;
 
     /**
-     * Constructs a new MutableChar with the default value of zero (null character '\u0000').
-     * This constructor has package-private visibility.
+     * Constructs a new MutableChar with the default value of zero (the null character
+     * <code>&#92;u0000</code>). This constructor has package-private visibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableChar ch = new MutableChar();
+     * MutableChar ch = MutableChar.of((char) 0);
      * }</pre>
      *
      */
@@ -77,7 +77,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableChar ch = new MutableChar('X');
+     * MutableChar ch = MutableChar.of('X');
      * }</pre>
      *
      * @param value the initial value to store
@@ -132,7 +132,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * val = ch.getValue();               // returns 'Z', value is unchanged
      *
      * MutableChar max = MutableChar.of(Character.MAX_VALUE);
-     * val = max.getValue();              // returns '\uffff' (Character.MAX_VALUE)
+     * val = max.getValue();              // returns Character.MAX_VALUE (0xFFFF), value is unchanged
      * }</pre>
      *
      * @return the current char value
@@ -159,10 +159,11 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Returns the current value and then sets it to the new value.
+     * Returns the current value and then sets the new value.
      *
-     * <p><strong>Note:</strong> this is not atomic; the read-then-write happens within
-     * a single method call but is not safe for concurrent use without external synchronization.</p>
+     * <p><strong>Note:</strong> this is not atomic; it simply returns the previous value
+     * and assigns the new one within a single method call. External synchronization is
+     * required for concurrent use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -173,7 +174,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * }</pre>
      *
      * @param newValue the new value to set
-     * @return the previous value before the update
+     * @return the value before it was updated
      */
     public char getAndSet(final char newValue) {
         final char result = this.value;
@@ -182,9 +183,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Sets the value to the new value and then returns it.
-     * This is useful when you want to update the value and immediately use the new value
-     * in the same expression.
+     * Sets the value and then returns it.
+     * This is useful when you want to update and immediately use the new value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -202,7 +202,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Conditionally sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p>This method is useful for conditional updates based on the current state.</p>
@@ -216,12 +216,12 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * updated = ch.setIf(c -> c < 'M', 'A');           // returns false, value remains 'Z'
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to test against the current value
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
-     * @return {@code true} if the value was updated (predicate returned true), {@code false} otherwise
+     * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws NullPointerException if {@code predicate} is {@code null}
-     * @throws E if the predicate throws an exception during evaluation
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
         if (predicate.test(value)) {
@@ -239,7 +239,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * This is equivalent to the {@code ++} operator for primitives.
      *
      * <p>Note: This operation wraps around if incrementing causes overflow
-     * (e.g., incrementing '\uffff' results in '\u0000').</p>
+     * (e.g., incrementing <code>&#92;uFFFF</code> yields <code>&#92;u0000</code>).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -258,7 +258,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * This is equivalent to the {@code --} operator for primitives.
      *
      * <p>Note: This operation wraps around if decrementing causes underflow
-     * (e.g., decrementing '\u0000' results in '\uffff').</p>
+     * (e.g., decrementing <code>&#92;u0000</code> yields <code>&#92;uFFFF</code>).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -510,7 +510,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      *
      * int hash1 = a.hashCode();   // returns 65 (Unicode value of 'A')
      * int hash2 = b.hashCode();   // returns 65
-     * assert hash1 == hash2;     // passes — hash codes are equal
+     * assert hash1 == hash2;      // passes — hash codes are equal
      * }</pre>
      *
      * @return a hash code value for this object, equal to the char value

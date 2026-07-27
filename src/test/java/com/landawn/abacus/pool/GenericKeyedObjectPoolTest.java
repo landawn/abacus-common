@@ -34,11 +34,16 @@ import com.landawn.abacus.TestBase;
 public class GenericKeyedObjectPoolTest extends TestBase {
 
     private static final class SpuriousWakeupCondition implements Condition {
+        private final int spuriousWakeups;
         private int awaitCount;
+
+        private SpuriousWakeupCondition(final int spuriousWakeups) {
+            this.spuriousWakeups = spuriousWakeups;
+        }
 
         @Override
         public long awaitNanos(final long nanosTimeout) {
-            return ++awaitCount <= 10_000 ? 1 : 0;
+            return ++awaitCount <= spuriousWakeups ? 1 : 0;
         }
 
         @Override
@@ -69,6 +74,32 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         @Override
         public void signalAll() {
             // no-op for this deterministic test condition
+        }
+    }
+
+    private static final class AtomicEvictPool extends GenericKeyedObjectPool<String, TestPoolable> {
+        private final AtomicReference<TestPoolable> removedDuringFormerGap;
+
+        private AtomicEvictPool(final AtomicReference<TestPoolable> removedDuringFormerGap) {
+            super(8, 0, EvictionPolicy.FIFO, true, 0.5f);
+            this.removedDuringFormerGap = removedDuringFormerGap;
+        }
+
+        @Override
+        protected void vacate(final int numberToEvict) {
+            // Legacy evict() computed numberToEvict, unlocked, and then dispatched here.
+            // Mutating in that gap made its count stale and removed three of four entries.
+            final Thread interloper = new Thread(() -> removedDuringFormerGap.set(remove("one")), "keyed-evict-gap-interloper");
+            interloper.start();
+
+            try {
+                interloper.join(2_000);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError(e);
+            }
+
+            super.vacate(numberToEvict);
         }
     }
 
@@ -2178,16 +2209,16 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTimedPutHonorsTimeoutAcrossMoreThanTenThousandWakeups() throws Exception {
+    public void testTimedPutStopsWhenConditionReportsTimeoutAfterSpuriousWakeups() throws Exception {
         final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
         assertTrue(p.put("existing", new TestPoolable("value")));
 
-        final SpuriousWakeupCondition condition = new SpuriousWakeupCondition();
+        final SpuriousWakeupCondition condition = new SpuriousWakeupCondition(3);
         p.notFull = condition;
 
         try {
-            assertFalse(p.put("new", new TestPoolable("new-value"), 1, TimeUnit.MILLISECONDS));
-            assertEquals(10_001, condition.awaitCount);
+            assertFalse(p.put("new", new TestPoolable("new-value"), 1, TimeUnit.SECONDS));
+            assertEquals(4, condition.awaitCount);
         } finally {
             p.close();
         }
@@ -2219,31 +2250,7 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     @Test
     public void testEvictSelectsCountAndVictimsInSingleCriticalSection() {
         final AtomicReference<TestPoolable> removedDuringFormerGap = new AtomicReference<>();
-
-        class AtomicEvictPool extends GenericKeyedObjectPool<String, TestPoolable> {
-            AtomicEvictPool() {
-                super(8, 0, EvictionPolicy.FIFO, true, 0.5f);
-            }
-
-            @Override
-            protected void vacate(final int numberToEvict) {
-                // Legacy evict() computed numberToEvict, unlocked, and then dispatched here.
-                // Mutating in that gap made its count stale and removed three of four entries.
-                final Thread interloper = new Thread(() -> removedDuringFormerGap.set(remove("one")), "keyed-evict-gap-interloper");
-                interloper.start();
-
-                try {
-                    interloper.join(2_000);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new AssertionError(e);
-                }
-
-                super.vacate(numberToEvict);
-            }
-        }
-
-        final AtomicEvictPool p = new AtomicEvictPool();
+        final AtomicEvictPool p = new AtomicEvictPool(removedDuringFormerGap);
 
         try {
             assertTrue(p.put("one", new TestPoolable("one")));

@@ -244,10 +244,14 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<float[]> type = TypeFactory.getType(float[].class);
-     * CharacterWriter writer = new BufferedJsonWriter();
-     * float[] array = {1.5f, 2.7f, 3.14f};
-     * type.serializeTo(writer, array, null);
-     * // Writer contains: "[1.5, 2.7, 3.14]"
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * try {
+     *     float[] array = {1.5f, 2.7f, 3.14f};
+     *     type.serializeTo(writer, array, null);
+     *     // Writer contains: "[1.5, 2.7, 3.14]"
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      * <p>
@@ -299,6 +303,8 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      *
      * @param c the Collection of Float objects to convert
      * @return a float array containing the unboxed values, or {@code null} if input is null
+     * @throws ClassCastException if any element in the collection is not a Float
+     * @throws NullPointerException if any element in the collection is {@code null}
      */
     @Override
     public float[] collectionToArray(final Collection<?> c) {
@@ -333,6 +339,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      *
      * @param x the float array to convert
      * @param output the Collection to add the boxed Float values to
+     * @throws ClassCastException if the output collection cannot accept Float objects
      */
     @Override
     public void arrayToCollection(final float[] x, final Collection<?> output) {
@@ -358,7 +365,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * }</pre>
      *
      * @param x the float array to hash
-     * @return the hash code of the array
+     * @return the hash code of the array, or 0 if the array is null
      */
     @Override
     public int hashCode(final float[] x) {

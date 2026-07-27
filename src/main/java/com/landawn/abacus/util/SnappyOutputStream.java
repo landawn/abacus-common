@@ -23,14 +23,14 @@ import java.io.OutputStream;
  * fast compression of data written to an underlying output stream.
  *
  * <p>Snappy is a compression/decompression library that aims for very high speeds
- * and reasonable compression ratios. It is particularly effective for data that
- * contains repeated byte sequences.
+ * and reasonable compression ratios. This wrapper emits Xerial's Snappy stream format,
+ * which can be read by {@link SnappyInputStream}; it is not the raw or framed Snappy format.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * try (FileOutputStream fos = new FileOutputStream("data.snappy");
  *      SnappyOutputStream sos = new SnappyOutputStream(fos)) {
- *     sos.write("Hello, World!".getBytes());
+ *     sos.write("Hello, World!".getBytes(StandardCharsets.UTF_8));
  * }
  * }</pre>
  *
@@ -50,7 +50,10 @@ public final class SnappyOutputStream extends OutputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OutputStream compressed = new SnappyOutputStream(new FileOutputStream("data.snappy"));
+     * try (OutputStream target = new FileOutputStream("data.snappy");
+     *      SnappyOutputStream compressed = new SnappyOutputStream(target)) {
+     *     compressed.write(new byte[] { 1, 2, 3 });
+     * }
      * }</pre>
      *
      * @param os the underlying output stream to write compressed data to; must not be {@code null}
@@ -70,7 +73,10 @@ public final class SnappyOutputStream extends OutputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use a 64KB buffer for better performance with large files
-     * OutputStream compressed = new SnappyOutputStream(new FileOutputStream("large.snappy"), 65536);
+     * try (OutputStream target = new FileOutputStream("large.snappy");
+     *      SnappyOutputStream compressed = new SnappyOutputStream(target, 65536)) {
+     *     compressed.write(new byte[] { 1, 2, 3 });
+     * }
      * }</pre>
      *
      * @param os the underlying output stream to write compressed data to; must not be {@code null}
@@ -116,7 +122,7 @@ public final class SnappyOutputStream extends OutputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data = "Hello, World!".getBytes();
+     * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
      * snappyOut.write(data);
      * }</pre>
      *
@@ -138,7 +144,9 @@ public final class SnappyOutputStream extends OutputStream {
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);
-     * snappyOut.write(buffer, 0, bytesRead);
+     * if (bytesRead >= 0) {
+     *     snappyOut.write(buffer, 0, bytesRead);
+     * }
      * }</pre>
      *
      * @param b the byte array containing data to write
@@ -170,7 +178,7 @@ public final class SnappyOutputStream extends OutputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * snappyOut.write("Hello".getBytes());
+     * snappyOut.write("Hello".getBytes(StandardCharsets.UTF_8));
      * snappyOut.flush();   // Force compression and output
      * }</pre>
      *
@@ -187,15 +195,15 @@ public final class SnappyOutputStream extends OutputStream {
      * blocks before closing the underlying output stream.
      *
      * <p>Once closed, this stream cannot be used for further write operations.
-     * Calling write methods after close() will result in an IOException.
+     * Calling write methods after close() results in an IOException.
      *
-     * <p>This method is idempotent - multiple calls to close() have no additional effect.
+     * <p>This method is idempotent: multiple calls to {@code close()} have no additional effect.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SnappyOutputStream snappyOut = new SnappyOutputStream(new FileOutputStream("data.snappy"));
      * try {
-     *     snappyOut.write("Hello, World!".getBytes());
+     *     snappyOut.write("Hello, World!".getBytes(StandardCharsets.UTF_8));
      * } finally {
      *     snappyOut.close();   // Flush and release resources
      * }

@@ -5056,4 +5056,96 @@ public class IndexTest extends TestBase {
         assertEquals(0, Index.allOf(new Object[0], "x").cardinality());
     }
 
+    @Test
+    public void test_of_String_String_emptySubstring_clamping() {
+        // An empty substring always matches; the returned index is the fromIndex clamped to [0, length]
+        // (mirrors String.indexOf("") conventions and Strings.indexOf).
+        assertEquals(OptionalInt.of(0), Index.of("aaa", "", -1));
+        assertEquals(OptionalInt.of(0), Index.of("aaa", "", 0));
+        assertEquals(OptionalInt.of(2), Index.of("aaa", "", 2));
+        assertEquals(OptionalInt.of(3), Index.of("aaa", "", 3));
+        assertEquals(OptionalInt.of(3), Index.of("aaa", "", 5));
+
+        assertEquals(OptionalInt.of(0), Index.ofIgnoreCase("aaa", "", -1));
+        assertEquals(OptionalInt.of(3), Index.ofIgnoreCase("aaa", "", 4));
+
+        // backward: min(startIndexFromBack, length); negative startIndexFromBack => empty
+        assertEquals(OptionalInt.of(2), Index.last("aaa", "", 2));
+        assertEquals(OptionalInt.of(3), Index.last("aaa", "", 10));
+        assertFalse(Index.last("aaa", "", -1).isPresent());
+        assertEquals(OptionalInt.of(3), Index.lastOfIgnoreCase("aaa", "", 10));
+        assertFalse(Index.lastOfIgnoreCase("aaa", "", -1).isPresent());
+
+        // null source with empty target => empty
+        assertFalse(Index.of((String) null, "", 0).isPresent());
+        assertFalse(Index.ofIgnoreCase((String) null, "", 0).isPresent());
+        assertFalse(Index.last((String) null, "", 0).isPresent());
+        assertFalse(Index.lastOfIgnoreCase((String) null, "", 0).isPresent());
+    }
+
+    @Test
+    public void test_ofSubArray_float_double_NaN_and_negativeZero() {
+        // Sub-array comparison uses N.equals (Float.compare/Double.compare semantics):
+        // NaN matches NaN, but -0.0 does NOT match 0.0.
+        final float[] fSource = { 1.0f, Float.NaN, 2.0f, Float.NaN };
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(fSource, new float[] { Float.NaN, 2.0f }));
+        assertEquals(OptionalInt.of(1), Index.lastOfSubArray(fSource, new float[] { Float.NaN, 2.0f }));
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(fSource, new float[] { 2.0f, Float.NaN }));
+        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(fSource, new float[] { 2.0f, Float.NaN }));
+
+        final float[] nzSource = { -0.0f, 1.0f };
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(nzSource, new float[] { -0.0f }));
+        assertFalse(Index.ofSubArray(nzSource, new float[] { 0.0f }).isPresent());
+
+        final double[] dSource = { 1.0, Double.NaN, 3.0 };
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(dSource, new double[] { Double.NaN, 3.0 }));
+        assertEquals(OptionalInt.of(1), Index.lastOfSubArray(dSource, new double[] { Double.NaN, 3.0 }));
+
+        final double[] dzSource = { -0.0d, 1.0d };
+        assertEquals(OptionalInt.of(0), Index.lastOfSubArray(dzSource, new double[] { -0.0d }));
+        assertFalse(Index.lastOfSubArray(dzSource, new double[] { 0.0d }).isPresent());
+    }
+
+    @Test
+    public void test_ofSubList_mixedRandomAccess_fallback() {
+        // When only ONE of source/sub implements RandomAccess, the toArray-based fallback is used;
+        // results must match the all-RandomAccess path.
+        final List<String> raSource = Arrays.asList("a", "b", "c", "b", "c", "d");
+        final List<String> raSub = Arrays.asList("b", "c");
+        final List<String> llSource = new LinkedList<>(raSource);
+        final List<String> llSub = new LinkedList<>(raSub);
+
+        // RandomAccess source + non-RandomAccess sub
+        assertEquals(OptionalInt.of(1), Index.ofSubList(raSource, llSub));
+        assertEquals(OptionalInt.of(3), Index.ofSubList(raSource, 2, llSub));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(raSource, llSub));
+        assertEquals(OptionalInt.of(1), Index.lastOfSubList(raSource, 2, llSub));
+
+        // non-RandomAccess source + RandomAccess sub
+        assertEquals(OptionalInt.of(1), Index.ofSubList(llSource, raSub));
+        assertEquals(OptionalInt.of(3), Index.ofSubList(llSource, 2, raSub));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(llSource, raSub));
+
+        // partial matching through the fallback path
+        final List<String> llSub3 = new LinkedList<>(Arrays.asList("x", "b", "c"));
+        assertEquals(OptionalInt.of(3), Index.ofSubList(raSource, 2, llSub3, 1, 2));
+        assertEquals(OptionalInt.of(1), Index.lastOfSubList(raSource, 2, llSub3, 1, 2));
+
+        // same results as the all-RandomAccess path
+        assertEquals(Index.ofSubList(raSource, 2, raSub), Index.ofSubList(raSource, 2, llSub));
+        assertEquals(Index.lastOfSubList(raSource, 2, raSub), Index.lastOfSubList(raSource, 2, llSub));
+    }
+
+    @Test
+    public void test_of_String_supplementaryCodePoint() {
+        // String searches take an int Unicode code point; a supplementary (non-BMP) character
+        // occupies two chars but must be found at its starting char index.
+        final String str = "a\uD835\uDD0Ab"; // "a" + U+1D50A + "b"
+        assertEquals(OptionalInt.of(1), Index.of(str, 0x1D50A));
+        assertFalse(Index.of(str, 0x1D50A, 2).isPresent());
+        assertEquals(OptionalInt.of(1), Index.last(str, 0x1D50A));
+        assertFalse(Index.last(str, 0x1D50A, 0).isPresent());
+        assertEquals(OptionalInt.of(3), Index.of(str, 'b'));
+    }
+
 }

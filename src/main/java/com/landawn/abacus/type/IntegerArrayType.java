@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and output operations for {@code Integer[]} arrays.
  *
  * <p>The canonical string format is a bracket-enclosed, comma-separated list where {@code null} elements
- * are written as the literal null (e.g., {@code [1, null, 3, 42]}).
+ * are written as the literal {@code null} (e.g., {@code [1, null, 3, 42]}).
  *
  * @see ObjectArrayType
  */

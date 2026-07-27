@@ -25,9 +25,10 @@ import com.landawn.abacus.util.SK;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * config.setPrettyFormat(true)
- *       .setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME)
- *       .setIndentation("  ");
+ * JsonSerConfig config = new JsonSerConfig()
+ *         .setPrettyFormat(true)
+ *         .setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME)
+ *         .setIndentation("  ");
  * }</pre>
  *
  * <p>Common configuration options include:</p>
@@ -144,7 +145,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
         if (charQuotation == SK.CHAR_ZERO || charQuotation == SK._SINGLE_QUOTE || charQuotation == SK._DOUBLE_QUOTE) {
             this.charQuotation = charQuotation;
         } else {
-            throw new IllegalArgumentException("Only ''', '\"', 0(value is zero) chars are supported");
+            throw new IllegalArgumentException("Only '\\'', '\"', 0(value is zero) chars are supported");
         }
 
         return (C) this;
@@ -186,7 +187,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
         if (stringQuotation == SK.CHAR_ZERO || stringQuotation == SK._SINGLE_QUOTE || stringQuotation == SK._DOUBLE_QUOTE) {
             this.stringQuotation = stringQuotation;
         } else {
-            throw new IllegalArgumentException("Only ''', '\"', 0(value is zero) chars are supported");
+            throw new IllegalArgumentException("Only '\\'', '\"', 0(value is zero) chars are supported");
         }
 
         return (C) this;
@@ -550,7 +551,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * config.setWriteBigDecimalAsPlain(true).isWriteBigDecimalAsPlain();   // returns true
      * }</pre>
      *
-     * @return {@code true} if {@code BigDecimal}s are written as plain strings, {@code false} otherwise
+     * @return {@code true} if {@code BigDecimal}s are written in plain notation without an exponent, {@code false} otherwise
      */
     public boolean isWriteBigDecimalAsPlain() {
         return writeBigDecimalAsPlain;

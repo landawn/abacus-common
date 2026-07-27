@@ -205,10 +205,19 @@ public final class Stopwatch {
         return new Stopwatch(ticker).start();
     }
 
+    /**
+     * Creates an unstarted stopwatch that uses the system ticker.
+     */
     Stopwatch() {
         ticker = Ticker.systemTicker();
     }
 
+    /**
+     * Creates an unstarted stopwatch that uses the specified ticker.
+     *
+     * @param ticker the time source to use
+     * @throws IllegalArgumentException if {@code ticker} is {@code null}
+     */
     Stopwatch(final Ticker ticker) {
         this.ticker = N.checkArgNotNull(ticker, "ticker");
     }

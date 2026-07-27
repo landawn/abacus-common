@@ -135,7 +135,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -617,8 +618,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .indexed()
      *     .foreachRemaining(indexed ->
-     *         System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
-     *     );
+     *         System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value()));
      * }</pre>
      *
      * @return an {@link ObjIterator} of {@link IndexedDouble} objects with indices starting at 0
@@ -637,8 +637,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .indexed(100)
      *     .foreachRemaining(indexed ->
-     *         System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
-     *     );
+     *         System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value()));
      * // Prints indices 100, 101, 102 with corresponding values
      * }</pre>
      *
@@ -702,7 +701,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) throws IllegalArgumentException {
+    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) {
         super.forEachRemaining(action);
     }
 
@@ -737,15 +736,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <pre>{@code
      * DoubleIterator.of(10.5, 20.5, 30.5)
      *     .foreachIndexed((index, value) ->
-     *         System.out.println("Position " + index + ": " + value)
-     *     );
+     *         System.out.println("Position " + index + ": " + value));
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each (index, value) pair; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator contains more than {@link Integer#MAX_VALUE} elements,
-     *         causing the index to overflow
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws IllegalArgumentException, E {

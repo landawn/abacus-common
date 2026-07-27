@@ -5212,6 +5212,21 @@ public class MultimapTest extends AbstractTest {
     }
 
     @Test
+    public void testRemoveValues_acceptsAliasedWrappedMultimap() {
+        final Map<String, List<Integer>> backing = new LinkedHashMap<>();
+        backing.put("a", new ArrayList<>(Arrays.asList(1, 2)));
+        backing.put("b", new ArrayList<>(Collections.singletonList(3)));
+        final ListMultimap<String, Integer> target = ListMultimap.wrap(backing);
+        final ListMultimap<String, Integer> aliasedRemovals = ListMultimap.wrap(backing);
+
+        assertTrue(target.removeValues(aliasedRemovals));
+
+        assertTrue(target.isEmpty());
+        assertTrue(aliasedRemovals.isEmpty());
+        assertTrue(backing.isEmpty());
+    }
+
+    @Test
     public void testPut_rejectedValueDoesNotLeaveEmptyMapping() {
         // Rejecting Set (null into TreeSet) must not leave key -> empty collection.
         final Multimap<String, Integer, java.util.NavigableSet<Integer>> mm = N.newMultimap(HashMap::new, TreeSet::new);
@@ -5321,16 +5336,27 @@ public class MultimapTest extends AbstractTest {
         final Predicate<String> keyPredicate = null;
         final BiPredicate<String, List<Integer>> entryPredicate = null;
 
-        assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(keyPredicate, 1));
-        assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(entryPredicate, 1));
-        assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(keyPredicate, Collections.emptyList()));
-        assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(entryPredicate, Collections.emptyList()));
-        assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(keyPredicate));
-        assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(entryPredicate));
-        assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(keyPredicate, 1, 2));
-        assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(entryPredicate, 1, 2));
-        assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(keyPredicate, Collections.emptyList()));
-        assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(entryPredicate, Collections.emptyList()));
+        // Each of these methods has a Predicate and a BiPredicate overload, so the message must name
+        // the parameter that was actually rejected -- otherwise the exception cannot tell a caller
+        // which overload they bound to. A validation sweep once pointed all ten at cs.Predicate,
+        // producing "'Predicate' cannot be null" for a parameter no signature declares.
+        assertEquals("'keyPredicate' cannot be null", assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(keyPredicate, 1)).getMessage());
+        assertEquals("'entryPredicate' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(entryPredicate, 1)).getMessage());
+        assertEquals("'keyPredicate' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(keyPredicate, Collections.emptyList())).getMessage());
+        assertEquals("'entryPredicate' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(entryPredicate, Collections.emptyList())).getMessage());
+        assertEquals("'keyPredicate' cannot be null", assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(keyPredicate)).getMessage());
+        assertEquals("'entryPredicate' cannot be null", assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(entryPredicate)).getMessage());
+        assertEquals("'keyPredicate' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(keyPredicate, 1, 2)).getMessage());
+        assertEquals("'entryPredicate' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(entryPredicate, 1, 2)).getMessage());
+        assertEquals("'keyPredicate' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(keyPredicate, Collections.emptyList())).getMessage());
+        assertEquals("'entryPredicate' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(entryPredicate, Collections.emptyList())).getMessage());
     }
 
 }

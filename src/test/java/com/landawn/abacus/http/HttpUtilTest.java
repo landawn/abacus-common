@@ -551,12 +551,17 @@ public class HttpUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetContentFormatWithPartialMatching() {
-        // Test partial content type matching
+    public void testGetContentFormatWithMediaSubtypeMatching() {
         assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("application/json; charset=UTF-8", null));
         assertEquals(ContentFormat.XML, HttpUtil.getContentFormat("text/xml; charset=UTF-8", null));
         assertEquals(ContentFormat.JSON_GZIP, HttpUtil.getContentFormat("something/json", "gzip"));
         assertEquals(ContentFormat.XML_SNAPPY, HttpUtil.getContentFormat("something/xml", "snappy"));
+        assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("application/problem+json", null));
+
+        // A format name must occupy the whole subtype or a recognized subtype suffix.
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("application/jsonp", null));
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("application/notjson", null));
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("application/not-json", null));
     }
 
     @Test
@@ -585,6 +590,7 @@ public class HttpUtilTest extends TestBase {
     @Test
     public void testGetContentFormatWithKryoAndUrlEncoded() {
         assertEquals(ContentFormat.KRYO, HttpUtil.getContentFormat("application/x-kryo", null));
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("application/not-x-kryo", null));
         assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/x-www-form-urlencoded", null));
         assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/x-www-form-urlencoded", ""));
 

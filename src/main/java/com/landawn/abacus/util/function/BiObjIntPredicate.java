@@ -28,6 +28,8 @@ import com.landawn.abacus.util.cs;
  *
  * @param <T> the type of the first object argument to the predicate
  * @param <U> the type of the second object argument to the predicate
+ * @see java.util.function.Predicate
+ * @see java.util.function.BiPredicate
  */
 @FunctionalInterface
 public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T, U, RuntimeException> { //NOSONAR

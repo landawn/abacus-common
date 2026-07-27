@@ -36,8 +36,11 @@ import java.io.Serial;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * MutableShort counter = MutableShort.of((short)0);
- * shortArray.forEach(s -> counter.add(s));
+ * short[] values = { 1, 2, 3 };
+ * MutableShort counter = MutableShort.of((short) 0);
+ * for (short value : values) {
+ *     counter.add(value);
+ * }
  * System.out.println("Sum: " + counter.value());
  * }</pre>
  *
@@ -64,7 +67,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableShort num = new MutableShort();
+     * MutableShort num = MutableShort.of((short) 0);
      * }</pre>
      *
      */
@@ -76,7 +79,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableShort num = new MutableShort((short)100);
+     * MutableShort num = MutableShort.of((short) 100);
      * }</pre>
      *
      * @param value the initial value to store
@@ -197,7 +200,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>
@@ -227,7 +230,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     /**
      * Increments the value by one.
-     * Note: short overflow will wrap around (32767 + 1 = -32768).
+     *
+     * <p><b>Note:</b> Short overflow will wrap around (e.g., 32767 + 1 = -32768).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -242,7 +246,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     /**
      * Decrements the value by one.
-     * Note: short underflow will wrap around (-32768 - 1 = 32767).
+     *
+     * <p><b>Note:</b> Short underflow will wrap around (e.g., -32768 - 1 = 32767).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -259,7 +264,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     /**
      * Adds the specified delta to the current value.
-     * Note: short overflow will wrap around.
+     *
+     * <p><b>Note:</b> Short overflow will wrap around.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -275,7 +281,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     /**
      * Subtracts the specified delta from the current value.
-     * Note: short underflow will wrap around.
+     *
+     * <p><b>Note:</b> Short underflow will wrap around.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -292,6 +299,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Returns the current value and then increments it by one.
      *
+     * <p><b>Note:</b> Short overflow will wrap around (e.g., 32767 + 1 = -32768).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
@@ -306,6 +315,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     /**
      * Returns the current value and then decrements it by one.
+     *
+     * <p><b>Note:</b> Short underflow will wrap around (e.g., -32768 - 1 = 32767).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -322,6 +333,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Increments the value by one and then returns it.
      *
+     * <p><b>Note:</b> Short overflow will wrap around (e.g., 32767 + 1 = -32768).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
@@ -337,6 +350,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     /**
      * Decrements the value by one and then returns it.
      *
+     * <p><b>Note:</b> Short underflow will wrap around (e.g., -32768 - 1 = 32767).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
@@ -351,6 +366,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     /**
      * Returns the current value and then adds the specified delta.
+     *
+     * <p><b>Note:</b> Short overflow will wrap around.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -369,6 +386,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
 
     /**
      * Adds the specified delta to the current value and then returns it.
+     *
+     * <p><b>Note:</b> Short overflow will wrap around.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

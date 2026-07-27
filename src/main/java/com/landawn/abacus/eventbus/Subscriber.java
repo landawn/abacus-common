@@ -51,7 +51,7 @@ package com.landawn.abacus.eventbus;
  *
  * <p><b>Usage Examples with method reference:</b></p>
  * <pre>{@code
- * public class MyHandler {
+ * class MyHandler {
  *     public void handleString(String message) {
  *         System.out.println("Handling: " + message);
  *     }

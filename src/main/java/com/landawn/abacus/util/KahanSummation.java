@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util;
 
+import java.util.Locale;
+
 import com.landawn.abacus.util.u.OptionalDouble;
 
 /**
@@ -276,7 +278,7 @@ public final class KahanSummation { // NOSONAR
      */
     @Override
     public String toString() {
-        return String.format("{count=%d, sum=%f, average=%f}", count(), sum(), average().orElseZero());
+        return String.format(Locale.ROOT, "{count=%d, sum=%f, average=%f}", count(), sum(), average().orElseZero());
     }
 
     // https://en.wikipedia.org/wiki/Kahan_summation_algorithm

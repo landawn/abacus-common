@@ -50,7 +50,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li>Efficient character buffer management</li>
  *   <li>Direct number parsing without intermediate string creation</li>
  *   <li>Support for escape character handling</li>
- *   <li>Optimized parsing of common JSON values ({@code true}, false, {@code null})</li>
+ *   <li>Optimized parsing of common JSON values ({@code true}, {@code false}, {@code null})</li>
  * </ul>
  *
  * <p>This is an internal class and should not be used directly by application code.
@@ -759,8 +759,8 @@ class JsonStringReader extends AbstractJsonReader {
 
     /**
      * Unescapes the character identified by the character or characters that immediately follow a backslash. The
-     * backslash {@code '\'} should have already been read. This supports both unicode escapes ({@code \\u000A}) and
-     * two-character escapes ({@code \\n}).
+     * backslash {@code '\'} should have already been read. This supports both unicode escapes (<code>&#92;u000A</code>) and
+     * two-character escapes (<code>&#92;n</code>).
      *
      * @return the unescaped character
      * @throws ParsingException if the escape sequence is incomplete or malformed, including

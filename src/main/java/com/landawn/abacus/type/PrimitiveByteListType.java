@@ -91,7 +91,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<ByteList> type = TypeFactory.getType(ByteList.class);
-     * ByteList list = ByteList.of(1, 2, 3, 127, -128);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 127, (byte) -128);
      * String result = type.stringOf(list);
      * // result: "[1, 2, 3, 127, -128]"
      * }</pre>
@@ -114,7 +114,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
     /**
      * Parses a string representation and creates a ByteList.
      * The string is first parsed as a byte array, then wrapped in a ByteList.
-     * Returns {@code null} if the input string is {@code null} or empty.
+     * Returns {@code null} if the input string is {@code null} or blank.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -128,7 +128,8 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a ByteList created from the parsed values, or {@code null} if input is {@code null} or empty
+     * @return a ByteList created from the parsed values, or {@code null} if input is {@code null} or blank
+     * @throws NumberFormatException if any element in the string cannot be parsed as a byte
      * @see #valueOf(Object)
      * @see #stringOf(ByteList)
      */

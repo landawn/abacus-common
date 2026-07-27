@@ -67,6 +67,9 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
  * <li>Type conversion support to other primitive stream types</li>
  * </ul>
  *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public ShortStream factory methods rather than instantiating this class directly.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * short[] data = {1, 2, 3, 4, 5};
@@ -84,16 +87,31 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
  * System.out.println("Average: " + summary.getAverage());
  * }</pre>
  *
+ * @see ShortStream
  */
 class ArrayShortStream extends AbstractShortStream {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final short[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
      * Constructs an ArrayShortStream from the entire short array.
+     * This constructor creates a stream that processes all elements in the provided array
+     * from index 0 to the end of the array.
      *
-     * @param values the short array to stream
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] data = {1, 2, 3, 4, 5};
+     * ShortStream stream = new ArrayShortStream(data);
+     * }</pre>
+     *
+     * @param values the short array to stream over
      */
     ArrayShortStream(final short[] values) {
         this(values, 0, values.length);
@@ -101,8 +119,18 @@ class ArrayShortStream extends AbstractShortStream {
 
     /**
      * Constructs an ArrayShortStream from the entire short array with close handlers.
+     * The close handlers will be executed when the stream is closed, allowing for
+     * resource cleanup or other post-processing operations.
      *
-     * @param values the short array to stream
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] data = {1, 2, 3, 4, 5};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * ShortStream stream = new ArrayShortStream(data, handlers);
+     * }</pre>
+     *
+     * @param values the short array to stream over
      * @param closeHandlers handlers to execute when the stream is closed, can be null
      */
     ArrayShortStream(final short[] values, final Collection<LocalRunnable> closeHandlers) {
@@ -111,8 +139,17 @@ class ArrayShortStream extends AbstractShortStream {
 
     /**
      * Constructs an ArrayShortStream from the entire short array with sorting state and close handlers.
+     * The sorted flag indicates whether the array is already in sorted order, which can be used
+     * to optimize certain stream operations.
      *
-     * @param values the short array to stream
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] sortedData = {1, 2, 3, 4, 5};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * ShortStream stream = new ArrayShortStream(sortedData, true, handlers);
+     * }</pre>
+     *
+     * @param values the short array to stream over
      * @param sorted whether the array elements are in sorted order
      * @param closeHandlers handlers to execute when the stream is closed, can be null
      */
@@ -122,10 +159,19 @@ class ArrayShortStream extends AbstractShortStream {
 
     /**
      * Constructs an ArrayShortStream from a range within the short array.
+     * This allows streaming over a subset of the array elements, from the specified
+     * start index (inclusive) to the end index (exclusive).
      *
-     * @param values the short array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] data = {1, 2, 3, 4, 5, 6, 7, 8};
+     * // Stream over elements from index 2 to 5 (exclusive): {3, 4, 5}
+     * ShortStream stream = new ArrayShortStream(data, 2, 5);
+     * }</pre>
+     *
+     * @param values the short array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
@@ -135,10 +181,20 @@ class ArrayShortStream extends AbstractShortStream {
 
     /**
      * Constructs an ArrayShortStream from a range within the short array with close handlers.
+     * Combines range specification with close handler support for resource management.
      *
-     * @param values the short array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] data = {1, 2, 3, 4, 5, 6, 7, 8};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * // Stream over elements from index 2 to 5 with close handlers
+     * ShortStream stream = new ArrayShortStream(data, 2, 5, handlers);
+     * }</pre>
+     *
+     * @param values the short array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
      * @param closeHandlers handlers to execute when the stream is closed, can be null
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
@@ -149,11 +205,21 @@ class ArrayShortStream extends AbstractShortStream {
 
     /**
      * Constructs an ArrayShortStream from a range within the short array with all configuration options.
-     * This is the primary constructor that all other constructors delegate to.
+     * This is the primary constructor that all other constructors delegate to. It provides full
+     * control over the stream configuration including range, sorting state, and close handlers.
      *
-     * @param values the short array to stream
-     * @param fromIndex the start index (inclusive) of the range
-     * @param toIndex the end index (exclusive) of the range
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] sortedData = {1, 2, 3, 4, 5, 6, 7, 8};
+     * List<LocalRunnable> handlers = new ArrayList<>();
+     * handlers.add(() -> System.out.println("Stream closed"));
+     * // Stream over sorted elements from index 2 to 6 with close handlers
+     * ShortStream stream = new ArrayShortStream(sortedData, 2, 6, true, handlers);
+     * }</pre>
+     *
+     * @param values the short array to stream over
+     * @param fromIndex the start index (inclusive) of the range to stream
+     * @param toIndex the end index (exclusive) of the range to stream
      * @param sorted whether the array elements in the range are in sorted order
      * @param closeHandlers handlers to execute when the stream is closed, can be null
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
@@ -1591,10 +1657,11 @@ class ArrayShortStream extends AbstractShortStream {
     }
 
     @Override
-    protected ShortStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected ShortStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayShortStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelArrayShortStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 

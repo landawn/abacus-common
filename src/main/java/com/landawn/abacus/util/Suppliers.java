@@ -116,164 +116,167 @@ import com.landawn.abacus.util.function.Supplier;
  */
 public final class Suppliers {
 
-    /** The Constant UUID. */
+    /** Shared supplier that generates a new hyphenated UUID string on every call. */
     private static final Supplier<String> UUID = Strings::uuid;
 
-    /** The Constant GUID. */
+    /** Shared supplier that generates a new UUID string without hyphens on every call. */
     private static final Supplier<String> GUID = Strings::uuidWithoutHyphens;
 
-    /** The Constant EMPTY_BOOLEAN_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code boolean[]}. */
     private static final Supplier<boolean[]> EMPTY_BOOLEAN_ARRAY = () -> N.EMPTY_BOOLEAN_ARRAY;
 
-    /** The Constant EMPTY_CHAR_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code char[]}. */
     private static final Supplier<char[]> EMPTY_CHAR_ARRAY = () -> N.EMPTY_CHAR_ARRAY;
 
-    /** The Constant EMPTY_BYTE_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code byte[]}. */
     private static final Supplier<byte[]> EMPTY_BYTE_ARRAY = () -> N.EMPTY_BYTE_ARRAY;
 
-    /** The Constant EMPTY_SHORT_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code short[]}. */
     private static final Supplier<short[]> EMPTY_SHORT_ARRAY = () -> N.EMPTY_SHORT_ARRAY;
 
-    /** The Constant EMPTY_INT_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code int[]}. */
     private static final Supplier<int[]> EMPTY_INT_ARRAY = () -> N.EMPTY_INT_ARRAY;
 
-    /** The Constant EMPTY_LONG_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code long[]}. */
     private static final Supplier<long[]> EMPTY_LONG_ARRAY = () -> N.EMPTY_LONG_ARRAY;
 
-    /** The Constant EMPTY_FLOAT_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code float[]}. */
     private static final Supplier<float[]> EMPTY_FLOAT_ARRAY = () -> N.EMPTY_FLOAT_ARRAY;
 
-    /** The Constant EMPTY_DOUBLE_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code double[]}. */
     private static final Supplier<double[]> EMPTY_DOUBLE_ARRAY = () -> N.EMPTY_DOUBLE_ARRAY;
 
-    /** The Constant EMPTY_STRING_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code String[]}. */
     private static final Supplier<String[]> EMPTY_STRING_ARRAY = () -> N.EMPTY_STRING_ARRAY;
 
-    /** The Constant EMPTY_OBJECT_ARRAY. */
+    /** Shared supplier that always returns the same zero-length {@code Object[]}. */
     private static final Supplier<Object[]> EMPTY_OBJECT_ARRAY = () -> N.EMPTY_OBJECT_ARRAY;
 
-    /** The Constant EMPTY_STRING. */
+    /** Shared supplier that always returns the empty {@code String}. */
     private static final Supplier<String> EMPTY_STRING = () -> Strings.EMPTY;
 
-    /** The Constant BOOLEAN_LIST. */
+    /** Shared supplier that creates a new empty {@link BooleanList} on every call. */
     private static final Supplier<BooleanList> BOOLEAN_LIST = BooleanList::new;
 
-    /** The Constant CHAR_LIST. */
+    /** Shared supplier that creates a new empty {@link CharList} on every call. */
     private static final Supplier<CharList> CHAR_LIST = CharList::new;
 
-    /** The Constant BYTE_LIST. */
+    /** Shared supplier that creates a new empty {@link ByteList} on every call. */
     private static final Supplier<ByteList> BYTE_LIST = ByteList::new;
 
-    /** The Constant SHORT_LIST. */
+    /** Shared supplier that creates a new empty {@link ShortList} on every call. */
     private static final Supplier<ShortList> SHORT_LIST = ShortList::new;
 
-    /** The Constant INT_LIST. */
+    /** Shared supplier that creates a new empty {@link IntList} on every call. */
     private static final Supplier<IntList> INT_LIST = IntList::new;
 
-    /** The Constant LONG_LIST. */
+    /** Shared supplier that creates a new empty {@link LongList} on every call. */
     private static final Supplier<LongList> LONG_LIST = LongList::new;
 
-    /** The Constant FLOAT_LIST. */
+    /** Shared supplier that creates a new empty {@link FloatList} on every call. */
     private static final Supplier<FloatList> FLOAT_LIST = FloatList::new;
 
-    /** The Constant DOUBLE_LIST. */
+    /** Shared supplier that creates a new empty {@link DoubleList} on every call. */
     private static final Supplier<DoubleList> DOUBLE_LIST = DoubleList::new;
 
-    /** The Constant LIST. */
+    /** Shared supplier that creates a new empty {@link ArrayList} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super List> LIST = ArrayList::new;
 
-    /** The Constant LINKED_LIST. */
+    /** Shared supplier that creates a new empty {@link LinkedList} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super LinkedList> LINKED_LIST = LinkedList::new;
 
-    /** The Constant SET. */
+    /** Shared supplier that creates a new empty {@link java.util.HashSet} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Set> SET = N::newHashSet;
 
-    /** The Constant LINKED_HASH_SET. */
+    /** Shared supplier that creates a new empty {@link LinkedHashSet} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Set> LINKED_HASH_SET = N::newLinkedHashSet;
 
-    /** The Constant TREE_SET. */
+    /** Shared supplier that creates a new empty, naturally ordered {@link TreeSet} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super TreeSet> TREE_SET = TreeSet::new;
 
-    /** The Constant QUEUE. */
+    /** Shared supplier that creates a new empty {@link LinkedList} typed as a {@link Queue} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Queue> QUEUE = LinkedList::new;
 
-    /** The Constant DEQUE. */
+    /** Shared supplier that creates a new empty {@link LinkedList} typed as a {@link Deque} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Deque> DEQUE = LinkedList::new;
 
-    /** The Constant ARRAY_DEQUE. */
+    /** Shared supplier that creates a new empty {@link ArrayDeque} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super ArrayDeque> ARRAY_DEQUE = ArrayDeque::new;
 
-    /** The Constant LINKED_BLOCKING_QUEUE. */
+    /** Shared supplier that creates a new unbounded {@link LinkedBlockingQueue} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE = LinkedBlockingQueue::new;
 
-    /** The Constant LINKED_BLOCKING_DEQUE. */
+    /** Shared supplier that creates a new unbounded {@link LinkedBlockingDeque} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE = LinkedBlockingDeque::new;
 
-    /** The Constant CONCURRENT_LINKED_QUEUE. */
+    /** Shared supplier that creates a new empty {@link ConcurrentLinkedQueue} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super ConcurrentLinkedQueue> CONCURRENT_LINKED_QUEUE = ConcurrentLinkedQueue::new;
 
-    /** The Constant PRIORITY_QUEUE. */
+    /** Shared supplier that creates a new empty, naturally ordered {@link PriorityQueue} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super PriorityQueue> PRIORITY_QUEUE = PriorityQueue::new;
 
-    /** The Constant MAP. */
+    /** Shared supplier that creates a new empty {@link HashMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Map> MAP = N::newHashMap;
 
-    /** The Constant LINKED_HASH_MAP. */
+    /** Shared supplier that creates a new empty {@link LinkedHashMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Map> LINKED_HASH_MAP = N::newLinkedHashMap;
 
-    /** The Constant IDENTITY_HASH_MAP. */
+    /** Shared supplier that creates a new empty {@link IdentityHashMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super IdentityHashMap> IDENTITY_HASH_MAP = IdentityHashMap::new;
 
-    /** The Constant TREE_MAP. */
+    /** Shared supplier that creates a new empty, naturally ordered {@link TreeMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super TreeMap> TREE_MAP = TreeMap::new;
 
-    /** The Constant CONCURRENT_HASH_MAP. */
+    /** Shared supplier that creates a new empty {@link ConcurrentHashMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super ConcurrentHashMap> CONCURRENT_HASH_MAP = ConcurrentHashMap::new;
 
-    /** The Constant CONCURRENT_SKIP_LIST_MAP. */
+    /** Shared supplier that creates a new empty {@link ConcurrentSkipListMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super ConcurrentSkipListMap> CONCURRENT_SKIP_LIST_MAP = ConcurrentSkipListMap::new;
 
-    /** The Constant CONCURRENT_HASH_SET. */
+    /** Shared supplier that creates a new empty concurrent {@link Set} backed by a {@link ConcurrentHashMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Set> CONCURRENT_HASH_SET = ConcurrentHashMap::newKeySet;
 
-    /** The Constant BI_MAP. */
+    /** Shared supplier that creates a new empty {@link BiMap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super BiMap> BI_MAP = BiMap::new;
 
-    /** The Constant MULTISET. */
+    /** Shared supplier that creates a new empty {@link Multiset} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super Multiset> MULTISET = Multiset::new;
 
-    /** The Constant LIST_MULTIMAP. */
+    /** Shared supplier that creates a new empty {@link ListMultimap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super ListMultimap> LIST_MULTIMAP = N::newListMultimap;
 
-    /** The Constant SET_MULTIMAP. */
+    /** Shared supplier that creates a new empty {@link SetMultimap} on every call. */
     @SuppressWarnings("rawtypes")
     private static final Supplier<? super SetMultimap> SET_MULTIMAP = N::newSetMultimap;
 
-    /** The Constant STRING_BUILDER. */
+    /** Shared supplier that creates a new empty {@link StringBuilder} on every call. */
     private static final Supplier<StringBuilder> STRING_BUILDER = StringBuilder::new;
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private Suppliers() {
         // utility class
     }
@@ -285,7 +288,19 @@ public final class Suppliers {
         return () -> N.requireNonNull(supplier.get(), "'" + argumentName + "' returned null");
     }
 
-    private static boolean canInstantiateWithoutProbe(final Class<?> targetType) {
+    /**
+     * Tests whether an instance of {@code targetType} can be created without first invoking a
+     * constructor to find out. This is {@code true} when the class declares a no-argument constructor,
+     * or when it is a non-static member or anonymous class, whose declared constructor takes the
+     * enclosing instance and so is not found by a no-argument constructor lookup but is still handled
+     * by {@link N#newInstance(Class)}.
+     *
+     * <p>Package-private: {@link IntFunctions} applies the same rule for its collection/map factories.</p>
+     *
+     * @param targetType the class to test, must not be {@code null}
+     * @return {@code true} if {@code targetType} has a usable no-argument construction path, {@code false} otherwise
+     */
+    static boolean canInstantiateWithoutProbe(final Class<?> targetType) {
         return ClassUtil.getDeclaredConstructor(targetType) != null
                 || (!Modifier.isStatic(targetType.getModifiers()) && ClassUtil.isAnonymousOrMemberClass(targetType));
     }
@@ -1605,7 +1620,7 @@ public final class Suppliers {
      * and their subtypes. The method uses a thread-safe cache to avoid creating duplicate suppliers for the same type.
      * Concrete mutable classes are preserved when they have a usable no-argument construction path. Interfaces,
      * abstract classes, and immutable collection types are mapped to the mutable implementations listed below.</p>
-    
+     *
      * <p>Calling this method does not invoke a concrete collection's constructor. Each invocation of the returned
      * supplier performs one construction attempt and, for the built-in and normally constructible concrete types,
      * returns a fresh empty collection. An exception thrown by a concrete constructor is propagated by the returned
@@ -1723,7 +1738,7 @@ public final class Suppliers {
      * TreeMap, and concurrent maps. The method uses a thread-safe cache to avoid creating duplicate suppliers for the same type.
      * Concrete mutable classes are preserved when they have a usable no-argument construction path. Interfaces,
      * abstract classes, {@code EnumMap}, and immutable map types use the mutable fallbacks listed below.</p>
-    
+     *
      * <p>Calling this method does not invoke a concrete map's constructor. Each invocation of the returned supplier
      * performs one construction attempt and, for the built-in and normally constructible concrete types, returns a
      * fresh empty map. An exception thrown by a concrete constructor is propagated by the returned supplier's

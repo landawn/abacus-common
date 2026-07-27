@@ -27,8 +27,11 @@ import com.landawn.abacus.util.stream.LongStream;
  * A specialized iterator for primitive long values. This class provides an efficient way to iterate over
  * long values without the overhead of boxing/unboxing that comes with using Iterator&lt;Long&gt;.
  *
- * <p>This abstract class extends ImmutableIterator to ensure that the remove() operation is not supported,
- * making all LongIterator instances immutable in terms of structural modification.</p>
+ * <p>This abstract class extends {@link ImmutableIterator} to ensure that the {@code remove()} operation
+ * is not supported. The traversal position itself is mutable and is consumed as values are read, so
+ * instances are neither reusable nor safe for concurrent consumption. Transformation methods such as
+ * {@code skip()}, {@code limit()} and {@code filter()} return wrappers over this same source iterator;
+ * consuming a wrapper also advances the source.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -98,7 +101,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates a {@code LongIterator} from the specified long array.
      *
      * <p>If the array is {@code null} or empty, returns an empty iterator.
-     * The iterator will iterate over all elements in the array from start to end.</p>
+     * The iterator will iterate over all elements in the array from start to end. The non-empty
+     * iterator is backed by the supplied array, so changes made before an element is consumed are visible.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -119,7 +123,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
      * iterator is returned. A {@code null} array is treated as length 0 for range validation,
-     * so only {@code fromIndex == toIndex == 0} is valid.</p>
+     * so only {@code fromIndex == toIndex == 0} is valid. A non-empty iterator is backed by
+     * the supplied array, so changes made before an element is consumed are visible.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -132,7 +137,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code LongIterator} over the specified range, or an empty iterator if the validated range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -178,11 +183,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates a {@code LongIterator} that is initialized lazily using the provided {@link Supplier}.
      * The actual iterator is not created until the first method call ({@code hasNext()} or {@code nextLong()}).
      * This is useful for deferring expensive iterator creation until it is actually needed.
+     * The supplier is invoked at most once. If it throws a runtime exception or error, that same
+     * failure is cached and rethrown by subsequent access attempts.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongIterator iter = LongIterator.defer(() -> LongIterator.of(expensiveMethod()));
-     * // expensiveMethod() is not called until iter.hasNext() or iter.nextLong() is invoked
+     * LongIterator iter = LongIterator.defer(() -> LongIterator.of(1L, 2L, 3L));
+     * // The supplier is not invoked until iter.hasNext() or iter.nextLong() is called
      * }</pre>
      *
      * @param iteratorSupplier a {@link Supplier} that provides the {@code LongIterator} when needed;
@@ -707,8 +714,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator.of(10L, 20L, 30L).foreachIndexed((index, value) ->
-     *     System.out.println("Index: " + index + ", Value: " + value)
-     * );
+     *     System.out.println("Index: " + index + ", Value: " + value));
      * // Prints:
      * // Index: 0, Value: 10
      * // Index: 1, Value: 20
@@ -718,8 +724,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element, accepting index and value; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if another element would require an index greater than
-     *         {@link Integer#MAX_VALUE}
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntLongConsumer<E> action) throws IllegalArgumentException, E {

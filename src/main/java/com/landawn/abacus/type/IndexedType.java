@@ -134,7 +134,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @param str the JSON array string to parse (e.g., {@code "[5,\"hello\"]"}); may be {@code null} or empty
      * @return the deserialized indexed value
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the array has fewer than two elements
+     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer than two elements
      * @see #valueOf(Object)
      * @see #stringOf(Indexed)
      */

@@ -41,7 +41,7 @@ import java.io.OutputStream;
  * <pre>{@code
  * try (FileOutputStream fileOut = new FileOutputStream("data.lz4");
  *      LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut)) {
- *     lz4Out.write(data);
+ *     lz4Out.write(new byte[] { 1, 2, 3 });
  * }
  * }</pre>
  *
@@ -58,8 +58,10 @@ public final class LZ4BlockOutputStream extends OutputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileOutputStream fileOut = new FileOutputStream("compressed.lz4");
-     * LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut);
+     * try (FileOutputStream fileOut = new FileOutputStream("compressed.lz4");
+     *      LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut)) {
+     *     lz4Out.write(new byte[] { 1, 2, 3 });
+     * }
      * }</pre>
      *
      * @param os the output stream to write compressed data to; must not be {@code null}
@@ -81,9 +83,11 @@ public final class LZ4BlockOutputStream extends OutputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileOutputStream fileOut = new FileOutputStream("compressed.lz4");
-     * // Use 1MB blocks for a better compression ratio
-     * LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut, 1024 * 1024);
+     * try (FileOutputStream fileOut = new FileOutputStream("compressed.lz4");
+     *      // Use 1 MB blocks for a better compression ratio.
+     *      LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut, 1024 * 1024)) {
+     *     lz4Out.write(new byte[] { 1, 2, 3 });
+     * }
      * }</pre>
      *
      * @param os the output stream to write compressed data to; must not be {@code null}

@@ -167,13 +167,14 @@ public abstract class Wrapper<T> implements Immutable {
      * // Case-insensitive string wrapper
      * String text = "Hello";
      * Wrapper<String> caseInsensitive = Wrapper.of(text,
-     *     s -> s.toLowerCase().hashCode(),
-     *     (s1, s2) -> s1.equalsIgnoreCase(s2)
+     *     s -> s.toLowerCase(java.util.Locale.ROOT).hashCode(),
+     *     (s1, s2) -> s1.toLowerCase(java.util.Locale.ROOT).equals(s2.toLowerCase(java.util.Locale.ROOT))
      * );
      * }</pre>
      *
      * @param <T> the type of the value to be wrapped.
-     * @param value the value to be wrapped; can be {@code null}.
+     * @param value the value to be wrapped; can be {@code null}, in which case the supplied
+     *              functions must accept {@code null}.
      * @param hashFunction the function to calculate the hash code of the wrapped value;
      *                     must not be {@code null} and must be consistent with {@code equalsFunction}.
      * @param equalsFunction the function to compare the wrapped value with other objects;
@@ -228,7 +229,8 @@ public abstract class Wrapper<T> implements Immutable {
      * }</pre>
      *
      * @param <T> the type of the value to be wrapped.
-     * @param value the value to be wrapped; can be {@code null}.
+     * @param value the value to be wrapped; can be {@code null}, in which case all supplied
+     *              functions must accept {@code null}.
      * @param hashFunction the function to calculate the hash code of the wrapped value;
      *                     must not be {@code null} and must be consistent with {@code equalsFunction}.
      * @param equalsFunction the function to compare the wrapped value with other objects;

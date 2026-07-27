@@ -47,6 +47,11 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
     }
 
     @Test
+    public void testRejectedTypeAttributeDoesNotFallBackToNodeName() {
+        assertRejectedTypeAttributeDoesNotFallBackToNodeName(abacusXMLDOMParser);
+    }
+
+    @Test
     public void test_prettyFormat_2() {
         Account account = createAccount(Account.class);
 

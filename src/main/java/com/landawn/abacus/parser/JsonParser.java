@@ -93,7 +93,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *
      * // For collections
      * String jsonArray = "[{\"id\":1},{\"id\":2}]";
-     * List<Item> items = parser.parse(jsonArray, Type.of(new TypeReference<List<Item>>() {}));
+     * List<Item> items = parser.parse(jsonArray, Type.of(new com.landawn.abacus.util.TypeReference<List<Item>>() {}));
      * }</pre>
      *
      * @param <T> the target type parameter
@@ -204,6 +204,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns without
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
@@ -228,6 +229,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
@@ -249,6 +251,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns without
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
@@ -272,6 +275,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the collection is unmodifiable
@@ -293,6 +297,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns
      *               without modifying {@code output}); must contain a JSON object when non-empty
      * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
@@ -316,6 +321,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *               without modifying {@code output}); must contain a JSON object when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
      * @throws com.landawn.abacus.exception.ParsingException if the source contains invalid JSON
      * @throws UnsupportedOperationException if the map is unmodifiable
@@ -382,7 +388,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * JsonDeserConfig config = new JsonDeserConfig()
      *     .setIgnoreUnmatchedProperty(true);
      * String json = "prefix{\"name\":\"John\",\"extra\":\"ignored\"}suffix";
-     * Person person = parser.deserialize(json, 6, 40, config, Type.of(Person.class));
+     * Person person = parser.deserialize(json, 6, 39, config, Type.of(Person.class));
      * }</pre>
      *
      * @param <T> the target type
@@ -409,7 +415,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * JsonDeserConfig config = new JsonDeserConfig()
      *     .setIgnoreUnmatchedProperty(true);
      * String json = "prefix{\"name\":\"John\",\"extra\":\"ignored\"}suffix";
-     * Person person = parser.deserialize(json, 6, 40, config, Person.class);
+     * Person person = parser.deserialize(json, 6, 39, config, Person.class);
      * }</pre>
      *
      * @param <T> the target type
@@ -445,7 +451,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the element type parameter
      * @param source the JSON string containing a JSON array (may be {@code null} or empty, in which case
      *               an empty stream is returned)
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the source is not a JSON array
@@ -471,7 +477,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string containing a JSON array (may be {@code null} or empty, in which case
      *               an empty stream is returned)
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the source is not a JSON array
@@ -497,7 +503,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *
      * @param <T> the element type parameter
      * @param source the JSON file containing a JSON array, must exist and be readable
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the file content is not a JSON array
@@ -523,7 +529,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the element type parameter
      * @param source the JSON file containing a JSON array, must exist and be readable
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the file content is not a JSON array
@@ -550,7 +556,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the element type parameter
      * @param source the input stream containing a JSON array, must not be {@code null}
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the returned stream is closed
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code source} is {@code null} or {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the source content is not a JSON array
@@ -578,7 +584,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the input stream containing a JSON array, must not be {@code null}
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the returned stream is closed
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code source} is {@code null} or {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the source content is not a JSON array
@@ -595,9 +601,9 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader reader = new FileReader("data.json");
-     *     Stream<Product> stream             = parser.stream(reader, true, Type.of(Product.class))) {
+     *      Stream<Product> stream = parser.stream(reader, true, Type.of(Product.class))) {
      *     Map<String, List<Product>> grouped = stream
-     *         .collect(Collectors.groupingBy(Product::getCategory));
+     *         .collect(java.util.stream.Collectors.groupingBy(Product::getCategory));
      * }
      * // Reader is automatically closed when stream is closed
      * }</pre>
@@ -605,7 +611,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param <T> the element type parameter
      * @param source the reader containing a JSON array, must not be {@code null}
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be closed when the returned stream is closed
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code source} is {@code null} or {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the source content is not a JSON array
@@ -633,7 +639,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the reader containing a JSON array, must not be {@code null}
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be closed when the returned stream is closed
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param elementType the type of array elements. Only Bean/Map/Collection/Array/Dataset element types are supported.
+     * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code source} is {@code null} or {@code elementType} is not one of the supported streaming element types
      * @throws UnsupportedOperationException if the source content is not a JSON array

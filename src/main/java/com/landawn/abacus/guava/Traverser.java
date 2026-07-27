@@ -62,7 +62,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @param <T> the type of nodes in the graph
  * @see com.google.common.graph.Traverser
- * @see <a href="http://google.github.io/guava/releases/23.3-android/api/docs/">Guava Documentation</a>
+ * @see <a href="https://guava.dev/releases/snapshot-jre/api/docs/">Guava Documentation</a>
  */
 public final class Traverser<T> {
 
@@ -126,6 +126,9 @@ public final class Traverser<T> {
      */
     public static final Traverser<Path> PATHS = wrap(com.google.common.io.MoreFiles.fileTraverser());
 
+    /**
+     * The wrapped Google Guava traverser that performs the actual traversal.
+     */
     private final com.google.common.graph.Traverser<T> gTraverser;
 
     /**
@@ -207,11 +210,15 @@ public final class Traverser<T> {
      *
      * <p><b>Note on binary trees:</b>
      *
-     * <p>This method can be used to traverse over a binary tree. Given methods {@code
-     * leftChild(node)} and {@code rightChild(node)}, this method can be called as:
+     * <p>This method can be used to traverse a binary tree whose child accessors may return
+     * {@code null}. Null children must be filtered out because successor iterables may not contain nulls:
      *
      * <pre>{@code
-     * Traverser.forTree(node -> Arrays.asList(leftChild(node), rightChild(node)));
+     * record BinaryNode(BinaryNode left, BinaryNode right) {}
+     * Traverser<BinaryNode> binaryTree = Traverser.forTree(node ->
+     *     java.util.stream.Stream.of(node.left(), node.right())
+     *         .filter(java.util.Objects::nonNull)
+     *         .toList());
      * }</pre>
      *
      * <p><b>Usage Examples:</b></p>

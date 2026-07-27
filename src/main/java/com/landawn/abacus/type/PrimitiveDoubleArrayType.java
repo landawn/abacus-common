@@ -117,7 +117,8 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return the parsed double array, or {@code null} if input is {@code null}, empty, or blank
+     * @return the parsed double array; {@code null} if input is {@code null}, empty, or blank;
+     *         or an empty array if input is {@code "[]"}
      * @throws NumberFormatException if any element in the string cannot be parsed as a double
      * @see #valueOf(Object)
      * @see #stringOf(double[])

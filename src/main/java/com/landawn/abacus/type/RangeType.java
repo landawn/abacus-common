@@ -55,6 +55,10 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
 
+    /**
+     * Shared {@code String} type handler used by {@link #serializeTo(CharacterWriter, Range, JsonXmlSerConfig)}
+     * to emit the bracket notation produced by {@link #stringOf(Range)} as a JSON/XML string value.
+     */
     static final Type<String> strType = TypeFactory.getType(String.class);
 
     /**

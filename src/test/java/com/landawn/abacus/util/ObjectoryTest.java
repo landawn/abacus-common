@@ -851,6 +851,27 @@ public class ObjectoryTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Objectory.createByteArrayOutputStream(-1));
     }
 
+    @Test
+    public void testWriterAndReaderFactoriesRejectNullBeforePolling() {
+        Objectory.recycle(Objectory.createBufferedWriter());
+        Objectory.recycle(Objectory.createBufferedXmlWriter());
+        Objectory.recycle(Objectory.createBufferedJsonWriter());
+        Objectory.recycle(Objectory.createBufferedCsvWriter());
+        Objectory.recycle(Objectory.createBufferedReader("pooled"));
+
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedWriter((OutputStream) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedWriter((java.io.Writer) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedXmlWriter((OutputStream) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedXmlWriter((java.io.Writer) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedJsonWriter((OutputStream) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedJsonWriter((java.io.Writer) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedCsvWriter((OutputStream) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedCsvWriter((java.io.Writer) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedReader((String) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedReader((java.io.InputStream) null));
+        Assertions.assertThrows(NullPointerException.class, () -> Objectory.createBufferedReader((java.io.Reader) null));
+    }
+
     /** Exhausting and re-recycling repeatedly must not leak or block. */
     @Test
     public void testListPool_RepeatedCycles() {

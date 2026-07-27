@@ -47,8 +47,18 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * MyClass obj = FastJson.fromJson(json, MyClass.class);
  * }</pre>
  *
- * <p>Caller-supplied streams, readers, and writers remain caller-owned and are not closed. File
- * overloads open and close their own stream.</p>
+ * <p>Caller-supplied writers and output streams are not closed. Readers and input streams passed to
+ * the {@code fromJson} overloads that delegate straight to {@code JSON.parseObject} <i>are</i> closed
+ * by the underlying parser, which wraps them in a try-with-resources {@code JSONReader}; the
+ * {@code JSONReader.Context} overloads read the source into a string first and leave it open. Close
+ * caller-supplied sources yourself rather than relying on either behaviour. File overloads open and
+ * close their own stream.</p>
+ *
+ * <p><b>Argument validation:</b> every method rejects a {@code null} {@code targetType},
+ * {@code typeReference}, {@code context}, {@code features} array or {@code output} target with an
+ * {@link IllegalArgumentException}; the {@code Reader} and byte-array-range overloads reject a
+ * {@code null} source the same way. A {@code null} JSON {@code String} is a legal input and yields
+ * {@code null}. Individual methods list only the exceptions beyond this shared contract.</p>
  *
  * <p><b>Security:</b> This class does not enable automatic type resolution. Enabling
  * {@link JSONReader.Feature#SupportAutoType} allows JSON input to influence the Java type being
@@ -247,7 +257,9 @@ public final class FastJson {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
-     * FastJson.toJson(person, new FileOutputStream("person.json"));
+     * try (OutputStream output = new java.io.FileOutputStream("person.json")) {
+     *     FastJson.toJson(person, output);
+     * }
      * }</pre>
      *
      * @param obj the object to be serialized to JSON
@@ -309,7 +321,9 @@ public final class FastJson {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person person = new Person("John", 30);
-     * FastJson.toJson(person, new FileWriter("person.json"));
+     * try (Writer output = new java.io.FileWriter("person.json")) {
+     *     FastJson.toJson(person, output);
+     * }
      * }</pre>
      *
      * @param obj the object to be serialized to JSON
@@ -424,6 +438,10 @@ public final class FastJson {
      * @param len the number of bytes to read from the starting position
      * @param targetType the Class object representing the target type
      * @return the deserialized object of type T, or {@code null} if the JSON represents null
+     * @throws IllegalArgumentException if {@code len} is negative (in addition to the shared
+     *         {@code null}-argument contract described in the class documentation)
+     * @throws IndexOutOfBoundsException if {@code offset} is negative, or if {@code offset + len}
+     *         is greater than {@code json.length}
      */
     @MayReturnNull
     public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
@@ -655,8 +673,9 @@ public final class FastJson {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("person.json");
-     * Person person = FastJson.fromJson(reader, Person.class);
+     * try (Reader reader = new java.io.FileReader("person.json")) {
+     *     Person person = FastJson.fromJson(reader, Person.class);
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -678,8 +697,9 @@ public final class FastJson {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("person.json");
-     * Person person = FastJson.fromJson(reader, Person.class, JSONReader.Feature.SupportSmartMatch);
+     * try (Reader reader = new java.io.FileReader("person.json")) {
+     *     Person person = FastJson.fromJson(reader, Person.class, JSONReader.Feature.SupportSmartMatch);
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -734,9 +754,10 @@ public final class FastJson {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("people.json");
-     * Type listType = new TypeReference<List<Person>>(){}.getType();
-     * List<Person> people = FastJson.fromJson(reader, listType);
+     * try (Reader reader = new java.io.FileReader("people.json")) {
+     *     Type listType = new TypeReference<List<Person>>(){}.getType();
+     *     List<Person> people = FastJson.fromJson(reader, listType);
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -759,9 +780,10 @@ public final class FastJson {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Reader reader = new FileReader("people.json");
-     * Type listType = new TypeReference<List<Person>>(){}.getType();
-     * List<Person> people = FastJson.fromJson(reader, listType, JSONReader.Feature.SupportSmartMatch);
+     * try (Reader reader = new java.io.FileReader("people.json")) {
+     *     Type listType = new TypeReference<List<Person>>(){}.getType();
+     *     List<Person> people = FastJson.fromJson(reader, listType, JSONReader.Feature.SupportSmartMatch);
+     * }
      * }</pre>
      *
      * @param <T> the type of the target object

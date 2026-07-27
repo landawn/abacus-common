@@ -36,10 +36,14 @@ import com.landawn.abacus.util.u.Optional;
  * constructing formatted strings from various data types including primitives, arrays, collections,
  * maps, and Java beans with extensive customization options for output formatting.
  *
- * <p>Joiner excels at creating formatted strings for logging, output generation, CSV creation, and
+ * <p>Joiner excels at creating formatted strings for logging, output generation, delimited text, and
  * any scenario requiring controlled string concatenation. It supports automatic {@code null} handling,
  * whitespace trimming, conditional appending, and efficient buffer management for high-performance
  * string building operations with minimal memory allocation overhead.</p>
+ *
+ * <p><b>Escaping:</b> This class only inserts delimiters; it does not quote or escape CSV fields,
+ * HTML/XML, or SQL. Use a format-aware encoder, and use parameterized statements for SQL, whenever
+ * input may contain delimiters, markup, or untrusted data.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -504,7 +508,9 @@ public final class Joiner implements Closeable {
 
     /**
      * Configures the joiner to skip {@code null} elements instead of adding them to the result.
-     * When enabled, {@code null} values will be ignored during appending operations.
+     * This applies to the single-element and unfiltered {@code appendAll} methods. Filtered
+     * overloads let their predicate decide inclusion, and entry methods still render null keys
+     * or values because each entry is one joined element.
      * By default, {@code null} values are converted to the string specified by {@link #useForNull(String)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -523,7 +529,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Sets the string representation to use for {@code null} values.
-     * This setting is ignored if {@link #skipNulls()} has been called.
+     * Operations that honor {@link #skipNulls()} do not use this text for skipped elements.
      * The default value is "null".
      *
      * <p><b>Usage Examples:</b></p>
@@ -699,8 +705,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * StringBuilder sb = new StringBuilder("test");
-     * Joiner.with(", ").append("hello").append(sb).toString();   // returns: "hello, test"
+     * CharSequence cs = new StringBuilder("test");
+     * Joiner.with(", ").append("hello").append(cs).toString();   // returns: "hello, test"
      * }</pre>
      *
      * @param element the CharSequence to append, may be null
@@ -2341,7 +2347,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> map = new HashMap<>();
+     * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("a", 1);
      * map.put("b", 2);
      * Joiner.with(", ").appendEntries(map).toString();   // returns: "a=1, b=2"
@@ -2422,7 +2428,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> map = new HashMap<>();
+     * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("a", 1); map.put("b", 2); map.put("c", 3);
      * Joiner.with(", ").appendEntries(map, e -> e.getValue() > 1).toString();   // returns: "b=2, c=3"
      * }</pre>
@@ -2475,7 +2481,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> map = new HashMap<>();
+     * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("apple", 5); map.put("banana", 3); map.put("cherry", 8);
      * Joiner.with(", ").appendEntries(map, (k, v) -> k.length() > 5 && v > 4).toString();   // returns: "cherry=8"
      * }</pre>
@@ -2590,7 +2596,10 @@ public final class Joiner implements Closeable {
      * class Person {
      *     String name = "John";
      *     int age = 30;
-     *     // getters/setters...
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
      * }
      * Person p = new Person();
      * Joiner.with(", ").appendBean(p).toString();   // returns: "name=John, age=30"
@@ -2627,7 +2636,12 @@ public final class Joiner implements Closeable {
      *     private String name = "John";
      *     private int age = 30;
      *     private String city = "NYC";
-     *     // getter/setter methods...
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
+     *     public String getCity() { return city; }
+     *     public void setCity(String city) { this.city = city; }
      * }
      *
      * Person person = new Person();
@@ -2697,7 +2711,14 @@ public final class Joiner implements Closeable {
      *     String name = "Alice";
      *     String email = null;
      *     String password = "secret";
-     *     // getters/setters...
+     *     public String getId() { return id; }
+     *     public void setId(String id) { this.id = id; }
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public String getEmail() { return email; }
+     *     public void setEmail(String email) { this.email = email; }
+     *     public String getPassword() { return password; }
+     *     public void setPassword(String password) { this.password = password; }
      * }
      * User u = new User();
      * Set<String> ignored = new HashSet<>(Arrays.asList("password"));
@@ -2769,7 +2790,12 @@ public final class Joiner implements Closeable {
      *     String name = "Laptop";
      *     double price = 999.99;
      *     int stock = 0;
-     *     // getters/setters...
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public double getPrice() { return price; }
+     *     public void setPrice(double price) { this.price = price; }
+     *     public int getStock() { return stock; }
+     *     public void setStock(int stock) { this.stock = stock; }
      * }
      * Product p = new Product();
      * Joiner.with(", ").appendBean(p, (prop, val) ->
@@ -3077,6 +3103,7 @@ public final class Joiner implements Closeable {
      * @param mapper the function to apply to the joined string if not empty
      * @return an Optional containing the result, or empty if no elements were appended
      * @throws IllegalArgumentException if mapper is null
+     * @throws NullPointerException if the mapper returns {@code null} for a non-empty joiner
      */
     @Beta
     public <T> Optional<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
@@ -3091,7 +3118,8 @@ public final class Joiner implements Closeable {
      * If the Joiner is already closed then invoking this method has no effect.
      * After closing, no more content may be appended. Materialize the result before closing: when
      * buffer reuse is enabled, closing releases any pooled builder and its unmaterialized content.
-     * This method is synchronized to ensure thread safety.
+     * Synchronization makes concurrent calls to {@code close()} idempotent; it does not make
+     * a {@code Joiner} safe to append to from multiple threads.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -133,6 +133,16 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     public Pair() {
     }
 
+    /**
+     * Constructs a {@code Pair} holding the given left and right elements.
+     *
+     * <p>Package-private on purpose: outside code creates instances through
+     * {@link #of(Object, Object)} or {@link #from(Map.Entry)}, or through the public no-arg
+     * constructor followed by {@link #setLeft(Object)} / {@link #setRight(Object)}.</p>
+     *
+     * @param leftValue the left element, may be {@code null}
+     * @param rightValue the right element, may be {@code null}
+     */
     Pair(final L leftValue, final R rightValue) {
         setLeft(leftValue);
         setRight(rightValue);
@@ -202,14 +212,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, Integer>[] emptyPairs = Pair.emptyArray();
      * // emptyPairs.length == 0
-     *
-     * // Useful in methods that return arrays:
-     * public Pair<String, Integer>[] getPairs() {
-     *     if (someCondition) {
-     *         return Pair.emptyArray();
-     *     }
-     *     // ... other logic
-     * }
      * }</pre>
      *
      * @param <L> the type of the left elements in the array.
@@ -691,7 +693,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, String> pair = Pair.of("Hello", "World");
      * List<String> collected = new ArrayList<>();
-     * pair.forEach(collected::add);
+     * pair.forEach((String value) -> collected.add(value));
      * // collected now contains ["Hello", "World"]
      *
      * // With different types (requires consumer that accepts Object)
@@ -753,7 +755,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Score", 100);
      * List<Pair<String, Integer>> pairs = new ArrayList<>();
-     * pair.accept(pairs::add);
+     * pair.accept((Pair<String, Integer> value) -> pairs.add(value));
      * // pairs now contains the pair
      *
      * pair.accept(p -> {

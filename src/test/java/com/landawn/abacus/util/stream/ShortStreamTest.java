@@ -3817,8 +3817,7 @@ public class ShortStreamTest extends TestBase {
 
     @Test
     public void testParallelWithParallelSettings() {
-        ParallelSettings ps = new ParallelSettings();
-        ps.maxThreadNum(2);
+        ParallelSettings ps = ParallelSettings.builder().maxThreadNum(2).build();
 
         short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).parallel(ps).map(n -> (short) (n * 2)).toArray();
 

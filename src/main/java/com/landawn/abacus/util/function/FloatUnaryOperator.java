@@ -69,7 +69,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * float result = negateThenSquare.applyAsFloat(3.0f);   // Returns 9.0f
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
      * @throws IllegalArgumentException if {@code before} is null
@@ -95,7 +95,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * float result = squareThenNegate.applyAsFloat(3.0f);   // Returns -9.0f
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
      * @throws IllegalArgumentException if {@code after} is null

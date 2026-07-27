@@ -26,12 +26,13 @@ import com.landawn.abacus.util.CharacterWriter;
 /**
  * Type handler for {@link Boolean} values that are stored as single-character strings
  * ({@code 'Y'}/{@code 'N'}) in the database.
- * Maps {@code Boolean.TRUE} to the string {@code "Y"} and {@code Boolean.FALSE} / {@code null}
- * to the string {@code "N"}, providing compatibility with legacy database schemas that
+ * Text conversion maps {@code Boolean.TRUE} to {@code "Y"} and {@code Boolean.FALSE} or
+ * {@code null} to {@code "N"}, providing compatibility with legacy database schemas that
  * represent boolean flags as {@code CHAR(1)} or {@code VARCHAR(1)} columns.
  *
  * <p>JDBC mapping: values are read and written as {@code VARCHAR} strings
- * ({@link java.sql.Types#VARCHAR}). SQL NULL values are read back as {@code Boolean.FALSE}.</p>
+ * ({@link java.sql.Types#VARCHAR}). A {@code null} value is bound as SQL {@code NULL}, while SQL
+ * {@code NULL} values are read back as {@code Boolean.FALSE}.</p>
  */
 @SuppressWarnings("java:S2160")
 public final class BooleanCharType extends AbstractType<Boolean> {

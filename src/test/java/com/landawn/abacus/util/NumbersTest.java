@@ -34,6 +34,7 @@ import static com.landawn.abacus.util.Numbers.createLong;
 import static com.landawn.abacus.util.Numbers.createNumber;
 import static com.landawn.abacus.util.Numbers.divide;
 import static com.landawn.abacus.util.Numbers.extractFirstDouble;
+import static com.landawn.abacus.util.Numbers.extractFirstDoubleOrElse;
 import static com.landawn.abacus.util.Numbers.factorial;
 import static com.landawn.abacus.util.Numbers.factorialToBigInteger;
 import static com.landawn.abacus.util.Numbers.format;
@@ -1043,10 +1044,10 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void test_extractFirstInt_withDefault() {
-        assertEquals(123, Numbers.extractFirstInt("abc123def", 99));
-        assertEquals(99, Numbers.extractFirstInt("abcdef", 99));
-        assertEquals(99, Numbers.extractFirstInt("", 99));
-        assertEquals(99, Numbers.extractFirstInt(null, 99));
+        assertEquals(123, Numbers.extractFirstIntOrElse("abc123def", 99));
+        assertEquals(99, Numbers.extractFirstIntOrElse("abcdef", 99));
+        assertEquals(99, Numbers.extractFirstIntOrElse("", 99));
+        assertEquals(99, Numbers.extractFirstIntOrElse(null, 99));
     }
 
     @Test
@@ -1059,10 +1060,10 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
-    public void testExtractFirstInt_withDefault() {
-        assertEquals(123, Numbers.extractFirstInt("abc 123 def", 99));
-        assertEquals(99, Numbers.extractFirstInt("abc def", 99));
-        assertEquals(99, Numbers.extractFirstInt(null, 99));
+    public void testExtractFirstIntOrElse() {
+        assertEquals(123, Numbers.extractFirstIntOrElse("abc 123 def", 99));
+        assertEquals(99, Numbers.extractFirstIntOrElse("abc def", 99));
+        assertEquals(99, Numbers.extractFirstIntOrElse(null, 99));
     }
 
     @Test
@@ -1075,9 +1076,9 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
-    public void testExtractFirstLong_withDefault() {
-        assertEquals(123L, Numbers.extractFirstLong("abc 123 def", 999L));
-        assertEquals(999L, Numbers.extractFirstLong("abc def", 999L));
+    public void testExtractFirstLongOrElse() {
+        assertEquals(123L, Numbers.extractFirstLongOrElse("abc 123 def", 999L));
+        assertEquals(999L, Numbers.extractFirstLongOrElse("abc def", 999L));
     }
 
     @Test
@@ -1090,10 +1091,10 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void test_extractFirstLong_withDefault() {
-        assertEquals(123L, Numbers.extractFirstLong("abc123def", 99L));
-        assertEquals(99L, Numbers.extractFirstLong("abcdef", 99L));
-        assertEquals(99L, Numbers.extractFirstLong("", 99L));
-        assertEquals(99L, Numbers.extractFirstLong(null, 99L));
+        assertEquals(123L, Numbers.extractFirstLongOrElse("abc123def", 99L));
+        assertEquals(99L, Numbers.extractFirstLongOrElse("abcdef", 99L));
+        assertEquals(99L, Numbers.extractFirstLongOrElse("", 99L));
+        assertEquals(99L, Numbers.extractFirstLongOrElse(null, 99L));
     }
 
     @Test
@@ -1123,15 +1124,15 @@ public class NumbersTest extends TestBase {
     public void test_extractFirstDouble_scientific() {
         assertEquals(1.23e-4, Numbers.extractFirstDouble("value is 1.23e-4", true).get(), 0.00001);
         assertEquals(1.23, Numbers.extractFirstDouble("value is 1.23e-4", false).get(), 0.001);
-        assertEquals(1.5e10, Numbers.extractFirstDouble("number 1.5e10 here", 0.0, true), 0.001);
+        assertEquals(1.5e10, Numbers.extractFirstDoubleOrElse("number 1.5e10 here", 0.0, true), 0.001);
     }
 
     @Test
-    public void testExtractFirstDouble_withDefault() {
-        assertEquals(123.45, Numbers.extractFirstDouble("abc 123.45 def", 9.9), DELTA);
-        assertEquals(9.9, Numbers.extractFirstDouble("abc def", 9.9), DELTA);
-        assertEquals(1.2E-5, Numbers.extractFirstDouble("num 1.2E-5 text", 0.0, true), DELTA);
-        assertEquals(0.000012, Numbers.extractFirstDouble("num 0.000012E0 text", 0.0, true), DELTA);
+    public void testExtractFirstDoubleOrElse() {
+        assertEquals(123.45, Numbers.extractFirstDoubleOrElse("abc 123.45 def", 9.9), DELTA);
+        assertEquals(9.9, Numbers.extractFirstDoubleOrElse("abc def", 9.9), DELTA);
+        assertEquals(1.2E-5, Numbers.extractFirstDoubleOrElse("num 1.2E-5 text", 0.0, true), DELTA);
+        assertEquals(0.000012, Numbers.extractFirstDoubleOrElse("num 0.000012E0 text", 0.0, true), DELTA);
     }
 
     @Test
@@ -1145,14 +1146,14 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
-    public void testExtractFirstDouble_WithDefault_NoMatch() {
-        double result = Numbers.extractFirstDouble("no numbers here", -99.9);
+    public void testExtractFirstDoubleOrElse_NoMatch() {
+        double result = Numbers.extractFirstDoubleOrElse("no numbers here", -99.9);
         assertEquals(-99.9, result, 0.001);
     }
 
     @Test
-    public void testExtractFirstDouble_WithDefault_Match() {
-        double result = Numbers.extractFirstDouble("price 3.14 each", 0.0);
+    public void testExtractFirstDoubleOrElse_Match() {
+        double result = Numbers.extractFirstDoubleOrElse("price 3.14 each", 0.0);
         assertEquals(3.14, result, 0.001);
     }
 
@@ -1168,10 +1169,10 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void test_extractFirstDouble_withDefault() {
-        assertEquals(3.14, Numbers.extractFirstDouble("pi is 3.14", 1.0), 0.001);
-        assertEquals(1.0, Numbers.extractFirstDouble("noNumber", 1.0), 0.001);
-        assertEquals(1.0, Numbers.extractFirstDouble("", 1.0), 0.001);
-        assertEquals(1.0, Numbers.extractFirstDouble(null, 1.0), 0.001);
+        assertEquals(3.14, Numbers.extractFirstDoubleOrElse("pi is 3.14", 1.0), 0.001);
+        assertEquals(1.0, Numbers.extractFirstDoubleOrElse("noNumber", 1.0), 0.001);
+        assertEquals(1.0, Numbers.extractFirstDoubleOrElse("", 1.0), 0.001);
+        assertEquals(1.0, Numbers.extractFirstDoubleOrElse(null, 1.0), 0.001);
     }
 
     // ==================== Additional Tests for Missing Coverage ====================
@@ -1195,15 +1196,15 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
-    public void testExtractFirstDouble_DefaultWithScientific() {
-        // extractFirstDouble(String, double, boolean) overload
-        assertEquals(1.23e10, Numbers.extractFirstDouble("val 1.23e10 end", 0.0, true), DELTA);
-        assertEquals(1.23, Numbers.extractFirstDouble("val 1.23e10 end", 0.0, false), DELTA);
+    public void testExtractFirstDoubleOrElse_WithScientific() {
+        // extractFirstDoubleOrElse(String, double, boolean) overload
+        assertEquals(1.23e10, Numbers.extractFirstDoubleOrElse("val 1.23e10 end", 0.0, true), DELTA);
+        assertEquals(1.23, Numbers.extractFirstDoubleOrElse("val 1.23e10 end", 0.0, false), DELTA);
 
         // default value when no match
-        assertEquals(-99.0, Numbers.extractFirstDouble("no numbers", -99.0, true), DELTA);
-        assertEquals(-99.0, Numbers.extractFirstDouble(null, -99.0, true), DELTA);
-        assertEquals(-99.0, Numbers.extractFirstDouble("", -99.0, false), DELTA);
+        assertEquals(-99.0, Numbers.extractFirstDoubleOrElse("no numbers", -99.0, true), DELTA);
+        assertEquals(-99.0, Numbers.extractFirstDoubleOrElse(null, -99.0, true), DELTA);
+        assertEquals(-99.0, Numbers.extractFirstDoubleOrElse("", -99.0, false), DELTA);
     }
 
     @Test
@@ -1224,7 +1225,7 @@ public class NumbersTest extends TestBase {
         assertEquals(123.456, extractFirstDouble("abc123.456def").orElseThrow(), DELTA);
         assertEquals(-78.9, extractFirstDouble("xyz-78.9abc").orElseThrow(), DELTA);
         assertTrue(extractFirstDouble("no numbers").isEmpty());
-        assertEquals(99.9, extractFirstDouble("no numbers", 99.9), DELTA);
+        assertEquals(99.9, extractFirstDoubleOrElse("no numbers", 99.9), DELTA);
 
         assertEquals(1.23e4, extractFirstDouble("value is 1.23e4", true).orElseThrow(), DELTA);
         assertEquals(1.23, extractFirstDouble("value is 1.23e4", false).orElseThrow(), DELTA);
@@ -7896,6 +7897,123 @@ public class NumbersTest extends TestBase {
         assertEquals(expected, Numbers.acosh(Double.MAX_VALUE), Math.ulp(expected));
         assertTrue(Double.isFinite(Numbers.asinh(Double.MAX_VALUE)));
         assertTrue(Double.isFinite(Numbers.acosh(Double.MAX_VALUE)));
+    }
+
+    @Test
+    public void test_round_preservesSignOfZero() {
+        // A value rounding to zero keeps the input's sign (the DOUBLE/FLOAT_POSITIVE_ZERO * x idiom):
+        // -0.4 rounded to scale 0 must be -0.0, not +0.0.
+        assertEquals(Long.MIN_VALUE, Double.doubleToRawLongBits(Numbers.round(-0.4, 0, RoundingMode.DOWN))); // -0.0d
+        assertEquals(Long.MIN_VALUE, Double.doubleToRawLongBits(Numbers.round(-0.3, 0, RoundingMode.HALF_UP))); // -0.0d
+        assertEquals(0L, Double.doubleToRawLongBits(Numbers.round(0.4, 0, RoundingMode.DOWN))); // +0.0d
+        assertEquals(Integer.MIN_VALUE, Float.floatToRawIntBits(Numbers.round(-0.3f, 0, RoundingMode.HALF_UP))); // -0.0f
+        assertEquals(Integer.MIN_VALUE, Float.floatToRawIntBits(Numbers.round(-0.0f, 2, RoundingMode.HALF_UP))); // -0.0f stays -0.0f
+        assertEquals(0, Float.floatToRawIntBits(Numbers.round(0.3f, 0, RoundingMode.HALF_UP))); // +0.0f
+
+        // HALF_UP rounds halves away from zero (class-level contract, unlike Math.round).
+        assertEquals(-3.0, Numbers.round(-2.5, 0, RoundingMode.HALF_UP), 0.0);
+        assertEquals(3.0, Numbers.round(2.5, 0, RoundingMode.HALF_UP), 0.0);
+    }
+
+    @Test
+    public void test_roundToInt_boundaryValues() {
+        // Both bounds are exactly representable as doubles and must convert.
+        assertEquals(Integer.MAX_VALUE, Numbers.roundToInt(2147483647.0, RoundingMode.UNNECESSARY));
+        assertEquals(Integer.MIN_VALUE, Numbers.roundToInt(-2147483648.0, RoundingMode.UNNECESSARY));
+        // A fractional value truncating to an in-range integer converts (DOWN leaves z = x, then (int) z).
+        assertEquals(Integer.MAX_VALUE, Numbers.roundToInt(2147483647.9, RoundingMode.DOWN));
+        // One past either bound is out of range even before/without rounding.
+        assertThrows(ArithmeticException.class, () -> Numbers.roundToInt(2147483648.0, RoundingMode.DOWN));
+        assertThrows(ArithmeticException.class, () -> Numbers.roundToInt(-2147483649.0, RoundingMode.DOWN));
+    }
+
+    @Test
+    public void test_roundToLong_boundaryValues() {
+        // 9223372036854774784.0 is the largest double below 2^63 and converts; (double) Long.MAX_VALUE is
+        // exactly 2^63 (one past the max) and must throw, as documented (no saturation).
+        assertEquals(9223372036854774784L, Numbers.roundToLong(9223372036854774784.0, RoundingMode.DOWN));
+        assertThrows(ArithmeticException.class, () -> Numbers.roundToLong(9.223372036854776E18, RoundingMode.DOWN));
+        // -2^63 is exactly representable and converts; one ulp below it throws.
+        assertEquals(Long.MIN_VALUE, Numbers.roundToLong(-9.223372036854776E18, RoundingMode.DOWN));
+        assertThrows(ArithmeticException.class, () -> Numbers.roundToLong(-9.223372036854778E18, RoundingMode.DOWN));
+    }
+
+    @Test
+    public void test_toScaledBigDecimal_NaNOrInfinite_throwsNFE() {
+        // NaN/+-Infinity are not representable as a BigDecimal: the Float/Double overloads reject them with
+        // NumberFormatException (from the BigDecimal conversion), as the @throws tag documents.
+        assertThrows(NumberFormatException.class, () -> Numbers.toScaledBigDecimal(Double.NaN));
+        assertThrows(NumberFormatException.class, () -> Numbers.toScaledBigDecimal(Double.POSITIVE_INFINITY));
+        assertThrows(NumberFormatException.class, () -> Numbers.toScaledBigDecimal(Float.NaN));
+        assertThrows(NumberFormatException.class, () -> Numbers.toScaledBigDecimal(Float.NEGATIVE_INFINITY, 2, RoundingMode.HALF_UP));
+
+        // null still returns ZERO, and the roundingMode null-check takes precedence over the value conversion.
+        assertEquals(BigDecimal.ZERO, Numbers.toScaledBigDecimal((Double) null));
+        assertEquals(BigDecimal.ZERO, Numbers.toScaledBigDecimal((Float) null));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.toScaledBigDecimal(1.0, 2, null));
+    }
+
+    @Test
+    public void test_toXxx_Object_NaNAndInfinity() {
+        // NaN truncates to 0 through JLS narrowing (Number.longValue semantics); an infinite value throws.
+        assertEquals((byte) 0, Numbers.toByte((Object) Float.NaN));
+        assertEquals((short) 0, Numbers.toShort((Object) Double.NaN));
+        assertEquals(0, Numbers.toInt((Object) Double.NaN));
+        assertEquals(0L, Numbers.toLong((Object) Double.NaN));
+        assertEquals(0L, Numbers.toLong((Object) Float.NaN));
+
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) Float.NEGATIVE_INFINITY));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort((Object) Float.POSITIVE_INFINITY));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((Object) Double.POSITIVE_INFINITY));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong((Object) Double.POSITIVE_INFINITY));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong((Object) Float.NEGATIVE_INFINITY));
+    }
+
+    @Test
+    public void test_extractFirstIntLong_overflowThrowsNFE() {
+        // The matched digit run is parsed with Integer.parseInt/Long.parseLong: an over-long run throws
+        // NumberFormatException (documented @throws), rather than returning empty or the default value.
+        assertThrows(NumberFormatException.class, () -> Numbers.extractFirstInt("id=99999999999"));
+        assertThrows(NumberFormatException.class, () -> Numbers.extractFirstIntOrElse("id=99999999999", 0));
+        assertThrows(NumberFormatException.class, () -> Numbers.extractFirstLong("id=99999999999999999999"));
+        assertThrows(NumberFormatException.class, () -> Numbers.extractFirstLongOrElse("id=99999999999999999999", 0L));
+
+        // extractFirstDouble never throws on overflow: an over-long match saturates to Infinity.
+        final StringBuilder sb = new StringBuilder("x");
+        for (int i = 0; i < 400; i++) {
+            sb.append('9');
+        }
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.extractFirstDouble(sb.toString()).getAsDouble(), 0.0);
+    }
+
+    @Test
+    public void test_isPerfectSquare_longNearMaxValue() {
+        // 3037000499^2 is the largest perfect square <= Long.MAX_VALUE; (long) Math.sqrt of it can be one ulp
+        // low, exercising the (tst + 1) * (tst + 1) == n second-chance check in the long overload.
+        final long maxSquare = 3037000499L * 3037000499L;
+        assertTrue(Numbers.isPerfectSquare(maxSquare));
+        assertFalse(Numbers.isPerfectSquare(maxSquare - 1));
+        assertFalse(Numbers.isPerfectSquare(Long.MAX_VALUE));
+        assertFalse(Numbers.isPerfectSquare(Long.MIN_VALUE));
+    }
+
+    @Test
+    public void test_isPrime_carmichaelAndPseudoprimeNumbers() {
+        // The Miller-Rabin bases must reject Carmichael numbers and base-2 pseudoprimes.
+        assertFalse(Numbers.isPrime(561)); // Carmichael
+        assertFalse(Numbers.isPrime(1105)); // Carmichael
+        assertFalse(Numbers.isPrime(1729)); // Carmichael
+        assertFalse(Numbers.isPrime(41041)); // Carmichael
+        assertFalse(Numbers.isPrime(2047)); // base-2 strong pseudoprime (23 * 89)
+        assertTrue(Numbers.isPrime(7919));
+    }
+
+    @Test
+    public void test_lcm_minValueWithOne_throwsArithmeticException() {
+        // |lcm(MIN_VALUE, 1)| == 2^31 / 2^63: not representable as a non-negative int/long, so it must throw
+        // (regression guard for the abs(Long.MIN_VALUE) == Long.MIN_VALUE overflow path in the long overload).
+        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MIN_VALUE, 1));
+        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Long.MIN_VALUE, 1L));
     }
 
 }

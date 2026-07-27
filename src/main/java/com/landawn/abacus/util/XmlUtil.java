@@ -137,7 +137,7 @@ public final class XmlUtil {
             XMLInputFactory.SUPPORT_DTD, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, XMLConstants.ACCESS_EXTERNAL_DTD, XMLConstants.ACCESS_EXTERNAL_SCHEMA,
             XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "XIncludeAware", "expandEntityReferences", "XMLResolver");
 
-    // ...
+    // Hardened SAX parser configuration and reusable parser pool.
     private static final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
     static {
@@ -155,7 +155,7 @@ public final class XmlUtil {
     private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
     private static final WeakIdentitySet<SAXParser> ownedSaxParsers = new WeakIdentitySet<>();
 
-    // ...
+    // Hardened DOM builder configuration and reusable builder pool.
     private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 
     static {
@@ -212,7 +212,7 @@ public final class XmlUtil {
     private static final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
     // private static final Queue<DocumentBuilder> xmlOutputPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    // ...
+    // Hardened transformer configuration.
     private static final TransformerFactory transferFactory = TransformerFactory.newInstance();
     // private static final Queue<DocumentBuilder> xmlTransferPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
@@ -231,7 +231,7 @@ public final class XmlUtil {
         setTransformerFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
     }
 
-    // ...
+    // JAXB contexts and XML node-name metadata.
     private static final Map<String, JAXBContext> pathJaxbContextPool = new ConcurrentHashMap<>(POOL_SIZE);
 
     private static final Map<Class<?>, JAXBContext> classJaxbContextPool = new ConcurrentHashMap<>(POOL_SIZE);
@@ -253,9 +253,15 @@ public final class XmlUtil {
     }
 
     /**
-     * Names of factory features/properties/attributes that are essential to XXE / billion-laughs
-     * defense. Failure to apply or verify one of these settings aborts class initialization so XML
-     * processing cannot continue with a silently weakened security policy.
+     * Reports a failure to apply an XML factory feature/property/attribute.
+     *
+     * <p>If {@code name} is one of {@link #CRITICAL_SECURITY_NAMES}, failing open would leave XML
+     * processing running with a silently weakened security policy, so class initialization is
+     * aborted instead. Non-critical settings are only logged.</p>
+     *
+     * @param factory the factory whose setting could not be applied
+     * @param name the feature/property/attribute name
+     * @param e the failure
      */
     private static void logFactoryFailure(final String factory, final String name, final Exception e) {
         // For critical XXE flags, fail-open is dangerous: abort class initialization instead of
@@ -388,16 +394,23 @@ public final class XmlUtil {
      * public class Person {
      *     private String name;
      *     private int age;
-     *     // getters and setters
+     *
+     *     public Person() {}
+     *     public Person(String name, int age) { this.name = name; this.age = age; }
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *     public int getAge() { return age; }
+     *     public void setAge(int age) { this.age = age; }
      * }
      *
      * Person person = new Person("John", 30);
      * String xml = XmlUtil.marshal(person);
-     * // Result: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><person><age>30</age><name>John</name></person>
+     * // xml contains a <person> element with <name>John</name> and <age>30</age>.
      * }</pre>
      *
      * @param jaxbBean The JAXB-annotated bean to be marshalled (must not be {@code null})
-     * @return The XML string representation of the JAXB bean
+     * @return The XML string representation of the JAXB bean, decoded as UTF-8
+     * @throws NullPointerException if {@code jaxbBean} is {@code null}
      * @throws RuntimeException if marshalling fails (e.g. a {@code JAXBException} is raised)
      * @throws UncheckedIOException if an I/O error occurs while writing the XML
      * @see JAXBContext#newInstance(Class...)
@@ -448,11 +461,15 @@ public final class XmlUtil {
      * @param cls The class of the object to be returned (must be JAXB-annotated)
      * @param xml The XML string to be unmarshalled (must not be {@code null})
      * @return The unmarshalled object of the specified class
+     * @throws NullPointerException if {@code cls} or {@code xml} is {@code null}
      * @throws RuntimeException if secure XML parsing or JAXB unmarshalling fails
      * @see JAXBContext#newInstance(Class...)
      * @see Unmarshaller#unmarshal(XMLStreamReader)
      */
     public static <T> T unmarshal(final Class<? extends T> cls, final String xml) {
+        java.util.Objects.requireNonNull(cls, "cls");
+        java.util.Objects.requireNonNull(xml, "xml");
+
         // Parse through the hardened StAX factory (DTD and external entities disabled) instead of
         // handing a raw Reader to JAXB, whose default unmarshaller would otherwise create its own
         // XXE-vulnerable parser and bypass the hardening every other parse path in this class uses.
@@ -462,9 +479,9 @@ public final class XmlUtil {
     /** Unmarshals from and always closes the supplied reader. Package-private for lifecycle testing. */
     @SuppressWarnings("unchecked")
     static <T> T unmarshalAndClose(final Class<? extends T> cls, final XMLStreamReader xmlStreamReader) {
-        JAXBContext jc = classJaxbContextPool.get(cls);
-
         try {
+            JAXBContext jc = classJaxbContextPool.get(cls);
+
             if (jc == null) {
                 jc = JAXBContext.newInstance(cls);
                 classJaxbContextPool.put(cls, jc);
@@ -605,7 +622,13 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Person person = XmlUtil.unmarshal(Person.class, xmlString);
+     * Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(Person.class);
+     * XMLStreamReader reader = XmlUtil.createXMLStreamReader(new StringReader(xmlString));
+     * try {
+     *     Person person = (Person) unmarshaller.unmarshal(reader);
+     * } finally {
+     *     reader.close();
+     * }
      * }</pre>
      *
      * @param cls The class for which to create the Unmarshaller (must be JAXB-annotated)
@@ -774,8 +797,9 @@ public final class XmlUtil {
         }
 
         synchronized (contentDocBuilderPool) {
-            if (!ownedContentParsers.contains(docBuilder) || containsByIdentity(contentDocBuilderPool, docBuilder)
-                    || contentDocBuilderPool.size() >= POOL_SIZE) {
+            // Cheap checks first: the identity scan is O(POOL_SIZE) and runs under this monitor.
+            if (!ownedContentParsers.contains(docBuilder) || contentDocBuilderPool.size() >= POOL_SIZE
+                    || containsByIdentity(contentDocBuilderPool, docBuilder)) {
                 return;
             }
 
@@ -809,8 +833,8 @@ public final class XmlUtil {
      * }</pre>
      *
      * @return A {@code SAXParser} instance from the pool, or a newly created one if the pool is empty
-     * @throws RuntimeException if the parser cannot be created
-     * @throws ParsingException if SAX parsing configuration fails
+     * @throws RuntimeException if the SAX parser configuration is invalid
+     * @throws ParsingException if the underlying SAX implementation fails to create the parser
      * @see SAXParserFactory#newSAXParser()
      */
     public static SAXParser createSAXParser() {
@@ -855,7 +879,8 @@ public final class XmlUtil {
         }
 
         synchronized (saxParserPool) {
-            if (!ownedSaxParsers.contains(saxParser) || containsByIdentity(saxParserPool, saxParser) || saxParserPool.size() >= POOL_SIZE) {
+            // Cheap checks first: the identity scan is O(POOL_SIZE) and runs under this monitor.
+            if (!ownedSaxParsers.contains(saxParser) || saxParserPool.size() >= POOL_SIZE || containsByIdentity(saxParserPool, saxParser)) {
                 return;
             }
 
@@ -888,9 +913,13 @@ public final class XmlUtil {
      * <pre>{@code
      * StringReader reader = new StringReader(xmlString);
      * XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(reader);
-     * while (xmlReader.hasNext()) {
-     *     int event = xmlReader.next();
-     *     // Process events
+     * try {
+     *     while (xmlReader.hasNext()) {
+     *         int event = xmlReader.next();
+     *         // Process events
+     *     }
+     * } finally {
+     *     xmlReader.close();
      * }
      * }</pre>
      *
@@ -915,9 +944,16 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileInputStream fis = new FileInputStream("data.xml");
-     * XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(fis);
-     * // Process XML stream
+     * try (InputStream source = new FileInputStream("data.xml")) {
+     *     XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(source);
+     *     try {
+     *         while (xmlReader.hasNext()) {
+     *             xmlReader.next();
+     *         }
+     *     } finally {
+     *         xmlReader.close();
+     *     }
+     * }
      * }</pre>
      *
      * @param source The InputStream source from which to create the XMLStreamReader
@@ -941,8 +977,16 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileInputStream fis = new FileInputStream("data.xml");
-     * XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(fis, "UTF-8");
+     * try (InputStream source = new FileInputStream("data.xml")) {
+     *     XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(source, "UTF-8");
+     *     try {
+     *         while (xmlReader.hasNext()) {
+     *             xmlReader.next();
+     *         }
+     *     } finally {
+     *         xmlReader.close();
+     *     }
+     * }
      * }</pre>
      *
      * @param source The InputStream source from which to create the XMLStreamReader
@@ -990,6 +1034,13 @@ public final class XmlUtil {
      *     }
      * };
      * XMLStreamReader filteredReader = XmlUtil.createFilteredStreamReader(reader, filter);
+     * try {
+     *     while (filteredReader.hasNext()) {
+     *         filteredReader.next();
+     *     }
+     * } finally {
+     *     filteredReader.close();
+     * }
      * }</pre>
      *
      * @param source The source XMLStreamReader to be filtered
@@ -1016,11 +1067,15 @@ public final class XmlUtil {
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(writer);
-     * xmlWriter.writeStartDocument();
-     * xmlWriter.writeStartElement("root");
-     * xmlWriter.writeCharacters("Hello XML");
-     * xmlWriter.writeEndElement();
-     * xmlWriter.writeEndDocument();
+     * try {
+     *     xmlWriter.writeStartDocument();
+     *     xmlWriter.writeStartElement("root");
+     *     xmlWriter.writeCharacters("Hello XML");
+     *     xmlWriter.writeEndElement();
+     *     xmlWriter.writeEndDocument();
+     * } finally {
+     *     xmlWriter.close();
+     * }
      * }</pre>
      *
      * @param output The Writer output to which the XMLStreamWriter will write
@@ -1044,10 +1099,15 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileOutputStream fos = new FileOutputStream("output.xml");
-     * XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(fos);
-     * // Write XML content
-     * xmlWriter.close();
+     * try (OutputStream output = new FileOutputStream("output.xml")) {
+     *     XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(output);
+     *     try {
+     *         xmlWriter.writeStartElement("root");
+     *         xmlWriter.writeEndElement();
+     *     } finally {
+     *         xmlWriter.close();
+     *     }
+     * }
      * }</pre>
      *
      * @param output The OutputStream to which the XMLStreamWriter will write
@@ -1071,10 +1131,18 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileOutputStream fos = new FileOutputStream("output.xml");
-     * XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(fos, "UTF-8");
-     * xmlWriter.writeStartDocument("UTF-8", "1.0");
-     * // Write XML content
+     * try (OutputStream output = new FileOutputStream("output.xml")) {
+     *     XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(output, "UTF-8");
+     *     try {
+     *         xmlWriter.writeStartDocument("UTF-8", "1.0");
+     *         xmlWriter.writeStartElement("root");
+     *         xmlWriter.writeCharacters("value");
+     *         xmlWriter.writeEndElement();
+     *         xmlWriter.writeEndDocument();
+     *     } finally {
+     *         xmlWriter.close();
+     *     }
+     * }
      * }</pre>
      *
      * @param output The OutputStream to which the XMLStreamWriter will write
@@ -1251,6 +1319,8 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Start the JVM with -Dabacus.xml.allowXmlEncoderDecoder=true.
+     * // Use this legacy format only for trusted, same-application data.
      * Person person = new Person("John", 30);
      * String xml = XmlUtil.xmlEncode(person);
      * // Result contains Java-specific XML encoding
@@ -1271,18 +1341,19 @@ public final class XmlUtil {
         }
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
-        try (XMLEncoder xmlEncoder = new XMLEncoder(os)) {
-            xmlEncoder.writeObject(bean);
-            xmlEncoder.flush();
+        try {
+            try (XMLEncoder xmlEncoder = new XMLEncoder(os)) {
+                xmlEncoder.writeObject(bean);
+                xmlEncoder.flush();
+            }
+
+            // XMLEncoder always writes UTF-8 (its declaration claims UTF-8), and xmlDecode reads the
+            // string back via getBytes(UTF_8) — decode with UTF-8 so non-ASCII content round-trips
+            // on JVMs whose default charset is not UTF-8.
+            return os.toString(Charsets.UTF_8);
+        } finally {
+            Objectory.recycle(os);
         }
-
-        // XMLEncoder always writes UTF-8 (its declaration claims UTF-8), and xmlDecode reads the
-        // string back via getBytes(UTF_8) — decode with UTF-8 so non-ASCII content round-trips
-        // on JVMs whose default charset is not UTF-8.
-        final String result = os.toString(Charsets.UTF_8);
-        Objectory.recycle(os);
-
-        return result;
     }
 
     /**
@@ -1301,6 +1372,7 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Start the JVM with -Dabacus.xml.allowXmlEncoderDecoder=true, and decode only trusted XML.
      * String xml = XmlUtil.xmlEncode(originalPerson);
      * Person decodedPerson = XmlUtil.xmlDecode(xml);
      * }</pre>
@@ -1341,10 +1413,11 @@ public final class XmlUtil {
      * }</pre>
      *
      * <p>Matching is performed on the qualified tag name (the same semantics as
-     * {@link Element#getElementsByTagName(String)}); namespace URIs are not considered.</p>
+     * {@link Element#getElementsByTagName(String)}); namespace URIs are not considered. As in the
+     * DOM API, the special value {@code "*"} matches every direct child element.</p>
      *
      * @param node The parent element to search within
-     * @param tagName The tag name of the elements to find
+     * @param tagName The tag name of the elements to find, or {@code "*"} to match every direct child element
      * @return A list of elements with the specified tag name that are direct children of the given
      *         node; an empty list if there is no match (never {@code null})
      * @see Element#getElementsByTagName(String)
@@ -1839,6 +1912,8 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from a portion of a character array to the given OutputStream.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     * Characters that are illegal in XML text (for example C0 control characters) are written as
+     * numeric character references such as <code>&amp;#x1f;</code>.
      * Uses a BufferedXmlWriter internally for efficient writing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1893,6 +1968,8 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from a portion of a string to the given OutputStream.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     * Characters that are illegal in XML text (for example C0 control characters) are written as
+     * numeric character references such as <code>&amp;#x1f;</code>.
      * Uses a BufferedXmlWriter internally for efficient writing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1945,6 +2022,8 @@ public final class XmlUtil {
     /**
      * Writes XML-escaped characters from a portion of a character array to the given Writer.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     * Characters that are illegal in XML text (for example C0 control characters) are written as
+     * numeric character references such as <code>&amp;#x1f;</code>.
      * Uses a BufferedXmlWriter for efficient writing if the output is not already a BufferedXmlWriter.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2000,6 +2079,9 @@ public final class XmlUtil {
 
     /**
      * Writes XML-escaped characters from a portion of a string to the given Writer.
+     * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
+     * Characters that are illegal in XML text (for example C0 control characters) are written as
+     * numeric character references such as <code>&amp;#x1f;</code>.
      * Uses a BufferedXmlWriter for efficient writing if the output is not already a BufferedXmlWriter.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2036,54 +2118,58 @@ public final class XmlUtil {
      * XStream issues). Enable with {@code -Dabacus.xml.allowTypeAttrClassForName=true} ONLY when
      * deserializing trusted XML.
      */
-    private static final boolean ALLOW_TYPE_ATTR_CLASS_FORNAME = Boolean.parseBoolean(System.getProperty("abacus.xml.allowTypeAttrClassForName", "false"));
+    private static final String XML_TYPE_CLASS_FOR_NAME_PROPERTY = "abacus.xml.allowTypeAttrClassForName";
 
     /**
-     * Returns {@code true} if the typeAttr names a JDK type that is safe to resolve from attacker
-     * input (primitive name, or {@code java.*}/{@code javax.*}/{@code jakarta.*} class). Any
-     * other class on the classpath is treated as a potential gadget and requires explicit
-     * opt-in via {@link #ALLOW_TYPE_ATTR_CLASS_FORNAME}.
+     * Exact type names that may be resolved from untrusted XML without name-driven class loading.
+     * Generic type expressions are intentionally excluded: every nested type name in such an
+     * expression would otherwise need its own trust decision.
      */
-    private static boolean isJdkTypeName(final String typeAttr) {
-        if (typeAttr == null || typeAttr.isEmpty()) {
-            return false;
+    private static final Set<String> SAFE_XML_TYPE_ATTRIBUTE_NAMES = Set.of("boolean", "byte", "char", "short", "int", "long", "float", "double", "Boolean",
+            "Byte", "Character", "Short", "Integer", "Long", "Float", "Double", "java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Short",
+            "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "String", "StringBuilder", "StringBuffer", "CharSequence", "Object",
+            "Number", "java.lang.String", "java.lang.StringBuilder", "java.lang.StringBuffer", "java.lang.CharSequence", "java.lang.Object", "java.lang.Number",
+            "BigInteger", "BigDecimal", "java.math.BigInteger", "java.math.BigDecimal", "Date", "Time", "Timestamp", "JUDate", "java.sql.Date", "java.sql.Time",
+            "java.sql.Timestamp", "java.util.Date", "Calendar", "GregorianCalendar", "java.util.Calendar", "java.util.GregorianCalendar", "Duration", "Instant",
+            "LocalDate", "LocalDateTime", "LocalTime", "MonthDay", "OffsetDateTime", "OffsetTime", "Period", "Year", "YearMonth", "ZonedDateTime", "ZoneId",
+            "ZoneOffset", "java.time.Duration", "java.time.Instant", "java.time.LocalDate", "java.time.LocalDateTime", "java.time.LocalTime",
+            "java.time.MonthDay", "java.time.OffsetDateTime", "java.time.OffsetTime", "java.time.Period", "java.time.Year", "java.time.YearMonth",
+            "java.time.ZonedDateTime", "java.time.ZoneId", "java.time.ZoneOffset", "UUID", "URI", "URL", "File", "Locale", "Currency", "java.util.UUID",
+            "java.net.URI", "java.net.URL", "java.io.File", "java.util.Locale", "java.util.Currency", "Optional", "OptionalInt", "OptionalLong",
+            "OptionalDouble", "java.util.Optional", "java.util.OptionalInt", "java.util.OptionalLong", "java.util.OptionalDouble", "AtomicBoolean",
+            "AtomicInteger", "AtomicLong", "AtomicReference", "java.util.concurrent.atomic.AtomicBoolean", "java.util.concurrent.atomic.AtomicInteger",
+            "java.util.concurrent.atomic.AtomicLong", "java.util.concurrent.atomic.AtomicReference", "Collection", "List", "ArrayList", "LinkedList", "Vector",
+            "Stack", "Set", "HashSet", "LinkedHashSet", "SortedSet", "NavigableSet", "TreeSet", "Queue", "Deque", "ArrayDeque", "PriorityQueue",
+            "java.util.Collection", "java.util.List", "java.util.ArrayList", "java.util.LinkedList", "java.util.Vector", "java.util.Stack", "java.util.Set",
+            "java.util.HashSet", "java.util.LinkedHashSet", "java.util.SortedSet", "java.util.NavigableSet", "java.util.TreeSet", "java.util.Queue",
+            "java.util.Deque", "java.util.ArrayDeque", "java.util.PriorityQueue", "CopyOnWriteArrayList", "CopyOnWriteArraySet", "ConcurrentLinkedQueue",
+            "ConcurrentLinkedDeque", "LinkedBlockingQueue", "LinkedBlockingDeque", "PriorityBlockingQueue", "ConcurrentSkipListSet",
+            "java.util.concurrent.CopyOnWriteArrayList", "java.util.concurrent.CopyOnWriteArraySet", "java.util.concurrent.ConcurrentLinkedQueue",
+            "java.util.concurrent.ConcurrentLinkedDeque", "java.util.concurrent.LinkedBlockingQueue", "java.util.concurrent.LinkedBlockingDeque",
+            "java.util.concurrent.PriorityBlockingQueue", "java.util.concurrent.ConcurrentSkipListSet", "Map", "HashMap", "LinkedHashMap", "SortedMap",
+            "NavigableMap", "TreeMap", "Hashtable", "IdentityHashMap", "WeakHashMap", "Properties", "java.util.Map", "java.util.HashMap",
+            "java.util.LinkedHashMap", "java.util.SortedMap", "java.util.NavigableMap", "java.util.TreeMap", "java.util.Hashtable", "java.util.IdentityHashMap",
+            "java.util.WeakHashMap", "java.util.Properties", "ConcurrentMap", "ConcurrentHashMap", "ConcurrentNavigableMap", "ConcurrentSkipListMap",
+            "java.util.concurrent.ConcurrentMap", "java.util.concurrent.ConcurrentHashMap", "java.util.concurrent.ConcurrentNavigableMap",
+            "java.util.concurrent.ConcurrentSkipListMap");
+
+    /**
+     * Returns whether the exact scalar/container name, after removing array suffixes, is safe to
+     * pass to the type registry without the legacy opt-in.
+     */
+    private static boolean isSafeXmlTypeAttributeName(String typeName) {
+        while (typeName.endsWith("[]")) {
+            typeName = typeName.substring(0, typeName.length() - 2);
         }
-        // Common primitive / wrapper aliases used by the Type system.
-        switch (typeAttr) {
-            case "boolean":
-            case "byte":
-            case "char":
-            case "short":
-            case "int":
-            case "long":
-            case "float":
-            case "double":
-            case "Boolean":
-            case "Byte":
-            case "Character":
-            case "Short":
-            case "Integer":
-            case "Long":
-            case "Float":
-            case "Double":
-            case "String":
-            case "Object":
-            case "Number":
-            case "BigInteger":
-            case "BigDecimal":
-                return true;
-            default:
-                // FQNs in JDK packages.
-                return typeAttr.startsWith("java.") || typeAttr.startsWith("javax.") || typeAttr.startsWith("jakarta.");
-        }
+
+        return SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(typeName);
     }
 
     /**
-     * Resolves the Java class indicated by the {@code type} attribute of the given XML node,
-     * subject to the security gate controlled by {@link #ALLOW_TYPE_ATTR_CLASS_FORNAME}.
-     * Returns {@code null} if the node has no {@code type} attribute, if the attribute names
-     * a non-JDK class and the opt-in system property is not set, or if the class cannot be
-     * found on the classpath.
+     * Resolves the Java class indicated by the {@code type} attribute without permitting arbitrary
+     * class loading by default. Only exact names in the built-in scalar/container allowlist (and
+     * arrays of those types) are accepted. Trusted legacy XML may restore unrestricted resolution
+     * by setting {@value #XML_TYPE_CLASS_FOR_NAME_PROPERTY} to {@code true}.
      *
      * @param node the XML node whose {@code type} attribute is to be resolved; must not be {@code null}
      * @return the resolved {@link Class}, or {@code null} if the type cannot or should not be resolved
@@ -2091,38 +2177,24 @@ public final class XmlUtil {
     static Class<?> getAttributeTypeClass(final Node node) {
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
 
-        if (typeAttr == null) {
+        if (Strings.isEmpty(typeAttr)) {
             return null;
         }
 
-        // Gate non-JDK class resolution behind an explicit opt-in. Both Type.of(typeAttr) and
-        // the ClassUtil.forName fallback below can reflectively load arbitrary classes named
-        // in attacker-controlled XML, which is a deserialization gadget primitive (the loaded
-        // class is later instantiated by AbstractXmlParser.newPropInstance). Refusing
-        // user-package names by default closes that without breaking the common case of
-        // primitives + java.*/javax.* types.
-        if (!ALLOW_TYPE_ATTR_CLASS_FORNAME && !isJdkTypeName(typeAttr)) {
+        final String typeName = typeAttr.trim();
+
+        if (typeName.isEmpty() || (!Boolean.getBoolean(XML_TYPE_CLASS_FOR_NAME_PROPERTY) && !isSafeXmlTypeAttributeName(typeName))) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Refusing to resolve non-JDK type attribute '{}'. Set -Dabacus.xml.allowTypeAttrClassForName=true to opt in.", typeAttr);
-            }
-            return null;
-        }
-
-        final Type<?> type = Type.of(typeAttr);
-
-        if (type != null) {
-            return type.javaType();
-        }
-
-        try {
-            return ClassUtil.forName(typeAttr);
-        } catch (final RuntimeException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(e, "Failed to load type attribute class: {}", typeAttr);
+                logger.debug("Refusing to resolve XML type attribute '{}'. Set -D{}=true only for trusted legacy XML.", typeName,
+                        XML_TYPE_CLASS_FOR_NAME_PROPERTY);
             }
 
             return null;
         }
+
+        final Type<?> type = Type.of(typeName);
+
+        return type == null ? null : type.javaType();
     }
 
     /*

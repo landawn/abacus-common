@@ -517,15 +517,21 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     /**
      * Returns an ImmutableNavigableMap containing the same mappings as the provided Map.
      * If the provided Map is already an instance of ImmutableNavigableMap, it is directly returned.
-     * If the provided Map is {@code null} or empty, an empty ImmutableNavigableMap is returned.
+     * If the provided Map is {@code null}, or is empty and not a {@link SortedMap}, an empty
+     * ImmutableNavigableMap is returned.
      * Otherwise, a new ImmutableNavigableMap is created with the elements of the provided Map.
+     *
+     * <p>If the source is a {@link SortedMap}, the returned map uses the same {@link java.util.Comparator}
+     * (or natural ordering) as the source, even when the source is empty. Otherwise, the entries are
+     * inserted into a new {@link TreeMap} using the natural ordering of the keys.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> map = new HashMap<>();
-     * map.put("b", 2);
-     * map.put("a", 1);
-     * ImmutableNavigableMap<String, Integer> immutable = ImmutableNavigableMap.copyOf(map);
+     * Map<String, Integer> mutable = new HashMap<>();
+     * mutable.put("b", 2);
+     * mutable.put("a", 1);
+     * ImmutableNavigableMap<String, Integer> immutable = ImmutableNavigableMap.copyOf(mutable);
+     * mutable.put("c", 3);             // does not affect immutable
      * System.out.println(immutable);   // prints {a=1, b=2}
      * }</pre>
      *

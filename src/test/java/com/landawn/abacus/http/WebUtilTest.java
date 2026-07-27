@@ -265,7 +265,7 @@ public class WebUtilTest extends TestBase {
         String result = WebUtil.curlToHttpRequestCode(curl);
 
         assertNotNull(result);
-        assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/users?q=\\\\\\\"quoted\\\\\\\"\")"));
+        assertTrue(result.contains("HttpRequest.url(\"https://api.example.com/users?q=\\\"quoted\\\"\")"));
     }
 
     @Test
@@ -309,6 +309,8 @@ public class WebUtilTest extends TestBase {
         assertNotNull(result);
         assertTrue(result.contains("OkHttpRequest.url(\"https://api.example.com/users\")"));
         assertTrue(result.contains(".get();"));
+        assertTrue(result.contains("Response response = OkHttpRequest.url("));
+        assertTrue(result.contains("try (response)"));
     }
 
     @Test
@@ -452,8 +454,8 @@ public class WebUtilTest extends TestBase {
         String result = WebUtil.curlToOkHttpRequestCode(curl);
 
         assertNotNull(result);
-        assertTrue(result.contains("OkHttpRequest.url(\"https://api.example.com/users?q=\\\\\\\"quoted\\\\\\\"\")"));
-        assertTrue(result.contains("MediaType.parse(\"multipart/form-data; boundary=\\\\\\\"abc\\\\\\\"\")"));
+        assertTrue(result.contains("OkHttpRequest.url(\"https://api.example.com/users?q=\\\"quoted\\\"\")"));
+        assertTrue(result.contains("MediaType.parse(\"multipart/form-data; boundary=\\\"abc\\\"\")"));
     }
 
     @Test
@@ -597,6 +599,17 @@ public class WebUtilTest extends TestBase {
         assertTrue(result.contains("-H 'Content-Type: application/json'"));
         assertTrue(result.contains("-H 'Authorization: Bearer token123'"));
         assertTrue(result.contains("-H 'Accept: application/json'"));
+    }
+
+    @Test
+    public void testBuildCurlRendersNullHeaderValueAsEmpty() {
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("X-Empty", null);
+
+        String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com/data", headers, null, null, '\'');
+
+        assertTrue(result.contains("-H 'X-Empty: '"), result);
+        assertFalse(result.contains("X-Empty: null"), result);
     }
 
     @Test

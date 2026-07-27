@@ -17,7 +17,7 @@
 package com.landawn.abacus.util;
 
 /**
- * Monitors a thread, interrupting it if it reaches the specified timeout.
+ * Monitors a thread, interrupting it when the specified timeout elapses.
  * <p>
  * This works by sleeping until the specified timeout amount and then
  * interrupting the thread being monitored. If the thread being monitored
@@ -28,12 +28,13 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  *       long timeoutInMillis = 1000;
+ *       Thread monitor = ThreadMonitor.start(timeoutInMillis);
  *       try {
- *           Thread monitor = ThreadMonitor.start(timeoutInMillis);
- *           // do some work here
- *           ThreadMonitor.stop(monitor);
+ *           Thread.sleep(2_000); // representative interruptible work
  *       } catch (InterruptedException e) {
  *           // timeout was reached
+ *       } finally {
+ *           ThreadMonitor.stop(monitor);
  *       }
  * }</pre>
  *
@@ -51,21 +52,21 @@ final class ThreadMonitor implements Runnable {
      * Starts monitoring the current thread with the specified timeout.
      *
      * <p>If the current thread does not complete its work within the specified timeout,
-     * it will be interrupted by the monitor thread. The monitored thread should handle
-     * the interruption appropriately and call {@link #stop(Thread)} to terminate the
-     * monitor thread when the work completes successfully.</p>
+     * it will be interrupted by the monitor thread. Interruption is cooperative: this utility
+     * does not forcibly terminate the monitored thread. The operation should react to interruption
+     * and call {@link #stop(Thread)} to cancel the monitor when it completes before the timeout.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long timeoutInMillis = 5000;
+     * Thread monitor = ThreadMonitor.start(timeoutInMillis);
      * try {
-     *     Thread monitor = ThreadMonitor.start(timeoutInMillis);
-     *     // do some work here
-     *     performLongRunningOperation();
-     *     ThreadMonitor.stop(monitor);
+     *     Thread.sleep(10_000); // representative interruptible work
      * } catch (InterruptedException e) {
      *     // timeout was reached
      *     System.err.println("Operation timed out");
+     * } finally {
+     *     ThreadMonitor.stop(monitor);
      * }
      * }</pre>
      *
@@ -90,10 +91,11 @@ final class ThreadMonitor implements Runnable {
      * Thread workerThread = new Thread(() -> {
      *     Thread monitor = ThreadMonitor.start(Thread.currentThread(), 10000);
      *     try {
-     *         performWork();
-     *         ThreadMonitor.stop(monitor);
+     *         Thread.sleep(20_000); // representative interruptible work
      *     } catch (InterruptedException e) {
      *         System.err.println("Work interrupted due to timeout");
+     *     } finally {
+     *         ThreadMonitor.stop(monitor);
      *     }
      * });
      * workerThread.start();
@@ -132,13 +134,13 @@ final class ThreadMonitor implements Runnable {
      * <pre>{@code
      * Thread monitor = ThreadMonitor.start(5000);
      * try {
-     *     // Perform work
-     *     processData();
-     *     // Work completed successfully, stop the monitor
-     *     ThreadMonitor.stop(monitor);
+     *     Thread.sleep(10_000); // representative interruptible work
      * } catch (InterruptedException e) {
      *     // Timeout occurred
-     *     handleTimeout();
+     *     System.err.println("Operation timed out");
+     * } finally {
+     *     // Always cancel a monitor that has not fired yet.
+     *     ThreadMonitor.stop(monitor);
      * }
      * }</pre>
      *

@@ -20,6 +20,8 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonParser;
@@ -43,11 +45,18 @@ public class TypeFactoryTest extends TestBase {
         public class Member<U> {
             // Type declaration used only to exercise owner-type name formatting.
         }
+
+        public class NonGenericMember {
+            // A parameterized owner still makes this reflection type parameterized, with no
+            // type arguments belonging to the member itself.
+        }
     }
 
     private static class GenericNameHolder {
         NestedGenericBean<String> bean;
         GenericOwner<String>.Member<Integer> member;
+        GenericOwner<Long>.Member<Integer> memberWithDifferentOwner;
+        GenericOwner<String>.NonGenericMember nonGenericMember;
     }
 
     // ---- NEW TESTS targeting uncovered lines ----
@@ -723,9 +732,29 @@ public class TypeFactoryTest extends TestBase {
     @Test
     public void testParameterizedMemberClassIncludesGenericOwnerName() throws NoSuchFieldException {
         final java.lang.reflect.Type reflectType = GenericNameHolder.class.getDeclaredField("member").getGenericType();
+        final java.lang.reflect.Type otherReflectType = GenericNameHolder.class.getDeclaredField("memberWithDifferentOwner").getGenericType();
         final String expectedName = GenericOwner.class.getCanonicalName() + "<String>.Member<Integer>";
+        final String otherExpectedName = GenericOwner.class.getCanonicalName() + "<Long>.Member<Integer>";
+
+        final Type<?> type = assertDoesNotThrow(() -> TypeFactory.getType(reflectType));
+        final Type<?> otherType = assertDoesNotThrow(() -> TypeFactory.getType(otherReflectType));
 
         assertEquals(expectedName, TypeFactory.getJavaTypeName(reflectType));
+        assertEquals(expectedName, type.name());
+        assertEquals(otherExpectedName, TypeFactory.getJavaTypeName(otherReflectType));
+        assertEquals(otherExpectedName, otherType.name());
+        assertNotSame(type, otherType);
+    }
+
+    @Test
+    public void testNonGenericMemberOfParameterizedOwnerDoesNotAddEmptyTypeArguments() throws NoSuchFieldException {
+        final java.lang.reflect.Type reflectType = GenericNameHolder.class.getDeclaredField("nonGenericMember").getGenericType();
+        final String expectedName = GenericOwner.class.getCanonicalName() + "<String>.NonGenericMember";
+
+        final Type<?> type = assertDoesNotThrow(() -> TypeFactory.getType(reflectType));
+
+        assertEquals(expectedName, TypeFactory.getJavaTypeName(reflectType));
+        assertEquals(expectedName, type.name());
     }
 
     @Test
@@ -795,242 +824,19 @@ public class TypeFactoryTest extends TestBase {
         assertNotNull(TypeFactory.getType(typeName));
     }
 
-    @Test
-    public void testGetType_ClazzRejectsMultipleTypeParameters() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Clazz<String, Integer>"));
-    }
-
-    @Test
-    public void testGetType_ClazzRejectsZeroTypeParameters() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Clazz"));
-    }
-
-    // Covers L616-L619: Password type with >0 type parameters should throw
-    @Test
-    public void testGetType_PasswordWithTypeParam_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Password<String>"));
-    }
-
-    // Covers L619: Password with >1 parameters should throw
-    @Test
-    public void testGetType_PasswordWithTwoParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Password(SHA256, MD5)"));
-    }
-
-    // Covers L656: Enum with >1 parameters should throw
-    @Test
-    public void testGetType_EnumWithTooManyParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("java.time.DayOfWeek(true, false)"));
-    }
-
-    // Covers L660-L663: JdkOptional with >1 type parameters should throw
-    @Test
-    public void testGetType_JdkOptionalWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("java.util.Optional<String, Integer>"));
-    }
-
-    // Covers L669-L672: com.landawn Optional with >1 type parameters should throw
-    @Test
-    public void testGetType_OptionalWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("com.landawn.abacus.util.u.Optional<String, Integer>"));
-    }
-
-    // Covers L678-L681: Nullable with >1 type parameters should throw
-    @Test
-    public void testGetType_NullableWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("com.landawn.abacus.util.u.Nullable<String, Integer>"));
-    }
-
-    // Covers L687-L691: Multiset with >1 type parameters / with extra params
-    @Test
-    public void testGetType_MultisetWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Multiset<String, Integer>"));
-    }
-
-    // Covers L702-L706: ListMultimap with wrong type param count
-    @Test
-    public void testGetType_ListMultimapWithOneTypeParam_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("ListMultimap<String>"));
-    }
-
-    // Covers L716-L720: SetMultimap with wrong type param count
-    @Test
-    public void testGetType_SetMultimapWithOneTypeParam_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("SetMultimap<String>"));
-    }
-
-    // Covers L748-L751: Range with >1 type parameters
-    @Test
-    public void testGetType_RangeWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Range<String, Integer>"));
-    }
-
-    // Covers L776-L779: HBaseColumn with >1 type parameters
-    @Test
-    public void testGetType_HBaseColumnWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("com.landawn.abacus.util.HBaseColumn<String, Integer>"));
-    }
-
-    // Covers L789-L793: ImmutableList with >1 type parameters
-    @Test
-    public void testGetType_ImmutableListWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("ImmutableList<String, Integer>"));
-    }
-
-    // Covers L803-L807: ImmutableSet with >1 type parameters
-    @Test
-    public void testGetType_ImmutableSetWithTwoTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("ImmutableSet<String, Integer>"));
-    }
-
-    // Covers L862-L866: ImmutableMap wrong type param count
-    @Test
-    public void testGetType_ImmutableMapWithOneTypeParam_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("ImmutableMap<String>"));
-    }
-
-    // Covers L889-L892: Map wrong type param count
-    @Test
-    public void testGetType_MapWithOneTypeParam_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Map<String>"));
-    }
-
-    // Covers L902-L906: Triple wrong type param count
-    @Test
-    public void testGetType_TripleWrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Triple<String, Integer>"));
-    }
-
-    // Covers L916-L920: Tuple1 wrong type param count
-    @Test
-    public void testGetType_Tuple1WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple1<String, Integer>"));
-    }
-
-    // Covers L930-L934: Tuple2 wrong type param count
-    @Test
-    public void testGetType_Tuple2WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple2<String>"));
-    }
-
-    // Covers L944-L948: Tuple3 wrong type param count
-    @Test
-    public void testGetType_Tuple3WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple3<String, Integer>"));
-    }
-
-    // Covers L958-L962: Tuple4 wrong type param count
-    @Test
-    public void testGetType_Tuple4WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple4<String, Integer, Long>"));
-    }
-
-    // Covers L972-L976: Tuple5 wrong type param count
-    @Test
-    public void testGetType_Tuple5WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple5<String, Integer, Long, Double>"));
-    }
-
-    // Covers L986-L990: Tuple6 wrong type param count
-    @Test
-    public void testGetType_Tuple6WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple6<String, Integer, Long, Double, Boolean>"));
-    }
-
-    // Covers L1000-L1004: Tuple7 wrong type param count
-    @Test
-    public void testGetType_Tuple7WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple7<String, Integer, Long, Double, Boolean, Byte>"));
-    }
-
-    // Covers L1016-L1020: Tuple8 wrong type param count
-    @Test
-    public void testGetType_Tuple8WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple8<String, Integer, Long, Double, Boolean, Byte, Short>"));
-    }
-
-    // Covers L1032-L1036: Tuple9 wrong type param count
-    @Test
-    public void testGetType_Tuple9WrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Tuple9<String, Integer, Long, Double, Boolean, Byte, Short, Float>"));
-    }
-
-    // Covers L1048-L1052: Indexed wrong type param count
-    @Test
-    public void testGetType_IndexedWrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Indexed<String, Integer>"));
-    }
-
-    // Covers L1062-L1065: Timed wrong type param count
-    @Test
-    public void testGetType_TimedWrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Timed<String, Integer>"));
-    }
-
-    // Covers L1075-L1079: ImmutableMapEntry wrong type param count
-    @Test
-    public void testGetType_ImmutableMapEntryWrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Map.ImmutableEntry<String>"));
-    }
-
-    // Covers L1089-L1093: Map.Entry wrong type param count
-    @Test
-    public void testGetType_MapEntryWrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Map.Entry<String>"));
-    }
-
-    // Covers L566: Clazz with extra parameters (not type params)
-    @Test
-    public void testGetType_ClazzWithExtraParameters_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Clazz<String>(extra)"));
-    }
-
-    // Covers L574-L577: JSON with extra parameters
-    @Test
-    public void testGetType_JSONWithExtraParameters_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("JSON<String>(extra)"));
-    }
-
-    // Covers L587-L590: XML with extra parameters
-    @Test
-    public void testGetType_XMLWithExtraParameters_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("XML<String>(extra)"));
-    }
-
-    // Covers L574: JSON with too many type parameters
-    @Test
-    public void testGetType_JSONWithTooManyTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("JSON<String, Integer>"));
-    }
-
-    // Covers L587: XML with too many type parameters
-    @Test
-    public void testGetType_XMLWithTooManyTypeParams_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("XML<String, Integer>"));
-    }
-
-    // Covers L732-L736: Multimap wrong type param count
-    @Test
-    public void testGetType_MultimapWrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("com.landawn.abacus.util.Multimap<String>"));
-    }
-
-    // Covers L765-L766: Sheet wrong type param count
-    @Test
-    public void testGetType_SheetWrongTypeParamCount_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Sheet<String, Integer>"));
-    }
-
-    @Test
-    public void testGetType_EnumWithTypeParams_Throws() {
-        // regression: the Enum branch was the only generic-capable branch that never validated
-        // typeParameters, silently accepting and discarding them (e.g. "java.time.DayOfWeek<String>").
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("java.time.DayOfWeek<String>"));
-    }
-
-    @Test
-    public void testGetType_ClazzRejectsParameters() {
-        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Clazz<String>(foo)"));
+    @ParameterizedTest(name = "rejects invalid type declaration: {0}")
+    @ValueSource(strings = { "Clazz<String, Integer>", "Clazz", "Password<String>", "Password(SHA256, MD5)", "java.time.DayOfWeek(true, false)",
+            "java.util.Optional<String, Integer>", "com.landawn.abacus.util.u.Optional<String, Integer>", "com.landawn.abacus.util.u.Nullable<String, Integer>",
+            "Multiset<String, Integer>", "ListMultimap<String>", "SetMultimap<String>", "Range<String, Integer>",
+            "com.landawn.abacus.util.HBaseColumn<String, Integer>", "ImmutableList<String, Integer>", "ImmutableSet<String, Integer>", "ImmutableMap<String>",
+            "Map<String>", "Triple<String, Integer>", "Tuple1<String, Integer>", "Tuple2<String>", "Tuple3<String, Integer>", "Tuple4<String, Integer, Long>",
+            "Tuple5<String, Integer, Long, Double>", "Tuple6<String, Integer, Long, Double, Boolean>", "Tuple7<String, Integer, Long, Double, Boolean, Byte>",
+            "Tuple8<String, Integer, Long, Double, Boolean, Byte, Short>", "Tuple9<String, Integer, Long, Double, Boolean, Byte, Short, Float>",
+            "Indexed<String, Integer>", "Timed<String, Integer>", "Map.ImmutableEntry<String>", "Map.Entry<String>", "Clazz<String>(extra)",
+            "JSON<String>(extra)", "XML<String>(extra)", "JSON<String, Integer>", "XML<String, Integer>", "com.landawn.abacus.util.Multimap<String>",
+            "Sheet<String, Integer>", "java.time.DayOfWeek<String>", "Clazz<String>(foo)" })
+    public void testGetTypeRejectsInvalidTypeDeclaration(final String typeName) {
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(typeName));
     }
 
     @Test

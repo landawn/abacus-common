@@ -1033,7 +1033,7 @@ public class DatasetTest extends AbstractTest {
             Dataset.columns(columnNames, columns);
         });
 
-        assertTrue(exception.getMessage().contains("The length of 'columnNames'(2) is not equal to the length of the sub-collections in 'columns'(3)"));
+        assertTrue(exception.getMessage().contains("The length of 'columnNames'(2) is not equal to the number of sub-arrays in 'columns'(3)"));
     }
 
     @Test

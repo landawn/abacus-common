@@ -170,11 +170,21 @@ public abstract class Observer<T> {
      * Creates a new Observer that uses the given dispatcher as the head of its chain.
      *
      * @param dispatcher the head dispatcher for this Observer's pipeline; must not be {@code null}
+     * @throws IllegalArgumentException if {@code dispatcher} is {@code null}
      */
     protected Observer(final Dispatcher<Object> dispatcher) {
-        this.dispatcher = dispatcher;
+        this.dispatcher = N.checkArgNotNull(dispatcher, "dispatcher");
     }
 
+    /**
+     * Validates and records the single subscription permitted for this observer.
+     *
+     * @param action the action to invoke for each emitted item
+     * @param onError the action to invoke when observation fails
+     * @param onComplete the action to invoke when observation completes
+     * @throws IllegalArgumentException if any callback is {@code null}
+     * @throws IllegalStateException if this observer has already been subscribed
+     */
     protected final synchronized void beginSubscription(final Consumer<? super T> action, final Consumer<? super Exception> onError,
             final Runnable onComplete) {
         N.checkArgNotNull(action, cs.action);
@@ -194,7 +204,8 @@ public abstract class Observer<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-     * // Add elements to queue...
+     * queue.add("alpha");
+     * queue.add("beta");
      * Observer.complete(queue);   // signals completion
      * }</pre>
      *
@@ -349,6 +360,8 @@ public abstract class Observer<T> {
      *        ({@code 0L}) is emitted immediately with no initial delay
      * @return a new Observer that emits sequential {@code Long} values periodically
      * @throws IllegalArgumentException if {@code periodInMillis} is zero or negative
+     * @see #interval(long, TimeUnit)
+     * @see #interval(long, long)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(final long periodInMillis) {
@@ -371,6 +384,8 @@ public abstract class Observer<T> {
      * @return a new Observer that emits sequential {@code Long} values periodically
      * @throws IllegalArgumentException if {@code initialDelayInMillis} is negative or
      *         {@code periodInMillis} is zero or negative
+     * @see #interval(long, long, TimeUnit)
+     * @see #interval(long)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(final long initialDelayInMillis, final long periodInMillis) {
@@ -393,6 +408,7 @@ public abstract class Observer<T> {
      * @return a new Observer that emits sequential {@code Long} values periodically
      * @throws IllegalArgumentException if {@code period} is zero or negative or {@code unit}
      *         is {@code null}
+     * @see #interval(long, long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(final long period, final TimeUnit unit) {
@@ -767,7 +783,7 @@ public abstract class Observer<T> {
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
     public Observer<T> throttleLast(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
-        N.checkArgument(intervalDuration >= 0, "Delay cannot be negative");
+        N.checkArgument(intervalDuration >= 0, "Interval cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
 
         if (intervalDuration == 0) {
@@ -954,7 +970,8 @@ public abstract class Observer<T> {
 
     /**
      * Transforms items into Timed objects that contain the time interval between
-     * consecutive emissions in milliseconds.
+     * consecutive emissions in milliseconds. For the first item the interval is measured from
+     * the moment this operator was applied, not from the start of the subscription.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1759,6 +1776,11 @@ public abstract class Observer<T> {
      */
     protected static class Dispatcher<T> {
 
+        /** Creates an empty dispatcher with no downstream dispatcher. */
+        protected Dispatcher() {
+            // Empty by design.
+        }
+
         /** Holds the most-recently-received item for debounce/throttle operators; initialised to the sentinel {@code NONE}. */
         protected final Holder<Object> holder = Holder.of(NONE);
 
@@ -1801,8 +1823,11 @@ public abstract class Observer<T> {
          * making it the new last element.
          *
          * @param downDispatcher the dispatcher to append; must not be {@code null}
+         * @throws IllegalArgumentException if {@code downDispatcher} is {@code null}
          */
         public void append(final Dispatcher<T> downDispatcher) {
+            N.checkArgNotNull(downDispatcher, "downDispatcher");
+
             Dispatcher<T> tmp = this;
 
             while (tmp.downDispatcher != null) {

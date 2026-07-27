@@ -89,6 +89,21 @@ public class ArrayStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapClosesMappedStreamsAndSource() {
+        final AtomicInteger sourceCloseCount = new AtomicInteger();
+        final AtomicInteger mappedCloseCount = new AtomicInteger();
+
+        final List<Integer> result = Stream.of(1, 2)
+                .onClose(sourceCloseCount::incrementAndGet)
+                .flatMap(value -> Stream.of(value).onClose(mappedCloseCount::incrementAndGet))
+                .toList();
+
+        assertEquals(Arrays.asList(1, 2), result);
+        assertEquals(2, mappedCloseCount.get());
+        assertEquals(1, sourceCloseCount.get());
+    }
+
+    @Test
     public void testFilter() {
         Stream<Integer> stream = Stream.of(integerArray);
         List<Integer> result = stream.filter(x -> x % 2 == 0).toList();

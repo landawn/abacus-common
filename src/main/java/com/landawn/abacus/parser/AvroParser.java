@@ -118,11 +118,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * as a Base64 string suitable for text-based transmission. The output is Base64 encoded
      * to make it suitable for text-based storage and transmission.</p>
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 30);
      * AvroSerConfig config = new AvroSerConfig()
-     *     .setSchema(User.getSchema());
+     *     .setSchema(User.getClassSchema());
      * String base64Encoded = parser.serialize(user, config);
      * }</pre>
      *
@@ -152,13 +152,14 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * Missing parent directories are created automatically. The content
      * is written in raw binary format without Base64 encoding for optimal performance.</p>
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = Arrays.asList(
+     * List<User> users = List.of(
      *     new User("John", 30),
      *     new User("Jane", 25)
      * );
-     * parser.serialize(users, config, new File("users.avro"));
+     * // SpecificRecord collections carry their own schema, so no config is required.
+     * parser.serialize(users, null, new File("users.avro"));
      * }</pre>
      *
      * <p><b>Implementation note:</b> The source type and required schema are validated before the
@@ -207,7 +208,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // With SpecificRecord
      * User user = new User("John", 30);
@@ -400,9 +401,13 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "...";  // base64Data is Base64-encoded Avro data
+     * AvroParser parser = new AvroParser();
+     * User original = new User("John", 30);
+     * AvroSerConfig serConfig = new AvroSerConfig()
+     *     .setSchema(User.getClassSchema());
+     * String base64Data = parser.serialize(original, serConfig);
      * AvroDeserConfig config = AvroDeserConfig.create()
-     *     .setSchema(User.getSchema());
+     *     .setSchema(User.getClassSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
      * }</pre>
      *
@@ -425,9 +430,13 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "...";  // base64Data is Base64-encoded Avro data
+     * AvroParser parser = new AvroParser();
+     * User original = new User("John", 30);
+     * AvroSerConfig serConfig = new AvroSerConfig()
+     *     .setSchema(User.getClassSchema());
+     * String base64Data = parser.serialize(original, serConfig);
      * AvroDeserConfig config = AvroDeserConfig.create()
-     *     .setSchema(User.getSchema());
+     *     .setSchema(User.getClassSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
      * }</pre>
      *

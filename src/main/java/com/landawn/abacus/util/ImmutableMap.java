@@ -32,7 +32,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable map</li>
- * <li>{@link #of(Object, Object)} (and arity-overloads up to nine key-value pairs) - creates maps with specific key-value pairs</li>
+ * <li>{@link #of(Object, Object)} (and arity-overloads up to ten key-value pairs) - creates maps with specific key-value pairs</li>
  * <li>{@link #copyOf(Map)} - creates a defensive copy from another map</li>
  * <li>{@link #wrap(Map)} - wraps an existing map (changes to the underlying map will be reflected)</li>
  * <li>{@link #builder()} - provides a builder for constructing immutable maps</li>
@@ -271,8 +271,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys.
-     * @param <V> the type of the values.
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
      * @param k1 the first key.
      * @param v1 the first value.
      * @param k2 the second key.
@@ -314,8 +314,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys.
-     * @param <V> the type of the values.
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
      * @param k1 the first key.
      * @param v1 the first value.
      * @param k2 the second key.
@@ -359,8 +359,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys.
-     * @param <V> the type of the values.
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
      * @param k1 the first key.
      * @param v1 the first value.
      * @param k2 the second key.
@@ -407,8 +407,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys.
-     * @param <V> the type of the values.
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
      * @param k1 the first key.
      * @param v1 the first value.
      * @param k2 the second key.
@@ -458,8 +458,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * );
      * }</pre>
      *
-     * @param <K> the type of the keys.
-     * @param <V> the type of the values.
+     * @param <K> the type of keys.
+     * @param <V> the type of values.
      * @param k1 the first key.
      * @param v1 the first value.
      * @param k2 the second key.

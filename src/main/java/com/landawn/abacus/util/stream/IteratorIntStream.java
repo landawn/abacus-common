@@ -80,6 +80,7 @@ import com.landawn.abacus.util.function.IntToShortFunction;
  * @see IntIteratorEx
  */
 class IteratorIntStream extends AbstractIntStream {
+    /** The backing iterator supplying this stream's elements; it is consumed lazily as the stream is traversed. */
     final IntIteratorEx elements;
 
     //    OptionalInt head;
@@ -2028,10 +2029,11 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    protected IntStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected IntStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorIntStream(elements, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorIntStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     @Override

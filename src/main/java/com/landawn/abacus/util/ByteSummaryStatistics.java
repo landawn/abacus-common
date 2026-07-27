@@ -77,7 +77,9 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * @param min the minimum {@code byte} value
      * @param max the maximum {@code byte} value
      * @param sum the sum of all values as a {@code long}
-     * @throws IllegalArgumentException if {@code count} is negative or {@code min} is greater than {@code max}
+     * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state does not use
+     *         {@link Byte#MAX_VALUE}, {@link Byte#MIN_VALUE}, and zero for min, max, and sum;
+     *         or if a non-empty state has {@code min} greater than {@code max}
      */
     public ByteSummaryStatistics(final long count, final byte min, final byte max, final long sum) {
         if (count < 0) {
@@ -145,7 +147,8 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * System.out.println(stats1.getSum());     // prints 100
      * }</pre>
      *
-     * @param other another {@code ByteSummaryStatistics} to combine with this one
+     * @param other another {@code ByteSummaryStatistics} to combine with this one; must not be {@code null}
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     public void combine(final ByteSummaryStatistics other) {
         count += other.count;

@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -45,15 +49,22 @@ import com.sun.net.httpserver.HttpServer;
 
 public class HttpRequestTest extends TestBase {
 
-    private static final String TEST_URL = "https://httpbin.org/get";
-    private static final String POST_URL = "https://httpbin.org/post";
-    private static final String PUT_URL = "https://httpbin.org/put";
-    private static final String PATCH_URL = "https://httpbin.org/patch";
-    private static final String DELETE_URL = "https://httpbin.org/delete";
+    private static final HttpServer SHARED_TEST_SERVER = startSharedTestServer();
+    private static final String SHARED_TEST_SERVER_URL = localUrl(SHARED_TEST_SERVER);
+    private static final String TEST_URL = SHARED_TEST_SERVER_URL + "get";
+    private static final String POST_URL = SHARED_TEST_SERVER_URL + "post";
+    private static final String PUT_URL = SHARED_TEST_SERVER_URL + "put";
+    private static final String PATCH_URL = SHARED_TEST_SERVER_URL + "patch";
+    private static final String DELETE_URL = SHARED_TEST_SERVER_URL + "delete";
 
-    private final String testUrl = "https://httpbin.org/get";
+    private final String testUrl = TEST_URL;
     private final URI testUri = URI.create(testUrl);
     private final HttpClient mockHttpClient = HttpClient.newHttpClient();
+
+    @AfterAll
+    public static void stopSharedTestServer() {
+        SHARED_TEST_SERVER.stop(0);
+    }
 
     public static class TestBean {
         private String name;
@@ -1633,11 +1644,11 @@ public class HttpRequestTest extends TestBase {
 
     @Test
     public void test_execute_withHeadMethod() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).execute(HttpMethod.HEAD);
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
+        final HttpResponse<String> response = HttpRequest.url(TEST_URL, 1_000L, 5_000L).execute(HttpMethod.HEAD);
+
+        assertNotNull(response);
+        assertEquals(200, response.statusCode());
+        assertEquals("HEAD", response.headers().firstValue("X-Request-Method").orElse(null));
     }
 
     // ==================== execute(HttpMethod, BodyHandler) ====================
@@ -1648,6 +1659,22 @@ public class HttpRequestTest extends TestBase {
             HttpResponse<String> response = HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofString());
             assertNotNull(response);
         } catch (Exception e) {
+        }
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecuteRestoresInterruptStatusWhenSendIsInterrupted() throws Exception {
+        final HttpClient client = mock(HttpClient.class);
+        when(client.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(new InterruptedException("interrupted"));
+
+        Thread.interrupted();
+
+        try {
+            assertThrows(RuntimeException.class, () -> HttpRequest.create("http://localhost", client).execute(HttpMethod.GET, BodyHandlers.ofString()));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
         }
     }
 
@@ -1701,7 +1728,7 @@ public class HttpRequestTest extends TestBase {
         try {
             CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet();
             assertNotNull(future);
-            HttpResponse<String> response = future.get();
+            HttpResponse<String> response = future.get(5, TimeUnit.SECONDS);
             assertNotNull(response);
         } catch (ExecutionException e) {
         }
@@ -1714,7 +1741,7 @@ public class HttpRequestTest extends TestBase {
         try {
             CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString());
             assertNotNull(future);
-            HttpResponse<String> response = future.get();
+            HttpResponse<String> response = future.get(5, TimeUnit.SECONDS);
             assertNotNull(response);
         } catch (ExecutionException e) {
         }
@@ -1736,7 +1763,7 @@ public class HttpRequestTest extends TestBase {
         try {
             CompletableFuture<String> future = HttpRequest.url(TEST_URL).asyncGet(String.class);
             assertNotNull(future);
-            String result = future.get();
+            String result = future.get(5, TimeUnit.SECONDS);
             assertNotNull(result);
         } catch (ExecutionException e) {
         }
@@ -2381,6 +2408,40 @@ public class HttpRequestTest extends TestBase {
 
         server.start();
         return server;
+    }
+
+    private static HttpServer startSharedTestServer() {
+        try {
+            final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+
+            server.createContext("/", exchange -> {
+                final String requestMethod = exchange.getRequestMethod();
+                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                exchange.getResponseHeaders().set("X-Request-Method", requestMethod);
+
+                try (InputStream requestBody = exchange.getRequestBody()) {
+                    requestBody.transferTo(OutputStream.nullOutputStream());
+                }
+
+                if (HttpMethod.HEAD.name().equals(requestMethod)) {
+                    exchange.sendResponseHeaders(200, -1);
+                    exchange.close();
+                    return;
+                }
+
+                final byte[] responseBody = (requestMethod + " response").getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(200, responseBody.length);
+
+                try (OutputStream outputStream = exchange.getResponseBody()) {
+                    outputStream.write(responseBody);
+                }
+            });
+
+            server.start();
+            return server;
+        } catch (final IOException e) {
+            throw new ExceptionInInitializerError(e);
+        }
     }
 
     private static HttpServer startLocalServer(final String body) throws Exception {

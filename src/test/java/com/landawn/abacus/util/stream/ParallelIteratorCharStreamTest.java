@@ -29,8 +29,8 @@ import com.landawn.abacus.util.function.CharFunction;
 import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.CharTernaryOperator;
 import com.landawn.abacus.util.function.CharUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelIteratorCharStreamTest extends TestBase {
 
@@ -41,7 +41,7 @@ public class ParallelIteratorCharStreamTest extends TestBase {
     private CharStream stream;
 
     protected CharStream createCharStream(char... elements) {
-        return CharStream.of(elements).map(e -> (char) (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
+        return CharStream.of(elements).map(e -> (char) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class ParallelIteratorCharStreamTest extends TestBase {
     // ---- Sequential-fallback path: 1-thread iterator stream => canBeSequential(maxThreadNum) == true ----
 
     private CharStream createSingleThreadStream(char... elements) {
-        return CharStream.of(elements).map(e -> (char) (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1));
+        return CharStream.of(elements).map(e -> (char) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test
@@ -698,7 +698,7 @@ public class ParallelIteratorCharStreamTest extends TestBase {
     public void testZipWithDefaultValues_SequentialFallback() {
         List<Character> result = CharStream.of('a', 'b')
                 .map(e -> (char) (e + 0))
-                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
                 .zipWith(CharStream.of('x'), '0', '?', (a, b) -> b == '?' ? a : b)
                 .toList();
 
@@ -730,8 +730,8 @@ public class ParallelIteratorCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ITERATOR, ((ParallelIteratorCharStream) createCharStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ITERATOR, ((ParallelIteratorCharStream) createCharStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

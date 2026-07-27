@@ -38,7 +38,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Type Safety:</b> Generic constraints ensure exception type {@code E} extends {@code Throwable}</li>
  *   <li><b>Structurally Immutable:</b> The stored references cannot be reassigned after construction</li>
  *   <li><b>Explicit Error State:</b> Carries the failure alongside the value for callers to inspect</li>
- *   <li><b>Functional API:</b> Provides functional-style methods for conditional execution and transformation</li>
+ *   <li><b>Functional API:</b> Provides functional-style methods for conditional execution, fallback, and unwrapping</li>
  *   <li><b>Deferred Exception Throwing:</b> Encapsulates failures until callers explicitly unwrap them</li>
  *   <li><b>Small State:</b> Stores two object references</li>
  *   <li><b>Integration Ready:</b> Seamless conversion to other container types like Pair and Tuple</li>
@@ -100,12 +100,15 @@ import com.landawn.abacus.util.u.Optional;
  * String computedDefault = result.orElseGetIfFailure(() -> computeDefault());
  *
  * // Exception transformation and re-throwing
- * String value = result.orElseThrow(ex -> new RuntimeException("Operation failed", ex));
- * String value2 = result.orElseThrow(() -> new CustomException("Operation failed"));
+ * String value = result.orElseThrow(
+ *     (Function<IOException, RuntimeException>) ex -> new RuntimeException("Operation failed", ex));
+ * String value2 = result.orElseThrow(
+ *     (Supplier<CustomException>) () -> new CustomException("Operation failed"));
  * }</pre>
  *
  * <p><b>Advanced Error Handling Patterns:</b>
  * <pre>{@code
+ * class ResultHandlers {
  * // Conditional execution with both success and failure handlers
  * public void processFile(Result<String, IOException> fileResult) {
  *     fileResult.ifSuccessOrElse(
@@ -117,36 +120,44 @@ import com.landawn.abacus.util.u.Optional;
  * // Convert exception to different type and re-throw
  * public String fetchData(Result<String, SQLException> dbResult) throws ServiceException {
  *     return dbResult.orElseThrow(
- *         sqlEx -> new ServiceException("Database operation failed", sqlEx)
+ *         (Function<SQLException, ServiceException>) sqlEx ->
+ *             new ServiceException("Database operation failed", sqlEx)
  *     );
  * }
  *
  * // Handle multiple results with fallback values
- * Result<String, IOException> result1 = readFile("file1.txt");
- * Result<String, IOException> result2 = readFile("file2.txt");
+ * public void demonstrateFallbacks() {
+ *     Result<String, IOException> result1 = readFile("file1.txt");
+ *     Result<String, IOException> result2 = readFile("file2.txt");
  *
- * String data1 = result1.orElseIfFailure("default1");
- * String data2 = result2.orElseGetIfFailure(() -> computeDefault());
+ *     String data1 = result1.orElseIfFailure("default1");
+ *     String data2 = result2.orElseGetIfFailure(() -> computeDefault());
+ * }
+ * }
  * }</pre>
  *
  * <p><b>Integration with Existing Code:</b>
  * <pre>{@code
+ * class ResultConversions {
  * // Converting from traditional exception-based code
- * public Result<String, FileNotFoundException> readFileAsResult(String path) {
+ * public Result<String, IOException> readFileAsResult(String path) {
  *     try {
  *         String content = Files.readString(Paths.get(path));
  *         return Result.of(content, null);
- *     } catch (FileNotFoundException e) {
+ *     } catch (IOException e) {
  *         return Result.of(null, e);
  *     }
  * }
  *
  * // Converting to other container types
- * Pair<String, IOException> pair = result.toPair();
- * Tuple2<String, IOException> tuple = result.toTuple();
- * Optional<String> optional = result.isSuccess()
- *     ? Optional.ofNullable(result.orElseIfFailure(null))
- *     : Optional.empty();
+ * public void convert(Result<String, IOException> result) {
+ *     Pair<String, IOException> pair = result.toPair();
+ *     Tuple2<String, IOException> tuple = result.toTuple();
+ *     Optional<String> optional = result.isSuccess()
+ *         ? Optional.ofNullable(result.orElseIfFailure(null))
+ *         : Optional.empty();
+ * }
+ * }
  * }</pre>
  *
  * <p><b>RR Nested Class - RuntimeException Specialization:</b>
@@ -204,7 +215,6 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Common Anti-Patterns to Avoid:</b>
  * <ul>
  *   <li>Creating Results with both value and exception {@code non-null} (ambiguous state)</li>
- *   <li>Calling {@code orElseThrow()} without checking {@code isSuccess()} first</li>
  *   <li>Ignoring failure cases and only handling success scenarios</li>
  *   <li>Using Result for control flow instead of genuine error scenarios</li>
  *   <li>Converting back to exception-throwing methods unnecessarily</li>
@@ -342,14 +352,14 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Result<Optional<String>, RuntimeException> optionalResult = Result.success(Optional.of("value"));
      *
      * // Typical pattern in service methods
-     * public Result<User, DatabaseException> findUserById(long id) {
+     * Function<Long, Result<User, DatabaseException>> findUserById = id -> {
      *     try {
      *         User user = userRepository.findById(id);
      *         return Result.success(user);
      *     } catch (DatabaseException e) {
      *         return Result.failure(e);
      *     }
-     * }
+     * };
      *
      * // Conditional execution
      * Result<String, RuntimeException> successResult = Result.success(computeValue());
@@ -450,7 +460,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Result<Config, IllegalStateException> configError = Result.failure(new IllegalStateException("Invalid config"));
      *
      * // Typical pattern in service methods
-     * public Result<User, ValidationException> validateUser(UserInput input) {
+     * Function<UserInput, Result<User, ValidationException>> validateUser = input -> {
      *     if (input.getEmail() == null) {
      *         return Result.failure(new ValidationException("Email is required"));
      *     }
@@ -458,16 +468,16 @@ public class Result<T, E extends Throwable> implements Immutable {
      *         return Result.failure(new ValidationException("Invalid email format"));
      *     }
      *     return Result.success(createUser(input));
-     * }
+     * };
      *
      * // Wrapping checked exceptions from external APIs
-     * public Result<String, IOException> readFile(Path path) {
+     * Function<Path, Result<String, IOException>> readFile = path -> {
      *     try {
      *         return Result.success(Files.readString(path));
      *     } catch (IOException e) {
      *         return Result.failure(e);
      *     }
-     * }
+     * };
      *
      * // Conditional execution on failure
      * Result<String, RuntimeException> failureResult = Result.failure(new IllegalArgumentException("Invalid input"));
@@ -478,7 +488,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * // Transforming and re-throwing exceptions
      * Result<Data, SQLException> dbResult = fetchFromDatabase();
-     * Data data = dbResult.orElseThrow(sqlEx -> new ServiceException("Database error", sqlEx));
+     * Data data = dbResult.orElseThrow(
+     *     (Function<SQLException, ServiceException>) sqlEx -> new ServiceException("Database error", sqlEx));
      *
      * // Providing fallback values for failures
      * String content = Result.<String, IOException>failure(new IOException("Read error"))
@@ -535,6 +546,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * <p><b>Common Patterns:</b></p>
      * <pre>{@code
+     * class ResultWorkflows {
      * // Pattern 1: Converting try-catch to Result
      * public Result<Data, ServiceException> fetchData(String id) {
      *     try {
@@ -553,21 +565,23 @@ public class Result<T, E extends Throwable> implements Immutable {
      *     if (request.getCustomerId() == null) {
      *         return Result.failure(new ValidationException("Customer ID is required"));
      *     }
-     *     // ... more validations
      *     return Result.success(orderService.create(request));
      * }
      *
      * // Pattern 3: Combining multiple Results
-     * Result<User, DbException> userResult = userRepo.findById(userId);
-     * Result<Account, DbException> accountResult = accountRepo.findByUserId(userId);
+     * public Result<UserProfile, DbException> createProfile(long userId) throws DbException {
+     *     Result<User, DbException> userResult = userRepo.findById(userId);
+     *     Result<Account, DbException> accountResult = accountRepo.findByUserId(userId);
      *
-     * if (userResult.isFailure()) {
-     *     return Result.failure(userResult.getException());
+     *     if (userResult.isFailure()) {
+     *         return Result.failure(userResult.getException());
+     *     }
+     *     if (accountResult.isFailure()) {
+     *         return Result.failure(accountResult.getException());
+     *     }
+     *     return Result.success(new UserProfile(userResult.orElseThrow(), accountResult.orElseThrow()));
      * }
-     * if (accountResult.isFailure()) {
-     *     return Result.failure(accountResult.getException());
      * }
-     * return Result.success(new UserProfile(userResult.orElseThrow(), accountResult.orElseThrow()));
      * }</pre>
      *
      * @param <T> the type of the successful result value; this parameter is inferred from context
@@ -825,10 +839,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Returns the value if this Result is successful, otherwise throws an exception created by applying
      * the contained exception to the provided exception mapper function.
      * This method allows transforming the original exception into a different exception type.
+     * The explicit {@link Function} target type shown below disambiguates this overload from the
+     * deprecated overload that accepts an exception instance directly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = result.orElseThrow(ex -> new RuntimeException("Failed", ex));
+     * String value = result.orElseThrow(
+     *     (Function<IOException, RuntimeException>) ex -> new RuntimeException("Failed", ex));
      * }</pre>
      *
      * @param <E2> the type of exception to be thrown.
@@ -851,10 +868,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Returns the value if this Result is successful, otherwise throws an exception supplied by the given supplier.
      * This method provides a way to throw a custom exception when the Result represents a failure.
      * The supplier is only invoked if this Result contains an exception.
+     * The explicit {@link Supplier} target type shown below disambiguates this overload from the
+     * deprecated overload that accepts an exception instance directly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = result.orElseThrow(() -> new IllegalStateException("Failed"));
+     * String value = result.orElseThrow(
+     *     (Supplier<IllegalStateException>) () -> new IllegalStateException("Failed"));
      * }</pre>
      *
      * @param <E2> the type of exception to be thrown.
@@ -1007,9 +1027,8 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     /**
      * Compares this Result with another object for equality.
-     * Two Results are considered equal if they are both successful with equal values,
-     * or both failures with equal exceptions. For equality, both the value and exception
-     * must match between the two Result instances.
+     * Two Results are considered equal when both their stored values and their stored exceptions
+     * are equal. This applies equally to success, failure, and the permitted both-present state.
      *
      * <p><b>Equality Contract:</b></p>
      * <ul>
@@ -1060,8 +1079,11 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * {value=success, exception=null}
-     * {value=null, exception=java.io.IOException: Error}
+     * Result<String, IOException> success = Result.success("success");
+     * success.toString();   // returns "{value=success, exception=null}"
+     *
+     * Result<String, IOException> failure = Result.failure(new IOException("Error"));
+     * failure.toString();   // returns "{value=null, exception=java.io.IOException: Error}"
      * }</pre>
      *
      * @return a string representation of this Result showing both value and exception.

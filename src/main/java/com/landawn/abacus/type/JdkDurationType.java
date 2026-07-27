@@ -107,6 +107,7 @@ public class JdkDurationType extends AbstractType<Duration> {
      *
      * @param str the string containing milliseconds to parse
      * @return the parsed Duration instance, or {@code null} if the input is {@code null} or empty
+     * @throws NumberFormatException if {@code str} is non-empty but does not contain a parsable {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(Duration)
      */
@@ -189,7 +190,8 @@ public class JdkDurationType extends AbstractType<Duration> {
 
     /**
      * Appends the string representation of a Duration to an Appendable.
-     * The duration is written as milliseconds.
+     * The duration is written as its millisecond count.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
@@ -230,8 +232,8 @@ public class JdkDurationType extends AbstractType<Duration> {
      * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Duration to write
-     * @param config the serialization configuration (not used for Duration)
+     * @param x the Duration to write; may be {@code null}
+     * @param config the serialization configuration (not used for Duration); may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

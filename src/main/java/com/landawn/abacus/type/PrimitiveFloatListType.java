@@ -125,7 +125,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Parses a string representation and creates a FloatList.
      * The string is first parsed as a float array, then wrapped in a FloatList.
-     * Returns {@code null} if the input string is {@code null} or empty.
+     * Returns {@code null} if the input string is {@code null} or blank.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -142,7 +142,8 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a FloatList created from the parsed values, or {@code null} if input is {@code null} or empty
+     * @return a FloatList created from the parsed values, or {@code null} if input is {@code null} or blank
+     * @throws NumberFormatException if any element in the string cannot be parsed as a float
      * @see #valueOf(Object)
      * @see #stringOf(FloatList)
      */
@@ -206,10 +207,14 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<FloatList> type = TypeFactory.getType(FloatList.class);
-     * CharacterWriter writer = new BufferedJsonWriter();
-     * FloatList list = FloatList.of(1.5f, 2.7f, 3.14f);
-     * type.serializeTo(writer, list, null);
-     * // Writer contains: "[1.5, 2.7, 3.14]"
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * try {
+     *     FloatList list = FloatList.of(1.5f, 2.7f, 3.14f);
+     *     type.serializeTo(writer, list, null);
+     *     // Writer contains: "[1.5, 2.7, 3.14]"
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      * <p>

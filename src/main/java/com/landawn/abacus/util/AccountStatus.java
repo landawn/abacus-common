@@ -97,6 +97,7 @@ public enum AccountStatus {
      * }</pre>
      *
      * @return the integer value of this status
+     * @see #fromCode(int)
      */
     public int code() {
         return code;
@@ -115,6 +116,7 @@ public enum AccountStatus {
      * @param code the integer value to convert (0–5)
      * @return the corresponding {@code AccountStatus}; never {@code null}
      * @throws IllegalArgumentException if no {@code AccountStatus} exists for the specified integer value
+     * @see #code()
      */
     public static AccountStatus fromCode(final int code) {
         switch (code) {

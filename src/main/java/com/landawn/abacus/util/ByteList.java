@@ -237,26 +237,26 @@ import com.landawn.abacus.util.stream.ByteStream;
  *   <li><b>{@link java.nio.ByteBuffer}:</b> Alternative for sequential byte operations</li>
  * </ul>
  *
- * <p><b>Usage Examples: Binary Protocol Processing</b>
+ * <p><b>Usage Examples: Binary Protocol Processing</b></p>
  * <pre>{@code
  * // Process a network packet with header and payload
  * ByteList packet = new ByteList(1024);
+ * byte[] payloadData = { 10, 20, 30 };
+ * int headerSize = 2;
  *
- * // Add packet header
- * packet.addAll(new byte[]{0x01, 0x02});      // Protocol version
- * packet.addAll(intToBytes(payloadLength));   // Payload length
- *
- * // Add payload data
+ * // Add a one-byte version and one-byte payload length, then the payload.
+ * packet.add((byte) 1);
+ * packet.add((byte) payloadData.length);
  * packet.addAll(payloadData);
  *
  * // Extract header information
  * byte version = packet.get(0);
- * int length = bytesToInt(packet.toArray(), 2);
+ * int length = packet.get(1) & 0xff;
  *
- * // Validate and process
+ * // Validate and extract the payload.
  * if (packet.size() >= length + headerSize) {
  *     ByteList payload = packet.copy(headerSize, headerSize + length);
- *     processPayload(payload.toArray());
+ *     byte[] bytes = payload.toArray();   // [10, 20, 30]
  * }
  * }</pre>
  *
@@ -348,9 +348,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * byte[] arr = {(byte) 1, (byte) 2, (byte) 3};
      * ByteList list = new ByteList(arr);
-     * list.size();   // returns 3
-     * list.get(0);   // returns (byte) 1
-     * arr[0] = (byte) 9;    // backing array shared: list.get(0) is now (byte) 9
+     * list.size();         // returns 3
+     * list.get(0);         // returns (byte) 1
+     * arr[0] = (byte) 9;   // backing array shared: list.get(0) is now (byte) 9
      *
      * ByteList empty = new ByteList(new byte[0]);
      * empty.size();                  // returns 0
@@ -1009,8 +1009,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Private method to quickly remove an element at a specific index without bounds checking.
-     * This method is used internally when the index is known to be valid.
+     * Removes the element at the specified index without bounds checking.
      *
      * @param index the index of the element to remove
      */
@@ -2182,14 +2181,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Finds and returns the maximum byte value within the specified range of this list.
+     * Returns the maximum value in the specified range of this list wrapped in an OptionalByte.
+     * The range extends from fromIndex (inclusive) to toIndex (exclusive).
+     * If the range is empty, returns an empty OptionalByte.
      *
-     * <p>This method scans through the elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)
-     * and returns the largest byte value found. If the range is empty (fromIndex == toIndex), an empty
-     * OptionalByte is returned.</p>
-     *
-     * <p>The comparison is performed using standard byte comparison, where bytes are treated as signed
-     * values ranging from -128 to 127.</p>
+     * <p>Values are compared as signed bytes, so the maximum is taken over the range
+     * -128 to 127.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2197,10 +2194,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * OptionalByte max = list.max(1, 4);  // returns max of [2, 8, 1] = OptionalByte[8]
      * }</pre>
      *
-     * @param fromIndex the starting index (inclusive) of the range to search
-     * @param toIndex the ending index (exclusive) of the range to search
-     * @return an OptionalByte containing the maximum value if the range is non-empty, or an empty OptionalByte if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @param fromIndex the index of the first element (inclusive) to consider
+     * @param toIndex the index after the last element (exclusive) to consider
+     * @return an OptionalByte containing the maximum value in the range,
+     *         or an empty OptionalByte if the range is empty
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
+     *         or if fromIndex &gt; toIndex
      */
     public OptionalByte max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2286,6 +2285,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6);
+     * ByteConsumer action = b -> System.out.print(b);
      * list.forEach(0, 5, action);    // Forward: processes indices 0,1,2,3,4
      * list.forEach(5, 0, action);    // Backward: processes indices 5,4,3,2,1
      * list.forEach(5, -1, action);   // Backward: processes indices 5,4,3,2,1,0
@@ -2323,7 +2324,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p>This is equivalent to:</p>
      * <pre>{@code
-     * size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(0))
+     * return size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(0));
      * }</pre>
      *
      * @return an OptionalByte containing the first element if the list is non-empty, or an empty OptionalByte if the list is empty
@@ -2341,7 +2342,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p>This is equivalent to:</p>
      * <pre>{@code
-     * size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(size() - 1))
+     * return size() == 0 ? OptionalByte.empty() : OptionalByte.of(get(size() - 1));
      * }</pre>
      *
      * @return an OptionalByte containing the last element if the list is non-empty, or an empty OptionalByte if the list is empty
@@ -2634,8 +2635,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Each possible permutation of the list has equal probability of being produced. The shuffle is
      * performed in-place using the Fisher-Yates algorithm, which runs in O(n) time.</p>
      *
-     * <p>This method uses a default source of randomness that is suitable for most applications
-     * but not for cryptographic purposes.</p>
+     * <p>The default source is the library's shared {@link java.security.SecureRandom} instance.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2786,6 +2786,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Override
     public ByteList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
+
+        if (size == 0) {
+            return new ByteList(N.copyOfRange(elementData, 0, 0, step));
+        }
 
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.
@@ -3081,7 +3085,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * int sum = list.stream()
      *     .filter(b -> b > 2)
      *     .map(b -> (byte) (b * 2))
-     *     .sum();   // returns Sum of (3*2 + 4*2 + 5*2) = 24
+     *     .sum();   // returns 24 (3*2 + 4*2 + 5*2)
      * }</pre>
      *
      * @return a ByteStream over all elements in this list

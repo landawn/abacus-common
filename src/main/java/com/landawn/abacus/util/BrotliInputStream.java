@@ -49,8 +49,10 @@ public final class BrotliInputStream extends InputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * InputStream compressed = new FileInputStream("compressed.br");
-     * BrotliInputStream brotli = new BrotliInputStream(compressed);
+     * try (InputStream source = new FileInputStream("compressed.br");
+     *      BrotliInputStream brotli = new BrotliInputStream(source)) {
+     *     // Read decompressed data.
+     * }
      * }</pre>
      *
      * @param source the input stream containing Brotli-compressed data
@@ -58,6 +60,8 @@ public final class BrotliInputStream extends InputStream {
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source) throws IOException {
+        N.checkArgNotNull(source, "source");
+
         in = new org.brotli.dec.BrotliInputStream(source);
     }
 
@@ -67,9 +71,11 @@ public final class BrotliInputStream extends InputStream {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * InputStream compressed = new FileInputStream("large-file.br");
      * // Use 64KB buffer for better performance
-     * BrotliInputStream brotli = new BrotliInputStream(compressed, 65536);
+     * try (InputStream source = new FileInputStream("large-file.br");
+     *      BrotliInputStream brotli = new BrotliInputStream(source, 65536)) {
+     *     // Read decompressed data.
+     * }
      * }</pre>
      *
      * @param source the input stream containing Brotli-compressed data
@@ -78,6 +84,9 @@ public final class BrotliInputStream extends InputStream {
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source, final int byteReadBufferSize) throws IOException {
+        N.checkArgNotNull(source, "source");
+        N.checkArgPositive(byteReadBufferSize, "byteReadBufferSize");
+
         in = new org.brotli.dec.BrotliInputStream(source, byteReadBufferSize);
     }
 

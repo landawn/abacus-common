@@ -32,8 +32,8 @@ import com.landawn.abacus.util.function.CharPredicate;
 import com.landawn.abacus.util.function.CharTernaryOperator;
 import com.landawn.abacus.util.function.CharToIntFunction;
 import com.landawn.abacus.util.function.CharUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelArrayCharStreamTest extends TestBase {
 
@@ -44,11 +44,11 @@ public class ParallelArrayCharStreamTest extends TestBase {
     private CharStream stream;
 
     protected CharStream createCharStream(char... elements) {
-        return CharStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
+        return CharStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
     }
 
-    protected CharStream createIteratorSplitorCharStream(char... elements) {
-        return new ParallelArrayCharStream(elements, 0, elements.length, false, testMaxThreadNum, Splitor.ITERATOR, null, false, new ArrayList<>());
+    protected CharStream createIteratorSplitStrategyCharStream(char... elements) {
+        return new ParallelArrayCharStream(elements, 0, elements.length, false, testMaxThreadNum, SplitStrategy.ITERATOR, null, false, new ArrayList<>());
     }
 
     @BeforeEach
@@ -102,26 +102,26 @@ public class ParallelArrayCharStreamTest extends TestBase {
 
     // Covers the iterator-based terminal-operation branch in ParallelArrayCharStream.
     @Test
-    public void testReduceAndFindMethods_IteratorSplitor() {
-        assertEquals('e', createIteratorSplitorCharStream('d', 'b', 'a', 'c', 'e').reduce((left, right) -> (char) Math.max(left, right)).get());
+    public void testReduceAndFindMethods_IteratorSplitStrategy() {
+        assertEquals('e', createIteratorSplitStrategyCharStream('d', 'b', 'a', 'c', 'e').reduce((left, right) -> (char) Math.max(left, right)).get());
 
-        OptionalChar reduced = createIteratorSplitorCharStream('d', 'b', 'a', 'c', 'e').reduce((left, right) -> (char) Math.max(left, right));
+        OptionalChar reduced = createIteratorSplitStrategyCharStream('d', 'b', 'a', 'c', 'e').reduce((left, right) -> (char) Math.max(left, right));
         assertTrue(reduced.isPresent());
         assertEquals('e', reduced.get());
 
-        OptionalChar firstVowel = createIteratorSplitorCharStream('d', 'b', 'a', 'c', 'e').findFirst(c -> c == 'a' || c == 'e');
+        OptionalChar firstVowel = createIteratorSplitStrategyCharStream('d', 'b', 'a', 'c', 'e').findFirst(c -> c == 'a' || c == 'e');
         assertTrue(firstVowel.isPresent());
         assertEquals('a', firstVowel.get());
 
-        OptionalChar anyVowel = createIteratorSplitorCharStream('d', 'b', 'a', 'c', 'e').findAny(c -> c == 'a' || c == 'e');
+        OptionalChar anyVowel = createIteratorSplitStrategyCharStream('d', 'b', 'a', 'c', 'e').findAny(c -> c == 'a' || c == 'e');
         assertTrue(anyVowel.isPresent());
         assertTrue(anyVowel.get() == 'a' || anyVowel.get() == 'e');
 
-        OptionalChar lastVowel = createIteratorSplitorCharStream('d', 'b', 'a', 'c', 'e').findLast(c -> c == 'a' || c == 'e');
+        OptionalChar lastVowel = createIteratorSplitStrategyCharStream('d', 'b', 'a', 'c', 'e').findLast(c -> c == 'a' || c == 'e');
         assertTrue(lastVowel.isPresent());
         assertEquals('e', lastVowel.get());
 
-        OptionalChar notFound = createIteratorSplitorCharStream('d', 'b', 'a', 'c', 'e').findAny(c -> c == 'z');
+        OptionalChar notFound = createIteratorSplitStrategyCharStream('d', 'b', 'a', 'c', 'e').findAny(c -> c == 'z');
         assertFalse(notFound.isPresent());
     }
 
@@ -521,9 +521,9 @@ public class ParallelArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testForEach_IteratorSplitor() {
+    public void testForEach_IteratorSplitStrategy() {
         AtomicInteger count = new AtomicInteger(0);
-        createIteratorSplitorCharStream('a', 'b', 'c', 'd', 'e').forEach(c -> count.incrementAndGet());
+        createIteratorSplitStrategyCharStream('a', 'b', 'c', 'd', 'e').forEach(c -> count.incrementAndGet());
         assertEquals(5, count.get());
     }
 
@@ -686,14 +686,14 @@ public class ParallelArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testIteratorSplitorReduceAndFindOperations_SparseMatch() {
-        assertEquals('o', createIteratorSplitorCharStream('e', 'b', 'd', 'i', 'k', 'o').reduce('a', (left, right) -> (char) Math.max(left, right)));
+    public void testIteratorSplitStrategyReduceAndFindOperations_SparseMatch() {
+        assertEquals('o', createIteratorSplitStrategyCharStream('e', 'b', 'd', 'i', 'k', 'o').reduce('a', (left, right) -> (char) Math.max(left, right)));
 
-        OptionalChar reduced = createIteratorSplitorCharStream('e', 'b', 'd', 'i', 'k', 'o').reduce((left, right) -> (char) Math.max(left, right));
+        OptionalChar reduced = createIteratorSplitStrategyCharStream('e', 'b', 'd', 'i', 'k', 'o').reduce((left, right) -> (char) Math.max(left, right));
         assertTrue(reduced.isPresent());
         assertEquals('o', reduced.get());
 
-        OptionalChar firstMatch = createIteratorSplitorCharStream('e', 'b', 'd', 'i', 'k', 'o').findFirst(c -> {
+        OptionalChar firstMatch = createIteratorSplitStrategyCharStream('e', 'b', 'd', 'i', 'k', 'o').findFirst(c -> {
             if (c == 'e') {
                 try {
                     Thread.sleep(10L);
@@ -707,11 +707,11 @@ public class ParallelArrayCharStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals('e', firstMatch.get());
 
-        OptionalChar anyMatch = createIteratorSplitorCharStream('e', 'b', 'd', 'i', 'k', 'o').findAny(c -> c == 'e' || c == 'i' || c == 'o');
+        OptionalChar anyMatch = createIteratorSplitStrategyCharStream('e', 'b', 'd', 'i', 'k', 'o').findAny(c -> c == 'e' || c == 'i' || c == 'o');
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 'e' || anyMatch.get() == 'i' || anyMatch.get() == 'o');
 
-        OptionalChar lastMatch = createIteratorSplitorCharStream('e', 'b', 'd', 'i', 'k', 'o').findLast(c -> {
+        OptionalChar lastMatch = createIteratorSplitStrategyCharStream('e', 'b', 'd', 'i', 'k', 'o').findLast(c -> {
             if (c == 'o') {
                 try {
                     Thread.sleep(10L);
@@ -746,8 +746,8 @@ public class ParallelArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testCollect_IteratorSplitor() {
-        List<Character> result = createIteratorSplitorCharStream('a', 'b', 'c').collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    public void testCollect_IteratorSplitStrategy() {
+        List<Character> result = createIteratorSplitStrategyCharStream('a', 'b', 'c').collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertHaveSameElements(List.of('a', 'b', 'c'), result);
     }
 
@@ -784,17 +784,17 @@ public class ParallelArrayCharStreamTest extends TestBase {
         assertTrue(createCharStream(new char[] {}).noneMatch(c -> true));
     }
 
-    // Cover the ITERATOR splitor path for anyMatch / allMatch / noneMatch / collect / forEach
+    // Cover the ITERATOR splitStrategy path for anyMatch / allMatch / noneMatch / collect / forEach
     @Test
-    public void testAnyMatchAllMatchNoneMatch_IteratorSplitor() {
-        assertTrue(createIteratorSplitorCharStream('a', 'b', 'c', 'd', 'e').anyMatch(c -> c == 'e'));
-        assertFalse(createIteratorSplitorCharStream('a', 'b', 'c').anyMatch(c -> c == 'z'));
+    public void testAnyMatchAllMatchNoneMatch_IteratorSplitStrategy() {
+        assertTrue(createIteratorSplitStrategyCharStream('a', 'b', 'c', 'd', 'e').anyMatch(c -> c == 'e'));
+        assertFalse(createIteratorSplitStrategyCharStream('a', 'b', 'c').anyMatch(c -> c == 'z'));
 
-        assertTrue(createIteratorSplitorCharStream('a', 'b', 'c').allMatch(c -> c >= 'a' && c <= 'z'));
-        assertFalse(createIteratorSplitorCharStream('a', 'b', 'C').allMatch(c -> c >= 'a' && c <= 'z'));
+        assertTrue(createIteratorSplitStrategyCharStream('a', 'b', 'c').allMatch(c -> c >= 'a' && c <= 'z'));
+        assertFalse(createIteratorSplitStrategyCharStream('a', 'b', 'C').allMatch(c -> c >= 'a' && c <= 'z'));
 
-        assertTrue(createIteratorSplitorCharStream('a', 'b', 'c').noneMatch(c -> c == 'z'));
-        assertFalse(createIteratorSplitorCharStream('a', 'b', 'c').noneMatch(c -> c == 'c'));
+        assertTrue(createIteratorSplitStrategyCharStream('a', 'b', 'c').noneMatch(c -> c == 'z'));
+        assertFalse(createIteratorSplitStrategyCharStream('a', 'b', 'c').noneMatch(c -> c == 'c'));
     }
 
     @Test
@@ -962,7 +962,7 @@ public class ParallelArrayCharStreamTest extends TestBase {
     @Test
     public void testZipWithBinaryDefaults_SequentialFallback() {
         List<Character> result = CharStream.of('a', 'b')
-                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
                 .zipWith(CharStream.of('x'), '0', '?', (a, b) -> b == '?' ? a : b)
                 .toList();
 
@@ -1002,8 +1002,8 @@ public class ParallelArrayCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ARRAY, ((ParallelArrayCharStream) createCharStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ARRAY, ((ParallelArrayCharStream) createCharStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

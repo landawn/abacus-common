@@ -130,6 +130,8 @@ public interface Logger {
     /**
      * Checks if the logger instance is enabled for the {@code TRACE} level.
      *
+     * <p>This method should be used to guard expensive trace message construction.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (logger.isTraceEnabled()) {

@@ -58,13 +58,28 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     private final T[] elements;
     private final int length;
 
+    /**
+     * Constructs an {@code ImmutableArray} backed directly by the given array, without copying it.
+     * The caller is responsible for not mutating {@code elements} afterwards.
+     *
+     * @param elements the array to be used as backing storage; if {@code null}, an empty
+     *        {@code Object[]} is used instead
+     */
     ImmutableArray(final T[] elements) {
         this.elements = elements == null ? (T[]) N.EMPTY_OBJECT_ARRAY : elements;
         length = N.len(this.elements);
     }
 
     /**
-     * Returns the cached empty ImmutableArray.
+     * Returns the cached empty ImmutableArray. This method always returns the same shared instance,
+     * whose backing storage is an {@code Object[]} regardless of the requested element type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<String> empty = ImmutableArray.empty();
+     * int len = empty.length();          // returns 0
+     * boolean none = empty.isEmpty();    // returns true
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @return the empty ImmutableArray
@@ -506,7 +521,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
      * List<String> filtered = array.stream()
      *     .filter(s -> s.startsWith("a"))
-     *     .collect(Collectors.toList());   // returns ["apple"]
+     *     .toList();   // returns ["apple"]
      * }</pre>
      *
      * @return a Stream over the elements in this array
@@ -551,7 +566,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * ImmutableArray<String> array = ImmutableArray.of("file1.txt", "file2.txt");
      * array.foreach(fileName -> {
      *     // This could throw IOException
-     *     Files.readAllLines(Paths.get(fileName));
+     *     java.nio.file.Files.readAllLines(java.nio.file.Path.of(fileName));
      * });
      * }</pre>
      *

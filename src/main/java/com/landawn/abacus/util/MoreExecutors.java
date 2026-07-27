@@ -258,7 +258,9 @@ public final class MoreExecutors {
      * This ensures that threads created by the executor won't prevent JVM shutdown.
      *
      * <p>The method wraps the executor's existing thread factory to set the daemon flag
-     * on all newly created threads. Threads that the executor created previously are unchanged.</p>
+     * on all newly created threads. Threads that the executor created previously are unchanged.
+     * If the existing factory declines to create a thread by returning {@code null}, the wrapper
+     * preserves that result.</p>
      *
      * @param executor the executor to configure with daemon threads
      */
@@ -269,7 +271,11 @@ public final class MoreExecutors {
             @Override
             public Thread newThread(final Runnable r) {
                 final Thread res = impl.newThread(r);
-                res.setDaemon(true);
+
+                if (res != null) {
+                    res.setDaemon(true);
+                }
+
                 return res;
             }
         });

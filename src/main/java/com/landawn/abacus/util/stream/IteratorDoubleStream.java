@@ -72,6 +72,7 @@ import com.landawn.abacus.util.function.DoubleToFloatFunction;
  * @see DoubleIteratorEx
  */
 class IteratorDoubleStream extends AbstractDoubleStream {
+    /** The backing iterator supplying this stream's elements; it is consumed lazily as the stream is traversed. */
     final DoubleIteratorEx elements;
 
     //    OptionalDouble head;
@@ -1096,7 +1097,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code n} is negative
      */
     @Override
-    public DoubleStream top(final int n) throws IllegalStateException {
+    public DoubleStream top(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         return top(n, DOUBLE_COMPARATOR);
@@ -1566,7 +1567,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * Consumes the entire underlying iterator. Closes the stream.
      *
      * <pre>{@code
-     * DoubleList list = stream.collect(DoubleList::new, DoubleList::add, DoubleList::addAll);
+     * DoubleList list = DoubleStream.of(1d, 2d, 3d).collect(DoubleList::new, DoubleList::add, DoubleList::addAll);
      * }</pre>
      *
      * @param <R> the type of the mutable result container
@@ -2108,17 +2109,18 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * in parallel using the specified configuration.
      *
      * @param maxThreadNum the maximum number of threads to use
-     * @param splitor the strategy for splitting the work among threads
+     * @param splitStrategy the strategy for splitting the work among threads
      * @param asyncExecutor the executor for asynchronous parallel tasks
      * @param cancelUncompletedThreads whether to cancel incomplete threads when the stream is closed
      * @return a parallel {@code DoubleStream} backed by the same iterator
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected DoubleStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected DoubleStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorDoubleStream(elements, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorDoubleStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     /**

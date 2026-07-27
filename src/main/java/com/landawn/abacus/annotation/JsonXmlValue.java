@@ -79,7 +79,7 @@ import java.lang.annotation.Target;
  *         return currency + " " + raw.toPlainString();
  *     }
  * }
- * // Amount(19.99, "USD")  ->  "USD 19.99"
+ * // Amount.parse("USD 19.99")  ->  serializes as "USD 19.99"
  * }</pre>
  *
  * @see JsonXmlCreator

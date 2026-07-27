@@ -57,11 +57,11 @@ import java.lang.annotation.Target;
  * as {@code com.landawn.abacus.util.N}, {@code Beans}, {@code CommonUtil}, and {@code Converters}.
  * It pairs naturally with {@link MayReturnNull} on the return side of an API.</p>
  *
- * <p><b>Name collision:</b> the simple name {@code NotNull} collides with the widely used
+ * <p><b>Similarly named annotations:</b> this declaration is not interchangeable with
  * {@code javax.annotation.Nonnull}, {@code jakarta.annotation.Nonnull},
- * {@code org.jetbrains.annotations.NotNull}, and {@code jakarta.validation.constraints.NotNull}.
- * These declarations are not interchangeable; when documenting an abacus API contract, ensure the
- * import resolves to this annotation.</p>
+ * {@code org.jetbrains.annotations.NotNull}, or {@code jakarta.validation.constraints.NotNull}.
+ * In particular, the latter two share this annotation's simple name, so ensure that imports resolve
+ * to the intended declaration.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

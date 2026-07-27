@@ -365,7 +365,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * This is the core serialization method that handles binary output.
      * The method creates and manages a Kryo {@code Output} instance from the pool.
      *
-     * <p><b>Note:</b> This is a protected method intended for internal use.
+     * <p><b>Note:</b> This is a private method intended for internal use.
      * External callers should use the public {@link #serialize} methods instead.</p>
      *
      * <p><b>Usage Examples (internal):</b></p>
@@ -400,7 +400,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * {@code null} or when {@code config} is not {@code null} and {@code config.isWriteClass()} returns {@code true}; otherwise only the object is
      * written (via {@code writeObject}).</p>
      *
-     * <p><b>Note:</b> This is a protected method intended for internal use.
+     * <p><b>Note:</b> This is a private method intended for internal use.
      * External callers should use the public {@link #serialize} methods instead.</p>
      *
      * <p><b>Usage Examples (internal):</b></p>
@@ -442,7 +442,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "rO0ABXNyABF...";  // value is Base64 encoded
+     * String base64Data = parser.serialize(myObject, null);
      * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
      * }</pre>
      *
@@ -466,7 +466,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "rO0ABXNyABF...";  // value is Base64 encoded
+     * String base64Data = parser.serialize(myObject, null);
      * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
      * }</pre>
      *
@@ -651,10 +651,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * This is the core deserialization method that handles binary input.
      * The method creates and manages a Kryo {@code Input} instance from the pool.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Note:</b> This is a private method intended for internal use.
+     * External callers should use the public {@link #deserialize} methods instead.</p>
+     *
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * ByteArrayInputStream bais = new ByteArrayInputStream(serializedData);
-     * MyObject obj = parser.read(bais, null, MyObject.class);
+     * MyObject obj = read(bais, null, MyObject.class);
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -681,10 +684,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * it reads both class and object information from the stream; otherwise it reads
      * just the object data and instantiates the specified class.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Note:</b> This is a private method intended for internal use.
+     * External callers should use the public {@link #deserialize} methods instead.</p>
+     *
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * Input in = new Input(new ByteArrayInputStream(data));
-     * MyObject obj = parser.read(in, null, MyObject.class);
+     * MyObject obj = read(in, null, MyObject.class);
      * }</pre>
      *
      * @param <T> the type of the target object
@@ -756,10 +762,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * This method can be used to enforce constraints on the serialization configuration.
      * Currently, this implementation accepts any configuration including {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * KryoSerConfig config = KryoSerConfig.create();
-     * config = parser.check(config);   // returns config
+     * config = check(config);   // returns config
      * }</pre>
      *
      * @param config the configuration to check (may be {@code null})
@@ -781,10 +787,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * This method can be used to enforce constraints on the deserialization configuration.
      * Currently, this implementation accepts any configuration including {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * KryoDeserConfig config = KryoDeserConfig.create();
-     * config = parser.check(config);   // returns config
+     * config = check(config);   // returns config
      * }</pre>
      *
      * @param config the configuration to check (may be {@code null})
@@ -809,7 +815,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <pre>{@code
      * MyObject original = new MyObject();
      * original.setName("Test");
-     * original.setList(Arrays.asList("a", "b"));
+     * original.setList(new ArrayList<>(List.of("a", "b")));
      *
      * MyObject copy = parser.shallowCopy(original);
      * // copy.getName() equals "Test"
@@ -838,7 +844,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <pre>{@code
      * MyObject original = new MyObject();
      * original.setName("Test");
-     * original.setList(Arrays.asList("a", "b"));
+     * original.setList(new ArrayList<>(List.of("a", "b")));
      *
      * MyObject copy = parser.deepCopy(original);
      * // copy.getName() equals "Test"
@@ -1386,8 +1392,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <pre>{@code
      * Output out = KryoParser.createOutput();
      * try {
-     *     out.setOutputStream(myOutputStream);
-     *     // ... use output ...
+     *     java.io.ByteArrayOutputStream target = new java.io.ByteArrayOutputStream();
+     *     out.setOutputStream(target);
+     *     out.writeString("value");
+     *     out.flush();
      * } finally {
      *     KryoParser.recycle(out);
      * }
@@ -1421,7 +1429,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <pre>{@code
      * Output out = KryoParser.createOutput();
      * try {
-     *     // ... use output ...
+     *     out.writeInt(42);
      * } finally {
      *     KryoParser.recycle(out);
      * }
@@ -1451,8 +1459,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <pre>{@code
      * Input in = KryoParser.createInput();
      * try {
-     *     in.setInputStream(myInputStream);
-     *     // ... use input ...
+     *     in.setBuffer(new byte[] { 42 });
+     *     int value = in.readByteUnsigned();   // returns 42
      * } finally {
      *     KryoParser.recycle(in);
      * }
@@ -1486,7 +1494,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <pre>{@code
      * Input in = KryoParser.createInput();
      * try {
-     *     // ... use input ...
+     *     in.setBuffer(new byte[] { 42 });
+     *     int value = in.readByteUnsigned();   // returns 42
      * } finally {
      *     KryoParser.recycle(in);
      * }

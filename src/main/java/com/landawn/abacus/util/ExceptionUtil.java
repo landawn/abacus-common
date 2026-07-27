@@ -51,30 +51,21 @@ import com.landawn.abacus.util.u.Optional;
  * <pre>{@code
  * // Convert checked exception to runtime exception
  * try {
- *     someMethodThatThrowsIOException();
+ *     java.nio.file.Files.readString(java.nio.file.Path.of("config.txt"));
  * } catch (IOException e) {
  *     throw ExceptionUtil.toRuntimeException(e);
  * }
  *
  * // Get stack trace as string
- * try {
- *     riskyOperation();
- * } catch (Exception e) {
- *     String stackTrace = ExceptionUtil.getStackTrace(e);
- *     logger.error(stackTrace);
- * }
+ * Exception failure = new IllegalStateException("processing failed");
+ * String stackTrace = ExceptionUtil.getStackTrace(failure);
+ * System.err.println(stackTrace);
  *
  * // Find specific cause in exception chain
- * try {
- *     databaseOperation();
- * } catch (Exception e) {
- *     Optional<SQLException> sqlEx = ExceptionUtil.findCause(e, SQLException.class);
- *     if (sqlEx.isPresent()) {
- *         handleSQLException(sqlEx.get());
- *     }
- * }
+ * Exception wrapped = new RuntimeException(new SQLException("query failed"));
+ * Optional<SQLException> sqlEx = ExceptionUtil.findCause(wrapped, SQLException.class);
+ * sqlEx.ifPresent(e -> System.err.println(e.getMessage()));
  * }</pre>
- *
  */
 public final class ExceptionUtil {
 
@@ -255,11 +246,8 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     reflectiveOperation();
-     * } catch (Throwable t) {
-     *     throw ExceptionUtil.toRuntimeException(t);
-     * }
+     * Throwable failure = new ReflectiveOperationException("constructor is inaccessible");
+     * RuntimeException converted = ExceptionUtil.toRuntimeException(failure);
      * }</pre>
      *
      * @param e the throwable to convert; must not be {@code null}
@@ -277,11 +265,9 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     riskyOperation();
-     * } catch (Throwable t) {
-     *     throw ExceptionUtil.toRuntimeException(t, true);
-     * }
+     * Throwable interruption = new InterruptedException("cancelled");
+     * RuntimeException converted = ExceptionUtil.toRuntimeException(interruption, true);
+     * // converted is UncheckedInterruptedException and the current thread is interrupted
      * }</pre>
      *
      * @param e the throwable to convert; must not be {@code null}
@@ -300,12 +286,8 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     criticalOperation();
-     * } catch (Throwable t) {
-     *     // Convert to runtime, call interrupt if needed, throw Error as-is
-     *     throw ExceptionUtil.toRuntimeException(t, true, true);
-     * }
+     * Throwable failure = new IOException("read failed");
+     * RuntimeException converted = ExceptionUtil.toRuntimeException(failure, true, true);
      * }</pre>
      *
      * @param e the throwable to convert; must not be {@code null}
@@ -378,7 +360,18 @@ public final class ExceptionUtil {
         return func.apply(e);
     }
 
-    static final Predicate<String> uncheckedExceptionNameTester = Pattern.compile("Unchecked[a-zA-Z0-9]*Exception").asPredicate();
+    /**
+     * Tests whether a simple class name follows the {@code Unchecked...Exception} naming convention
+     * used to recognize wrapper exceptions in {@link #tryToGetOriginalCheckedException(Exception)}.
+     */
+    // This is a whole simple-class-name convention, not a substring convention. Using an
+    // unanchored predicate could misclassify names such as NotUncheckedIOExceptionWrapper.
+    static final Predicate<String> uncheckedExceptionNameTester = Pattern.compile("^Unchecked[a-zA-Z0-9]*Exception$").asPredicate();
+
+    /**
+     * Cache mapping a runtime wrapper exception class to the checked exception class it was observed
+     * to wrap, so that repeated unwrapping does not have to re-derive the pairing.
+     */
     static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
 
     /**
@@ -441,13 +434,8 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     complexDatabaseOperation();
-     * } catch (Exception e) {
-     *     if (ExceptionUtil.hasCause(e, SQLException.class)) {
-     *         handleDatabaseError();
-     *     }
-     * }
+     * Throwable failure = new RuntimeException(new SQLException("query failed"));
+     * boolean containsSqlException = ExceptionUtil.hasCause(failure, SQLException.class);   // returns true
      * }</pre>
      *
      * @param e the exception to check, which may be {@code null}
@@ -481,13 +469,9 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     operation();
-     * } catch (Exception e) {
-     *     if (ExceptionUtil.hasCause(e, ex -> ex.getMessage().contains("timeout"))) {
-     *         handleTimeout();
-     *     }
-     * }
+     * Throwable failure = new RuntimeException(new IOException("read timeout"));
+     * boolean timedOut = ExceptionUtil.hasCause(failure,
+     *     ex -> ex.getMessage() != null && ex.getMessage().contains("timeout"));   // returns true
      * }</pre>
      *
      * @param e the exception to check, which may be {@code null}
@@ -521,13 +505,8 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     databaseOperation();
-     * } catch (Exception e) {
-     *     if (ExceptionUtil.hasSQLCause(e)) {
-     *         rollbackTransaction();
-     *     }
-     * }
+     * Throwable failure = new RuntimeException(new SQLException("query failed"));
+     * boolean sqlRelated = ExceptionUtil.hasSQLCause(failure);   // returns true
      * }</pre>
      *
      * @param e the exception to check, which may be {@code null}
@@ -559,13 +538,8 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     fileOperation();
-     * } catch (Exception e) {
-     *     if (ExceptionUtil.hasIOCause(e)) {
-     *         handleFileError();
-     *     }
-     * }
+     * Throwable failure = new RuntimeException(new IOException("file missing"));
+     * boolean ioRelated = ExceptionUtil.hasIOCause(failure);   // returns true
      * }</pre>
      *
      * @param e the exception to check, which may be {@code null}
@@ -621,13 +595,10 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     complexOperation();
-     * } catch (Exception e) {
-     *     List<Throwable> causes = ExceptionUtil.listCauses(e);
-     *     for (Throwable cause : causes) {
-     *         logger.error("Cause: " + cause.getClass().getName());
-     *     }
+     * Throwable failure = new RuntimeException(new IOException("read failed"));
+     * List<Throwable> causes = ExceptionUtil.listCauses(failure);
+     * for (Throwable cause : causes) {
+     *     System.err.println("Cause: " + cause.getClass().getName());
      * }
      * }</pre>
      *
@@ -658,12 +629,9 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     wrappedOperation();
-     * } catch (Exception e) {
-     *     Throwable root = ExceptionUtil.getRootCause(e);
-     *     logger.error("Root cause: " + root.getMessage());
-     * }
+     * Throwable failure = new RuntimeException(new IOException("read failed"));
+     * Throwable root = ExceptionUtil.getRootCause(failure);
+     * System.err.println("Root cause: " + root.getMessage());
      * }</pre>
      *
      * @param e the exception to traverse, which may be {@code null}
@@ -692,14 +660,9 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     serviceCall();
-     * } catch (Exception e) {
-     *     Optional<IOException> ioError = ExceptionUtil.findCause(e, IOException.class);
-     *     if (ioError.isPresent()) {
-     *         handleIOError(ioError.get());
-     *     }
-     * }
+     * Throwable failure = new RuntimeException(new IOException("service unavailable"));
+     * Optional<IOException> ioError = ExceptionUtil.findCause(failure, IOException.class);
+     * ioError.ifPresent(e -> System.err.println(e.getMessage()));
      * }</pre>
      *
      * @param <E> the type of exception to find
@@ -733,18 +696,17 @@ public final class ExceptionUtil {
     /**
      * Finds the first exception in the cause chain that matches the specified predicate.
      *
+     * <p>The matched exception is cast to {@code E} without a runtime type check, because the
+     * predicate — not a class token — determines the match. Declare {@code E} as a type the
+     * predicate actually guarantees, or use {@link #findCause(Throwable, Class)} when the match
+     * should be checked.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     complexOperation();
-     * } catch (Exception e) {
-     *     Optional<Throwable> timeoutError = ExceptionUtil.findCause(e,
-     *         ex -> ex.getMessage() != null && ex.getMessage().contains("timeout")
-     *     );
-     *     if (timeoutError.isPresent()) {
-     *         handleTimeout();
-     *     }
-     * }
+     * Throwable failure = new RuntimeException(new IOException("read timeout"));
+     * Optional<Throwable> timeoutError = ExceptionUtil.findCause(failure,
+     *     ex -> ex.getMessage() != null && ex.getMessage().contains("timeout")
+     * );
      * }</pre>
      *
      * @param <E> the type of exception expected
@@ -785,13 +747,9 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     riskyOperation();
-     * } catch (Exception e) {
-     *     String stackTrace = ExceptionUtil.getStackTrace(e);
-     *     logger.error("Full stack trace:\n" + stackTrace);
-     *     emailAdmin(stackTrace);
-     * }
+     * Exception failure = new IllegalStateException("processing failed");
+     * String stackTrace = ExceptionUtil.getStackTrace(failure);
+     * System.err.println("Full stack trace:\n" + stackTrace);
      * }</pre>
      *
      * @param throwable the {@link Throwable} to be examined, which may be null
@@ -813,12 +771,8 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     operation();
-     * } catch (Exception e) {
-     *     String msg = ExceptionUtil.getErrorMessage(e);
-     *     showUserError(msg);
-     * }
+     * Exception failure = new IllegalArgumentException("invalid user name");
+     * String msg = ExceptionUtil.getErrorMessage(failure);   // returns "invalid user name"
      * }</pre>
      *
      * @param e the exception, which may be {@code null}
@@ -836,12 +790,9 @@ public final class ExceptionUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try {
-     *     databaseOperation();
-     * } catch (SQLException e) {
-     *     String msg = ExceptionUtil.getErrorMessage(e, true);
-     *     // Returns: "SQLException|1054|Unknown column 'xyz'"
-     * }
+     * SQLException failure = new SQLException("Unknown column 'xyz'", "42S22", 1054);
+     * String msg = ExceptionUtil.getErrorMessage(failure, true);
+     * // returns "SQLException|1054|Unknown column 'xyz'"
      * }</pre>
      *
      * @param e the exception, which may be {@code null}

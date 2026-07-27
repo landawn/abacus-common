@@ -49,10 +49,11 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
     }
 
     /**
-     * Indicates whether instances of this type implement the Comparable interface.
-     * OptionalLong values can be compared when both are present.
+     * Indicates that this handler defines an ordering for {@link OptionalLong} values.
+     * The ordering is {@code null < empty < present}; present values are compared numerically.
      *
-     * @return {@code true}, as OptionalLong values are comparable
+     * @return {@code true}, because this handler implements comparison even though
+     *         {@code OptionalLong} itself does not implement {@link Comparable}
      */
     @Override
     public boolean isComparable() {
@@ -126,6 +127,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param str the string to parse
      * @return OptionalLong.empty() if the string is {@code null} or empty, otherwise OptionalLong containing the parsed value
+     * @throws NumberFormatException if a non-empty string cannot be parsed as a {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(OptionalLong)
      */

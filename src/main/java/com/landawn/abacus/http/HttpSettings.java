@@ -19,6 +19,7 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -60,6 +61,7 @@ import com.landawn.abacus.util.cs;
  * @see HttpHeaders
  * @see ContentFormat
  */
+@SuppressFBWarnings(value = "AT_NONATOMIC_64BIT_PRIMITIVE", justification = "HttpSettings is a mutable, explicitly non-thread-safe request builder; callers must not race reads and writes")
 public final class HttpSettings {
 
     private long connectTimeout;
@@ -92,6 +94,7 @@ public final class HttpSettings {
      * settings.useCaches(false);                    // caching disabled (the default)
      * }</pre>
      *
+     * @see #create()
      */
     public HttpSettings() { //NOSONAR
     }
@@ -246,12 +249,13 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
      * SSLContext sslContext = SSLContext.getInstance("TLS");
-     * // Configure SSL context...
+     * sslContext.init(null, null, null);   // use the platform's default key/trust managers
      * settings.setSSLSocketFactory(sslContext.getSocketFactory());
      * }</pre>
      *
-     * @param sslSocketFactory the SSL socket factory to use
+     * @param sslSocketFactory the SSL socket factory to use; {@code null} clears it so the default is used
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setSSLSocketFactory(final SSLSocketFactory sslSocketFactory) {
@@ -291,7 +295,7 @@ public final class HttpSettings {
      * settings.setProxy(proxy);
      * }</pre>
      *
-     * @param proxy the proxy to use
+     * @param proxy the proxy to use; {@code null} clears it so the connection is made directly
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setProxy(final Proxy proxy) {
@@ -403,14 +407,16 @@ public final class HttpSettings {
 
     /**
      * Sets whether the connection will be used for output.
-     * This is automatically set to {@code true} for POST and PUT requests.
+     * When disabled, {@link HttpClient} does not write a configured request body. The default is
+     * {@code true}, but output is enabled on the underlying connection only for methods that send
+     * a body ({@code POST}, {@code PUT}, and {@code PATCH}).
      *
      * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * settings.doOutput(true);    // true enables output (default)
-     * settings.doOutput(false);   // false disables output for GET requests
+     * settings.doOutput(false);   // suppresses a configured POST/PUT/PATCH request body
      * }</pre>
      *
      * @param doOutput {@code true} if the connection will be used for output
@@ -502,7 +508,8 @@ public final class HttpSettings {
      * settings.setContentFormat(ContentFormat.FORM_URL_ENCODED);
      * }</pre>
      *
-     * @param contentFormat the content format to use
+     * @param contentFormat the content format to use; {@code null} or {@link ContentFormat#NONE} leaves
+     *        {@link #getContentFormat()} to derive the format from the headers
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setContentFormat(final ContentFormat contentFormat) {
@@ -690,6 +697,7 @@ public final class HttpSettings {
      * @param name2 the second header name
      * @param value2 the second header value
      * @return this HttpSettings instance for method chaining
+     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}
      * @see HttpHeaders
      */
     public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2) {
@@ -721,6 +729,7 @@ public final class HttpSettings {
      * @param name3 the third header name
      * @param value3 the third header value
      * @return this HttpSettings instance for method chaining
+     * @throws IllegalArgumentException if {@code name1}, {@code name2} or {@code name3} is {@code null}
      * @see HttpHeaders
      */
     public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
@@ -752,8 +761,10 @@ public final class HttpSettings {
      * settings.headers().get("Accept");   // "application/json" (added/overwritten)
      * }</pre>
      *
-     * @param headers a map containing header names and values to merge in
+     * @param headers a map containing header names and values to merge in; must not be {@code null}
      * @return this HttpSettings instance for method chaining
+     * @throws NullPointerException if {@code headers} is {@code null}
+     * @throws IllegalArgumentException if any key in {@code headers} is {@code null}
      * @see HttpHeaders
      * @see #setHeaders(HttpHeaders)
      */
@@ -815,15 +826,19 @@ public final class HttpSettings {
 
     /**
      * Gets the HTTP headers configured in this settings object.
-     * If no headers have been set yet, this method creates an empty HttpHeaders object.
+     * If no headers have been set yet, an empty {@link HttpHeaders} instance is created and stored.
+     *
+     * <p>The returned object is the live instance backing this settings object, not a copy:
+     * changes made through it take effect on this {@code HttpSettings}. Use {@link #copy()} first
+     * if you need to modify headers without affecting this instance.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = settings.headers();
-     * headers.set("X-Custom-Header", "value");
+     * headers.set("X-Custom-Header", "value");   // also visible through settings
      * }</pre>
      *
-     * @return the HttpHeaders object (never {@code null})
+     * @return the live HttpHeaders object backing this settings instance (never {@code null})
      * @see HttpHeaders
      */
     public HttpHeaders headers() {
@@ -836,7 +851,10 @@ public final class HttpSettings {
 
     /**
      * Creates a copy of this HttpSettings object.
-     * The copy includes all settings including headers, timeouts, SSL configuration, etc.
+     * The copy includes all settings: timeouts, SSL socket factory, proxy, the caching/input/output
+     * flags, the one-way flag, the content format and the headers. The headers are copied into a new
+     * {@link HttpHeaders} instance, so header changes made on either object afterwards do not affect
+     * the other; the {@code sslSocketFactory} and {@code proxy} references themselves are shared.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

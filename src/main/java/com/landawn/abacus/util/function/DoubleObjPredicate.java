@@ -28,6 +28,7 @@ import com.landawn.abacus.util.cs;
  * @param <T> the type of the object argument to the predicate
  *
  * @see java.util.function.BiPredicate
+ * @see java.util.function.DoublePredicate
  */
 @FunctionalInterface
 public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, RuntimeException> { // NOSONAR

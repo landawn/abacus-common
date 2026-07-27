@@ -68,20 +68,41 @@ import com.landawn.abacus.util.function.DoubleToFloatFunction;
  * <li>Support for partial array ranges via fromIndex and toIndex</li>
  * <li>Optimized implementations of filter, map, flatMap, and terminal operations</li>
  * <li>Efficient sorted stream handling with specialized algorithms</li>
+ * <li>Type conversion support to other primitive stream types</li>
  * <li>Inherits Kahan-summation-based {@code sum()} and {@code average()} from {@link AbstractDoubleStream} for numerical stability</li>
  * </ul>
+ *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public DoubleStream factory methods rather than instantiating this class directly.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * double[] data = {1.5, 2.5, 3.5, 4.5, 5.5};
  * DoubleStream stream = DoubleStream.of(data);
  * double max = stream.max().orElse(0.0);
+ *
+ * // Filtering and mapping
+ * DoubleStream scaled = DoubleStream.of(data)
+ *     .filter(n -> n > 2.0)
+ *     .map(n -> n * 1.5);
+ *
+ * // Statistical operations
+ * DoubleStream stats = DoubleStream.of(data);
+ * DoubleSummaryStatistics summary = stats.summaryStatistics();
+ * System.out.println("Average: " + summary.getAverage());
  * }</pre>
  *
+ * @see DoubleStream
  */
 class ArrayDoubleStream extends AbstractDoubleStream {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final double[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
@@ -1768,7 +1789,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
      * accumulator, and combiner functions, and returns the resulting container. Closes the stream.
      *
      * <pre>{@code
-     * DoubleList list = stream.collect(DoubleList::new, DoubleList::add, DoubleList::addAll);
+     * DoubleList list = DoubleStream.of(1d, 2d, 3d).collect(DoubleList::new, DoubleList::add, DoubleList::addAll);
      * }</pre>
      *
      * @param <R> the type of the mutable result container
@@ -2245,17 +2266,18 @@ class ArrayDoubleStream extends AbstractDoubleStream {
      * range in parallel using the specified configuration.
      *
      * @param maxThreadNum the maximum number of threads to use
-     * @param splitor the strategy for splitting the work among threads
+     * @param splitStrategy the strategy for splitting the work among threads
      * @param asyncExecutor the executor for asynchronous parallel tasks
      * @param cancelUncompletedThreads whether to cancel incomplete threads when the stream is closed
      * @return a parallel {@code DoubleStream} backed by the same array range
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected DoubleStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected DoubleStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayDoubleStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelArrayDoubleStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 

@@ -19,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -4695,6 +4696,234 @@ public class DatesTest extends TestBase {
         } finally {
             pool.remove(callerOwned);
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testCallerControlledFormatterPoolsAreBounded() throws Exception {
+        final Field dateFormatPoolField = Dates.class.getDeclaredField("dfPool");
+        dateFormatPoolField.setAccessible(true);
+        final Map<String, ?> dateFormatPool = (Map<String, ?>) dateFormatPoolField.get(null);
+        final java.util.Set<String> originalFormats = new java.util.HashSet<>(dateFormatPool.keySet());
+
+        final Field calendarPoolField = Dates.class.getDeclaredField("calendarPool");
+        calendarPoolField.setAccessible(true);
+        final Map<TimeZone, ?> calendarPool = (Map<TimeZone, ?>) calendarPoolField.get(null);
+        final java.util.Set<TimeZone> originalTimeZones = new java.util.HashSet<>(calendarPool.keySet());
+
+        try {
+            for (int i = 0; i < 128; i++) {
+                final String pattern = "yyyy-MM-dd 'pool-" + i + "'";
+                assertNotNull(Dates.format(new java.util.Date(0L), pattern, TimeZone.getTimeZone("GMT")));
+
+                final TimeZone zone = new SimpleTimeZone(0, "DatesTest-pool-zone-" + i);
+                assertNotNull(Dates.parseJUDate("2024-01-02 03:04:05", Dates.LOCAL_DATE_TIME_FORMAT, zone));
+            }
+
+            assertTrue(dateFormatPool.size() <= 64, "caller-supplied patterns must not grow the process-wide pool without bound");
+            assertTrue(calendarPool.size() <= 64, "caller-supplied zones must not grow the process-wide pool without bound");
+        } finally {
+            dateFormatPool.keySet().removeIf(pattern -> !originalFormats.contains(pattern));
+            calendarPool.keySet().removeIf(zone -> !originalTimeZones.contains(zone));
+        }
+    }
+
+    // ===== parse*: the "null" literal is case-insensitive =====
+
+    @Test
+    public void testParse_nullLiteralCaseInsensitive() {
+        assertNull(Dates.parseJUDate("NULL"));
+        assertNull(Dates.parseDate("Null"));
+        assertNull(Dates.parseTime("nUlL"));
+        assertNull(Dates.parseTimestamp("NULL"));
+        assertNull(Dates.parseCalendar("NULL"));
+        assertNull(Dates.parseGregorianCalendar("NULL"));
+        assertNull(Dates.parseXMLGregorianCalendar("NULL"));
+        assertNull(Dates.DTF.LOCAL_DATE.parseToLocalDate("NULL"));
+        assertNull(Dates.DTF.LOCAL_TIME.parseToLocalTime("NULL"));
+    }
+
+    // ===== parse*: negative numeric strings are raw epoch millis =====
+
+    @Test
+    public void testParse_negativeNumericString_rawEpochMillis() {
+        assertEquals(-1000L, Dates.parseJUDate("-1000").getTime());
+        assertEquals(-1000L, Dates.parseDate("-1000").getTime());
+        assertEquals(-1000L, Dates.parseTime("-1000").getTime());
+        assertEquals(-1000L, Dates.parseTimestamp("-1000").getTime());
+        assertEquals(-1000L, Dates.parseCalendar("-1000").getTimeInMillis());
+    }
+
+    // ===== parseJUDate: auto-detection of offset and non-3-digit fraction forms =====
+
+    @Test
+    public void testParseJUDate_isoOffset_autoDetectMatchesExplicit() {
+        final String s = "2025-01-15T10:30:45+05:30";
+        assertEquals(Dates.parseJUDate(s, Dates.ISO_OFFSET_DATE_TIME_FORMAT).getTime(), Dates.parseJUDate(s).getTime());
+    }
+
+    @Test
+    public void testParseJUDate_shortFraction_fractionSemantics() {
+        // fraction lengths other than exactly three digits miss the fast-format detection and fall to the
+        // ISO-8601 parser, which still interprets the fraction as a fraction of a second (.5 = 500 ms).
+        final TimeZone utc = TimeZone.getTimeZone("UTC");
+        assertEquals(1736937045500L, Dates.parseJUDate("2025-01-15T10:30:45.5", null, utc).getTime());
+        assertEquals(1736937045120L, Dates.parseJUDate("2025-01-15T10:30:45.12", null, utc).getTime());
+        assertEquals(1736937045123L, Dates.parseJUDate("2025-01-15T10:30:45.1234", null, utc).getTime());
+    }
+
+    // ===== parseDate: lenient handling of an invalid leap day =====
+
+    @Test
+    public void testParseDate_nonLeapYearFeb29_rollsToMarch() {
+        final TimeZone utc = TimeZone.getTimeZone("UTC");
+        // 2023 is not a leap year: the lenient parser rolls Feb 29 into Mar 1
+        assertEquals("2023-03-01", Dates.format(Dates.parseDate("2023-02-29", Dates.LOCAL_DATE_FORMAT, utc), "yyyy-MM-dd", utc));
+        // a real leap day parses as-is
+        assertEquals("2024-02-29", Dates.format(Dates.parseDate("2024-02-29", Dates.LOCAL_DATE_FORMAT, utc), "yyyy-MM-dd", utc));
+    }
+
+    // ===== set*: out-of-range amounts rejected by the non-lenient calendar =====
+
+    @Test
+    public void testSet_outOfRangeAmount_throws() {
+        final java.util.Date date = new java.util.Date(1736937045000L);
+        assertThrows(IllegalArgumentException.class, () -> Dates.setMonths(date, 12));
+        assertThrows(IllegalArgumentException.class, () -> Dates.setHours(date, 24));
+
+        // 2023 is not a leap year: Feb 29 is out of range for the non-lenient calendar
+        final java.util.Date feb1 = Dates.parseJUDate("2023-02-01", "yyyy-MM-dd");
+        assertThrows(IllegalArgumentException.class, () -> Dates.setDays(feb1, 29));
+    }
+
+    // ===== truncate to YEAR clears every lower field =====
+
+    @Test
+    public void testTruncate_year_clearsLowerFields() {
+        final java.util.Date date = Dates.parseJUDate("2023-06-15 10:30:45.123", "yyyy-MM-dd HH:mm:ss.SSS");
+        assertEquals("2023-01-01 00:00:00.000", Dates.format(Dates.truncate(date, Calendar.YEAR), "yyyy-MM-dd HH:mm:ss.SSS"));
+    }
+
+    // ===== ceiling on an exact boundary moves to the next boundary (Commons Lang semantics) =====
+
+    @Test
+    public void testCeiling_exactBoundary_goesToNextUnit() {
+        final java.util.Date date = Dates.parseJUDate("2024-11-24 10:00:00.000", "yyyy-MM-dd HH:mm:ss.SSS");
+        assertEquals("2024-11-24 11:00:00.000", Dates.format(Dates.ceiling(date, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss.SSS"));
+        // truncate and round on the same boundary are no-ops
+        assertEquals("2024-11-24 10:00:00.000", Dates.format(Dates.truncate(date, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss.SSS"));
+        assertEquals("2024-11-24 10:00:00.000", Dates.format(Dates.round(date, Calendar.HOUR_OF_DAY), "yyyy-MM-dd HH:mm:ss.SSS"));
+    }
+
+    // ===== round with SEMI_MONTH: precise half-month boundaries =====
+
+    @Test
+    public void testRound_semiMonth_preciseBoundaries() {
+        // days 1-8 round down to the 1st, days 9-15 round up to the 16th,
+        // days 16-23 round down to the 16th, day 24 onward rounds up to the 1st of the next month
+        assertEquals("2023-01-01", Dates.format(Dates.round(Dates.parseJUDate("2023-01-08"), Dates.SEMI_MONTH), "yyyy-MM-dd"));
+        assertEquals("2023-01-16", Dates.format(Dates.round(Dates.parseJUDate("2023-01-09"), Dates.SEMI_MONTH), "yyyy-MM-dd"));
+        assertEquals("2023-01-16", Dates.format(Dates.round(Dates.parseJUDate("2023-01-15"), Dates.SEMI_MONTH), "yyyy-MM-dd"));
+        assertEquals("2023-01-16", Dates.format(Dates.round(Dates.parseJUDate("2023-01-16"), Dates.SEMI_MONTH), "yyyy-MM-dd"));
+        assertEquals("2023-01-16", Dates.format(Dates.round(Dates.parseJUDate("2023-01-23"), Dates.SEMI_MONTH), "yyyy-MM-dd"));
+        assertEquals("2023-02-01", Dates.format(Dates.round(Dates.parseJUDate("2023-01-31"), Dates.SEMI_MONTH), "yyyy-MM-dd"));
+    }
+
+    // ===== getFragment*: unsupported fragments rejected =====
+
+    @Test
+    public void testGetFragment_unsupportedFragment_throws() {
+        final java.util.Date date = new java.util.Date(1736937045000L);
+        final Calendar cal = Dates.createCalendar(1736937045000L);
+
+        assertThrows(IllegalArgumentException.class, () -> Dates.getFragmentInMilliseconds(date, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.getFragmentInSeconds(date, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.getFragmentInMinutes(cal, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.getFragmentInHours(cal, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.getFragmentInDays(date, CalendarField.WEEK_OF_YEAR));
+    }
+
+    // ===== round/truncate/ceiling: unsupported fields rejected on all overloads =====
+
+    @Test
+    public void testRoundTruncateCeiling_unsupportedField_throws() {
+        final java.util.Date date = new java.util.Date(1736937045000L);
+        final Calendar cal = Dates.createCalendar(1736937045000L);
+
+        assertThrows(IllegalArgumentException.class, () -> Dates.round(date, Calendar.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.truncate(date, Calendar.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.ceiling(date, Calendar.WEEK_OF_YEAR));
+
+        assertThrows(IllegalArgumentException.class, () -> Dates.round(date, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.truncate(date, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.ceiling(date, CalendarField.WEEK_OF_YEAR));
+
+        assertThrows(IllegalArgumentException.class, () -> Dates.round(cal, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.truncate(cal, CalendarField.WEEK_OF_YEAR));
+        assertThrows(IllegalArgumentException.class, () -> Dates.ceiling(cal, CalendarField.WEEK_OF_YEAR));
+    }
+
+    // ===== formatTo: the default-format fast path writes directly through Writer.write(char[]) =====
+
+    @Test
+    public void testFormatTo_writerFastPath() {
+        final java.io.StringWriter tsWriter = new java.io.StringWriter();
+        Dates.formatTo(new Timestamp(1736937045123L), tsWriter);
+        assertEquals("2025-01-15T10:30:45.123Z", tsWriter.toString());
+
+        final java.io.StringWriter dateWriter = new java.io.StringWriter();
+        Dates.formatTo(new java.util.Date(1736937045123L), dateWriter);
+        assertEquals("2025-01-15T10:30:45Z", dateWriter.toString());
+    }
+
+    // ===== isSameDay: compared in each calendar's own zone =====
+
+    @Test
+    public void testIsSameDay_calendarsInDifferentZones() {
+        final TimeZone utc = TimeZone.getTimeZone("UTC");
+        final long millis = Dates.parseJUDate("2023-01-01T12:00:00Z", Dates.ISO_8601_DATE_TIME_FORMAT, utc).getTime();
+
+        final Calendar utcCal = Dates.createCalendar(millis, utc);
+        // +14:00: the same instant is already Jan 2 there
+        final Calendar kiritimatiCal = Dates.createCalendar(millis, TimeZone.getTimeZone("Pacific/Kiritimati"));
+        // -11:00: still Jan 1 there
+        final Calendar nomeCal = Dates.createCalendar(millis, TimeZone.getTimeZone("America/Nome"));
+
+        assertFalse(Dates.isSameDay(utcCal, kiritimatiCal));
+        assertTrue(Dates.isSameDay(utcCal, nomeCal));
+    }
+
+    // ===== add*: int amounts are widened to long before unit conversion (no 32-bit overflow) =====
+
+    @Test
+    public void testAdd_intMaxAmount_noIntermediateOverflow() {
+        final java.util.Date epoch = new java.util.Date(0L);
+        assertEquals(Integer.MAX_VALUE * 3600000L, Dates.addHours(epoch, Integer.MAX_VALUE).getTime());
+        assertEquals(Integer.MAX_VALUE * 60000L, Dates.addMinutes(epoch, Integer.MAX_VALUE).getTime());
+        assertEquals(Integer.MAX_VALUE * 1000L, Dates.addSeconds(epoch, Integer.MAX_VALUE).getTime());
+        assertEquals(Integer.MAX_VALUE, Dates.addMilliseconds(epoch, Integer.MAX_VALUE).getTime());
+
+        // the Calendar variants agree in UTC (no DST transitions there)
+        final Calendar utcCal = Dates.createCalendar(0L, TimeZone.getTimeZone("UTC"));
+        assertEquals(Integer.MAX_VALUE * 3600000L, Dates.addHours(utcCal, Integer.MAX_VALUE).getTimeInMillis());
+        assertEquals(Integer.MAX_VALUE * 60000L, Dates.addMinutes(utcCal, Integer.MAX_VALUE).getTimeInMillis());
+    }
+
+    // ===== DTF: invalid input rejected with DateTimeParseException (per javadoc) =====
+
+    @Test
+    public void testDtf_parseToLocalDateTime_invalidInput_throwsDateTimeParseException() {
+        assertThrows(DateTimeParseException.class, () -> Dates.DTF.LOCAL_DATE.parseToLocalDate("not-a-date"));
+        assertThrows(DateTimeParseException.class, () -> Dates.DTF.LOCAL_TIME.parseToLocalTime("25:00:00"));
+        assertThrows(DateTimeParseException.class, () -> Dates.DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("2023-12-25 14:30:45"));
+    }
+
+    // ===== addYears: leap day to leap year lands on leap day =====
+
+    @Test
+    public void testAddYears_leapDayToLeapYear() {
+        final java.util.Date feb29 = Dates.parseJUDate("2024-02-29", "yyyy-MM-dd");
+        assertEquals("2028-02-29", Dates.format(Dates.addYears(feb29, 4), "yyyy-MM-dd"));
     }
 
 }

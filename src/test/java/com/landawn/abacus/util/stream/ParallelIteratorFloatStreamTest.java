@@ -31,8 +31,8 @@ import com.landawn.abacus.util.function.FloatPredicate;
 import com.landawn.abacus.util.function.FloatTernaryOperator;
 import com.landawn.abacus.util.function.FloatToLongFunction;
 import com.landawn.abacus.util.function.FloatUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelIteratorFloatStreamTest extends TestBase {
 
@@ -44,7 +44,7 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
     private FloatStream parallelStream;
 
     protected FloatStream createFloatStream(float... elements) {
-        return FloatStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
+        return FloatStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
 
     // Tests using thread count = 1 to exercise the canBeSequential sequential fallback branches
     protected FloatStream createSingleThreadFloatStream(float... elements) {
-        return FloatStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1));
+        return FloatStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test
@@ -1004,8 +1004,8 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ITERATOR, ((ParallelIteratorFloatStream) createFloatStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ITERATOR, ((ParallelIteratorFloatStream) createFloatStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

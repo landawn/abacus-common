@@ -110,6 +110,8 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * short result = identity.applyAsShort((short) 42);   // returns 42
      *
      * // Useful in stream operations or as a default operator
+     * ShortUnaryOperator doubler = x -> (short) (x * 2);
+     * boolean condition = true;
      * ShortUnaryOperator op = condition ? doubler : ShortUnaryOperator.identity();
      * }</pre>
      *

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.Locale;
+
 import com.landawn.abacus.util.function.FloatConsumer;
 
 /**
@@ -81,8 +83,11 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * @param max the maximum {@code float} value
      * @param sum the sum of all values as a {@code double}
      * @throws IllegalArgumentException if {@code count} is negative, the empty state is not canonical,
-     *         {@code min} is greater than {@code max}, or the NaN states of {@code min}, {@code max},
-     *         and {@code sum} are inconsistent
+     *         {@code min} is greater than {@code max}, {@code min} and {@code max} disagree on being
+     *         {@code NaN}, or the {@code NaN} state of {@code sum} is unreachable for the given
+     *         {@code min} and {@code max}. A {@code NaN} {@code sum} is accepted when
+     *         {@code min} is {@code -Infinity} and {@code max} is {@code +Infinity}, since summing
+     *         opposite infinities produces exactly that state.
      */
     public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
         if (count < 0) {
@@ -93,7 +98,12 @@ public class FloatSummaryStatistics implements FloatConsumer {
             if (min != Float.POSITIVE_INFINITY || max != Float.NEGATIVE_INFINITY || sum != 0D) {
                 throw new IllegalArgumentException("Invalid empty state: min, max, and sum must be canonical");
             }
-        } else if (N.compare(min, max) > 0 || Float.isNaN(min) != Float.isNaN(max) || Float.isNaN(min) != Double.isNaN(sum)) {
+            // A NaN input makes min, max and sum all NaN, so min and max must agree on NaN and a NaN
+            // min requires a NaN sum. A NaN sum with non-NaN min/max is only reachable by summing
+            // opposite infinities, which forces min == -Infinity and max == +Infinity; any other
+            // non-NaN min/max paired with a NaN sum is unreachable.
+        } else if (N.compare(min, max) > 0 || Float.isNaN(min) != Float.isNaN(max) || (Float.isNaN(min) && !Double.isNaN(sum))
+                || (Double.isNaN(sum) && !Float.isNaN(min) && !(min == Float.NEGATIVE_INFINITY && max == Float.POSITIVE_INFINITY))) {
             throw new IllegalArgumentException("minimum, maximum, and sum are inconsistent");
         }
 
@@ -143,7 +153,8 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * stats1.combine(stats2);
      * }</pre>
      *
-     * @param other another {@code FloatSummaryStatistics} to be combined with this one
+     * @param other another {@code FloatSummaryStatistics} to be combined with this one; must not be {@code null}
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     public void combine(final FloatSummaryStatistics other) {
         summation.combine(other.summation);
@@ -279,6 +290,6 @@ public class FloatSummaryStatistics implements FloatConsumer {
      */
     @Override
     public String toString() {
-        return String.format("{min=%f, max=%f, count=%d, sum=%f, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
+        return String.format(Locale.ROOT, "{min=%f, max=%f, count=%d, sum=%f, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
     }
 }

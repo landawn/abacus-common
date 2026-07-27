@@ -67,7 +67,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
-     * @param x The Long array to convert
+     * @param x the Long array to convert
      * @return the serialized array representation
      *         or {@code null} if the input array is {@code null}, or {@code "[]"} if the array is empty
      * @see #valueOf(String)
@@ -119,8 +119,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
-     * @param str The string to parse
-     * @return The parsed Long array, or {@code null} if the input is {@code null}, empty, or blank
+     * @param str the string to parse
+     * @return the parsed Long array, or {@code null} if the input is {@code null}, empty, or blank
      * @throws NumberFormatException if any non-{@code null} value cannot be parsed as a {@code Long}
      * @see #valueOf(Object)
      * @see #stringOf(Long[])
@@ -181,8 +181,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
      * JSON/XML serializers.
      *
-     * @param appendable The Appendable to write to
-     * @param x The Long array to append
+     * @param appendable the Appendable to write to
+     * @param x the Long array to append
      * @throws IOException if an I/O error occurs while appending
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -226,18 +226,22 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long[]> type = TypeFactory.getType(Long[].class);
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter writer2 = Objectory.createBufferedJsonWriter();
      * JsonXmlSerConfig<?> config = null;
+     * try {
+     *     Long[] array = {100L, 200L, 300L};
+     *     type.serializeTo(writer, array, config);
+     *     String result = writer.toString();
+     *     // result: "[100, 200, 300]"
      *
-     * Long[] array = {100L, 200L, 300L};
-     * type.serializeTo(writer, array, config);
-     * String result = writer.toString();
-     * // result: "[100, 200, 300]"
-     *
-     * BufferedJsonWriter writer2 = new BufferedJsonWriter();
-     * type.serializeTo(writer2, null, config);
-     * String result2 = writer2.toString();
-     * // result2: "null"
+     *     type.serializeTo(writer2, null, config);
+     *     String result2 = writer2.toString();
+     *     // result2: "null"
+     * } finally {
+     *     Objectory.recycle(writer);
+     *     Objectory.recycle(writer2);
+     * }
      * }</pre>
      *
      * <p>
@@ -250,9 +254,9 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
      *
-     * @param writer The CharacterWriter to write to
-     * @param x The Long array to write
-     * @param config The serialization configuration forwarded to each element; may be {@code null}
+     * @param writer the CharacterWriter to write to
+     * @param x the Long array to write
+     * @param config the serialization configuration forwarded to each element; may be {@code null}
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

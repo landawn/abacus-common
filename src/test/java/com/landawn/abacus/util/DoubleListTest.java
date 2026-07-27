@@ -2147,16 +2147,6 @@ public class DoubleListTest extends TestBase {
     }
 
     @Test
-    public void testMaxArraySize() {
-        try {
-            DoubleList largeList = new DoubleList(Integer.MAX_VALUE - 8);
-            assertTrue(largeList.isEmpty());
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
     public void testMedian() {
         list.addAll(new double[] { 3.3, 1.1, 5.5, 2.2, 4.4 });
         OptionalDouble median = list.median();
@@ -3162,19 +3152,6 @@ public class DoubleListTest extends TestBase {
         assertEquals(100, dl.size());
         assertEquals(0.0, dl.get(0), DELTA);
         assertEquals(99.0, dl.get(99), DELTA);
-    }
-
-    @Test
-    public void testEnsureCapacityOverflow() {
-        list.add(1.1);
-        try {
-            for (int i = 0; i < 100; i++) {
-                list.add(i * 0.1);
-            }
-            assertTrue(list.size() > 1);
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
     }
 
     @Test

@@ -95,17 +95,17 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      * Returns the specified predicate instance.
-     * This method exists primarily for consistency and readability in method chains.
+     * This method is useful for type inference or when you need to give a lambda expression the
+     * {@code ShortPredicate} target type (for example, to make the {@code negate}/{@code and}/{@code or}
+     * default methods available on a bare lambda).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortPredicate isPositive = value -> value > 0;
-     * ShortPredicate wrapped = ShortPredicate.of(isPositive);   // returns the same instance
+     * ShortPredicate isPositive = ShortPredicate.of(value -> value > 0);
+     * boolean result = isPositive.test((short) 5);   // returns true
      *
-     * // Useful for method references and composition
-     * Stream.of(predicates)
-     *       .map(ShortPredicate::of)
-     *       .forEach(System.out::println);
+     * // Gives a bare lambda access to the default methods
+     * ShortPredicate isNotPositive = ShortPredicate.of(value -> value > 0).negate();
      * }</pre>
      *
      * @param predicate the predicate to return

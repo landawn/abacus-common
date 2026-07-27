@@ -36,11 +36,9 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
- * A high-performance, resizable array implementation for primitive double values that provides
- * specialized operations optimized for double-precision floating-point data types. This class extends
- * {@link PrimitiveList} to offer memory-efficient storage and operations that avoid the boxing overhead
- * associated with {@code List<Double>}, making it ideal for applications requiring intensive double array
- * manipulation with optimal performance characteristics.
+ * A resizable-array implementation for primitive {@code double} values. This class extends
+ * {@link PrimitiveList} and stores elements without the per-element boxing required by
+ * {@code List<Double>}.
  *
  * <p>DoubleList is specifically designed for scenarios involving large collections of high-precision
  * floating-point values such as scientific computing, financial calculations, statistical analysis,
@@ -53,10 +51,8 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>Zero-Boxing Overhead:</b> Direct double primitive storage without Double wrapper allocation</li>
  *   <li><b>Memory Efficiency:</b> Compact double array storage with minimal memory overhead</li>
  *   <li><b>Double-Precision Arithmetic:</b> Full support for IEEE 754 double-precision operations</li>
- *   <li><b>High Performance:</b> Optimized algorithms for floating-point specific operations</li>
  *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum, average</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
- *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
+ *   <li><b>Set Operations:</b> Occurrence-aware intersection, difference, and symmetric difference operations</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
  *   <li><b>Stream Integration:</b> Full compatibility with DoubleStream for functional processing</li>
@@ -103,7 +99,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * // High-performance sorting and searching
  * prices.sort();                             // Sort in ascending order
  * prices.parallelSort();                     // Parallel sort for large datasets
- * int index = prices.binarySearch(101.25);   // Fast lookup
+ * int index = prices.binarySearch(101.50);   // returns the index of the updated price
  *
  * // Statistical and functional operations
  * DoubleList scaled = prices.stream()                      // Scale every price by 1.1
@@ -125,15 +121,15 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
  *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
- *   <li><b>Parallel Sorting:</b> O(n log n) with improved constants on multi-core systems</li>
- *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Parallel Sorting:</b> O(n log n), delegated to the JDK primitive-array parallel sort</li>
+ *   <li><b>Set Operations:</b> O(n) to O(n²), depending on the operation and input sizes</li>
  *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
  * </ul>
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
  *   <li><b>Storage:</b> 8 bytes per element (64 bits) with no object overhead</li>
- *   <li><b>vs List&lt;Double&gt;:</b> ~3x less memory usage (no Double wrapper objects)</li>
+ *   <li><b>vs List&lt;Double&gt;:</b> Avoids one wrapper object per stored element; exact savings are JVM-dependent</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
  * </ul>
@@ -145,6 +141,8 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>Precision:</b> ~15-17 decimal digits of precision (53-bit mantissa)</li>
  *   <li><b>Range:</b> Approximately ±1.8 × 10^308 with subnormal support</li>
  *   <li><b>Comparison:</b> NaN-aware comparison operations</li>
+ *   <li><b>Decimal values:</b> Binary floating point cannot represent every decimal value exactly;
+ *       use {@link java.math.BigDecimal} when exact decimal arithmetic is required</li>
  *   <li><b>Aggregation:</b> {@code min()} and {@code max()} <i>propagate</i> NaN (they do not skip it);
  *       any NaN present makes the result NaN. Use {@code stream().filter(Double::isFinite)} first to ignore NaN.
  *       ({@code median()} instead orders NaN as the largest value, so it is only NaN when NaN occupies the middle position.)</li>
@@ -186,9 +184,9 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <p><b>Thread Safety:</b>
  * <ul>
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
- *   <li><b>External Synchronization:</b> Required for concurrent access</li>
+ *   <li><b>External Synchronization:</b> Required when any thread may mutate the list</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
@@ -210,9 +208,8 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <p><b>Serialization Support:</b>
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
- *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of double arrays</li>
- *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ *   <li><b>Version Identifier:</b> Declares a fixed {@code serialVersionUID}</li>
+ *   <li><b>Format:</b> Default Java serialization includes the backing array, including unused capacity</li>
  * </ul>
  *
  * <p><b>Integration with Collections Framework:</b>
@@ -234,7 +231,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Double&gt;:</b> 3x less memory, significantly faster operations</li>
+ *   <li><b>vs List&lt;Double&gt;:</b> Avoids boxed element storage</li>
  *   <li><b>vs double[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
  *   <li><b>vs FloatList:</b> Higher precision, larger range, better for scientific computing</li>
  *   <li><b>vs ArrayList&lt;Double&gt;:</b> No boxing overhead, primitive-specific methods</li>
@@ -246,7 +243,6 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
  *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
  *   <li>Leverage DoubleStream for complex mathematical transformations</li>
- *   <li>Consider parallel operations for large datasets (>10,000 elements)</li>
  *   <li>Be aware of floating-point precision limitations in equality comparisons</li>
  * </ul>
  *
@@ -255,7 +251,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li>Pre-size lists with known capacity using the {@code DoubleList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
- *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
+ *   <li>Benchmark {@code parallelSort()} for the actual data size and runtime environment</li>
  *   <li>Consider {@code stream().parallel()} for CPU-intensive mathematical operations</li>
  * </ul>
  *
@@ -263,7 +259,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <ul>
  *   <li><b>Financial Data:</b> {@code DoubleList prices = new DoubleList(tradingDays);}</li>
  *   <li><b>Scientific Data:</b> {@code DoubleList measurements = DoubleList.random(count);}</li>
- *   <li><b>Statistical Analysis:</b> {@code DoubleList results = dataset.stream().mapToDouble(...).collect(...);}</li>
+ *   <li><b>Statistical Analysis:</b> {@code DoubleList squares = DoubleList.of(1d, 2d, 3d).stream().map(value -> value * value).toDoubleList();}</li>
  *   <li><b>Mathematical Modeling:</b> {@code DoubleList coefficients = DoubleList.of(a, b, c, d);}</li>
  * </ul>
  *
@@ -325,6 +321,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     @Serial
     private static final long serialVersionUID = 766157472430159621L;
 
+    /** Shared random number generator used by {@link #random(int)}. */
     static final Random RAND = new SecureRandom();
 
     /**
@@ -521,6 +518,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return a new DoubleList containing a copy of the elements in the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      *                                   or {@code fromIndex > toIndex}
+     * @throws NullPointerException if {@code a} is {@code null}
      */
     public static DoubleList copyOf(final double[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
@@ -902,7 +900,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             N.copy(elementData, index + 1, elementData, index, numMoved);
         }
 
-        elementData[--size] = 0; // clear to let GC do its work
+        elementData[--size] = 0; // clear the vacated slot
     }
 
     /**
@@ -2624,6 +2622,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     @Override
     public DoubleList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
+
+        if (size == 0) {
+            return new DoubleList(N.copyOfRange(elementData, 0, 0, step));
+        }
 
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.

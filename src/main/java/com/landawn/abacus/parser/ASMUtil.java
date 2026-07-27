@@ -32,7 +32,7 @@ import lombok.Data;
  * <p>The class performs a runtime check to verify if reflectasm classes are present
  * and functional by attempting to use MethodAccess and FieldAccess on a test bean.</p>
  *
- * <p>Usage Examples:</p>
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * if (ASMUtil.isASMAvailable()) {
  *     // Use ASM-optimized reflection
@@ -95,14 +95,14 @@ final class ASMUtil {
      * whether the reflectasm library is present and functional. The check is performed
      * once during class loading.</p>
      *
-     * <p>Usage Examples:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (ASMUtil.isASMAvailable()) {
      *     // Use optimized reflection with ASM
-     *     MethodAccess access = MethodAccess.get(MyClass.class);
+     *     var access = com.esotericsoftware.reflectasm.MethodAccess.get(MyClass.class);
      * } else {
      *     // Use standard Java reflection
-     *     Method method = MyClass.class.getMethod("myMethod");
+     *     java.lang.reflect.Method method = MyClass.class.getMethod("myMethod");
      * }
      * }</pre>
      *

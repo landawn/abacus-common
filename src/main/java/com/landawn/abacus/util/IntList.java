@@ -54,7 +54,7 @@ import com.landawn.abacus.util.stream.IntStream;
  *   <li><b>Memory Efficiency:</b> Compact int array storage with minimal memory overhead</li>
  *   <li><b>High Performance:</b> Optimized algorithms for integer-specific operations</li>
  *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Multiset Operations:</b> Intersection, difference, and symmetric-difference operations that preserve duplicate counts</li>
  *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
@@ -125,8 +125,8 @@ import com.landawn.abacus.util.stream.IntStream;
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
- *   <li><b>Storage:</b> 4 bytes per element (32 bits) with no object overhead</li>
- *   <li><b>vs List&lt;Integer&gt;:</b> ~4x less memory usage (no Integer wrapper objects)</li>
+ *   <li><b>Storage:</b> 4 bytes per backing-array slot, plus list/array headers, alignment, and any spare capacity</li>
+ *   <li><b>vs List&lt;Integer&gt;:</b> Typically lower memory use because values need no {@code Integer} wrapper objects</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
  * </ul>
@@ -221,7 +221,7 @@ import com.landawn.abacus.util.stream.IntStream;
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Integer&gt;:</b> 4x less memory, significantly faster operations</li>
+ *   <li><b>vs List&lt;Integer&gt;:</b> Typically lower memory use and no boxing for primitive operations</li>
  *   <li><b>vs int[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
  *   <li><b>vs ArrayList&lt;Integer&gt;:</b> No boxing overhead, primitive-specific methods</li>
  *   <li><b>vs Vector&lt;Integer&gt;:</b> Not synchronized, better performance, modern API</li>
@@ -251,7 +251,7 @@ import com.landawn.abacus.util.stream.IntStream;
  *   <li><b>Index Collections:</b> {@code IntList indices = IntList.range(0, array.length);}</li>
  *   <li><b>Random Sampling:</b> {@code IntList sample = IntList.random(0, population, sampleSize);}</li>
  *   <li><b>Mathematical Sequences:</b> {@code IntList fibonacci = IntList.of(1, 1, 2, 3, 5, 8, 13);}</li>
- *   <li><b>Data Transformation:</b> {@code IntList doubled = numbers.stream().map(x -> x * 2).collect(...);}</li>
+ *   <li><b>Data Transformation:</b> {@code IntList doubled = IntList.of(1, 2, 3).stream().map(value -> value * 2).toIntList();}</li>
  * </ul>
  *
  * <p><b>Related Classes:</b>
@@ -304,6 +304,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     @Serial
     private static final long serialVersionUID = 8661773953226671696L;
 
+    /** Shared random number generator used by {@link #random(int)}. */
     static final Random RAND = new SecureRandom();
 
     /**
@@ -1008,8 +1009,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Private helper method to remove an element at the specified index without range checking.
-     * This method is used internally when the index is known to be valid.
+     * Removes the element at the specified index without bounds checking.
      *
      * @param index the index of the element to remove
      */
@@ -2272,6 +2272,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(10, 20, 30, 40, 50);
+     * IntConsumer action = value -> System.out.print(value);
      * list.forEach(0, 3, action);    // Forward: processes indices 0,1,2
      * list.forEach(3, 0, action);    // Backward: processes indices 3,2,1
      * list.forEach(4, -1, action);   // Backward: processes indices 4,3,2,1,0
@@ -2726,6 +2727,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     @Override
     public IntList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
+
+        if (size == 0) {
+            return new IntList(N.copyOfRange(elementData, 0, 0, step));
+        }
 
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.

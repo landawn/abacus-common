@@ -30,7 +30,7 @@ import com.landawn.abacus.util.N;
  * common calendar handling functionality.
  *
  * <p>String representations follow the standard date/time formats supported by the
- * {@code Dates} utility. The special string {@code "sysTime"} resolves to the current
+ * {@code Dates} utility. The special strings {@code "sysTime"} and {@code "SYS_TIME"} (case-insensitive) resolve to the current
  * system time. Numeric strings are interpreted as milliseconds since the epoch.
  * Database columns are read and written as {@link java.sql.Timestamp} values.
  */
@@ -38,7 +38,7 @@ import com.landawn.abacus.util.N;
 public class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
 
     /**
-     * The type name constant for GregorianCalendar type identification.
+     * The type name constant for GregorianCalendar type identification, equal to {@code "GregorianCalendar"}.
      */
     public static final String GREGORIAN_CALENDAR = GregorianCalendar.class.getSimpleName();
 
@@ -92,7 +92,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * The method handles:
      * <ul>
      *   <li>{@code null}, empty, or the literal {@code "null"} strings: returns {@code null}</li>
-     *   <li>{@code "sysTime"}: returns current time as {@code GregorianCalendar}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns current time as {@code GregorianCalendar}</li>
      *   <li>Numeric strings: interpreted as milliseconds since the epoch</li>
      *   <li>Date/time strings: parsed according to standard date formats</li>
      * </ul>

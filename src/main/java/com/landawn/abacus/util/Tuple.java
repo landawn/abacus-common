@@ -63,7 +63,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>All tuple elements are final fields set only during construction</li>
  *   <li>Immutability is shallow: referenced element objects are neither copied nor frozen</li>
  *   <li>Thread safety therefore also depends on the thread-safety and usage of the contained elements</li>
- *   <li>All operations return new instances rather than modifying existing ones</li>
+ *   <li>No operation reassigns a tuple position; transformations such as {@code reverse()} create new tuples</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -71,7 +71,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Simplicity Over Complexity:</b> Provides simple, straightforward access to tuple elements</li>
  *   <li><b>Type Safety Over Flexibility:</b> Compile-time type checking prevents runtime errors</li>
  *   <li><b>Performance Over Convenience:</b> Optimized implementations for each tuple size</li>
- *   <li><b>Immutability Over Mutability:</b> Ensures predictable behavior and thread safety</li>
+ *   <li><b>Structural Immutability Over Mutability:</b> Prevents reassignment of tuple positions</li>
  *   <li><b>Explicitness Over Magic:</b> Clear, numbered field access rather than reflection-based access</li>
  * </ul>
  *
@@ -113,13 +113,14 @@ import com.landawn.abacus.util.u.Optional;
  * Boolean active = triple._3;
  *
  * // Using tuples for multiple return values
- * public Tuple3<String, Integer, Boolean> getUserInfo(long userId) {
- *     User user = findUser(userId);
- *     return Tuple.of(user.getName(), user.getAge(), user.isActive());
+ * class UserLookup {
+ *     Tuple3<String, Integer, Boolean> getUserInfo(long userId) {
+ *         return Tuple.of("Alice", 42, true);
+ *     }
  * }
  *
- * // Destructuring in calling code
- * Tuple3<String, Integer, Boolean> userInfo = getUserInfo(123L);
+ * // Accessing the returned components
+ * Tuple3<String, Integer, Boolean> userInfo = new UserLookup().getUserInfo(123L);
  * String userName = userInfo._1;
  * Integer userAge = userInfo._2;
  * Boolean isUserActive = userInfo._3;
@@ -128,8 +129,8 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Advanced Usage Examples:</b></p>
  * <pre>{@code
  * // Functional programming with tuples
- * List<Tuple2<String, Integer>> nameAgePairs = users.stream()
- *     .map(user -> Tuple.of(user.getName(), user.getAge()))
+ * List<Tuple2<String, Integer>> nameLengthPairs = List.of("Alice", "Bob").stream()
+ *     .map(nameValue -> Tuple.of(nameValue, nameValue.length()))
  *     .collect(Collectors.toList());
  *
  * // Using forEach for processing all elements
@@ -198,7 +199,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>vs. Custom Classes:</b> Tuples avoid boilerplate but sacrifice named fields and domain meaning</li>
  *   <li><b>vs. Arrays:</b> Tuples provide type safety and heterogeneous elements vs. homogeneous arrays</li>
  *   <li><b>vs. Collections:</b> Tuples have fixed size and direct access vs. dynamic collections</li>
- *   <li><b>vs. Records (Java 14+):</b> Records provide named fields but tuples offer positional access patterns</li>
+ *   <li><b>vs. Records (Java 16+):</b> Records provide named fields but tuples offer positional access patterns</li>
  *   <li><b>vs. Pair/Triple:</b> Tuples use numbered access vs. named fields, supporting larger arities</li>
  * </ul>
  *
@@ -208,7 +209,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>Prefer custom classes or records for domain objects with meaningful field names</li>
  *   <li>Use {@link Pair} or {@link Triple} when semantic meaning is more important than arity flexibility</li>
  *   <li>Document the meaning of each tuple position when not obvious from context</li>
- *   <li>Consider using records for Java 14+ projects when you need named fields</li>
+ *   <li>Consider using records for Java 16+ projects when you need named fields</li>
  *   <li>Use tuple conversion methods ({@code Tuple.toList(...)}) when you need to process elements uniformly</li>
  *   <li>Leverage the type system to prevent mixing up tuple element order</li>
  * </ul>
@@ -252,30 +253,19 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Usage Examples: Data Processing Pipeline</b></p>
  * <pre>{@code
- * public class DataProcessor {
- *     // Using tuples for intermediate processing results
- *     public List<Tuple3<String, Double, Integer>> processData(List<RawData> rawData) {
- *         return rawData.stream()
- *             .map(this::parseAndValidate)
- *             .filter(tuple -> tuple._3 > 0)                    // Filter by count
- *             .sorted((t1, t2) -> Double.compare(t2._2, t1._2)) // Sort by score descending
- *             .collect(Collectors.toList());
- *     }
+ * List<String> rawData = List.of("alpha,9.5,2", "beta,7.0,0", "gamma,8.5,3");
+ * List<Tuple3<String, Double, Integer>> processed = rawData.stream()
+ *     .map(row -> {
+ *         String[] fields = row.split(",");
+ *         return Tuple.of(fields[0], Double.valueOf(fields[1]), Integer.valueOf(fields[2]));
+ *     })
+ *     .filter(tuple -> tuple._3 > 0)                    // Filter by count
+ *     .sorted((t1, t2) -> Double.compare(t2._2, t1._2)) // Sort by score descending
+ *     .collect(Collectors.toList());
  *
- *     private Tuple3<String, Double, Integer> parseAndValidate(RawData data) {
- *         String processedName = sanitizeName(data.getName());
- *         Double calculatedScore = computeScore(data);
- *         Integer validCount = countValidEntries(data);
- *         return Tuple.of(processedName, calculatedScore, validCount);
- *     }
- *
- *     // Converting results back to domain objects
- *     public List<ProcessedData> convertToResults(List<Tuple3<String, Double, Integer>> tuples) {
- *         return tuples.stream()
- *             .map(tuple -> new ProcessedData(tuple._1, tuple._2, tuple._3))
- *             .collect(Collectors.toList());
- *     }
- * }
+ * List<String> summaries = processed.stream()
+ *     .map(tuple -> tuple._1 + ": " + tuple._2 + " (" + tuple._3 + ")")
+ *     .collect(Collectors.toList());
  * }</pre>
  *
  * @param <TP> the self-type of the tuple, enabling type-safe method chaining and inheritance.
@@ -382,7 +372,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * Object[] array = t.toArray();   // returns ["a", 1, true]
      * }</pre>
      *
-     * @return a new Object array containing all tuple elements in order.
+     * @return an Object array containing all tuple elements in order; non-empty tuples return a
+     *         new array, while {@link Tuple0} returns a shared empty array
      */
     public abstract Object[] toArray();
 
@@ -418,8 +409,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     /**
      * Performs the given action for each element of this tuple in order.
      *
-     * <p>Elements are passed to the consumer one by one from first to last position.
-     * The consumer receives each element as an Object, regardless of its actual type.</p>
+     * <p>Elements are passed to the consumer one by one from first to last position. Because tuple
+     * positions may have different types, the consumer must accept a common supertype of every
+     * element it will receive.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -434,6 +426,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the action to be performed for each element, must not be {@code null}.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws ClassCastException if the consumer cannot accept the runtime type of an element
      * @throws E if the consumer throws an exception.
      */
     public abstract <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E;
@@ -456,6 +449,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @throws NullPointerException if {@code action} is {@code null}.
      * @throws E if the action throws an exception.
      */
+    @SuppressWarnings("unchecked")
     public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E {
         action.accept((TP) this);
     }
@@ -472,8 +466,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * String description = t.map(tuple -> tuple._1 + " is " + tuple._2 + " years old");
      * // Returns: "John is 30 years old"
      *
-     * // Converting to a custom object
-     * Person person = t.map(tuple -> new Person(tuple._1, tuple._2));
+     * // Mapping to another value
+     * String label = t.map(tuple -> tuple._1 + " (" + tuple._2 + ")");
      * }</pre>
      *
      * @param <R> the type of the result of the mapping function.
@@ -483,6 +477,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper throws an exception.
      */
+    @SuppressWarnings("unchecked")
     public <R, E extends Exception> R map(final Throwables.Function<? super TP, R, E> mapper) throws E {
         return mapper.apply((TP) this);
     }
@@ -512,6 +507,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @throws E if the predicate throws an exception.
      */
     @Beta
+    @SuppressWarnings("unchecked")
     public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E {
         return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.empty();
     }
@@ -591,8 +587,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Tuple4<String, String, Integer, Date> record =
-     *     Tuple.of("John", "Doe", 35, new Date());
+     * Tuple4<String, String, Integer, java.util.Date> record =
+     *     Tuple.of("John", "Doe", 35, new java.util.Date());
      * }</pre>
      *
      * @param <T1> the type of the first element.
@@ -706,7 +702,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p>Example of preferred approach:</p>
      * <pre>{@code
      * // Instead of Tuple8, consider:
-     * public record PersonDetails(
+     * record PersonDetails(
      *     String firstName, String lastName, int age,
      *     String email, String phone, String address,
      *     String city, String country
@@ -748,12 +744,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Creating a Tuple9 (discouraged for production code):
+     * @SuppressWarnings("deprecation")
      * Tuple9<String, String, Integer, String, String, String, String, String, String> contact =
      *     Tuple.of("John", "Doe", 35, "john@example.com", "555-1234",
      *              "123 Main St", "Apt 4B", "Boston", "MA");
      *
      * // Better approach - use a record or class:
-     * public record ContactInfo(
+     * record ContactInfo(
      *     String firstName, String lastName, int age,
      *     String email, String phone, String street,
      *     String apartment, String city, String state
@@ -818,7 +815,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * Creates a tuple from an array of objects.
      *
      * <p>The arity of the returned tuple matches the length of the array.
-     * The array must contain between 0 and 9 elements.</p>
+     * The array must contain between 0 and 9 elements. The generic return type is unchecked and is
+     * inferred from the assignment context; callers are responsible for matching both the tuple
+     * arity and each positional element type to the source array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -834,6 +833,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @throws IllegalArgumentException if the array contains more than 9 elements.
      */
     @Beta
+    @SuppressWarnings("unchecked")
     public static <TP extends Tuple<TP>> TP from(final Object[] a) {
         final int len = a == null ? 0 : a.length;
 
@@ -892,7 +892,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * <p>The arity of the returned tuple matches the size of the collection.
      * Elements are added to the tuple in the order returned by the collection's iterator.
-     * The collection must contain between 0 and 9 elements.</p>
+     * The collection must contain between 0 and 9 elements. The generic return type is unchecked and
+     * is inferred from the assignment context; callers are responsible for matching both the tuple
+     * arity and each positional element type to the collection's iteration order.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -908,6 +910,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @throws IllegalArgumentException if the collection contains more than 9 elements.
      */
     @Beta
+    @SuppressWarnings("unchecked")
     public static <TP extends Tuple<TP>> TP from(final Collection<?> c) {
         final int len = c == null ? 0 : c.size();
 
@@ -1132,6 +1135,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * @SuppressWarnings("deprecation")
      * Tuple8<String, String, String, String, String, String, String, String> t =
      *     Tuple.of("a", "b", "c", "d", "e", "f", "g", "h");
      * List<String> list = Tuple.toList(t);   // returns ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -1156,6 +1160,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * @SuppressWarnings("deprecation")
      * Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> t =
      *     Tuple.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
      * List<Integer> list = Tuple.toList(t);   // returns [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -1210,10 +1215,10 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Tuple3<Tuple3<String, Integer, Double>, Boolean, Date> nested =
-     *     Tuple.of(Tuple.of("data", 100, 3.14), true, new Date());
-     * Tuple5<String, Integer, Double, Boolean, Date> flat = Tuple.flatten(nested);
-     * // Result: ("data", 100, 3.14, true, Date)
+     * Tuple3<Tuple3<String, Integer, Double>, Boolean, java.util.Date> nested =
+     *     Tuple.of(Tuple.of("data", 100, 3.14), true, new java.util.Date());
+     * Tuple5<String, Integer, Double, Boolean, java.util.Date> flat = Tuple.flatten(nested);
+     * // Result: ("data", 100, 3.14, true, java.util.Date)
      * }</pre>
      *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
@@ -1256,8 +1261,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY; // internal use, returned by Tuple.from() when source is empty
-         * int arity = empty.arity();               // returns 0
+         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * int arity = empty.arity();   // returns 0
          * }</pre>
          *
          * @return 0, as this is an empty tuple.
@@ -1274,7 +1279,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
+         * Tuple<?> empty = Tuple.from(new Object[0]);
          * boolean hasNull = empty.anyNull();   // returns false
          * }</pre>
          *
@@ -1293,7 +1298,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
+         * Tuple<?> empty = Tuple.from(new Object[0]);
          * boolean allNull = empty.allNull();   // returns true
          * }</pre>
          *
@@ -1311,7 +1316,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
+         * Tuple<?> empty = Tuple.from(new Object[0]);
          * boolean found = empty.contains("hello");   // returns false
          * }</pre>
          *
@@ -1330,7 +1335,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
+         * Tuple<?> empty = Tuple.from(new Object[0]);
          * Object[] array = empty.toArray();   // returns an empty Object[]
          * }</pre>
          *
@@ -1351,7 +1356,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
+         * Tuple<?> empty = Tuple.from(new Object[0]);
          * String[] arr = empty.toArray(new String[5]);   // returns the same array, all elements untouched
          * }</pre>
          *
@@ -1375,7 +1380,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
+         * Tuple<?> empty = Tuple.from(new Object[0]);
          * empty.forEach(System.out::println);   // Does nothing (no elements)
          * }</pre>
          *
@@ -1419,7 +1424,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
+         * Tuple<?> empty = Tuple.from(new Object[0]);
          * String str = empty.toString();   // returns "()"
          * }</pre>
          *
@@ -1454,9 +1459,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      */
     public static final class Tuple1<T1> extends Tuple<Tuple1<T1>> {
 
-        /** The first and only element of this tuple. May be null. */
+        /** The first and only element of this tuple. May be {@code null}. */
         public final T1 _1;
 
+        /**
+         * Default constructor for serialization frameworks.
+         * Creates a Tuple1 with a {@code null} element.
+         */
         // For Kryo
         Tuple1() {
             this(null);
@@ -1581,7 +1590,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 1);
             }
 
-            a[0] = (A) _1;
+            final Object[] result = a;
+            result[0] = _1;
 
             return a;
         }
@@ -1601,6 +1611,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -1772,12 +1783,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      */
     public static final class Tuple2<T1, T2> extends Tuple<Tuple2<T1, T2>> {
 
-        /** The first element of this tuple. May be null. */
+        /** The first element of this tuple. May be {@code null}. */
         public final T1 _1;
 
-        /** The second element of this tuple. May be null. */
+        /** The second element of this tuple. May be {@code null}. */
         public final T2 _2;
 
+        /**
+         * Default constructor for serialization frameworks.
+         * Creates a Tuple2 with all {@code null} elements.
+         */
         // For Kryo
         Tuple2() {
             this(null, null);
@@ -1902,8 +1917,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 2);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
 
             return a;
         }
@@ -1985,6 +2001,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -2317,9 +2334,10 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 3);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
-            a[2] = (A) _3;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
+            result[2] = _3;
 
             return a;
         }
@@ -2369,6 +2387,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -2495,7 +2514,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     }
 
     /**
-     * Represents an immutable tuple of 4 elements of potentially different types.
+     * Represents a structurally immutable tuple of 4 elements of potentially different types.
      *
      * <p>Tuple4 is commonly used for:</p>
      * <ul>
@@ -2512,8 +2531,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *     Tuple.of(255, 128, 0, 0.8f);
      *
      * // Database record
-     * Tuple4<Long, String, String, Date> user =
-     *     Tuple.of(123L, "John", "john@example.com", new Date());
+     * Tuple4<Long, String, String, java.util.Date> user =
+     *     Tuple.of(123L, "John", "john@example.com", new java.util.Date());
      * }</pre>
      *
      * @param <T1> the type of the first element.
@@ -2615,10 +2634,11 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 4);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
-            a[2] = (A) _3;
-            a[3] = (A) _4;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
+            result[2] = _3;
+            result[3] = _4;
 
             return a;
         }
@@ -2653,6 +2673,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -2715,7 +2736,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     }
 
     /**
-     * Represents an immutable tuple of 5 elements of potentially different types.
+     * Represents a structurally immutable tuple of 5 elements of potentially different types.
      *
      * <p>Tuple5 is suitable for very complex data structures requiring five components.
      * At this size, consider whether a dedicated class with meaningful field names
@@ -2724,8 +2745,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Database record with five fields
-     * Tuple5<Long, String, String, Date, Boolean> employee =
-     *     Tuple.of(123L, "John Doe", "Engineering", new Date(), true);
+     * Tuple5<Long, String, String, java.util.Date, Boolean> employee =
+     *     Tuple.of(123L, "John Doe", "Engineering", new java.util.Date(), true);
      *
      * // 5D point
      * Tuple5<Double, Double, Double, Double, Double> point5D =
@@ -2837,11 +2858,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 5);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
-            a[2] = (A) _3;
-            a[3] = (A) _4;
-            a[4] = (A) _5;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
+            result[2] = _3;
+            result[3] = _4;
+            result[4] = _5;
 
             return a;
         }
@@ -2877,6 +2899,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -2941,7 +2964,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     }
 
     /**
-     * Represents an immutable tuple of 6 elements of potentially different types.
+     * Represents a structurally immutable tuple of 6 elements of potentially different types.
      *
      * <p>Tuple6 is suitable for very complex data structures requiring six components.
      * At this size, consider whether a dedicated class with meaningful field names
@@ -3068,12 +3091,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 6);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
-            a[2] = (A) _3;
-            a[3] = (A) _4;
-            a[4] = (A) _5;
-            a[5] = (A) _6;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
+            result[2] = _3;
+            result[3] = _4;
+            result[4] = _5;
+            result[5] = _6;
 
             return a;
         }
@@ -3108,6 +3132,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -3176,7 +3201,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     }
 
     /**
-     * Represents an immutable tuple of 7 elements of potentially different types.
+     * Represents a structurally immutable tuple of 7 elements of potentially different types.
      *
      * <p>Tuple7 is suitable for very complex data structures requiring seven components.
      * At this size, consider whether a dedicated class with meaningful field names
@@ -3189,8 +3214,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *     Tuple.of(20.5, 21.0, 19.8, 22.3, 23.1, 24.0, 22.5);
      *
      * // Complex database record
-     * Tuple7<Long, String, String, Date, Boolean, Double, String> record =
-     *     Tuple.of(123L, "John", "Doe", new Date(), true, 75000.0, "Active");
+     * Tuple7<Long, String, String, java.util.Date, Boolean, Double, String> record =
+     *     Tuple.of(123L, "John", "Doe", new java.util.Date(), true, 75000.0, "Active");
      * }</pre>
      *
      * @param <T1> the type of the first element.
@@ -3308,13 +3333,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 7);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
-            a[2] = (A) _3;
-            a[3] = (A) _4;
-            a[4] = (A) _5;
-            a[5] = (A) _6;
-            a[6] = (A) _7;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
+            result[2] = _3;
+            result[3] = _4;
+            result[4] = _5;
+            result[5] = _6;
+            result[6] = _7;
 
             return a;
         }
@@ -3349,6 +3375,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -3419,7 +3446,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     }
 
     /**
-     * Represents an immutable tuple of 8 elements of potentially different types.
+     * Represents a structurally immutable tuple of 8 elements of potentially different types.
      *
      * <p>Tuple8 is suitable for very complex data structures requiring eight components.
      * At this size, consider whether a dedicated class with meaningful field names
@@ -3428,10 +3455,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Complex configuration with eight parameters
+     * @SuppressWarnings("deprecation")
      * Tuple8<String, Integer, String, Boolean, Double, Long, String, Integer> config =
      *     Tuple.of("server1", 8080, "https", true, 99.9, 5000L, "admin", 10);
      *
      * // Multi-dimensional data point
+     * @SuppressWarnings("deprecation")
      * Tuple8<Double, Double, Double, Double, Double, Double, Double, Double> point8D =
      *     Tuple.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
      * }</pre>
@@ -3556,14 +3585,15 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 8);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
-            a[2] = (A) _3;
-            a[3] = (A) _4;
-            a[4] = (A) _5;
-            a[5] = (A) _6;
-            a[6] = (A) _7;
-            a[7] = (A) _8;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
+            result[2] = _3;
+            result[3] = _4;
+            result[4] = _5;
+            result[5] = _6;
+            result[6] = _7;
+            result[7] = _8;
 
             return a;
         }
@@ -3574,6 +3604,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple8<String, Integer, Double, Boolean, Long, Character, Float, Byte> original =
          *     Tuple.of("A", 1, 2.0, true, 100L, 'X', 3.14f, (byte)5);
          * Tuple8<Byte, Float, Character, Long, Boolean, Double, Integer, String> reversed =
@@ -3597,6 +3628,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -3669,7 +3701,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     }
 
     /**
-     * Represents an immutable tuple of 9 elements of potentially different types.
+     * Represents a structurally immutable tuple of 9 elements of potentially different types.
      *
      * <p>Tuple9 is suitable for very complex data structures requiring nine components.
      * At this size, consider whether a dedicated class with meaningful field names
@@ -3678,6 +3710,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Creating a Tuple9
+     * @SuppressWarnings("deprecation")
      * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
      *     Tuple.of("John", 30, 175.5, true, 'A', 1000L, 3.14f, (short)10, (byte)5);
      *
@@ -3766,6 +3799,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * int arity = t.arity();   // returns 9
@@ -3786,10 +3820,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of("A", null, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * boolean hasNull = t1.anyNull();   // returns true
          *
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          * boolean hasNull2 = t2.anyNull();   // returns false
@@ -3809,10 +3845,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of(null, null, null, null, null, null, null, null, null);
          * boolean allNull = t1.allNull();   // returns true
          *
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", null, null, null, null, null, null, null, null);
          * boolean allNull2 = t2.allNull();   // returns false
@@ -3834,6 +3872,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
@@ -3861,6 +3900,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
@@ -3884,6 +3924,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, String, String, String, String, String, String, String, String> t =
          *     Tuple.of("A", "B", "C", "D", "E", "F", "G", "H", "I");
          *
@@ -3912,15 +3953,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 a = N.copyOf(a, 9);
             }
 
-            a[0] = (A) _1;
-            a[1] = (A) _2;
-            a[2] = (A) _3;
-            a[3] = (A) _4;
-            a[4] = (A) _5;
-            a[5] = (A) _6;
-            a[6] = (A) _7;
-            a[7] = (A) _8;
-            a[8] = (A) _9;
+            final Object[] result = a;
+            result[0] = _1;
+            result[1] = _2;
+            result[2] = _3;
+            result[3] = _4;
+            result[4] = _5;
+            result[5] = _6;
+            result[6] = _7;
+            result[7] = _8;
+            result[8] = _9;
 
             return a;
         }
@@ -3933,6 +3975,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
@@ -3956,6 +3999,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
@@ -3977,6 +4021,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws E if the consumer throws an exception.
          */
         @Override
+        @SuppressWarnings("unchecked")
         public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
 
@@ -4005,8 +4050,10 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
@@ -4039,10 +4086,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t1 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t3 =
          *     Tuple.of("B", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
@@ -4079,12 +4129,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
          * String str = t.toString();
          * // Returns: "(A, 1, 2.0, true, X, 100, 3.14, 5, 10)"
          *
+         * @SuppressWarnings("deprecation")
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t2 =
          *     Tuple.of("A", null, 2.0, true, null, 100L, 3.14f, null, (byte)10);
          *

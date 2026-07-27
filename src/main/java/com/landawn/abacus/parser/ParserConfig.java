@@ -30,7 +30,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * ParserConfig config = new MyParserConfig()
+ * JsonSerConfig config = new JsonSerConfig()
  *     .setIgnoredPropNames(Set.of("password", "internalId"))
  *     .setIgnoredPropNames(User.class, Set.of("temporaryToken"));
  * }</pre>
@@ -187,8 +187,9 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ParserConfig copy = originalConfig.copy();
-     * // copy has the same settings as originalConfig
+     * JsonSerConfig original = new JsonSerConfig().setPrettyFormat(true);
+     * JsonSerConfig copy = original.copy();
+     * // copy has the same settings as original
      * }</pre>
      *
      * @return a copy of this configuration

@@ -29,8 +29,12 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * <p>This abstract class provides various static factory methods for creating
  * char iterators from arrays, suppliers, and other sources. It also provides
- * transformation methods like {@code indexed()} and utility methods like
- * {@code toArray()} and {@code stream()}.</p>
+ * transformation methods like {@code skip()}, {@code limit()}, {@code filter()} and
+ * {@code indexed()}, and utility methods like {@code toArray()} and {@code stream()}.</p>
+ *
+ * <p>Instances are mutable traversal cursors and are not safe for concurrent consumption unless a
+ * particular implementation explicitly documents stronger guarantees. Transformation methods return
+ * wrappers over this same source iterator; consuming a wrapper also advances the source.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -87,7 +91,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.empty();
-     * System.out.println(iter.hasNext());   // returns false
+     * System.out.println(iter.hasNext());   // prints false
      * }</pre>
      *
      * @return an empty {@code CharIterator}
@@ -121,7 +125,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -558,7 +563,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * // array = ['a', 'b', 'c', 'd', 'e']
      *
      * // Empty iterator returns empty array
-     * char[] empty = CharIterator.empty().toArray();   // returns empty.length == 0
+     * char[] empty = CharIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a {@code char} array containing all remaining elements; an empty array if there are none
@@ -581,7 +586,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * // list contains ['a', 'b', 'c', 'd', 'e']
      *
      * // Empty iterator returns empty list
-     * CharList empty = CharIterator.empty().toList();   // returns empty.size() == 0
+     * CharList empty = CharIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a {@link CharList} containing all remaining elements; an empty list if there are none
@@ -725,7 +730,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Character> action) throws IllegalArgumentException {
+    public void forEachRemaining(final java.util.function.Consumer<? super Character> action) {
         super.forEachRemaining(action);
     }
 
@@ -770,15 +775,15 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
      * iter.foreachIndexed((index, ch) ->
-     *     System.out.println(index + ": " + ch)
-     * );
+     *     System.out.println(index + ": " + ch));
      * // Output: 0: a, 1: b, 2: c
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element and its index, must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator yields more than {@code Integer.MAX_VALUE} elements (index overflow)
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception during processing
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntCharConsumer<E> action) throws IllegalArgumentException, E {

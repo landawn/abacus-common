@@ -3,11 +3,13 @@ package com.landawn.abacus.logging;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -178,12 +180,17 @@ public class LogJvLoggerTest extends TestBase {
         final int threadCount = 5;
         final int messagesPerThread = 10;
         Thread[] threads = new Thread[threadCount];
+        AtomicReference<Throwable> failure = new AtomicReference<>();
 
         for (int i = 0; i < threadCount; i++) {
             final int threadId = i;
             threads[i] = new Thread(() -> {
-                for (int j = 0; j < messagesPerThread; j++) {
-                    logger.info("Thread " + threadId + " message " + j);
+                try {
+                    for (int j = 0; j < messagesPerThread; j++) {
+                        logger.info("Thread " + threadId + " message " + j);
+                    }
+                } catch (Throwable e) {
+                    failure.compareAndSet(null, e);
                 }
             });
         }
@@ -196,7 +203,7 @@ public class LogJvLoggerTest extends TestBase {
             thread.join();
         }
 
-        assertTrue(true);
+        assertNull(failure.get());
     }
 
     @Test

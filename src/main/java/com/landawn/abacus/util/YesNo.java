@@ -71,7 +71,7 @@ public enum YesNo {
      * int value = consent.intValue();   // returns 1
      *
      * // Storing in database
-     * preparedStatement.setInt(1, userConsent.intValue());
+     * preparedStatement.setInt(1, consent.intValue());
      * }</pre>
      *
      * @return 0 for NO, 1 for YES

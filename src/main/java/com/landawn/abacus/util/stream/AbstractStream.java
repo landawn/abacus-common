@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -166,7 +167,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         if (isParallel()) {
             //noinspection resource
-            return (Stream<U>) sequential().filter(Fn.instanceOf(targetType)).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return (Stream<U>) sequential().filter(Fn.instanceOf(targetType))
+                    .parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return (Stream<U>) filter(Fn.instanceOf(targetType));
         }
@@ -2390,7 +2392,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().onEach(action).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().onEach(action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return onEach(action);
         }
@@ -2419,7 +2421,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().onEach(action).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().onEach(action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return onEach(action);
         }
@@ -2438,7 +2440,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         } else {
             return newStream(new ObjIteratorEx<>() { //NOSONAR
                 private final ObjIteratorEx<T> iter = iteratorEx();
-                private final long durationMillis = duration.toMillis();
+                private final long durationNanos = TimeUnit.MILLISECONDS.toNanos(duration.toMillis());
                 private T prev; // the most recent element of the current burst, awaiting a quiet gap
                 private boolean hasPrev = false;
                 private long prevTime = 0;
@@ -2453,13 +2455,13 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                     while (iter.hasNext()) {
                         final T val = iter.next();
-                        final long now = System.currentTimeMillis();
+                        final long now = System.nanoTime();
 
                         if (!hasPrev) {
                             prev = val;
                             prevTime = now;
                             hasPrev = true;
-                        } else if (now - prevTime >= durationMillis) {
+                        } else if (now - prevTime >= durationNanos) {
                             // prev was followed by a quiet gap >= duration -> emit it; val starts the next burst.
                             next = prev;
                             hasNext = true;
@@ -2506,7 +2508,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().filter(Fn.notNull()).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().filter(Fn.notNull()).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return filter(Fn.notNull());
         }
@@ -2762,7 +2764,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return elements[((start + cnt++) % len) + fromIndex];
+                return elements[(int) (((long) start + cnt++) % len) + fromIndex];
             }
 
             @Override
@@ -2800,7 +2802,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 a = a.length >= remaining ? a : (A[]) N.newArray(a.getClass().getComponentType(), remaining);
 
                 for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = (A) elements[((start + i) % len) + fromIndex];
+                    a[i - cnt] = (A) elements[(int) (((long) start + i) % len) + fromIndex];
                 }
 
                 if (a.length > remaining) {
@@ -4439,12 +4441,19 @@ abstract class AbstractStream<T> extends Stream<T> {
             throws IllegalStateException, IOException {
         assertNotClosed();
 
-        final Writer writer = IOUtil.newFileWriter(output);
+        Writer writer = null;
 
         try {
+            writer = IOUtil.newFileWriter(output);
             return persist(header, tail, toLine, writer);
         } finally {
-            IOUtil.close(writer);
+            try {
+                IOUtil.close(writer);
+            } finally {
+                // The writer can fail to open before the Writer overload gets a chance to
+                // consume (and close) this terminal stream.
+                close();
+            }
         }
     }
 
@@ -4452,12 +4461,19 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persist(final Function<? super T, String> toLine, final OutputStream output) throws IllegalStateException, IOException {
         assertNotClosed();
 
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+        BufferedWriter bw = null;
 
         try {
+            bw = Objectory.createBufferedWriter(output);
             return persist(toLine, bw);
         } finally {
-            Objectory.recycle(bw);
+            try {
+                if (bw != null) {
+                    Objectory.recycle(bw);
+                }
+            } finally {
+                close();
+            }
         }
     }
 
@@ -4466,12 +4482,19 @@ abstract class AbstractStream<T> extends Stream<T> {
             throws IllegalStateException, IOException {
         assertNotClosed();
 
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+        BufferedWriter bw = null;
 
         try {
+            bw = Objectory.createBufferedWriter(output);
             return persist(header, tail, toLine, bw);
         } finally {
-            Objectory.recycle(bw);
+            try {
+                if (bw != null) {
+                    Objectory.recycle(bw);
+                }
+            } finally {
+                close();
+            }
         }
 
     }
@@ -4543,12 +4566,17 @@ abstract class AbstractStream<T> extends Stream<T> {
             throws IOException {
         assertNotClosed();
 
-        final Writer writer = IOUtil.newFileWriter(output);
+        Writer writer = null;
 
         try {
+            writer = IOUtil.newFileWriter(output);
             return persist(header, tail, write, writer);
         } finally {
-            IOUtil.close(writer);
+            try {
+                IOUtil.close(writer);
+            } finally {
+                close();
+            }
         }
     }
 
@@ -4668,7 +4696,11 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
         } finally {
-            DataSourceUtil.closeQuietly(stmt);
+            try {
+                DataSourceUtil.closeQuietly(stmt);
+            } finally {
+                close();
+            }
         }
     }
 
@@ -4693,7 +4725,11 @@ abstract class AbstractStream<T> extends Stream<T> {
             try {
                 DataSourceUtil.closeQuietly(stmt);
             } finally {
-                DataSourceUtil.releaseConnection(conn, ds);
+                try {
+                    DataSourceUtil.releaseConnection(conn, ds);
+                } finally {
+                    close();
+                }
             }
         }
     }
@@ -4702,12 +4738,17 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persistToCsv(final File output) throws IOException {
         assertNotClosed();
 
-        final Writer writer = IOUtil.newFileWriter(output);
+        Writer writer = null;
 
         try {
+            writer = IOUtil.newFileWriter(output);
             return persistToCsv(writer);
         } finally {
-            IOUtil.close(writer);
+            try {
+                IOUtil.close(writer);
+            } finally {
+                close();
+            }
         }
     }
 
@@ -4715,12 +4756,17 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persistToCsv(final Collection<String> headers, final File output) throws IOException {
         assertNotClosed();
 
-        final Writer writer = IOUtil.newFileWriter(output);
+        Writer writer = null;
 
         try {
+            writer = IOUtil.newFileWriter(output);
             return persistToCsv(headers, writer);
         } finally {
-            IOUtil.close(writer);
+            try {
+                IOUtil.close(writer);
+            } finally {
+                close();
+            }
         }
     }
 
@@ -4728,12 +4774,19 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persistToCsv(final OutputStream output) throws IOException {
         assertNotClosed();
 
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+        BufferedWriter bw = null;
 
         try {
+            bw = Objectory.createBufferedWriter(output);
             return persistToCsv(bw);
         } finally {
-            Objectory.recycle(bw);
+            try {
+                if (bw != null) {
+                    Objectory.recycle(bw);
+                }
+            } finally {
+                close();
+            }
         }
     }
 
@@ -4741,12 +4794,19 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persistToCsv(final Collection<String> headers, final OutputStream output) throws IOException {
         assertNotClosed();
 
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+        BufferedWriter bw = null;
 
         try {
+            bw = Objectory.createBufferedWriter(output);
             return persistToCsv(headers, bw);
         } finally {
-            Objectory.recycle(bw);
+            try {
+                if (bw != null) {
+                    Objectory.recycle(bw);
+                }
+            } finally {
+                close();
+            }
         }
     }
 
@@ -5014,12 +5074,17 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persistToJson(final File output) throws IOException {
         assertNotClosed();
 
-        final Writer writer = IOUtil.newFileWriter(output);
+        Writer writer = null;
 
         try {
+            writer = IOUtil.newFileWriter(output);
             return persistToJson(writer);
         } finally {
-            IOUtil.close(writer);
+            try {
+                IOUtil.close(writer);
+            } finally {
+                close();
+            }
         }
     }
 
@@ -5027,12 +5092,19 @@ abstract class AbstractStream<T> extends Stream<T> {
     public long persistToJson(final OutputStream output) throws IOException {
         assertNotClosed();
 
-        final BufferedWriter bw = Objectory.createBufferedWriter(output);
+        BufferedWriter bw = null;
 
         try {
+            bw = Objectory.createBufferedWriter(output);
             return persistToJson(bw);
         } finally {
-            Objectory.recycle(bw);
+            try {
+                if (bw != null) {
+                    Objectory.recycle(bw);
+                }
+            } finally {
+                close();
+            }
         }
     }
 
@@ -5083,6 +5155,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         }
     }
 
+    /**
+     * Returns a mapper that turns each {@code List} produced by a chunking operation (such as {@code splitToList}
+     * or {@code slidingToList}) into a {@code Stream} over a snapshot copy of that list. The returned streams
+     * inherit this stream's sorted flag and comparator and carry no close handlers.
+     *
+     * @return a function mapping a list of elements to a stream over a copy of that list
+     */
     Function<List<T>, Stream<T>> listToStreamMapper() {
         return t -> new ArrayStream<>(StreamBase.toArray(t), 0, t.size(), isSorted(), comparator(), null);
     }
@@ -5676,7 +5755,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 if (!initialized) {
                     synchronized (this) {
                         if (!initialized) {
-                            // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor()).groupTo(rightKeyExtractor);   // TODO may not be necessary.
+                            // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor()).groupTo(rightKeyExtractor);   // TODO may not be necessary.
                             map = Stream.<U> of(b).groupTo(Fn.from(rightKeyExtractor));
                             initialized = true;
                         }
@@ -5729,7 +5808,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     if (currentStream.isParallel()) {
                         synchronized (this) {
                             if (!initialized) {
-                                // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor()).groupTo(rightKeyExtractor);   // TODO may not be necessary.
+                                // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor()).groupTo(rightKeyExtractor);   // TODO may not be necessary.
                                 map = ((Stream<U>) b).groupTo(Fn.from(rightKeyExtractor));
                                 initialized = true;
                             }
@@ -5793,7 +5872,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                         synchronized (this) {
                             if (!initialized) {
                                 //    map = Stream.of(b)
-                                //            .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
+                                //            .parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor())
                                 //            .toMap(rightKeyExtractor, Fn.<U> identity(), mergeFunction);   // TODO may not be necessary.
 
                                 map = Stream.of(b).toMap(Fn.from(rightKeyExtractor), Fn.<U> identity(), mergeFunction);
@@ -5852,7 +5931,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                         synchronized (this) {
                             if (!initialized) {
                                 //    map = Stream.of(b)
-                                //            .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
+                                //            .parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor())
                                 //            .toMap(rightKeyExtractor, Fn.<U> identity(), mergeFunction);   // TODO may not be necessary.
 
                                 map = b.toMap(Fn.from(rightKeyExtractor), Fn.identity(), mergeFunction);
@@ -5902,10 +5981,12 @@ abstract class AbstractStream<T> extends Stream<T> {
                     init();
                 }
 
-                // Local, not a field: this mapper instance is shared across parallel worker threads.
-                final D val = map.get(leftKeyExtractor.apply(t));
+                final K key = leftKeyExtractor.apply(t);
 
-                if (val == null) {
+                // Local, not a field: this mapper instance is shared across parallel worker threads.
+                final D val = map.get(key);
+
+                if (val == null && !map.containsKey(key)) {
                     //noinspection resource
                     return func.apply(t, Stream.<U> empty().collect(downstream));
                 } else {
@@ -5921,7 +6002,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                         synchronized (this) {
                             if (!initialized) {
                                 //    map = Stream.of(b)
-                                //            .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
+                                //            .parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor())
                                 //            .toMap(rightKeyExtractor, Fn.<U> identity(), downstream);   // TODO may not be necessary.
 
                                 map = Stream.of(b).groupTo(Fn.from(rightKeyExtractor), Fn.<U> identity(), downstream);
@@ -5978,10 +6059,12 @@ abstract class AbstractStream<T> extends Stream<T> {
                     init();
                 }
 
-                // Local, not a field: this mapper instance is shared across parallel worker threads.
-                final D val = map.get(leftKeyExtractor.apply(t));
+                final K key = leftKeyExtractor.apply(t);
 
-                if (val == null) {
+                // Local, not a field: this mapper instance is shared across parallel worker threads.
+                final D val = map.get(key);
+
+                if (val == null && !map.containsKey(key)) {
                     //noinspection resource
                     return func.apply(t, Stream.<U> empty().collect(downstream));
                 } else {
@@ -5997,7 +6080,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                         synchronized (this) {
                             if (!initialized) {
                                 //    map = Stream.of(b)
-                                //            .parallel(ps.maxThreadNum(), ps.splitor(), ps.asyncExecutor())
+                                //            .parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor())
                                 //            .toMap(rightKeyExtractor, Fn.<U> identity(), downstream);   // TODO may not be necessary.
 
                                 map = b.groupTo(Fn.from(rightKeyExtractor), Fn.<U> identity(), downstream);
@@ -6059,7 +6142,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().map(mapper).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().map(mapper).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return map(mapper);
         }
@@ -6120,7 +6203,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().map(mapper).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().map(mapper).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return map(mapper);
         }
@@ -6183,7 +6266,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     // ran: the untouched iterator must still be routed to mapperForUnJoinedElements.
                     .append(Stream.defer(() -> nextValueHolder.value() == none ? (b.hasNext() ? mapperForUnJoinedElements.apply(b) : Stream.<R> empty())
                             : mapperForUnJoinedElements.apply(Iterators.concat(ObjIterator.of(nextValueHolder.value()), b))))
-                    .parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+                    .parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             //noinspection resource
             // value == none also occurs when this (left) stream was empty and the mapper never

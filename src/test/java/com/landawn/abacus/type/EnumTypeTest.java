@@ -75,6 +75,29 @@ public class EnumTypeTest extends TestBase {
         }
     }
 
+    public interface DefaultCode {
+        int codeValue();
+
+        default int code() {
+            return codeValue();
+        }
+    }
+
+    public enum InheritedCodeEnum implements DefaultCode {
+        LOW(31), HIGH(47);
+
+        private final int code;
+
+        InheritedCodeEnum(final int code) {
+            this.code = code;
+        }
+
+        @Override
+        public int codeValue() {
+            return code;
+        }
+    }
+
     private EnumType<TestEnum> enumTypeByName;
     private EnumType<TestEnum> enumTypeByOrdinal;
     private CharacterWriter characterWriter;
@@ -133,6 +156,17 @@ public class EnumTypeTest extends TestBase {
         assertEquals(com.landawn.abacus.util.EnumType.CODE, colorType.enumerated());
         assertEquals(com.landawn.abacus.util.Color.RED, colorType.valueOf(2));
         assertEquals(com.landawn.abacus.util.Color.PURPLE, colorType.valueOf(8));
+    }
+
+    @Test
+    public void testCodeRepresentationFindsInheritedInterfaceDefaultCode() {
+        // code() is inherited from DefaultCode, so getDeclaredMethod("code") would not find it.
+        assertThrows(NoSuchMethodException.class, () -> InheritedCodeEnum.class.getDeclaredMethod("code"));
+
+        final EnumType<InheritedCodeEnum> type = (EnumType<InheritedCodeEnum>) createType(InheritedCodeEnum.class.getName() + "(CODE)");
+        assertEquals(com.landawn.abacus.util.EnumType.CODE, type.enumerated());
+        assertEquals(InheritedCodeEnum.LOW, type.valueOf(31));
+        assertEquals(InheritedCodeEnum.HIGH, type.valueOf(47));
     }
 
     @Test

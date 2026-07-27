@@ -58,9 +58,11 @@ import com.landawn.abacus.annotation.MayReturnNull;
  */
 public final class Reflection<T> {
 
+    /** Shared empty parameter-type array used for no-argument lookups. */
     @SuppressWarnings("rawtypes")
     static final Class[] EMPTY_CLASSES = {};
 
+    /** Whether the optional ReflectASM implementation is available at runtime. */
     static final boolean isReflectASMAvailable;
 
     static {
@@ -77,6 +79,7 @@ public final class Reflection<T> {
         isReflectASMAvailable = tmp;
     }
 
+    /** Field metadata cache whose entries are scoped to, and reclaimed with, their declaring class. */
     static final ClassValue<Map<String, Field>> clsFieldPool = new ClassValue<>() {
         @Override
         protected Map<String, Field> computeValue(final Class<?> type) {
@@ -84,6 +87,7 @@ public final class Reflection<T> {
         }
     };
 
+    /** Constructor metadata cache whose entries are scoped to, and reclaimed with, their target class. */
     static final ClassValue<Map<Wrapper<Class<?>[]>, Constructor<?>>> clsConstructorPool = new ClassValue<>() {
         @Override
         protected Map<Wrapper<Class<?>[]>, Constructor<?>> computeValue(final Class<?> type) {
@@ -91,6 +95,7 @@ public final class Reflection<T> {
         }
     };
 
+    /** Method metadata cache whose entries are scoped to, and reclaimed with, their declaring class. */
     static final ClassValue<Map<String, Map<Wrapper<Class<?>[]>, Method>>> clsMethodPool = new ClassValue<>() {
         @Override
         protected Map<String, Map<Wrapper<Class<?>[]>, Method>> computeValue(final Class<?> type) {
@@ -104,6 +109,12 @@ public final class Reflection<T> {
 
     private final ReflectASM<T> reflectASM;
 
+    /**
+     * Creates a wrapper for a target class and, optionally, an existing instance.
+     *
+     * @param cls the target class
+     * @param instance the wrapped instance, or {@code null} when operating on the class
+     */
     Reflection(final Class<T> cls, final T instance) {
         this.cls = cls;
         this.instance = instance;
@@ -141,10 +152,13 @@ public final class Reflection<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param cls the class to reflect upon
+     * @param cls the class to reflect upon; must not be {@code null}
      * @return a Reflection instance for the specified class
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static <T> Reflection<T> on(final Class<T> cls) {
+        N.checkArgNotNull(cls, "cls");
+
         return new Reflection<>(cls, null);
     }
 
@@ -367,11 +381,13 @@ public final class Reflection<T> {
     }
 
     /**
-     * Returns the field with the specified name.
+     * Returns the field with the specified name, searching the reflected class first and then each
+     * superclass in turn, so inherited and private fields are found. Results are cached per class.
      *
      * @param fieldName the name of the field to retrieve
-     * @return the Field object corresponding to the field name
-     * @throws NoSuchFieldException if no field with the specified name is found
+     * @return the Field object corresponding to the field name; never {@code null}
+     * @throws NoSuchFieldException if no field with the specified name is found anywhere in the
+     *         superclass chain
      */
     private Field getField(final String fieldName) throws NoSuchFieldException {
         final Map<String, Field> fieldPool = clsFieldPool.get(cls);

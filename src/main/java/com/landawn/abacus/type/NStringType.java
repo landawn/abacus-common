@@ -20,10 +20,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for National String (NString) values, providing database interaction
- * capabilities for handling Unicode string data using national character sets.
- * This type is specifically designed for databases that distinguish between
- * regular strings and national character strings.
+ * Type handler for national-character {@link String} values registered under the
+ * type name {@code "NString"}.
+ *
+ * <p>This class extends {@link AbstractStringType} and overrides the JDBC accessors so that values
+ * are transferred with {@link ResultSet#getNString(int) getNString} and
+ * {@link PreparedStatement#setNString(int, String) setNString} instead of the non-national
+ * variants. It is intended for SQL {@code NCHAR}, {@code NVARCHAR}, and {@code LONGNVARCHAR}
+ * columns on databases that distinguish national character strings from regular strings.
+ * String serialization is inherited unchanged from {@link AbstractStringType}.</p>
+ *
+ * @see AbstractStringType
+ * @see NCharacterStreamType
  */
 public class NStringType extends AbstractStringType {
 

@@ -78,12 +78,14 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      *
      * <p>Default settings:</p>
      * <ul>
-     *   <li>quotePropName: true</li>
-     *   <li>quoteMapKey: true</li>
-     *   <li>bracketRootValue: true</li>
-     *   <li>wrapRootValue: false</li>
-     *   <li>writeNullToEmpty: false</li>
-     *   <li>writeDatasetAsRows: false</li>
+     *   <li>quotePropName: {@code true}</li>
+     *   <li>quoteMapKey: {@code true}</li>
+     *   <li>bracketRootValue: {@code true}</li>
+     *   <li>wrapRootValue: {@code false}</li>
+     *   <li>writeNullToEmpty: {@code false}</li>
+     *   <li>writeDatasetAsRows: {@code false}</li>
+     *   <li>writeRowColumnKeyType: {@code false}</li>
+     *   <li>writeColumnType: {@code false}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>

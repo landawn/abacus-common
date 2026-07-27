@@ -34,6 +34,11 @@ import java.lang.annotation.Target;
  *   <li>Missing features that will be added later.</li>
  * </ul>
  *
+ * <p>Contrast with {@link Internal}: a {@code @Beta} element is part of the public API but is still
+ * stabilizing; an {@code @Internal} element is not part of the public API at all. Retention is
+ * {@link RetentionPolicy#CLASS} so the marker survives in compiled bytecode for tooling but does not
+ * occupy runtime metadata.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * @Beta

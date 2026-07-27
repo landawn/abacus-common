@@ -248,8 +248,7 @@ public enum JavaVersion {
     /**
      * Java 24.
      * <p>
-     * Released in March 2025, made unnamed variables and patterns standard, and finalized
-     * stream gatherers and class-file API.
+     * Released in March 2025; finalized stream gatherers and the class-file API.
      * </p>
      */
     JAVA_24(24.0f, "24"),
@@ -385,7 +384,7 @@ public enum JavaVersion {
      * If the system property cannot be read, defaults to version 99.0.
      * </p>
      */
-    JAVA_RECENT(maxVersion(), Float.toString(maxVersion()));
+    JAVA_RECENT(maxVersion());
 
     /**
      * The float value used for numerical version comparisons.
@@ -406,6 +405,17 @@ public enum JavaVersion {
     JavaVersion(final float value, final String name) {
         this.value = value;
         this.name = name;
+    }
+
+    /**
+     * Constructs a JavaVersion enum constant whose name is derived from the float value
+     * (for example {@code 25.0f} yields the name {@code "25.0"}). Used for {@link #JAVA_RECENT},
+     * whose value is only known at runtime.
+     *
+     * @param value the float value for numerical comparisons
+     */
+    JavaVersion(final float value) {
+        this(value, Float.toString(value));
     }
 
     //-----------------------------------------------------------------------
@@ -595,10 +605,15 @@ public enum JavaVersion {
             case "39":
                 return JAVA_39;
             default:
-                if ((versionStr.startsWith("1.") || versionStr.startsWith("0.")) && versionStr.indexOf('.', 2) > 0) {
-                    return get(versionStr.substring(0, versionStr.indexOf('.', 2)));
-                } else if (versionStr.indexOf('.') > 0) {
-                    return get(versionStr.substring(0, versionStr.indexOf('.')));
+                try {
+                    if ((versionStr.startsWith("1.") || versionStr.startsWith("0.")) && versionStr.indexOf('.', 2) > 0) {
+                        return get(versionStr.substring(0, versionStr.indexOf('.', 2)));
+                    } else if (versionStr.indexOf('.') > 0) {
+                        return get(versionStr.substring(0, versionStr.indexOf('.')));
+                    }
+                } catch (final IllegalArgumentException e) {
+                    // Report the caller's original string, not the truncated recursion argument.
+                    throw new IllegalArgumentException("Invalid Java version: " + versionStr); //NOSONAR
                 }
 
                 float v = toFloatVersion(versionStr);
@@ -648,8 +663,11 @@ public enum JavaVersion {
 
         JavaVersion result = null;
 
-        if ((versionStr.startsWith("1.") || versionStr.startsWith("0.")) && versionStr.length() >= 3) {
-            result = get(versionStr.substring(0, 3));
+        if (versionStr.startsWith("1.") || versionStr.startsWith("0.")) {
+            // Truncate at the second dot (e.g. "1.8.0_291" -> "1.8") but keep two-part versions
+            // intact so unknown ones like "1.10" reject instead of collapsing to "1.1".
+            final int secondDot = versionStr.indexOf('.', 2);
+            result = get(secondDot > 0 ? versionStr.substring(0, secondDot) : versionStr);
         } else {
             final int idx = versionStr.indexOf('.');
             result = get(idx > 0 ? versionStr.substring(0, idx) : versionStr);
@@ -695,7 +713,14 @@ public enum JavaVersion {
      * @return the value of {@code java.specification.version} system property or 99.0 if it is not set.
      */
     private static float maxVersion() {
-        final float v = toFloatVersion(System.getProperty("java.specification.version", "99.0"));
+        final float v;
+
+        try {
+            v = toFloatVersion(System.getProperty("java.specification.version", "99.0"));
+        } catch (final SecurityException e) {
+            return 99f;
+        }
+
         if (v > 0) {
             return v;
         }

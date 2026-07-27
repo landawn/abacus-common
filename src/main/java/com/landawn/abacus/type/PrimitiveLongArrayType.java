@@ -258,16 +258,21 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<long[]> type = TypeFactory.getType(long[].class);
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * long[] arr = {5L, 10L, 15L};
-     * type.serializeTo(writer, arr, null);
-     * String result = writer.toString();
-     * // result: "[5, 10, 15]"
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter writer2 = Objectory.createBufferedJsonWriter();
+     * try {
+     *     long[] arr = {5L, 10L, 15L};
+     *     type.serializeTo(writer, arr, null);
+     *     String result = writer.toString();
+     *     // result: "[5, 10, 15]"
      *
-     * BufferedJsonWriter writer2 = new BufferedJsonWriter();
-     * type.serializeTo(writer2, null, null);
-     * String result2 = writer2.toString();
-     * // result2: "null"
+     *     type.serializeTo(writer2, null, null);
+     *     String result2 = writer2.toString();
+     *     // result2: "null"
+     * } finally {
+     *     Objectory.recycle(writer);
+     *     Objectory.recycle(writer2);
+     * }
      * }</pre>
      *
      * <p>

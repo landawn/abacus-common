@@ -61,7 +61,8 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Type Safety:</b> Strongly typed generic wrapper with compile-time type checking</li>
  *   <li><b>Specialized Builders:</b> Optimized builders for collections, maps, primitive lists, and datasets</li>
  *   <li><b>Automatic Detection:</b> Smart factory method that automatically selects appropriate builder type</li>
- *   <li><b>Null Safety:</b> Built-in {@code null} checking to prevent {@code null} pointer exceptions</li>
+ *   <li><b>Wrapped-Value Validation:</b> Builder creation rejects a {@code null} wrapped value;
+ *       arguments passed to subsequent operations follow those operations' own contracts</li>
  *   <li><b>Functional Integration:</b> Support for lambda expressions and functional programming patterns</li>
  *   <li><b>Comparison Utilities:</b> Built-in comparison and equality builders for complex comparisons</li>
  * </ul>
@@ -638,7 +639,7 @@ public class Builder<T> {
      *     .val();                                     // returns [a, b]
      *
      * try {
-     *     Builder.of(null);
+     *     Builder.of((Object) null);
      * } catch (IllegalArgumentException e) {
      *     // null value rejected
      * }
@@ -769,6 +770,13 @@ public class Builder<T> {
      */
     public static final class BooleanListBuilder extends Builder<BooleanList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code BooleanList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         BooleanListBuilder(final BooleanList val) {
             super(val);
         }
@@ -790,6 +798,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the boolean value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public BooleanListBuilder set(final int index, final boolean e) {
             val.set(index, e);
@@ -835,6 +844,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the boolean value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public BooleanListBuilder add(final int index, final boolean e) {
             val.add(index, e);
@@ -880,6 +890,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the BooleanList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public BooleanListBuilder addAll(final int index, final BooleanList c) {
             val.addAll(index, c);
@@ -936,6 +947,13 @@ public class Builder<T> {
      */
     public static final class CharListBuilder extends Builder<CharList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code CharList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         CharListBuilder(final CharList val) {
             super(val);
         }
@@ -957,6 +975,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the char value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public CharListBuilder set(final int index, final char e) {
             val.set(index, e);
@@ -1002,6 +1021,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the char value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public CharListBuilder add(final int index, final char e) {
             val.add(index, e);
@@ -1047,6 +1067,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the CharList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public CharListBuilder addAll(final int index, final CharList c) {
             val.addAll(index, c);
@@ -1103,6 +1124,13 @@ public class Builder<T> {
      */
     public static final class ByteListBuilder extends Builder<ByteList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code ByteList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         ByteListBuilder(final ByteList val) {
             super(val);
         }
@@ -1124,6 +1152,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the byte value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ByteListBuilder set(final int index, final byte e) {
             val.set(index, e);
@@ -1169,6 +1198,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the byte value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ByteListBuilder add(final int index, final byte e) {
             val.add(index, e);
@@ -1214,6 +1244,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the ByteList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ByteListBuilder addAll(final int index, final ByteList c) {
             val.addAll(index, c);
@@ -1270,6 +1301,13 @@ public class Builder<T> {
      */
     public static final class ShortListBuilder extends Builder<ShortList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code ShortList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         ShortListBuilder(final ShortList val) {
             super(val);
         }
@@ -1291,6 +1329,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the short value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ShortListBuilder set(final int index, final short e) {
             val.set(index, e);
@@ -1336,6 +1375,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the short value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ShortListBuilder add(final int index, final short e) {
             val.add(index, e);
@@ -1381,6 +1421,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the ShortList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ShortListBuilder addAll(final int index, final ShortList c) {
             val.addAll(index, c);
@@ -1437,6 +1478,13 @@ public class Builder<T> {
      */
     public static final class IntListBuilder extends Builder<IntList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code IntList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         IntListBuilder(final IntList val) {
             super(val);
         }
@@ -1458,6 +1506,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the int value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public IntListBuilder set(final int index, final int e) {
             val.set(index, e);
@@ -1503,6 +1552,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the int value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public IntListBuilder add(final int index, final int e) {
             val.add(index, e);
@@ -1548,6 +1598,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the IntList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public IntListBuilder addAll(final int index, final IntList c) {
             val.addAll(index, c);
@@ -1604,6 +1655,13 @@ public class Builder<T> {
      */
     public static final class LongListBuilder extends Builder<LongList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code LongList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         LongListBuilder(final LongList val) {
             super(val);
         }
@@ -1625,6 +1683,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the long value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public LongListBuilder set(final int index, final long e) {
             val.set(index, e);
@@ -1670,6 +1729,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the long value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public LongListBuilder add(final int index, final long e) {
             val.add(index, e);
@@ -1715,6 +1775,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the LongList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public LongListBuilder addAll(final int index, final LongList c) {
             val.addAll(index, c);
@@ -1771,6 +1832,13 @@ public class Builder<T> {
      */
     public static final class FloatListBuilder extends Builder<FloatList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code FloatList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         FloatListBuilder(final FloatList val) {
             super(val);
         }
@@ -1792,6 +1860,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the float value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public FloatListBuilder set(final int index, final float e) {
             val.set(index, e);
@@ -1837,6 +1906,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the float value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public FloatListBuilder add(final int index, final float e) {
             val.add(index, e);
@@ -1882,6 +1952,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the FloatList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public FloatListBuilder addAll(final int index, final FloatList c) {
             val.addAll(index, c);
@@ -1938,6 +2009,13 @@ public class Builder<T> {
      */
     public static final class DoubleListBuilder extends Builder<DoubleList> {
 
+        /**
+         * Creates a builder wrapping the specified {@code DoubleList}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param val the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}
+         */
         DoubleListBuilder(final DoubleList val) {
             super(val);
         }
@@ -1959,6 +2037,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the double value to be stored at the specified position
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public DoubleListBuilder set(final int index, final double e) {
             val.set(index, e);
@@ -2004,6 +2083,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the double value to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public DoubleListBuilder add(final int index, final double e) {
             val.add(index, e);
@@ -2049,6 +2129,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified list
          * @param c the DoubleList containing elements to be added to this list
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public DoubleListBuilder addAll(final int index, final DoubleList c) {
             val.addAll(index, c);
@@ -2109,6 +2190,13 @@ public class Builder<T> {
      */
     public static final class ListBuilder<T, L extends List<T>> extends CollectionBuilder<T, L> {
 
+        /**
+         * Creates a builder wrapping the specified list. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param c the list to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code c} is {@code null}
+         */
         ListBuilder(final L c) {
             super(c);
         }
@@ -2125,7 +2213,7 @@ public class Builder<T> {
          * @param index the index of the element to replace
          * @param e the element to store at the specified position
          * @return this builder instance for method chaining
-         * @throws IndexOutOfBoundsException if the index is out of range
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ListBuilder<T, L> set(final int index, final T e) {
             val.set(index, e);
@@ -2295,6 +2383,7 @@ public class Builder<T> {
          * @param index the index at which the specified element is to be inserted
          * @param e the element to be inserted
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ListBuilder<T, L> add(final int index, final T e) {
             val.add(index, e);
@@ -2322,7 +2411,7 @@ public class Builder<T> {
          * @param index the index at which to insert the first element from the specified collection
          * @param c the collection containing elements to be added to this list
          * @return this builder instance
-         * @throws IndexOutOfBoundsException if the index is out of range
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ListBuilder<T, L> addAll(final int index, final Collection<? extends T> c) throws IndexOutOfBoundsException {
             if (N.notEmpty(c)) {
@@ -2350,6 +2439,7 @@ public class Builder<T> {
          *
          * @param index the index of the element to be removed
          * @return this builder instance
+         * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ListBuilder<T, L> remove(final int index) {
             val.remove(index);
@@ -2372,6 +2462,13 @@ public class Builder<T> {
      */
     public static sealed class CollectionBuilder<T, C extends Collection<T>> extends Builder<C> permits ListBuilder {
 
+        /**
+         * Creates a builder wrapping the specified collection. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param c the collection to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code c} is {@code null}
+         */
         CollectionBuilder(final C c) {
             super(c);
         }
@@ -2383,7 +2480,7 @@ public class Builder<T> {
          * <pre>{@code
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * Set<String> result = cb.add("apple").add("banana").val(); // returns [apple, banana]
-         * cb.add("apple");
+         * cb.add("apple");                                          // no change - the backing Set rejects the duplicate
          * }</pre>
          *
          * @param e the element to add
@@ -2521,6 +2618,13 @@ public class Builder<T> {
      */
     public static final class MultisetBuilder<T> extends Builder<Multiset<T>> {
 
+        /**
+         * Creates a builder wrapping the specified multiset. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param c the multiset to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code c} is {@code null}
+         */
         MultisetBuilder(final Multiset<T> c) {
             super(c);
         }
@@ -2562,11 +2666,13 @@ public class Builder<T> {
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple").add("apple").add("banana").val();   // returns apple count=2, banana count=1
-         * mb.add(null).val();                                 // null may not be allowed
+         * mb.add(null).val();                                 // null counted like any other element (default backing map allows it)
          * }</pre>
          *
          * @param e the element to add
          * @return this builder instance
+         * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences
+         * @see Multiset#add(Object)
          */
         public MultisetBuilder<T> add(final T e) {
             val.add(e);
@@ -2729,6 +2835,13 @@ public class Builder<T> {
      */
     public static final class MapBuilder<K, V, M extends Map<K, V>> extends Builder<M> {
 
+        /**
+         * Creates a builder wrapping the specified map. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param m the map to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code m} is {@code null}
+         */
         MapBuilder(final M m) {
             super(m);
         }
@@ -2792,9 +2905,9 @@ public class Builder<T> {
          * <pre>{@code
          * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95);
-         * mb.putIfAbsent("Alice", 100).val();   // returns {Alice=95} - already present
-         * mb.putIfAbsent("Bob", 87).val();      // returns {Alice=95, Bob=87} - absent
-         * mb.putIfAbsent("Charlie", null).val();             // null stored if absent
+         * mb.putIfAbsent("Alice", 100).val();      // returns {Alice=95} - already present
+         * mb.putIfAbsent("Bob", 87).val();         // returns {Alice=95, Bob=87} - absent
+         * mb.putIfAbsent("Charlie", null).val();   // null stored if absent
          * }</pre>
          *
          * @param key the key with which the specified value is to be associated
@@ -2911,6 +3024,13 @@ public class Builder<T> {
      */
     public static final class MultimapBuilder<K, E, V extends Collection<E>, M extends Multimap<K, E, V>> extends Builder<M> {
 
+        /**
+         * Creates a builder wrapping the specified multimap. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param m the multimap to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code m} is {@code null}
+         */
         MultimapBuilder(final M m) {
             super(m);
         }
@@ -3149,6 +3269,13 @@ public class Builder<T> {
      */
     public static final class DatasetBuilder extends Builder<Dataset> {
 
+        /**
+         * Creates a builder wrapping the specified {@code Dataset}. The wrapped value is not copied;
+         * mutations made through this builder are applied to it directly.
+         *
+         * @param ds the dataset to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code ds} is {@code null}
+         */
         DatasetBuilder(final Dataset ds) {
             super(ds);
         }
@@ -3513,11 +3640,13 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), (i, c, v) -> v * 1.1);
+         * // func receives the row index, the column name and the current value (typed as Object)
+         * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), (i, c, v) -> ((Double) v) * 1.1);
          * }</pre>
          *
          * @param columnNames the names of columns to update
-         * @param func the function to transform values in the specified columns
+         * @param func the function to transform values in the specified columns; it receives the row index,
+         *             the column name and the current value
          * @return this builder instance for method chaining
          * @see Dataset#updateColumns(Collection, IntBiObjFunction)
          */

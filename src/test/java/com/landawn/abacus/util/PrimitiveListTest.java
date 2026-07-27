@@ -1079,6 +1079,19 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
+    @DisplayName("Test descending copy on every empty primitive list")
+    public void testCopyRangeWithNegativeStep_EmptyPrimitiveLists() {
+        assertTrue(BooleanList.of().copy(0, -1, -1).isEmpty());
+        assertTrue(ByteList.of().copy(0, -1, -1).isEmpty());
+        assertTrue(CharList.of().copy(0, -1, -1).isEmpty());
+        assertTrue(ShortList.of().copy(0, -1, -1).isEmpty());
+        assertTrue(IntList.of().copy(0, -1, -1).isEmpty());
+        assertTrue(LongList.of().copy(0, -1, -1).isEmpty());
+        assertTrue(FloatList.of().copy(0, -1, -1).isEmpty());
+        assertTrue(DoubleList.of().copy(0, -1, -1).isEmpty());
+    }
+
+    @Test
     public void testSplit() {
         IntList list = IntList.of(1, 2, 3, 4, 5, 6, 7);
         List<IntList> chunks = list.split(3);

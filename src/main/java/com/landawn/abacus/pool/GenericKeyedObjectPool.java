@@ -157,7 +157,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
-     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
+     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) {
@@ -171,7 +171,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param autoBalance whether to automatically remove entries when the pool is full
-     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
+     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate entry memory size; required when {@code maxMemorySize > 0}
      * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
@@ -255,11 +255,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * <em>not</em> destroyed when it is the same instance as {@code value} (re-pooling the same
      * instance simply re-inserts it).
      *
-     * <p>The put operation will fail if:</p>
+     * <p>The put operation returns {@code false} (does not insert) if:</p>
      * <ul>
      *   <li>The element has already expired</li>
-     *   <li>The pool is at capacity and auto-balancing is disabled (or balancing did not free a slot)</li>
-     *   <li>The element would exceed memory constraints (when memory measure is configured)</li>
+     *   <li>The pool is at capacity and either auto-balancing is disabled, or balancing did not free a slot</li>
+     *   <li>The element would exceed memory constraints (when a memory measure is configured) and balancing did not free enough memory</li>
      *   <li>The memory measure returns a negative size or throws an exception</li>
      * </ul>
      *
@@ -282,21 +282,21 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Override
     public boolean put(final K key, final E value) throws IllegalStateException {
+        assertNotClosed();
+
         if (key == null || value == null) {
             throw new IllegalArgumentException("Key and value cannot be null");
         }
-
-        assertNotClosed();
 
         if (value.activityPrint().isExpired()) {
             return false;
         }
 
-        lock.lock();
-
         boolean valueStored = false;
         E removedValue = null;
         List<DestroyTask<K, E>> pendingDestroys = null;
+
+        lock.lock();
 
         try {
             // Re-check inside the lock; a concurrent close() between an unlocked check and lock
@@ -418,10 +418,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         } finally {
             // Mirror timed put: if we freed a same-key slot up-front but never stored the new value,
             // wake notFull waiters so capacity is not silently withheld.
-            if (removedValue != null && !valueStored) {
-                notFull.signalAll();
+            try {
+                if (removedValue != null && !valueStored) {
+                    notFull.signalAll();
+                }
+            } finally {
+                // Keep unlock on an unconditional path even if condition signalling unexpectedly
+                // fails (for example, after a future lock/condition implementation change).
+                lock.unlock();
             }
-            lock.unlock();
+
             invokeDestroyCallbacks(pendingDestroys);
         }
     }
@@ -620,11 +626,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             // Wake a put(...) waiter parked on notFull so the slot is not silently withheld. Signalled
             // under the still-held lock, before unlock. (The success path leaves the slot count net-zero
             // and instead signals notEmpty.)
-            if (oldValue != null && !valueStored) {
-                notFull.signalAll();
+            try {
+                if (oldValue != null && !valueStored) {
+                    notFull.signalAll();
+                }
+            } finally {
+                // Keep unlock on an unconditional path even if condition signalling unexpectedly
+                // fails (for example, after a future lock/condition implementation change).
+                lock.unlock();
             }
 
-            lock.unlock();
             invokeDestroyCallbacks(pendingDestroys);
         }
     }
@@ -639,6 +650,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param unit the time unit of the timeout, must not be {@code null}
      * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the value was added, {@code false} otherwise
+     * @throws IllegalArgumentException if the key, value, or unit is null
+     * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
@@ -688,7 +701,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param key the key whose associated element is to be returned
      * @return the element associated with the key, or {@code null} if no mapping exists or element expired
      * @throws IllegalStateException if the pool has been closed
-     * @throws IllegalArgumentException if the unit is null
      */
     @MayReturnNull
     @Override

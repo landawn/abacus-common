@@ -42,8 +42,9 @@ import java.util.concurrent.TimeUnit;
  * <p>The class works by executing platform-specific commands:</p>
  * <ul>
  * <li>Windows: uses 'dir /a /-c' command</li>
- * <li>Unix/Linux: uses 'df -k' command</li>
+ * <li>Unix/Linux/macOS: uses 'df -k' command</li>
  * <li>AIX/HP-UX: uses 'df -kP' command</li>
+ * <li>Solaris: uses '/usr/xpg4/bin/df -kP' command</li>
  * </ul>
  *
  * <p><b>Note:</b> This implementation relies on command-line utilities and may not work
@@ -132,8 +133,9 @@ final class FileSystemUtil {
      * <p>Platform-specific behavior:</p>
      * <ul>
      * <li>Windows: uses 'dir /a /-c' on the specified path</li>
-     * <li>Unix/Linux: uses 'df -k' on the specified path</li>
+     * <li>Unix/Linux/macOS: uses 'df -k' on the specified path</li>
      * <li>AIX/HP-UX: uses 'df -kP' on the specified path</li>
+     * <li>Solaris: uses '/usr/xpg4/bin/df -kP' on the specified path</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -153,7 +155,8 @@ final class FileSystemUtil {
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if {@code path} is {@code null}, or is empty on a Unix-like system
+     * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system,
+     *         or contains a double-quote character on Windows
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb(final String path) throws IOException {
@@ -182,8 +185,10 @@ final class FileSystemUtil {
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
      * @return the amount of free space in kilobytes
-     * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if {@code path} is {@code null}, or is empty on a Unix-like system
+     * @throws IOException if an error occurs when finding the free space, or the command exceeds a
+     *         positive {@code timeout}
+     * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system,
+     *         or contains a double-quote character on Windows
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb(final String path, final long timeout) throws IOException {
@@ -195,7 +200,7 @@ final class FileSystemUtil {
      *
      * <p>This is equivalent to calling:</p>
      * <pre>{@code
-     * freeSpaceKb(new File(".").getAbsolutePath())
+     * return freeSpaceKb(new File(".").getAbsolutePath());
      * }</pre>
      *
      * <p><b>Usage Examples:</b></p>
@@ -217,7 +222,7 @@ final class FileSystemUtil {
      *
      * <p>This is equivalent to calling:</p>
      * <pre>{@code
-     * freeSpaceKb(new File(".").getAbsolutePath(), timeout)
+     * return freeSpaceKb(new File(".").getAbsolutePath(), timeout);
      * }</pre>
      *
      * <p><b>Usage Examples:</b></p>
@@ -288,7 +293,9 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free disk space in bytes
-     * @throws IOException if an error occurs or the command exceeds a positive {@code timeout}
+     * @throws IllegalArgumentException if {@code path} contains a double-quote character
+     * @throws IOException if the path cannot be normalized, an error occurs, or the command exceeds
+     *         a positive {@code timeout}
      */
     long freeSpaceWindows(String path, final long timeout) throws IOException {
         path = FilenameUtil.normalize(path, false);
@@ -430,6 +437,11 @@ final class FileSystemUtil {
         } else {
             tok.nextToken(); // Ignore Filesystem
         }
+
+        if (tok.countTokens() < 3) {
+            throw new IOException("Command line '" + DF + "' did not return data as expected for path '" + path + "' - check path is valid"); //NOSONAR
+        }
+
         tok.nextToken(); // Ignore 1K-blocks
         tok.nextToken(); // Ignore Used
         final String freeSpace = tok.nextToken();

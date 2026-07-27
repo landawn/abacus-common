@@ -36,30 +36,25 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
 import com.landawn.abacus.util.stream.ShortStream;
 
 /**
- * A high-performance, resizable array implementation for primitive short values that provides
- * specialized operations optimized for 16-bit integer data types. This class extends {@link PrimitiveList}
- * to offer memory-efficient storage and operations that avoid the boxing overhead associated with
- * {@code List<Short>}, making it ideal for applications requiring intensive short integer array
- * manipulation with optimal performance characteristics.
+ * A resizable-array list specialized for primitive {@code short} values. This class extends
+ * {@link PrimitiveList} and avoids boxing in its primitive-specific storage and operations;
+ * methods that explicitly return standard collections necessarily box their elements.
  *
  * <p>ShortList is specifically designed for scenarios involving large collections of small integer
- * values such as audio sample data, compact integer storage, memory-constrained applications,
- * embedded systems programming, and performance-critical applications requiring 16-bit integer
- * precision. The implementation uses a compact short array as the underlying storage mechanism,
- * providing direct primitive access without wrapper object allocation.</p>
+ * values such as audio samples and compact integer data. The implementation uses a {@code short[]}
+ * as its backing storage. It is not a {@link java.util.List} or other JDK {@link Collection}; use
+ * {@link #boxed()} when a standard collection is required.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>Zero-Boxing Overhead:</b> Direct short primitive storage without Short wrapper allocation</li>
- *   <li><b>Memory Efficiency:</b> Compact short array storage with minimal memory overhead</li>
+ *   <li><b>Primitive Storage:</b> Direct {@code short[]} storage without per-element wrappers</li>
  *   <li><b>16-bit Integer Range:</b> Full support for short integer range (-32,768 to 32,767)</li>
- *   <li><b>High Performance:</b> Optimized algorithms for short-specific operations</li>
  *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Multiset Operations:</b> Intersection, difference, and symmetric difference preserve occurrence counts</li>
  *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
- *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
- *   <li><b>Type Conversions:</b> Seamless conversion to other numeric primitive lists</li>
+ *   <li><b>Dynamic Sizing:</b> Automatic capacity growth</li>
+ *   <li><b>Type Conversions:</b> Conversion to boxed lists and wider primitive lists</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -92,7 +87,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * OptionalShort max = audioSamples.max();         // Find maximum sample
  * OptionalShort median = audioSamples.median();   // Calculate median sample
  *
- * // Set operations for data analysis
+ * // Multiset-style operations for data analysis
  * ShortList set1 = ShortList.of((short) 100, (short) 200, (short) 300);
  * ShortList set2 = ShortList.of((short) 200, (short) 300, (short) 400);
  * ShortList intersection = set1.intersection(set2);   // returns [200, 300]
@@ -116,15 +111,15 @@ import com.landawn.abacus.util.stream.ShortStream;
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
  *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
- *   <li><b>Set Operations:</b> O(n) to O(n²) depending on algorithm selection and data size</li>
+ *   <li><b>Containment Operations:</b> O(n) to O(n*m), depending on input sizes and the selected lookup strategy</li>
  *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
  * </ul>
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
- *   <li><b>Storage:</b> 2 bytes per element (16 bits) with no object overhead</li>
- *   <li><b>vs List&lt;Short&gt;:</b> ~8x less memory usage (no Short wrapper objects)</li>
- *   <li><b>vs IntList:</b> 50% less memory usage for values within short range</li>
+ *   <li><b>Backing Elements:</b> Each occupied array slot stores one 16-bit value; the list object and array still have normal JVM overhead</li>
+ *   <li><b>vs List&lt;Short&gt;:</b> Avoids per-element references and wrapper allocation, subject to JVM caching and layout details</li>
+ *   <li><b>vs IntList:</b> Uses half as many bits per backing-array element</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
  * </ul>
@@ -134,7 +129,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
  *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
  *   <li><b>Type Conversions:</b> {@code toIntList()}</li>
- *   <li><b>Random Generation:</b> {@code random()} methods for test data and simulations</li>
+ *   <li><b>Random Generation:</b> {@code random(int)} for test data and simulations</li>
  *   <li><b>Bulk Updates:</b> {@code replaceAll()}, {@code replaceIf()} for value transformations</li>
  * </ul>
  *
@@ -171,12 +166,12 @@ import com.landawn.abacus.util.stream.ShortStream;
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Capacity:</b> The no-argument constructor starts with shared zero-length storage; first growth allocates at least 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
  *   <li><b>Manual Control:</b> specify the initial capacity via the {@code ShortList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
@@ -193,32 +188,31 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <p><b>Serialization Support:</b>
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
- *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of short arrays</li>
- *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
+ *   <li><b>Compatibility:</b> A serialVersionUID identifies the class, but compatibility still depends on future field changes</li>
+ *   <li><b>Format:</b> Default Java serialization includes the backing array, including unused capacity</li>
  * </ul>
  *
  * <p><b>Integration with Collections Framework:</b>
  * <ul>
- *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
- *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
- *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
- *   <li><b>Stream API:</b> Full integration with ShortStream for functional processing</li>
+ *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
+ *   <li><b>Collection Conversion:</b> {@link #boxed()} creates a standard list copy</li>
+ *   <li><b>Utility Integration:</b> JDK collection utilities can be used on that boxed copy</li>
+ *   <li><b>Stream API:</b> Primitive stream traversal through {@link ShortStream}</li>
  * </ul>
  *
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
  *   <li><b>Aggregation:</b> {@code min()} and {@code max()} are direct methods; sum is available via the stream API</li>
- *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Central Tendency:</b> Median calculation without modifying the list</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Short&gt;:</b> 8x less memory, significantly faster operations</li>
- *   <li><b>vs short[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
- *   <li><b>vs IntList:</b> 50% less memory for values within short range</li>
+ *   <li><b>vs List&lt;Short&gt;:</b> Primitive storage avoids per-element references and most boxing</li>
+ *   <li><b>vs short[]:</b> Dynamic sizing, rich API, multiset-style operations, and statistical functions</li>
+ *   <li><b>vs IntList:</b> Half-width backing elements for values within the short range</li>
  *   <li><b>vs ArrayList&lt;Short&gt;:</b> No boxing overhead, primitive-specific methods</li>
  * </ul>
  *
@@ -246,7 +240,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *   <li><b>Audio Samples:</b> {@code ShortList samples = new ShortList(sampleRate);}</li>
  *   <li><b>Port Numbers:</b> {@code ShortList ports = ShortList.range((short) 8000, (short) 9000);}</li>
  *   <li><b>Sensor Data:</b> {@code ShortList readings = ShortList.random(count);}</li>
- *   <li><b>Compact Storage:</b> {@code ShortList ids = data.stream().mapToShort(...).collect(...);}</li>
+ *   <li><b>Compact Storage:</b> {@code ShortList ids = IntList.of(100, 200, 300).stream().mapToShort(value -> (short) value).toShortList();}</li>
  * </ul>
  *
  * <p><b>Related Classes:</b>
@@ -303,7 +297,6 @@ import com.landawn.abacus.util.stream.ShortStream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see java.util.List
- * @see java.util.RandomAccess
  * @see java.io.Serializable
  */
 public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
@@ -379,7 +372,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * ShortList list = new ShortList(a);
      * list.size();          // returns 3
      * list.set(0, (short) 9);
-     * a[0];                            // returns 9 (backing array is shared, not copied)
+     * short first = a[0];              // 9 (backing array is shared, not copied)
      * new ShortList((short[]) null);   // throws NullPointerException
      * }</pre>
      *
@@ -478,7 +471,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * short[] a = { (short) 1, (short) 2, (short) 3 };
      * ShortList list = ShortList.copyOf(a);
      * list.set(0, (short) 9);
-     * a[0];                          // returns 1 (defensive copy; original is unaffected)
+     * short first = a[0];            // 1 (defensive copy; original is unaffected)
      * ShortList.copyOf(null).size(); // returns 0
      * }</pre>
      *
@@ -509,6 +502,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new ShortList containing a copy of the elements in the specified range
+     * @throws NullPointerException if {@code a} is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      *                                   or {@code fromIndex > toIndex}
      */
@@ -782,7 +776,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * stored in the specified list. The behavior of this operation is undefined if the specified list
      * is modified during the operation.
      *
-     * @param c the ShortList containing elements to be added to this list
+     * @param c the ShortList containing elements to be added to this list; {@code null} is treated as empty
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -809,7 +803,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * in the specified list.
      *
      * @param index the index at which to insert the first element from the specified list
-     * @param c the ShortList containing elements to be added to this list
+     * @param c the ShortList containing elements to be added to this list; {@code null} is treated as empty
      * @return {@code true} if this list changed as a result of the call
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
@@ -842,8 +836,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Appends all elements from the specified array to the end of this list, in the order they appear
      * in the array.
      *
-     * @param a the array containing elements to be added to this list
-     * @return {@code true} if this list changed as a result of the call (returns {@code false} only if the array is empty)
+     * @param a the array containing elements to be added to this list; {@code null} is treated as empty
+     * @return {@code true} if this list changed as a result of the call; {@code false} if the array is {@code null} or empty
      */
     @Override
     public boolean addAll(final short[] a) {
@@ -857,8 +851,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * in the array.
      *
      * @param index the index at which to insert the first element from the specified array
-     * @param a the array containing elements to be added to this list
-     * @return {@code true} if this list changed as a result of the call (returns {@code false} only if the array is empty)
+     * @param a the array containing elements to be added to this list; {@code null} is treated as empty
+     * @return {@code true} if this list changed as a result of the call; {@code false} if the array is {@code null} or empty
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
@@ -971,7 +965,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             N.copy(elementData, index + 1, elementData, index, numMoved);
         }
 
-        elementData[--size] = 0; // clear to let GC do its work
+        elementData[--size] = 0; // Keep unused backing-array slots in their default state.
     }
 
     /**
@@ -1025,6 +1019,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
+     * @throws NullPointerException if {@code p} is {@code null}
      */
     public boolean removeIf(final ShortPredicate p) {
         N.requireNonNull(p, cs.predicate);
@@ -1290,7 +1285,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to be replaced
      * @param toIndex the ending index (exclusive) of the range to be replaced
-     * @param replacement the ShortList whose elements will replace the specified range. Can be empty.
+     * @param replacement the ShortList whose elements will replace the specified range; {@code null} or empty removes the range
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         (fromIndex &lt; 0 || toIndex &gt; size() || fromIndex &gt; toIndex)
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
@@ -1449,9 +1444,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.replaceIf(e -> e > 100, (short) 0);                   // returns false; list is unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test each element
+     * @param predicate the predicate to test each element; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced; {@code false} otherwise
+     * @throws NullPointerException if {@code predicate} is {@code null}
      * @see #replaceAll(short, short)
      * @see #replaceAll(ShortUnaryOperator)
      */
@@ -1833,7 +1829,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a new ShortList containing elements that are present in either this list or the specified list,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * but not in both. This is a multiset symmetric difference: occurrence counts are significant.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
      *
@@ -1893,7 +1889,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Returns a new ShortList containing elements that are present in either this list or the specified array,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * but not in both. This is a multiset symmetric difference: occurrence counts are significant.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
      *
@@ -2229,9 +2225,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)10, (short)20, (short)30, (short)40, (short)50);
-     * list.forEach(0, 3, action);    // Forward: processes indices 0,1,2
-     * list.forEach(3, 0, action);    // Backward: processes indices 3,2,1
-     * list.forEach(4, -1, action);   // Backward: processes indices 4,3,2,1,0
+     * list.forEach(0, 3, System.out::println);    // Forward: processes indices 0,1,2
+     * list.forEach(3, 0, System.out::println);    // Backward: processes indices 3,2,1
+     * list.forEach(4, -1, System.out::println);   // Backward: processes indices 4,3,2,1,0
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
@@ -2531,8 +2527,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Creates and returns a new ShortList containing all elements of this list.
      *
-     * <p>The returned list is a shallow copy; it contains the same element values
-     * but is a distinct list instance.</p>
+     * <p>The returned list has independent primitive backing storage.</p>
      *
      * @return a new ShortList containing all elements of this list
      */
@@ -2578,6 +2573,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     @Override
     public ShortList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
+
+        if (size == 0) {
+            return new ShortList(N.copyOfRange(elementData, 0, 0, step));
+        }
 
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.
@@ -2748,6 +2747,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param supplier a function that creates a new collection instance with the specified initial capacity
      * @return a new collection containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws NullPointerException if {@code supplier} or the collection it returns is {@code null}
      */
     @Override
     public <C extends Collection<Short>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
@@ -2773,6 +2773,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param supplier a function that creates a new Multiset instance with the specified initial capacity
      * @return a new Multiset containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws NullPointerException if {@code supplier} or the multiset it returns is {@code null}
      */
     @Override
     public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier) throws IndexOutOfBoundsException {
@@ -2791,8 +2792,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns an iterator over the elements in this list.
      *
-     * <p>The iterator returns elements in order from first to last. The iterator
-     * does not support element removal.</p>
+     * <p>The iterator returns elements in order from first to last and does not support removal.
+     * It reads the current backing array with the size captured at iterator creation; subsequent
+     * structural modification is unsupported and the iterator is not fail-fast.</p>
      *
      * @return a ShortIterator over the elements in this list
      */
@@ -2808,7 +2810,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns a ShortStream with this list as its source.
      *
-     * <p>The stream provides access to all elements in the list in order.</p>
+     * <p>The stream reads the current backing array and size. Do not structurally modify this list
+     * between stream creation and consumption; the stream is not a defensive snapshot.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2827,8 +2830,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Returns a ShortStream for the specified range of this list.
      *
-     * <p>The stream provides access to elements from fromIndex (inclusive) to
-     * toIndex (exclusive) in order.</p>
+     * <p>The stream reads the current backing array from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive). Do not structurally modify this list between stream creation
+     * and consumption; the stream is not a defensive snapshot.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

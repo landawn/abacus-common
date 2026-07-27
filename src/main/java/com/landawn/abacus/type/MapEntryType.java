@@ -247,8 +247,9 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * If the entry is {@code null}, the literal {@code "null"} character array is written.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * {@code CharacterWriter}. Map-key quoting follows JSON key rules (string keys remain quoted even when
+     * {@code config} is {@code null}); the value is delegated to its type handler with the supplied config.
+     * It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
@@ -257,7 +258,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Map.Entry} to write, may be {@code null}
-     * @param config the serialization configuration used when writing the key and value
+     * @param config the serialization configuration used when writing the key and value; may be {@code null}
      * @throws IOException if an I/O error occurs while writing
      */
     @Override

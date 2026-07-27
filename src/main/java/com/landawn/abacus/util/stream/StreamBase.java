@@ -261,7 +261,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     // static final long MAX_WAIT_TO_BREAK_FOR_DEAD_LOCK = 6 * 60 * 1000; // 6 minutes
 
-    static final Splitor DEFAULT_SPLITOR = Splitor.ITERATOR;
+    static final SplitStrategy DEFAULT_SPLIT_STRATEGY = SplitStrategy.ITERATOR;
 
     static final int MAX_POOLED_EXECUTOR_SIZE_FOR_VIRTUAL_THREAD = IOUtil.CPU_CORES;
 
@@ -404,7 +404,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
             if (num == null) {
                 throw new RuntimeException(cls.getCanonicalName()
-                        + " cannot be combined by default. Only Collection/Map/StringBuilder/Multiset/LongMultiset/Multimap/BooleanList/IntList/.../DoubleList are supported");
+                        + " cannot be combined by default. Only Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList are supported");
             }
 
             switch (num) {
@@ -435,7 +435,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
                 default:
                     throw new IllegalArgumentException(cls.getCanonicalName()
-                            + " cannot be combined by default. Only Collection/Map/StringBuilder/Multiset/LongMultiset/Multimap/BooleanList/IntList/.../DoubleList are supported");
+                            + " cannot be combined by default. Only Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList are supported");
             }
         }
     };
@@ -464,6 +464,17 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     private Deque<LocalRunnable> closeHandlers;
     private volatile boolean isClosed = false;
 
+    /**
+     * Creates a stream carrying the given sortedness hint and close handlers.
+     * The handler collection is adopted as-is when it is already a {@link LocalArrayDeque};
+     * otherwise its elements are copied into a new one, so later changes to the caller's collection
+     * do not affect this stream.
+     *
+     * @param sorted {@code true} if the elements are known to be sorted by {@code cmp}
+     * @param cmp the comparator the elements are sorted by, or {@code null} for natural ordering;
+     *        meaningful only when {@code sorted} is {@code true}
+     * @param closeHandlers the handlers to run when this stream is closed; may be {@code null} or empty
+     */
     StreamBase(final boolean sorted, final Comparator<? super T> cmp, final Collection<LocalRunnable> closeHandlers) {
         this.closeHandlers = isEmptyCloseHandlers(closeHandlers) ? null
                 : (closeHandlers instanceof LocalArrayDeque ? (LocalArrayDeque<LocalRunnable>) closeHandlers : new LocalArrayDeque<>(closeHandlers));
@@ -624,14 +635,37 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return toArray(true);
     }
 
+    /**
+     * Drains this stream into a newly allocated array, optionally leaving the stream open.
+     * Subclasses implement the actual traversal; {@link #toArray()} calls it with {@code true}.
+     *
+     * @param closeStream {@code true} to close this stream once the array has been filled,
+     *        {@code false} to leave it open for a follow-up intermediate operation
+     * @return a new array holding the remaining elements in encounter order
+     */
     protected abstract A toArray(boolean closeStream);
 
+    /**
+     * Drains this stream into an array for use by an intermediate operation that needs the whole
+     * content materialized (sorting, reversing, shuffling, ...).
+     *
+     * @return a new array holding the remaining elements in encounter order
+     */
     protected A toArrayForIntermediateOp() {
         // return toArray(false);
 
         return toArray(true);
     }
 
+    /**
+     * Returns the elements of this stream as an array plus the {@code [fromIndex, toIndex)} range
+     * within it that is actually in use, for intermediate operations that can work in place.
+     * Array-backed subclasses override this to hand back their existing backing array instead of a
+     * copy, so callers must treat the returned array as read-only.
+     *
+     * @return a triple of (backing array, inclusive start index, exclusive end index)
+     * @throws IllegalStateException if the stream is already closed
+     */
     // Try to avoid unnecessary copy of an array if possible
     protected Tuple3<A, Integer, Integer> arrayForIntermediateOp() {
         assertNotClosed();
@@ -642,6 +676,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return Tuple.of(a, 0, Array.getLength(a));
     }
 
+    /**
+     * Returns whether this stream has no elements. Depending on the subclass this may consume the
+     * source, so it is meant for internal use by operations that immediately act on the answer.
+     *
+     * @return {@code true} if this stream has no elements
+     */
     protected abstract boolean isEmpty();
 
     /**
@@ -879,14 +919,14 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
         final AsyncExecutor asyncExecutor = executor == null ? DEFAULT_ASYNC_EXECUTOR : createAsyncExecutor(executor);
 
-        return parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), DEFAULT_SPLITOR, asyncExecutor, false);
+        return parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), DEFAULT_SPLIT_STRATEGY, asyncExecutor, false);
     }
 
     //    @Override
 
     /**
      * Returns an equivalent parallel stream configured according to the given {@link ParallelSettings}.
-     * The settings specify the maximum thread count, splitor strategy, and executor to use.
+     * The settings specify the maximum thread count, splitStrategy strategy, and executor to use.
      *
      * @param ps the parallel settings to apply; must not be {@code null}
      * @return a parallel stream configured according to {@code ps}
@@ -902,20 +942,44 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         checkArgNotNegative(ps.maxThreadNum(), "ps.maxThreadNum()");
 
         final int maxThreadNum = ps.maxThreadNum() == 0 ? DEFAULT_MAX_THREAD_NUM : ps.maxThreadNum();
-        final Splitor splitor = ps.splitor() == null ? DEFAULT_SPLITOR : ps.splitor();
+        final SplitStrategy splitStrategy = ps.splitStrategy() == null ? DEFAULT_SPLIT_STRATEGY : ps.splitStrategy();
         final AsyncExecutor asyncExecutor = ps.executor() == null ? DEFAULT_ASYNC_EXECUTOR : createAsyncExecutor(ps.executor());
         final int checkedMaxThreadNum = checkMaxThreadNum(maxThreadNum, asyncExecutor);
         // final int checkedVirtualTaskNum = checkExecutorNumForVirtualThread(checkedMaxThreadNum, ps.executorNumForVirtualThread());
 
-        return parallel(checkedMaxThreadNum, splitor, asyncExecutor, false);
+        return parallel(checkedMaxThreadNum, splitStrategy, asyncExecutor, false);
     }
 
-    protected abstract S parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads);
+    /**
+     * Returns a parallel stream with the same elements as this one, using the fully resolved
+     * settings. All the public {@code parallel(...)} overloads normalize their arguments and then
+     * funnel into this method, so subclasses only have to implement this single form.
+     *
+     * @param maxThreadNum the number of worker threads to use; already resolved to a positive value
+     * @param splitStrategy how the source is split among the workers; never {@code null}
+     * @param asyncExecutor the executor the workers are submitted to; never {@code null}
+     * @param cancelUncompletedThreads whether a short-circuiting terminal operation should try to
+     *        cancel the workers that are still running
+     * @return an equivalent parallel stream
+     */
+    protected abstract S parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads);
 
-    // protected abstract S parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads);
+    // protected abstract S parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads);
 
-    // protected abstract S parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads);
+    // protected abstract S parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads);
 
+    /**
+     * Resolves a requested thread count into the count that will actually be used.
+     * {@code 0} means "unspecified" and maps to {@link #DEFAULT_MAX_THREAD_NUM}. A request larger
+     * than {@link #MAX_THREAD_NUM_PER_OPERATION} is capped at that limit when the shared default
+     * executor is used, because the shared pool has to stay available to the rest of the pipeline;
+     * with a caller-supplied executor the request is honored as given.
+     *
+     * @param maxThreadNum the requested number of threads; must not be negative
+     * @param asyncExecutor the executor that will run the tasks; {@code null} means the default one
+     * @return the number of threads to actually use
+     */
     static int checkMaxThreadNum(final int maxThreadNum, final AsyncExecutor asyncExecutor) {
         if (maxThreadNum == 0) {
             return DEFAULT_MAX_THREAD_NUM;
@@ -990,7 +1054,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
             final int checkedMaxThreadNum = checkMaxThreadNum(maxThreadNum, asyncExecutor());
             // final int checkedVirtualTaskNum = checkExecutorNumForVirtualThread(checkedMaxThreadNum);
 
-            return (SS) ops.apply(parallel(checkedMaxThreadNum, splitor(), asyncExecutor(), cancelUncompletedThreads())).sequential();
+            return (SS) ops.apply(parallel(checkedMaxThreadNum, splitStrategy(), asyncExecutor(), cancelUncompletedThreads())).sequential();
         }
     }
 
@@ -1019,7 +1083,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
         final AsyncExecutor asyncExecutor = executor == null ? DEFAULT_ASYNC_EXECUTOR : createAsyncExecutor(executor);
 
-        return (SS) ops.apply(parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), splitor(), asyncExecutor, cancelUncompletedThreads())).sequential();
+        return (SS) ops.apply(parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), splitStrategy(), asyncExecutor, cancelUncompletedThreads()))
+                .sequential();
 
     }
 
@@ -1044,7 +1109,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         checkArgNotNull(ops, "ops");
 
         if (isParallel()) {
-            return (SS) ((StreamBase) ops.apply(this.sequential())).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return (SS) ((StreamBase) ops.apply(this.sequential())).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return (SS) ops.apply((S) this).parallel();
         }
@@ -1077,6 +1142,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return transfer.apply((S) this); // TODO not lazy evaluation?
     }
 
+    /**
+     * Returns the number of worker threads this stream runs on.
+     * Parallel implementations override this; a sequential stream always reports {@code 1}.
+     *
+     * @return the number of worker threads; {@code 1} for a sequential stream
+     */
     protected int maxThreadNum() {
         // throw new UnsupportedOperationException();
 
@@ -1084,13 +1155,27 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return 1; //NOSONAR
     }
 
-    protected Splitor splitor() {
+    /**
+     * Returns the strategy used to split the source among worker threads.
+     * Parallel implementations override this; a sequential stream reports the default strategy,
+     * which is only used when the pipeline is later switched to parallel.
+     *
+     * @return the split strategy; never {@code null}
+     */
+    protected SplitStrategy splitStrategy() {
         // throw new UnsupportedOperationException();
 
         // ignore, do nothing if it's a sequential stream.
-        return DEFAULT_SPLITOR;
+        return DEFAULT_SPLIT_STRATEGY;
     }
 
+    /**
+     * Returns the executor this stream submits its worker tasks to.
+     * Parallel implementations override this; a sequential stream reports the shared default
+     * executor, which is only used when the pipeline is later switched to parallel.
+     *
+     * @return the executor; never {@code null}
+     */
     protected AsyncExecutor asyncExecutor() {
         // throw new UnsupportedOperationException();
 
@@ -1098,22 +1183,56 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return DEFAULT_ASYNC_EXECUTOR;
     }
 
+    /**
+     * Returns this stream's close handlers, in the order they will be run.
+     * The returned deque is the live internal one, not a copy, and may be {@code null} when no
+     * handler has been registered.
+     *
+     * @return the close handlers of this stream, or {@code null} if there are none
+     */
     protected Deque<LocalRunnable> closeHandlers() {
         return closeHandlers;
     }
 
+    /**
+     * Returns whether this stream is known to be sorted, so that operations such as
+     * {@code sorted()} or {@code distinct()} can take a cheaper path.
+     * {@code false} only means "not known to be sorted" — the elements may still happen to be in order.
+     *
+     * @return {@code true} if this stream is known to be sorted
+     */
     protected boolean isSorted() {
         return sorted;
     }
 
+    /**
+     * Returns the comparator this stream is known to be sorted by.
+     * A {@code null} result means natural ordering when {@link #isSorted()} is {@code true}, and
+     * carries no meaning otherwise.
+     *
+     * @return the sort comparator, or {@code null} for natural ordering / unknown ordering
+     */
     protected Comparator<? super T> comparator() {
         return cmp;
     }
 
+    /**
+     * Returns the {@link Executor} backing the shared default async executor used by parallel streams
+     * that were not given an executor of their own.
+     *
+     * @return the shared default executor
+     */
     protected static Executor executor() {
         return DEFAULT_ASYNC_EXECUTOR.getExecutor();
     }
 
+    /**
+     * Returns whether a short-circuiting terminal operation should try to cancel worker threads that
+     * are still running. Parallel implementations override this; a sequential stream reports
+     * {@code false} because it has no workers to cancel.
+     *
+     * @return {@code true} if uncompleted worker threads should be cancelled
+     */
     protected boolean cancelUncompletedThreads() {
         // throw new UnsupportedOperationException();
 
@@ -1121,12 +1240,26 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return false;
     }
 
+    /**
+     * Wraps a caller-supplied {@link Executor} in an {@link AsyncExecutor}. The wrapper never owns
+     * the executor, so it is not shut down when the stream completes.
+     *
+     * @param executor the executor to wrap; must not be {@code null}
+     * @return an {@code AsyncExecutor} delegating to {@code executor}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     */
     final AsyncExecutor createAsyncExecutor(final Executor executor) {
         checkArgNotNull(executor, cs.executor);
 
         return new AsyncExecutor(executor);
     }
 
+    /**
+     * Returns whether {@link #close()} has already run on this stream. Once closed, any further
+     * operation on it fails with an {@code IllegalStateException}.
+     *
+     * @return {@code true} if this stream has been closed
+     */
     protected boolean isClosed() {
         return isClosed;
     }
@@ -1755,7 +1888,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     CharStream newStream(final char[] a, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayCharStream(a, 0, a.length, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayCharStream(a, 0, a.length, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayCharStream(a, sorted, closeHandlersForNewStream());
@@ -1768,7 +1901,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     CharStream newStream(final char[] a, final int fromIndex, final int toIndex, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayCharStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayCharStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayCharStream(a, fromIndex, toIndex, sorted, closeHandlersForNewStream());
@@ -1785,7 +1918,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     CharStream newStream(final CharIterator iter, final boolean sorted, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorCharStream(iter, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorCharStream(iter, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
         } else {
             return new IteratorCharStream(iter, sorted, closeHandlers);
         }
@@ -1797,7 +1930,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     ByteStream newStream(final byte[] a, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayByteStream(a, 0, a.length, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayByteStream(a, 0, a.length, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayByteStream(a, sorted, closeHandlersForNewStream());
@@ -1810,7 +1943,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     ByteStream newStream(final byte[] a, final int fromIndex, final int toIndex, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayByteStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayByteStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayByteStream(a, fromIndex, toIndex, sorted, closeHandlersForNewStream());
@@ -1827,7 +1960,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     ByteStream newStream(final ByteIterator iter, final boolean sorted, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorByteStream(iter, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorByteStream(iter, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
         } else {
             return new IteratorByteStream(iter, sorted, closeHandlers);
         }
@@ -1839,7 +1972,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     ShortStream newStream(final short[] a, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayShortStream(a, 0, a.length, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayShortStream(a, 0, a.length, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayShortStream(a, sorted, closeHandlersForNewStream());
@@ -1852,7 +1985,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     ShortStream newStream(final short[] a, final int fromIndex, final int toIndex, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayShortStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayShortStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayShortStream(a, fromIndex, toIndex, sorted, closeHandlersForNewStream());
@@ -1869,7 +2002,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     ShortStream newStream(final ShortIterator iter, final boolean sorted, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorShortStream(iter, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorShortStream(iter, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
         } else {
             return new IteratorShortStream(iter, sorted, closeHandlers);
         }
@@ -1881,7 +2014,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     IntStream newStream(final int[] a, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayIntStream(a, 0, a.length, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayIntStream(a, 0, a.length, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayIntStream(a, sorted, closeHandlersForNewStream());
@@ -1894,7 +2027,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     IntStream newStream(final int[] a, final int fromIndex, final int toIndex, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayIntStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayIntStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayIntStream(a, fromIndex, toIndex, sorted, closeHandlersForNewStream());
@@ -1911,7 +2044,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     IntStream newStream(final IntIterator iter, final boolean sorted, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorIntStream(iter, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorIntStream(iter, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
         } else {
             return new IteratorIntStream(iter, sorted, closeHandlers);
         }
@@ -1923,7 +2056,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     LongStream newStream(final long[] a, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayLongStream(a, 0, a.length, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayLongStream(a, 0, a.length, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayLongStream(a, sorted, closeHandlersForNewStream());
@@ -1936,7 +2069,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     LongStream newStream(final long[] a, final int fromIndex, final int toIndex, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayLongStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayLongStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayLongStream(a, fromIndex, toIndex, sorted, closeHandlersForNewStream());
@@ -1953,7 +2086,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     LongStream newStream(final LongIterator iter, final boolean sorted, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorLongStream(iter, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorLongStream(iter, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
         } else {
             return new IteratorLongStream(iter, sorted, closeHandlers);
         }
@@ -1965,7 +2098,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     FloatStream newStream(final float[] a, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayFloatStream(a, 0, a.length, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayFloatStream(a, 0, a.length, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayFloatStream(a, sorted, closeHandlersForNewStream());
@@ -1978,7 +2111,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     FloatStream newStream(final float[] a, final int fromIndex, final int toIndex, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayFloatStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayFloatStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayFloatStream(a, fromIndex, toIndex, sorted, closeHandlersForNewStream());
@@ -1995,7 +2128,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     FloatStream newStream(final FloatIterator iter, final boolean sorted, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorFloatStream(iter, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorFloatStream(iter, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
         } else {
             return new IteratorFloatStream(iter, sorted, closeHandlers);
         }
@@ -2007,7 +2140,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     DoubleStream newStream(final double[] a, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayDoubleStream(a, 0, a.length, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayDoubleStream(a, 0, a.length, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayDoubleStream(a, sorted, closeHandlersForNewStream());
@@ -2020,7 +2153,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     DoubleStream newStream(final double[] a, final int fromIndex, final int toIndex, final boolean sorted) {
         if (isParallel()) {
-            return new ParallelArrayDoubleStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelArrayDoubleStream(a, fromIndex, toIndex, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlersForNewStream());
         } else {
             return new ArrayDoubleStream(a, fromIndex, toIndex, sorted, closeHandlersForNewStream());
@@ -2037,7 +2170,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     DoubleStream newStream(final DoubleIterator iter, final boolean sorted, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorDoubleStream(iter, sorted, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorDoubleStream(iter, sorted, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
         } else {
             return new IteratorDoubleStream(iter, sorted, closeHandlers);
         }
@@ -2062,8 +2195,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     <E> Stream<E> newStream(final E[] a, final int fromIndex, final int toIndex, final boolean sorted, final Comparator<? super E> comparator,
             final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelArrayStream<>(a, fromIndex, toIndex, sorted, comparator, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
-                    closeHandlers);
+            return new ParallelArrayStream<>(a, fromIndex, toIndex, sorted, comparator, maxThreadNum(), splitStrategy(), asyncExecutor(),
+                    cancelUncompletedThreads(), closeHandlers);
         } else {
             return new ArrayStream<>(a, fromIndex, toIndex, sorted, comparator, closeHandlers);
         }
@@ -2079,7 +2212,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     <E> Stream<E> newStream(final Iterator<E> iter, final boolean sorted, final Comparator<? super E> comparator, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorStream<>(iter, sorted, comparator, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(),
+            return new ParallelIteratorStream<>(iter, sorted, comparator, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
                     closeHandlers);
         } else {
             return new IteratorStream<>(iter, sorted, comparator, closeHandlers);
@@ -2096,7 +2229,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     <E> Stream<E> newStream(final Stream<E> s, final boolean sorted, final Comparator<? super E> comparator, final Deque<LocalRunnable> closeHandlers) {
         if (isParallel()) {
-            return new ParallelIteratorStream<>(s, sorted, comparator, maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads(), closeHandlers);
+            return new ParallelIteratorStream<>(s, sorted, comparator, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
+                    closeHandlers);
         } else {
             return new IteratorStream<>(s, sorted, comparator, closeHandlers);
         }
@@ -2184,7 +2318,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     /**
      * Counts the number of windows produced by a {@code sliding(windowSize, increment)} call
-     * over a source of {@code remaining} elements. Includes any trailing partial window.
+     * over a source of {@code remaining} elements. A partial window is counted only when it is
+     * the initial window or introduces a source element not present in the preceding window.
      * <p>
      * For {@code increment >= windowSize} (non-overlapping windows): {@code ceil(remaining/increment)}.
      * For {@code increment <  windowSize} (overlapping windows):     {@code 1} if {@code remaining <= windowSize},
@@ -2349,6 +2484,13 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * Waits for every submitted task, even after a worker has reported an error. This keeps
      * terminal cleanup from closing sources or shutting down a temporary executor while a
      * sibling task is still using it.
+     *
+     * <p>If more than one task fails, the first failure is returned and the later ones are attached
+     * to it as suppressed exceptions. If the current thread is interrupted while waiting, its
+     * interrupt status is restored before this method returns.
+     *
+     * @param futureList the futures to wait for
+     * @return the first failure observed, or {@code null} if every task completed normally
      */
     private static Throwable awaitAll(final List<? extends ContinuableFuture<?>> futureList) {
         Throwable failure = null;
@@ -2878,6 +3020,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return maxThreadNum <= 1 || toIndex - fromIndex <= 1;
     }
 
+    /**
+     * A {@link Runnable} marker used for stream close handlers. Handlers created through
+     * {@link #wrap(Runnable)} and {@link #wrap(AutoCloseable)} run at most once, no matter how many
+     * times the enclosing stream (or a stream derived from it) is closed, so the same handler can be
+     * shared safely by several stages of a pipeline.
+     *
+     * <p>Implementing this interface also marks a handler as already wrapped, which lets
+     * {@link #wrap(Runnable)} return it unchanged instead of adding another layer.
+     */
     @Internal
     interface LocalRunnable extends Runnable {
 
@@ -2942,6 +3093,13 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
+    /**
+     * An {@link ArrayDeque} subclass used to hold a stream's close handlers. It adds no behavior;
+     * the distinct type merely lets the stream implementation recognize a deque it created itself
+     * (and may therefore reuse or mutate) from one supplied by a caller.
+     *
+     * @param <T> the type of elements held in this deque
+     */
     @Internal
     static final class LocalArrayDeque<T> extends ArrayDeque<T> {
 

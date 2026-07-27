@@ -351,7 +351,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (pooledObject.activityPrint().isExpired()) {
-     *     pooledObject.destroy(Caller.EVICT);
+     *     pooledObject.destroy(Poolable.Caller.EVICT);
      * }
      * }</pre>
      *

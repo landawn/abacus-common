@@ -70,6 +70,11 @@ import com.landawn.abacus.exception.UncheckedIOException;
 @SuppressFBWarnings
 sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWriter { // NOSONAR
 
+    /**
+     * Shared placeholder passed to the {@link java.io.BufferedWriter} superclass constructor in
+     * internal buffer mode, where there is no real destination. All of its I/O methods throw
+     * {@link UnsupportedOperationException}, so it must never actually be written to.
+     */
     static final Writer DUMMY_WRITER = new DummyWriter();
 
     /**
@@ -114,7 +119,6 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * writer.write("Hello World");
      * String content = writer.toString();   // "Hello World"
      * }</pre>
-     *
      */
     BufferedWriter() {
         super(DUMMY_WRITER, 1);
@@ -288,7 +292,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes a {@link Date} using the default ISO-8601 date format
-     * ({@code yyyy-MM-dd'T'HH:mm:ss'Z'}). If {@code date} is {@code null},
+     * ({@code yyyy-MM-dd'T'HH:mm:ss'Z'}, or {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'} when the argument
+     * is a {@code java.sql.Timestamp}). If {@code date} is {@code null},
      * the string {@code "null"} is written.
      *
      * <p><b>Usage Examples:</b></p>
@@ -330,8 +335,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance().newXMLGregorianCalendar();
-     * writer.write(xmlCal);                        // "2024-06-15T10:30:00Z" is written (example value)
+     * XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
+     *         .newXMLGregorianCalendar("2024-06-15T10:30:00Z");
+     * writer.write(xmlCal);                        // "2024-06-15T10:30:00Z" is written
      * writer.write((XMLGregorianCalendar) null);   // "null" is written
      * }</pre>
      *
@@ -381,8 +387,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello");   // "Hello" is written
-     * writer.write(null);      // "null" is written
+     * writer.write("Hello");         // "Hello" is written
+     * writer.write((String) null);   // "null" is written
      * }</pre>
      *
      * @param str the string to write
@@ -407,11 +413,12 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param str the string to write; if {@code null}, {@code "null"} is written
-     * @param off the offset from which to start writing; must be {@code >= 0} and {@code <= str.length()}
-     * @param len the number of characters to write; must be {@code >= 0} and {@code <= str.length() - off}
+     * @param off the offset from which to start writing; bounds are checked against {@code str},
+     *        or against the four-character string {@code "null"} when {@code str} is {@code null}
+     * @param len the number of characters to write; bounds are checked against the same effective source string
      * @throws IOException if an I/O error occurs
      * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
-     *         {@code off > str.length()}, or {@code len > str.length() - off}
+     *         the requested range exceeds the effective source string
      */
     @Override
     public void write(final String str, final int off, final int len) throws IOException {
@@ -805,7 +812,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @return the string representation of the written content
-     * @throws UncheckedIOException if an I/O error occurs during flush (external writer mode only)
+     * @throws UncheckedIOException if an I/O error occurs during flush, or if the writer has been closed
      */
     @Override
     public String toString() throws UncheckedIOException {
@@ -827,6 +834,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * state. Any previously held internal or flush buffers are recycled, and a
      * fresh internal character buffer is allocated. This allows reusing the same
      * writer instance without creating a new object.
+     * If this writer currently has an external destination, close it before calling
+     * this method; reinitialization does not flush or close the previous destination.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -838,7 +847,6 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * writer.write("Second use");
      * System.out.println(writer.toString());   // "Second use"
      * }</pre>
-     *
      */
     void reinit() {
         isClosed = false;
@@ -858,13 +866,19 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * replacing any previous state. The stream is wrapped in a UTF-8
      * {@link java.io.OutputStreamWriter}. Any previously held buffers are recycled.
      * This allows reusing the same writer instance with a different output stream.
+     * The previous destination, if any, is not flushed or closed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedWriter writer = new BufferedWriter();
-     * writer.write("First file");
-     * writer.reinit(new FileOutputStream("second.txt"));
-     * writer.write("Second file");
+     * try {
+     *     writer.write("Buffered text");
+     *     String firstResult = writer.toString();
+     *     writer.reinit(new FileOutputStream("second.txt"));
+     *     writer.write("Second file");
+     * } finally {
+     *     writer.close();   // flushes and closes second.txt
+     * }
      * }</pre>
      *
      * @param os the new OutputStream to write to; must not be {@code null}
@@ -878,14 +892,23 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * replacing any previous state. Any previously held internal buffers are
      * recycled. This allows reusing the same writer instance with a different
      * underlying writer.
+     * The previous destination, if any, is not flushed or closed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedWriter writer = new BufferedWriter(new FileWriter("first.txt"));
-     * writer.write("First content");
+     * try {
+     *     writer.write("First content");
+     * } finally {
+     *     writer.close();
+     * }
      *
      * writer.reinit(new FileWriter("second.txt"));
-     * writer.write("Second content");
+     * try {
+     *     writer.write("Second content");
+     * } finally {
+     *     writer.close();
+     * }
      * }</pre>
      *
      * @param writer the new Writer to write to; must not be {@code null}
@@ -900,6 +923,12 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         lock = writer;
     }
 
+    /**
+     * Releases and recycles both the internal buffer and the transient flush buffer and clears
+     * all writer state, leaving this instance with no destination. Nothing is flushed and no
+     * underlying writer is closed. Called from {@link #close()} before the writer is marked
+     * closed; the instance can be made usable again with one of the {@code reinit} methods.
+     */
     void _reset() { //NOSONAR
         Objectory.recycle(_cbuf);
         _cbuf = null;
@@ -946,6 +975,10 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * A dummy Writer implementation used as a placeholder for internal buffer mode.
      */
     static final class DummyWriter extends Writer {
+        /**
+         * Creates the placeholder writer. Every I/O method of the created instance
+         * throws {@link UnsupportedOperationException}.
+         */
         DummyWriter() {
         }
 

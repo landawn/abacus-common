@@ -85,7 +85,7 @@ public final class IndexedByte extends AbstractIndexed {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IndexedByte indexed = IndexedByte.of((byte) 25, 1000000000L);
+     * IndexedByte indexed = IndexedByte.of((byte) 25, 5_000_000_000L);
      * }</pre>
      *
      * @param value the byte value to be associated with the index

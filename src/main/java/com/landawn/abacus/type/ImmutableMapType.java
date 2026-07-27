@@ -102,9 +102,9 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
 
     /**
      * Returns the parameter types for this generic ImmutableMap type.
-     * The list contains two elements: the key type at index 0 and the value type at index 1.
+     * The list always contains exactly two elements: the key type at index 0 and the value type at index 1.
      *
-     * @return an immutable list containing the key type and value type
+     * @return an immutable two-element list containing the key type and the value type
      */
     @Override
     public List<Type<?>> parameterTypes() {

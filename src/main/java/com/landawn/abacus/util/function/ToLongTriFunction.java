@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * <p><b>Note:</b> {@code TriFunction} primitive result-specializations are provided only for
- * {@code int}/{@code long}/{@code double} ({@code ToInt}/{@code ToLong}/{@code ToDoubleTriFunction}) by
+ * {@code int}/{@code long}/{@code double} ({@code ToIntTriFunction}/{@code ToLongTriFunction}/{@code ToDoubleTriFunction}) by
  * design — there are intentionally no {@code byte}/{@code char}/{@code short}/{@code float}/{@code boolean}
  * three-arg variants, unlike the all-8 {@code ToXxxFunction}/{@code ToXxxBiFunction} families.
  *

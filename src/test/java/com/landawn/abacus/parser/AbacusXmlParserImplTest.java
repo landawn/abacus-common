@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.entity.RecordB;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
@@ -316,6 +317,23 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertTrue(xml.contains("1"));
         assertTrue(xml.contains("b"));
         assertTrue(xml.contains("2"));
+    }
+
+    @Test
+    public void testSerializeMapIgnoresKeysByTheirStringForm() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+
+        final Map<Object, String> map = new LinkedHashMap<>();
+        map.put(new StringBuilder("skip"), "hidden");
+        map.put(new StringBuilder("keep"), "visible");
+        final XmlSerConfig config = new XmlSerConfig().setIgnoredPropNames(Map.class, Set.of("skip"));
+
+        final String xml = staxParser.serialize(map, config);
+
+        assertTrue(!xml.contains("skip"), xml);
+        assertTrue(xml.contains("keep"), xml);
     }
 
     @Test
@@ -811,12 +829,16 @@ public class AbacusXmlParserImplTest extends TestBase {
     }
 
     @Test
-    public void testDeserialize_NodeTypesWithNameAttribute_ThrowsNullPointerException() {
+    public void testDeserialize_NodeTypesWithNameAttribute_ThrowsParsingException() {
         String xml = "<entry name=\"person\"><name>AttrRoot</name><age>64</age></entry>";
         Map<String, Type<?>> nodeTypes = Map.of("person", Type.of(Person.class));
 
-        assertThrows(NullPointerException.class,
+        // The name attribute on the root switches the parse to name-attribute mode, so the inner
+        // property elements without a 'name' attribute are rejected with a descriptive error
+        // (previously an internal NullPointerException).
+        ParsingException ex = assertThrows(ParsingException.class,
                 () -> staxParser.deserialize(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), new XmlDeserConfig(), nodeTypes));
+        assertTrue(ex.getMessage().contains("Missing 'name' attribute"));
     }
 
     // TODO: testReadByDOMParser_mapType requires specific XML format for Map deserialization
@@ -935,6 +957,21 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertTrue(result instanceof Person);
         assertEquals("DOMParsed", ((Person) result).getName());
         assertEquals(31, ((Person) result).getAge());
+    }
+
+    @Test
+    public void testDomMapSkipsNonElementsAndRequiresExactlyKeyAndValue() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+
+        final String validXml = "<map><!-- before --><?entry value?><entry><!-- key --><key>a</key><?value next?><value>1</value></entry></map>";
+        final Map<?, ?> result = domParser.deserialize(validXml, Map.class);
+        assertEquals("1", result.get("a"));
+
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> domParser.deserialize("<map><entry><key>a</key></entry></map>", Map.class));
+        assertThrows(com.landawn.abacus.exception.ParsingException.class,
+                () -> domParser.deserialize("<map><entry><key>a</key><value>1</value><value>2</value></entry></map>", Map.class));
     }
 
     @Test

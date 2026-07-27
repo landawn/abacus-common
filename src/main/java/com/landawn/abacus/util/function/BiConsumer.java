@@ -29,6 +29,9 @@ import com.landawn.abacus.util.cs;
  *
  * @param <T> the type of the first argument to the operation
  * @param <U> the type of the second argument to the operation
+ * @see java.util.function.Consumer
+ * @see java.util.function.BiConsumer
+ * @see TriConsumer
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
@@ -93,8 +96,8 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiConsumer<String, String> concatenator = (s1, s2) -> System.out.println(s1 + s2);
-     * var throwableConsumer = concatenator.toThrowable();
-     * // Can now be used in a context whose callback declares an exception type
+     * Throwables.BiConsumer<String, String, RuntimeException> throwableConsumer = concatenator.toThrowable();
+     * throwableConsumer.accept("Hello, ", "World!");
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.BiConsumer}

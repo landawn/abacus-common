@@ -71,7 +71,7 @@ import com.landawn.abacus.util.u.Optional;
  *     <td>Thread visibility</td>
  *     <td>{@code volatile} field — single reads/writes are visible across threads, but
  *         compound operations are <em>not</em> atomic. Use {@link java.util.concurrent.atomic.AtomicReference}
- *         for {@code true} CAS semantics.</td>
+ *         for true CAS semantics.</td>
  *     <td>Not applicable — instances are immutable and freely shareable.</td>
  *   </tr>
  *   <tr>
@@ -128,7 +128,6 @@ public final class Holder<T> implements Mutable {
      * Holder<String> holder = new Holder<>();
      * holder.setValue("Hello");
      * }</pre>
-     *
      */
     public Holder() {
         this(null);
@@ -261,7 +260,7 @@ public final class Holder<T> implements Mutable {
      */
     public T setAndGet(final T value) {
         this.value = value;
-        return this.value;
+        return value;
     }
 
     /**
@@ -288,9 +287,9 @@ public final class Holder<T> implements Mutable {
      * @throws E if the update function throws an exception.
      */
     public <E extends Exception> T getAndUpdate(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
-        final T res = value;
-        value = updateFunction.apply(value);
-        return res;
+        final T oldValue = value;
+        value = updateFunction.apply(oldValue);
+        return oldValue;
     }
 
     /**
@@ -317,8 +316,9 @@ public final class Holder<T> implements Mutable {
      * @throws E if the update function throws an exception.
      */
     public <E extends Exception> T updateAndGet(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
-        value = updateFunction.apply(value);
-        return value;
+        final T newValue = updateFunction.apply(value);
+        value = newValue;
+        return newValue;
     }
 
     /**
@@ -417,9 +417,10 @@ public final class Holder<T> implements Mutable {
      */
     public <E extends Exception> void ifNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, "action"); //NOSONAR
+        final T currentValue = value;
 
-        if (isNotNull()) {
-            action.accept(value);
+        if (currentValue != null) {
+            action.accept(currentValue);
         }
     }
 
@@ -452,9 +453,10 @@ public final class Holder<T> implements Mutable {
             final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
         N.checkArgNotNull(action, "action");
         N.checkArgNotNull(emptyAction, "emptyAction");
+        final T currentValue = value;
 
-        if (isNotNull()) {
-            action.accept(value);
+        if (currentValue != null) {
+            action.accept(currentValue);
         } else {
             emptyAction.run();
         }
@@ -501,9 +503,10 @@ public final class Holder<T> implements Mutable {
     @Deprecated
     public <E extends Exception> void acceptIfNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, "action");
+        final T currentValue = value;
 
-        if (isNotNull()) {
-            action.accept(value);
+        if (currentValue != null) {
+            action.accept(currentValue);
         }
     }
 
@@ -560,9 +563,10 @@ public final class Holder<T> implements Mutable {
      */
     public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, "mapper");
+        final T currentValue = value;
 
-        if (isNotNull()) {
-            return Nullable.of(mapper.apply(value));
+        if (currentValue != null) {
+            return Nullable.of(mapper.apply(currentValue));
         } else {
             return Nullable.empty();
         }
@@ -600,9 +604,10 @@ public final class Holder<T> implements Mutable {
     public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
             throws IllegalArgumentException, NullPointerException, E {
         N.checkArgNotNull(mapper, "mapper");
+        final T currentValue = value;
 
-        if (isNotNull()) {
-            return Optional.of(mapper.apply(value));
+        if (currentValue != null) {
+            return Optional.of(mapper.apply(currentValue));
         } else {
             return Optional.empty();
         }
@@ -630,8 +635,10 @@ public final class Holder<T> implements Mutable {
      * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E {
-        if (predicate.test(value)) {
-            return Nullable.of(value);
+        final T currentValue = value;
+
+        if (predicate.test(currentValue)) {
+            return Nullable.of(currentValue);
         } else {
             return Nullable.empty();
         }
@@ -664,9 +671,10 @@ public final class Holder<T> implements Mutable {
      */
     public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, "predicate");
+        final T currentValue = value;
 
-        if (isNotNull() && predicate.test(value)) {
-            return Optional.of(value);
+        if (currentValue != null && predicate.test(currentValue)) {
+            return Optional.of(currentValue);
         } else {
             return Optional.empty();
         }
@@ -692,7 +700,8 @@ public final class Holder<T> implements Mutable {
      * @return the held value if not {@code null}, otherwise {@code other}.
      */
     public T orElseIfNull(final T other) {
-        return isNotNull() ? value : other;
+        final T currentValue = value;
+        return currentValue == null ? other : currentValue;
     }
 
     /**
@@ -716,9 +725,10 @@ public final class Holder<T> implements Mutable {
      */
     public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, "other");
+        final T currentValue = value;
 
-        if (isNotNull()) {
-            return value;
+        if (currentValue != null) {
+            return currentValue;
         } else {
             return other.get();
         }
@@ -740,8 +750,10 @@ public final class Holder<T> implements Mutable {
      * @throws NoSuchElementException if the value is {@code null}.
      */
     public T orElseThrowIfNull() throws NoSuchElementException {
-        if (isNotNull()) {
-            return value;
+        final T currentValue = value;
+
+        if (currentValue != null) {
+            return currentValue;
         } else {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NULL_ELEMENT_EX);
         }
@@ -766,8 +778,10 @@ public final class Holder<T> implements Mutable {
      */
     @Beta
     public T orElseThrowIfNull(final String errorMessage) throws NoSuchElementException {
-        if (isNotNull()) {
-            return value;
+        final T currentValue = value;
+
+        if (currentValue != null) {
+            return currentValue;
         } else {
             throw new NoSuchElementException(errorMessage);
         }
@@ -793,8 +807,10 @@ public final class Holder<T> implements Mutable {
      */
     @Beta
     public T orElseThrowIfNull(final String errorMessage, final Object param) throws NoSuchElementException {
-        if (isNotNull()) {
-            return value;
+        final T currentValue = value;
+
+        if (currentValue != null) {
+            return currentValue;
         } else {
             throw new NoSuchElementException(N.format(errorMessage, param));
         }
@@ -821,8 +837,10 @@ public final class Holder<T> implements Mutable {
      */
     @Beta
     public T orElseThrowIfNull(final String errorMessage, final Object param1, final Object param2) throws NoSuchElementException {
-        if (isNotNull()) {
-            return value;
+        final T currentValue = value;
+
+        if (currentValue != null) {
+            return currentValue;
         } else {
             throw new NoSuchElementException(N.format(errorMessage, param1, param2));
         }
@@ -849,8 +867,10 @@ public final class Holder<T> implements Mutable {
      */
     @Beta
     public T orElseThrowIfNull(final String errorMessage, final Object param1, final Object param2, final Object param3) throws NoSuchElementException {
-        if (isNotNull()) {
-            return value;
+        final T currentValue = value;
+
+        if (currentValue != null) {
+            return currentValue;
         } else {
             throw new NoSuchElementException(N.format(errorMessage, param1, param2, param3));
         }
@@ -877,8 +897,10 @@ public final class Holder<T> implements Mutable {
      */
     @Beta
     public T orElseThrowIfNull(final String errorMessage, final Object... params) throws NoSuchElementException {
-        if (isNotNull()) {
-            return value;
+        final T currentValue = value;
+
+        if (currentValue != null) {
+            return currentValue;
         } else {
             throw new NoSuchElementException(N.format(errorMessage, params));
         }
@@ -907,9 +929,10 @@ public final class Holder<T> implements Mutable {
      */
     public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+        final T currentValue = value;
 
-        if (isNotNull()) {
-            return value;
+        if (currentValue != null) {
+            return currentValue;
         } else {
             throw exceptionSupplier.get();
         }
@@ -979,10 +1002,12 @@ public final class Holder<T> implements Mutable {
      */
     @Override
     public String toString() {
-        if (value == null) {
+        final T currentValue = value;
+
+        if (currentValue == null) {
             return "Holder[null]";
         } else {
-            return String.format("Holder[%s]", N.toString(value));
+            return String.format("Holder[%s]", N.toString(currentValue));
         }
     }
 }

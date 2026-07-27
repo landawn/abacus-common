@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -57,16 +56,19 @@ public class OkHttpRequestTest extends TestBase {
 
     private MockWebServer server;
     private String baseUrl;
+    private ExecutorService executor;
 
     @BeforeEach
     public void setUp() throws IOException {
         server = new MockWebServer();
         server.start();
         baseUrl = server.url("/").toString();
+        executor = Executors.newSingleThreadExecutor();
     }
 
     @AfterEach
     public void tearDown() throws IOException {
+        executor.shutdownNow();
         server.shutdown();
     }
 
@@ -151,14 +153,14 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncMethodsReturnTypes() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
+    public void testAsyncMethodsReturnTypes() throws Exception {
+        enqueueResponses(4);
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
 
-        ContinuableFuture<?> future1 = request.asyncGet();
+        ContinuableFuture<Response> future1 = request.asyncGet();
         assertNotNull(future1);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncGet(executor);
+        ContinuableFuture<Response> future2 = request.asyncGet(executor);
         assertNotNull(future2);
 
         ContinuableFuture<String> future3 = request.asyncGet(String.class);
@@ -166,6 +168,9 @@ public class OkHttpRequestTest extends TestBase {
 
         ContinuableFuture<String> future4 = request.asyncGet(String.class, executor);
         assertNotNull(future4);
+
+        awaitAndClose(future1, future2);
+        await(future3, future4);
     }
 
     @Test
@@ -919,7 +924,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testAsyncGetWithExecutor() throws Exception {
         server.enqueue(new MockResponse().setBody("Async GET response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<Response> future = request.asyncGet(executor);
         Response response = future.get();
@@ -943,7 +947,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testAsyncGetWithResultClassAndExecutor() throws Exception {
         server.enqueue(new MockResponse().setBody("Async GET response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<String> future = request.asyncGet(String.class, executor);
         String result = future.get();
@@ -951,14 +954,14 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncPostMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/post").jsonBody("{}");
+    public void testAsyncPostMethods() throws Exception {
+        enqueueResponses(4);
+        OkHttpRequest request = OkHttpRequest.url(baseUrl).jsonBody("{}");
 
-        ContinuableFuture<?> future1 = request.asyncPost();
+        ContinuableFuture<Response> future1 = request.asyncPost();
         assertNotNull(future1);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncPost(executor);
+        ContinuableFuture<Response> future2 = request.asyncPost(executor);
         assertNotNull(future2);
 
         ContinuableFuture<String> future3 = request.asyncPost(String.class);
@@ -966,6 +969,9 @@ public class OkHttpRequestTest extends TestBase {
 
         ContinuableFuture<String> future4 = request.asyncPost(String.class, executor);
         assertNotNull(future4);
+
+        awaitAndClose(future1, future2);
+        await(future3, future4);
     }
 
     @Test
@@ -987,7 +993,6 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setBody("Async POST response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         request.jsonBody("{\"test\":true}");
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<Response> future = request.asyncPost(executor);
         Response response = future.get();
@@ -1013,7 +1018,6 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setBody("Async POST response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         request.jsonBody("{\"test\":true}");
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<String> future = request.asyncPost(String.class, executor);
         String result = future.get();
@@ -1021,14 +1025,14 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncPutMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/put").jsonBody("{}");
+    public void testAsyncPutMethods() throws Exception {
+        enqueueResponses(4);
+        OkHttpRequest request = OkHttpRequest.url(baseUrl).jsonBody("{}");
 
-        ContinuableFuture<?> future1 = request.asyncPut();
+        ContinuableFuture<Response> future1 = request.asyncPut();
         assertNotNull(future1);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncPut(executor);
+        ContinuableFuture<Response> future2 = request.asyncPut(executor);
         assertNotNull(future2);
 
         ContinuableFuture<String> future3 = request.asyncPut(String.class);
@@ -1036,6 +1040,9 @@ public class OkHttpRequestTest extends TestBase {
 
         ContinuableFuture<String> future4 = request.asyncPut(String.class, executor);
         assertNotNull(future4);
+
+        awaitAndClose(future1, future2);
+        await(future3, future4);
     }
 
     @Test
@@ -1057,7 +1064,6 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setBody("Async PUT response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         request.jsonBody("{\"test\":true}");
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<Response> future = request.asyncPut(executor);
         Response response = future.get();
@@ -1083,7 +1089,6 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setBody("Async PUT response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         request.jsonBody("{\"test\":true}");
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<String> future = request.asyncPut(String.class, executor);
         String result = future.get();
@@ -1091,14 +1096,14 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncPatchMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/patch").jsonBody("{}");
+    public void testAsyncPatchMethods() throws Exception {
+        enqueueResponses(4);
+        OkHttpRequest request = OkHttpRequest.url(baseUrl).jsonBody("{}");
 
-        ContinuableFuture<?> future1 = request.asyncPatch();
+        ContinuableFuture<Response> future1 = request.asyncPatch();
         assertNotNull(future1);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncPatch(executor);
+        ContinuableFuture<Response> future2 = request.asyncPatch(executor);
         assertNotNull(future2);
 
         ContinuableFuture<String> future3 = request.asyncPatch(String.class);
@@ -1106,6 +1111,9 @@ public class OkHttpRequestTest extends TestBase {
 
         ContinuableFuture<String> future4 = request.asyncPatch(String.class, executor);
         assertNotNull(future4);
+
+        awaitAndClose(future1, future2);
+        await(future3, future4);
     }
 
     @Test
@@ -1127,7 +1135,6 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setBody("Async PATCH response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         request.jsonBody("{\"test\":true}");
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<Response> future = request.asyncPatch(executor);
         Response response = future.get();
@@ -1153,7 +1160,6 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setBody("Async PATCH response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         request.jsonBody("{\"test\":true}");
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<String> future = request.asyncPatch(String.class, executor);
         String result = future.get();
@@ -1161,14 +1167,14 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncDeleteMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/delete");
+    public void testAsyncDeleteMethods() throws Exception {
+        enqueueResponses(4);
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
 
-        ContinuableFuture<?> future1 = request.asyncDelete();
+        ContinuableFuture<Response> future1 = request.asyncDelete();
         assertNotNull(future1);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncDelete(executor);
+        ContinuableFuture<Response> future2 = request.asyncDelete(executor);
         assertNotNull(future2);
 
         ContinuableFuture<String> future3 = request.asyncDelete(String.class);
@@ -1176,6 +1182,9 @@ public class OkHttpRequestTest extends TestBase {
 
         ContinuableFuture<String> future4 = request.asyncDelete(String.class, executor);
         assertNotNull(future4);
+
+        awaitAndClose(future1, future2);
+        await(future3, future4);
     }
 
     @Test
@@ -1195,7 +1204,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testAsyncDeleteWithExecutor() throws Exception {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<Response> future = request.asyncDelete(executor);
         Response response = future.get();
@@ -1219,7 +1227,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testAsyncDeleteWithResultClassAndExecutor() throws Exception {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<String> future = request.asyncDelete(String.class, executor);
         String result = future.get();
@@ -1227,15 +1234,17 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncHeadMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
+    public void testAsyncHeadMethods() throws Exception {
+        enqueueResponses(2);
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
 
-        ContinuableFuture<?> future1 = request.asyncHead();
+        ContinuableFuture<Response> future1 = request.asyncHead();
         assertNotNull(future1);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncHead(executor);
+        ContinuableFuture<Response> future2 = request.asyncHead(executor);
         assertNotNull(future2);
+
+        awaitAndClose(future1, future2);
     }
 
     @Test
@@ -1254,7 +1263,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testAsyncHeadWithExecutor() throws Exception {
         server.enqueue(new MockResponse());
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<Response> future = request.asyncHead(executor);
         Response response = future.get();
@@ -1264,14 +1272,14 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncExecuteMethods() {
-        OkHttpRequest request = OkHttpRequest.url("https://httpbin.org/get");
+    public void testAsyncExecuteMethods() throws Exception {
+        enqueueResponses(4);
+        OkHttpRequest request = OkHttpRequest.url(baseUrl);
 
-        ContinuableFuture<?> future1 = request.asyncExecute(HttpMethod.GET);
+        ContinuableFuture<Response> future1 = request.asyncExecute(HttpMethod.GET);
         assertNotNull(future1);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<?> future2 = request.asyncExecute(HttpMethod.GET, executor);
+        ContinuableFuture<Response> future2 = request.asyncExecute(HttpMethod.GET, executor);
         assertNotNull(future2);
 
         ContinuableFuture<String> future3 = request.asyncExecute(HttpMethod.GET, String.class);
@@ -1279,6 +1287,9 @@ public class OkHttpRequestTest extends TestBase {
 
         ContinuableFuture<String> future4 = request.asyncExecute(HttpMethod.GET, String.class, executor);
         assertNotNull(future4);
+
+        awaitAndClose(future1, future2);
+        await(future3, future4);
     }
 
     @Test
@@ -1298,7 +1309,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testAsyncExecuteWithExecutor() throws Exception {
         server.enqueue(new MockResponse().setBody("Async Execute response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<Response> future = request.asyncExecute(HttpMethod.GET, executor);
         Response response = future.get();
@@ -1322,7 +1332,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testAsyncExecuteWithResultClassAndExecutor() throws Exception {
         server.enqueue(new MockResponse().setBody("Async Execute response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Executor executor = Executors.newSingleThreadExecutor();
 
         ContinuableFuture<String> future = request.asyncExecute(HttpMethod.GET, String.class, executor);
         String result = future.get();
@@ -1501,6 +1510,26 @@ public class OkHttpRequestTest extends TestBase {
         } finally {
             releaseClose.countDown();
             closerExecutor.shutdownNow();
+        }
+    }
+
+    private void enqueueResponses(final int count) {
+        for (int i = 0; i < count; i++) {
+            server.enqueue(new MockResponse().setBody("OK"));
+        }
+    }
+
+    @SafeVarargs
+    private static void awaitAndClose(final ContinuableFuture<Response>... futures) throws Exception {
+        for (final ContinuableFuture<Response> future : futures) {
+            IOUtil.close(future.get(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @SafeVarargs
+    private static void await(final ContinuableFuture<?>... futures) throws Exception {
+        for (final ContinuableFuture<?> future : futures) {
+            assertNotNull(future.get(5, TimeUnit.SECONDS));
         }
     }
 

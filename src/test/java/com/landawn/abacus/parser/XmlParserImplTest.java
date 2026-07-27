@@ -431,6 +431,19 @@ public class XmlParserImplTest extends TestBase {
     }
 
     @Test
+    public void testSerializeMapIgnoresKeysByTheirStringForm() {
+        final Map<Object, String> map = new HashMap<>();
+        map.put(new StringBuilder("skip"), "hidden");
+        map.put(new StringBuilder("keep"), "visible");
+        final XmlSerConfig config = new XmlSerConfig().setIgnoredPropNames(Map.class, N.asSet("skip"));
+
+        final String xml = staxParser.serialize(map, config);
+
+        Assertions.assertFalse(xml.contains("skip"), xml);
+        Assertions.assertTrue(xml.contains("keep"), xml);
+    }
+
+    @Test
     public void testSerializeMapEntity() {
         MapEntity entity = new MapEntity("TestEntity");
         entity.set("prop1", "value1");
@@ -672,6 +685,9 @@ public class XmlParserImplTest extends TestBase {
         config.setFailOnEmptyBean(false);
         String xml = staxParser.serialize(bean, config);
         Assertions.assertEquals("", xml);
+
+        final XmlParserImpl parserWithDefaultConfig = new XmlParserImpl(XmlParserType.StAX, config, null);
+        Assertions.assertEquals("", parserWithDefaultConfig.serialize(bean));
     }
 
     @Test
@@ -1334,6 +1350,26 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertNotNull(result);
         Assertions.assertEquals("DOMBean", result.getName());
         Assertions.assertEquals(66, result.getAge());
+    }
+
+    @Test
+    public void testDomBeanParsingSkipsCommentsAndProcessingInstructions() {
+        final String xml = "<TestBean><?before value?><name>DOMBean</name><!-- between --><age>66</age></TestBean>";
+
+        final TestBean result = domParser.deserialize(xml, TestBean.class);
+
+        Assertions.assertEquals("DOMBean", result.getName());
+        Assertions.assertEquals(66, result.getAge());
+    }
+
+    @Test
+    public void testDomTagByValueRequiresPropertyNameAttribute() {
+        final String xml = "<bean name=\"TestBean\"><property>DOMBean</property><property name=\"age\">66</property></bean>";
+        final XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
+
+        final ParsingException exception = Assertions.assertThrows(ParsingException.class, () -> domParser.deserialize(xml, config, TestBean.class));
+
+        Assertions.assertTrue(exception.getMessage().contains("Missing 'name' attribute"), exception.getMessage());
     }
 
     @Test

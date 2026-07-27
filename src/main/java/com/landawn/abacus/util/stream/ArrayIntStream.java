@@ -79,6 +79,9 @@ import com.landawn.abacus.util.function.IntToShortFunction;
  * <li>Type conversion support to other primitive stream types</li>
  * </ul>
  *
+ * <p>This is an internal implementation class. Users should create streams through
+ * the public IntStream factory methods rather than instantiating this class directly.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * int[] data = {1, 2, 3, 4, 5};
@@ -96,10 +99,17 @@ import com.landawn.abacus.util.function.IntToShortFunction;
  * System.out.println("Average: " + summary.getAverage());
  * }</pre>
  *
+ * @see IntStream
  */
 class ArrayIntStream extends AbstractIntStream {
+
+    /** The backing array. It is used directly, not copied, so callers must not mutate it afterwards. */
     final int[] elements;
+
+    /** Index of the first element of this stream within {@link #elements}, inclusive. */
     final int fromIndex;
+
+    /** Index one past the last element of this stream within {@link #elements}, exclusive. */
     final int toIndex;
 
     /**
@@ -2236,10 +2246,11 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    protected IntStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected IntStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelArrayIntStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelArrayIntStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 

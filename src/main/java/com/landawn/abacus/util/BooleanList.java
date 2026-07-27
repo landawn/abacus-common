@@ -52,8 +52,8 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Zero-Boxing Overhead:</b> Direct boolean primitive storage without Boolean wrapper allocation</li>
  *   <li><b>Memory Efficiency:</b> Compact boolean array storage with minimal memory overhead</li>
  *   <li><b>High Performance:</b> Optimized algorithms for boolean-specific operations</li>
- *   <li><b>Rich Boolean API:</b> Specialized methods for boolean logic and bit manipulation</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Rich Boolean API:</b> Primitive search, replacement, filtering, and occurrence-count operations</li>
+ *   <li><b>Occurrence Operations:</b> Intersection, difference, and symmetric difference with multiset semantics</li>
  *   <li><b>Statistical Operations:</b> Count occurrences of true/false values</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
@@ -110,7 +110,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Insertion:</b> O(1) amortized for append, O(n) for middle insertion</li>
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) for contains/indexOf operations</li>
- *   <li><b>Set Operations:</b> O(n) for intersection, union, difference</li>
+ *   <li><b>Occurrence Operations:</b> O(n) for intersection, difference, and symmetric difference</li>
  *   <li><b>Bulk Operations:</b> O(n) for addAll, removeAll, replaceAll</li>
  * </ul>
  *
@@ -118,7 +118,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Storage:</b> 1 bit per boolean value in theory, 1 byte per boolean in practice</li>
  *   <li><b>Overhead:</b> Minimal object header and length field overhead</li>
- *   <li><b>vs List&lt;Boolean&gt;:</b> ~16x less memory usage (no Boolean wrapper objects)</li>
+ *   <li><b>vs List&lt;Boolean&gt;:</b> Avoids per-element references and boxing operations</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  * </ul>
  *
@@ -171,7 +171,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Capacity:</b> The no-argument constructor starts with shared zero-length storage; first growth allocates at least 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
  *   <li><b>Manual Control:</b> specify the initial capacity via the {@code BooleanList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
@@ -198,12 +198,12 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>RandomAccess:</b> Indicates efficient random access capabilities</li>
  *   <li><b>Collection Compatibility:</b> Seamless conversion to standard collections</li>
  *   <li><b>Utility Integration:</b> Works with Collections utility methods via boxed()</li>
- *   <li><b>Stream API:</b> Full integration with Java 8+ streaming operations</li>
+ *   <li><b>Stream API:</b> Integration via {@link #stream()}, which returns a boxed {@link Stream}{@code <Boolean>}</li>
  * </ul>
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Boolean&gt;:</b> 16x less memory, significantly faster operations</li>
+ *   <li><b>vs List&lt;Boolean&gt;:</b> Avoids boxing and per-element references</li>
  *   <li><b>vs boolean[]:</b> Dynamic sizing, rich API, set operations</li>
  *   <li><b>vs BitSet:</b> {@link java.util.BitSet} is more compact for large bit vectors; {@code BooleanList} focuses on list-style ordering and primitive-list APIs</li>
  *   <li><b>vs Collection&lt;Boolean&gt;:</b> Type safety, performance, boolean-specific operations</li>
@@ -222,14 +222,14 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Pre-size lists with known capacity using the {@code BooleanList(int)} constructor</li>
  *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
- *   <li>Prefer {@code contains()} over {@code indexOf() >= 0} for existence checks</li>
+ *   <li>Use {@code contains()} for existence checks; it delegates to {@code indexOf()}, so it costs no more</li>
  *   <li>Use {@code frequency()} instead of manual counting loops</li>
  * </ul>
  *
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Feature Flags:</b> {@code BooleanList features = BooleanList.repeat(false, flagCount);}</li>
- *   <li><b>Filtering Results:</b> {@code BooleanList matches = data.stream().map(predicate).collect(...)}</li>
+ *   <li><b>Filtering Results:</b> {@code BooleanList matches = BooleanList.of(true, false, true); matches.removeIf(value -> !value);}</li>
  *   <li><b>Boolean Logic:</b> {@code result = set1.intersection(set2).contains(true);}</li>
  *   <li><b>State Tracking:</b> {@code states.set(index, newState); boolean current = states.get(index);}</li>
  * </ul>
@@ -251,10 +251,10 @@ import com.landawn.abacus.util.stream.Stream;
  * // Multiset-style intersection: pairs each element of a with one matching element of b
  * BooleanList and = a.intersection(b);   // returns [true, false, true, false]
  *
- * // OR operation: combine all true positions
- * BooleanList or = a.copy();
- * or.addAll(b);
- * or = or.distinct();   // returns [true, false] (only the unique boolean values)
+ * // Collect the distinct values occurring in either list (not positional OR)
+ * BooleanList distinctValues = a.copy();
+ * distinctValues.addAll(b);
+ * distinctValues = distinctValues.distinct();   // returns [true, false]
  *
  * // Multiset-style symmetric difference: elements left over after pairing
  * BooleanList xor = a.symmetricDifference(b);   // returns [] (a and b have the same multiset of values)
@@ -276,6 +276,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     @Serial
     private static final long serialVersionUID = -1194435277403867258L;
 
+    /** Shared random number generator used by {@link #random(int)}. */
     static final Random RAND = new SecureRandom();
 
     /**
@@ -1647,7 +1648,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param b the BooleanList to intersect with this list
      * @return a new BooleanList containing the intersection of this list and the specified list
-     * @see BooleanList#intersection(BooleanList)
+     * @see #intersection(boolean[])
      */
     @Override
     public BooleanList intersection(final BooleanList b) {
@@ -1677,7 +1678,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param b the array to intersect with this list
      * @return a new BooleanList containing the intersection of this list and the specified array
      * @see #intersection(BooleanList)
-     * @see BooleanList#intersection(boolean[])
      */
     @Override
     public BooleanList intersection(final boolean[] b) {
@@ -1765,7 +1765,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param b the BooleanList to compute symmetric difference with
      * @return a new BooleanList containing the symmetric difference of the two lists
-     * @see BooleanList#symmetricDifference(BooleanList)
+     * @see #symmetricDifference(boolean[])
      */
     @Override
     public BooleanList symmetricDifference(final BooleanList b) {
@@ -1807,7 +1807,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param b the array to compute symmetric difference with
      * @return a new BooleanList containing the symmetric difference
      * @see #symmetricDifference(BooleanList)
-     * @see BooleanList#symmetricDifference(boolean[])
      */
     @Override
     public BooleanList symmetricDifference(final boolean[] b) {
@@ -2328,6 +2327,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public BooleanList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
+        if (size == 0) {
+            return new BooleanList(N.copyOfRange(elementData, 0, 0, step));
+        }
+
         // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
         // against the backing array's length, which may exceed size and expose phantom elements.
         return new BooleanList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
@@ -2724,8 +2727,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * <pre>{@code
      * int hashCode = 1;
-     * for (boolean e : list)
+     * for (int i = 0; i < list.size(); i++) {
+     *     boolean e = list.get(i);
      *     hashCode = 31 * hashCode + (e ? 1231 : 1237);
+     * }
      * }</pre>
      *
      * @return the hash code value for this list
@@ -2763,7 +2768,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * of the list's elements in order, enclosed in square brackets ("[]"). Adjacent
      * elements are separated by the characters ", " (comma and space).
      *
-     * <p><b>Usage Examples:</b> A list containing {@code true}, false, {@code true} would return "{@code [true, false, true]}".</p>
+     * <p><b>Usage Examples:</b> A list containing {@code true}, {@code false}, {@code true} would return "{@code [true, false, true]}".</p>
      *
      * @return a string representation of this list
      */

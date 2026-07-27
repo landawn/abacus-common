@@ -141,7 +141,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Type Conversion System:</b> Sophisticated type conversion between primitives, wrappers, and objects</li>
  *   <li><b>Method Handle Support:</b> Modern method handle creation for improved reflection performance</li>
  *   <li><b>Package Scanning:</b> Efficient class discovery and classpath scanning capabilities</li>
- *   <li><b>XML Binding Integration:</b> Support for JAXB and XML binding class operations</li>
+ *   <li><b>Type-Name Formatting:</b> Readable, normalized names for parameterized and array types</li>
  *   <li><b>Cached Metadata:</b> Thread-safe caching of reflection metadata for optimal performance</li>
  *   <li><b>Security Aware:</b> Proper handling of security managers and access control</li>
  * </ul>
@@ -150,7 +150,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <ul>
  *   <li><b>Performance First:</b> Extensive caching and optimization for high-throughput reflection operations</li>
  *   <li><b>Type Safety Priority:</b> Strong typing support with comprehensive type conversion capabilities</li>
- *
  *   <li><b>Cache Efficiency:</b> Intelligent caching strategies to balance memory usage and performance</li>
  *   <li><b>Security Conscious:</b> Proper access control and security manager integration</li>
  *   <li><b>Framework Integration:</b> Designed for seamless integration with enterprise frameworks</li>
@@ -197,7 +196,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   </tr>
  * </table>
  *
- * <p><b>Bean Property Operations:</b>
+ * <p><b>Bean Property Operations:</b> the operations below live in {@link Beans}, not in this class; they are
+ * listed here because {@code ClassUtil} supplies the underlying reflection primitives.
  * <ul>
  *   <li><b>Property Discovery:</b> Automatic discovery of JavaBean properties using getter/setter conventions</li>
  *   <li><b>Type-Safe Access:</b> Strong typing for property values with automatic type conversion</li>
@@ -296,13 +296,16 @@ import com.landawn.abacus.util.u.OptionalShort;
  * }
  * }</pre>
  *
- * <p><b>Type Conversion and Wrapping:</b>
+ * <p><b>Type Conversion and Wrapping:</b> These methods map {@code Class} objects to other {@code Class}
+ * objects; they never convert values.
  * <ul>
- *   <li><b>Primitive Wrapping:</b> Automatic conversion between primitive types and their wrapper classes</li>
- *   <li><b>Type Compatibility:</b> Intelligent type compatibility checking and conversion</li>
- *   <li><b>Collection Types:</b> Support for generic collection type handling and conversion</li>
- *   <li><b>Null Safety:</b> Proper {@code null} handling in type conversion operations</li>
- *   <li><b>Custom Converters:</b> Extensible type conversion system for custom types</li>
+ *   <li><b>Primitive Wrapping:</b> {@link #wrap(Class)} maps a primitive type (and a primitive array type) to its
+ *       wrapper equivalent; any other class is returned unchanged</li>
+ *   <li><b>Primitive Unwrapping:</b> {@link #unwrap(Class)} performs the reverse mapping</li>
+ *   <li><b>Type Classification:</b> {@link #isPrimitiveType(Class)}, {@link #isPrimitiveWrapper(Class)} and
+ *       {@link #isPrimitiveArrayType(Class)} classify a class without loading its metadata</li>
+ *   <li><b>Value Conversion:</b> For converting <i>values</i> between types, use {@link com.landawn.abacus.type.Type}
+ *       or {@link N}</li>
  * </ul>
  *
  * <p><b>Performance Optimization Features:</b>
@@ -340,12 +343,14 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>JAR File Processing:</b> Efficient scanning of JAR files and nested archives</li>
  * </ul>
  *
- * <p><b>XML Binding and JAXB Integration:</b>
+ * <p><b>Type-Name Formatting:</b>
  * <ul>
- *   <li><b>JAXB Class Support:</b> Special handling for JAXB-annotated classes</li>
- *   <li><b>XML Element Mapping:</b> Integration with XML element and attribute annotations</li>
- *   <li><b>Schema Generation:</b> Support for XML schema generation from Java classes</li>
- *   <li><b>Namespace Handling:</b> Proper XML namespace processing for binding operations</li>
+ *   <li><b>Readable Names:</b> {@link #formatParameterizedTypeName(String)} strips {@code "class "}/{@code "interface "}
+ *       prefixes, normalizes {@code [L...;} array notation, and drops the {@code java.lang.} package prefix</li>
+ *   <li><b>Generic Members:</b> {@link #getParameterizedTypeNameByField(Field)} and
+ *       {@link #getParameterizedTypeNameByMethod(Method)} recover the declared generic type of a field or method</li>
+ *   <li><b>Reflection Types:</b> {@link #getTypeName(java.lang.reflect.Type)} applies the same formatting to any
+ *       {@link java.lang.reflect.Type}</li>
  * </ul>
  *
  * <p><b>Attribution:</b>
@@ -413,12 +418,11 @@ public final class ClassUtil {
 
     private static final String CLASS_POSTFIX = ".class";
 
-    // ... it has to be big enough to make it safe to add an element to
-    // ArrayBlockingQueue.
+    // Shared capacity for the bounded reflection metadata pools.
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    // formalized property name list.
+    // Built-in aliases resolved without class-loader lookups.
     private static final Map<String, Class<?>> BUILT_IN_TYPE = new ObjectPool<>(POOL_SIZE); // new LinkedHashMap<>();
 
     static {
@@ -1227,7 +1231,8 @@ public final class ClassUtil {
      *         discovery order; duplicate classes may appear if multiple resources overlap.
      * @throws IllegalArgumentException if no classpath resources are found
      *                                  for the specified package (e.g., package does not exist, typo in package name,
-     *                                  or attempting to scan JDK packages which are not supported).
+     *                                  or attempting to scan JDK packages which are not supported), or if
+     *                                  {@code pkgName} is empty or {@code predicate} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during classpath scanning, JAR file reading, or
      *                              resource enumeration. This typically indicates file system issues, corrupted
      *                              JAR files, or insufficient permissions for accessing classpath resources.
@@ -1242,6 +1247,9 @@ public final class ClassUtil {
      */
     public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotEmpty(pkgName, "pkgName");
+        N.checkArgNotNull(predicate, "predicate");
+
         if (logger.isDebugEnabled()) {
             logger.debug("Looking for classes in package: " + pkgName);
         }
@@ -1318,35 +1326,31 @@ public final class ClassUtil {
                         entry = entries.nextElement();
                         entryName = entry.getName();
 
-                        if (entryName.startsWith(pkgPath)) {
-                            if (entryName.endsWith(CLASS_POSTFIX) && (entryName.indexOf("/", pkgPath.length()) < 0)) {
-                                // Strip the ".class" suffix BEFORE converting '/' to '.': replace on the converted
-                                // name would also hit package segments named "class*" (e.g. com.example.classes).
-                                final String className = filePathToPackageName(entryName.substring(0, entryName.length() - CLASS_POSTFIX.length()));
+                        if (!entry.isDirectory() && entryName.startsWith(pkgPath) && entryName.endsWith(CLASS_POSTFIX)) {
+                            final String relativeEntryName = entryName.substring(pkgPath.length());
 
-                                try { //NOSONAR
-                                    final Class<?> clazz = ClassUtil.forName(className, false);
-                                    final Package pkg = clazz.getPackage();
+                            if (!isRecursive && relativeEntryName.indexOf('/') >= 0) {
+                                continue;
+                            }
 
-                                    if ((clazz.getCanonicalName() != null) && (pkg != null)
-                                            && (pkg.getName().equals(pkgName) || (pkg.getName().startsWith(pkgName) && isRecursive)) && predicate.test(clazz)) {
-                                        classes.add(clazz);
-                                    }
-                                } catch (final Throwable e) {
-                                    if (logger.isWarnEnabled()) {
-                                        logger.warn("ClassNotFoundException loading " + className, e);
-                                    }
+                            // Strip the ".class" suffix BEFORE converting '/' to '.': replace on the converted
+                            // name would also hit package segments named "class*" (e.g. com.example.classes).
+                            final String className = filePathToPackageName(entryName.substring(0, entryName.length() - CLASS_POSTFIX.length()));
 
-                                    if (!skipClassLoadingException) {
-                                        IOUtil.close(jarFile);
-                                        jarFile = null;
-                                        throw new RuntimeException("ClassNotFoundException loading " + className, e);
-                                    }
+                            try { //NOSONAR
+                                final Class<?> clazz = ClassUtil.forName(className, false);
+
+                                if (clazz.getCanonicalName() != null && predicate.test(clazz)) {
+                                    classes.add(clazz);
                                 }
-                            } else if (entry.isDirectory() && (entryName.length() > (pkgPath.length() + 1)) && isRecursive) {
-                                final String subPkgName = filePathToPackageName(entryName);
-                                //noinspection ConstantValue
-                                classes.addAll(findClassesInPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
+                            } catch (final Throwable e) {
+                                if (logger.isWarnEnabled()) {
+                                    logger.warn("ClassNotFoundException loading " + className, e);
+                                }
+
+                                if (!skipClassLoadingException) {
+                                    throw new RuntimeException("ClassNotFoundException loading " + className, e);
+                                }
                             }
                         }
                     }
@@ -1361,8 +1365,6 @@ public final class ClassUtil {
 
         return classes;
     }
-
-    //    /**
 
     private static List<URL> getResources(final String pkgName) {
         final List<URL> resourceList = new ArrayList<>();
@@ -1888,7 +1890,7 @@ public final class ClassUtil {
      * }
      *
      * // API response type formatting
-     * public class TypeInfoResponse {
+     * class TypeInfoResponse {
      *     public String getFormattedType(Class<?> clazz) {
      *         return ClassUtil.formatParameterizedTypeName(clazz.getTypeName());
      *     }
@@ -1973,9 +1975,9 @@ public final class ClassUtil {
             res = res.substring("interface [L".length(), res.length() - 1) + "[]";
         }
 
-        // Strip "java.lang." only when a class name follows (uppercase): subpackages such as
-        // java.lang.reflect must keep their full name or the result is unresolvable.
-        res = res.replaceAll("java\\.lang\\.(?=[A-Z])", "").replace("class ", "").replace("interface ", ""); //NOSONAR
+        // Strip a complete "java.lang." token only when a class name follows (uppercase): subpackages such as
+        // java.lang.reflect and user packages containing that segment must keep their full name.
+        res = res.replaceAll("(?<![\\w.$])java\\.lang\\.(?=[A-Z])", "").replace("class ", "").replace("interface ", ""); //NOSONAR
 
         final int idx = res.lastIndexOf('$');
 
@@ -2414,7 +2416,7 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a member class.
-     * A member class is a non-static nested class that is directly enclosed within another class.
+     * A member class is a nested class (static or non-static) that is directly enclosed within another class.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2439,7 +2441,15 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = ClassUtil.isAnonymousOrMemberClass(someClass);
+     * class Outer {
+     *     class Inner { }
+     * }
+     * Runnable r = new Runnable() {
+     *     public void run() { }
+     * };
+     * boolean member = ClassUtil.isAnonymousOrMemberClass(Outer.Inner.class);   // returns true
+     * boolean anon = ClassUtil.isAnonymousOrMemberClass(r.getClass());          // returns true
+     * boolean neither = ClassUtil.isAnonymousOrMemberClass(String.class);       // returns false
      * }</pre>
      *
      * @param cls the class to be checked
@@ -2523,7 +2533,7 @@ public final class ClassUtil {
         return Type.of(cls).isPrimitiveArray();
     }
 
-    // ...
+    // Bidirectional lookup between primitive types and their wrapper classes.
     private static final BiMap<Class<?>, Class<?>> PRIMITIVE_2_WRAPPER = new BiMap<>();
 
     static {

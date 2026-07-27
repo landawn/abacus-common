@@ -149,6 +149,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
 
     /**
      * Returns the serialization type category for this immutable list.
+     * Delegates to the underlying list type for serialization categorization.
      *
      * @return {@link SerializationType#SERIALIZABLE} if the underlying list type is serializable,
      *         or {@link SerializationType#COLLECTION} otherwise
@@ -186,8 +187,9 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to parse; may be {@code null}
-     * @return a new {@link ImmutableList} containing the parsed elements, or {@code null} if the input is {@code null}
+     * @param str the string to parse; may be {@code null} or blank
+     * @return a new {@link ImmutableList} containing the parsed elements,
+     *         or {@code null} if {@code str} is {@code null} or blank
      * @see #valueOf(Object)
      * @see #stringOf(ImmutableList)
      */

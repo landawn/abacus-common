@@ -235,7 +235,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param toIndex the index after the last element to iterate (exclusive)
      * @return an {@code ObjListIterator} over the specified range of array elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0},
-     *         {@code toIndex > (a == {@code null} ? 0 : a.length)}, or {@code fromIndex > toIndex}
+     *         {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static <T> ObjListIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -753,8 +753,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * ObjListIterator<String> iter = ObjListIterator.of(list);
      * iter.next();
      * iter.foreachIndexed((index, value) ->
-     *     System.out.println(index + ": " + value)
-     * );
+     *     System.out.println(index + ": " + value));
      * // Prints:
      * // 1: b
      * // 2: c
@@ -763,8 +762,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each element and its index
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if {@link #nextIndex()} overflows (more than
-     *         {@link Integer#MAX_VALUE} elements)
+     * @throws IllegalStateException if {@link #nextIndex()} returns a negative value because its
+     *         index has overflowed
      * @throws E if the action throws an exception
      * @see #foreachRemaining(Throwables.Consumer)
      */

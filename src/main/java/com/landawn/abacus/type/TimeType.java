@@ -70,13 +70,14 @@ public class TimeType extends AbstractDateType<Time> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Time> type = TypeFactory.getType(Time.class);
-     * Time time1 = type.valueOf(1609459200000L);   // From milliseconds
-     * Time time2 = type.valueOf(new Date());       // From Date
-     * Time time3 = type.valueOf("12:30:45");       // From String
+     * Time time1 = type.valueOf(1609459200000L);        // From milliseconds
+     * Time time2 = type.valueOf(new java.util.Date());  // From Date
+     * Time time3 = type.valueOf("12:30:45");            // From String
      * }</pre>
      *
      * @param obj the object to convert
-     * @return a Time object, or {@code null} if obj is null
+     * @return a Time object, or {@code null} if {@code obj} is {@code null}
+     *         or is a value whose string form {@link #valueOf(String)} maps to {@code null}
      */
     @Override
     public Time valueOf(final Object obj) {

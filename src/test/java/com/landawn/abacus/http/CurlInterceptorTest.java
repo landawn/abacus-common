@@ -68,21 +68,27 @@ public class CurlInterceptorTest extends TestBase {
             count[0]++;
         });
 
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("GET response"));
+            server.enqueue(new MockResponse().setBody("POST response"));
 
-        Request request1 = new Request.Builder().url("https://httpbin.org/get").get().build();
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            Request request1 = new Request.Builder().url(server.url("/get")).get().build();
+            Request request2 = new Request.Builder().url(server.url("/post")).post(RequestBody.create("", MediaType.get("text/plain"))).build();
 
-        Request request2 = new Request.Builder().url("https://httpbin.org/post").post(RequestBody.create("", MediaType.get("text/plain"))).build();
+            try (Response ignored = client.newCall(request1).execute()) {
+                // Close the response before issuing the next request.
+            }
 
-        try {
-            client.newCall(request1).execute();
-            client.newCall(request2).execute();
-        } catch (Exception e) {
-            // May fail due to network
+            try (Response ignored = client.newCall(request2).execute()) {
+                // Closed by try-with-resources.
+            }
         }
 
         // Log handler should be called for each request
-        assertTrue(count[0] >= 0);
+        assertEquals(2, count[0]);
+        assertNotNull(capturedCurl.get());
     }
 
     @Test
@@ -90,20 +96,20 @@ public class CurlInterceptorTest extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("OK"));
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            Request request = new Request.Builder().url(server.url("/get")).get().build();
 
-        Request request = new Request.Builder().url("https://httpbin.org/get").get().build();
+            try (Response ignored = client.newCall(request).execute()) {
+                // Closed by try-with-resources.
+            }
 
-        try {
-            client.newCall(request).execute();
-        } catch (Exception e) {
-            // May fail due to network, but interceptor should still capture curl
-        }
-
-        String curl = capturedCurl.get();
-        if (curl != null) {
+            String curl = capturedCurl.get();
+            assertNotNull(curl);
             assertTrue(curl.contains("curl"));
-            assertTrue(curl.contains("https://httpbin.org/get"));
+            assertTrue(curl.contains(server.url("/get").toString()));
         }
     }
 
@@ -112,21 +118,21 @@ public class CurlInterceptorTest extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("OK"));
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            RequestBody body = RequestBody.create("{\"key\":\"value\"}", MediaType.get("application/json"));
+            Request request = new Request.Builder().url(server.url("/post")).post(body).build();
 
-        RequestBody body = RequestBody.create("{\"key\":\"value\"}", MediaType.get("application/json"));
-        Request request = new Request.Builder().url("https://httpbin.org/post").post(body).build();
+            try (Response ignored = client.newCall(request).execute()) {
+                // Closed by try-with-resources.
+            }
 
-        try {
-            client.newCall(request).execute();
-        } catch (Exception e) {
-            // May fail due to network, but interceptor should still capture curl
-        }
-
-        String curl = capturedCurl.get();
-        if (curl != null) {
+            String curl = capturedCurl.get();
+            assertNotNull(curl);
             assertTrue(curl.contains("curl"));
-            assertTrue(curl.contains("https://httpbin.org/post"));
+            assertTrue(curl.contains(server.url("/post").toString()));
             assertTrue(curl.contains("POST") || curl.contains("-d") || curl.contains("--data"));
         }
     }
@@ -136,22 +142,22 @@ public class CurlInterceptorTest extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("OK"));
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            Request request = new Request.Builder().url(server.url("/get"))
+                    .header("Accept", "application/json")
+                    .header("Authorization", "Bearer token")
+                    .get()
+                    .build();
 
-        Request request = new Request.Builder().url("https://httpbin.org/get")
-                .header("Accept", "application/json")
-                .header("Authorization", "Bearer token")
-                .get()
-                .build();
+            try (Response ignored = client.newCall(request).execute()) {
+                // Closed by try-with-resources.
+            }
 
-        try {
-            client.newCall(request).execute();
-        } catch (Exception e) {
-            // May fail due to network, but interceptor should still capture curl
-        }
-
-        String curl = capturedCurl.get();
-        if (curl != null) {
+            String curl = capturedCurl.get();
+            assertNotNull(curl);
             assertTrue(curl.contains("curl"));
             assertTrue(curl.contains("-H") || curl.contains("--header"));
         }
@@ -162,20 +168,20 @@ public class CurlInterceptorTest extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor('"', capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("OK"));
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            Request request = new Request.Builder().url(server.url("/get")).get().build();
 
-        Request request = new Request.Builder().url("https://httpbin.org/get").get().build();
+            try (Response ignored = client.newCall(request).execute()) {
+                // Closed by try-with-resources.
+            }
 
-        try {
-            client.newCall(request).execute();
-        } catch (Exception e) {
-            // May fail due to network, but interceptor should still capture curl
-        }
-
-        String curl = capturedCurl.get();
-        if (curl != null) {
+            String curl = capturedCurl.get();
+            assertNotNull(curl);
             assertTrue(curl.contains("curl"));
-            // When using double quote, URLs and values should be quoted with "
+            // When using double quote, URLs and values should be quoted with ".
             assertTrue(curl.contains("\"") || curl.contains("curl"));
         }
     }
@@ -185,19 +191,19 @@ public class CurlInterceptorTest extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("OK"));
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            RequestBody body = RequestBody.create("test data", MediaType.get("text/plain"));
+            Request request = new Request.Builder().url(server.url("/post")).post(body).build();
 
-        RequestBody body = RequestBody.create("test data", MediaType.get("text/plain"));
-        Request request = new Request.Builder().url("https://httpbin.org/post").post(body).build();
+            try (Response ignored = client.newCall(request).execute()) {
+                // Closed by try-with-resources.
+            }
 
-        try {
-            client.newCall(request).execute();
-        } catch (Exception e) {
-            // May fail due to network, but interceptor should still capture curl
-        }
-
-        String curl = capturedCurl.get();
-        if (curl != null) {
+            String curl = capturedCurl.get();
+            assertNotNull(curl);
             assertTrue(curl.contains("curl"));
             assertTrue(curl.contains("test data") || curl.contains("-d") || curl.contains("--data"));
         }
@@ -208,20 +214,20 @@ public class CurlInterceptorTest extends TestBase {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
 
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("OK"));
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+            RequestBody body = RequestBody.create("test data", MediaType.parse("text/plain; charset=UTF-8"));
+            Request request = new Request.Builder().url(server.url("/post")).header("Content-Type", "text/plain; charset=ISO-8859-1").post(body).build();
 
-        RequestBody body = RequestBody.create("test data", MediaType.parse("text/plain; charset=UTF-8"));
-        Request request = new Request.Builder().url("https://httpbin.org/post").header("Content-Type", "text/plain; charset=ISO-8859-1").post(body).build();
-
-        try {
-            client.newCall(request).execute();
-        } catch (Exception e) {
-            // May fail due to network, but interceptor should still capture curl
+            try (Response ignored = client.newCall(request).execute()) {
+                // Closed by try-with-resources.
+            }
         }
 
-        String curl = capturedCurl.get();
         assertNotNull(interceptor);
-        // The curl should be generated even if request fails
+        assertNotNull(capturedCurl.get());
     }
 
     @Test

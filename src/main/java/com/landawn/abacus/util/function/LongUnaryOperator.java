@@ -137,6 +137,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * boolean condition = true;
      * LongUnaryOperator op = condition ? x -> x * 2 : LongUnaryOperator.identity();
      * long result = op.applyAsLong(5L);   // returns 10L if condition is true, 5L otherwise
      * }</pre>

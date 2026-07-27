@@ -19,10 +19,12 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@link com.landawn.abacus.util.MutableLong} objects, providing
- * serialization, deserialization, and database interaction capabilities for
- * mutable {@code long} wrapper objects. Values are serialized as the unwrapped
- * numeric long (identical to {@link LongType}).
+ * Type handler for {@link com.landawn.abacus.util.MutableLong} objects.
+ * <p>
+ * This class provides serialization, deserialization, and database operations for
+ * {@code MutableLong} instances, which are mutable wrappers around primitive
+ * {@code long} values. Values are serialized as the unwrapped numeric long
+ * (identical to {@link LongType}).
  *
  * @see com.landawn.abacus.util.MutableLong
  * @see NumberType
@@ -33,9 +35,8 @@ public class MutableLongType extends NumberType<MutableLong> {
     public static final String MUTABLE_LONG = MutableLong.class.getSimpleName();
 
     /**
-     * Protected constructor for MutableLongType.
-     * This constructor is invoked by the type system (typically via {@link TypeFactory})
-     * when registering the {@link MutableLong} type handler.
+     * Constructor for {@code MutableLongType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     protected MutableLongType() {
         super(MUTABLE_LONG);
@@ -60,7 +61,7 @@ public class MutableLongType extends NumberType<MutableLong> {
      * into the original value.</p>
      *
      * @param x the {@code MutableLong} object to convert, may be {@code null}
-     * @return the string representation of the long value, or {@code null} if the input is {@code null}
+     * @return the decimal string representation of the long value, or {@code null} if the input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */

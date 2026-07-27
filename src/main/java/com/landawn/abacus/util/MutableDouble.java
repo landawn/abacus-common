@@ -59,7 +59,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableDouble num = new MutableDouble();
+     * MutableDouble num = MutableDouble.of(0.0);
      * }</pre>
      *
      */
@@ -71,7 +71,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableDouble num = new MutableDouble(3.14159);
+     * MutableDouble num = MutableDouble.of(3.14159);
      * }</pre>
      *
      * @param value the initial value to store
@@ -175,8 +175,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Sets the value and then returns it.
-     * This method first updates the internal value to the specified value,
-     * then returns the newly set value.
+     * This is useful when you want to update and immediately use the new value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -185,7 +184,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * }</pre>
      *
      * @param newValue the new value to set
-     * @return the newly set value
+     * @return the new value after it has been set
      */
     public double setAndGet(final double newValue) {
         this.value = newValue;
@@ -193,7 +192,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Sets the value to newValue if the predicate returns {@code true} for the current value.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p><b>Usage Examples:</b></p>
@@ -203,9 +202,9 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * changed = num.setIf(val -> val < 15, 5.0);            // returns false, value remains 20.7
      * }</pre>
      *
-     * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate that tests the current value
-     * @param newValue the new value to set if the predicate evaluates to {@code true}
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate the predicate to test the current value
+     * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws NullPointerException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception

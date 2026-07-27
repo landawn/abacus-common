@@ -64,6 +64,13 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
 
     private final NavigableSet<E> navigableSet;
 
+    /**
+     * Constructs an ImmutableNavigableSet backed by the provided navigable set.
+     * The backing set is always exposed through an unmodifiable view; its concrete class name
+     * is not treated as evidence that it is immutable.
+     *
+     * @param navigableSet the navigable set whose elements are to be included in this ImmutableNavigableSet.
+     */
     ImmutableNavigableSet(final NavigableSet<? extends E> navigableSet) {
         super(navigableSet);
         this.navigableSet = (NavigableSet<E>) navigableSet;
@@ -356,10 +363,19 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing the elements of the specified array in natural order.
      * Duplicate elements are removed. If the array is {@code null} or empty, the cached empty set is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf(new String[] { "charlie", "alpha", "beta", "alpha" });
+     * System.out.println(set);          // prints [alpha, beta, charlie]
+     * System.out.println(set.ceiling("b"));   // prints beta
+     * }</pre>
+     *
      * @param <E> the type of elements, which must be mutually comparable
      * @param a the array whose elements are to be copied
      * @return an ImmutableNavigableSet containing the array elements
      * @throws NullPointerException if the array contains a {@code null} element
+     * @throws ClassCastException if the elements are not mutually comparable
+     * @see #copyOf(Collection)
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final E[] a) {
         return N.isEmpty(a) ? empty() : new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(a)));
@@ -437,9 +453,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * This method is deprecated and will throw an UnsupportedOperationException if used.
-     * Use {@link #wrap(NavigableSet)} for NavigableSet or {@link ImmutableSortedSet#wrap(SortedSet)}
-     * for regular SortedSets.
+     * This method is deprecated and always throws an {@link UnsupportedOperationException}.
+     * Use {@link #wrap(NavigableSet)} for a {@code NavigableSet} or {@link ImmutableSortedSet#wrap(SortedSet)}
+     * for a regular {@code SortedSet}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -448,10 +464,12 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * }</pre>
      *
      * @param <E> the type of elements
-     * @param sortedSet ignored
+     * @param sortedSet the sorted set parameter (ignored)
      * @return never returns normally
      * @throws UnsupportedOperationException always
-     * @deprecated throws {@code UnsupportedOperationException}
+     * @deprecated this overload is not supported and always throws {@code UnsupportedOperationException};
+     *             use {@link #wrap(NavigableSet)} for a {@code NavigableSet} or
+     *             {@link ImmutableSortedSet#wrap(SortedSet)} for a regular {@code SortedSet}
      */
     @Deprecated
     public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) throws UnsupportedOperationException {

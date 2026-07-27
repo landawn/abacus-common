@@ -20,10 +20,14 @@ import com.landawn.abacus.util.cs;
 /**
  * Represents an operation that accepts two {@code byte}-valued arguments and returns no result.
  * This is the primitive type specialization of {@link java.util.function.BiConsumer} for {@code byte}.
+ * Unlike most other functional interfaces, {@code ByteBiConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(byte, byte)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.BiConsumer
+ * @see ByteConsumer
  */
 @FunctionalInterface
 public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeException> { //NOSONAR

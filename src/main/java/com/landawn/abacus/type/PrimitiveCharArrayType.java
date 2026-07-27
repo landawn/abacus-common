@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -152,7 +153,10 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return the parsed char array, or {@code null} if input is {@code null}, empty, or blank
+     * @return the parsed char array, or {@code null} if input is {@code null}, empty, or blank.
+     *         Returns an empty array for "[]".
+     * @throws NumberFormatException if an unquoted multi-character element cannot be parsed as a numeric character code
+     * @throws IllegalArgumentException if such an element parses to a numeric value outside the {@code char} range
      * @see #valueOf(Object)
      * @see #stringOf(char[])
      */
@@ -196,6 +200,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param obj the object to convert (can be a {@link Reader}, {@link Clob}, or any other type)
      * @return the char array representation of the object, or {@code null} if input is null
+     * @throws UncheckedIOException if an I/O error occurs while reading a {@link Reader}
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Clob
      * @throws UnsupportedOperationException if the Clob length exceeds {@link Integer#MAX_VALUE}
      */
@@ -207,7 +212,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         } else if (obj instanceof Reader reader) {
             return IOUtil.readAllChars(reader);
         } else if (obj instanceof Clob clob) {
-            RuntimeException primaryException = null;
+            Throwable primaryException = null;
 
             try {
                 final long len = clob.length();
@@ -216,11 +221,12 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 }
                 return clob.getSubString(1, (int) len).toCharArray();
             } catch (final SQLException e) {
-                primaryException = new UncheckedSQLException(e);
-                throw primaryException;
-            } catch (final RuntimeException e) {
+                final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
+                primaryException = uncheckedException;
+                throw uncheckedException;
+            } catch (final RuntimeException | Error e) {
                 primaryException = e;
-                throw primaryException;
+                throw e;
             } finally {
                 try {
                     clob.free();
@@ -230,6 +236,12 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                         primaryException.addSuppressed(freeException);
                     } else {
                         throw freeException; //NOSONAR
+                    }
+                } catch (final RuntimeException | Error e) {
+                    if (primaryException == null) {
+                        throw e;
+                    } else if (primaryException != e) {
+                        primaryException.addSuppressed(e);
                     }
                 }
             }
@@ -345,6 +357,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param c the Collection of Character objects to convert
      * @return a char array containing the unboxed values, or {@code null} if input is null
+     * @throws ClassCastException if any element in the collection is not a Character
+     * @throws NullPointerException if any element in the collection is {@code null}
      */
     @Override
     public char[] collectionToArray(final Collection<?> c) {
@@ -370,6 +384,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param x the char array to convert
      * @param output the Collection to add the boxed Character values to
+     * @throws ClassCastException if the output collection cannot accept Character objects
      */
     @Override
     public void arrayToCollection(final char[] x, final Collection<?> output) {
@@ -387,7 +402,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Uses the standard Arrays.hashCode algorithm for consistency.
      *
      * @param x the char array to hash
-     * @return the hash code of the array
+     * @return the hash code of the array, or 0 if the array is null
      */
     @Override
     public int hashCode(final char[] x) {

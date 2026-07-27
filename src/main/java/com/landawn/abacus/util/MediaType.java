@@ -47,14 +47,15 @@ package com.landawn.abacus.util;
  * MediaType decoded = MediaType.of(2);   // returns VIDEO
  *
  * // Using in switch statements
- * switch (contentType) {
+ * switch (type) {
  *     case AUDIO:
- *         processAudio();
+ *         System.out.println("audio");
  *         break;
  *     case VIDEO:
- *         processVideo();
+ *         System.out.println("video");
  *         break;
- *     // ... other cases
+ *     default:
+ *         System.out.println(type.name().toLowerCase(java.util.Locale.ROOT));
  * }
  * }</pre>
  *
@@ -146,7 +147,7 @@ public enum MediaType {
      * int audioCode = audioType.intValue();   // returns 1
      *
      * // Storing in database
-     * preparedStatement.setInt(1, mediaType.intValue());
+     * preparedStatement.setInt(1, audioType.intValue());
      * }</pre>
      *
      * @return the numeric value of this media type (0-5)

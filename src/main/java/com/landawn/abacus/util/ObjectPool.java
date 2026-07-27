@@ -48,14 +48,14 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Create a pool for caching resolved types by name
- * ObjectPool<String, Type<?>> typeCache = new ObjectPool<>(128);
+ * // Create a pool for caching values by name
+ * ObjectPool<String, Integer> cache = new ObjectPool<>(128);
  *
- * // Cache a resolved type
- * typeCache.put("int", IntType.INSTANCE);
+ * // Cache a value
+ * cache.put("answer", 42);
  *
- * // Look up a cached type
- * Type<?> type = typeCache.get("int");
+ * // Look up the cached value
+ * Integer value = cache.get("answer");
  * }</pre>
  *
  * <p><b>Thread safety note:</b> {@link #putIfAbsent(Object, Object)} and
@@ -112,7 +112,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<?> type = typeCache.get("int");
+     * ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+     * pool.put("answer", 42);
+     * Integer value = pool.get("answer");
      * Object result = pool.get(null);   // returns null instead of throwing
      * }</pre>
      *
@@ -136,8 +138,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * typeCache.put("int", IntType.INSTANCE);
-     * Type<?> oldValue = typeCache.put("int", LongType.INSTANCE);  // returns the old value (IntType.INSTANCE)
+     * ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+     * pool.put("answer", 42);
+     * Integer oldValue = pool.put("answer", 43);  // returns 42
      * }</pre>
      *
      * @param key   key with which the specified value is to be associated
@@ -163,9 +166,10 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<?> prior = typeCache.putIfAbsent("int", IntType.INSTANCE);
+     * ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+     * Integer prior = pool.putIfAbsent("answer", 42);
      * if (prior != null) {
-     *     // a mapping already existed for "int"; "int" was left unchanged
+     *     // a mapping already existed for "answer"; it was left unchanged
      * }
      * }</pre>
      *
@@ -204,7 +208,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<?> removed = typeCache.remove("int");
+     * ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+     * pool.put("answer", 42);
+     * Integer removed = pool.remove("answer");
      * pool.remove(null);   // returns null instead of throwing
      * }</pre>
      *
@@ -252,8 +258,10 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (typeCache.containsKey("int")) {
-     *     Type<?> type = typeCache.get("int");
+     * ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+     * pool.put("answer", 42);
+     * if (pool.containsKey("answer")) {
+     *     Integer value = pool.get("answer");
      * }
      * pool.containsKey(null);   // returns false instead of throwing
      * }</pre>
@@ -280,8 +288,10 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (typeCache.containsValue(IntType.INSTANCE)) {
-     *     // IntType has been cached
+     * ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+     * pool.put("answer", 42);
+     * if (pool.containsValue(42)) {
+     *     // The value has been cached
      * }
      * pool.containsValue(null);   // returns false instead of throwing
      * }</pre>

@@ -55,8 +55,9 @@ import com.landawn.abacus.type.Type;
  * <p><b>Exception handling:</b> Methods throw {@link JSONException} when org.json encounters an
  * error, and {@link IllegalArgumentException} when an unsupported target type is requested.
  *
- * <p><b>Circular references:</b> Object graphs containing cycles will cause infinite recursion
- * during wrapping. Callers must ensure the object graph is acyclic.
+ * <p><b>Circular references:</b> Cyclic object graphs are unsupported. Depending on where the
+ * cycle occurs, conversion can fail with a recursion error or an org.json nesting-depth error.
+ * Callers must ensure the object graph is acyclic.
  *
  * <p><b>Usage examples:</b>
  * <pre>{@code
@@ -109,8 +110,11 @@ public final class JsonUtil {
      * // Result: {"name":"Alice","score":95.5,"active":true}
      * }</pre>
      *
-     * @param map the map to convert; keys must be {@link String}s
-     * @return a new {@link JSONObject} containing all key-value pairs from the input map
+     * Java {@code null} values are omitted by the org.json constructor. A {@code null} map is
+     * treated as an empty map.
+     *
+     * @param map the map to convert; may be {@code null}; keys must be non-null {@link String}s
+     * @return a new {@link JSONObject} containing the non-null-valued entries from the input map
      * @throws JSONException if any value in the map cannot be represented as a valid JSON type
      */
     public static JSONObject wrap(final Map<String, ?> map) {
@@ -138,8 +142,8 @@ public final class JsonUtil {
      * JSONObject json2 = JsonUtil.wrap((Object) map);
      * }</pre>
      *
-     * @param bean the object to convert; may be a {@link Map} or any JavaBean with accessible properties
-     * @return a new {@link JSONObject} representing the input object
+     * @param bean the object to convert; may be {@code null}, a {@link Map}, or any JavaBean with accessible properties
+     * @return a new {@link JSONObject} representing the input object; an empty {@link JSONObject} if {@code bean} is {@code null}
      * @throws JSONException if any property value cannot be converted to a valid JSON type
      */
     @SuppressWarnings("unchecked")
@@ -159,9 +163,10 @@ public final class JsonUtil {
      * // Result: [true,false,true,true,false]
      * }</pre>
      *
-     * @param array the boolean array to convert
+     * @param array the non-null boolean array to convert
      * @return a new {@link JSONArray} containing all elements from the input array
      * @throws JSONException if an error occurs during conversion
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final boolean[] array) throws JSONException {
         return new JSONArray(array);
@@ -181,9 +186,10 @@ public final class JsonUtil {
      * // Serializes as: ["H","e","l","l","o"]
      * }</pre>
      *
-     * @param array the character array to convert
+     * @param array the non-null character array to convert
      * @return a new {@link JSONArray} containing the characters from the input array
      * @throws JSONException if an error occurs during conversion
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final char[] array) throws JSONException {
         return new JSONArray(array);
@@ -201,9 +207,10 @@ public final class JsonUtil {
      * // Result: [10,20,30,40,50]
      * }</pre>
      *
-     * @param array the byte array to convert
+     * @param array the non-null byte array to convert
      * @return a new {@link JSONArray} containing all byte values from the input array as numbers
      * @throws JSONException if an error occurs during conversion
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final byte[] array) throws JSONException {
         return new JSONArray(array);
@@ -221,9 +228,10 @@ public final class JsonUtil {
      * // Result: [100,200,300,400,500]
      * }</pre>
      *
-     * @param array the short array to convert
+     * @param array the non-null short array to convert
      * @return a new {@link JSONArray} containing all short values from the input array as numbers
      * @throws JSONException if an error occurs during conversion
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final short[] array) throws JSONException {
         return new JSONArray(array);
@@ -241,9 +249,10 @@ public final class JsonUtil {
      * // Result: [1,2,3,4,5]
      * }</pre>
      *
-     * @param array the integer array to convert
+     * @param array the non-null integer array to convert
      * @return a new {@link JSONArray} containing all integer values from the input array
      * @throws JSONException if an error occurs during conversion
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final int[] array) throws JSONException {
         return new JSONArray(array);
@@ -263,9 +272,10 @@ public final class JsonUtil {
      * // Result: [1609459200000,1609545600000,1609632000000]
      * }</pre>
      *
-     * @param array the long array to convert
+     * @param array the non-null long array to convert
      * @return a new {@link JSONArray} containing all long values from the input array
      * @throws JSONException if an error occurs during conversion
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final long[] array) throws JSONException {
         return new JSONArray(array);
@@ -275,8 +285,8 @@ public final class JsonUtil {
      * Converts a {@code float} array into a {@link JSONArray}.
      *
      * <p>Each float value is stored as a JSON number. The standard JSON specification does not
-     * support {@code NaN} or {@code Infinity}; the org.json library may throw a
-     * {@link JSONException} for such values depending on its configuration.
+     * support {@code NaN} or {@code Infinity}; the org.json constructor throws a
+     * {@link JSONException} for such values.
      *
      * <p><b>Usage example:</b>
      * <pre>{@code
@@ -285,10 +295,11 @@ public final class JsonUtil {
      * // Result: [98.6,99.1,97.8,98.2]
      * }</pre>
      *
-     * @param array the float array to convert
+     * @param array the non-null float array to convert
      * @return a new {@link JSONArray} containing all float values from the input array
      * @throws JSONException if an error occurs during conversion, or if the array contains
      *         {@code NaN} or {@code Infinity}
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final float[] array) throws JSONException {
         return new JSONArray(array);
@@ -298,8 +309,8 @@ public final class JsonUtil {
      * Converts a {@code double} array into a {@link JSONArray}.
      *
      * <p>Each double value is stored as a JSON number. The standard JSON specification does not
-     * support {@code NaN} or {@code Infinity}; the org.json library may throw a
-     * {@link JSONException} for such values depending on its configuration.
+     * support {@code NaN} or {@code Infinity}; the org.json constructor throws a
+     * {@link JSONException} for such values.
      *
      * <p><b>Usage example:</b>
      * <pre>{@code
@@ -308,10 +319,11 @@ public final class JsonUtil {
      * // Result: [19.99,29.99,39.99,49.99]
      * }</pre>
      *
-     * @param array the double array to convert
+     * @param array the non-null double array to convert
      * @return a new {@link JSONArray} containing all double values from the input array
      * @throws JSONException if an error occurs during conversion, or if the array contains
      *         {@code NaN} or {@code Infinity}
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final double[] array) throws JSONException {
         return new JSONArray(array);
@@ -337,9 +349,10 @@ public final class JsonUtil {
      * // Result: ["text",123,true,null,{"key":"value"},[1,2,3]]
      * }</pre>
      *
-     * @param array the object array to convert
+     * @param array the non-null object array to convert
      * @return a new {@link JSONArray} containing all elements from the input array
      * @throws JSONException if an error occurs during conversion
+     * @throws NullPointerException if {@code array} is {@code null}
      */
     public static JSONArray wrap(final Object[] array) throws JSONException {
         return new JSONArray(array);
@@ -360,7 +373,9 @@ public final class JsonUtil {
      * // Result: ["Alice","Bob","Charlie"]
      * }</pre>
      *
-     * @param coll the collection to convert
+     * A {@code null} collection is treated as empty.
+     *
+     * @param coll the collection to convert; may be {@code null}
      * @return a new {@link JSONArray} containing all elements from the collection in iteration order
      * @throws JSONException if an error occurs during conversion
      */
@@ -387,6 +402,7 @@ public final class JsonUtil {
      * @param jsonObject the {@link JSONObject} to convert
      * @return a {@code Map<String, Object>} containing all key-value pairs from the {@link JSONObject}
      * @throws JSONException if an error occurs during conversion
+     * @throws IllegalArgumentException if {@code jsonObject} is {@code null}
      * @see #unwrap(JSONObject, Class)
      * @see #unwrap(JSONObject, Type)
      */
@@ -564,6 +580,8 @@ public final class JsonUtil {
      * @param jsonArray the {@link JSONArray} to convert
      * @return a {@link java.util.List} containing all elements from the {@link JSONArray}
      * @throws JSONException if an error occurs during conversion
+     * @throws IllegalArgumentException if {@code jsonArray} is {@code null}
+     * @see #toList(JSONArray, Class)
      */
     @SuppressWarnings("unchecked")
     public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
@@ -719,9 +737,9 @@ public final class JsonUtil {
             }
 
             return (T) array;
-        } else if (targetType.javaType().isAssignableFrom(JSONArray.class)) {
-            return (T) jsonArray;
         } else {
+            // A type assignable from JSONArray is impossible here: such types already returned
+            // from the guard at the top of the method.
             throw new IllegalArgumentException(targetType.name() + " is not an array or collection type");
         }
     }

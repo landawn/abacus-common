@@ -135,6 +135,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * double result = identity.applyAsDouble(42.5);   // Returns 42.5
      *
      * // Useful in conditional operations
+     * boolean shouldTransform = true;
      * DoubleUnaryOperator operation = shouldTransform ? x -> x * 2 : DoubleUnaryOperator.identity();
      * }</pre>
      *

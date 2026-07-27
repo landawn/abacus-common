@@ -16,6 +16,8 @@ package com.landawn.abacus.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Objects;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -76,7 +78,23 @@ public final class Password {
 
         try {
             msgDigest = MessageDigest.getInstance(algorithm);
-            this.algorithm = msgDigest.getProvider().getService("MessageDigest", algorithm).getAlgorithm();
+
+            // Resolve the canonical standard algorithm name. msgDigest.getAlgorithm() may return
+            // the name exactly as requested (e.g. "sha-256" or an alias like "SHA256"), while
+            // Provider.getService("MessageDigest", ...) accepts aliases/case variants and yields
+            // the provider's standard name. Fall back to getAlgorithm() if no service is found.
+            String canonicalAlgorithm = null;
+
+            for (final Provider provider : Security.getProviders()) {
+                final Provider.Service service = provider.getService("MessageDigest", algorithm);
+
+                if (service != null) {
+                    canonicalAlgorithm = service.getAlgorithm();
+                    break;
+                }
+            }
+
+            this.algorithm = canonicalAlgorithm == null ? msgDigest.getAlgorithm() : canonicalAlgorithm;
         } catch (final NoSuchAlgorithmException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -131,9 +149,10 @@ public final class Password {
     /**
      * Verifies whether a plain-text password matches a previously hashed password.
      * This method hashes {@code plainPassword} with the configured algorithm and compares
-     * the resulting Base64 text against {@code encodedDigest}. The {@code non-null} comparison
-     * is performed with {@link MessageDigest#isEqual(byte[], byte[])}, which runs in constant
-     * time with respect to the number of matching bytes.
+     * the resulting Base64 text against {@code encodedDigest}. When both arguments are
+     * non-{@code null}, the comparison is performed with
+     * {@link MessageDigest#isEqual(byte[], byte[])}, which runs in constant time with respect
+     * to the number of matching bytes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

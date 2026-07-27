@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -78,7 +79,7 @@ import com.landawn.abacus.util.function.ToByteFunction;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Subclasses implement concrete stream behavior
- * ByteStream stream = new ArrayByteStream(new byte[] {1, 2, 3});
+ * ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 3);
  * stream.filter(b -> b > 1).forEach(System.out::println);
  * }</pre>
  *
@@ -105,7 +106,7 @@ abstract class AbstractByteStream extends ByteStream {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().onEach(action).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().onEach(action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return onEach(action);
         }
@@ -134,7 +135,7 @@ abstract class AbstractByteStream extends ByteStream {
 
         if (isParallel()) {
             //noinspection resource
-            return sequential().onEach(action).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return sequential().onEach(action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return onEach(action);
         }
@@ -154,7 +155,7 @@ abstract class AbstractByteStream extends ByteStream {
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ByteIteratorEx() { //NOSONAR
-            private final long durationMillis = duration.toMillis();
+            private final long durationNanos = TimeUnit.MILLISECONDS.toNanos(duration.toMillis());
             private byte prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
             private long prevTime = 0;
@@ -169,13 +170,13 @@ abstract class AbstractByteStream extends ByteStream {
 
                 while (iter.hasNext()) {
                     final byte val = iter.nextByte();
-                    final long now = System.currentTimeMillis();
+                    final long now = System.nanoTime();
 
                     if (!hasPrev) {
                         prev = val;
                         prevTime = now;
                         hasPrev = true;
-                    } else if (now - prevTime >= durationMillis) {
+                    } else if (now - prevTime >= durationNanos) {
                         // prev was followed by a quiet gap >= duration -> emit it; val starts the next burst.
                         next = prev;
                         hasNext = true;
@@ -750,7 +751,7 @@ abstract class AbstractByteStream extends ByteStream {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return elements[((start + cnt++) % len) + fromIndex];
+                return elements[(int) (((long) start + cnt++) % len) + fromIndex];
             }
 
             @Override
@@ -786,7 +787,7 @@ abstract class AbstractByteStream extends ByteStream {
                 final byte[] a = new byte[len - cnt];
 
                 for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
+                    a[i - cnt] = elements[(int) (((long) start + i) % len) + fromIndex];
                 }
 
                 cnt = len;
@@ -1126,7 +1127,7 @@ abstract class AbstractByteStream extends ByteStream {
         assertNotClosed();
 
         if (isParallel()) {
-            return ByteStream.concat(stream, this).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return ByteStream.concat(stream, this).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return ByteStream.concat(stream, this);
         }
@@ -1152,7 +1153,7 @@ abstract class AbstractByteStream extends ByteStream {
         assertNotClosed();
 
         if (isParallel()) {
-            return ByteStream.concat(this, stream).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return ByteStream.concat(this, stream).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return ByteStream.concat(this, stream);
         }
@@ -1178,7 +1179,7 @@ abstract class AbstractByteStream extends ByteStream {
         assertNotClosed();
 
         if (isParallel()) {
-            return ByteStream.merge(this, b, nextSelector).parallel(maxThreadNum(), splitor(), asyncExecutor(), cancelUncompletedThreads());
+            return ByteStream.merge(this, b, nextSelector).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             return ByteStream.merge(this, b, nextSelector);
         }

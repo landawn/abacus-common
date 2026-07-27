@@ -66,9 +66,10 @@ import java.lang.annotation.Target;
 public @interface Column {
 
     /**
-     * Deprecated alias for {@link #name()}.
+     * Deprecated alias for {@link #name()}. When both are specified, this element wins:
+     * {@link #name()} is consulted only if this one is empty.
      *
-     * @return the column name
+     * @return the column name, or an empty string if not specified
      * @deprecated Use {@link #name()} to specify the column name explicitly.
      */
     @Deprecated

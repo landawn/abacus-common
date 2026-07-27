@@ -66,6 +66,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
 
     private final SortedMap<K, V> sortedMap;
 
+    /**
+     * Constructs an {@code ImmutableSortedMap} backed by the given sorted map.
+     * The provided map is retained as live backing storage; external changes to it are
+     * reflected in this read-only view. Use {@link #copyOf(Map)} for independent storage.
+     *
+     * @param sortedMap the sorted map to back this immutable map
+     */
     ImmutableSortedMap(final SortedMap<? extends K, ? extends V> sortedMap) {
         super(sortedMap);
         this.sortedMap = (SortedMap<K, V>) sortedMap;
@@ -516,7 +523,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     /**
      * Returns an ImmutableSortedMap containing the same mappings as the provided Map.
      * If the provided Map is already an instance of ImmutableSortedMap, it is directly returned.
-     * If the provided Map is {@code null} or empty, an empty ImmutableSortedMap is returned.
+     * If the provided Map is {@code null}, or is empty and not a {@link SortedMap}, an empty
+     * ImmutableSortedMap is returned.
      * Otherwise, a new ImmutableSortedMap is created with the elements of the provided Map.
      *
      * <p>If the source is a {@link SortedMap}, the returned map uses the same {@link Comparator}

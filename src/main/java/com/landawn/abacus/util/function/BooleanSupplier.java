@@ -25,6 +25,9 @@ import com.landawn.abacus.util.Throwables;
  * <p>This is a functional interface whose functional method is {@link #getAsBoolean()}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ *
+ * @see java.util.function.Supplier
+ * @see java.util.function.BooleanSupplier
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface

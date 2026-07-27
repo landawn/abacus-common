@@ -29,6 +29,8 @@ import com.landawn.abacus.util.cs;
  *
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
+ * @see ByteFunction
+ * @see ByteBiFunction
  */
 @FunctionalInterface
 public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> { //NOSONAR

@@ -22,11 +22,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for NCLOB (National Character Large Object) database values accessed as
- * character {@link java.io.Reader} streams.
- * This type automatically converts NCLOB database values to Reader objects.
+ * Type handler for NCLOB (National Character Large Object) values accessed as character {@link Reader}s.
+ * This class extends {@link ReaderType} and overrides the JDBC accessors so that NCLOB columns
+ * are read via {@link NClob#getCharacterStream()} and written via
+ * {@link java.sql.PreparedStatement#setNClob(int, Reader) setNClob}.
  * Callers must close readers returned by the {@code get} methods; closing a returned reader also
  * releases the internally acquired {@code NClob} locator.
+ *
+ * @see ReaderType
+ * @see ClobReaderType
+ * @see NClob
+ * @see Reader
  */
 public class NClobReaderType extends ReaderType {
 
@@ -106,12 +112,12 @@ public class NClobReaderType extends ReaderType {
 
     /**
      * Sets a parameter in a {@link PreparedStatement} at the specified index to an {@code NCLOB} value,
-     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
+     * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
-     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @param sqlTypeOrLength the declared number of characters in the stream
      * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
@@ -121,12 +127,12 @@ public class NClobReaderType extends ReaderType {
 
     /**
      * Sets a parameter in a {@link CallableStatement} by name to an {@code NCLOB} value,
-     * reading at most {@code sqlTypeOrLength} characters from the {@link java.io.Reader}.
+     * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
-     * @param sqlTypeOrLength the maximum number of characters to read from the stream
+     * @param sqlTypeOrLength the declared number of characters in the stream
      * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
@@ -135,13 +141,15 @@ public class NClobReaderType extends ReaderType {
     }
 
     /**
-     * Converts an NClob object to a Reader by extracting its character stream.
+     * Extracts a character {@link Reader} from an {@link NClob}.
+     * This is a package-private utility used by both {@code get} overloads.
      * Closing the returned reader closes the delegate and calls {@link NClob#free()}.
      * This method therefore assumes ownership of a non-null {@code clob}.
      *
-     * @param clob the NClob to convert to a Reader
-     * @return a Reader for the NClob character stream, or {@code null} if the input NClob is {@code null}
-     * @throws SQLException if a database access error occurs while accessing the NClob
+     * @param clob the {@link NClob} to read from; may be {@code null}
+     * @return a {@link Reader} for the NCLOB's character stream,
+     *         or {@code null} if {@code clob} is {@code null}
+     * @throws SQLException if a database access error occurs while accessing the NCLOB
      */
     static Reader clobToReader(final NClob clob) throws SQLException {
         return Utils.openCharacterStream(clob);

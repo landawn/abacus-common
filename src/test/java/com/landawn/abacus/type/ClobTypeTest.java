@@ -242,6 +242,22 @@ public class ClobTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfPreservesPrimaryRuntimeFailureWhenFreeFailsUnchecked() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        final RuntimeException primaryFailure = new IllegalArgumentException();
+        final AssertionError cleanupFailure = new AssertionError();
+
+        when(clob.length()).thenThrow(primaryFailure);
+        doThrow(cleanupFailure).when(clob).free();
+
+        final RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, () -> type.stringOf(clob));
+
+        assertSame(primaryFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+    }
+
+    @Test
     public void testMultipleOperations() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         PreparedStatement stmt = mock(PreparedStatement.class);

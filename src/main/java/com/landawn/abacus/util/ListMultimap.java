@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -51,7 +52,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>This is a <b>final class</b> that cannot be extended for API stability</li>
  *   <li>Extends {@link Multimap} to inherit common multimap operations</li>
  *   <li>Uses {@link ArrayList} as the default list implementation for optimal performance</li>
- *   <li>Thread safety depends on the backing Map and List implementations chosen</li>
+ *   <li>Not thread-safe, regardless of the backing Map and List implementations chosen</li>
  * </ul>
  *
  * <p><b>Common Use Cases:</b>
@@ -927,9 +928,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Returns the first value for the given key, or {@code null} if no value is found.
      *
-     * <p>Since ListMultimap maintains values in a list, this method returns the first element
-     * from the list associated with the specified key in O(1) time. If the key is not present
-     * or the list is empty, {@code null} is returned.
+     * <p>This method returns the first element from the list associated with the specified key.
+     * It is O(1) for the default {@link ArrayList} value lists; the exact complexity depends on
+     * the custom list implementation, if any. If the key is not present or the list is empty,
+     * {@code null} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -952,9 +954,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     /**
      * Returns the first value for the given key, or {@code defaultValue} if no value is found.
      *
-     * <p>Since ListMultimap maintains values in a list, this method returns the first element
-     * from the list associated with the specified key in O(1) time. If the key is not present
-     * or the list is empty, the provided default value is returned instead.
+     * <p>This method returns the first element from the list associated with the specified key.
+     * It is O(1) for the default {@link ArrayList} value lists; the exact complexity depends on
+     * the custom list implementation, if any. If the key is not present or the list is empty,
+     * the provided default value is returned instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -984,13 +987,17 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method creates a new ListMultimap where each value from the original multimap becomes a key,
      * and the associated original key becomes a value in the new multimap. If multiple keys in the original
      * multimap share the same value, that value will be associated with multiple keys in the inverted multimap.
-     * The order of values in the original multimap is preserved in the inverted multimap. The inverted value
+     * Values within each original list are processed in list order. Original keys are processed in the backing
+     * map's iteration order, which is unspecified for an unordered map such as {@link HashMap}. The inverted value
      * lists are new {@link ArrayList} instances; a custom value-list supplier from this multimap is not reused,
      * because it may enforce the original value type rather than the inverted value type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ListMultimap<String, Integer> mm = ListMultimap.of("a", 1, "a", 2, "b", 1);
+     * ListMultimap<String, Integer> mm = N.newLinkedListMultimap();
+     * mm.put("a", 1);
+     * mm.put("a", 2);
+     * mm.put("b", 1);
      * ListMultimap<Integer, String> inverted = mm.invert();
      * inverted.get(1);   // returns ["a", "b"] (keys that mapped to 1)
      * inverted.get(2);   // returns ["a"]
@@ -1096,6 +1103,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * The ImmutableList contains all the values associated with the key in the ListMultimap.
      * This method allows control over the underlying map implementation used for the ImmutableMap, enabling
      * customization of characteristics like ordering, capacity, or load factor.
+     * The supplier must return a non-null map that is dedicated to the returned immutable view. Existing entries
+     * in that map are retained unless replaced by a key from this multimap. Because the supplied map becomes the
+     * view's backing storage, mutating it through a separately retained reference would be reflected in the
+     * returned object.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1112,14 +1123,15 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *     mm.toImmutableMap(size -> new HashMap<>(size * 2));   // size == 2 (number of keys)
      * }</pre>
      *
-     * @param mapSupplier the supplier function that provides a {@link Map} instance; the integer argument passed to it is
+     * @param mapSupplier the supplier function that provides a non-null {@link Map} instance; the integer argument passed to it is
      *                    the number of keys in this multimap (i.e., {@code backingMap.size()})
      * @return an ImmutableMap where each key is associated with an ImmutableList of values from the original ListMultimap
-     * @throws NullPointerException if {@code mapSupplier} is {@code null}
+     * @throws NullPointerException if {@code mapSupplier} or the map it returns is {@code null}
      * @see #toImmutableMap()
      */
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) {
-        final Map<K, ImmutableList<E>> map = mapSupplier.apply(backingMap.size());
+        Objects.requireNonNull(mapSupplier, "mapSupplier");
+        final Map<K, ImmutableList<E>> map = Objects.requireNonNull(mapSupplier.apply(backingMap.size()), "mapSupplier returned null");
 
         for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));

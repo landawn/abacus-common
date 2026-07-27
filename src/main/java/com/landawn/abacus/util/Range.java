@@ -252,9 +252,10 @@ import com.landawn.abacus.util.u.Optional;
  *         Range<LocalDateTime> result = workingHours;
  *         for (Range<LocalDateTime> busy : busyPeriods) {
  *             Optional<Range<LocalDateTime>> intersected = result.intersection(busy);
- *             if (intersected.isPresent()) {
- *                 result = intersected.get();
+ *             if (!intersected.isPresent()) {
+ *                 return Optional.empty();
  *             }
+ *             result = intersected.get();
  *         }
  *         return result.isEmpty() ? Optional.empty() : Optional.of(result);
  *     }
@@ -476,8 +477,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #boundType()
      */
     public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) {
-        final U newLower = mapper.apply(lowerEndpoint.value);
-        final U newUpper = mapper.apply(upperEndpoint.value);
+        N.requireNonNull(mapper, "mapper");
+
+        final U newLower = N.requireNonNull(mapper.apply(lowerEndpoint.value), "mapper returned null for the lower endpoint");
+        final U newUpper = N.requireNonNull(mapper.apply(upperEndpoint.value), "mapper returned null for the upper endpoint");
 
         if (newLower.compareTo(newUpper) > 0) {
             throw new IllegalArgumentException(
@@ -502,7 +505,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(1, 5);
-     * BoundType type = range.boundType();   // returns BoundType.CLOSED_CLOSED
+     * Range.BoundType type = range.boundType();   // returns Range.BoundType.CLOSED_CLOSED
      *
      * Range.open(1, 5).boundType();         // returns BoundType.OPEN_OPEN
      * Range.closedOpen(1, 5).boundType();   // returns BoundType.CLOSED_OPEN
@@ -608,6 +611,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param c the collection of elements to test; may be {@code null} or empty
      * @return {@code true} if every element in {@code c} is contained within this range,
      *         or if {@code c} is {@code null} or empty; {@code false} otherwise
+     * @see #contains(Comparable)
+     * @see #containsAny(Collection)
      */
     public boolean containsAll(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -644,6 +649,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param c the collection of elements to test; may be {@code null} or empty
      * @return {@code true} if at least one element in {@code c} is contained within this range;
      *         {@code false} if none are contained or if {@code c} is {@code null} or empty
+     * @see #contains(Comparable)
+     * @see #containsAll(Collection)
      */
     public boolean containsAny(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
@@ -832,11 +839,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range3 = Range.closed(5, 15);
      * Range<Integer> range4 = Range.open(1, 10);
      *
-     * range1.containsRange(range2);   // returns true
-     * range1.containsRange(range3);   // returns false (extends beyond upper bound)
-     * range1.containsRange(range4);   // returns true (open range (1,10) is within [1,10])
+     * range1.containsRange(range2);             // returns true
+     * range1.containsRange(range3);             // returns false (extends beyond upper bound)
+     * range1.containsRange(range4);             // returns true (open range (1,10) is within [1,10])
      * range1.containsRange(Range.open(20, 20)); // returns true (the other range is empty)
-     * range1.containsRange(null);     // returns false
+     * range1.containsRange(null);               // returns false
      * }</pre>
      *
      * @param other the range to check for containment, {@code null} returns false
@@ -1061,7 +1068,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * that are not in either input range.
      *
      * <p>The span operation takes the minimum of the lower endpoints and the maximum of the
-     * upper endpoints, preserving the most inclusive bound type at each endpoint.</p>
+     * upper endpoints, preserving the most inclusive bound type at each endpoint. An empty
+     * operand contributes no values, so spanning a non-empty range with an empty range returns
+     * the non-empty operand unchanged.</p>
      *
      * <p>This operation is commutative, associative, and idempotent.</p>
      *
@@ -1084,6 +1093,21 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #intersection(Range)
      */
     public Range<T> span(final Range<T> other) {
+        N.requireNonNull(other, "other");
+
+        if (isEmpty()) {
+            if (!other.isEmpty()) {
+                return other;
+            }
+
+            // Every empty range represents the same empty set, but Range equality also records
+            // endpoints and bound types. Select one deterministically so span remains commutative.
+            final int emptyCmp = lowerEndpoint.value.compareTo(other.lowerEndpoint.value);
+            return emptyCmp < 0 || (emptyCmp == 0 && boundType.ordinal() <= other.boundType.ordinal()) ? this : other;
+        } else if (other.isEmpty()) {
+            return this;
+        }
+
         final int lowerCmp = N.compare(lowerEndpoint.value, other.lowerEndpoint.value);
         final LowerEndpoint<T> newLowerEndpoint;
 
@@ -1190,10 +1214,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range2 = Range.closed(1, 5);
      * int hash1 = range1.hashCode();
      * int hash2 = range2.hashCode();
-     * assertEquals(hash1, hash2);
+     * assert hash1 == hash2;
      *
      * Range<Integer> range3 = Range.open(1, 5);
-     * range1.hashCode() != range3.hashCode();  // may differ due to different bound types
+     * boolean mayDiffer = range1.hashCode() != range3.hashCode();
      * }</pre>
      *
      * @return a hash code value for this object

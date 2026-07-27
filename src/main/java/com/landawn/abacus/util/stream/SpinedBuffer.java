@@ -57,7 +57,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
     /**
      * Constructs a SpinedBuffer with the default initial capacity.
-     * The default capacity is optimized for typical stream operations.
+     * The buffer grows automatically as elements are appended, so no capacity has to be
+     * estimated up front.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -86,7 +87,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
      * System.out.println(buffer.size());   // prints 150
      * }</pre>
      *
-     * @param initialCapacity the initial capacity for the buffer
+     * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
      * @throws IllegalArgumentException if the initial capacity is negative
      */
     public SpinedBuffer(final int initialCapacity) throws IllegalArgumentException {
@@ -254,7 +255,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
         /**
          * Constructs a SpinedBuffer.OfInt with the default initial capacity.
-         * The default capacity is optimized for typical stream operations.
+         * The buffer grows automatically as elements are appended, so no capacity has to be
+        * estimated up front.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -363,6 +365,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
         /**
          * Returns an iterator over the int values in this buffer in proper sequence.
+         * The returned iterator covers the values present at the time of this call; values appended
+         * afterwards are not visible to it.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -451,7 +455,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
         /**
          * Constructs a SpinedBuffer.OfLong with the default initial capacity.
-         * The default capacity is optimized for typical stream operations.
+         * The buffer grows automatically as elements are appended, so no capacity has to be
+        * estimated up front.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -560,6 +565,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
         /**
          * Returns an iterator over the long values in this buffer in proper sequence.
+         * The returned iterator covers the values present at the time of this call; values appended
+         * afterwards are not visible to it.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -648,7 +655,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
         /**
          * Constructs a SpinedBuffer.OfDouble with the default initial capacity.
-         * The default capacity is optimized for typical stream operations.
+         * The buffer grows automatically as elements are appended, so no capacity has to be
+        * estimated up front.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -757,6 +765,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
         /**
          * Returns an iterator over the double values in this buffer in proper sequence.
+         * The returned iterator covers the values present at the time of this call; values appended
+         * afterwards are not visible to it.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

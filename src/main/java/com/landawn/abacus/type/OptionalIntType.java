@@ -228,7 +228,6 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * Connection connection = Mockito.mock(Connection.class);
      * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalInt opt = OptionalInt.of(25);
@@ -261,7 +260,6 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * Connection connection = Mockito.mock(Connection.class);
      * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalInt opt = OptionalInt.of(30);

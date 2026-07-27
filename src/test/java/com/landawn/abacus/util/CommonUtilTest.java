@@ -26,6 +26,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.AbstractCollection;
+import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -23327,6 +23328,48 @@ public class CommonUtilTest extends TestBase {
         // verbatim as the error message - including when the first space is at index 0.
         final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNull(null, " must not be null (custom message)"));
         assertEquals(" must not be null (custom message)", ex.getMessage());
+    }
+
+    @Test
+    public void testLastElementsSupportsNullElements() {
+        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", null, "c"));
+
+        assertEquals(Arrays.asList(null, "c"), N.lastElements(set, 2));
+        assertEquals(Arrays.asList(null, "c"), N.lastElements(Arrays.asList("a", null, "c").iterator(), 2));
+    }
+
+    @Test
+    public void testRangeSortOnlyWritesTheRequestedRange() {
+        final class TrackingList extends AbstractList<Integer> {
+            private final List<Integer> values = new ArrayList<>(Arrays.asList(9, 3, 1, 2, 8));
+            private final List<Integer> writtenIndices = new ArrayList<>();
+
+            @Override
+            public Integer get(final int index) {
+                return values.get(index);
+            }
+
+            @Override
+            public int size() {
+                return values.size();
+            }
+
+            @Override
+            public Integer set(final int index, final Integer element) {
+                writtenIndices.add(index);
+                return values.set(index, element);
+            }
+        }
+
+        final TrackingList sequential = new TrackingList();
+        N.sort(sequential, 1, 4, Comparator.naturalOrder());
+        assertEquals(Arrays.asList(9, 1, 2, 3, 8), sequential);
+        assertEquals(Arrays.asList(1, 2, 3), sequential.writtenIndices);
+
+        final TrackingList parallel = new TrackingList();
+        N.parallelSort(parallel, 1, 4, Comparator.naturalOrder());
+        assertEquals(Arrays.asList(9, 1, 2, 3, 8), parallel);
+        assertEquals(Arrays.asList(1, 2, 3), parallel.writtenIndices);
     }
 
 }

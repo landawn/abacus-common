@@ -35,8 +35,8 @@ import com.landawn.abacus.util.function.FloatToDoubleFunction;
 import com.landawn.abacus.util.function.FloatToIntFunction;
 import com.landawn.abacus.util.function.FloatToLongFunction;
 import com.landawn.abacus.util.function.FloatUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelArrayFloatStreamTest extends TestBase {
 
@@ -48,11 +48,11 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     private FloatStream parallelStream;
 
     protected FloatStream createFloatStream(float... elements) {
-        return FloatStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
+        return FloatStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
     }
 
-    protected FloatStream createIteratorSplitorFloatStream(float... elements) {
-        return new ParallelArrayFloatStream(elements, 0, elements.length, false, testMaxThreadNum, Splitor.ITERATOR, null, false, new ArrayList<>());
+    protected FloatStream createIteratorSplitStrategyFloatStream(float... elements) {
+        return new ParallelArrayFloatStream(elements, 0, elements.length, false, testMaxThreadNum, SplitStrategy.ITERATOR, null, false, new ArrayList<>());
     }
 
     @BeforeEach
@@ -106,31 +106,31 @@ public class ParallelArrayFloatStreamTest extends TestBase {
 
     // Helper: creates a ParallelArrayFloatStream with a single element so canBeSequential() returns true.
     protected FloatStream createSingleElementFloatStream(float value) {
-        return new ParallelArrayFloatStream(new float[] { value }, 0, 1, false, testMaxThreadNum, Splitor.ARRAY, null, false, new ArrayList<>());
+        return new ParallelArrayFloatStream(new float[] { value }, 0, 1, false, testMaxThreadNum, SplitStrategy.ARRAY, null, false, new ArrayList<>());
     }
 
     // Covers the iterator-based terminal-operation branch in ParallelArrayFloatStream.
     @Test
-    public void testReduceAndFindMethods_IteratorSplitor() {
-        assertEquals(15.0f, createIteratorSplitorFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).reduce(0.0f, Float::sum), 0.0001f);
+    public void testReduceAndFindMethods_IteratorSplitStrategy() {
+        assertEquals(15.0f, createIteratorSplitStrategyFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).reduce(0.0f, Float::sum), 0.0001f);
 
-        OptionalFloat reduced = createIteratorSplitorFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).reduce(Float::sum);
+        OptionalFloat reduced = createIteratorSplitStrategyFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).reduce(Float::sum);
         assertTrue(reduced.isPresent());
         assertEquals(15.0f, reduced.get(), 0.0001f);
 
-        OptionalFloat firstOdd = createIteratorSplitorFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findFirst(f -> f == 1.0f || f == 3.0f || f == 5.0f);
+        OptionalFloat firstOdd = createIteratorSplitStrategyFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findFirst(f -> f == 1.0f || f == 3.0f || f == 5.0f);
         assertTrue(firstOdd.isPresent());
         assertEquals(1.0f, firstOdd.get(), 0.0001f);
 
-        OptionalFloat anyOdd = createIteratorSplitorFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findAny(f -> f == 1.0f || f == 3.0f || f == 5.0f);
+        OptionalFloat anyOdd = createIteratorSplitStrategyFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findAny(f -> f == 1.0f || f == 3.0f || f == 5.0f);
         assertTrue(anyOdd.isPresent());
         assertTrue(anyOdd.get() == 1.0f || anyOdd.get() == 3.0f || anyOdd.get() == 5.0f);
 
-        OptionalFloat lastOdd = createIteratorSplitorFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findLast(f -> f == 1.0f || f == 3.0f || f == 5.0f);
+        OptionalFloat lastOdd = createIteratorSplitStrategyFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findLast(f -> f == 1.0f || f == 3.0f || f == 5.0f);
         assertTrue(lastOdd.isPresent());
         assertEquals(5.0f, lastOdd.get(), 0.0001f);
 
-        OptionalFloat notFound = createIteratorSplitorFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findAny(f -> f > 10.0f);
+        OptionalFloat notFound = createIteratorSplitStrategyFloatStream(4.0f, 2.0f, 1.0f, 3.0f, 5.0f).findAny(f -> f > 10.0f);
         assertFalse(notFound.isPresent());
     }
 
@@ -648,9 +648,9 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     }
 
     @Test
-    public void testForEach_IteratorSplitor() {
+    public void testForEach_IteratorSplitStrategy() {
         AtomicInteger count = new AtomicInteger(0);
-        createIteratorSplitorFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).forEach(f -> count.incrementAndGet());
+        createIteratorSplitStrategyFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).forEach(f -> count.incrementAndGet());
         assertEquals(5, count.get());
     }
 
@@ -847,14 +847,14 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     }
 
     @Test
-    public void testIteratorSplitorReduceAndFindOperations_SparseMatch() {
-        assertEquals(72.0f, createIteratorSplitorFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f).reduce(0.0f, Float::sum), 0.0001f);
+    public void testIteratorSplitStrategyReduceAndFindOperations_SparseMatch() {
+        assertEquals(72.0f, createIteratorSplitStrategyFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f).reduce(0.0f, Float::sum), 0.0001f);
 
-        OptionalFloat reduced = createIteratorSplitorFloatStream(21.0f, 2.0f, 4.0f).reduce(Float::sum);
+        OptionalFloat reduced = createIteratorSplitStrategyFloatStream(21.0f, 2.0f, 4.0f).reduce(Float::sum);
         assertTrue(reduced.isPresent());
         assertEquals(27.0f, reduced.get(), 0.0001f);
 
-        OptionalFloat firstMatch = createIteratorSplitorFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f).findFirst(f -> {
+        OptionalFloat firstMatch = createIteratorSplitStrategyFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f).findFirst(f -> {
             if (f == 21.0f) {
                 try {
                     Thread.sleep(10L);
@@ -868,12 +868,12 @@ public class ParallelArrayFloatStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals(21.0f, firstMatch.get(), 0.0001f);
 
-        OptionalFloat anyMatch = createIteratorSplitorFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f)
+        OptionalFloat anyMatch = createIteratorSplitStrategyFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f)
                 .findAny(f -> f > 5.0f && ((int) f) % 2 == 1);
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21.0f || anyMatch.get() == 7.0f || anyMatch.get() == 11.0f || anyMatch.get() == 13.0f);
 
-        OptionalFloat lastMatch = createIteratorSplitorFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f).findLast(f -> {
+        OptionalFloat lastMatch = createIteratorSplitStrategyFloatStream(21.0f, 2.0f, 4.0f, 7.0f, 6.0f, 11.0f, 8.0f, 13.0f).findLast(f -> {
             if (f == 13.0f) {
                 try {
                     Thread.sleep(10L);
@@ -941,17 +941,17 @@ public class ParallelArrayFloatStreamTest extends TestBase {
         assertTrue(createFloatStream(new float[] {}).noneMatch(f -> true));
     }
 
-    // Cover the ITERATOR splitor path for anyMatch / allMatch / noneMatch / forEach
+    // Cover the ITERATOR splitStrategy path for anyMatch / allMatch / noneMatch / forEach
     @Test
-    public void testAnyMatchAllMatchNoneMatch_IteratorSplitor() {
-        assertTrue(createIteratorSplitorFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).anyMatch(f -> f > 4.0f));
-        assertFalse(createIteratorSplitorFloatStream(1.0f, 2.0f, 3.0f).anyMatch(f -> f > 10.0f));
+    public void testAnyMatchAllMatchNoneMatch_IteratorSplitStrategy() {
+        assertTrue(createIteratorSplitStrategyFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).anyMatch(f -> f > 4.0f));
+        assertFalse(createIteratorSplitStrategyFloatStream(1.0f, 2.0f, 3.0f).anyMatch(f -> f > 10.0f));
 
-        assertTrue(createIteratorSplitorFloatStream(1.0f, 2.0f, 3.0f).allMatch(f -> f >= 1.0f && f <= 3.0f));
-        assertFalse(createIteratorSplitorFloatStream(1.0f, 2.0f, 3.0f).allMatch(f -> f < 3.0f));
+        assertTrue(createIteratorSplitStrategyFloatStream(1.0f, 2.0f, 3.0f).allMatch(f -> f >= 1.0f && f <= 3.0f));
+        assertFalse(createIteratorSplitStrategyFloatStream(1.0f, 2.0f, 3.0f).allMatch(f -> f < 3.0f));
 
-        assertTrue(createIteratorSplitorFloatStream(1.0f, 2.0f, 3.0f).noneMatch(f -> f > 10.0f));
-        assertFalse(createIteratorSplitorFloatStream(1.0f, 2.0f, 3.0f).noneMatch(f -> f > 2.0f));
+        assertTrue(createIteratorSplitStrategyFloatStream(1.0f, 2.0f, 3.0f).noneMatch(f -> f > 10.0f));
+        assertFalse(createIteratorSplitStrategyFloatStream(1.0f, 2.0f, 3.0f).noneMatch(f -> f > 2.0f));
     }
 
     @Test
@@ -1268,7 +1268,7 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     @Test
     public void testZipWithBinaryDefaults_SequentialFallback_UnevenLengths() {
         List<Float> result = FloatStream.of(1F, 2F, 3F)
-                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
                 .zipWith(FloatStream.of(10F), 0F, -1F, (a, b) -> a + b)
                 .toList();
 
@@ -1313,8 +1313,8 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ARRAY, ((ParallelArrayFloatStream) createFloatStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ARRAY, ((ParallelArrayFloatStream) createFloatStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -221,6 +225,11 @@ public final class PropertiesUtil {
      * common configuration locations. The search includes Maven/Gradle build directories,
      * resources directories, and standard config/conf directories at both current and parent levels.
      *
+     * <p>Each candidate is resolved twice: first relative to the location this class was loaded from,
+     * then relative to the current working directory. Paths resolved by both passes therefore appear
+     * twice in the returned list, and the list is ordered by search priority rather than alphabetically.
+     * Directories that do not exist are skipped, so the result may be empty.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> paths = PropertiesUtil.getCommonConfigPaths();
@@ -274,8 +283,8 @@ public final class PropertiesUtil {
         final String path = dir.getAbsolutePath().replace('\\', '/');
 
         // if the class/library is loaded from local maven repository.
-        if (path.indexOf("/.m2/repository/com/landawn/abacus-common/") > 0 || path.indexOf("/.m2/repository/com/landawn/abacus-common-se/") > 0 //NOSONAR
-                || path.indexOf("/.m2/repository/com/landawn/abacus-common-se-jdk7/") > 0) { //NOSONAR
+        if (path.contains("/.m2/repository/com/landawn/abacus-core/") || path.contains("/.m2/repository/com/landawn/abacus-common/")
+                || path.contains("/.m2/repository/com/landawn/abacus-common-se/") || path.contains("/.m2/repository/com/landawn/abacus-common-se-jdk7/")) {
             return new File(IOUtil.CURRENT_DIR);
         }
 
@@ -297,6 +306,7 @@ public final class PropertiesUtil {
      * @param file the file whose path should be decoded
      * @return a {@code File} with {@code %20} replaced by spaces if the decoded path exists;
      *         the original {@code file} otherwise
+     * @throws NullPointerException if {@code file} is {@code null}
      */
     public static File formatPath(File file) {
         if (!file.exists()) {
@@ -679,28 +689,33 @@ public final class PropertiesUtil {
      * @see #load(File)
      */
     public static Properties<String, String> load(final File source, final boolean autoRefresh) {
-        Properties<String, String> properties = null;
         InputStream is = null;
-        try {
-            is = IOUtil.newFileInputStream(source);
 
+        try {
             if (autoRefresh) {
                 final Resource resource = new Resource(Properties.class, source, ResourceType.PROPERTIES);
-                resource.setLastLoadTime(source.lastModified());
 
                 synchronized (registeredAutoRefreshProperties) {
-                    properties = (Properties<String, String>) registeredAutoRefreshProperties.get(resource);
+                    final Properties<String, String> registered = (Properties<String, String>) registeredAutoRefreshProperties.get(resource);
 
-                    if (properties == null) {
-                        properties = load(is);
-                        registeredAutoRefreshProperties.put(resource, properties);
+                    // Looking up the normalized resource before opening the file is important: callers are
+                    // promised the already-registered live object, even if the backing file is temporarily
+                    // unavailable while an editor replaces it.
+                    if (registered != null) {
+                        return registered;
                     }
+
+                    is = IOUtil.newFileInputStream(resource.getFile());
+                    final Properties<String, String> properties = load(is);
+                    resource.setLastLoadTime(resource.getFile().lastModified());
+                    registeredAutoRefreshProperties.put(resource, properties);
+
+                    return properties;
                 }
-            } else {
-                properties = load(is);
             }
 
-            return properties;
+            is = IOUtil.newFileInputStream(source);
+            return load(is);
         } finally {
             IOUtil.close(is);
         }
@@ -718,7 +733,7 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source the InputStream from which to load the properties.
+     * @param source the InputStream from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the stream
      */
@@ -750,7 +765,7 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source the Reader from which to load the properties.
+     * @param source the Reader from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading from the reader
      */
@@ -804,7 +819,7 @@ public final class PropertiesUtil {
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File, boolean)
      * @see #loadFromXml(File, Class)
      */
@@ -831,7 +846,7 @@ public final class PropertiesUtil {
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File)
      */
     public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh) {
@@ -851,11 +866,11 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source the InputStream from which to load the properties.
+     * @param source the InputStream from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the stream
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(InputStream, Class)
      */
     public static Properties<String, Object> loadFromXml(final InputStream source) {
@@ -875,11 +890,11 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param source the Reader from which to load the properties.
+     * @param source the Reader from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading from the reader
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(Reader, Class)
      */
     public static Properties<String, Object> loadFromXml(final Reader source) {
@@ -894,11 +909,16 @@ public final class PropertiesUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * public class MyProperties extends Properties<String, Object> {
-     *     // Custom properties class
-     * }
+     * class Example {
+     *     public static class MyProperties extends Properties<String, Object> {
+     *         public MyProperties() {
+     *         }
+     *     }
      *
-     * MyProperties props = PropertiesUtil.loadFromXml(new File("config.xml"), MyProperties.class);
+     *     MyProperties load() {
+     *         return PropertiesUtil.loadFromXml(new File("config.xml"), MyProperties.class);
+     *     }
+     * }
      * }</pre>
      *
      * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
@@ -907,7 +927,7 @@ public final class PropertiesUtil {
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File)
      * @see #loadFromXml(File, boolean, Class)
      */
@@ -917,17 +937,24 @@ public final class PropertiesUtil {
 
     /**
      * Loads properties from the specified XML file into the target properties class with an option for auto-refresh.
-     * When auto-refresh is enabled, the properties will be automatically updated when the file is modified.
-     * A background thread checks the file's last modification time every second.
+     * When auto-refresh is enabled, the returned instance is registered with a shared background
+     * scheduler that reloads it whenever the source file's last-modified timestamp advances.
+     * If a properties instance for the same file and target class has already been registered for
+     * auto-refresh, that same instance is returned instead of loading a new one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * public class DatabaseConfig extends Properties<String, Object> {
-     *     // Custom config class
+     * class Example {
+     *     public static class DatabaseConfig extends Properties<String, Object> {
+     *         public DatabaseConfig() {
+     *         }
+     *     }
+     *
+     *     DatabaseConfig load() {
+     *         // The returned object auto-refreshes when the file changes.
+     *         return PropertiesUtil.loadFromXml(new File("db-config.xml"), true, DatabaseConfig.class);
+     *     }
      * }
-     * DatabaseConfig config = PropertiesUtil.loadFromXml(
-     *     new File("db-config.xml"), true, DatabaseConfig.class);
-     * // Config auto-refreshes when file changes
      * }</pre>
      *
      * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
@@ -938,34 +965,34 @@ public final class PropertiesUtil {
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the file
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File, Class)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
-        T properties = null;
         InputStream is = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
-
             if (autoRefresh) {
                 final Resource resource = new Resource(targetClass, source, ResourceType.XML);
-                resource.setLastLoadTime(source.lastModified());
 
                 synchronized (registeredAutoRefreshProperties) {
-                    properties = (T) registeredAutoRefreshProperties.get(resource);
+                    final T registered = (T) registeredAutoRefreshProperties.get(resource);
 
-                    if (properties == null) {
-                        properties = loadFromXml(is, targetClass);
-
-                        registeredAutoRefreshProperties.put(resource, properties);
+                    if (registered != null) {
+                        return registered;
                     }
+
+                    is = IOUtil.newFileInputStream(resource.getFile());
+                    final T properties = loadFromXml(is, targetClass);
+                    resource.setLastLoadTime(resource.getFile().lastModified());
+                    registeredAutoRefreshProperties.put(resource, properties);
+
+                    return properties;
                 }
-            } else {
-                properties = loadFromXml(is, targetClass);
             }
 
-            return properties;
+            is = IOUtil.newFileInputStream(source);
+            return loadFromXml(is, targetClass);
         } finally {
             IOUtil.close(is);
         }
@@ -979,18 +1006,27 @@ public final class PropertiesUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new FileInputStream("config.xml")) {
-     *     MyConfig config = PropertiesUtil.loadFromXml(is, MyConfig.class);
+     * class Example {
+     *     public static class MyConfig extends Properties<String, Object> {
+     *         public MyConfig() {
+     *         }
+     *     }
+     *
+     *     MyConfig load() throws IOException {
+     *         try (InputStream is = new FileInputStream("config.xml")) {
+     *             return PropertiesUtil.loadFromXml(is, MyConfig.class);
+     *         }
+     *     }
      * }
      * }</pre>
      *
      * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
-     * @param source the InputStream from which to load the properties.
+     * @param source the InputStream from which to load the properties; it is not closed by this method.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading the stream
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(InputStream)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass) {
@@ -1022,18 +1058,27 @@ public final class PropertiesUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (Reader reader = new FileReader("config.xml")) {
-     *     AppConfig config = PropertiesUtil.loadFromXml(reader, AppConfig.class);
+     * class Example {
+     *     public static class AppConfig extends Properties<String, Object> {
+     *         public AppConfig() {
+     *         }
+     *     }
+     *
+     *     AppConfig load() throws IOException {
+     *         try (Reader reader = new FileReader("config.xml")) {
+     *             return PropertiesUtil.loadFromXml(reader, AppConfig.class);
+     *         }
+     *     }
      * }
      * }</pre>
      *
      * @param <T> the type of the target properties class, must extend Properties&lt;String, Object&gt;.
-     * @param source the Reader from which to load the properties.
+     * @param source the Reader from which to load the properties; it is not closed by this method.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
      * @throws UncheckedIOException if an I/O error occurs reading from the reader
      * @throws ParsingException if the XML cannot be parsed or has no document element
-     * @throws RuntimeException if the XML contains duplicated sibling property names (same node tag name under the same parent)
+     * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(Reader)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass) {
@@ -1061,9 +1106,9 @@ public final class PropertiesUtil {
     private static <T extends Properties<String, Object>> T loadFromXml(final Node source, Method propSetMethod, final boolean isFirstCall, final T output,
             final Class<T> inputClass) {
 
-        // TODO: It is difficult to support duplicate properties, and they may be misused.
+        // Normalized sibling names are map keys and therefore cannot be represented independently.
         if (hasDuplicatedPropName(source)) {
-            throw new RuntimeException("The source XML document contains duplicate properties that have the same node tag name in the same root.");
+            throw new RuntimeException("The source XML document contains sibling element names that collide after property-name normalization.");
         }
 
         Class<?> targetClass = null;
@@ -1105,8 +1150,8 @@ public final class PropertiesUtil {
                     propValue = Type.of(typeAttr).valueOf(Strings.strip(XmlUtil.getTextContent(propNode)));
                 }
             } else {
-                // TODO: It is difficult to support duplicate properties, and they may be misused.
-                // How to get target property value for auto-refresh if it's list of Properties or entities.
+                // Reuse an existing nested Properties value when present so recursive refreshes can
+                // preserve its identity; duplicate/list-style sibling properties are rejected above.
                 final T targetPropValue = (T) properties.get(propName);
                 final Class<T> propClass = (Class<T>) (propSetMethod == null ? Properties.class : propSetMethod.getParameterTypes()[0]);
                 propValue = loadFromXml(propNode, propSetMethod, false, targetPropValue, propClass);
@@ -1175,7 +1220,9 @@ public final class PropertiesUtil {
 
     /**
      * Stores the specified properties to the given file with optional comments.
-     * The properties are written in the standard Java properties format.
+     * The properties are written in the standard Java properties format. Non-string keys and values
+     * are converted with {@link String#valueOf(Object)}; null keys or values are rejected because the
+     * standard {@link java.util.Properties} representation does not support them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1188,6 +1235,7 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include as a leading comment line in the stored file; may be {@code null} for no comment.
      * @param output the file to which the properties will be stored. The file is created if it does not already exist.
+     * @throws NullPointerException if {@code properties}, {@code output}, or any key or value is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while writing to the file
      * @see #store(Properties, String, OutputStream)
      * @see #store(Properties, String, Writer)
@@ -1209,9 +1257,12 @@ public final class PropertiesUtil {
 
     /**
      * Stores the specified properties to the given OutputStream with optional comments.
+     * Non-string keys and values are converted with {@link String#valueOf(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Properties<String, String> properties = new Properties<>();
+     * properties.put("mode", "production");
      * try (OutputStream os = new FileOutputStream("config.properties")) {
      *     PropertiesUtil.store(properties, "Configuration", os);
      * }
@@ -1220,12 +1271,11 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include as a leading comment line in the stored output; may be {@code null} for no comment.
      * @param output the OutputStream to which the properties will be stored. The stream is flushed but not closed.
+     * @throws NullPointerException if {@code properties}, {@code output}, or any key or value is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while writing to the stream
      */
     public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output) {
-        final java.util.Properties tmp = new java.util.Properties();
-
-        tmp.putAll(properties);
+        final java.util.Properties tmp = toJavaProperties(properties);
 
         try {
             tmp.store(output, comments);
@@ -1237,9 +1287,12 @@ public final class PropertiesUtil {
 
     /**
      * Stores the specified properties to the given Writer with optional comments.
+     * Non-string keys and values are converted with {@link String#valueOf(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Properties<String, String> properties = new Properties<>();
+     * properties.put("mode", "production");
      * try (Writer writer = new FileWriter("config.properties")) {
      *     PropertiesUtil.store(properties, "Configuration", writer);
      * }
@@ -1248,12 +1301,11 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include as a leading comment line in the stored output; may be {@code null} for no comment.
      * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
+     * @throws NullPointerException if {@code properties}, {@code output}, or any key or value is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while writing to the writer
      */
     public static void store(final Properties<?, ?> properties, final String comments, final Writer output) {
-        final java.util.Properties tmp = new java.util.Properties();
-
-        tmp.putAll(properties);
+        final java.util.Properties tmp = toJavaProperties(properties);
 
         try {
             tmp.store(output, comments);
@@ -1263,6 +1315,20 @@ public final class PropertiesUtil {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static java.util.Properties toJavaProperties(final Properties<?, ?> properties) {
+        Objects.requireNonNull(properties, "properties");
+
+        final java.util.Properties result = new java.util.Properties();
+
+        for (final Map.Entry<?, ?> entry : properties.entrySet()) {
+            final Object key = Objects.requireNonNull(entry.getKey(), "property key");
+            final Object value = Objects.requireNonNull(entry.getValue(), "property value for key: " + key);
+            result.setProperty(String.valueOf(key), String.valueOf(value));
+        }
+
+        return result;
     }
 
     /**
@@ -1287,12 +1353,17 @@ public final class PropertiesUtil {
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the file to which the properties will be stored, encoded as UTF-8. The file is created if it does not already exist.
+     * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
+     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element name,
+     *         or if nested {@code Properties} instances contain a reference cycle
      * @throws UncheckedIOException if an I/O error occurs while writing to the file
      * @see #storeToXml(Properties, String, boolean, OutputStream)
      * @see #storeToXml(Properties, String, boolean, Writer)
      * @see #loadFromXml(File)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output) {
+        validateXmlStructure(properties, rootElementName);
+
         OutputStream os = null;
         Writer writer = null;
 
@@ -1302,7 +1373,7 @@ public final class PropertiesUtil {
             os = IOUtil.newFileOutputStream(output);
             writer = IOUtil.newOutputStreamWriter(os, Charsets.UTF_8);
 
-            storeToXml(properties, rootElementName, writeTypeInfo, writer);
+            storeToXml(properties, rootElementName, writeTypeInfo, true, writer);
 
             writer.flush();
         } catch (final IOException e) {
@@ -1315,9 +1386,13 @@ public final class PropertiesUtil {
 
     /**
      * Stores the specified properties to the given XML OutputStream.
+     * Each non-null mapping is written under its own key nested inside the root element;
+     * null-valued mappings are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Properties<String, Object> properties = new Properties<>();
+     * properties.put("theme", "dark");
      * try (OutputStream os = new FileOutputStream("config.xml")) {
      *     PropertiesUtil.storeToXml(properties, "settings", false, os);
      * }
@@ -1329,10 +1404,17 @@ public final class PropertiesUtil {
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the OutputStream to which the properties will be stored, encoded as UTF-8. The stream is flushed but not closed.
+     * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
+     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element name,
+     *         or if nested {@code Properties} instances contain a reference cycle
      * @throws UncheckedIOException if an I/O error occurs while writing to the stream
+     * @see #storeToXml(Properties, String, boolean, File)
+     * @see #loadFromXml(InputStream)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
             throws UncheckedIOException {
+        validateXmlStructure(properties, rootElementName);
+
         final java.io.OutputStreamWriter writer = IOUtil.newOutputStreamWriter(output, Charsets.UTF_8);
         try {
             storeToXml(properties, rootElementName, writeTypeInfo, true, writer);
@@ -1344,9 +1426,13 @@ public final class PropertiesUtil {
 
     /**
      * Stores the specified properties to the given XML Writer.
+     * Each non-null mapping is written under its own key nested inside the root element;
+     * null-valued mappings are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Properties<String, Object> properties = new Properties<>();
+     * properties.put("port", 8080);
      * try (Writer writer = new FileWriter("config.xml")) {
      *     PropertiesUtil.storeToXml(properties, "config", true, writer);
      * }
@@ -1358,11 +1444,73 @@ public final class PropertiesUtil {
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
+     * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
+     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element name,
+     *         or if nested {@code Properties} instances contain a reference cycle
      * @throws UncheckedIOException if an I/O error occurs while writing to the writer
+     * @see #storeToXml(Properties, String, boolean, File)
+     * @see #loadFromXml(Reader)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final Writer output)
             throws UncheckedIOException {
+        validateXmlStructure(properties, rootElementName);
         storeToXml(properties, rootElementName, writeTypeInfo, true, output);
+    }
+
+    private static void validateXmlStructure(final Properties<?, ?> properties, final String rootElementName) {
+        Objects.requireNonNull(properties, "properties");
+        final Document document;
+
+        try {
+            // Use the JDK DOM factory directly. XML storing has no reason to acquire the optional
+            // parser/JAXB dependencies used by XmlUtil's deserialization paths.
+            document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        } catch (final ParserConfigurationException e) {
+            throw new IllegalStateException("No DOM implementation is available for validating XML element names", e);
+        }
+
+        validateXmlElementName(rootElementName, "rootElementName", document);
+
+        final Set<Properties<?, ?>> ancestors = Collections.newSetFromMap(new IdentityHashMap<>());
+        validateXmlProperties(properties, document, ancestors);
+    }
+
+    private static void validateXmlProperties(final Properties<?, ?> properties, final Document document, final Set<Properties<?, ?>> ancestors) {
+        if (!ancestors.add(properties)) {
+            throw new IllegalArgumentException("Nested properties contain a reference cycle");
+        }
+
+        try {
+            for (final Map.Entry<?, ?> entry : properties.entrySet()) {
+                final Object value = entry.getValue();
+
+                // Null-valued entries are deliberately omitted, so their keys are never emitted either.
+                if (value == null) {
+                    continue;
+                }
+
+                final Object key = Objects.requireNonNull(entry.getKey(), "property key");
+                validateXmlElementName(String.valueOf(key), "property key", document);
+
+                if (value instanceof Properties) {
+                    validateXmlProperties((Properties<?, ?>) value, document, ancestors);
+                }
+            }
+        } finally {
+            ancestors.remove(properties);
+        }
+    }
+
+    private static void validateXmlElementName(final String name, final String argumentName, final Document document) {
+        if (Strings.isEmpty(name) || name.indexOf(':') >= 0) {
+            throw new IllegalArgumentException(argumentName + " must be a non-empty, namespace-free XML element name: " + name);
+        }
+
+        try {
+            document.createElement(name);
+        } catch (final RuntimeException e) {
+            throw new IllegalArgumentException(argumentName + " must be a valid XML element name: " + name, e);
+        }
     }
 
     /**
@@ -1395,12 +1543,13 @@ public final class PropertiesUtil {
             Object propValue = null;
             Type<Object> type = null;
             for (final Map.Entry<?, ?> entry : properties.entrySet()) { //NOSONAR
-                propName = entry.getKey().toString();
                 propValue = entry.getValue();
 
                 if (propValue == null) {
                     continue;
                 }
+
+                propName = entry.getKey().toString();
 
                 if (propValue instanceof Properties) {
                     bw.flush();
@@ -1439,32 +1588,32 @@ public final class PropertiesUtil {
 
     /**
      * Escapes characters that are illegal inside an XML attribute value. Parameterized type
-     * declaring names (e.g. {@code List<Object>}) contain {@code '<'}/{@code '>'}; written raw
-     * they make the stored XML unparseable. The XML parser unescapes them on reload, so
+     * declaring names (e.g. {@code List<Object>}) contain markup characters; written raw
+     * they can make the stored XML unparseable. The XML parser unescapes them on reload, so
      * {@code Type.of(...)} still receives the original name.
      *
      * @param typeName the type name to escape
      * @return the escaped attribute value
      */
     private static String escapeTypeAttr(final String typeName) {
-        if (typeName.indexOf('<') < 0 && typeName.indexOf('>') < 0 && typeName.indexOf('&') < 0) {
+        if (typeName.indexOf('<') < 0 && typeName.indexOf('>') < 0 && typeName.indexOf('&') < 0 && typeName.indexOf('"') < 0) {
             return typeName;
         }
 
-        return typeName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+        return typeName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 
     /**
      * Generates Java code from the specified XML string.
      * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
-     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     * with typed getters and setters backed by runtime casts. The generated class extends Properties&lt;String, Object&gt;.
      *
      * <p>The generated code includes:</p>
      * <ul>
      *   <li>Nested static classes for complex properties</li>
-     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Getter and setter signatures derived from XML type attributes</li>
      *   <li>Automatic handling of property types based on XML type attributes</li>
-     *   <li>Support for nested and list properties</li>
+     *   <li>Support for nested properties and container types recognized by {@link Type}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1476,10 +1625,12 @@ public final class PropertiesUtil {
      *
      * @param xml the XML content as a string.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
-     * @param packageName the package name for the generated Java classes.
-     * @param className the name of the generated Java class.
+     * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
+     * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
+     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws RuntimeException if XML parsing or file I/O fails
      */
     public static void xmlToJava(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         xmlToJava(IOUtil.stringToInputStream(xml), srcPath, packageName, className, isPublicField);
@@ -1488,14 +1639,14 @@ public final class PropertiesUtil {
     /**
      * Generates Java code from the specified XML file.
      * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
-     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     * with typed getters and setters backed by runtime casts. The generated class extends Properties&lt;String, Object&gt;.
      *
      * <p>The generated code includes:</p>
      * <ul>
      *   <li>Nested static classes for complex properties</li>
-     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Getter and setter signatures derived from XML type attributes</li>
      *   <li>Automatic handling of property types based on XML type attributes</li>
-     *   <li>Support for nested and list properties</li>
+     *   <li>Support for nested properties and container types recognized by {@link Type}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1506,10 +1657,12 @@ public final class PropertiesUtil {
      *
      * @param xml the XML file from which to generate Java code.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
-     * @param packageName the package name for the generated Java classes.
-     * @param className the name of the generated Java class.
+     * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
+     * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
+     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws RuntimeException if XML parsing or file I/O fails
      */
     public static void xmlToJava(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         Reader reader = null;
@@ -1526,14 +1679,14 @@ public final class PropertiesUtil {
     /**
      * Generates Java code from the specified XML InputStream.
      * This method analyzes the XML structure and generates a corresponding Java class hierarchy that mirrors it,
-     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     * with typed getters and setters backed by runtime casts. The generated class extends Properties&lt;String, Object&gt;.
      *
      * <p>The generated code includes:</p>
      * <ul>
      *   <li>Nested static classes for complex properties</li>
-     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Getter and setter signatures derived from XML type attributes</li>
      *   <li>Automatic handling of property types based on XML type attributes</li>
-     *   <li>Support for nested and list properties</li>
+     *   <li>Support for nested properties and container types recognized by {@link Type}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1543,12 +1696,14 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param xml the InputStream from which to generate Java code.
+     * @param xml the InputStream from which to generate Java code; it is not closed by this method.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
-     * @param packageName the package name for the generated Java classes.
-     * @param className the name of the generated Java class.
+     * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
+     * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
+     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws RuntimeException if XML parsing or file I/O fails
      */
     public static void xmlToJava(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         xmlToJava(IOUtil.newInputStreamReader(xml), srcPath, packageName, className, isPublicField);
@@ -1557,14 +1712,14 @@ public final class PropertiesUtil {
     /**
      * Generates Java code from the specified XML Reader.
      * This method parses the XML and generates a Java class hierarchy that mirrors the XML structure,
-     * with typed getters and setters for each property. The generated class extends Properties&lt;String, Object&gt;.
+     * with typed getters and setters backed by runtime casts. The generated class extends Properties&lt;String, Object&gt;.
      *
      * <p>The generated code includes:</p>
      * <ul>
      *   <li>Nested static classes for complex properties</li>
-     *   <li>Type-safe getter and setter methods</li>
+     *   <li>Getter and setter signatures derived from XML type attributes</li>
      *   <li>Automatic handling of property types based on XML type attributes</li>
-     *   <li>Support for nested and list properties</li>
+     *   <li>Support for nested properties and container types recognized by {@link Type}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1575,15 +1730,20 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param xml the Reader from which to generate Java code.
+     * @param xml the Reader from which to generate Java code; it is not closed by this method.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
-     * @param packageName the package name for the generated Java classes.
-     * @param className the name of the generated Java class. If {@code null}, uses the root element name from XML.
+     * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
+     * @param className the name of the generated Java class. If {@code null}, uses the normalized and capitalized root element name.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
+     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws RuntimeException if XML parsing or file I/O fails
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public static void xmlToJava(final Reader xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {
+        N.checkArgNotEmpty(srcPath, "srcPath");
+        validatePackageName(packageName);
+
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
         Writer writer = null;
 
@@ -1595,49 +1755,36 @@ public final class PropertiesUtil {
                 throw new RuntimeException("No document element found in XML source");
             }
 
-            // TODO: It is difficult to support duplicate properties, and they may be misused.
+            // Normalized sibling names would generate duplicate accessors and map keys.
             if (hasDuplicatedPropName(root)) {
-                throw new RuntimeException("The source XML document contains duplicate properties that have the same node tag name in the same root.");
+                throw new RuntimeException("The source XML document contains sibling element names that collide after property-name normalization.");
             }
 
             if (className == null) {
-                className = Strings.capitalize(root.getNodeName());
+                className = generatedClassName(root);
+            } else {
+                checkJavaIdentifier(className, "className");
             }
 
-            final String classFilePath = ClassUtil.makeFolderForPackage(srcPath, packageName);
+            validateGeneratedStructure(root, className, N.newHashSet());
+
+            // Generate completely in memory first. Invalid type declarations or identifiers must not
+            // delete/truncate an existing source file before generation has succeeded.
+            final java.io.StringWriter generatedSource = new java.io.StringWriter();
+
+            if (Strings.isNotEmpty(packageName)) {
+                generatedSource.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
+                generatedSource.write(IOUtil.LINE_SEPARATOR_UNIX);
+                generatedSource.write(IOUtil.LINE_SEPARATOR_UNIX);
+            }
+
+            xmlPropertiesToJava(root, className, isPublicField, "", true, generatedSource);
+
+            final String classFilePath = ClassUtil.makeFolderForPackage(srcPath, Strings.isEmpty(packageName) ? null : packageName);
             final File classFile = new File(classFilePath + className + ".java");
 
-            IOUtil.deleteIfExists(classFile);
-
-            IOUtil.createNewFileIfNotExists(classFile);
-
             writer = IOUtil.newFileWriter(classFile, Charsets.UTF_8);
-            writer.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
-
-            writer.write(IOUtil.LINE_SEPARATOR_UNIX);
-            writer.write(IOUtil.LINE_SEPARATOR_UNIX);
-
-            final Set<String> importType = getImportType(root);
-
-            if (hasDuplicatedPropName(root)) {
-                importType.add(List.class.getCanonicalName());
-                importType.add(java.util.ArrayList.class.getCanonicalName());
-                importType.add(java.util.Collections.class.getCanonicalName());
-            }
-
-            importType.add(Map.class.getCanonicalName());
-
-            for (final String clsName : importType) {
-                writer.write("import " + clsName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
-            }
-
-            writer.write(IOUtil.LINE_SEPARATOR_UNIX);
-            writer.write("import " + Properties.class.getCanonicalName() + ";" + IOUtil.LINE_SEPARATOR_UNIX);
-            writer.write(IOUtil.LINE_SEPARATOR_UNIX);
-
-            xmlPropertiesToJava(root, className, isPublicField, "", true, writer);
-
-            writer.flush();
+            writer.write(generatedSource.toString());
         } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
@@ -1645,10 +1792,61 @@ public final class PropertiesUtil {
         }
     }
 
+    private static void validatePackageName(final String packageName) {
+        if (Strings.isEmpty(packageName)) {
+            return;
+        }
+
+        for (final String identifier : packageName.split("\\.", -1)) {
+            checkJavaIdentifier(identifier, "packageName");
+        }
+    }
+
+    private static void checkJavaIdentifier(final String identifier, final String argumentName) {
+        if (!Strings.isValidJavaIdentifier(identifier)) {
+            throw new IllegalArgumentException(argumentName + " must be a valid Java identifier: " + identifier);
+        }
+    }
+
+    private static String generatedClassName(final Node node) {
+        final String className = Strings.capitalize(Beans.normalizePropName(node.getNodeName()));
+        checkJavaIdentifier(className, "XML element name");
+        return className;
+    }
+
+    private static void validateGeneratedStructure(final Node node, final String className, final Set<String> enclosingClassNames) {
+        checkJavaIdentifier(className, "generated class name");
+
+        if (!enclosingClassNames.add(className)) {
+            throw new IllegalArgumentException("A generated nested class has the same name as an enclosing class: " + className);
+        }
+
+        try {
+            final NodeList childNodes = node.getChildNodes();
+
+            for (int i = 0, len = childNodes.getLength(); i < len; i++) {
+                final Node childNode = childNodes.item(i);
+
+                if (childNode.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+
+                final String propName = Beans.normalizePropName(childNode.getNodeName());
+                checkJavaIdentifier(propName, "normalized XML property name");
+
+                if (!XmlUtil.isTextElement(childNode) && Strings.isEmpty(XmlUtil.getAttribute(childNode, TYPE))) {
+                    validateGeneratedStructure(childNode, generatedClassName(childNode), enclosingClassNames);
+                }
+            }
+        } finally {
+            enclosingClassNames.remove(className);
+        }
+    }
+
     private static void xmlPropertiesToJava(final Node xmlNode, String className, final boolean isPublicField, final String spaces, final boolean isRoot,
             final Writer output) throws IOException {
         if (className == null) {
-            className = Strings.capitalize(xmlNode.getNodeName());
+            className = generatedClassName(xmlNode);
         }
 
         output.write(IOUtil.LINE_SEPARATOR_UNIX);
@@ -1657,10 +1855,10 @@ public final class PropertiesUtil {
             output.write(spaces + "/**" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(spaces + " * Auto-generated by Abacus." + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(spaces + " */" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(
-                    spaces + "public class " + className + " extends " + Properties.class.getSimpleName() + "<String, Object> {" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(spaces + "public class " + className + " extends " + Properties.class.getCanonicalName() + "<String, Object> {"
+                    + IOUtil.LINE_SEPARATOR_UNIX);
         } else {
-            output.write(spaces + "public static class " + className + " extends " + Properties.class.getSimpleName() + "<String, Object> {"
+            output.write(spaces + "public static class " + className + " extends " + Properties.class.getCanonicalName() + "<String, Object> {"
                     + IOUtil.LINE_SEPARATOR_UNIX);
         }
 
@@ -1668,7 +1866,6 @@ public final class PropertiesUtil {
 
         //noinspection ConstantValue
         if ((childNodes != null) && (childNodes.getLength() > 0)) {
-            final Set<String> duplicatedPropNameSet = getDuplicatedPropNameSet(xmlNode);
             final Set<String> propNameSet = N.newHashSet();
 
             Node childNode = null;
@@ -1696,10 +1893,11 @@ public final class PropertiesUtil {
 
                 typeName = getTypeName(childNode, propName);
 
-                writeMethod(methodSpace, propName, typeName, duplicatedPropNameSet, output);
+                writeMethod(methodSpace, propName, typeName, output);
             }
 
-            // disable put/put/all/set/remove method
+            // Retain generic mutation methods for compatibility, but deprecate them in favor of
+            // the generated property-specific accessors.
             output.write(IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "@Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
@@ -1717,7 +1915,7 @@ public final class PropertiesUtil {
             output.write(IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "@Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "public void putAll(Map<? extends String, ? extends Object> m) {" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "public void putAll(java.util.Map<? extends String, ? extends Object> m) {" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "    " + "super.putAll(m);" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "}" + IOUtil.LINE_SEPARATOR_UNIX);
 
@@ -1765,57 +1963,7 @@ public final class PropertiesUtil {
         output.write(spaces + "}" + IOUtil.LINE_SEPARATOR_UNIX);
     }
 
-    private static Set<String> getImportType(final Node node) {
-        final Set<String> result = N.newLinkedHashSet();
-        final NodeList childNodes = node.getChildNodes();
-
-        //noinspection ConstantValue
-        if ((childNodes == null) || (childNodes.getLength() == 0)) {
-            return result;
-        }
-
-        Node childNode = null;
-        String attr = null;
-        Type<Object> type = null;
-
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            childNode = childNodes.item(i);
-
-            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
-
-            attr = XmlUtil.getAttribute(childNode, TYPE);
-
-            if (Strings.isNotEmpty(attr)) {
-                type = Type.of(attr);
-                if (type != null) {
-                    final Class<?> typeClass = type.javaType();
-                    if (typeClass.getCanonicalName().startsWith("java.lang") || ClassUtil.isPrimitiveType(typeClass)
-                            || (typeClass.isArray() && ClassUtil.isPrimitiveType(typeClass.getComponentType()))) {
-                        // ignore
-                    } else {
-                        result.add(type.javaType().getCanonicalName());
-                    }
-
-                }
-            }
-
-            // See xmlPropertiesToJava: must match loadFromXml's nested-element detection (XmlUtil.isTextElement)
-            // so that type attributes inside compact single-child chains still get their imports collected.
-            if (!XmlUtil.isTextElement(childNode)) {
-                result.addAll(getImportType(childNode));
-            }
-        }
-
-        return result;
-    }
-
-    private static void writeMethod(final String spaces, final String propName, final String typeName, final Set<String> duplicatedPropNameSet,
-            final Writer output) throws IOException {
-        final String listPropName = propName + "List";
-        final String elementTypeName = Type.of(typeName).isPrimitive() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(Type.of(typeName).javaType())) : typeName;
-
+    private static void writeMethod(final String spaces, final String propName, final String typeName, final Writer output) throws IOException {
         output.write(spaces + "public " + typeName + " get" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR_UNIX);
         output.write(spaces + "    " + "return (" + typeName + ") super.get(\"" + propName + "\");" + IOUtil.LINE_SEPARATOR_UNIX);
         output.write(spaces + "}" + IOUtil.LINE_SEPARATOR_UNIX);
@@ -1824,12 +1972,6 @@ public final class PropertiesUtil {
 
         output.write(spaces + "public void set" + Strings.capitalize(propName) + "(" + typeName + " " + propName + ") {" + IOUtil.LINE_SEPARATOR_UNIX);
         output.write(spaces + "    " + "super.put(\"" + propName + "\", " + propName + ");" + IOUtil.LINE_SEPARATOR_UNIX);
-        // output.write(spaces + "    " + "this." + propName + " = " + propName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
-
-        if (duplicatedPropNameSet.contains(propName)) {
-            output.write(spaces + "    " + "put(\"" + listPropName + "\", " + listPropName + ");" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(spaces + "    " + "this." + listPropName + ".add(" + propName + ");" + IOUtil.LINE_SEPARATOR_UNIX);
-        }
 
         output.write(spaces + "}" + IOUtil.LINE_SEPARATOR_UNIX);
 
@@ -1837,31 +1979,7 @@ public final class PropertiesUtil {
 
         output.write(spaces + "public void remove" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR_UNIX);
         output.write(spaces + "    " + "super.remove(\"" + propName + "\");" + IOUtil.LINE_SEPARATOR_UNIX);
-        // output.write(spaces + "    " + "this." + propName + " = " + Type.of(typeName).defaultValue() + ";" + IOUtil.LINE_SEPARATOR_UNIX);
-
-        // TODO: It is difficult to support duplicate properties, and they may be misused.
-        //        if (duplicatedPropNameSet.contains(propName)) {
-        //            writer.write(spaces + "    " + "remove(\"" + listPropName + "\", " + listPropName + ");" + N.LINE_SEPARATOR);
-        //            writer.write(spaces + "    " + "this." + listPropName + ".remove(" + propName + ");" + N.LINE_SEPARATOR);
-        //        }
-
         output.write(spaces + "}" + IOUtil.LINE_SEPARATOR_UNIX);
-
-        if (duplicatedPropNameSet.contains(propName)) {
-            output.write(IOUtil.LINE_SEPARATOR_UNIX);
-
-            output.write(spaces + "public List<" + elementTypeName + "> get" + Strings.capitalize(listPropName) + "() {" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(spaces + "    " + "return " + listPropName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(spaces + "}" + IOUtil.LINE_SEPARATOR_UNIX);
-
-            output.write(IOUtil.LINE_SEPARATOR_UNIX);
-
-            output.write(spaces + "public void set" + Strings.capitalize(listPropName) + "(List<" + elementTypeName + "> " + listPropName + ") {"
-                    + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(spaces + "    " + "super.put(\"" + listPropName + "\", " + listPropName + ");" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(spaces + "    " + "this." + listPropName + " = " + listPropName + ";" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(spaces + "}" + IOUtil.LINE_SEPARATOR_UNIX);
-        }
     }
 
     private static String getTypeName(final Node node, final String propName) {
@@ -1872,11 +1990,17 @@ public final class PropertiesUtil {
 
         if (Strings.isNotEmpty(typeAttr)) {
             if (typeAttr.equals("Properties")) {
-                typeName = "Properties<String, Object>";
+                typeName = Properties.class.getCanonicalName() + "<String, Object>";
             } else {
                 final Type<?> type = Type.of(typeAttr);
-                if (type != null) {
-                    typeName = type.javaType().getSimpleName();
+                if (type == null || type.javaType() == void.class) {
+                    throw new IllegalArgumentException("Unsupported XML property type: " + typeAttr);
+                }
+
+                typeName = type.javaType().getCanonicalName();
+
+                if (typeName == null) {
+                    throw new IllegalArgumentException("The XML property type has no canonical Java source name: " + typeAttr);
                 }
             }
         }
@@ -1916,38 +2040,6 @@ public final class PropertiesUtil {
         }
 
         return false;
-    }
-
-    private static Set<String> getDuplicatedPropNameSet(final Node node) {
-        final NodeList childNodes = node.getChildNodes();
-        //noinspection ConstantValue
-        if (childNodes == null || childNodes.getLength() == 0) {
-            return N.newHashSet();
-        }
-
-        final Set<String> propNameSet = N.newHashSet();
-        final Set<String> duplicatedPropNameSet = N.newHashSet();
-
-        Node childNode = null;
-        String propName = null;
-
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            childNode = childNodes.item(i);
-
-            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
-
-            propName = Beans.normalizePropName(childNode.getNodeName());
-
-            if (propNameSet.contains(propName)) {
-                duplicatedPropNameSet.add(propName);
-            } else {
-                propNameSet.add(propName);
-            }
-        }
-
-        return duplicatedPropNameSet;
     }
 
     /**

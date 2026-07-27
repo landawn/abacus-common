@@ -53,6 +53,7 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11136,6 +11137,39 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
+    public void testAsyncTerminalWrappersCloseSeqWhenSchedulingIsRejected() {
+        final RejectedExecutionException rejection = new RejectedExecutionException("expected");
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Seq<Integer, RuntimeException> runSource = Seq.<Integer, RuntimeException> of(1).onClose(closeCount::incrementAndGet);
+
+        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> runSource.runAsync(s -> s.count(), command -> {
+            throw rejection;
+        })));
+        assertEquals(1, closeCount.get());
+        assertThrows(IllegalStateException.class, runSource::count);
+
+        final Seq<Integer, RuntimeException> callSource = Seq.<Integer, RuntimeException> of(1).onClose(closeCount::incrementAndGet);
+        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> callSource.callAsync(s -> s.count(), command -> {
+            throw rejection;
+        })));
+        assertEquals(2, closeCount.get());
+        assertThrows(IllegalStateException.class, callSource::count);
+
+        final IllegalStateException closeFailure = new IllegalStateException("close failed");
+        final Seq<Integer, RuntimeException> closeFailingSource = Seq.<Integer, RuntimeException> of(1).onClose(() -> {
+            throw closeFailure;
+        });
+        final RejectedExecutionException thrown = assertThrows(RejectedExecutionException.class, () -> closeFailingSource.runAsync(s -> s.count(), command -> {
+            throw rejection;
+        }));
+
+        assertSame(rejection, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(closeFailure, thrown.getSuppressed()[0]);
+        assertThrows(IllegalStateException.class, closeFailingSource::count);
+    }
+
+    @Test
     public void testcallAsync_WithExecutor() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
@@ -11633,11 +11667,6 @@ public class SeqTest extends AbstractTest {
         List<Integer> result = Seq.of(1, 2, 3).onClose(() -> called.set(true)).toList();
         assertEquals(3, result.size());
         assertTrue(called.get());
-    }
-
-    @Test
-    public void testNullArgument_ThrowsException() throws Exception {
-        assertTrue(true);
     }
 
     // ===================================================================

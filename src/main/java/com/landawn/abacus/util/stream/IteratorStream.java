@@ -77,6 +77,12 @@ import com.landawn.abacus.util.function.TriFunction;
  * @see ObjIteratorEx
  */
 class IteratorStream<T> extends AbstractStream<T> {
+
+    /**
+     * The backing element source. A source that is already an {@link ObjIteratorEx} is used as-is;
+     * any other {@link Iterator} is wrapped. It is consumed lazily, so it must not be advanced
+     * externally once this stream has been created.
+     */
     final ObjIteratorEx<T> elements;
 
     //    Optional<T> head;
@@ -89,7 +95,8 @@ class IteratorStream<T> extends AbstractStream<T> {
      * Constructs an IteratorStream from an Iterator.
      * Creates an unsorted stream with no close handlers.
      *
-     * @param values the iterator to wrap as a stream
+     * @param values the iterator to wrap as a stream; must not be {@code null}
+     * @throws IllegalArgumentException if {@code values} is {@code null}
      */
     IteratorStream(final Iterator<? extends T> values) {
         this(values, null);
@@ -99,8 +106,9 @@ class IteratorStream<T> extends AbstractStream<T> {
      * Constructs an IteratorStream from an Iterator with close handlers.
      * Creates an unsorted stream with no comparator that will execute the provided close handlers when closed.
      *
-     * @param values the iterator to wrap as a stream
-     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be null
+     * @param values the iterator to wrap as a stream; must not be {@code null}
+     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be {@code null}
+     * @throws IllegalArgumentException if {@code values} is {@code null}
      */
     IteratorStream(final Iterator<? extends T> values, final Collection<LocalRunnable> closeHandlers) {
         this(values, false, null, closeHandlers);
@@ -110,10 +118,11 @@ class IteratorStream<T> extends AbstractStream<T> {
      * Constructs an IteratorStream from an Iterator with sorting, comparator, and close handlers.
      * This is the primary constructor that all other constructors delegate to.
      *
-     * @param values the iterator to wrap as a stream
+     * @param values the iterator to wrap as a stream; must not be {@code null}
      * @param sorted {@code true} if the elements are already sorted according to the comparator, {@code false} otherwise
      * @param comparator the comparator used for ordering, may be {@code null} for natural ordering
-     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be null
+     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be {@code null}
+     * @throws IllegalArgumentException if {@code values} is {@code null}
      */
     IteratorStream(final Iterator<? extends T> values, final boolean sorted, final Comparator<? super T> comparator,
             final Collection<LocalRunnable> closeHandlers) {
@@ -141,6 +150,16 @@ class IteratorStream<T> extends AbstractStream<T> {
         elements = tmp;
     }
 
+    /**
+     * Constructs an IteratorStream over the elements of another {@code Stream}.
+     * The source stream's iterator is adopted, and the source stream's own close handlers are
+     * merged with the specified ones, so closing this stream also closes the source stream.
+     *
+     * @param stream the source stream to iterate over; a {@code null} stream is treated as empty
+     * @param sorted {@code true} if the elements are already sorted according to the comparator, {@code false} otherwise
+     * @param comparator the comparator used for ordering, may be {@code null} for natural ordering
+     * @param closeHandlers additional close handlers to execute when the stream is closed, may be {@code null}
+     */
     IteratorStream(final Stream<T> stream, final boolean sorted, final Comparator<? super T> comparator, final Deque<LocalRunnable> closeHandlers) {
         this(iterate(stream), sorted, comparator, mergeCloseHandlers(closeHandlers, stream));
     }
@@ -2124,6 +2143,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void advance(final long n2) {
+                if (n2 <= 0) {
+                    return;
+                }
+
                 if (!skipped) {
                     skipped = true;
                     elements.advance(n);
@@ -3084,7 +3107,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    public long count() throws IllegalStateException, IllegalArgumentException {
+    public long count() throws IllegalStateException {
         assertNotClosed();
 
         try {
@@ -3478,17 +3501,18 @@ class IteratorStream<T> extends AbstractStream<T> {
      * Creates a parallel version of this iterator-backed stream using the specified parameters.
      *
      * @param maxThreadNum the maximum number of threads for parallel execution
-     * @param splitor the strategy used to split the iterator for parallel processing
+     * @param splitStrategy the strategy used to split the iterator for parallel processing
      * @param asyncExecutor the executor for submitting parallel tasks
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @return a new {@link ParallelIteratorStream} wrapping the same underlying iterator
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected Stream<T> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected Stream<T> parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorStream<>(elements, isSorted(), comparator(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+        return new ParallelIteratorStream<>(elements, isSorted(), comparator(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 closeHandlers());
     }
 
@@ -3496,7 +3520,8 @@ class IteratorStream<T> extends AbstractStream<T> {
      * Returns a standard JDK {@link java.util.stream.Stream} backed by this stream's underlying iterator.
      * Close handlers registered on this stream are forwarded to the returned JDK stream.
      *
-     * <p>This is a terminal operation that transfers ownership to the returned JDK stream.
+     * <p>This conversion is lazy. The returned JDK stream owns subsequent traversal and should
+     * be closed when it is no longer needed, particularly when this stream has close handlers.
      *
      * @return a JDK {@link java.util.stream.Stream} over the elements of this stream
      * @throws IllegalStateException if the stream is already closed

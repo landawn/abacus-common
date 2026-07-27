@@ -33,7 +33,7 @@ import com.landawn.abacus.util.Numbers;
 public final class FloatType extends AbstractFloatType {
 
     /**
-     * The type name constant for Float type identification.
+     * The type name constant for Float type identification, equal to {@code "Float"}.
      */
     public static final String FLOAT = Float.class.getSimpleName();
 

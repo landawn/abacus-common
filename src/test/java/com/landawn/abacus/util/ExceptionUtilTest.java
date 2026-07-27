@@ -456,6 +456,22 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
+    public void testTryToGetOriginalCheckedException_requiresWholeUncheckedClassName() {
+        IOException cause = new IOException("checked cause");
+        RuntimeException wrapper = new NotUncheckedIOExceptionWrapper(cause);
+
+        Assertions.assertSame(wrapper, ExceptionUtil.tryToGetOriginalCheckedException(wrapper));
+    }
+
+    private static final class NotUncheckedIOExceptionWrapper extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        private NotUncheckedIOExceptionWrapper(final IOException cause) {
+            super(cause);
+        }
+    }
+
+    @Test
     public void testTryToGetOriginalCheckedException_UncheckedException() {
         IOException cause = new IOException("original io");
         UncheckedIOException wrapped = new UncheckedIOException(cause);

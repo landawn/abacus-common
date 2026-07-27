@@ -181,8 +181,12 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Short[]> type = TypeFactory.getType(Short[].class);
-     * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * type.serializeTo(writer, new Short[] {1, 2, 3}, null);   // Writes "[1, 2, 3]"
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * try {
+     *     type.serializeTo(writer, new Short[] {1, 2, 3}, null);   // Writes "[1, 2, 3]"
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
      * }</pre>
      *
      * <p>

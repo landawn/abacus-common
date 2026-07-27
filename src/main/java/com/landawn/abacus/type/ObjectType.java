@@ -30,16 +30,17 @@ public final class ObjectType<T> extends SingleValueType<T> {
     public static final String OBJECT = Object.class.getSimpleName();
 
     /**
-     * Constructs an ObjectType for the generic Object class.
-     * This constructor creates a type handler for java.lang.Object.
+     * Constructs an {@code ObjectType} for {@link Object}, the general fallback handler used when
+     * no more specific type is registered for a value's runtime class.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
      */
     ObjectType() {
         this((Class<T>) Object.class);
     }
 
     /**
-     * Constructs an ObjectType with a specific class.
-     * This constructor creates a type handler for a specific class type.
+     * Constructs an {@code ObjectType} for a specific class, taking the canonical class name of
+     * {@code cls} as the type name.
      *
      * @param cls the class to create a type handler for
      */

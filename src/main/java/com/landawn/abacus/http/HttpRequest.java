@@ -92,6 +92,15 @@ public final class HttpRequest {
 
     private boolean closeHttpClientAfterExecution = false;
 
+    /**
+     * Constructs an {@code HttpRequest} bound to the given client.
+     * The client is <i>not</i> closed after execution unless
+     * {@link #closeHttpClientAfterExecution(boolean)} is set; this constructor is package-private,
+     * so use {@link #create(HttpClient)} or one of the {@code url(...)} factories.
+     *
+     * @param httpClient the client used to execute this request; must not be {@code null}
+     * @throws IllegalArgumentException if {@code httpClient} is {@code null}
+     */
     HttpRequest(final HttpClient httpClient) {
         this.httpClient = N.checkArgNotNull(httpClient, "httpClient");
     }
@@ -126,7 +135,8 @@ public final class HttpRequest {
      *
      * @param url The target URL for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or its scheme is not
+     *         {@code http} or {@code https}.
      */
     public static HttpRequest url(final String url) {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
@@ -145,7 +155,8 @@ public final class HttpRequest {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, its scheme is not
+     *         {@code http} or {@code https}, or either timeout is negative.
      */
     public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -164,7 +175,8 @@ public final class HttpRequest {
      *
      * @param url The target URL for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, or its scheme is not
+     *         {@code http} or {@code https}.
      */
     public static HttpRequest url(final URL url) {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
@@ -185,12 +197,21 @@ public final class HttpRequest {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, its scheme is not
+     *         {@code http} or {@code https}, or either timeout is negative.
      */
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
+    /**
+     * Sets whether the underlying {@link HttpClient} is closed once this request has been executed.
+     * The {@code url(...)} factories enable this because they create a dedicated client;
+     * {@link #create(HttpClient)} leaves it disabled so a caller-supplied client stays usable.
+     *
+     * @param shouldClose {@code true} to close the client after execution
+     * @return This HttpRequest instance for method chaining
+     */
     HttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
         closeHttpClientAfterExecution = shouldClose;
 
@@ -256,6 +277,7 @@ public final class HttpRequest {
      * @param username The username for authentication
      * @param password The password for authentication
      * @return This HttpRequest instance for method chaining
+     * @see HttpHeaders#setBasicAuthentication(String, String)
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -280,9 +302,10 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param name The header name
-     * @param value The header value
+     * @param name The header name; must not be {@code null}
+     * @param value The header value; may be {@code null}
      * @return This HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -313,6 +336,7 @@ public final class HttpRequest {
      * @param name2 The second header name
      * @param value2 The second header value
      * @return This HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -346,6 +370,7 @@ public final class HttpRequest {
      * @param name3 The third header name
      * @param value3 The third header value
      * @return This HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code name1}, {@code name2} or {@code name3} is {@code null}
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -376,8 +401,11 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param headers A map containing header names and values
+     * @param headers A map containing header names and values; must not be {@code null}
      * @return This HttpRequest instance for method chaining
+     * @throws NullPointerException if {@code headers} is {@code null}
+     * @throws IllegalArgumentException if any key in {@code headers} is {@code null}
+     * @see #setHeaders(HttpHeaders)
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -392,7 +420,9 @@ public final class HttpRequest {
 
     /**
      * Resets all headers on this request with the specified headers.
-     * This method replaces all existing headers with the provided HttpHeaders instance.
+     * This method discards every header previously set on this request and installs the entries of
+     * the provided instance instead. It is the replace-all counterpart of {@link #headers(Map)},
+     * which merges. The entries are copied, so later changes to {@code headers} are not picked up.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -404,8 +434,9 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param headers The HttpHeaders instance to set
+     * @param headers The HttpHeaders instance to set; {@code null} clears all headers
      * @return This HttpRequest instance for method chaining
+     * @see #headers(Map)
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -430,8 +461,10 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param connectTimeout The connection timeout in milliseconds. Must be non-negative.
+     * @param connectTimeout The connection timeout in milliseconds. Must be non-negative;
+     *        {@code 0} means "not set", so the client-level default applies.
      * @return This HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative
      */
     public HttpRequest connectTimeout(final long connectTimeout) {
         checkSettings();
@@ -451,8 +484,11 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param connectTimeout The connection timeout as a Duration
+     * @param connectTimeout The connection timeout as a Duration; must not be {@code null} and must
+     *        not be negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
+     * @throws NullPointerException if {@code connectTimeout} is {@code null}
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative
      */
     public HttpRequest connectTimeout(final Duration connectTimeout) {
         checkSettings();
@@ -474,8 +510,10 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param readTimeout The read timeout in milliseconds. Must be non-negative.
+     * @param readTimeout The read timeout in milliseconds. Must be non-negative;
+     *        {@code 0} means "not set", so the client-level default applies.
      * @return This HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code readTimeout} is negative
      */
     public HttpRequest readTimeout(final long readTimeout) {
         checkSettings();
@@ -495,8 +533,11 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param readTimeout The read timeout as a Duration
+     * @param readTimeout The read timeout as a Duration; must not be {@code null} and must not be
+     *        negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
+     * @throws NullPointerException if {@code readTimeout} is {@code null}
+     * @throws IllegalArgumentException if {@code readTimeout} is negative
      */
     public HttpRequest readTimeout(final Duration readTimeout) {
         checkSettings();
@@ -541,8 +582,10 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param sslSocketFactory The SSL socket factory to use. Must not be {@code null}.
+     * @param sslSocketFactory The SSL socket factory to use; {@code null} clears any previously set
+     *        factory so the platform default is used.
      * @return This HttpRequest instance for method chaining
+     * @see HttpSettings#setSSLSocketFactory(SSLSocketFactory)
      */
     public HttpRequest sslSocketFactory(final SSLSocketFactory sslSocketFactory) {
         checkSettings();
@@ -564,8 +607,10 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param proxy The proxy to use. Must not be {@code null}.
+     * @param proxy The proxy to use; {@code null} clears any previously set proxy so the connection
+     *        is made directly.
      * @return This HttpRequest instance for method chaining
+     * @see HttpSettings#setProxy(Proxy)
      */
     public HttpRequest proxy(final Proxy proxy) {
         checkSettings();
@@ -771,7 +816,11 @@ public final class HttpRequest {
     private void setContentType(final String contentType) {
         checkSettings();
 
-        if (Strings.isEmpty(settings.getContentType()) || !Strings.containsIgnoreCase(settings.getContentType(), contentType)) {
+        final String configuredContentType = settings.getContentType();
+        final int parameterSeparatorIndex = configuredContentType == null ? -1 : configuredContentType.indexOf(';');
+        final String configuredMediaType = parameterSeparatorIndex < 0 ? configuredContentType : configuredContentType.substring(0, parameterSeparatorIndex);
+
+        if (Strings.isEmpty(configuredMediaType) || !contentType.equalsIgnoreCase(configuredMediaType.trim())) {
             settings.header(HttpHeaders.Names.CONTENT_TYPE, contentType);
         }
     }

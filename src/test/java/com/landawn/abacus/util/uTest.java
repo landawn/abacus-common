@@ -3888,4 +3888,112 @@ public class uTest extends TestBase {
         assertSame(Nullable.FALSE, Nullable.from(java.util.Optional.of(Boolean.FALSE)));
         assertSame(Nullable.of(""), Nullable.from(java.util.Optional.of("")));
     }
+
+    @Test
+    @DisplayName("OptionalBoolean orElseFalse/orElseTrue on present and empty")
+    public void testOptionalBoolean_orElseFalseOrElseTrue() {
+        assertTrue(OptionalBoolean.of(true).orElseFalse());
+        assertFalse(OptionalBoolean.of(false).orElseFalse());
+        assertFalse(OptionalBoolean.empty().orElseFalse());
+
+        assertTrue(OptionalBoolean.of(true).orElseTrue());
+        assertFalse(OptionalBoolean.of(false).orElseTrue());
+        assertTrue(OptionalBoolean.empty().orElseTrue());
+    }
+
+    @Test
+    @DisplayName("Cached instance identity at exact cache boundaries for Char/Short/Long/Byte")
+    public void testCacheBoundaries() {
+        // OptionalChar caches 0..128
+        assertSame(OptionalChar.of((char) 0), OptionalChar.of((char) 0));
+        assertSame(OptionalChar.of((char) 128), OptionalChar.of((char) 128));
+        assertNotSame(OptionalChar.of((char) 129), OptionalChar.of((char) 129));
+        assertEquals(OptionalChar.of((char) 129), OptionalChar.of((char) 129));
+
+        // OptionalShort caches -128..256
+        assertSame(OptionalShort.of((short) -128), OptionalShort.of((short) -128));
+        assertSame(OptionalShort.of((short) 256), OptionalShort.of((short) 256));
+        assertNotSame(OptionalShort.of((short) -129), OptionalShort.of((short) -129));
+        assertNotSame(OptionalShort.of((short) 257), OptionalShort.of((short) 257));
+        assertEquals(OptionalShort.of((short) 257), OptionalShort.of((short) 257));
+
+        // OptionalLong caches -256..1024
+        assertSame(OptionalLong.of(-256L), OptionalLong.of(-256L));
+        assertSame(OptionalLong.of(1024L), OptionalLong.of(1024L));
+        assertNotSame(OptionalLong.of(-257L), OptionalLong.of(-257L));
+        assertNotSame(OptionalLong.of(1025L), OptionalLong.of(1025L));
+        assertEquals(OptionalLong.of(1025L), OptionalLong.of(1025L));
+
+        // OptionalByte caches the entire byte range
+        assertSame(OptionalByte.of((byte) -128), OptionalByte.of((byte) -128));
+        assertSame(OptionalByte.of((byte) 127), OptionalByte.of((byte) 127));
+    }
+
+    @Test
+    @DisplayName("OptionalFloat: -0.0f is distinct from cached 0.0f; NaN equals NaN")
+    public void testOptionalFloat_NegativeZeroAndNaN() {
+        // +0.0f hits the cached ZERO instance; -0.0f must not (Float.compare distinguishes them)
+        assertSame(OptionalFloat.of(0.0f), OptionalFloat.of(0.0f));
+        assertNotSame(OptionalFloat.of(-0.0f), OptionalFloat.of(-0.0f));
+
+        // -0.0f and +0.0f are NOT equal (equals uses Float.compare via N.equals) and must not share a hash code
+        assertNotEquals(OptionalFloat.of(-0.0f), OptionalFloat.of(0.0f));
+        assertNotEquals(OptionalFloat.of(-0.0f).hashCode(), OptionalFloat.of(0.0f).hashCode());
+        assertTrue(OptionalFloat.of(-0.0f).compareTo(OptionalFloat.of(0.0f)) < 0);
+
+        // NaN is equal to itself (Float.compare semantics) with a consistent hash code
+        assertEquals(OptionalFloat.of(Float.NaN), OptionalFloat.of(Float.NaN));
+        assertEquals(OptionalFloat.of(Float.NaN).hashCode(), OptionalFloat.of(Float.NaN).hashCode());
+        assertEquals(0, OptionalFloat.of(Float.NaN).compareTo(OptionalFloat.of(Float.NaN)));
+    }
+
+    @Test
+    @DisplayName("OptionalDouble: -0.0d is distinct from cached 0.0d; NaN equals NaN")
+    public void testOptionalDouble_NegativeZeroAndNaN() {
+        assertSame(OptionalDouble.of(0.0d), OptionalDouble.of(0.0d));
+        assertNotSame(OptionalDouble.of(-0.0d), OptionalDouble.of(-0.0d));
+
+        assertNotEquals(OptionalDouble.of(-0.0d), OptionalDouble.of(0.0d));
+        assertNotEquals(OptionalDouble.of(-0.0d).hashCode(), OptionalDouble.of(0.0d).hashCode());
+        assertTrue(OptionalDouble.of(-0.0d).compareTo(OptionalDouble.of(0.0d)) < 0);
+
+        assertEquals(OptionalDouble.of(Double.NaN), OptionalDouble.of(Double.NaN));
+        assertEquals(OptionalDouble.of(Double.NaN).hashCode(), OptionalDouble.of(Double.NaN).hashCode());
+        assertEquals(0, OptionalDouble.of(Double.NaN).compareTo(OptionalDouble.of(Double.NaN)));
+    }
+
+    @Test
+    @DisplayName("from(jdk optional) throws NullPointerException for null argument where documented")
+    public void testFrom_NullJdkOptional() {
+        assertThrows(NullPointerException.class, () -> OptionalInt.from(null));
+        assertThrows(NullPointerException.class, () -> OptionalLong.from(null));
+        assertThrows(NullPointerException.class, () -> OptionalDouble.from(null));
+        assertThrows(NullPointerException.class, () -> Nullable.from((java.util.Optional<String>) null));
+    }
+
+    @Test
+    @DisplayName("compareTo treats a null argument as an empty optional")
+    public void testCompareTo_NullArgument() {
+        assertTrue(OptionalInt.of(1).compareTo(null) > 0);
+        assertEquals(0, OptionalInt.empty().compareTo(null));
+
+        assertTrue(OptionalChar.of('a').compareTo(null) > 0);
+        assertEquals(0, OptionalChar.empty().compareTo(null));
+
+        assertTrue(OptionalDouble.of(1.0).compareTo(null) > 0);
+        assertEquals(0, OptionalDouble.empty().compareTo(null));
+    }
+
+    @Test
+    @DisplayName("hashCode is 0 for empty primitive optionals")
+    public void testEmptyHashCodeIsZero() {
+        assertEquals(0, OptionalBoolean.empty().hashCode());
+        assertEquals(0, OptionalChar.empty().hashCode());
+        assertEquals(0, OptionalByte.empty().hashCode());
+        assertEquals(0, OptionalShort.empty().hashCode());
+        assertEquals(0, OptionalLong.empty().hashCode());
+        assertEquals(0, OptionalFloat.empty().hashCode());
+        assertEquals(0, OptionalDouble.empty().hashCode());
+        assertEquals(0, Nullable.empty().hashCode());
+    }
 }

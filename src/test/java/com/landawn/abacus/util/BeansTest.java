@@ -338,6 +338,144 @@ public class BeansTest extends TestBase {
         }
     }
 
+    public static class MapBean {
+        private Map<String, Integer> values;
+
+        public Map<String, Integer> getValues() {
+            return values;
+        }
+
+        public void setValues(final Map<String, Integer> values) {
+            this.values = values;
+        }
+    }
+
+    public static class AccessorCacheBean {
+        private String visible;
+        private String hidden;
+
+        public String getVisible() {
+            return visible;
+        }
+
+        public void setVisible(final String visible) {
+            this.visible = visible;
+        }
+
+        public String getHidden() {
+            return hidden;
+        }
+
+        public void setHidden(final String hidden) {
+            this.hidden = hidden;
+        }
+    }
+
+    public static class CustomAccessorBean {
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(final String value) {
+            this.value = value;
+        }
+    }
+
+    public static class PropertyAccessorBaseBean {
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(final String value) {
+            this.value = value;
+        }
+    }
+
+    public static class CachedPropertyAccessorSubclass extends PropertyAccessorBaseBean {
+        // Dedicated regression type: its metadata is populated before base accessor registration.
+    }
+
+    public static class LatePropertyAccessorSubclass extends PropertyAccessorBaseBean {
+        // Dedicated regression type: its metadata is first populated after base accessor registration.
+    }
+
+    public static class PropertyAccessorOverrideBaseBean {
+        private String baseValue;
+
+        public String getBaseValue() {
+            return baseValue;
+        }
+
+        public void setBaseValue(final String baseValue) {
+            this.baseValue = baseValue;
+        }
+    }
+
+    public static class BaseFirstPropertyAccessorSubclass extends PropertyAccessorOverrideBaseBean {
+        private String childValue;
+
+        public String getChildValue() {
+            return childValue;
+        }
+
+        public void setChildValue(final String childValue) {
+            this.childValue = childValue;
+        }
+    }
+
+    public static class SubclassFirstPropertyAccessorSubclass extends PropertyAccessorOverrideBaseBean {
+        private String childValue;
+
+        public String getChildValue() {
+            return childValue;
+        }
+
+        public void setChildValue(final String childValue) {
+            this.childValue = childValue;
+        }
+    }
+
+    public interface LeftAmbiguousPropertyAccessor {
+        String getLeftValue();
+
+        void setLeftValue(String value);
+    }
+
+    public interface RightAmbiguousPropertyAccessor {
+        String getRightValue();
+
+        void setRightValue(String value);
+    }
+
+    public static class AmbiguousPropertyAccessorBean implements LeftAmbiguousPropertyAccessor, RightAmbiguousPropertyAccessor {
+        private String leftValue;
+        private String rightValue;
+
+        @Override
+        public String getLeftValue() {
+            return leftValue;
+        }
+
+        @Override
+        public void setLeftValue(final String value) {
+            leftValue = value;
+        }
+
+        @Override
+        public String getRightValue() {
+            return rightValue;
+        }
+
+        @Override
+        public void setRightValue(final String value) {
+            rightValue = value;
+        }
+    }
+
     private SimpleBean simpleBean;
     private NestedBean nestedBean;
     private EntityBean entityBean;
@@ -560,6 +698,19 @@ public class BeansTest extends TestBase {
     }
 
     @Test
+    public void testRegisterNonPropertyAccessor_refreshesExistingMetadata() {
+        assertTrue(Beans.getPropNameList(AccessorCacheBean.class).contains("hidden"));
+        assertNotNull(Beans.getPropGetter(AccessorCacheBean.class, "hidden"));
+
+        Beans.registerNonPropertyAccessor(AccessorCacheBean.class, "hidden");
+
+        assertFalse(Beans.getPropNameList(AccessorCacheBean.class).contains("hidden"));
+        assertNull(Beans.getPropGetter(AccessorCacheBean.class, "hidden"));
+        assertNull(Beans.getPropSetter(AccessorCacheBean.class, "hidden"));
+        assertTrue(Beans.getPropNameList(AccessorCacheBean.class).contains("visible"));
+    }
+
+    @Test
     public void testRegisterPropGetSetMethod() throws Exception {
         Method method = SimpleBean.class.getMethod("getName");
         Beans.registerPropertyAccessor("name", method);
@@ -598,6 +749,82 @@ public class BeansTest extends TestBase {
         // Registering a setter method
         Method setAge = SimpleBean.class.getMethod("setAge", int.class);
         assertDoesNotThrow(() -> Beans.registerPropertyAccessor("age", setAge));
+    }
+
+    @Test
+    public void testRegisterPropertyAccessor_addsAliasAfterMissWasCached() throws Exception {
+        assertNull(Beans.getPropGetter(CustomAccessorBean.class, "alias"));
+
+        final Method getter = CustomAccessorBean.class.getMethod("getValue");
+        final Method setter = CustomAccessorBean.class.getMethod("setValue", String.class);
+        Beans.registerPropertyAccessor("alias", getter);
+        Beans.registerPropertyAccessor("alias", setter);
+
+        assertEquals(getter, Beans.getPropGetter(CustomAccessorBean.class, "alias"));
+        assertEquals(setter, Beans.getPropSetter(CustomAccessorBean.class, "alias"));
+        assertTrue(Beans.getPropNameList(CustomAccessorBean.class).contains("alias"));
+    }
+
+    @Test
+    public void testRegisterPropertyAccessor_baseAliasAppliesToCachedAndLaterSubclasses() throws Exception {
+        final String alias = "inheritedAlias";
+
+        assertNull(Beans.getPropGetter(CachedPropertyAccessorSubclass.class, alias));
+        assertNull(Beans.getPropSetter(CachedPropertyAccessorSubclass.class, alias));
+        assertNull(Beans.getBeanInfo(CachedPropertyAccessorSubclass.class).getPropInfo(alias));
+
+        final Method getter = PropertyAccessorBaseBean.class.getMethod("getValue");
+        final Method setter = PropertyAccessorBaseBean.class.getMethod("setValue", String.class);
+        Beans.registerPropertyAccessor(alias, getter);
+        Beans.registerPropertyAccessor(alias, setter);
+
+        assertEquals(getter, Beans.getPropGetter(CachedPropertyAccessorSubclass.class, alias));
+        assertEquals(setter, Beans.getPropSetter(CachedPropertyAccessorSubclass.class, alias));
+        assertNotNull(Beans.getBeanInfo(CachedPropertyAccessorSubclass.class).getPropInfo(alias));
+
+        assertEquals(getter, Beans.getPropGetter(LatePropertyAccessorSubclass.class, alias));
+        assertEquals(setter, Beans.getPropSetter(LatePropertyAccessorSubclass.class, alias));
+        assertNotNull(Beans.getBeanInfo(LatePropertyAccessorSubclass.class).getPropInfo(alias));
+
+        final LatePropertyAccessorSubclass bean = new LatePropertyAccessorSubclass();
+        Beans.setPropValue(bean, alias, "registered-on-base");
+        assertEquals("registered-on-base", Beans.getPropValue(bean, alias));
+    }
+
+    @Test
+    public void testRegisterPropertyAccessor_subclassAliasWinsRegardlessOfRegistrationOrder() throws Exception {
+        final Method baseGetter = PropertyAccessorOverrideBaseBean.class.getMethod("getBaseValue");
+        final Method baseSetter = PropertyAccessorOverrideBaseBean.class.getMethod("setBaseValue", String.class);
+
+        final Method baseFirstGetter = BaseFirstPropertyAccessorSubclass.class.getMethod("getChildValue");
+        final Method baseFirstSetter = BaseFirstPropertyAccessorSubclass.class.getMethod("setChildValue", String.class);
+        Beans.registerPropertyAccessor("baseFirstAlias", baseGetter);
+        Beans.registerPropertyAccessor("baseFirstAlias", baseSetter);
+        Beans.registerPropertyAccessor("baseFirstAlias", baseFirstGetter);
+        Beans.registerPropertyAccessor("baseFirstAlias", baseFirstSetter);
+
+        assertEquals(baseFirstGetter, Beans.getPropGetter(BaseFirstPropertyAccessorSubclass.class, "baseFirstAlias"));
+        assertEquals(baseFirstSetter, Beans.getPropSetter(BaseFirstPropertyAccessorSubclass.class, "baseFirstAlias"));
+        assertEquals(baseGetter, Beans.getPropGetter(PropertyAccessorOverrideBaseBean.class, "baseFirstAlias"));
+
+        final Method subclassFirstGetter = SubclassFirstPropertyAccessorSubclass.class.getMethod("getChildValue");
+        final Method subclassFirstSetter = SubclassFirstPropertyAccessorSubclass.class.getMethod("setChildValue", String.class);
+        Beans.registerPropertyAccessor("subclassFirstAlias", subclassFirstGetter);
+        Beans.registerPropertyAccessor("subclassFirstAlias", subclassFirstSetter);
+        Beans.registerPropertyAccessor("subclassFirstAlias", baseGetter);
+        Beans.registerPropertyAccessor("subclassFirstAlias", baseSetter);
+
+        assertEquals(subclassFirstGetter, Beans.getPropGetter(SubclassFirstPropertyAccessorSubclass.class, "subclassFirstAlias"));
+        assertEquals(subclassFirstSetter, Beans.getPropSetter(SubclassFirstPropertyAccessorSubclass.class, "subclassFirstAlias"));
+        assertEquals(baseGetter, Beans.getPropGetter(PropertyAccessorOverrideBaseBean.class, "subclassFirstAlias"));
+    }
+
+    @Test
+    public void testRegisterPropertyAccessor_rejectsAmbiguousIncomparableInterfaces() throws Exception {
+        Beans.registerPropertyAccessor("ambiguousAlias", LeftAmbiguousPropertyAccessor.class.getMethod("getLeftValue"));
+        Beans.registerPropertyAccessor("ambiguousAlias", RightAmbiguousPropertyAccessor.class.getMethod("getRightValue"));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(AmbiguousPropertyAccessorBean.class, "ambiguousAlias"));
     }
 
     @Test
@@ -1601,7 +1828,7 @@ public class BeansTest extends TestBase {
 
         java.lang.reflect.Method getItems = CollectionBean.class.getMethod("getItems");
         Beans.setPropValueByGetter(bean, getItems, null);
-        // Setting null through getter for collection should clear it (not set null)
+        // A null value is a no-op for a getter-only collection property.
         assertNotNull(bean.getItems());
     }
 
@@ -1624,6 +1851,26 @@ public class BeansTest extends TestBase {
         Method getter = CollectionBean.class.getMethod("getItems");
         Beans.setPropValueByGetter(bean, getter, null);
         assertEquals(1, bean.getItems().size());
+    }
+
+    @Test
+    public void testSetPropValueByGetter_sameCollectionIsNoOp() throws Exception {
+        final CollectionBean bean = new CollectionBean();
+        bean.setItems(new ArrayList<>(Arrays.asList("a", "b")));
+
+        Beans.setPropValueByGetter(bean, CollectionBean.class.getMethod("getItems"), bean.getItems());
+
+        assertEquals(Arrays.asList("a", "b"), bean.getItems());
+    }
+
+    @Test
+    public void testSetPropValueByGetter_sameMapIsNoOp() throws Exception {
+        final MapBean bean = new MapBean();
+        bean.setValues(new LinkedHashMap<>(Map.of("one", 1, "two", 2)));
+
+        Beans.setPropValueByGetter(bean, MapBean.class.getMethod("getValues"), bean.getValues());
+
+        assertEquals(Map.of("one", 1, "two", 2), bean.getValues());
     }
 
     // ===== setPropValueByGetter - throws for non-Collection non-Map return type =====

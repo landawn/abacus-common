@@ -31,8 +31,8 @@ import com.landawn.abacus.util.function.DoublePredicate;
 import com.landawn.abacus.util.function.DoubleTernaryOperator;
 import com.landawn.abacus.util.function.DoubleToLongFunction;
 import com.landawn.abacus.util.function.DoubleUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelIteratorDoubleStreamTest extends TestBase {
 
@@ -44,7 +44,7 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
     private DoubleStream parallelStream;
 
     protected DoubleStream createDoubleStream(double... elements) {
-        return DoubleStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
+        return DoubleStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
 
     // Single-thread parallel (sequential fallback) tests to cover the canBeSequential branches.
     protected DoubleStream createSingleThreadDoubleStream(double... elements) {
-        return DoubleStream.of(elements).map(e -> (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1));
+        return DoubleStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test
@@ -985,7 +985,7 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
     public void testZipWithBinaryDefaults_singleThread_UnevenLengths() {
         List<Double> result = DoubleStream.of(1D, 2D, 3D)
                 .map(e -> e + 0D)
-                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
                 .zipWith(DoubleStream.of(10D), 0D, -1D, Double::sum)
                 .toList();
 
@@ -1031,8 +1031,8 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ITERATOR, ((ParallelIteratorDoubleStream) createDoubleStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ITERATOR, ((ParallelIteratorDoubleStream) createDoubleStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

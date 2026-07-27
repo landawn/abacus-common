@@ -18,11 +18,11 @@
 package com.landawn.abacus.util;
 
 /**
- * A marker interface that provides mutable access to a value.
+ * A marker interface for value holders whose contents can be changed after construction.
  *
- * <p>This interface serves as a common marker for the mutable wrapper implementations
- * in this package. It identifies classes that wrap primitive or object values and allow
- * those values to be modified after construction.</p>
+ * <p>This interface declares no methods; it serves purely as a common marker for the mutable
+ * wrapper implementations in this package. It identifies classes that wrap primitive or object
+ * values and allow those values to be replaced after construction.</p>
  *
  * <p>The primary use cases for mutable wrappers include:</p>
  * <ul>
@@ -32,7 +32,7 @@ package com.landawn.abacus.util;
  *   <li>Avoiding the overhead of autoboxing when working with primitive values that change frequently</li>
  * </ul>
  *
- * <p>Common implementations include:</p>
+ * <p>The primitive wrapper implementations are:</p>
  * <ul>
  *   <li>{@link MutableBoolean} - for boolean values</li>
  *   <li>{@link MutableByte} - for byte values</li>
@@ -43,6 +43,9 @@ package com.landawn.abacus.util;
  *   <li>{@link MutableDouble} - for double values</li>
  *   <li>{@link MutableChar} - for char values</li>
  * </ul>
+ *
+ * <p>{@link Holder}, {@link Pair} and {@link Triple} also implement this interface: they hold
+ * object references that can be reassigned after construction.</p>
  *
  * <p>Example usage with a mutable counter in a lambda:</p>
  * <pre>{@code

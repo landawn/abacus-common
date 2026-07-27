@@ -34,8 +34,8 @@ import com.landawn.abacus.util.Numbers;
  * Database columns are read and written using JDBC's native {@code LocalDate} support with a
  * {@link java.sql.Date} fallback for older drivers.</p>
  *
- * @see java.time.LocalDate
  * @see AbstractTemporalType
+ * @see java.time.LocalDate
  */
 public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
@@ -95,13 +95,16 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     /**
      * Converts an Object to a LocalDate.
      * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalDate using the default zone ID.
+     * A {@link java.util.Date} (including its SQL subclasses) or {@link java.util.Calendar} is converted the same
+     * way from its epoch-millisecond value.
      * Otherwise, the object is converted to a string and parsed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LocalDate> type = TypeFactory.getType(LocalDate.class);
      * LocalDate date1 = type.valueOf(1609459200000L);
-     * LocalDate date2 = type.valueOf("2021-01-01");
+     * LocalDate date2 = type.valueOf(new java.util.Date());
+     * LocalDate date3 = type.valueOf("2021-01-01");
      * }</pre>
      *
      * @param obj The object to convert to LocalDate
@@ -111,6 +114,10 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     public LocalDate valueOf(final Object obj) {
         if (obj instanceof Number) {
             return LocalDate.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Date) {
+            return LocalDate.ofInstant(Instant.ofEpochMilli(((java.util.Date) obj).getTime()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Calendar) {
+            return LocalDate.ofInstant(Instant.ofEpochMilli(((java.util.Calendar) obj).getTimeInMillis()), DEFAULT_ZONE_ID);
         }
 
         return obj == null ? null : valueOf(N.stringOf(obj));
@@ -121,7 +128,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * The method supports multiple formats:
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
-     *   <li>{@code "SYS_TIME"} returns the current {@code LocalDate}</li>
+     *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code LocalDate}</li>
      *   <li>Numeric strings are treated as milliseconds since the epoch</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalDate#parse(CharSequence)}</li>
      * </ul>

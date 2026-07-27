@@ -18,7 +18,7 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts a variable number of char-valued arguments and returns no result.
- * This is a functional interface designed to consume char arrays of any length.
+ * This is the N-arity specialization of {@link CharConsumer}.
  * Unlike most other functional interfaces, {@code CharNConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(char...)}.
@@ -61,9 +61,11 @@ public interface CharNConsumer {
     /**
      * Returns a composed {@code CharNConsumer} that performs, in sequence, this operation
      * followed by the {@code after} operation. If performing either operation throws an
-     * exception, it is relayed to the caller of the composed operation.
+     * exception, it is relayed to the caller of the composed operation. If performing this
+     * operation throws an exception, the {@code after} operation will not be performed.
      *
-     * <p>The char array is passed to both consumers in the same order.
+     * <p>Both operations receive the same array reference, so a modification made by one of them
+     * is visible to the other.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

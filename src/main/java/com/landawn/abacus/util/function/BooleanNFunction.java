@@ -26,6 +26,9 @@ import com.landawn.abacus.util.cs;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <R> the type of the result of the function
+ *
+ * @see BooleanFunction
+ * @see BooleanBiFunction
  */
 @FunctionalInterface
 public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, RuntimeException> { //NOSONAR

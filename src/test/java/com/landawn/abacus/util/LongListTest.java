@@ -1609,16 +1609,6 @@ public class LongListTest extends TestBase {
     }
 
     @Test
-    public void testMaxArraySize() {
-        try {
-            LongList largeList = new LongList(Integer.MAX_VALUE - 8);
-            assertTrue(largeList.isEmpty());
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
-    }
-
-    @Test
     public void testMedian() {
         list.add(1L);
         list.add(3L);
@@ -2705,19 +2695,6 @@ public class LongListTest extends TestBase {
         assertEquals(100, ll.size());
         assertEquals(0L, ll.get(0));
         assertEquals(99L, ll.get(99));
-    }
-
-    @Test
-    public void testEnsureCapacityOverflow() {
-        list.add(1L);
-        try {
-            for (int i = 0; i < 100; i++) {
-                list.add(i);
-            }
-            assertTrue(list.size() > 1);
-        } catch (OutOfMemoryError e) {
-            assertTrue(true);
-        }
     }
 
     @Test

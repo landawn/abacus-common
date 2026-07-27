@@ -56,7 +56,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
  * </table>
  *
- * <p>Note: {@link ObjectPool#poll()} <em>removes</em> the object from the pool, so its {@code true} keyed
+ * <p>Note: {@link ObjectPool#poll()} <em>removes</em> the object from the pool, so its true keyed
  * mirror is {@link #remove(Object)} (which also removes). {@link #get(Object)} returns the value
  * <em>without</em> removing it and therefore has no unkeyed analog.</p>
  *
@@ -91,11 +91,12 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     /**
      * Associates the specified poolable element with the specified key in this pool.
      * If the pool previously contained an element for the key, the old element is removed and
-     * destroyed (with {@link Poolable.Caller#REMOVE_REPLACE_CLEAR}) <em>before</em> the new value
-     * is inserted; this happens even when the subsequent insertion of the new value fails. The one
-     * exception is an already-expired {@code value}, which is rejected before any previous mapping
-     * for {@code key} is removed. The old element is not destroyed when it is the same instance as
-     * {@code value}.
+     * accounted (with {@link Poolable.Caller#REMOVE_REPLACE_CLEAR}) <em>before</em> the new value
+     * is inserted, and it is destroyed as part of the put; its destruction callback may run after
+     * the new mapping is already visible. The removal happens even when the subsequent insertion
+     * of the new value fails. The one exception is an already-expired {@code value}, which is
+     * rejected before any previous mapping for {@code key} is removed. The old element is not
+     * destroyed when it is the same instance as {@code value}.
      *
      * <p>The put operation returns {@code false} (does not insert) if:</p>
      * <ul>
@@ -166,7 +167,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      *     // Successfully pooled
      * } else {
      *     // Timed out waiting for a slot - handle the connection
-     *     conn.destroy(Caller.PUT_ADD_FAILURE);
+     *     conn.destroy(Poolable.Caller.PUT_ADD_FAILURE);
      * }
      * }</pre>
      *
@@ -365,7 +366,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MemoryMeasure<String, CachedData> measure = (key, data) ->
+     * KeyedObjectPool.MemoryMeasure<String, CachedData> measure = (key, data) ->
      *     key.length() * 2 + data.getDataSize();   // uses 2 bytes per char for UTF-16 encoding
      *
      * KeyedObjectPool<String, CachedData> pool = PoolFactory.createKeyedObjectPool(

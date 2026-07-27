@@ -136,6 +136,7 @@ public class AsyncExecutor {
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating
      * @param unit the time unit for the keepAliveTime argument
      * @throws IllegalArgumentException if {@code coreThreadPoolSize} is negative, if {@code maxThreadPoolSize} is negative,
+     *         if {@code coreThreadPoolSize} and {@code maxThreadPoolSize} are both zero,
      *         if {@code keepAliveTime} is negative, or if {@code unit} is {@code null}.
      */
     public AsyncExecutor(final int coreThreadPoolSize, final int maxThreadPoolSize, final long keepAliveTime, final TimeUnit unit)
@@ -163,7 +164,13 @@ public class AsyncExecutor {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService customExecutor = Executors.newFixedThreadPool(5);
-     * AsyncExecutor asyncExecutor = new AsyncExecutor(customExecutor);
+     * try {
+     *     AsyncExecutor asyncExecutor = new AsyncExecutor(customExecutor);
+     *     asyncExecutor.execute(() -> processData()).get();
+     * } finally {
+     *     // AsyncExecutor does not own an externally supplied executor.
+     *     customExecutor.shutdown();
+     * }
      * }</pre>
      *
      * @param executor the Executor to be used for executing tasks
@@ -213,6 +220,7 @@ public class AsyncExecutor {
      *
      * @param command the Runnable command to be executed asynchronously; may throw checked exceptions
      * @return a ContinuableFuture representing the pending completion of this action
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command) {
         return execute(new FutureTask<>(() -> {
@@ -239,6 +247,7 @@ public class AsyncExecutor {
      * @param command the Runnable command to be executed asynchronously; may throw checked exceptions
      * @param finallyAction the Runnable to be executed after the command completes (in a finally block)
      * @return a ContinuableFuture representing the pending completion of this action
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable finallyAction) {
         return execute(new FutureTask<>(() -> {
@@ -276,6 +285,7 @@ public class AsyncExecutor {
      * @param commands the list of Runnable commands to be executed asynchronously; may be {@code null} or empty
      * @return a list of ContinuableFutures representing the pending completion of this action for each command;
      *         returns an empty list if commands is {@code null} or empty
+     * @throws IllegalStateException if {@code commands} is non-empty and this {@code AsyncExecutor} has already been shut down
      */
     public List<ContinuableFuture<Void>> execute(final List<? extends Throwables.Runnable<? extends Exception>> commands) {
         if (N.isEmpty(commands)) {
@@ -311,6 +321,7 @@ public class AsyncExecutor {
      * @param <R> the type of the result returned by the Callable
      * @param command the Callable command to be executed asynchronously; may throw exceptions
      * @return a ContinuableFuture representing the pending result of this computation
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     public <R> ContinuableFuture<R> execute(final Callable<? extends R> command) {
         return execute(new FutureTask<>(command));
@@ -335,6 +346,7 @@ public class AsyncExecutor {
      * @param command the Callable command to be executed asynchronously; may throw exceptions
      * @param finallyAction the Runnable to be executed after the command completes (in a finally block)
      * @return a ContinuableFuture representing the pending result of this computation
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     public <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final java.lang.Runnable finallyAction) {
         return execute(new FutureTask<>(() -> {
@@ -372,6 +384,7 @@ public class AsyncExecutor {
      * @param commands the collection of Callable commands to be executed asynchronously; may be {@code null} or empty
      * @return a list of ContinuableFutures representing the pending result of this computation for each command;
      *         returns an empty list if commands is {@code null} or empty
+     * @throws IllegalStateException if {@code commands} is non-empty and this {@code AsyncExecutor} has already been shut down
      */
     public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<? extends R>> commands) {
         if (N.isEmpty(commands)) {
@@ -411,6 +424,7 @@ public class AsyncExecutor {
      * @param retryCondition the predicate to determine whether to retry based on the caught exception;
      *                       receives the exception and returns {@code true} to retry, {@code false} to fail immediately
      * @return a ContinuableFuture representing the pending completion of this action (including retries)
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     public ContinuableFuture<Void> executeWithRetry(final Throwables.Runnable<? extends Exception> command, final int retryTimes,
             final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition) {
@@ -446,6 +460,7 @@ public class AsyncExecutor {
      * @param retryCondition the bi-predicate to determine whether to retry based on the result and exception;
      *                       receives (result, exception) where one may be {@code null}, returns {@code true} to retry, {@code false} to complete
      * @return a ContinuableFuture representing the pending result of this computation (including retries)
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     public <R> ContinuableFuture<R> executeWithRetry(final Callable<? extends R> command, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
@@ -465,6 +480,7 @@ public class AsyncExecutor {
      * @param <R> the type of the result produced by the FutureTask
      * @param futureTask the FutureTask to be executed asynchronously
      * @return a ContinuableFuture representing the pending result of this computation
+     * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      */
     protected <R> ContinuableFuture<R> execute(final FutureTask<? extends R> futureTask) {
         final Executor executor = getExecutor(); //NOSONAR
@@ -548,13 +564,18 @@ public class AsyncExecutor {
      * {@link #shutdownAndAwait(long, TimeUnit)} to wait for task completion.</p>
      *
      * <p>If the executor is not an {@code ExecutorService} or has not been initialized,
-     * this method still marks the executor as shut down to prevent future initialization.</p>
+     * this method still marks the executor as shut down to prevent future initialization.
+     * Note: if this AsyncExecutor wraps an externally supplied {@code ExecutorService},
+     * that executor is shut down as well.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
-     * // Use executor...
-     * executor.shutdown();   // Gracefully shuts down
+     * try {
+     *     executor.execute(() -> System.out.println("task completed")).get();
+     * } finally {
+     *     executor.shutdown();   // gracefully shuts down even if get() fails
+     * }
      * }</pre>
      *
      */
@@ -572,7 +593,9 @@ public class AsyncExecutor {
      * shutdownNow is called).</p>
      *
      * <p>If the executor is not an {@code ExecutorService} or has not been initialized, this
-     * method still marks the executor as shut down to prevent future initialization.</p>
+     * method still marks the executor as shut down to prevent future initialization.
+     * Note: if this AsyncExecutor wraps an externally supplied {@code ExecutorService},
+     * that executor is shut down as well.</p>
      *
      * <p>If the calling thread is interrupted while waiting, the executor will still be shut
      * down, but the method will return early and log a warning.</p>
@@ -580,8 +603,11 @@ public class AsyncExecutor {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
-     * // Use executor...
-     * executor.shutdownAndAwait(30, TimeUnit.SECONDS);   // Waits up to 30 seconds for tasks to complete
+     * try {
+     *     executor.execute(() -> System.out.println("task completed")).get();
+     * } finally {
+     *     executor.shutdownAndAwait(30, TimeUnit.SECONDS);   // waits up to 30 seconds
+     * }
      * }</pre>
      *
      * @param terminationTimeout the maximum time to wait for executor termination; if 0 or negative,
@@ -611,7 +637,27 @@ public class AsyncExecutor {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
             isShutdown = true; // Mark as shutdown even if executor is null
             executor = null;
-            shutdownExecutorService = null;
+
+            // A prior shutdown may still be draining tasks: keep the tracker so isTerminated()
+            // stays accurate, and honor this call's termination timeout against it.
+            final ExecutorService pending = shutdownExecutorService;
+
+            if (pending != null) {
+                if (terminationTimeout > 0 && !pending.isTerminated()) {
+                    try {
+                        //noinspection ResultOfMethodCallIgnored
+                        pending.awaitTermination(terminationTimeout, timeUnit);
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        logger.warn("Not all AsyncExecutor tasks completed successfully before shutdown");
+                    }
+                }
+
+                if (pending.isTerminated()) {
+                    shutdownExecutorService = null;
+                }
+            }
+
             return;
         }
 

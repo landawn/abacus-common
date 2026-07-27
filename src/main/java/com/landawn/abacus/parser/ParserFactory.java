@@ -38,6 +38,7 @@ import com.landawn.abacus.util.cs;
  *   <li>Standard XML support (requires JAXP)</li>
  *   <li>Avro support (requires Apache Avro library)</li>
  *   <li>Kryo support (requires Kryo library)</li>
+ *   <li>JAXB support (requires the Jakarta XML Binding API and a runtime implementation)</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -85,12 +86,6 @@ public final class ParserFactory {
     private static final boolean isJaxbParserAvailable;
 
     static {
-        // initialize N to avoid below error if 'ParserFactory' is called before N initialized.
-        //    java.lang.NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
-        //    at com.landawn.abacus.parser.ParserFactory.createJsonParser(ParserFactory.java:188)
-        //    at com.landawn.abacus.util.MongoDBExecutor.<clinit>(MongoDBExecutor.java:92)
-        //    at com.landawn.abacus.util.MongoDBExecutorTest.<clinit>(MongoDBExecutorTest.java:42)
-
         {
             boolean isAvailable = false;
 
@@ -489,18 +484,20 @@ public final class ParserFactory {
     }
 
     /**
-     * Creates a new XML StAX parser instance.
+     * Creates a new standard XML StAX parser instance.
+     * StAX parser provides a good balance between performance and ease of use.
      *
-     * @return a new XML StAX parser
+     * @return a new standard XML StAX parser
      */
     static XmlParser createXmlStAXParser() {
         return new XmlParserImpl(XmlParserType.StAX);
     }
 
     /**
-     * Creates a new XML DOM parser instance.
+     * Creates a new standard XML DOM parser instance.
+     * DOM parser loads the entire document into memory but provides random access.
      *
-     * @return a new XML DOM parser
+     * @return a new standard XML DOM parser
      */
     static XmlParser createXmlDOMParser() {
         return new XmlParserImpl(XmlParserType.DOM);

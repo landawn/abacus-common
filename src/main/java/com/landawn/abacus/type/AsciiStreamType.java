@@ -47,7 +47,8 @@ import com.landawn.abacus.util.Objectory;
 public class AsciiStreamType extends InputStreamType {
 
     /**
-     * The type name constant used to identify the ASCII stream type within the type system.
+     * The type name constant used to identify the ASCII stream type within the type system,
+     * equal to {@code "AsciiStream"}.
      */
     public static final String ASCII_STREAM = "AsciiStream";
 
@@ -119,7 +120,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Sets an ASCII {@link java.io.InputStream} parameter on a {@link java.sql.PreparedStatement} at the given position,
-     * reading at most {@code sqlTypeOrLength} bytes from the stream.
+     * declaring that the stream contains exactly {@code sqlTypeOrLength} bytes.
      * Delegates to {@link java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int)}.
      *
      * @param stmt the {@code PreparedStatement} on which to set the parameter
@@ -135,7 +136,7 @@ public class AsciiStreamType extends InputStreamType {
 
     /**
      * Sets a named ASCII {@link java.io.InputStream} parameter on a {@link java.sql.CallableStatement},
-     * reading at most {@code sqlTypeOrLength} bytes from the stream.
+     * declaring that the stream contains exactly {@code sqlTypeOrLength} bytes.
      * Delegates to {@link java.sql.CallableStatement#setAsciiStream(String, java.io.InputStream, int)}.
      *
      * @param stmt the {@code CallableStatement} on which to set the parameter

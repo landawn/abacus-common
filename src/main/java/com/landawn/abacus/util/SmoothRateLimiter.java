@@ -25,9 +25,10 @@ import java.util.concurrent.TimeUnit;
  * throttling, and {@link SmoothWarmingUp} for a warming-up rate limiter that increases
  * throughput gradually from a cold start.
  *
- * <p>The limiter tracks a "next free ticket" time rather than the last granted time,
- * allowing large requests to be granted immediately while deferring subsequent ones.
- * Stored permits accumulate during idle periods up to {@code maxPermits}.</p>
+ * <p>The limiter tracks a "next free ticket" time rather than the last granted time. The size of a
+ * request adds no extra delay to that same request, although an existing scheduling debt can still
+ * make it wait; its permit cost instead delays subsequent requests. Stored permits accumulate during
+ * idle periods up to {@code maxPermits}.</p>
  *
  * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
  */
@@ -213,7 +214,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      */
     static final class SmoothWarmingUp extends SmoothRateLimiter {
 
-        /** The warmup period micros. */
+        /** The warmup period in microseconds. */
         private final long warmupPeriodMicros;
 
         /** The slope of the line from the stable interval (when permits == 0), to the cold interval (when permits == maxPermits). */
@@ -320,7 +321,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      */
     static final class SmoothBursty extends SmoothRateLimiter {
 
-        /** The work (permits) of how many seconds can be saved up if this RateLimiter is unused. */
+        /** The maximum number of seconds' worth of permits that can accumulate while the limiter is idle. */
         final double maxBurstSeconds;
 
         /**

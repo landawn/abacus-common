@@ -59,7 +59,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableFloat num = new MutableFloat();
+     * MutableFloat num = MutableFloat.of(0.0f);
      * }</pre>
      *
      */
@@ -71,7 +71,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableFloat num = new MutableFloat(3.14f);
+     * MutableFloat num = MutableFloat.of(3.14f);
      * }</pre>
      *
      * @param value the initial value to store
@@ -164,9 +164,9 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p>This method is useful when you need both the old and new values in a single call,
      * such as calculating deltas or maintaining state transitions.</p>
      *
-     * <p><strong>Note:</strong> this is not atomic and this class is NOT thread-safe.
-     * For multi-threaded scenarios, use {@link java.util.concurrent.atomic.AtomicReference} with Float
-     * or external synchronization.</p>
+     * <p><strong>Note:</strong> this is not atomic; it simply returns the previous value
+     * and assigns the new one within a single method call. External synchronization is
+     * required for concurrent use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -176,7 +176,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * // Useful for tracking changes
      * MutableFloat temperature = MutableFloat.of(98.6f);
      * float previousTemp = temperature.getAndSet(99.1f);
-     * float delta = temperature.value() - previousTemp;  // returns 0.5f
+     * float delta = temperature.value() - previousTemp;  // delta is 0.5f
      * }</pre>
      *
      * @param newValue the new value to set
@@ -192,9 +192,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Sets the value and then returns it.
      * This is useful when you want to update and immediately use the new value.
      *
-     * <p>This method is particularly useful in fluent programming and when you need to
-     * both update a value and use it in the same expression.</p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
@@ -202,10 +199,10 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * // Useful in method chaining or inline assignments
      * MutableFloat score = MutableFloat.of(0.0f);
-     * System.out.println("New score: " + score.setAndGet(95.5f));   // prints and updates
+     * System.out.println("New score: " + score.setAndGet(95.5f));   // prints "New score: 95.5"
      *
      * // Can be used in calculations
-     * float result = score.setAndGet(100.0f) * 0.9f;  // Sets to 100.0f and calculates
+     * float result = score.setAndGet(100.0f) * 0.9f;  // value is now 100.0f, result is 90.0f
      * }</pre>
      *
      * @param newValue the new value to set
@@ -217,7 +214,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Sets the value to newValue if the predicate evaluates to {@code true} for the current value.
+     * Sets the value to {@code newValue} if the predicate evaluates to {@code true} when testing the current value.
      * If the predicate returns {@code false}, the value remains unchanged.
      *
      * <p>This method provides conditional update functionality, useful for implementing
@@ -451,13 +448,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * // Tracking changes
      * MutableFloat counter = MutableFloat.of(100.0f);
      * float previous = counter.getAndAdd(25.5f);
-     * float change = counter.value() - previous;  // returns 25.5f
-     *
-     * // Accumulating with history
-     * MutableFloat total = MutableFloat.of(0.0f);
-     * List<Float> history = new ArrayList<>();
-     * history.add(total.getAndAdd(10.5f));   // Adds 10.5f, saves old value (0.0f)
-     * history.add(total.getAndAdd(20.3f));   // Adds 20.3f, saves old value (10.5f)
+     * float change = counter.value() - previous;  // change is 25.5f
      * }</pre>
      *
      * @param delta the value to add to the current value
@@ -486,8 +477,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * // Conditional logic based on updated value
      * MutableFloat progress = MutableFloat.of(75.0f);
-     * if (progress.addAndGet(15.0f) >= 100.0f) {
-     *     System.out.println("Task complete!");   // Executes if progress reaches 100%
+     * if (progress.addAndGet(25.0f) >= 100.0f) {
+     *     System.out.println("Task complete!");   // Executes: progress reached 100%
      * }
      * }</pre>
      *
@@ -609,13 +600,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * MutableFloat b = MutableFloat.of(20.5f);
      * int result = a.compareTo(b);   // returns negative value (a < b)
      *
-     * // Sorting example
-     * List<MutableFloat> list = Arrays.asList(
-     *     MutableFloat.of(5.5f),
-     *     MutableFloat.of(2.2f),
-     *     MutableFloat.of(8.8f)
-     * );
-     * Collections.sort(list);   // Sorts in ascending order
+     * MutableFloat nan = MutableFloat.of(Float.NaN);
+     * result = nan.compareTo(MutableFloat.of(Float.POSITIVE_INFINITY));   // returns positive value
      * }</pre>
      *
      * @param other the other MutableFloat to compare to, not {@code null}

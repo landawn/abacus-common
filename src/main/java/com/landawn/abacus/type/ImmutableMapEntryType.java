@@ -44,6 +44,7 @@ import com.landawn.abacus.util.Strings;
 @SuppressWarnings("java:S2160")
 public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
 
+    /** The base type name for immutable map entries, equal to {@code "Map.ImmutableEntry"}. */
     static final String MAP_IMMUTABLE_ENTRY = "Map.ImmutableEntry";
 
     @SuppressWarnings("rawtypes")
@@ -100,9 +101,9 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
     /**
      * Returns an immutable list containing the parameter types of this generic map entry type.
-     * For map entry types, this list contains two elements: the key type and the value type.
+     * The list always contains exactly two elements: the key type at index 0 and the value type at index 1.
      *
-     * @return an immutable list containing the key type and value type
+     * @return an immutable two-element list containing the key type and the value type
      */
     @Override
     public List<Type<?>> parameterTypes() {
@@ -243,8 +244,9 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * as a single-entry JSON object (e.g., {@code {"age":25}}).
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * {@code CharacterWriter}. Map-key quoting follows JSON key rules (string keys remain quoted even when
+     * {@code config} is {@code null}); the value is delegated to its type handler with the supplied config.
+     * It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),

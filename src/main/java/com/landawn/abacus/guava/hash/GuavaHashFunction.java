@@ -72,8 +72,9 @@ final class GuavaHashFunction implements HashFunction {
      * HashFunction wrapped = GuavaHashFunction.wrap(guavaHash);
      * }</pre>
      *
-     * @param gHashFunction the Guava hash function to wrap (must not be null)
+     * @param gHashFunction the Guava hash function to wrap, must not be {@code null}
      * @return a new GuavaHashFunction instance wrapping the given function
+     * @throws NullPointerException if {@code gHashFunction} is {@code null}
      */
     static GuavaHashFunction wrap(final com.google.common.hash.HashFunction gHashFunction) {
         return new GuavaHashFunction(gHashFunction);

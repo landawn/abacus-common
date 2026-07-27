@@ -74,6 +74,7 @@ import com.landawn.abacus.util.function.LongToFloatFunction;
  * @see LongIteratorEx
  */
 class IteratorLongStream extends AbstractLongStream {
+    /** The backing iterator supplying this stream's elements; it is consumed lazily as the stream is traversed. */
     final LongIteratorEx elements;
 
     //    OptionalLong head;
@@ -1788,10 +1789,11 @@ class IteratorLongStream extends AbstractLongStream {
     }
 
     @Override
-    protected LongStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {
+    protected LongStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
+            final boolean cancelUncompletedThreads) {
         assertNotClosed();
 
-        return new ParallelIteratorLongStream(elements, isSorted(), maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return new ParallelIteratorLongStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
     }
 
     @Override

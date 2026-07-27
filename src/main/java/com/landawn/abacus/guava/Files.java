@@ -107,7 +107,7 @@ import com.landawn.abacus.util.ImmutableList;
  *
  * // Writing file content
  * Files.write("Hello World".getBytes(), new File("output.txt"));
- * Files.asCharSink(file, UTF_8).write("Hello World");
+ * Files.asCharSink(file, StandardCharsets.UTF_8).write("Hello World");
  *
  * // File operations
  * Files.copy(sourceFile, targetFile);
@@ -245,7 +245,8 @@ import com.landawn.abacus.util.ImmutableList;
  * <p><b>MoreFiles Nested Class:</b>
  * <ul>
  *   <li><b>Alias Class:</b> A nested subclass that inherits all static methods from {@link Files}</li>
- *   <li><b>Interchangeable Use:</b> {@code Files.MoreFiles.xxx(...)} is equivalent to {@code Files.xxx(...)}</li>
+ *   <li><b>Interchangeable Use:</b> {@code Files.MoreFiles.getFileExtension(path)} is equivalent to
+ *       {@code Files.getFileExtension(path)}</li>
  *   <li><b>Import-Clash Workaround:</b> Its primary purpose is to sidestep the very common import clash on the simple
  *       name {@code Files} (shared by {@link java.nio.file.Files}, {@link com.google.common.io.Files} and this facade);
  *       when another {@code Files} already occupies the simple name, callers can reach this facade through the
@@ -282,7 +283,7 @@ import com.landawn.abacus.util.ImmutableList;
  *             // Write to output directory
  *             String outputName = Files.getNameWithoutExtension(file.getName()) + ".processed";
  *             File outputFile = new File(outputDir, outputName);
- *             Files.asCharSink(outputFile, UTF_8).write(processed);
+ *             Files.asCharSink(outputFile, StandardCharsets.UTF_8).write(processed);
  *
  *             // Create backup
  *             File backupFile = new File(file.getParent(), file.getName() + ".bak");
@@ -460,6 +461,7 @@ public abstract class Files { //NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("output.bin");
+     * byte[] byteArray = "Hello, World!".getBytes(StandardCharsets.UTF_8);
      * ByteSink sink = Files.asByteSink(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
      * sink.write(byteArray);
      * }</pre>
@@ -627,8 +629,9 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Returns {@code true} if the given files exist, are not directories, and contain the same bytes.
-     * This method performs a byte-by-byte comparison of the file contents.
+     * Returns {@code true} if the two {@link File} objects are equal or, otherwise, if their contents
+     * contain the same bytes. Equal {@code File} objects return {@code true} without accessing the file
+     * system; for distinct objects, both files must be readable regular files.
      *
      * <p>This method may be faster than reading both files into memory for comparison,
      * as it can stop reading as soon as a difference is found.
@@ -643,7 +646,8 @@ public abstract class Files { //NOSONAR
      *
      * @param file1 the first file to compare.
      * @param file2 the second file to compare.
-     * @return {@code true} if the files contain the same bytes, {@code false} otherwise.
+     * @return {@code true} if the {@code File} objects are equal or their contents contain the same bytes,
+     *         {@code false} otherwise.
      * @throws IOException if an I/O error occurs while reading either file.
      */
     public static boolean equal(final File file1, final File file2) throws IOException { //NOSONAR
@@ -651,8 +655,9 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Returns {@code true} if the files located by the given paths exist, are not directories, and contain
-     * the same bytes. This method performs a byte-by-byte comparison of the file contents.
+     * Returns {@code true} if the paths identify the same file-system entry or, otherwise, if their contents
+     * contain the same bytes. Identical paths may return {@code true} without requiring the entry to exist;
+     * for paths that do not identify the same entry, both paths must identify readable regular files.
      *
      * <p>This method may be faster than reading both files into memory for comparison,
      * as it can stop reading as soon as a difference is found.
@@ -666,8 +671,9 @@ public abstract class Files { //NOSONAR
      *
      * @param path1 the first path to compare.
      * @param path2 the second path to compare.
-     * @return {@code true} if the files contain the same bytes, {@code false} otherwise.
-     * @throws IOException if an I/O error occurs while reading either file.
+     * @return {@code true} if the paths identify the same entry or their contents contain the same bytes,
+     *         {@code false} otherwise.
+     * @throws IOException if the same-file check or content comparison fails.
      */
     public static boolean equal(final Path path1, final Path path2) throws IOException { //NOSONAR
         return com.google.common.io.MoreFiles.equal(path1, path2);
@@ -1641,8 +1647,8 @@ public abstract class Files { //NOSONAR
      *
      * <p>Because {@code MoreFiles} simply {@code extends Files}, it inherits all of the parent's
      * {@code public static} methods unchanged — there are no additional or overridden members. The two
-     * types are therefore fully interchangeable; {@code Files.MoreFiles.xxx(...)} always behaves
-     * identically to {@code Files.xxx(...)}. Like {@link Files}, this class is a stateless utility and
+     * types are therefore fully interchangeable; for example, {@code Files.MoreFiles.getFileExtension(path)}
+     * behaves identically to {@code Files.getFileExtension(path)}. Like {@link Files}, this class is a stateless utility and
      * cannot be instantiated.</p>
      *
      * <p><b>Usage Examples:</b></p>

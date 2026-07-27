@@ -127,7 +127,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -189,11 +190,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FloatIterator lazy = FloatIterator.defer(() -> {
-     *     // Expensive computation
-     *     float[] data = loadFloatData();
-     *     return FloatIterator.of(data);
-     * });
+     * FloatIterator lazy = FloatIterator.defer(() -> FloatIterator.of(1.5f, 2.5f, 3.5f));
      * // Iterator is not created until first use
      * if (lazy.hasNext()) {
      *     float value = lazy.nextFloat();
@@ -618,8 +615,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
      * iter.indexed().foreachRemaining(indexed ->
-     *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
-     * );
+     *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value()));
      * }</pre>
      *
      * @return an {@code ObjIterator} of {@link IndexedFloat} objects with indices starting at 0
@@ -637,8 +633,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
      * iter.indexed(10).foreachRemaining(indexed ->
-     *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
-     * );
+     *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value()));
      * // Prints indices starting from 10, 11, 12...
      * }</pre>
      *
@@ -703,7 +698,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Float> action) throws IllegalArgumentException {
+    public void forEachRemaining(final java.util.function.Consumer<? super Float> action) {
         super.forEachRemaining(action);
     }
 
@@ -742,8 +737,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
      * iter.foreachIndexed((index, value) ->
-     *     System.out.println("Index: " + index + ", Value: " + value)
-     * );
+     *     System.out.println("Index: " + index + ", Value: " + value));
      * // Output: Index: 0, Value: 1.0
      * //         Index: 1, Value: 2.0
      * //         Index: 2, Value: 3.0
@@ -752,8 +746,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param <E> the type of exception the action may throw
      * @param action the action to be performed for each element with its index; must not be {@code null}
      * @throws IllegalArgumentException if {@code action} is {@code null}
-     * @throws IllegalStateException if the iterator yields more than {@link Integer#MAX_VALUE} elements,
-     *         causing the index counter to overflow
+     * @throws IllegalStateException if elements remain after the zero-based index has reached
+     *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntFloatConsumer<E> action) throws IllegalArgumentException, E {

@@ -49,10 +49,11 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     * Indicates whether instances of this type implement the Comparable interface.
-     * OptionalInt values can be compared when both are present.
+     * Indicates that this handler defines an ordering for {@link OptionalInt} values.
+     * The ordering is {@code null < empty < present}; present values are compared numerically.
      *
-     * @return {@code true}, as OptionalInt values are comparable
+     * @return {@code true}, because this handler implements comparison even though
+     *         {@code OptionalInt} itself does not implement {@link Comparable}
      */
     @Override
     public boolean isComparable() {
@@ -126,6 +127,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      *
      * @param str the string to parse
      * @return OptionalInt.empty() if the string is {@code null} or empty, otherwise OptionalInt containing the parsed value
+     * @throws NumberFormatException if a non-empty string cannot be parsed as an {@code int}
      * @see #valueOf(Object)
      * @see #stringOf(OptionalInt)
      */

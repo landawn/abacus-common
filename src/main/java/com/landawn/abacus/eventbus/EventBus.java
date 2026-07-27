@@ -172,7 +172,9 @@ public class EventBus {
     /**
      * Creates a new {@code EventBus} instance with the specified identifier and executor.
      * The executor is used for asynchronous event delivery when {@link ThreadMode#THREAD_POOL_EXECUTOR} is specified.
-     * If the executor is an {@link ExecutorService}, a shutdown hook will be registered to properly shutdown the executor.
+     * If a caller-supplied executor (that is, one other than the shared default executor) is an
+     * {@link ExecutorService}, a JVM shutdown hook is registered to shut that executor down and wait
+     * up to 60 seconds for its tasks to finish. No hook is registered for the shared default executor.
      *
      * @param identifier the unique identifier for this {@code EventBus} instance
      * @param executor the executor to use for asynchronous event delivery, or {@code null} to use the default executor
@@ -254,6 +256,8 @@ public class EventBus {
     /**
      * Creates a new {@code EventBus} instance with the specified identifier and executor.
      * The executor is used for asynchronous event delivery when {@link ThreadMode#THREAD_POOL_EXECUTOR} is specified.
+     * If the supplied executor is an {@link ExecutorService}, a JVM shutdown hook is registered to shut
+     * it down and wait up to 60 seconds for its tasks to finish.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -310,7 +314,7 @@ public class EventBus {
      * List<Object> subscribers = eventBus.subscribers("textEvents", String.class);
      * }</pre>
      *
-     * @param eventId the event ID to match, or {@code null} for subscribers without event ID
+     * @param eventId the event ID to match, or {@code null} or empty for subscribers without an event ID
      * @param eventType the event type to search for
      * @return a snapshot list of subscribers registered for the specified event type and ID
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
@@ -318,12 +322,13 @@ public class EventBus {
     public List<Object> subscribers(final String eventId, final Class<?> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, "eventType");
 
+        final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<Object> eventSubs = new ArrayList<>();
 
         synchronized (registeredSubMap) {
             for (final Map.Entry<Object, List<SubIdentifier>> entry : registeredSubMap.entrySet()) {
                 for (final SubIdentifier sub : entry.getValue()) {
-                    if (sub.isMyEvent(eventId, eventType)) {
+                    if (sub.isMyEvent(normalizedEventId, eventType)) {
                         eventSubs.add(entry.getKey());
 
                         break;
@@ -386,8 +391,9 @@ public class EventBus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * record OrderPlacedEvent(long orderId) {}
      * if (eventBus.hasSubscribers(OrderPlacedEvent.class)) {
-     *     eventBus.post(new OrderPlacedEvent(...));
+     *     eventBus.post(new OrderPlacedEvent(42L));
      * }
      * }</pre>
      *
@@ -417,11 +423,12 @@ public class EventBus {
      * The subscriber must either implement the {@link Subscriber} interface or have methods annotated with {@link Subscribe}.
      * No registration-level thread mode override is applied, so each subscriber method is delivered events using the thread mode declared in its own {@link Subscribe} annotation (defaulting to {@link ThreadMode#DEFAULT}).
      *
-     * <p>This {@code Object} overload requires a subscriber whose event handling is exposed through a
-     * {@code public}, non-{@code static}, single-argument method annotated with {@link Subscribe}.
-     * A <b>bare lambda</b> {@link Subscriber} (whose erased {@code on(...)} parameter type is
-     * {@code Object}) cannot be registered here: it has no event ID, so this method throws
-     * {@link IllegalStateException}. Register lambda / {@code Subscriber} instances through
+     * <p>This {@code Object} overload accepts a subscriber that exposes its event handling either through
+     * {@code public}, non-{@code static}, single-argument methods annotated with {@link Subscribe}, or by
+     * implementing {@link Subscriber} with a reified {@code on(...)} parameter type (a named or anonymous
+     * class, as in the example below). A <b>bare lambda</b> {@link Subscriber} (whose erased {@code on(...)}
+     * parameter type is {@code Object}) cannot be registered here: it has no event ID, so this method throws
+     * {@link IllegalStateException}. Register lambda {@code Subscriber} instances through
      * {@link #register(Subscriber, String)} or {@link #register(Subscriber, String, ThreadMode)},
      * which require an event ID, instead.
      *
@@ -646,6 +653,19 @@ public class EventBus {
         return this;
     }
 
+    /**
+     * Returns the cached list of prototype {@link SubIdentifier}s for the given subscriber class,
+     * building it on first use. The class and all of its supertypes (superclasses and interfaces) are
+     * scanned for {@code public}, non-{@code static}, single-argument methods annotated with
+     * {@link Subscribe}; if the class also implements {@link Subscriber}, its {@code on(...)} method is
+     * added when no annotated method with the same signature was already found. The result is shared
+     * across all {@code EventBus} instances and is never {@code null}, but may be empty.
+     *
+     * @param subscriberClass the subscriber class to introspect
+     * @return the prototype subscriber-method descriptors for {@code subscriberClass}, possibly empty
+     * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare
+     *         exactly one parameter
+     */
     private List<SubIdentifier> getClassSubList(final Class<?> subscriberClass) {
         synchronized (classMetaSubMap) {
             List<SubIdentifier> subscriberMethods = classMetaSubMap.get(subscriberClass);
@@ -1261,6 +1281,9 @@ public class EventBus {
      *       (determined by {@code equals()}) will be ignored. This prevents redundant processing
      *       of unchanged data.</li>
      * </ul>
+     *
+     * <p><b>Error Handling:</b> Any exception thrown by the subscriber method, or by the reflective
+     * invocation itself, is caught and logged; it is never propagated to the caller.</p>
      *
      * @param sub the subscriber identifier containing the method to invoke, subscriber instance,
      *            and filtering configuration (interval, deduplicate)

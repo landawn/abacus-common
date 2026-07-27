@@ -99,7 +99,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>High-Performance I/O:</b> Optimized stream operations with efficient buffer management</li>
  *   <li><b>Comprehensive File Operations:</b> Complete file and directory manipulation capabilities</li>
- *   <li><b>Stream Processing:</b> Advanced stream utilities with automatic resource management</li>
+ *   <li><b>Stream Processing:</b> Stream utilities with explicit resource-ownership contracts</li>
  *   <li><b>Compression Support:</b> Built-in support for ZIP, GZIP, Snappy, and Brotli compression</li>
  *   <li><b>NIO Integration:</b> Modern NIO.2 operations with Path and Channel support</li>
  *   <li><b>Charset Handling:</b> Explicit charset conversion utilities for reads and writes</li>
@@ -129,7 +129,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Core Operation Categories:</b>
  * <ul>
- *   <li><b>Stream Creation:</b> Factory methods for various stream types with automatic buffering</li>
+ *   <li><b>Stream Creation:</b> Factory methods for file, buffered, character, and compression streams</li>
  *   <li><b>File Operations:</b> Copy, move, delete, create operations with advanced options</li>
  *   <li><b>Directory Management:</b> Recursive operations, listing, traversal, and cleanup</li>
  *   <li><b>Compression/Decompression:</b> ZIP, GZIP, Snappy, Brotli format support</li>
@@ -154,10 +154,10 @@ import com.landawn.abacus.util.stream.Stream;
  * IOUtil.moveToDirectory(sourceFile, targetDirectory);
  * boolean success = IOUtil.deleteIfExists(file);
  *
- * // Stream operations with automatic resource management
+ * // Caller-owned streams are closed with try-with-resources
  * try (InputStream is = IOUtil.newFileInputStream(file);
  *      OutputStream os = IOUtil.newFileOutputStream(targetFile)) {
- *     IOUtil.copy(is, os);
+ *     IOUtil.write(is, os);
  * }
  *
  * // Compression operations
@@ -211,25 +211,23 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>File Copy:</b> O(n) with optimized buffer sizes and NIO channels</li>
  *   <li><b>Directory Traversal:</b> O(n) with efficient file system walking</li>
- *   <li><b>Line Processing:</b> O(n) with streaming approach, memory usage O(1)</li>
+ *   <li><b>Line Processing:</b> O(n) with memory bounded primarily by the longest line and any configured work queue</li>
  *   <li><b>Compression:</b> Algorithm-dependent, optimized for speed vs. ratio trade-offs</li>
  *   <li><b>File Splitting:</b> O(n) with minimal memory overhead</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All utility methods are stateless and thread-safe</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
- *   <li><b>Resource Pools:</b> Internal object pools are thread-safe and lock-free where possible</li>
- *   <li><b>Parallel Operations:</b> Built-in support for parallel processing with configurable thread pools</li>
+ *   <li><b>Shared State:</b> The utility has no caller-visible mutable state other than its cached host name</li>
+ *   <li><b>Caller Resources:</b> Concurrent operations on the same file, stream, reader, writer, or callback require caller coordination</li>
+ *   <li><b>Parallel Operations:</b> Selected line-processing overloads support configurable worker threads</li>
  * </ul>
  *
  * <p><b>Error Handling Strategy:</b>
  * <ul>
  *   <li><b>UncheckedIOException:</b> Wraps checked {@code IOException} for cleaner API usage</li>
- *   <li><b>Graceful Degradation:</b> Operations continue where possible despite partial failures</li>
- *   <li><b>Resource Cleanup:</b> Automatic cleanup even in error scenarios</li>
- *   <li><b>Detailed Logging:</b> Comprehensive logging for debugging and monitoring</li>
+ *   <li><b>Partial Results:</b> Mutating file operations are not transactional and may leave partial output after a failure</li>
+ *   <li><b>Resource Cleanup:</b> Resources opened internally are closed; caller-supplied resources remain caller-owned unless documented otherwise</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
@@ -237,15 +235,15 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Streaming Operations:</b> Process large files without loading into memory</li>
  *   <li><b>Buffer Optimization:</b> Intelligent buffer sizing based on operation type</li>
  *   <li><b>Memory Mapping:</b> Use OS-level memory mapping for very large files</li>
- *   <li><b>Object Pooling:</b> Reuse of expensive objects like channels and buffers</li>
+ *   <li><b>Buffer Reuse:</b> Internal byte/character buffers and selected wrappers are reused where appropriate</li>
  * </ul>
  *
  * <p><b>Platform Compatibility:</b>
  * <ul>
  *   <li><b>Cross-Platform Paths:</b> Handles platform-specific path separators automatically</li>
  *   <li><b>File System Features:</b> Adapts to file system capabilities (symlinks, permissions)</li>
- *   <li><b>Charset Handling:</b> Robust charset detection and conversion across platforms</li>
- *   <li><b>NIO.2 Integration:</b> Modern file system operations with fallback support</li>
+ *   <li><b>Charset Handling:</b> Explicit charset conversion with UTF-8 as this class's default</li>
+ *   <li><b>NIO.2 Integration:</b> Modern file-system operations through {@link Files} where appropriate</li>
  * </ul>
  *
  * <p><b>Integration with Java NIO:</b>
@@ -253,7 +251,6 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Path Support:</b> Seamless integration with {@code java.nio.file.Path}</li>
  *   <li><b>Channel Operations:</b> Direct support for NIO channels for high-performance I/O</li>
  *   <li><b>File Attributes:</b> Advanced file attribute handling and manipulation</li>
- *   <li><b>Watch Service:</b> Integration points for file system monitoring</li>
  * </ul>
  *
  * <p><b>Compression Performance:</b>
@@ -287,7 +284,6 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Custom Stream Types:</b> Integration with custom InputStream/OutputStream implementations</li>
  *   <li><b>Filter Functions:</b> Custom predicates for file filtering and selection</li>
- *   <li><b>Progress Callbacks:</b> Monitoring long-running operations</li>
  *   <li><b>Custom Charsets:</b> Support for application-specific character encodings</li>
  * </ul>
  *
@@ -704,7 +700,7 @@ public final class IOUtil {
     public static final String LINE_SEPARATOR_WINDOWS = "\r\n";
 
     /**
-     * Current path retrieved by {@code new File("./").getAbsolutePath()}.
+     * Current path retrieved by {@code new File("./").getAbsolutePath()}, with the trailing '.' removed.
      */
     public static final String CURRENT_DIR;
 
@@ -957,7 +953,7 @@ public final class IOUtil {
      * byte[] bytes = IOUtil.charsToBytes(chars, 1, 3, StandardCharsets.UTF_8);
      * }</pre>
      *
-     * @param chars the source character array, may be {@code null} or empty.
+     * @param chars the source character array; {@code null} is accepted only when {@code offset} is 0 and {@code charCount} is 0.
      * @param offset the starting position in the character array (0-based), must be &gt;= 0.
      * @param charCount the number of characters to convert, must be &gt;= 0.
      * @param charset the character set to use for encoding. If {@code null}, the default charset (UTF-8) is used.
@@ -1030,7 +1026,7 @@ public final class IOUtil {
      * char[] chars = IOUtil.bytesToChars(bytes, 1, 3, StandardCharsets.UTF_8);
      * }</pre>
      *
-     * @param bytes the source byte array, may be {@code null} or empty.
+     * @param bytes the source byte array; {@code null} is accepted only when {@code offset} is 0 and {@code byteCount} is 0.
      * @param offset the starting position in the byte array (0-based), must be &gt;= 0.
      * @param byteCount the number of bytes to convert, must be &gt;= 0.
      * @param charset the character set to use for decoding. If {@code null}, the default charset (UTF-8) is used.
@@ -1335,7 +1331,8 @@ public final class IOUtil {
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
      * @param offset the starting position in bytes from where to begin reading, must be &gt;= 0.
-     * @param maxLen the maximum number of bytes to read, must be &gt;= 0.
+     * @param maxLen the maximum number of bytes to read, must be &gt;= 0. When 0, the method returns
+     *               an empty array immediately without skipping any bytes.
      * @return a byte array containing the bytes read from the stream. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
@@ -1846,7 +1843,8 @@ public final class IOUtil {
      *
      * @param source the {@code Reader} to read from, must not be {@code null}.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
-     * @param maxLen the maximum number of characters to read, must be &gt;= 0.
+     * @param maxLen the maximum number of characters to read, must be &gt;= 0. When 0, the method returns
+     *               an empty array immediately without skipping any characters.
      * @return a character array containing the characters read from the reader. The length of the array will be at most {@code maxLen}.
      * @throws IOException if an I/O error occurs during reading or skipping.
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
@@ -3379,6 +3377,8 @@ public final class IOUtil {
      */
     public static void writeLines(final Iterator<?> lines, final File output) throws IOException {
         if (N.isEmpty(lines)) {
+            // Match the other empty-input write-to-File overloads: the target file is still created.
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -3489,6 +3489,8 @@ public final class IOUtil {
      */
     public static void writeLines(final Iterable<?> lines, final File output) throws IOException {
         if (N.isEmptyCollection(lines)) {
+            // Match the other empty-input write-to-File overloads: the target file is still created.
+            createNewFileIfNotExists(output);
             return;
         }
 
@@ -3731,7 +3733,7 @@ public final class IOUtil {
      * try (Writer writer = new FileWriter("output.txt")) {
      *     IOUtil.write("Hello", writer);
      *     IOUtil.write(Arrays.asList(1, 2, 3), writer);
-     *     IOUtil.write(null, writer);  // Writes "null"
+     *     IOUtil.write((Object) null, writer);  // Writes "null"
      * }
      * }</pre>
      *
@@ -4342,7 +4344,7 @@ public final class IOUtil {
     }
 
     /**
-     * Writes an array of bytes to a File. If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
+     * Writes an array of bytes to a File.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4353,7 +4355,7 @@ public final class IOUtil {
      *
      * @param bytes  the byte array to be written.
      * @param output the File where the byte array is to be written.
-     *      if the file exists, it will be overwritten (unless the input is empty, in which case existing content is left unchanged). if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten (unless the input is empty, in which case existing content is left unchanged). If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
     public static void write(final byte[] bytes, final File output) throws IOException {
@@ -4366,7 +4368,7 @@ public final class IOUtil {
     }
 
     /**
-     * Writes a portion of a byte array to a File. If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
+     * Writes a portion of a byte array to a File.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4379,9 +4381,10 @@ public final class IOUtil {
      * @param offset the starting position in the byte array.
      * @param count  the number of bytes to be written from the byte array.
      * @param output the File where the byte array is to be written.
-     *      if the file exists, it will be overwritten (unless the input is empty, in which case existing content is left unchanged). if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten (unless {@code count} is 0, in which case existing content is left unchanged). If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IndexOutOfBoundsException if {@code offset} and {@code count} exceed the length of {@code bytes}.
      */
     public static void write(final byte[] bytes, final int offset, final int count, final File output)
             throws IllegalArgumentException, IndexOutOfBoundsException, IOException {
@@ -4417,7 +4420,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data = "Hello".getBytes();
+     * byte[] data = "Hello".getBytes(StandardCharsets.UTF_8);
      * try (OutputStream os = new FileOutputStream("output.bin")) {
      *     IOUtil.write(data, os);
      * }
@@ -4440,7 +4443,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data = "Hello, World!".getBytes();
+     * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
      * try (OutputStream os = new FileOutputStream("output.bin")) {
      *     IOUtil.write(data, 7, 5, os);  // Writes "World"
      * }
@@ -4469,7 +4472,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data = "Data".getBytes();
+     * byte[] data = "Data".getBytes(StandardCharsets.UTF_8);
      * try (OutputStream os = new FileOutputStream("output.bin")) {
      *     IOUtil.write(data, os, true);  // Write and flush
      * }
@@ -4493,7 +4496,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data = "Hello, World!".getBytes();
+     * byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
      * try (OutputStream os = new FileOutputStream("output.bin")) {
      *     IOUtil.write(data, 0, 5, os, true);  // Writes "Hello" and flushes
      * }
@@ -4536,7 +4539,7 @@ public final class IOUtil {
      *
      * @param source the file to read from.
      * @param output the file to write to.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written to the output file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code source} and {@code output} are the same file.
@@ -4559,7 +4562,7 @@ public final class IOUtil {
      * @param offset the starting position in the source file, in bytes.
      * @param count  the number of bytes to be written from the source file.
      * @param output the output file where the source file is to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and {@code output} are the same file.
@@ -4580,8 +4583,13 @@ public final class IOUtil {
 
             return write(is, offset, count, os, true);
         } finally {
-            closeQuietly(os);
-            closeQuietly(is);
+            // Propagate close-time failures on the output like the InputStream->File sibling; the
+            // input close stays quiet.
+            try {
+                close(os);
+            } finally {
+                closeQuietly(is);
+            }
         }
     }
 
@@ -4651,7 +4659,7 @@ public final class IOUtil {
 
     /**
      * Writes the content of the source file to the output stream, starting from the specified offset and writing up to the specified count.
-     * if the flush parameter is {@code true}, the output stream is flushed after the write operation.
+     * If the flush parameter is {@code true}, the output stream is flushed after the write operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4698,7 +4706,7 @@ public final class IOUtil {
      *
      * @param source the input stream to read from.
      * @param output the file to write to.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written to the output file.
      * @throws IOException if an I/O error occurs.
      */
@@ -4721,7 +4729,7 @@ public final class IOUtil {
      * @param offset the starting point from where to begin writing bytes from the {@code InputStream}, in bytes.
      * @param count  the maximum number of bytes to write to the file.
      * @param output the file where the {@code InputStream} is to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}, or if {@code offset} or {@code count} is negative.
@@ -4815,7 +4823,7 @@ public final class IOUtil {
 
     /**
      * Writes the content of the input stream to the output stream, starting from the specified offset and writing up to the specified count.
-     * if the flush parameter is {@code true}, the output stream is flushed after the write operation.
+     * If the flush parameter is {@code true}, the output stream is flushed after the write operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4849,11 +4857,19 @@ public final class IOUtil {
                 final long skipped = skip(source, offset);
 
                 if (skipped < offset) {
+                    if (flush) {
+                        output.flush();
+                    }
+
                     return 0;
                 }
             }
 
             if (count == 0) {
+                if (flush) {
+                    output.flush();
+                }
+
                 return 0;
             }
 
@@ -4894,7 +4910,7 @@ public final class IOUtil {
      *
      * @param source the {@code Reader} to be written, must not be {@code null}.
      * @param output the file where the {@code Reader}'s content is to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
@@ -4916,7 +4932,7 @@ public final class IOUtil {
      * @param source  the {@code Reader} to be written, must not be {@code null}.
      * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the default charset (UTF-8) is used.
      * @param output  the file where the {@code Reader}'s content is to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      */
@@ -4939,7 +4955,7 @@ public final class IOUtil {
      * @param offset the position in the {@code Reader} to start writing from, in characters.
      * @param count  the maximum number of characters to be written.
      * @param output the file where the {@code Reader}'s content is to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
@@ -4964,7 +4980,7 @@ public final class IOUtil {
      * @param count   the maximum number of characters to be written.
      * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the default charset (UTF-8) is used.
      * @param output  the file where the {@code Reader}'s content is to be written, must not be {@code null}.
-     *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}, or if {@code offset} or {@code count} is negative.
@@ -5090,11 +5106,19 @@ public final class IOUtil {
                 final long skipped = skip(source, offset);
 
                 if (skipped < offset) {
+                    if (flush) {
+                        output.flush();
+                    }
+
                     return 0;
                 }
             }
 
             if (count == 0) {
+                if (flush) {
+                    output.flush();
+                }
+
                 return 0;
             }
 
@@ -5134,7 +5158,7 @@ public final class IOUtil {
      *
      * @param bytes      the byte array to append to the file.
      * @param targetFile the file to which the byte array will be appended.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
     public static void append(final byte[] bytes, final File targetFile) throws IOException {
@@ -5160,9 +5184,10 @@ public final class IOUtil {
      * @param offset     the starting index from where to append the bytes.
      * @param count      the number of bytes to append from the byte array.
      * @param targetFile the file to which the byte array will be appended.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IndexOutOfBoundsException if {@code offset} and {@code count} exceed the length of {@code bytes}.
      */
     public static void append(final byte[] bytes, final int offset, final int count, final File targetFile)
             throws IllegalArgumentException, IndexOutOfBoundsException, IOException {
@@ -5203,7 +5228,7 @@ public final class IOUtil {
      *
      * @param chars      the character array to append to the file.
      * @param targetFile the file to which the character array will be appended.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #charsToBytes(char[], Charset)
      */
@@ -5229,7 +5254,7 @@ public final class IOUtil {
      * @param chars      the character array to append to the file.
      * @param charset    the Charset to be used to encode the character array into a sequence of bytes.
      * @param targetFile the file to which the character array will be appended.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #charsToBytes(char[], Charset)
      */
@@ -5257,7 +5282,7 @@ public final class IOUtil {
      * @param offset     the initial offset in the character array.
      * @param count      the number of characters to append.
      * @param targetFile the file to which the character array will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see #charsToBytes(char[], int, int, Charset)
@@ -5291,7 +5316,7 @@ public final class IOUtil {
      * @param count      the number of characters to append.
      * @param charset    the Charset to be used to encode the character array into a sequence of bytes.
      * @param targetFile the file to which the character array will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see #charsToBytes(char[], int, int, Charset)
@@ -5321,7 +5346,7 @@ public final class IOUtil {
      *
      * @param cs         the CharSequence to append to the file.
      * @param targetFile the file to which the CharSequence will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
     public static void append(final CharSequence cs, final File targetFile) throws IOException {
@@ -5341,7 +5366,7 @@ public final class IOUtil {
      * @param cs         the CharSequence to append to the file.
      * @param charset    the Charset to be used to encode the CharSequence into a sequence of bytes.
      * @param targetFile the file to which the CharSequence will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      */
     public static void append(final CharSequence cs, final Charset charset, final File targetFile) throws IOException {
@@ -5360,7 +5385,7 @@ public final class IOUtil {
      *
      * @param source     the source file to read from, must not be {@code null}.
      * @param targetFile the target file to append to, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the number of bytes appended.
      * @throws IOException if an I/O error occurs.
      */
@@ -5383,7 +5408,7 @@ public final class IOUtil {
      * @param offset     the starting point in bytes from where to read in the source file.
      * @param count      the maximum number of bytes to read from the source file.
      * @param targetFile the file to which the content will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and {@code targetFile} denote the same file.
@@ -5410,8 +5435,13 @@ public final class IOUtil {
 
             return write(is, offset, count, output, true);
         } finally {
-            closeQuietly(output);
-            closeQuietly(is);
+            // Propagate close-time failures on the output like the InputStream->File sibling; the
+            // input close stays quiet.
+            try {
+                close(output);
+            } finally {
+                closeQuietly(is);
+            }
         }
     }
 
@@ -5422,7 +5452,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = File.createTempFile("data", ".txt");   // throws IOException
-     * try (InputStream is = new ByteArrayInputStream("abc".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("abc".getBytes(StandardCharsets.UTF_8))) {
      *     long n = IOUtil.append(is, file);   // returns 3
      * }
      * String content = IOUtil.readAllToString(file);   // returns "abc"
@@ -5430,7 +5460,7 @@ public final class IOUtil {
      *
      * @param source     the InputStream to read from, must not be {@code null}.
      * @param targetFile the file to which the InputStream content will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
      */
@@ -5445,7 +5475,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File log = new File("app.log");
-     * byte[] data = "substring".getBytes();
+     * byte[] data = "substring".getBytes(StandardCharsets.UTF_8);
      * try (InputStream is = new ByteArrayInputStream(data)) {
      *     IOUtil.append(is, 0, 3, log);                // appends first 3 bytes ("sub")
      *     IOUtil.append(is, 0, 6, log);                // returns 6 ("string" appended)
@@ -5456,7 +5486,7 @@ public final class IOUtil {
      * @param offset     the starting point in bytes from where to read in the InputStream.
      * @param count      the maximum number of bytes to read from the InputStream.
      * @param targetFile the file to which the InputStream content will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code source} or {@code targetFile} is {@code null}, or if {@code offset} or {@code count} is negative.
@@ -5519,7 +5549,7 @@ public final class IOUtil {
      * @param source the {@code Reader} to read from, must not be {@code null}.
      * @param charset the character set to use for encoding, if {@code null} the default charset (UTF-8) is used.
      * @param targetFile the file where the {@code Reader}'s content is to be appended, must not be {@code null}.
-     *                   If the file exists, content will be appended. If the file's parent directory doesn't exist, it will be created
+     *                   If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters appended.
      * @throws IOException if an I/O error occurs.
      */
@@ -5545,7 +5575,7 @@ public final class IOUtil {
      * @param offset     the position in the Reader to start reading from.
      * @param count      the maximum number of characters to read from the Reader.
      * @param targetFile the file to which the Reader content will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the number of characters appended to the target file.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
@@ -5572,7 +5602,7 @@ public final class IOUtil {
      * @param count the maximum number of characters to read, must be &gt;= 0.
      * @param charset the character set to use for encoding, if {@code null} the default charset (UTF-8) is used.
      * @param targetFile the file where the {@code Reader}'s content is to be appended, must not be {@code null}.
-     *                   If the file exists, content will be appended. If the file's parent directory doesn't exist, it will be created
+     *                   If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters appended.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code source} or {@code targetFile} is {@code null}, or if {@code offset} or {@code count} is negative.
@@ -5614,7 +5644,7 @@ public final class IOUtil {
      *
      * @param obj        the object whose string representation is to be appended to the file.
      * @param targetFile the file to which the object's string representation will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLine(Object, File)
      * @see N#toString(Object)
@@ -5637,7 +5667,7 @@ public final class IOUtil {
      * @param obj        the object whose string representation is to be appended to the file.
      * @param charset    the Charset to be used to encode string representation of the specified object into a sequence of bytes.
      * @param targetFile the file to which the object's string representation will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLine(Object, File)
      * @see N#toString(Object)
@@ -5663,7 +5693,7 @@ public final class IOUtil {
      *
      * @param lines      the iterable whose elements' string representations are to be appended to the file.
      * @param targetFile the file to which the elements' string representations will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLines(Iterable, File)
      * @see N#toString(Object)
@@ -5693,7 +5723,7 @@ public final class IOUtil {
      * @param lines      the iterable whose elements' string representations are to be appended to the file.
      * @param charset    the Charset to be used to open the specified file for writing.
      * @param targetFile the file to which the elements' string representations will be appended, must not be {@code null}.
-     *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
+     *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
      * @see #writeLines(Iterable, File)
      * @see N#toString(Object)
@@ -5746,11 +5776,11 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new ByteArrayInputStream("0123456789".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("0123456789".getBytes(StandardCharsets.UTF_8))) {
      *     long skipped = IOUtil.skip(is, 3);   // returns 3
      *     int next = is.read();                // returns '3' (51)
      * }
-     * try (InputStream is = new ByteArrayInputStream("ab".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("ab".getBytes(StandardCharsets.UTF_8))) {
      *     long skipped = IOUtil.skip(is, 100); // returns 2 (capped at end of stream)
      *     long none = IOUtil.skip(is, 0);      // returns 0
      *     // IOUtil.skip(is, -1);              // throws IllegalArgumentException
@@ -6027,6 +6057,8 @@ public final class IOUtil {
      * <li>fold out ../ when possible
      * <li>collapse multiple slashes
      * <li>delete trailing slashes (unless the path is just "/")
+     * <li>backslashes are treated as separators and normalized to {@code /}
+     * <li>a Windows drive prefix such as {@code C:/} is kept as the root and cannot be ascended above
      * </ul>
      *
      * <p>These heuristics do not always match the behavior of the filesystem. In
@@ -6040,10 +6072,12 @@ public final class IOUtil {
      * String simplified = IOUtil.simplifyPath("/a/./b/./c/");   // returns "/a/b/c"
      * String simplified2 = IOUtil.simplifyPath("a/b/./c");      // returns "a/b/c"
      * String simplified3 = IOUtil.simplifyPath("a/b/../c");     // returns "a/c"
+     * String simplified4 = IOUtil.simplifyPath("a\\b\\c");      // returns "a/b/c"
+     * String simplified5 = IOUtil.simplifyPath("");             // returns "."
      * }</pre>
      *
-     * @param pathname the file path to simplify.
-     * @return the simplified path string with redundant elements removed.
+     * @param pathname the file path to simplify; {@code null} or empty yields {@code "."}.
+     * @return the simplified path string with redundant elements removed; never {@code null}.
      * @see java.nio.file.Path#normalize()
      * @see FilenameUtil#normalize(String)
      * @see FilenameUtil#normalize(String, boolean)
@@ -6054,6 +6088,9 @@ public final class IOUtil {
         }
 
         pathname = pathname.replace('\\', '/');
+        final boolean windowsAbsolutePath = pathname.length() >= 3 && Character.isLetter(pathname.charAt(0)) && pathname.charAt(1) == ':'
+                && pathname.charAt(2) == '/';
+        final int rootComponentCount = windowsAbsolutePath ? 1 : 0;
 
         // split the path apart
         final String[] components = pathSplitter.splitToArray(pathname);
@@ -6064,8 +6101,11 @@ public final class IOUtil {
             if (component.isEmpty() || component.equals(".")) {
                 //NOSONAR
             } else if (component.equals("..")) {
-                if (path.size() > 0 && !path.get(path.size() - 1).equals("..")) {
+                if (path.size() > rootComponentCount && !path.get(path.size() - 1).equals("..")) {
                     path.remove(path.size() - 1);
+                } else if (pathname.charAt(0) == '/' || windowsAbsolutePath) {
+                    // An absolute path cannot ascend above its root. In particular, keep a Windows
+                    // drive prefix ("C:/") instead of treating "C:" as a removable directory name.
                 } else {
                     path.add("..");
                 }
@@ -6079,6 +6119,8 @@ public final class IOUtil {
 
         if (!pathname.isEmpty() && pathname.charAt(0) == '/') {
             result = "/" + result;
+        } else if (windowsAbsolutePath && result.length() == 2) {
+            result += "/";
         }
 
         while (result.startsWith("/../")) {
@@ -6273,7 +6315,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = IOUtil.newByteArrayOutputStream(1024);
-     * baos.write("Hello".getBytes());
+     * baos.write("Hello".getBytes(StandardCharsets.UTF_8));
      * byte[] result = baos.toByteArray();
      * }</pre>
      *
@@ -6334,17 +6376,18 @@ public final class IOUtil {
     }
 
     /**
-     * Creates a new FileOutputStream instance for the specified file.
+     * Creates a new FileOutputStream instance for the specified file, truncating it if it already exists.
+     * The file, along with any missing parent directories, is created first if it does not exist.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("output.bin");
      * try (FileOutputStream fos = IOUtil.newFileOutputStream(file)) {
-     *     fos.write("Hello".getBytes());
+     *     fos.write("Hello".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
-     * @param file the file to be opened for writing.
+     * @param file the file to be opened for writing. It is created, along with any missing parent directories, if it does not exist.
      * @return a new FileOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileOutputStream#FileOutputStream(File)
@@ -6361,17 +6404,18 @@ public final class IOUtil {
 
     /**
      * Creates a new FileOutputStream instance for the specified file.
+     * The file, along with any missing parent directories, is created first if it does not exist.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("output.txt");
      * try (FileOutputStream fos = IOUtil.newFileOutputStream(file, true)) {
-     *     fos.write("Appended content".getBytes());
+     *     fos.write("Appended content".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
-     * @param file   the file to be opened for writing.
-     * @param append {@code true} if the file is to be opened for appending.
+     * @param file   the file to be opened for writing. It is created, along with any missing parent directories, if it does not exist.
+     * @param append {@code true} to append to the existing content instead of truncating the file.
      * @return a new FileOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileOutputStream#FileOutputStream(File, boolean)
@@ -6387,7 +6431,8 @@ public final class IOUtil {
     }
 
     /**
-     * Creates a new FileOutputStream instance for the specified file name.
+     * Creates a new FileOutputStream instance for the specified file name, truncating the file if it already exists.
+     * The file, along with any missing parent directories, is created first if it does not exist.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6396,9 +6441,10 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param name the name of the file to be opened for writing.
+     * @param name the name of the file to be opened for writing. It is created, along with any missing parent directories, if it does not exist.
      * @return a new FileOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
+     * @see #newFileOutputStream(File)
      * @see FileOutputStream#FileOutputStream(String)
      */
     public static FileOutputStream newFileOutputStream(final String name) throws UncheckedIOException {
@@ -6456,7 +6502,8 @@ public final class IOUtil {
     }
 
     /**
-     * Creates a new FileWriter instance for the specified file and the default Charset.
+     * Creates a new FileWriter instance for the specified file and the default Charset, truncating the file if it already exists.
+     * The file, along with any missing parent directories, is created first if it does not exist.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6466,7 +6513,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file the file to be opened for writing.
+     * @param file the file to be opened for writing. It is created, along with any missing parent directories, if it does not exist.
      * @return a new FileWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileWriter#FileWriter(File, Charset)
@@ -6482,7 +6529,8 @@ public final class IOUtil {
     }
 
     /**
-     * Creates a new FileWriter instance for the specified file and charset.
+     * Creates a new FileWriter instance for the specified file and charset, truncating the file if it already exists.
+     * The file, along with any missing parent directories, is created first if it does not exist.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6492,7 +6540,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file    the file to be opened for writing.
+     * @param file    the file to be opened for writing. It is created, along with any missing parent directories, if it does not exist.
      * @param charset the Charset to be used for creating the FileWriter; {@code null} uses the default charset (UTF-8).
      * @return a new FileWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -6510,6 +6558,7 @@ public final class IOUtil {
 
     /**
      * Creates a new FileWriter instance for the specified file and charset.
+     * The file, along with any missing parent directories, is created first if it does not exist.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6519,9 +6568,9 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file    the file to be opened for writing.
+     * @param file    the file to be opened for writing. It is created, along with any missing parent directories, if it does not exist.
      * @param charset the Charset to be used for creating the FileWriter; {@code null} uses the default charset (UTF-8).
-     * @param append  {@code true} if the file is to be opened for appending.
+     * @param append  {@code true} to append to the existing content instead of truncating the file.
      * @return a new FileWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see FileWriter#FileWriter(File, Charset, boolean)
@@ -6568,7 +6617,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param is      the InputStream to be read.
-     * @param charset the Charset to be used for creating the InputStreamReader.
+     * @param charset the Charset to be used for creating the InputStreamReader; {@code null} uses the default charset (UTF-8).
      * @return a new InputStreamReader instance.
      * @see InputStreamReader#InputStreamReader(InputStream, Charset)
      */
@@ -6607,7 +6656,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param os      the OutputStream to be written to.
-     * @param charset the Charset to be used for creating the OutputStreamWriter.
+     * @param charset the Charset to be used for creating the OutputStreamWriter; {@code null} uses the default charset (UTF-8).
      * @return a new OutputStreamWriter instance.
      * @see OutputStreamWriter#OutputStreamWriter(OutputStream, Charset)
      */
@@ -6701,7 +6750,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (OutputStream os = new FileOutputStream("output.bin");
      *      BufferedOutputStream bos = IOUtil.newBufferedOutputStream(os)) {
-     *     bos.write("Hello".getBytes());
+     *     bos.write("Hello".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -6709,7 +6758,7 @@ public final class IOUtil {
      * @return a new BufferedOutputStream instance.
      * @see BufferedOutputStream#BufferedOutputStream(OutputStream)
      */
-    public static BufferedOutputStream newBufferedOutputStream(final OutputStream os) throws UncheckedIOException {
+    public static BufferedOutputStream newBufferedOutputStream(final OutputStream os) {
         return new BufferedOutputStream(os);
     }
 
@@ -6724,7 +6773,7 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file the file to be written to.
+     * @param file the file to be written to. It is created, along with any missing parent directories, if it does not exist; otherwise it is truncated.
      * @return a new BufferedOutputStream instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newFileOutputStream(File)
@@ -6741,11 +6790,11 @@ public final class IOUtil {
      * <pre>{@code
      * File file = new File("output.bin");
      * try (BufferedOutputStream bos = IOUtil.newBufferedOutputStream(file, 8192)) {
-     *     bos.write("Data".getBytes());
+     *     bos.write("Data".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
-     * @param file the file to be written to.
+     * @param file the file to be written to. It is created, along with any missing parent directories, if it does not exist; otherwise it is truncated.
      * @param size the size of the buffer to be used.
      * @return a new BufferedOutputStream instance.
      * @throws IllegalArgumentException if {@code size} is not positive.
@@ -6774,7 +6823,7 @@ public final class IOUtil {
      * @return a new BufferedReader instance.
      * @see java.io.BufferedReader#BufferedReader(Reader)
      */
-    public static java.io.BufferedReader newBufferedReader(final Reader reader) throws UncheckedIOException {
+    public static java.io.BufferedReader newBufferedReader(final Reader reader) {
         return new java.io.BufferedReader(reader);
     }
 
@@ -6903,7 +6952,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param is      the InputStream to be read from.
-     * @param charset the charset to be used.
+     * @param charset the charset to be used; {@code null} uses the default charset (UTF-8).
      * @return a new BufferedReader instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see #newInputStreamReader(InputStream, Charset)
@@ -6929,16 +6978,17 @@ public final class IOUtil {
      * @return a new BufferedWriter instance.
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
-    public static java.io.BufferedWriter newBufferedWriter(final Writer writer) throws UncheckedIOException {
+    public static java.io.BufferedWriter newBufferedWriter(final Writer writer) {
         return new java.io.BufferedWriter(writer);
     }
 
     /**
      * Creates a new BufferedWriter instance for the specified file path and default charset.
      *
-     * @param filePath the path of the file to be written to.
+     * @param filePath the path of the file to be written to. It is created, along with any missing parent directories, if it does not exist; otherwise it is truncated.
      * @return a new BufferedWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
+     * @see #newBufferedWriter(File)
      */
     static java.io.BufferedWriter newBufferedWriter(final String filePath) throws UncheckedIOException {
         return newBufferedWriter(new File(filePath));
@@ -6956,9 +7006,11 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file the file to be written to.
+     * @param file the file to be written to. It is created, along with any missing parent directories, if it does not exist; otherwise it is truncated.
      * @return a new BufferedWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
+     * @see #newFileWriter(File)
+     * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
     public static java.io.BufferedWriter newBufferedWriter(final File file) throws UncheckedIOException {
         return new java.io.BufferedWriter(newFileWriter(file));
@@ -6975,8 +7027,8 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param file    the file to be written to.
-     * @param charset the charset to be used for writing to the file.
+     * @param file    the file to be written to. It is created, along with any missing parent directories, if it does not exist.
+     * @param charset the charset to be used for writing to the file; {@code null} uses the default charset (UTF-8).
      * @return a new BufferedWriter instance.
      * @throws UncheckedIOException if an I/O error occurs.
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
@@ -7017,7 +7069,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param os      the OutputStream to be written to.
-     * @param charset the Charset to be used for writing to the OutputStream.
+     * @param charset the Charset to be used for writing to the OutputStream; {@code null} uses the default charset (UTF-8).
      * @return a new BufferedWriter instance.
      * @see #newOutputStreamWriter(OutputStream, Charset)
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
@@ -7051,7 +7103,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (OutputStream os = new FileOutputStream("data.lz4");
      *      LZ4BlockOutputStream lz4Os = IOUtil.newLZ4BlockOutputStream(os)) {
-     *     lz4Os.write("Compressed data".getBytes());
+     *     lz4Os.write("Compressed data".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -7069,7 +7121,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (OutputStream os = new FileOutputStream("data.lz4");
      *      LZ4BlockOutputStream lz4Os = IOUtil.newLZ4BlockOutputStream(os, 8192)) {
-     *     lz4Os.write("Compressed with custom block size".getBytes());
+     *     lz4Os.write("Compressed with custom block size".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -7111,7 +7163,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (OutputStream os = new FileOutputStream("data.snappy");
      *      SnappyOutputStream snappyOs = IOUtil.newSnappyOutputStream(os)) {
-     *     snappyOs.write("Snappy compressed".getBytes());
+     *     snappyOs.write("Snappy compressed".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -7129,7 +7181,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (OutputStream os = new FileOutputStream("data.snappy");
      *      SnappyOutputStream snappyOs = IOUtil.newSnappyOutputStream(os, 8192)) {
-     *     snappyOs.write("Snappy with buffer".getBytes());
+     *     snappyOs.write("Snappy with buffer".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -7195,7 +7247,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (OutputStream os = new FileOutputStream("data.gz");
      *      GZIPOutputStream gzipOs = IOUtil.newGZIPOutputStream(os)) {
-     *     gzipOs.write("GZIP compressed data".getBytes());
+     *     gzipOs.write("GZIP compressed data".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -7218,7 +7270,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (OutputStream os = new FileOutputStream("data.gz");
      *      GZIPOutputStream gzipOs = IOUtil.newGZIPOutputStream(os, 8192)) {
-     *     gzipOs.write("GZIP with buffer".getBytes());
+     *     gzipOs.write("GZIP with buffer".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -7267,7 +7319,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param is      the InputStream to be used for creating the ZipInputStream.
-     * @param charset the Charset to be used for creating the ZipInputStream.
+     * @param charset the Charset to be used for decoding entry names and comments; {@code null} uses the default charset (UTF-8).
      * @return a new ZipInputStream instance.
      * @see ZipInputStream#ZipInputStream(InputStream, Charset)
      */
@@ -7283,7 +7335,7 @@ public final class IOUtil {
      * try (OutputStream os = new FileOutputStream("archive.zip");
      *      ZipOutputStream zipOs = IOUtil.newZipOutputStream(os)) {
      *     zipOs.putNextEntry(new ZipEntry("file.txt"));
-     *     zipOs.write("Content".getBytes());
+     *     zipOs.write("Content".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
@@ -7303,12 +7355,12 @@ public final class IOUtil {
      * try (OutputStream os = new FileOutputStream("archive.zip");
      *      ZipOutputStream zipOs = IOUtil.newZipOutputStream(os, StandardCharsets.UTF_8)) {
      *     zipOs.putNextEntry(new ZipEntry("file.txt"));
-     *     zipOs.write("UTF-8 content".getBytes());
+     *     zipOs.write("UTF-8 content".getBytes(StandardCharsets.UTF_8));
      * }
      * }</pre>
      *
      * @param os      the OutputStream to be used for creating the ZipOutputStream.
-     * @param charset the Charset to be used for creating the ZipOutputStream.
+     * @param charset the Charset to be used for encoding entry names and comments; {@code null} uses the default charset (UTF-8).
      * @return a new ZipOutputStream instance.
      * @see ZipOutputStream#ZipOutputStream(OutputStream, Charset)
      */
@@ -7346,7 +7398,9 @@ public final class IOUtil {
      * <pre>{@code
      * URLConnection conn = new URL("http://example.com").openConnection();   // throws IOException
      * try {
-     *     // ... use the connection ...
+     *     try (InputStream input = conn.getInputStream()) {
+     *         byte[] responseBody = IOUtil.readAllBytes(input);
+     *     }
      * } finally {
      *     IOUtil.close(conn);   // disconnects if it is an HttpURLConnection; otherwise no-op
      * }
@@ -7434,8 +7488,8 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * InputStream a = new ByteArrayInputStream("x".getBytes());
-     * InputStream b = new ByteArrayInputStream("y".getBytes());
+     * InputStream a = new ByteArrayInputStream("x".getBytes(StandardCharsets.UTF_8));
+     * InputStream b = new ByteArrayInputStream("y".getBytes(StandardCharsets.UTF_8));
      * IOUtil.closeAll(a, b, null);   // closes a and b in order; null is ignored
      * IOUtil.closeAll();             // empty varargs: no-op
      * }</pre>
@@ -7461,7 +7515,9 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<AutoCloseable> closeables = Arrays.asList(new FileInputStream("a.txt"), new FileInputStream("b.txt"));
+     * List<AutoCloseable> closeables = Arrays.asList(
+     *         new ByteArrayInputStream("a".getBytes(StandardCharsets.UTF_8)),
+     *         new ByteArrayInputStream("b".getBytes(StandardCharsets.UTF_8)));
      * IOUtil.closeAll(closeables);                               // closes all in order
      * IOUtil.closeAll(Collections.<AutoCloseable>emptyList());   // empty collection, no-op
      * }</pre>
@@ -7484,7 +7540,10 @@ public final class IOUtil {
             } catch (final Exception e) {
                 if (ex == null) {
                     ex = e;
-                } else {
+                } else if (ex != e) {
+                    // A custom closeable may throw the same cached exception instance on
+                    // repeated close attempts. Throwable rejects self-suppression, but that
+                    // must not prevent the remaining closeables from being processed.
                     ex.addSuppressed(e);
                 }
             }
@@ -7533,7 +7592,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * InputStream a = new ByteArrayInputStream("x".getBytes());
+     * InputStream a = new ByteArrayInputStream("x".getBytes(StandardCharsets.UTF_8));
      * AutoCloseable failing = () -> { throw new IOException("boom"); };
      * IOUtil.closeAllQuietly(a, failing, null);   // closes a; the thrown exception is suppressed; null ignored
      * IOUtil.closeAllQuietly();                   // empty varargs: no-op
@@ -7555,7 +7614,9 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<AutoCloseable> closeables = Arrays.asList(new FileInputStream("a.txt"), new FileInputStream("b.txt"));
+     * List<AutoCloseable> closeables = Arrays.asList(
+     *         new ByteArrayInputStream("a".getBytes(StandardCharsets.UTF_8)),
+     *         new ByteArrayInputStream("b".getBytes(StandardCharsets.UTF_8)));
      * IOUtil.closeAllQuietly(closeables);                               // closes all, suppresses exceptions
      * IOUtil.closeAllQuietly(Collections.<AutoCloseable>emptyList());   // empty collection, no-op
      * }</pre>
@@ -7634,8 +7695,10 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File srcDir = ...;    // a directory containing "keep.txt" and "skip.log"
-     * File destDir = ...;   // an existing destination directory
+     * // Assume "input" is a directory containing "keep.txt" and "skip.log",
+     * // and "backup" is an existing destination directory.
+     * File srcDir = new File("input");
+     * File destDir = new File("backup");
      * // copy only files whose name ends with ".txt"
      * IOUtil.copyToDirectory(srcDir, destDir, false, (parent, file) -> file.getName().endsWith(".txt"));
      * // destDir/<srcDir-name>/keep.txt exists; skip.log is not copied
@@ -7645,10 +7708,10 @@ public final class IOUtil {
      * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
      * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
-     * @param filter           a BiPredicate that takes the source directory and the file being evaluated as arguments and returns a boolean. if the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied.
+     * @param filter           a BiPredicate that takes the source directory and the file being evaluated as arguments and returns a boolean. if the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied. A rejected subdirectory is still descended into, so that its own matching entries are copied.
      * @throws IllegalArgumentException if {@code filter} is {@code null}, if {@code destDir} is {@code null} or exists but is not a directory, or if the destination directory is inside or the same as the source directory.
      * @throws IOException if an I/O error occurs.
-     * @throws E                    if the filter throws an exception.
+     * @throws E if the filter throws an exception.
      */
     public static <E extends Exception> void copyToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IllegalArgumentException, IOException, E {
@@ -7698,7 +7761,6 @@ public final class IOUtil {
      * @throws IOException if an I/O error occurs.
      * @throws E           if filter throws an exception during file filtering.
      */
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     private static <E extends Exception> void doCopyDirectory(final File srcDir, final File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
         N.checkArgNotNull(filter, cs.filter);
@@ -7726,7 +7788,9 @@ public final class IOUtil {
                 final File dest = new File(destDir, subFile.getName());
 
                 if (subFile.isDirectory() && !isSymlink) {
-                    doCopyDirectory(subFile, dest, preserveFileDate, Fn.BiPredicates.alwaysTrue());
+                    // The filter applies to every descendant, not just to entries whose parent
+                    // directory happened to be rejected by the filter.
+                    doCopyDirectory(subFile, dest, preserveFileDate, filter);
                 } else {
                     doCopyFile(subFile, dest, preserveFileDate);
                 }
@@ -7742,7 +7806,6 @@ public final class IOUtil {
         }
     }
 
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     private static void doCopyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
         if (destFile.exists()) {
             throw new IOException("The destination file already exists: " + destFile.getAbsolutePath());
@@ -7765,7 +7828,35 @@ public final class IOUtil {
 
             while (pos < size) {
                 count = ((size - pos) > FILE_COPY_BUFFER_SIZE) ? FILE_COPY_BUFFER_SIZE : (size - pos);
-                pos += output.transferFrom(input, pos, count);
+                final long transferred = output.transferFrom(input, pos, count);
+
+                if (transferred > 0) {
+                    pos += transferred;
+                    continue;
+                }
+
+                // transferFrom is permitted to make no progress on some platforms. Fall back to a
+                // regular channel read/write so a transient zero cannot turn this into an infinite loop.
+                final ByteBuffer fallbackBuffer = ByteBuffer.allocate((int) Math.min(8192L, size - pos));
+                input.position(pos);
+                final int bytesRead = input.read(fallbackBuffer);
+
+                if (bytesRead < 0) {
+                    break;
+                } else if (bytesRead == 0) {
+                    throw new IOException("Unable to make progress while copying '" + srcFile + "' to '" + destFile + "'");
+                }
+
+                fallbackBuffer.flip();
+                output.position(pos);
+
+                while (fallbackBuffer.hasRemaining()) {
+                    if (output.write(fallbackBuffer) <= 0) {
+                        throw new IOException("Unable to make progress while writing '" + destFile + "'");
+                    }
+                }
+
+                pos += bytesRead;
             }
         } finally {
             // closeAll closes every resource even if an earlier close() throws (failures are aggregated).
@@ -7846,7 +7937,7 @@ public final class IOUtil {
             // Set creation, modified, last accessed to match source file
             final BasicFileAttributes srcAttr = Files.readAttributes(sourceFile.toPath(), BasicFileAttributes.class);
             final BasicFileAttributeView destAttrView = Files.getFileAttributeView(targetFile.toPath(), BasicFileAttributeView.class);
-            // null guards are not needed; BasicFileAttributes.setTimes(..) is null safe
+            // null guards are not needed; BasicFileAttributeView.setTimes(..) is null safe
             destAttrView.setTimes(srcAttr.lastModifiedTime(), srcAttr.lastAccessTime(), srcAttr.creationTime());
             return true;
         } catch (final IOException ignored) {
@@ -7912,8 +8003,9 @@ public final class IOUtil {
      *
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
-     * @throws IOException if source or destination is invalid, if an error occurs during copying, if setting the
-     *         last-modified time didn't succeed, or if the output file length differs from the input after copying.
+     * @throws FileNotFoundException if the source does not exist or is not readable.
+     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile} denote the same file.
+     * @throws IOException if source or destination is invalid, or if an error occurs during copying.
      * @see #copyToDirectory(File, File)
      * @see #copyFile(File, File, boolean)
      */
@@ -7945,6 +8037,8 @@ public final class IOUtil {
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
      * @param preserveFileDate {@code true} if the file date of the copy should be the same as the original.
+     * @throws FileNotFoundException if the source does not exist or is not readable.
+     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile} denote the same file.
      * @throws IOException if source or destination is invalid, if an error occurs during copying, if setting the
      *         last-modified time didn't succeed, or if the output file length differs from the input after copying.
      * @see #copyFile(File, File, boolean, CopyOption...)
@@ -7971,9 +8065,10 @@ public final class IOUtil {
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
      * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
-     * @throws FileNotFoundException if the source does not exist.
-     * @throws IllegalArgumentException if source is not a file.
+     * @throws FileNotFoundException if the source does not exist or is not readable.
+     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile} denote the same file.
      * @throws IOException if an I/O error occurs.
+     * @see #copyFile(File, File, boolean, CopyOption...)
      * @see StandardCopyOption
      */
     public static void copyFile(final File srcFile, final File destFile, final CopyOption... copyOptions) throws IOException {
@@ -8011,9 +8106,9 @@ public final class IOUtil {
      * @param destFile the new file, must not be {@code null}.
      * @param preserveFileDate {@code true} if the file date of the copy should be the same as the original.
      * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
-     * @throws FileNotFoundException if the source does not exist.
-     * @throws IllegalArgumentException if {@code srcFile} or {@code destFile} is not a file.
-     * @throws IOException if the output file length is not the same as the input file length after the copy completes, or if an I/O error occurs, setting the last-modified time didn't succeed or the destination is not writable.
+     * @throws FileNotFoundException if the source does not exist or is not readable.
+     * @throws IllegalArgumentException if {@code srcFile} or an existing {@code destFile} is not a file, or if they denote the same file.
+     * @throws IOException if an I/O error occurs, if setting the last-modified time didn't succeed, or if the destination is not writable.
      * @see #copyToDirectory(File, File, boolean)
      */
     public static void copyFile(final File srcFile, final File destFile, final boolean preserveFileDate, final CopyOption... copyOptions)
@@ -8047,8 +8142,9 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File source = new File("data.txt");
-     * OutputStream out = new FileOutputStream("output.bin");
-     * long bytesCopied = IOUtil.copyFile(source, out);
+     * try (OutputStream out = new FileOutputStream("output.bin")) {
+     *     long bytesCopied = IOUtil.copyFile(source, out);
+     * }
      * }</pre>
      *
      * @param srcFile the {@link File} to read.
@@ -8138,8 +8234,9 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Path source = ...;                           // an existing file path
-     * Path target = ...;                           // the (non-existing) destination path
+     * // Assume input.txt exists and input-copy.txt does not.
+     * Path source = Path.of("input.txt");
+     * Path target = Path.of("input-copy.txt");
      * Path result = IOUtil.copy(source, target);                          // returns target; file contents copied
      * // overwrite an existing target:
      * IOUtil.copy(source, target, StandardCopyOption.REPLACE_EXISTING);   // returns target
@@ -8162,7 +8259,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path target = Paths.get("output.dat");
-     * try (InputStream in = new ByteArrayInputStream("data".getBytes())) {
+     * try (InputStream in = new ByteArrayInputStream("data".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.copy(in, target);                                       // copies to file (creates new)
      *     IOUtil.copy(in, target, StandardCopyOption.REPLACE_EXISTING);  // overwrites existing file
      * }
@@ -8275,8 +8372,9 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File srcFile = ...;   // an existing file named "data.txt"
-     * File destDir = ...;   // the destination directory
+     * // Assume data.txt exists and archive is the destination directory.
+     * File srcFile = new File("data.txt");
+     * File destDir = new File("archive");
      * IOUtil.moveToDirectory(srcFile, destDir, StandardCopyOption.REPLACE_EXISTING);
      * // srcFile no longer exists; destDir/data.txt now holds the content
      * }</pre>
@@ -8322,17 +8420,20 @@ public final class IOUtil {
     }
 
     /**
-     * Renames the specified source file to the new file name provided.
+     * Renames the specified source file to the new file name provided. The renamed file stays in the
+     * source file's own parent directory; {@code newFileName} is a file name, not a path.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File oldFile = new File("old_name.txt");
-     * boolean success = IOUtil.renameTo(oldFile, "new_name.txt");
+     * File oldFile = new File("dir/old_name.txt");
+     * boolean success = IOUtil.renameTo(oldFile, "new_name.txt");   // the file becomes dir/new_name.txt
      * }</pre>
      *
-     * @param srcFile     the source file to be renamed.
+     * @param srcFile     the source file to be renamed. Can be {@code null}, in which case {@code false} is returned.
      * @param newFileName the new name for the file.
      * @return {@code true} if the renaming succeeded, {@code false} otherwise.
+     * @see File#renameTo(File)
+     * @see #move(Path, Path, CopyOption...)
      */
     public static boolean renameTo(final File srcFile, final String newFileName) {
         if (srcFile == null) {
@@ -8503,9 +8604,9 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param dir the directory from which to delete all files and subdirectories.
+     * @param dir the directory from which to delete all files and subdirectories. Can be {@code null}.
      * @return {@code true} if all files and directories were deleted successfully;
-     *         {@code false} if the directory does not exist or is actually a file,
+     *         {@code false} if {@code dir} is {@code null}, does not exist, is actually a file or a symbolic link,
      *         or some files could not be deleted or if the operation failed.
      * @see File#delete()
      * @see Files#delete(Path)
@@ -8541,11 +8642,12 @@ public final class IOUtil {
      * }</pre>
      *
      * @param <E> the type of exception that the filter may throw.
-     * @param dir the directory from which to delete files and subdirectories.
+     * @param dir the directory from which to delete files and subdirectories. Can be {@code null}.
      * @param filter the predicate to determine which files/directories should be deleted.
      *               Receives the parent directory and the file/directory being evaluated.
+     *               A rejected subdirectory is not deleted, but is still descended into so that its own matching entries are removed.
      * @return {@code true} if all matching files and directories were deleted successfully;
-     *         {@code false} if the directory does not exist or is actually a file,
+     *         {@code false} if {@code dir} is {@code null}, does not exist, is actually a file or a symbolic link,
      *         or some files could not be deleted or if the operation failed.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws E if the filter throws an exception during evaluation.
@@ -8608,7 +8710,7 @@ public final class IOUtil {
      * a file, the method returns {@code false} without performing any operations.
      * <p>
      * This operation is recursive - subdirectories and all their contents will be deleted.
-     * The method is equivalent to calling {@code deleteFilesFromDirectory(directory)}.
+     * The method is equivalent to calling {@code deleteFilesFromDirectory(dir)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8621,9 +8723,9 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param dir the directory to clean.
+     * @param dir the directory to clean. Can be {@code null}.
      * @return {@code true} if all subfiles and subdirectories were deleted successfully;
-     *         {@code false} if the directory does not exist or is actually a file,
+     *         {@code false} if {@code dir} is {@code null}, does not exist, is actually a file or a symbolic link,
      *         or some files could not be deleted or if the operation failed.
      * @see #deleteFilesFromDirectory(File)
      * @see #deleteRecursivelyIfExists(File)
@@ -8634,27 +8736,18 @@ public final class IOUtil {
     }
 
     static boolean createNewFileIfNotExists(final File file) throws IOException {
-        if (!file.exists()) {
-            try {
-                if (!file.createNewFile()) {
-                    final File parent = file.getParentFile();
-                    if (parent != null && (parent.exists() || parent.mkdirs())) {
-                        return file.createNewFile();
-                    }
-                }
-            } catch (final IOException e) {
-                final File parent = file.getParentFile();
-                if (!file.exists() && parent != null && (parent.exists() || parent.mkdirs())) {
-                    return file.createNewFile();
-                }
-
-                throw e;
-            }
-
-            return true;
+        if (file.exists()) {
+            return false;
         }
 
-        return false;
+        final File parent = file.getParentFile();
+
+        if (parent != null && !parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) {
+            throw new IOException("Failed to create parent directory: " + parent.getAbsolutePath());
+        }
+
+        // File.createNewFile() is atomic: false also correctly reports a concurrent creator.
+        return file.createNewFile();
     }
 
     /**
@@ -8898,7 +8991,8 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File file = ...;                                         // an existing regular file
+     * // Assume document.txt is an existing regular file.
+     * File file = new File("document.txt");
      * boolean a = IOUtil.isFile(file);                         // returns true
      * boolean b = IOUtil.isFile(file.getParentFile());         // returns false (it is a directory)
      * boolean c = IOUtil.isFile(new File("does_not_exist"));   // returns false
@@ -9028,7 +9122,8 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File file = ...;                          // a file containing the 5 bytes "hello"
+     * // Assume greeting.txt contains the five bytes "hello".
+     * File file = new File("greeting.txt");
      * long size = IOUtil.sizeOf(file, false);   // returns 5
      * File missing = new File("missing_file.tmp");
      * long zero = IOUtil.sizeOf(missing, true);   // returns 0 (treated as empty)
@@ -9155,7 +9250,7 @@ public final class IOUtil {
         checkFileExists(file, true);
 
         if (file.isDirectory()) {
-            return sizeOfDirectoryAsBigInteger(file); // private method; expects directory
+            return sizeOfDirectoryAsBigInteger(file);
         }
 
         return BigInteger.valueOf(file.length());
@@ -9276,6 +9371,7 @@ public final class IOUtil {
      *
      * @param sourceFile the file or directory to be compressed.
      * @param targetFile the file to which the compressed data will be written. It is created if it does not exist, and overwritten if it does.
+     * @throws IllegalArgumentException if {@code sourceFile} and {@code targetFile} are the same file.
      * @throws UncheckedIOException if the source file does not exist or is not readable, or if an I/O error occurs.
      */
     public static void zip(final File sourceFile, final File targetFile) throws UncheckedIOException {
@@ -9303,14 +9399,16 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File a = ...;                         // a file containing "aaa"
-     * File b = ...;                         // a file containing "bbb"
-     * File zip = ...;                       // the target archive
+     * // Assume a.txt contains "aaa" and b.txt contains "bbb".
+     * File a = new File("a.txt");
+     * File b = new File("b.txt");
+     * File zip = new File("files.zip");
      * IOUtil.zip(Arrays.asList(a, b), zip); // writes a ZIP with one entry per source file
      * }</pre>
      *
      * @param sourceFiles the collection of files or directories to be compressed. Each must be an existing file or directory.
      * @param targetFile  the file to which the compressed data will be written. It is created if it does not exist, and overwritten if it does.
+     * @throws IllegalArgumentException if any source file and {@code targetFile} are the same file.
      * @throws UncheckedIOException if any source file does not exist or is not readable, or if an I/O error occurs.
      */
     public static void zip(final Collection<File> sourceFiles, final File targetFile) throws UncheckedIOException {
@@ -9349,7 +9447,7 @@ public final class IOUtil {
      */
     private static void zipFile(final File sourceFile, final ZipOutputStream zos, final File targetFile) throws IOException {
         if (sourceFile.isFile()) {
-            zipFile(sourceFile, null, zos, targetFile);
+            zipSingleFile(sourceFile, zos, targetFile);
         } else {
             final Path sourcePath = sourceFile.toPath().toAbsolutePath().normalize();
             final Path sourceParentPath = sourcePath.getParent();
@@ -9358,7 +9456,7 @@ public final class IOUtil {
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (normalizedTargetPath.equals(file.toAbsolutePath().normalize())) {
+                    if (normalizedTargetPath.equals(file.toAbsolutePath().normalize()) || Files.isSameFile(file, normalizedTargetPath)) {
                         return FileVisitResult.CONTINUE;
                     }
                     // Relativize from parent to include source directory name
@@ -9384,27 +9482,21 @@ public final class IOUtil {
     }
 
     /**
-     * Compresses the specified file and writes the compressed data to the target file using the provided ZipOutputStream.
-     * This is a helper method used in the process of creating a ZIP file.
+     * Compresses a single regular file and writes the compressed data to the target file using the provided ZipOutputStream.
+     * This is a helper method used in the process of creating a ZIP file; directory sources are
+     * handled by the {@code Files.walkFileTree} branch of the caller.
      *
      * @param file       the file to be compressed. This must be a valid file.
-     * @param sourceDir  the directory containing the file to be compressed.
      * @param zos        the ZipOutputStream to which the compressed data will be written.
      * @param targetFile the file to which the compressed data will be written. This must be a valid file.
      * @throws IOException if an I/O error occurs during the process.
      */
-    private static void zipFile(final File file, final File sourceDir, final ZipOutputStream zos, final File targetFile) throws IOException {
+    private static void zipSingleFile(final File file, final ZipOutputStream zos, final File targetFile) throws IOException {
         if (file.equals(targetFile)) {
             return;
         }
 
-        String relativeFileName = null;
-
-        if (sourceDir == null) {
-            relativeFileName = file.getName();
-        } else {
-            relativeFileName = getRelativePath(sourceDir, file);
-        }
+        final String relativeFileName = file.getName();
 
         final ZipEntry ze = new ZipEntry(relativeFileName);
         ze.setSize(file.length());
@@ -9448,7 +9540,8 @@ public final class IOUtil {
      * @param srcZipFile the source ZIP file to be unzipped. This must be a valid ZIP file.
      * @param targetDir  the directory to which the contents of the ZIP file will be extracted. It is created if it does not exist.
      * @throws IllegalArgumentException if {@code srcZipFile} is a directory, or if {@code targetDir} is {@code null} or is an existing file.
-     * @throws IOException if {@code srcZipFile} does not exist, a ZIP entry would be extracted outside {@code targetDir}, or another I/O error occurs during the unzip process.
+     * @throws IOException if {@code srcZipFile} does not exist, a ZIP entry is absolute, would be extracted outside
+     *         {@code targetDir}, would overwrite the source archive, or another I/O error occurs during extraction.
      */
     public static void unzip(final File srcZipFile, final File targetDir) throws IOException {
         checkFileExists(srcZipFile);
@@ -9458,8 +9551,6 @@ public final class IOUtil {
         ZipEntry ze = null;
         OutputStream os = null;
         InputStream is = null;
-
-        final Path outputPath = targetDir.toPath();
 
         final byte[] buf = Objectory.createByteArrayBuffer();
         final int bufLength = buf.length;
@@ -9472,20 +9563,38 @@ public final class IOUtil {
                 ze = entryEnum.nextElement();
 
                 // Fix for Zip Slip
-                File newFile = new File(targetDir, ze.getName());
+                final String entryName = ze.getName();
+
+                // ZIP entry names are relative. Reject rooted forms explicitly because absolute-path
+                // handling differs among File, Path, operating systems, and ZIP-producing tools.
+                if (entryName.startsWith("/") || entryName.startsWith("\\")
+                        || (entryName.length() > 1 && Character.isLetter(entryName.charAt(0)) && entryName.charAt(1) == ':')) {
+                    throw new IOException("Zip entry has an absolute path: " + entryName);
+                }
+
+                // Treat both ZIP's standard '/' and the backslash accepted by many ZIP tools as
+                // separators on every host. The same File object must be used for validation and
+                // extraction; otherwise an entry such as "..\\outside" is a harmless-looking file
+                // name on Unix during validation but becomes a parent traversal when normalized later.
+                final String platformEntryName = entryName.replace('\\', File.separatorChar).replace('/', File.separatorChar);
+                final File newFile = new File(targetDir, platformEntryName);
 
                 if (!newFile.getCanonicalPath().startsWith(targetDir.getCanonicalPath() + File.separator)
                         && !newFile.getCanonicalPath().equals(targetDir.getCanonicalPath())) {
-                    throw new IOException("Zip entry is outside of the target dir: " + ze.getName());
+                    throw new IOException("Zip entry is outside of the target dir: " + entryName);
+                }
+
+                if (newFile.getCanonicalFile().equals(srcZipFile.getCanonicalFile())
+                        || (newFile.exists() && Files.isSameFile(newFile.toPath(), srcZipFile.toPath()))) {
+                    throw new IOException("Zip entry would overwrite the source archive: " + entryName);
                 }
 
                 if (ze.isDirectory()) {
-                    Path entryPath = outputPath.resolve(ze.getName());
-                    Files.createDirectories(entryPath);
+                    Files.createDirectories(newFile.toPath());
                     continue;
                 }
 
-                os = IOUtil.newFileOutputStream(getAbsolutePath(targetDir, ze.getName()));
+                os = IOUtil.newFileOutputStream(newFile);
 
                 try {
                     is = zip.getInputStream(ze);
@@ -9653,6 +9762,10 @@ public final class IOUtil {
                         partLength = partLength - count;
                     }
 
+                    if (partLength != 0) {
+                        throw new IOException("Source file ended before split part " + (i + 1) + " was complete: " + file.getAbsolutePath());
+                    }
+
                     output.flush();
                 } finally {
                     close(output);
@@ -9783,14 +9896,10 @@ public final class IOUtil {
                 final String subFileName = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + fileName + "_"
                         + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
                 output = IOUtil.newFileOutputStream(new File(subFileName));
-                long partLength = sizeOfPart;
-
-                if (i == numOfParts - 1) {
-                    final long remainder = fileLength % sizeOfPart;
-                    if (remainder != 0) {
-                        partLength = remainder;
-                    }
-                }
+                // The last part receives whatever remains — 0 for an empty source file, which still
+                // produces its single documented empty part instead of a spurious truncation error.
+                final long partStart = i * sizeOfPart;
+                long partLength = (i == numOfParts - 1) ? (fileLength - partStart) : sizeOfPart;
 
                 int count = 0;
 
@@ -9803,6 +9912,10 @@ public final class IOUtil {
                         output.write(buf, 0, count);
 
                         partLength = partLength - count;
+                    }
+
+                    if (partLength != 0) {
+                        throw new IOException("Source file ended before split part " + (i + 1) + " was complete: " + file.getAbsolutePath());
                     }
 
                     output.flush();
@@ -9848,8 +9961,7 @@ public final class IOUtil {
      * @param numOfParts the number of parts the file should be split into.
      * @param destDir    the directory where the split parts will be stored.
      * @param charset    the charset used to read the source and write the parts. Must not be {@code null}.
-     *                   The previous platform-default behavior silently corrupted UTF-8 files
-     *                   on JVMs whose default charset wasn't UTF-8 (e.g. Windows-1252).
+     * @throws IllegalArgumentException if {@code numOfParts} is not positive, or {@code charset} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during the process.
      */
     static void splitByLine(final File file, final int numOfParts, final File destDir, final Charset charset) throws UncheckedIOException {
@@ -9975,7 +10087,7 @@ public final class IOUtil {
      * @param sourceFiles an array of files to be merged. Each must be an existing, readable file.
      * @param destFile    the destination file where the merged content will be written. It is created if it does not exist, and overwritten if it does.
      * @return the number of bytes written to the destination file.
-     * @throws IllegalArgumentException if any source file is a directory.
+     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as {@code destFile}.
      * @throws UncheckedIOException if any source file does not exist or is not readable, or if an I/O error occurs during the process.
      */
     public static long merge(final File[] sourceFiles, final File destFile) throws UncheckedIOException {
@@ -9987,9 +10099,10 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File a = ...;   // a file containing "foo"
-     * File b = ...;   // a file containing "bar"
-     * File merged = ...;
+     * // Assume a.txt contains "foo" and b.txt contains "bar".
+     * File a = new File("a.txt");
+     * File b = new File("b.txt");
+     * File merged = new File("merged.txt");
      * long n = IOUtil.merge(Arrays.asList(a, b), merged);             // returns 6; merged holds "foobar"
      * long m = IOUtil.merge(Collections.<File>emptyList(), merged);   // returns 0 (nothing written)
      * }</pre>
@@ -9997,7 +10110,7 @@ public final class IOUtil {
      * @param sourceFiles a collection of files to be merged. Each must be an existing, readable file.
      * @param destFile    the destination file where the merged content will be written. It is created if it does not exist, and overwritten if it does.
      * @return the number of bytes written to the destination file.
-     * @throws IllegalArgumentException if any source file is a directory.
+     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as {@code destFile}.
      * @throws UncheckedIOException if any source file does not exist or is not readable, or if an I/O error occurs during the process.
      */
     public static long merge(final Collection<File> sourceFiles, final File destFile) throws UncheckedIOException {
@@ -10016,17 +10129,19 @@ public final class IOUtil {
      *     new File("data.txt.3")
      * );
      * File merged = new File("data_merged.txt");
-     * long bytesWritten = IOUtil.merge(parts, merged);
      *
      * // Merge with delimiter (e.g., newline between files)
-     * IOUtil.merge(parts, "\n".getBytes(), merged);
+     * long bytesWritten = IOUtil.merge(parts, "\n".getBytes(StandardCharsets.UTF_8), merged);
+     *
+     * // An empty delimiter concatenates the parts back-to-back
+     * IOUtil.merge(parts, N.EMPTY_BYTE_ARRAY, merged);
      * }</pre>
      *
      * @param sourceFiles a collection of files to be merged. Each must be an existing, readable file.
-     * @param delimiter   a byte array that will be inserted between each file during the merge.
+     * @param delimiter   a byte array that will be inserted between each file during the merge; {@code null} or empty inserts nothing.
      * @param destFile    the destination file where the merged content will be written. It is created if it does not exist, and overwritten if it does.
-     * @return the number of bytes written to the destination file.
-     * @throws IllegalArgumentException if any source file is a directory.
+     * @return the number of bytes written to the destination file, including the delimiters.
+     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as {@code destFile}.
      * @throws UncheckedIOException if any source file does not exist or is not readable, or if an I/O error occurs during the process.
      */
     public static long merge(final Collection<File> sourceFiles, final byte[] delimiter, final File destFile) throws UncheckedIOException {
@@ -10086,38 +10201,9 @@ public final class IOUtil {
         return totalCount;
     }
 
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-    private static String getAbsolutePath(final File parentDir, String relativeFilePath) {
-        String newRelativePath = "";
-
-        for (int i = 0; i < relativeFilePath.length(); i++) {
-            final char c = relativeFilePath.charAt(i);
-
-            if ((c == '\\') || (c == '/')) {
-                //noinspection StringConcatenationInLoop
-                newRelativePath += File.separator; //NOSONAR
-            } else {
-                //noinspection StringConcatenationInLoop
-                newRelativePath += c; //NOSONAR
-            }
-        }
-
-        relativeFilePath = newRelativePath;
-
-        final String path = parentDir.getAbsolutePath() + File.separator + relativeFilePath;
-
-        final File dir = new File(path.substring(0, path.lastIndexOf(File.separator)));
-
-        if (!dir.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            dir.mkdirs();
-        }
-
-        return path;
-    }
-
     /**
-     * Lists all files in the specified parent directory.
+     * Lists the immediate entries of the specified parent directory, subdirectories included.
+     * Subdirectories are not descended into.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10128,8 +10214,10 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param parentPath the parent directory from which to list files.
-     * @return a list of File objects representing all files in the parent directory.
+     * @param parentPath the parent directory from which to list entries. If it is {@code null} or does not exist, an empty list is returned.
+     * @return a new, modifiable list of the direct children (files and subdirectories) of the parent directory.
+     * @see #listFiles(File, boolean, boolean)
+     * @see #listDirectories(File)
      * @see Stream#listFiles(File)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
@@ -10152,10 +10240,11 @@ public final class IOUtil {
      * }
      * }</pre>
      *
-     * @param parentPath       the parent directory from which to list files.
-     * @param recursively      a boolean indicating whether to list files in all subdirectories.
+     * @param parentPath       the parent directory from which to list entries. If it is {@code null} or does not exist, an empty list is returned.
+     * @param recursively      a boolean indicating whether to list files in all subdirectories. Symbolic links to directories are never descended into.
      * @param excludeDirectory a boolean indicating whether to exclude directories from the list.
-     * @return a list of File objects representing all files in the parent directory.
+     * @return a new, modifiable list of the matching entries under the parent directory.
+     * @see #listFiles(File, boolean, Throwables.BiPredicate)
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
@@ -10180,9 +10269,9 @@ public final class IOUtil {
      *
      * @param <E>         the type of the exception that may be thrown by the filter.
      * @param parentPath  the parent directory where the listing will start. if it is {@code null} or does not exist, an empty list is returned.
-     * @param recursively if {@code true}, files in all subdirectories of the parent directory will be listed.
-     * @param filter      a BiPredicate that takes the parent directory and a file as arguments and returns a boolean. if the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed.
-     * @return a list of files in the specified directory and possibly its subdirectories.
+     * @param recursively if {@code true}, files in all subdirectories of the parent directory will be listed. Symbolic links to directories are never descended into.
+     * @param filter      a BiPredicate that takes the parent directory and a file as arguments and returns a boolean. if the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed. A rejected subdirectory is still descended into when {@code recursively} is {@code true}.
+     * @return a new, modifiable list of the matching files in the specified directory and possibly its subdirectories.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws E if the filter throws an exception.
      * @see Stream#listFiles(File, boolean, boolean)
@@ -10229,8 +10318,9 @@ public final class IOUtil {
      * List<File> subdirs = IOUtil.listDirectories(parentDir);
      * }</pre>
      *
-     * @param parentPath the parent directory from which to list directories.
-     * @return a list of File objects representing all directories in the parent directory.
+     * @param parentPath the parent directory from which to list directories. If it is {@code null} or does not exist, an empty list is returned.
+     * @return a new, modifiable list of the direct subdirectories of the parent directory.
+     * @see #listDirectories(File, boolean)
      * @see Stream#listFiles(File)
      * @see Fn#isDirectory()
      */
@@ -10248,22 +10338,14 @@ public final class IOUtil {
      * List<File> subdirs = IOUtil.listDirectories(parentDir, true);
      * }</pre>
      *
-     * @param parentPath  the parent directory from which to list directories.
-     * @param recursively a boolean indicating whether to list directories in all subdirectories.
-     * @return a list of File objects representing all directories in the parent directory and its subdirectories if recursively is {@code true}.
+     * @param parentPath  the parent directory from which to list directories. If it is {@code null} or does not exist, an empty list is returned.
+     * @param recursively a boolean indicating whether to list directories in all subdirectories. Symbolic links to directories are never descended into.
+     * @return a new, modifiable list of File objects representing all directories in the parent directory and its subdirectories if recursively is {@code true}.
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isDirectory()
      */
     public static List<File> listDirectories(final File parentPath, final boolean recursively) {
         return listFiles(parentPath, recursively, directories_only_filter);
-    }
-
-    private static String getRelativePath(final File parentDir, final File file) {
-        if (file.equals(parentDir)) {
-            return file.getName();
-        } else {
-            return file.getAbsolutePath().substring(parentDir.getAbsolutePath().length() + 1);
-        }
     }
 
     /**
@@ -10356,7 +10438,6 @@ public final class IOUtil {
      * @param url the URL to decode, may be {@code null}.
      * @return the decoded URL or {@code null} if the input was {@code null}.
      */
-    // unavoidable until Java 7
     private static String decodeUrl(final String url) {
         String decoded = url;
         if (url != null && url.indexOf('%') >= 0) {
@@ -10416,7 +10497,7 @@ public final class IOUtil {
      * @return a non-{@code null} array of Files matching the input.
      * @throws IllegalArgumentException if any URL is {@code null} or is not a file URL.
      */
-    public static File[] toFiles(final URL[] urls) throws UncheckedIOException {
+    public static File[] toFiles(final URL[] urls) {
         if (N.isEmpty(urls)) {
             return new File[0];
         }
@@ -10652,9 +10733,11 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File a = ...;                                               // a file containing "line1\nline2"
-     * File b = ...;                                               // a file containing "line1\r\nline2" (same text, different EOL)
-     * File c = ...;                                               // a file containing "line1\nDIFFERENT"
+     * // Assume unix.txt contains "line1\nline2", windows.txt contains the same text with CRLF,
+     * // and different.txt contains "line1\nDIFFERENT".
+     * File a = new File("unix.txt");
+     * File b = new File("windows.txt");
+     * File c = new File("different.txt");
      * boolean x = IOUtil.contentEqualsIgnoreEOL(a, b, "UTF-8");                                   // returns true (EOL differences ignored)
      * boolean y = IOUtil.contentEqualsIgnoreEOL(a, c, "UTF-8");                                   // returns false
      * boolean z = IOUtil.contentEqualsIgnoreEOL(a, b, null);                                      // returns true (null charsetName uses default)
@@ -10723,12 +10806,12 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is1 = new ByteArrayInputStream("abc".getBytes());
-     *      InputStream is2 = new ByteArrayInputStream("abc".getBytes())) {
+     * try (InputStream is1 = new ByteArrayInputStream("abc".getBytes(StandardCharsets.UTF_8));
+     *      InputStream is2 = new ByteArrayInputStream("abc".getBytes(StandardCharsets.UTF_8))) {
      *     boolean equal = IOUtil.contentEquals(is1, is2);   // returns true
      * }
-     * try (InputStream is1 = new ByteArrayInputStream("abc".getBytes());
-     *      InputStream is2 = new ByteArrayInputStream("xyz".getBytes())) {
+     * try (InputStream is1 = new ByteArrayInputStream("abc".getBytes(StandardCharsets.UTF_8));
+     *      InputStream is2 = new ByteArrayInputStream("xyz".getBytes(StandardCharsets.UTF_8))) {
      *     boolean equal = IOUtil.contentEquals(is1, is2);   // returns false
      * }
      * }</pre>
@@ -10762,9 +10845,7 @@ public final class IOUtil {
 
                 for (int index = 0; index < bufferSize; index++) {
                     if (pos1 == index) {
-                        do {
-                            count1 = input1.read(buffer1, pos1, bufferSize - pos1);
-                        } while (count1 == 0);
+                        count1 = readWithProgress(input1, buffer1, pos1, bufferSize - pos1);
 
                         if (count1 == EOF) {
                             return pos2 == index && input2.read() == EOF;
@@ -10774,9 +10855,7 @@ public final class IOUtil {
                     }
 
                     if (pos2 == index) {
-                        do {
-                            count2 = input2.read(buffer2, pos2, bufferSize - pos2);
-                        } while (count2 == 0);
+                        count2 = readWithProgress(input2, buffer2, pos2, bufferSize - pos2);
 
                         if (count2 == EOF) {
                             return pos1 == index && input1.read() == EOF;
@@ -10794,6 +10873,25 @@ public final class IOUtil {
             Objectory.recycle(buffer1);
             Objectory.recycle(buffer2);
         }
+    }
+
+    private static int readWithProgress(final InputStream input, final byte[] buffer, final int offset, final int length) throws IOException {
+        final int count = input.read(buffer, offset, length);
+
+        if (count != 0) {
+            return count;
+        }
+
+        // A non-zero-length blocking read should not return zero, but custom/channel-backed
+        // streams occasionally do. A one-byte read guarantees progress or EOF without spinning.
+        final int value = input.read();
+
+        if (value == EOF) {
+            return EOF;
+        }
+
+        buffer[offset] = (byte) value;
+        return 1;
     }
 
     /**
@@ -10843,9 +10941,7 @@ public final class IOUtil {
 
                 for (int index = 0; index < bufferSize; index++) {
                     if (pos1 == index) {
-                        do {
-                            count1 = input1.read(buffer1, pos1, bufferSize - pos1);
-                        } while (count1 == 0);
+                        count1 = readWithProgress(input1, buffer1, pos1, bufferSize - pos1);
 
                         if (count1 == EOF) {
                             return pos2 == index && input2.read() == EOF;
@@ -10855,9 +10951,7 @@ public final class IOUtil {
                     }
 
                     if (pos2 == index) {
-                        do {
-                            count2 = input2.read(buffer2, pos2, bufferSize - pos2);
-                        } while (count2 == 0);
+                        count2 = readWithProgress(input2, buffer2, pos2, bufferSize - pos2);
 
                         if (count2 == EOF) {
                             return pos1 == index && input1.read() == EOF;
@@ -10875,6 +10969,23 @@ public final class IOUtil {
             Objectory.recycle(buffer1);
             Objectory.recycle(buffer2);
         }
+    }
+
+    private static int readWithProgress(final Reader input, final char[] buffer, final int offset, final int length) throws IOException {
+        final int count = input.read(buffer, offset, length);
+
+        if (count != 0) {
+            return count;
+        }
+
+        final int value = input.read();
+
+        if (value == EOF) {
+            return EOF;
+        }
+
+        buffer[offset] = (char) value;
+        return 1;
     }
 
     /**
@@ -11071,7 +11182,7 @@ public final class IOUtil {
      * @param source the file or directory to process. If a directory, all files within it are processed recursively.
      * @param lineOffset the number of lines to skip from the beginning.
      * @param count the maximum number of lines to process after the offset.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize the size of the buffer queue between reader and processor threads.
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -11117,6 +11228,17 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
+        N.checkArgument(processThreadNum >= 0 && queueSize >= 0, "'processThreadNum'=%s and 'queueSize'=%s cannot be negative", processThreadNum, queueSize);
+        N.checkArgNotNull(lineAction, "lineAction");
+
+        try {
+            checkFileExists(source, true);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
         forLines(source.isDirectory() ? listFiles(source, true, true) : Array.asList(source), lineOffset, count, processThreadNum, queueSize, lineAction,
                 onComplete);
     }
@@ -11250,7 +11372,7 @@ public final class IOUtil {
      * @param files            the collection of files/directories to process. Directories are processed recursively.
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -11351,6 +11473,10 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
+        N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
+        N.checkArgument(processThreadNum >= 0 && queueSize >= 0, "'processThreadNum'=%s and 'queueSize'=%s cannot be negative", processThreadNum, queueSize);
+        N.checkArgNotNull(lineAction, "lineAction");
+
         if (N.isEmpty(files)) {
             // No files to read still counts as successful completion, so honor the onComplete callback
             // (consistent with the non-empty path, where Iterators.forEach runs it after the last line).
@@ -11368,6 +11494,12 @@ public final class IOUtil {
 
         try { //NOSONAR
             for (final File subFile : files) {
+                try {
+                    checkFileExists(subFile, true);
+                } catch (final IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+
                 if (subFile.isFile()) {
                     iterators.add(new LazyFileLineIterator(subFile));
                 } else {
@@ -11399,7 +11531,7 @@ public final class IOUtil {
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the file or directory to process. Directories are processed recursively.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -11431,7 +11563,7 @@ public final class IOUtil {
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
      * @param source           the file or directory to process. Directories are processed recursively.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @param onComplete       the action to perform after all lines have been processed successfully.
@@ -11463,7 +11595,7 @@ public final class IOUtil {
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -11497,7 +11629,7 @@ public final class IOUtil {
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @param onComplete       the action to perform after all lines have been processed successfully.
@@ -11510,6 +11642,18 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
+        N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
+                "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
+        N.checkArgNotNull(lineAction, "lineAction");
+
+        try {
+            checkFileExists(source, true);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
         forLines(source.isDirectory() ? listFiles(source, true, true) : Array.asList(source), lineOffset, count, readThreadNum, processThreadNum, queueSize,
                 lineAction, onComplete);
     }
@@ -11528,7 +11672,7 @@ public final class IOUtil {
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param files            the collection of files/directories to process. Directories are processed recursively.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -11560,7 +11704,7 @@ public final class IOUtil {
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
      * @param files            the collection of files/directories to process. Directories are processed recursively.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @param onComplete       the action to perform after all lines have been processed successfully.
@@ -11592,7 +11736,7 @@ public final class IOUtil {
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -11626,7 +11770,7 @@ public final class IOUtil {
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
      * @param readThreadNum    the number of threads for reading files.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @param onComplete       the action to perform after all lines have been processed successfully.
@@ -11640,6 +11784,11 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+        N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
+        N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
+                "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
+        N.checkArgNotNull(lineAction, "lineAction");
+
         if (N.isEmpty(files)) {
             // No files to read still counts as successful completion, so honor the onComplete callback
             // (consistent with the non-empty path, where Iterators.forEach runs it after the last line).
@@ -11657,6 +11806,12 @@ public final class IOUtil {
 
         try { //NOSONAR
             for (final File subFile : files) {
+                try {
+                    checkFileExists(subFile, true);
+                } catch (final IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+
                 if (subFile.isFile()) {
                     iterators.add(new LazyFileLineIterator(subFile));
                 } else {
@@ -11679,7 +11834,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is, line -> System.out.println(line));
      * }
      * // Edge: empty stream
@@ -11706,7 +11861,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is,
      *         line -> System.out.println(line),
      *         () -> System.out.println("Done"));
@@ -11740,11 +11895,11 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is, 0, 10, line -> System.out.println(line));   // process first 10 lines
      * }
      * // Edge: skip 1 line
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is, 1, 10, line -> System.out.println(line));
      * }
      * }</pre>
@@ -11769,13 +11924,13 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is, 0, 10,
      *         line -> System.out.println(line),
      *         () -> System.out.println("Done"));
      * }
      * // Edge: skip 1 line
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is, 1, 10,
      *         line -> System.out.println(line),
      *         () -> System.out.println("Done"));
@@ -11805,7 +11960,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is, 0, 10, 4, 1024, line -> System.out.println(line));   // 4 processing threads
      * }
      * // Edge: empty stream
@@ -11818,7 +11973,7 @@ public final class IOUtil {
      * @param source           the InputStream to read lines from.
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -11836,7 +11991,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes(StandardCharsets.UTF_8))) {
      *     IOUtil.forLines(is, 0, 10, 4, 1024,
      *         line -> System.out.println(line),
      *         () -> System.out.println("Done"));
@@ -11854,7 +12009,7 @@ public final class IOUtil {
      * @param source           the InputStream to read lines from.
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @param onComplete       the action to perform after all lines have been processed successfully.
@@ -12020,7 +12175,7 @@ public final class IOUtil {
      * @param source           the Reader to read lines from.
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -12056,7 +12211,7 @@ public final class IOUtil {
      * @param source           the Reader to read lines from.
      * @param lineOffset       the number of lines to skip from the beginning.
      * @param count            the maximum number of lines to process after the offset.
-     * @param processThreadNum the number of worker threads for parallel processing. 0 or negative for sequential processing.
+     * @param processThreadNum the number of worker threads for parallel processing. Use 0 for sequential processing; must not be negative.
      * @param queueSize        the size of the buffer queue between reader and processor threads.
      * @param lineAction       the action to perform on each line.
      * @param onComplete       the action to perform after all lines have been processed successfully.
@@ -12073,7 +12228,8 @@ public final class IOUtil {
     }
 
     /**
-     * Opens a file and returns an input stream. ZIP files are read from their first non-directory entry.
+     * Opens a file and returns an input stream. File-name checks for {@code .gz} and {@code .zip}
+     * are case-insensitive; ZIP files are read from their first non-directory entry.
      *
      * @param source the file to open, must not be {@code null}.
      * @param outputZipFile a holder for the ZipFile if the source is a .zip file.
@@ -12082,16 +12238,17 @@ public final class IOUtil {
      */
     private static InputStream openFile(final File source, final Holder<ZipFile> outputZipFile) throws IOException {
         InputStream is = null;
+        final String lowerCaseName = source.getName().toLowerCase(Locale.ROOT);
 
-        if (source.getName().endsWith(GZ)) {
+        if (lowerCaseName.endsWith(GZ)) {
             final FileInputStream fis = IOUtil.newFileInputStream(source);
             try {
                 is = new GZIPInputStream(fis);
             } catch (IOException e) {
-                close(fis);
+                closeQuietly(fis);
                 throw e;
             }
-        } else if (source.getName().endsWith(ZIP)) {
+        } else if (lowerCaseName.endsWith(ZIP)) {
             ZipFile zf = null;
             try {
                 zf = new ZipFile(source);
@@ -12114,7 +12271,7 @@ public final class IOUtil {
                 is = zf.getInputStream(ze);
                 outputZipFile.setValue(zf);
             } catch (IOException e) {
-                close(zf);
+                closeQuietly(zf);
                 throw e;
             }
         } else {

@@ -31,7 +31,7 @@ import com.landawn.abacus.util.N;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * DeserializationConfig config = new MyDeserConfig()
+ * JsonDeserConfig config = new JsonDeserConfig()
  *     .setIgnoreUnmatchedProperty(true)
  *     .setElementType(Person.class)
  *     .setMapKeyType(String.class)

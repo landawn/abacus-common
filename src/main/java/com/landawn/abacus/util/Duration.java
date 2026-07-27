@@ -18,43 +18,41 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 
 /**
- * A high-performance, immutable representation of a time-based amount of duration measured in milliseconds,
- * designed as an efficient alternative to {@code java.time.Duration} for scenarios where nanosecond precision
- * is not required. This class provides comprehensive duration arithmetic, conversion operations, and formatting
- * capabilities while maintaining optimal performance through a simplified internal representation.
+ * An immutable representation of a time-based amount stored with millisecond precision. It is a
+ * compact alternative to {@code java.time.Duration} for code that neither needs nor wants to retain
+ * sub-millisecond precision.
  *
  * <p>Unlike {@code java.time.Duration} which stores both seconds and nanoseconds internally, this implementation
- * uses only milliseconds as its internal representation, eliminating the computational overhead of dual-field
- * arithmetic. This design choice makes it particularly suitable for performance-critical applications where
- * millisecond precision is sufficient and nanosecond precision is rarely needed.</p>
+ * uses one signed millisecond value. Arithmetic is therefore straightforward, but converting from a
+ * nanosecond-precision source necessarily discards any sub-millisecond portion before this class receives it.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
- *   <li><b>High Performance:</b> Single-field millisecond representation eliminates complex arithmetic operations</li>
- *   <li><b>Immutable Design:</b> All instances are immutable, ensuring thread safety and preventing accidental modification</li>
+ *   <li><b>Simple Representation:</b> One signed {@code long} stores the complete value</li>
+ *   <li><b>Immutable Design:</b> Operations never modify an existing instance</li>
  *   <li><b>Comprehensive Arithmetic:</b> Full support for addition, subtraction, multiplication, and division operations</li>
  *   <li><b>Multiple Time Units:</b> Direct support for days, hours, minutes, seconds, and milliseconds</li>
  *   <li><b>Type Safety:</b> Strong typing prevents mixing incompatible duration operations</li>
  *   <li><b>ISO 8601 Formatting:</b> Standard duration string representation following ISO 8601 format</li>
  *   <li><b>JDK Interoperability:</b> Seamless conversion to/from {@code java.time.Duration}</li>
- *   <li><b>Memory Efficient:</b> Minimal memory footprint with single primitive field</li>
+ *   <li><b>Compact State:</b> Each instance has one primitive value field</li>
  * </ul>
  *
  * <p><b>IMPORTANT - Immutable Design:</b>
  * <ul>
  *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
  *   <li>The internal milliseconds field is final and set only during construction</li>
- *   <li>All arithmetic operations return new Duration instances rather than modifying existing ones</li>
+ *   <li>Arithmetic never mutates an instance; implementations may return {@code this} or {@link #ZERO} when the value is unchanged</li>
  *   <li>Thread-safe by design due to immutability and lack of mutable state</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
  * <ul>
- *   <li><b>Performance Over Precision:</b> Millisecond precision provides optimal balance of accuracy and speed</li>
- *   <li><b>Simplicity Over Complexity:</b> Single internal representation simplifies implementation and improves performance</li>
+ *   <li><b>Precision Choice:</b> Millisecond precision is an explicit tradeoff</li>
+ *   <li><b>Simplicity:</b> A single internal representation keeps arithmetic and conversion rules clear</li>
  *   <li><b>Immutability Over Mutability:</b> Ensures predictable behavior and thread safety</li>
  *   <li><b>Compatibility Over Isolation:</b> Seamless integration with standard Java time APIs</li>
- *   <li><b>Efficiency Over Features:</b> Focused feature set optimized for common duration use cases</li>
+ *   <li><b>Focused API:</b> The feature set covers common millisecond-duration use cases</li>
  * </ul>
  *
  * <p><b>Internal Representation:</b>
@@ -65,12 +63,12 @@ import java.time.temporal.TemporalUnit;
  *   <li><b>Negative Durations:</b> Supported for representing time differences and offsets</li>
  * </ul>
  *
- * <p><b>Time Unit Constants:</b>
+ * <p><b>Unit Conversion Factors</b> (used internally; not part of the public API):
  * <ul>
- *   <li><b>MILLIS_PER_SECOND:</b> 1,000 milliseconds per second</li>
- *   <li><b>MILLIS_PER_MINUTE:</b> 60,000 milliseconds per minute</li>
- *   <li><b>MILLIS_PER_HOUR:</b> 3,600,000 milliseconds per hour</li>
- *   <li><b>MILLIS_PER_DAY:</b> 86,400,000 milliseconds per day</li>
+ *   <li>1,000 milliseconds per second</li>
+ *   <li>60,000 milliseconds per minute</li>
+ *   <li>3,600,000 milliseconds per hour</li>
+ *   <li>86,400,000 milliseconds per day</li>
  * </ul>
  *
  * <p><b>Common Usage Patterns:</b>
@@ -100,33 +98,18 @@ import java.time.temporal.TemporalUnit;
  *
  * <p><b>Advanced Usage Examples:</b></p>
  * <pre>{@code
- * // Complex duration calculations
+ * // Chained calculations
  * Duration workDay = Duration.ofHours(8);
  * Duration lunchBreak = Duration.ofMinutes(30);
  * Duration shortBreaks = Duration.ofMinutes(15).multipliedBy(2);
  * Duration totalWorkTime = workDay.minus(lunchBreak).minus(shortBreaks);   // returns 7 hours
  *
- * // Performance measurement
- * Duration executionTime = measureExecutionTime(() -> performOperation());
- * if (executionTime.toMillis() > 1000) {
- *     logSlowOperation(executionTime);
- * }
- *
- * // Duration formatting for display
+ * // Formatting and JDK interoperability
  * Duration uptime = Duration.ofDays(5).plusHours(3).plusMinutes(45);
  * String formatted = uptime.toString();   // returns "PT123H45M" (ISO 8601 format)
- *
- * // Interoperability with java.time.Duration
- * Duration customDuration = Duration.ofMinutes(90);
- * java.time.Duration jdkDuration = customDuration.toJdkDuration();
- * Duration backConverted = Duration.ofMillis(jdkDuration.toMillis());
- *
- * // Conditional duration operations
- * Duration timeout = Duration.ofSeconds(30);
- * Duration elapsed = getCurrentElapsedTime();
- * if (elapsed.compareTo(timeout) > 0) {
- *     handleTimeout();
- * }
+ * java.time.Duration jdkDuration = uptime.toJdkDuration();
+ * Duration roundTrip = Duration.ofMillis(jdkDuration.toMillis());
+ * boolean unchanged = uptime.equals(roundTrip);   // true
  * }</pre>
  *
  * <p><b>Static Factory Methods:</b>
@@ -158,13 +141,12 @@ import java.time.temporal.TemporalUnit;
  *   <li><b>{@code toJdkDuration()}:</b> Converts to {@code java.time.Duration}</li>
  * </ul>
  *
- * <p><b>Performance Characteristics:</b>
+ * <p><b>Implementation Characteristics:</b>
  * <ul>
- *   <li><b>Creation Cost:</b> O(1) - Simple long assignment with minimal validation</li>
- *   <li><b>Arithmetic Cost:</b> O(1) - Single long arithmetic operation per method</li>
- *   <li><b>Comparison Cost:</b> O(1) - Direct long comparison</li>
- *   <li><b>Memory Overhead:</b> Minimal - Single long field plus standard object header</li>
- *   <li><b>GC Impact:</b> Low - Immutable objects are GC-friendly</li>
+ *   <li><b>Creation:</b> O(1), with overflow checks where unit conversion is required</li>
+ *   <li><b>Arithmetic:</b> O(1), using checked {@code long} operations where overflow is possible</li>
+ *   <li><b>Comparison:</b> O(1), using the stored millisecond value</li>
+ *   <li><b>Instance State:</b> One {@code long} field in addition to the normal object header</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
@@ -194,7 +176,7 @@ import java.time.temporal.TemporalUnit;
  * <p><b>Best Practices:</b>
  * <ul>
  *   <li>Use static factory methods ({@code ofHours()}, {@code ofMinutes()}) for readable duration creation</li>
- *   <li>Prefer this class over {@code java.time.Duration} when nanosecond precision is not needed</li>
+ *   <li>Use this class when millisecond precision matches the surrounding API; use {@code java.time.Duration} when finer precision is required</li>
  *   <li>Use {@code compareTo()} for duration ordering rather than converting to primitive types</li>
  *   <li>Cache frequently used duration instances to reduce object allocation</li>
  *   <li>Use {@code abs()} when you need magnitude without caring about direction</li>
@@ -205,7 +187,7 @@ import java.time.temporal.TemporalUnit;
  * <p><b>Common Anti-Patterns to Avoid:</b>
  * <ul>
  *   <li>Performing unnecessary conversions between this class and {@code java.time.Duration}</li>
- *   <li>Using {@code new Duration()} constructor directly instead of static factory methods</li>
+ *   <li>Bypassing the named factory methods from code in this package</li>
  *   <li>Ignoring potential overflow in arithmetic operations with very large values</li>
  *   <li>Converting to primitive types for comparison instead of using {@code compareTo()}</li>
  *   <li>Creating multiple duration instances for the same logical duration value</li>
@@ -214,10 +196,10 @@ import java.time.temporal.TemporalUnit;
  *
  * <p><b>Comparison with java.time.Duration:</b>
  * <ul>
- *   <li><b>Performance:</b> This implementation is faster for millisecond-precision operations</li>
+ *   <li><b>Representation:</b> This class stores one millisecond count; {@code java.time.Duration} stores seconds plus a nanosecond adjustment</li>
  *   <li><b>Precision:</b> {@code java.time.Duration} supports nanoseconds, this class supports milliseconds</li>
- *   <li><b>Memory:</b> This class uses less memory (single long vs. two longs)</li>
- *   <li><b>Features:</b> {@code java.time.Duration} has more features, this class is optimized for common cases</li>
+ *   <li><b>State:</b> This class has one {@code long} value field; actual object size remains JVM-dependent</li>
+ *   <li><b>Features:</b> {@code java.time.Duration} exposes a broader, nanosecond-precision API</li>
  *   <li><b>API:</b> Similar API design for easy migration between the two classes</li>
  * </ul>
  *
@@ -228,50 +210,6 @@ import java.time.temporal.TemporalUnit;
  *   <li><b>{@link java.util.concurrent.TimeUnit}:</b> Can be converted using {@code toMillis()}</li>
  *   <li><b>Stopwatch Utilities:</b> Natural fit for timing and performance measurement</li>
  * </ul>
- *
- * <p><b>Usage Examples: Performance Monitoring System</b>
- * <pre>{@code
- * public class PerformanceMonitor {
- *     private static final Duration WARNING_THRESHOLD = Duration.ofSeconds(5);
- *     private static final Duration ERROR_THRESHOLD = Duration.ofSeconds(30);
- *
- *     public PerformanceReport measureOperation(String operationName, Runnable operation) {
- *         long startTime = System.currentTimeMillis();
- *         try {
- *             operation.run();
- *             return createSuccessReport(operationName, startTime);
- *         } catch (Exception e) {
- *             return createErrorReport(operationName, startTime, e);
- *         }
- *     }
- *
- *     private PerformanceReport createSuccessReport(String operationName, long startTime) {
- *         Duration executionTime = Duration.ofMillis(System.currentTimeMillis() - startTime);
- *
- *         PerformanceLevel level;
- *         if (executionTime.compareTo(ERROR_THRESHOLD) > 0) {
- *             level = PerformanceLevel.ERROR;
- *         } else if (executionTime.compareTo(WARNING_THRESHOLD) > 0) {
- *             level = PerformanceLevel.WARNING;
- *         } else {
- *             level = PerformanceLevel.NORMAL;
- *         }
- *
- *         return new PerformanceReport(operationName, executionTime, level);
- *     }
- *
- *     public Duration calculateAverageExecutionTime(List<Duration> executionTimes) {
- *         if (executionTimes.isEmpty()) {
- *             return Duration.ZERO;
- *         }
- *
- *         Duration total = executionTimes.stream()
- *             .reduce(Duration.ZERO, Duration::plus);
- *
- *         return total.dividedBy(executionTimes.size());
- *     }
- * }
- * }</pre>
  *
  * @see Immutable
  * @see Comparable
@@ -299,6 +237,16 @@ public final class Duration implements Comparable<Duration>, Immutable {
 
     private final long milliseconds;
 
+    /**
+     * Constructs a {@code Duration} holding the given signed millisecond amount.
+     *
+     * <p>Package-private on purpose: outside code creates instances through the named
+     * factory methods ({@link #ofDays(long)}, {@link #ofHours(long)}, {@link #ofMinutes(long)},
+     * {@link #ofSeconds(long)}, {@link #ofMillis(long)}), which also return the shared
+     * {@link #ZERO} instance for a zero amount.</p>
+     *
+     * @param milliseconds the length of this duration in milliseconds, positive, negative or zero
+     */
     Duration(final long milliseconds) {
         this.milliseconds = milliseconds;
     }
@@ -435,11 +383,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Examples:</b>
      * <pre>{@code
      * // Measuring elapsed time
-     * Date start = new Date();
-     * // ... perform operation
-     * Date end = new Date();
+     * Date start = new Date(1_000L);
+     * Date end = new Date(1_250L);
      * Duration elapsed = Duration.between(start, end);
-     * long millisElapsed = elapsed.toMillis();
+     * long millisElapsed = elapsed.toMillis();   // returns 250
      *
      * // Calculating age
      * Date birthDate = Dates.parseDate("1990-05-15");
@@ -488,10 +435,11 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * // Measuring elapsed time
      * Calendar start = Calendar.getInstance();
-     * // ... perform operation
+     * start.setTimeInMillis(1_000L);
      * Calendar end = Calendar.getInstance();
+     * end.setTimeInMillis(1_250L);
      * Duration elapsed = Duration.between(start, end);
-     * long millisElapsed = elapsed.toMillis();
+     * long millisElapsed = elapsed.toMillis();   // returns 250
      *
      * // Calculating age
      * Calendar birthDate = Calendar.getInstance();
@@ -541,11 +489,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Examples:</b>
      * <pre>{@code
      * // Measuring elapsed time
-     * Instant start = Instant.now();
-     * // ... perform operation
-     * Instant end = Instant.now();
+     * Instant start = Instant.ofEpochMilli(1_000L);
+     * Instant end = Instant.ofEpochMilli(1_250L);
      * Duration elapsed = Duration.between(start, end);
-     * long millisElapsed = elapsed.toMillis();
+     * long millisElapsed = elapsed.toMillis();   // returns 250
      *
      * // Calculating age
      * LocalDateTime birthDate = LocalDateTime.of(1990, Month.MAY, 15, 0, 0);
@@ -1223,6 +1170,12 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Days are the largest unit handled by this class, so there is no enclosing unit to take a remainder against.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration d = Duration.ofDays(1).plusHours(2);
+     * long daysPart = d.toDaysPart();  // returns 1
+     * }</pre>
+     *
      * @return the number of whole days in the duration, may be negative.
      * @see #toDays()
      * @see java.time.Duration#toDaysPart()
@@ -1324,8 +1277,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Converts this {@code Duration} to a {@code java.time.Duration}.
      * <p>
      * This method creates a new {@code java.time.Duration} instance representing the same amount of time
-     * as this Duration. The conversion is straightforward as both use milliseconds precision.
-     * This is useful for interoperability with Java's standard time API.
+     * as this Duration. The resulting JDK object can represent finer precision, but this conversion
+     * contributes only the millisecond value stored here.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>

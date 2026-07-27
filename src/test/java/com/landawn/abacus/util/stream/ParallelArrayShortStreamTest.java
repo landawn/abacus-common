@@ -34,8 +34,8 @@ import com.landawn.abacus.util.function.ShortPredicate;
 import com.landawn.abacus.util.function.ShortTernaryOperator;
 import com.landawn.abacus.util.function.ShortToIntFunction;
 import com.landawn.abacus.util.function.ShortUnaryOperator;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelArrayShortStreamTest extends TestBase {
 
@@ -50,11 +50,11 @@ public class ParallelArrayShortStreamTest extends TestBase {
     private short[] smallArray;
 
     protected ShortStream createShortStream(short... elements) {
-        return ShortStream.of(elements).parallel(PS.create(Splitor.ARRAY).maxThreadNum(testMaxThreadNum));
+        return ShortStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
     }
 
-    protected ShortStream createIteratorSplitorShortStream(short... elements) {
-        return new ParallelArrayShortStream(elements, 0, elements.length, false, testMaxThreadNum, Splitor.ITERATOR, null, false, new ArrayList<>());
+    protected ShortStream createIteratorSplitStrategyShortStream(short... elements) {
+        return new ParallelArrayShortStream(elements, 0, elements.length, false, testMaxThreadNum, SplitStrategy.ITERATOR, null, false, new ArrayList<>());
     }
 
     @BeforeEach
@@ -111,28 +111,28 @@ public class ParallelArrayShortStreamTest extends TestBase {
 
     // Covers the iterator-based terminal-operation branch in ParallelArrayShortStream.
     @Test
-    public void testReduceAndFindMethods_IteratorSplitor() {
-        assertEquals((short) 15, createIteratorSplitorShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).reduce((short) 0,
+    public void testReduceAndFindMethods_IteratorSplitStrategy() {
+        assertEquals((short) 15, createIteratorSplitStrategyShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).reduce((short) 0,
                 (left, right) -> (short) (left + right)));
 
-        OptionalShort reduced = createIteratorSplitorShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5)
+        OptionalShort reduced = createIteratorSplitStrategyShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5)
                 .reduce((left, right) -> (short) (left + right));
         assertTrue(reduced.isPresent());
         assertEquals((short) 15, reduced.get());
 
-        OptionalShort firstOdd = createIteratorSplitorShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findFirst(s -> (s & 1) == 1);
+        OptionalShort firstOdd = createIteratorSplitStrategyShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findFirst(s -> (s & 1) == 1);
         assertTrue(firstOdd.isPresent());
         assertEquals((short) 1, firstOdd.get());
 
-        OptionalShort anyOdd = createIteratorSplitorShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findAny(s -> (s & 1) == 1);
+        OptionalShort anyOdd = createIteratorSplitStrategyShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findAny(s -> (s & 1) == 1);
         assertTrue(anyOdd.isPresent());
         assertTrue(anyOdd.get() == (short) 1 || anyOdd.get() == (short) 3 || anyOdd.get() == (short) 5);
 
-        OptionalShort lastOdd = createIteratorSplitorShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findLast(s -> (s & 1) == 1);
+        OptionalShort lastOdd = createIteratorSplitStrategyShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findLast(s -> (s & 1) == 1);
         assertTrue(lastOdd.isPresent());
         assertEquals((short) 5, lastOdd.get());
 
-        OptionalShort notFound = createIteratorSplitorShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findAny(s -> s > 10);
+        OptionalShort notFound = createIteratorSplitStrategyShortStream((short) 4, (short) 2, (short) 1, (short) 3, (short) 5).findAny(s -> s > 10);
         assertFalse(notFound.isPresent());
     }
 
@@ -585,9 +585,9 @@ public class ParallelArrayShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testForEach_IteratorSplitor() {
+    public void testForEach_IteratorSplitStrategy() {
         AtomicInteger sum = new AtomicInteger(0);
-        createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).forEach(s -> sum.addAndGet(s));
+        createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).forEach(s -> sum.addAndGet(s));
         assertEquals(15, sum.get());
     }
 
@@ -753,15 +753,15 @@ public class ParallelArrayShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testIteratorSplitorReduceAndFindOperations_SparseMatch() {
-        assertEquals((short) 72, createIteratorSplitorShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
+    public void testIteratorSplitStrategyReduceAndFindOperations_SparseMatch() {
+        assertEquals((short) 72, createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
                 .reduce((short) 0, (left, right) -> (short) (left + right)));
 
-        OptionalShort reduced = createIteratorSplitorShortStream((short) 21, (short) 2, (short) 4).reduce((left, right) -> (short) (left + right));
+        OptionalShort reduced = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4).reduce((left, right) -> (short) (left + right));
         assertTrue(reduced.isPresent());
         assertEquals((short) 27, reduced.get());
 
-        OptionalShort firstMatch = createIteratorSplitorShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
+        OptionalShort firstMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
                 .findFirst(s -> {
                     if (s == 21) {
                         try {
@@ -776,12 +776,12 @@ public class ParallelArrayShortStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals((short) 21, firstMatch.get());
 
-        OptionalShort anyMatch = createIteratorSplitorShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
+        OptionalShort anyMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
                 .findAny(s -> s > 5 && (s & 1) == 1);
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21 || anyMatch.get() == 7 || anyMatch.get() == 11 || anyMatch.get() == 13);
 
-        OptionalShort lastMatch = createIteratorSplitorShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
+        OptionalShort lastMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
                 .findLast(s -> {
                     if (s == 13) {
                         try {
@@ -807,16 +807,16 @@ public class ParallelArrayShortStreamTest extends TestBase {
     // Tests covering parallel code paths with large array
 
     @Test
-    public void testCollect_ArraySplitor_ParallelPath() {
-        // Uses ARRAY splitor (default), 26 elements, 4 threads - goes parallel
+    public void testCollect_ArraySplitStrategy_ParallelPath() {
+        // Uses ARRAY splitStrategy (default), 26 elements, 4 threads - goes parallel
         List<Short> result = createShortStream(TEST_ARRAY).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertEquals(TEST_ARRAY.length, result.size());
     }
 
     @Test
-    public void testCollect_IteratorSplitor_ParallelPath() {
-        // Uses ITERATOR splitor, 26 elements, 4 threads - goes through iterator path
-        List<Short> result = createIteratorSplitorShortStream(TEST_ARRAY).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    public void testCollect_IteratorSplitStrategy_ParallelPath() {
+        // Uses ITERATOR splitStrategy, 26 elements, 4 threads - goes through iterator path
+        List<Short> result = createIteratorSplitStrategyShortStream(TEST_ARRAY).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertEquals(TEST_ARRAY.length, result.size());
     }
 
@@ -828,8 +828,8 @@ public class ParallelArrayShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testCollect_IteratorSplitor() {
-        List<Short> result = createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    public void testCollect_IteratorSplitStrategy() {
+        List<Short> result = createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         assertHaveSameElements(List.of((short) 1, (short) 2, (short) 3), result);
     }
 
@@ -866,17 +866,17 @@ public class ParallelArrayShortStreamTest extends TestBase {
         assertTrue(createShortStream(new short[] {}).noneMatch(s -> true));
     }
 
-    // Cover the ITERATOR splitor path for anyMatch / allMatch / noneMatch / collect / forEach
+    // Cover the ITERATOR splitStrategy path for anyMatch / allMatch / noneMatch / collect / forEach
     @Test
-    public void testAnyMatchAllMatchNoneMatch_IteratorSplitor() {
-        assertTrue(createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).anyMatch(s -> s > 4));
-        assertFalse(createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3).anyMatch(s -> s > 10));
+    public void testAnyMatchAllMatchNoneMatch_IteratorSplitStrategy() {
+        assertTrue(createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).anyMatch(s -> s > 4));
+        assertFalse(createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3).anyMatch(s -> s > 10));
 
-        assertTrue(createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3).allMatch(s -> s >= 1 && s <= 3));
-        assertFalse(createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3).allMatch(s -> s < 3));
+        assertTrue(createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3).allMatch(s -> s >= 1 && s <= 3));
+        assertFalse(createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3).allMatch(s -> s < 3));
 
-        assertTrue(createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3).noneMatch(s -> s > 10));
-        assertFalse(createIteratorSplitorShortStream((short) 1, (short) 2, (short) 3).noneMatch(s -> s > 2));
+        assertTrue(createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3).noneMatch(s -> s > 10));
+        assertFalse(createIteratorSplitStrategyShortStream((short) 1, (short) 2, (short) 3).noneMatch(s -> s > 2));
     }
 
     @Test
@@ -1199,7 +1199,7 @@ public class ParallelArrayShortStreamTest extends TestBase {
     @Test
     public void testZipWithDefaultValues_SequentialFallback() {
         List<Short> result = ShortStream.of((short) 1, (short) 2, (short) 3)
-                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
                 .zipWith(ShortStream.of((short) 10), (short) 0, (short) -1, (a, b) -> (short) (a + b))
                 .toList();
 
@@ -1241,8 +1241,8 @@ public class ParallelArrayShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-        assertEquals(Splitor.ARRAY, ((ParallelArrayShortStream) createShortStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() throws IllegalAccessException, NoSuchFieldException {
+        assertEquals(SplitStrategy.ARRAY, ((ParallelArrayShortStream) createShortStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

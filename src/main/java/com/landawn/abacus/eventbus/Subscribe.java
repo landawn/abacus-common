@@ -28,9 +28,12 @@ import com.landawn.abacus.util.ThreadMode;
  *
  * <p>The annotated method must meet the following requirements:</p>
  * <ul>
- *   <li>Must be {@code public}.</li>
- *   <li>Must have exactly one parameter representing the event type.</li>
- *   <li>Must not be {@code static}.</li>
+ *   <li>Must be {@code public} — a non-{@code public} annotated method is silently ignored rather
+ *       than rejected.</li>
+ *   <li>Must have exactly one parameter representing the event type; otherwise registering the
+ *       declaring object throws a {@link RuntimeException}.</li>
+ *   <li>Must not be {@code static}; otherwise registering the declaring object throws a
+ *       {@link RuntimeException}.</li>
  *   <li>Should not throw checked exceptions (any thrown exceptions are caught and logged).</li>
  * </ul>
  *
@@ -129,17 +132,17 @@ public @interface Subscribe {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Post a sticky configuration
-     * eventBus.postSticky(new AppConfig("production"));
-     *
-     * // Later, register a subscriber
-     * public class ConfigHandler {
+     * class ConfigHandler {
      *     @Subscribe(sticky = true)
      *     public void onConfig(AppConfig config) {
      *         // This will be called immediately with the sticky config
      *         applyConfiguration(config);
      *     }
      * }
+     *
+     * // Post a sticky configuration, then register the annotated subscriber.
+     * eventBus.postSticky(new AppConfig("production"));
+     * eventBus.register(new ConfigHandler());
      * }</pre>
      *
      * @return {@code true} to receive sticky events upon registration

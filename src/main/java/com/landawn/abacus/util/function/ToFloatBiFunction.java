@@ -30,6 +30,9 @@ import com.landawn.abacus.util.Throwables;
  *
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
+ *
+ * @see java.util.function.BiFunction
+ * @see ToFloatFunction
  */
 @FunctionalInterface
 public interface ToFloatBiFunction<T, U> extends Throwables.ToFloatBiFunction<T, U, RuntimeException> { //NOSONAR

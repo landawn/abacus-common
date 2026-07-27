@@ -97,8 +97,11 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * <pre>{@code
      * IntFunction<Integer> identity = IntFunction.identity();
      * Integer result = identity.apply(42);   // Returns 42 (boxed)
-     * int[] array = {1, 2, 3};
-     * List<Integer> list = IntStream.of(array).mapToObj(identity).collect(Collectors.toList());
+     *
+     * // Useful as a conditional no-op when an IntFunction<Integer> is required
+     * boolean shouldSquare = false;
+     * IntFunction<Integer> step = shouldSquare ? value -> value * value : IntFunction.identity();
+     * Integer value = step.apply(7);   // Returns 7
      * }</pre>
      *
      * @return a function that always returns its input argument boxed as an {@link Integer}

@@ -37,8 +37,7 @@ import com.landawn.abacus.util.stream.Stream;
  * A flexible string splitting utility that divides strings into parts based on configurable delimiters
  * and patterns. This final class provides a fluent builder-pattern API for parsing text with extensive
  * customization options including whitespace handling, empty string management, result limiting, and
- * type conversion. Splitter excels at structured text parsing, data extraction, and format conversion
- * scenarios with optimal performance and memory efficiency.
+ * type conversion.
  *
  * <p>Splitter supports multiple delimiter types including single characters, multi-character strings,
  * and regular expression patterns. It provides sophisticated preprocessing options such as trimming
@@ -64,7 +63,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Common Use Cases:</b>
  * <ul>
- *   <li><b>CSV/TSV Parsing:</b> Structured data file processing with delimiter-based formats</li>
+ *   <li><b>Simple delimiter-separated text:</b> Formats that do not require CSV-style quoting or escaping</li>
  *   <li><b>Configuration Parsing:</b> Property files, command-line arguments, and settings</li>
  *   <li><b>Log Analysis:</b> Extracting fields from structured log entries</li>
  *   <li><b>Data Import/Export:</b> Converting between string formats and structured data</li>
@@ -97,9 +96,10 @@ import com.landawn.abacus.util.stream.Stream;
  *     .split("1;2;3;4", Integer.class);
  * // Result: [1, 2, 3, 4]
  *
- * // Stream processing for large datasets
+ * // Stream processing (the same pipeline also scales to large inputs)
+ * String text = "INFO ready\nERROR failed";
  * long count = Splitter.with("\n")
- *     .splitToStream(largeTextFile)
+ *     .splitToStream(text)
  *     .filter(line -> !line.isEmpty())
  *     .map(String::trim)
  *     .filter(line -> line.startsWith("ERROR"))
@@ -159,7 +159,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Character splitting: O(n) time, O(k) space where n is input length, k is result count</li>
  *   <li>String splitting: O(n*m) time where m is delimiter length</li>
- *   <li>Pattern splitting: O(n) to O(n*p) depending on regex complexity</li>
+ *   <li>Pattern splitting: runtime depends on the supplied {@link Pattern}, including any regex backtracking</li>
  *   <li>Memory usage: Lazy evaluation reduces memory footprint for stream operations</li>
  * </ul>
  *
@@ -176,7 +176,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Whitespace Handling Details:</b>
  * <ul>
  *   <li><b>trimResults():</b> Removes only the space character (' ') from the start and end</li>
- *   <li><b>stripResults():</b> Removes all whitespace as defined by {@link Character#isWhitespace(char)}</li>
+ *   <li><b>stripResults():</b> Removes leading and trailing whitespace as defined by {@link Character#isWhitespace(char)}</li>
  *   <li><b>Both methods:</b> Applied after splitting but before empty string filtering</li>
  *   <li><b>Unicode Support:</b> {@link #WHITE_SPACE_PATTERN} provides full Unicode whitespace matching</li>
  * </ul>
@@ -218,7 +218,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Cache configured Splitter instances for repeated use</li>
  *   <li>Use {@code splitToStream()} for large inputs to minimize memory usage</li>
- *   <li>Configure whitespace handling before other options for optimal performance</li>
+ *   <li>Complete all configuration before publishing an instance for concurrent read-only use</li>
  *   <li>Use appropriate delimiter types based on parsing requirements</li>
  *   <li>Consider {@code limit()} for performance when only first few splits are needed</li>
  * </ul>
@@ -314,14 +314,19 @@ public final class Splitter {
     private boolean stripResults = false;
     private int limit = Integer.MAX_VALUE;
 
+    /**
+     * Creates a splitter backed by the specified splitting strategy.
+     *
+     * @param strategy the strategy used to locate separators
+     */
     Splitter(final Strategy strategy) {
         this.strategy = strategy;
     }
 
     /**
      * Returns a new Splitter instance configured with the default delimiter: ", " (comma followed by space).
-     * This is the standard delimiter used in many contexts such as CSV files or
-     * comma-separated lists.
+     * This delimiter is useful for simple comma-and-space-separated lists. It does not implement
+     * CSV quoting or escaping rules.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -465,9 +470,7 @@ public final class Splitter {
         N.checkArgNotEmpty(delimiter, cs.delimiter);
         final String delimiterStr = delimiter.toString();
 
-        if (Strings.isEmpty(delimiterStr)) {
-            return with(WHITE_SPACE_PATTERN);
-        } else if (delimiterStr.length() == 1) {
+        if (delimiterStr.length() == 1) {
             return with(delimiterStr.charAt(0));
         } else {
             return new Splitter((source, omitEmptyStrings, trim, strip, limit) -> {
@@ -552,8 +555,8 @@ public final class Splitter {
 
     /**
      * Returns a new Splitter instance that uses the specified regular expression pattern as a delimiter.
-     * The pattern is applied using Java's regular expression engine. Empty strings
-     * cannot be matched by the pattern.
+     * The pattern is applied using Java's regular expression engine. The pattern must not match
+     * the empty input string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -753,7 +756,7 @@ public final class Splitter {
     /**
      * Configures this Splitter to trim leading and trailing spaces from each
      * resulting substring. Only space characters (not all whitespace) are trimmed.
-     * For trimming all whitespace characters, use {@link #stripResults()}.
+     * To recognize other leading and trailing whitespace characters, use {@link #stripResults()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -775,9 +778,8 @@ public final class Splitter {
 
     /**
      * Configures this Splitter to remove leading and trailing whitespace characters
-     * from each resulting substring when the specified parameter is {@code true}. This method
-     * removes all whitespace as defined by {@link Character#isWhitespace(char)},
-     * including spaces, tabs, newlines, etc.
+     * from each resulting substring when the specified parameter is {@code true}. Whitespace
+     * is identified by {@link Character#isWhitespace(char)}, including spaces, tabs, and newlines.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -799,15 +801,15 @@ public final class Splitter {
 
     /**
      * Configures this Splitter to remove leading and trailing whitespace characters
-     * from each resulting substring. This method removes all whitespace as defined
-     * by {@link Character#isWhitespace(char)}, including spaces, tabs, newlines, etc.
+     * from each resulting substring. Whitespace is identified by
+     * {@link Character#isWhitespace(char)}, including spaces, tabs, and newlines.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> result = Splitter.with(",")
      *     .stripResults()
      *     .split("a\t,\nb\t,\tc");
-     * // Returns ["a", "b", "c"] with all whitespace removed
+     * // Returns ["a", "b", "c"] with surrounding whitespace removed
      * }</pre>
      *
      * @return this Splitter instance for method chaining.
@@ -885,8 +887,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LinkedHashSet<String> uniqueParts = Splitter.with(",")
-     *     .split("a,b,a,c", LinkedHashSet::new);
+     * java.util.function.Supplier<LinkedHashSet<String>> factory = LinkedHashSet::new;
+     * LinkedHashSet<String> uniqueParts = Splitter.with(",").split("a,b,a,c", factory);
      * // Returns a LinkedHashSet containing ["a", "b", "c"]
      * }</pre>
      *
@@ -913,8 +915,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Integer> numbers = Splitter.with(",")
-     *     .split("1,2,3", Integer::parseInt);
+     * java.util.function.Function<String, Integer> toInteger = Integer::parseInt;
+     * List<Integer> numbers = Splitter.with(",").split("1,2,3", toInteger);
      * // Returns [1, 2, 3]
      * }</pre>
      *
@@ -982,8 +984,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Set<Integer> uniqueNumbers = Splitter.with(",")
-     *     .split("1,2,1,3", Integer.class, HashSet::new);
+     * java.util.function.Supplier<HashSet<Integer>> factory = HashSet::new;
+     * Set<Integer> uniqueNumbers = Splitter.with(",").split("1,2,1,3", Integer.class, factory);
      * // Returns a HashSet containing {1, 2, 3}
      * }</pre>
      *
@@ -1025,9 +1027,11 @@ public final class Splitter {
      *
      * @param <T> the target type for conversion.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param targetType the Type instance used for converting strings to the target type.
-     * @return a List containing the converted results.
+     * @param targetType the Type instance used for converting strings to the target type. Must not be {@code null}.
+     * @return a new List containing the converted results.
      * @throws IllegalArgumentException if targetType is {@code null}.
+     * @see #split(CharSequence, Class)
+     * @see #split(CharSequence, Type, Supplier)
      */
     public <T> List<T> split(final CharSequence source, final Type<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
@@ -1050,8 +1054,8 @@ public final class Splitter {
      * <pre>{@code
      * // Split into a TreeSet of Integers using Type
      * Type<Integer> intType = N.typeOf(Integer.class);
-     * TreeSet<Integer> uniqueNumbers = Splitter.with(",")
-     *     .split("3,1,2,1,3", intType, TreeSet::new);
+     * java.util.function.Supplier<TreeSet<Integer>> factory = TreeSet::new;
+     * TreeSet<Integer> uniqueNumbers = Splitter.with(",").split("3,1,2,1,3", intType, factory);
      * // Returns sorted unique values: [1, 2, 3]
      * }</pre>
      *
@@ -1207,6 +1211,8 @@ public final class Splitter {
      * @param targetType the Class representing the type to convert each substring to, not {@code null}.
      * @return an ImmutableList containing the converted results.
      * @throws IllegalArgumentException if targetType is {@code null}.
+     * @see #splitToImmutableList(CharSequence)
+     * @see #split(CharSequence, Class)
      */
     public <T> ImmutableList<T> splitToImmutableList(final CharSequence source, final Class<? extends T> targetType) {
         return ImmutableList.wrap(split(source, targetType));
@@ -1487,6 +1493,16 @@ public final class Splitter {
      * strings into Map objects, with support for various configuration options
      * such as trimming, stripping whitespace, and omitting empty entries.</p>
      *
+     * <p>Two behaviours are fixed when a MapSplitter is created:</p>
+     * <ul>
+     *   <li>Empty entry strings are omitted (see {@link #omitEmptyStrings(boolean)} to re-enable them)</li>
+     *   <li>Each entry is split into at most two parts, so the <i>first</i> key-value delimiter
+     *       separates the key from the value and any further occurrences stay inside the value</li>
+     * </ul>
+     *
+     * <p>An entry that contains no key-value delimiter at all causes an
+     * {@link IllegalArgumentException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = MapSplitter.with(",", "=")
@@ -1508,6 +1524,14 @@ public final class Splitter {
         /** The key value splitter. */
         private final Splitter keyValueSplitter;
 
+        /**
+         * Creates a map splitter from the specified entry and key-value splitters.
+         * Empty entries are omitted, and each entry is divided into at most two
+         * key-value parts.
+         *
+         * @param entrySplitter the splitter used to separate map entries
+         * @param keyValueSplitter the splitter used to separate each key from its value
+         */
         MapSplitter(final Splitter entrySplitter, final Splitter keyValueSplitter) {
             this.entrySplitter = entrySplitter;
             this.entrySplitter.omitEmptyStrings();
@@ -1621,7 +1645,9 @@ public final class Splitter {
          * MapSplitter.with(",", "=").omitEmptyStrings(true).split("a=1,,b=2");  // returns {a=1, b=2}
          * }</pre>
          *
-         * @param omitEmptyStrings {@code true} to omit empty entry strings, {@code false} to include them.
+         * @param omitEmptyStrings {@code true} to omit empty entry strings; {@code false} to keep them, in which
+         *        case an empty entry — having no key-value delimiter — makes the split throw
+         *        {@link IllegalArgumentException}.
          * @return this MapSplitter instance for method chaining.
          * @deprecated replaced by {@link #omitEmptyStrings()}
          */
@@ -1636,6 +1662,10 @@ public final class Splitter {
          * Configures this MapSplitter to omit empty entry strings.
          * This applies to the entry splitting phase, filtering out entry
          * strings that are empty after splitting by the entry delimiter.
+         *
+         * <p>Omitting empty entries is already enabled when a MapSplitter is created, so calling
+         * this method only restores the default after {@link #omitEmptyStrings(boolean)
+         * omitEmptyStrings(false)} has turned it off.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1774,41 +1804,38 @@ public final class Splitter {
          * MapSplitter splitter = MapSplitter.with(",", "=");
          *
          * // Input has more entries than limit
-         * splitter.limit(2).split("a=1,b=2,c=3,d=4")
+         * Map<String, String> firstTwo = splitter.limit(2).split("a=1,b=2,c=3,d=4");
          * // Returns: {a=1, b=2,c=3,d=4} - 2 entries; the last value absorbs the remaining input
          *
          * // Input has exactly limit entries
-         * splitter.limit(2).split("a=1,b=2")
+         * Map<String, String> exactlyTwo = splitter.limit(2).split("a=1,b=2");
          * // Returns: {a=1, b=2} - all 2 entries
          *
          * // Input has fewer entries than limit
-         * splitter.limit(5).split("a=1,b=2")
+         * Map<String, String> fewerThanFive = splitter.limit(5).split("a=1,b=2");
          * // Returns: {a=1, b=2} - all available entries (only 2)
          *
          * // Input is empty
-         * splitter.limit(2).split("")
+         * Map<String, String> empty = splitter.limit(2).split("");
          * // Returns: {} - empty map
          *
          * // Combined with other options
-         * splitter.limit(2).trimResults().omitEmptyStrings().split(" a = 1 , , b = 2 , c = 3 ")
-         * // Returns: {a=1, ", b"="2 , c = 3"} - once the limit is reached, the second entry
-         * // absorbs the remaining input (including the empty entry and its delimiter), so its
-         * // key keeps the leading ", "; trimming strips only spaces, not delimiters
+         * Map<String, String> combined = splitter.limit(2).trimResults().omitEmptyStrings()
+         *     .split(" a = 1 , , b = 2 , c = 3 ");
+         * // Returns: {a=1, ", b"="2 , c = 3"}. Once the limit is reached, the raw remainder
+         * // (including the empty entry, which omitEmptyStrings never gets to drop) is absorbed
+         * // as the final entry and split at its first key-value delimiter.
          * }</pre>
          *
          * <p><b>Common Mistakes:</b></p>
          * <pre>{@code
-         * // DON'T: Think limit(2) returns 1 entry
+         * MapSplitter splitter = MapSplitter.with(",", "=");
          * Map<String, String> result = splitter.limit(2).split("a=1,b=2,c=3");
-         * assertEquals(1, result.size());   // WRONG! Returns 2, not 1
+         * assert result.size() == 2;   // limit(2) means up to two map entries
          *
-         * // DO: Understand limit(N) returns UP TO N entries
-         * Map<String, String> result = splitter.limit(2).split("a=1,b=2,c=3");
-         * assertEquals(2, result.size());   // Correct - returns 2 entries
-         *
-         * // DON'T: Confuse with split string indices
-         * // In String.split("a,b,c", 2) returns ["a", "b,c"] (2 parts)
-         * // But here limit(2) means 2 map entries, not 1
+         * String[] parts = "a,b,c".split(",", 2);
+         * assert Arrays.equals(new String[] { "a", "b,c" }, parts);
+         * // Both APIs limit the number of produced results; MapSplitter produces map entries.
          * }</pre>
          *
          * @param limit the maximum number of entries to return; must be &gt; 0.
@@ -1864,8 +1891,8 @@ public final class Splitter {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * TreeMap<String, String> sorted = MapSplitter.with(",", "=")
-         *     .split("z=3,a=1,m=2", TreeMap::new);
+         * java.util.function.Supplier<TreeMap<String, String>> factory = TreeMap::new;
+         * TreeMap<String, String> sorted = MapSplitter.with(",", "=").split("z=3,a=1,m=2", factory);
          * // Returns a TreeMap with entries sorted by key
          * }</pre>
          *
@@ -1902,7 +1929,8 @@ public final class Splitter {
          * @param keyType the Class representing the type to convert keys to, not {@code null}
          * @param valueType the Class representing the type to convert values to, not {@code null}
          * @return a LinkedHashMap containing the parsed and converted key-value pairs
-         * @throws IllegalArgumentException if keyType or valueType is {@code null}
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry
+         *         string cannot be properly parsed into a key-value pair
          * @see #split(CharSequence)
          * @see #split(CharSequence, Type, Type)
          * @see #split(CharSequence, Class, Class, Supplier)
@@ -1935,10 +1963,13 @@ public final class Splitter {
          * @param <K> the key type
          * @param <V> the value type
          * @param source the CharSequence to split into a map; may be {@code null}
-         * @param keyType the Type instance used for converting strings to keys
-         * @param valueType the Type instance used for converting strings to values
+         * @param keyType the Type instance used for converting strings to keys, not {@code null}
+         * @param valueType the Type instance used for converting strings to values, not {@code null}
          * @return a LinkedHashMap containing the parsed and converted key-value pairs
-         * @throws IllegalArgumentException if keyType or valueType is null
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry
+         *         string cannot be properly parsed into a key-value pair
+         * @see #split(CharSequence, Class, Class)
+         * @see #split(CharSequence, Type, Type, Supplier)
          */
         public <K, V> Map<K, V> split(final CharSequence source, final Type<K> keyType, final Type<V> valueType) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, cs.keyType);
@@ -1959,8 +1990,9 @@ public final class Splitter {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * java.util.function.Supplier<TreeMap<String, Integer>> factory = TreeMap::new;
          * TreeMap<String, Integer> sorted = MapSplitter.with(",", "=")
-         *     .split("z=3,a=1,m=2", String.class, Integer.class, TreeMap::new);
+         *     .split("z=3,a=1,m=2", String.class, Integer.class, factory);
          * // Returns a TreeMap with entries sorted by key
          * }</pre>
          *
@@ -1996,8 +2028,9 @@ public final class Splitter {
          * <pre>{@code
          * Type<String> strType = N.typeOf(String.class);
          * Type<Integer> intType = N.typeOf(Integer.class);
+         * java.util.function.Supplier<TreeMap<String, Integer>> factory = TreeMap::new;
          * TreeMap<String, Integer> sorted = MapSplitter.with(",", "=")
-         *     .split("z=3,a=1,m=2", strType, intType, TreeMap::new);
+         *     .split("z=3,a=1,m=2", strType, intType, factory);
          * // Returns a TreeMap sorted by keys: {a=1, m=2, z=3}
          * }</pre>
          *
@@ -2187,6 +2220,9 @@ public final class Splitter {
          *
          * @param source the CharSequence to split into a map; may be {@code null}
          * @return an ImmutableMap containing the parsed key-value pairs
+         * @throws IllegalArgumentException if any entry string cannot be properly parsed into a key-value pair
+         * @see #split(CharSequence)
+         * @see #splitToImmutableMap(CharSequence, Class, Class)
          */
         public ImmutableMap<String, String> splitToImmutableMap(final CharSequence source) {
             return ImmutableMap.wrap(split(source));
@@ -2211,7 +2247,10 @@ public final class Splitter {
          * @param keyType the Class representing the type to convert keys to, not {@code null}
          * @param valueType the Class representing the type to convert values to, not {@code null}
          * @return an ImmutableMap containing the parsed and converted key-value pairs
-         * @throws IllegalArgumentException if keyType or valueType is {@code null}
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry
+         *         string cannot be properly parsed into a key-value pair
+         * @see #splitToImmutableMap(CharSequence)
+         * @see #split(CharSequence, Class, Class)
          */
         public <K, V> ImmutableMap<K, V> splitToImmutableMap(final CharSequence source, final Class<K> keyType, final Class<V> valueType) {
             return ImmutableMap.wrap(split(source, keyType, valueType));
@@ -2386,7 +2425,7 @@ public final class Splitter {
          * @param toSplit the CharSequence to be split; may be {@code null}
          * @param omitEmptyStrings {@code true} to omit empty strings from results
          * @param trim {@code true} to trim leading and trailing spaces from each substring
-         * @param strip {@code true} to strip all whitespace from each substring
+         * @param strip {@code true} to strip leading and trailing whitespace from each substring
          * @param limit the maximum number of substrings to produce
          * @return an ObjIterator that produces split substrings; returns an empty iterator if toSplit is null
          */

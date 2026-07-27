@@ -37,7 +37,7 @@ package com.landawn.abacus.util;
  *
  * <p><b>Design Philosophy:</b>
  * <ul>
- *   <li><b>Immutability:</b> Once created, an Indexed instance cannot be modified, ensuring thread safety</li>
+ *   <li><b>Shallow Immutability:</b> The index and value reference cannot be reassigned; a mutable value still requires its own synchronization</li>
  *   <li><b>Simplicity:</b> Focused on a single purpose - pairing values with indices</li>
  *   <li><b>Type Safety:</b> Leverages generics to prevent type-related runtime errors</li>
  *   <li><b>Integration:</b> Works seamlessly with Java's collections framework and functional APIs</li>
@@ -102,10 +102,10 @@ package com.landawn.abacus.util;
  * <p><b>Performance Characteristics:</b>
  * <ul>
  *   <li><b>Creation Cost:</b> O(1) - Simple object allocation with two field assignments</li>
- *   <li><b>Memory Overhead:</b> Minimal - One long (8 bytes) + one object reference + object header</li>
+ *   <li><b>Memory Overhead:</b> One {@code long} and one reference, plus JVM-dependent object headers, padding, and alignment</li>
  *   <li><b>Access Cost:</b> O(1) - Direct field access for both index and value</li>
- *   <li><b>Equality Check:</b> O(1) - Compares index (primitive) and value (using equals)</li>
- *   <li><b>Hash Code:</b> O(1) - Simple computation based on index and value hash</li>
+ *   <li><b>Equality Check:</b> O(1) wrapper work plus the cost of the value's equality operation</li>
+ *   <li><b>Hash Code:</b> O(1) wrapper work plus the cost of the value's hash-code operation</li>
  * </ul>
  *
  * <p><b>Thread Safety:</b>
@@ -129,8 +129,8 @@ package com.landawn.abacus.util;
  * <p>The {@link #toString()} method returns a string in the format {@code [index]=value},
  * making it easy to identify both the position and content at a glance. For example:
  * <pre>{@code
- * Indexed.of("hello", 5).toString()  // returns "[5]=hello"
- * Indexed.of(null, 0).toString()     // returns "[0]=null"
+ * Indexed.of("hello", 5).toString();  // returns "[5]=hello"
+ * Indexed.of(null, 0).toString();     // returns "[0]=null"
  * }</pre>
  *
  * <p><b>Best Practices:</b>
@@ -360,14 +360,14 @@ public final class Indexed<T> extends AbstractIndexed {
      * Indexed<String> idx2 = Indexed.of("Hello", 5);
      * Indexed<String> idx3 = Indexed.of("World", 5);
      *
-     * idx1.hashCode() == idx2.hashCode();   // returns true (same index and value)
-     * idx1.hashCode() == idx3.hashCode();   // likely returns false (different values)
+     * boolean sameHash = idx1.hashCode() == idx2.hashCode();        // true (same index and value)
+     * boolean differentHash = idx1.hashCode() != idx3.hashCode();   // true for these values
      *
      * // Using in HashSet
      * Set<Indexed<String>> set = new HashSet<>();
      * set.add(Indexed.of("A", 0));
      * set.add(Indexed.of("A", 0));
-     * set.size();                    // returns 1
+     * int size = set.size();         // 1
      * }</pre>
      *
      * @return the hash code value for this Indexed instance.

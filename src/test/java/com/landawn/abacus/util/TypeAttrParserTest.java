@@ -58,6 +58,19 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
+    public void testParameterizedOwnerMemberType() {
+        TypeAttrParser parser = TypeAttrParser.parse("com.example.Owner<Integer>.Member<String>");
+        Assertions.assertEquals("com.example.Owner.Member", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String" }, parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[0], parser.getParameters());
+
+        parser = TypeAttrParser.parse("Outer<Long>.Middle<Integer>.Inner<String>(value)");
+        Assertions.assertEquals("Outer.Middle.Inner", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String" }, parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[] { "value" }, parser.getParameters());
+    }
+
+    @Test
     public void testGetParameters() {
         TypeAttrParser parser = TypeAttrParser.parse("HashMap(16, 0.75f)");
         String[] params = parser.getParameters();
@@ -320,6 +333,8 @@ public class TypeAttrParserTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String>junk"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String>(16)junk"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("String(1)junk"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Owner<Integer>.Member<String>junk"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Owner<Integer>.Member<String>."));
     }
 
     @Test

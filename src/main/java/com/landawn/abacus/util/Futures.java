@@ -43,8 +43,8 @@ import com.landawn.abacus.util.Tuple.Tuple7;
 /**
  * A comprehensive utility class providing powerful methods for composing, combining, and managing multiple
  * {@link Future} objects in concurrent programming scenarios. This class offers sophisticated functionality
- * for orchestrating asynchronous operations, including parallel execution coordination, result aggregation,
- * and sequential processing of completed futures in a thread-safe and efficient manner.
+ * for coordinating already-started asynchronous operations, including result aggregation and
+ * completion-order processing. Iterators returned by this class are intended for a single consumer.
  *
  * <p>The {@code Futures} utility addresses common challenges in concurrent programming by providing intuitive
  * methods for handling multiple asynchronous operations simultaneously. It bridges the gap between individual
@@ -55,11 +55,11 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * <ul>
  *   <li><b>Future Composition:</b> Combine multiple futures using custom zip functions for flexible result processing</li>
  *   <li><b>Tuple Integration:</b> Seamless conversion of multiple futures into strongly-typed Tuple objects</li>
- *   <li><b>Parallel Coordination:</b> {@code allOf()} methods for waiting until all futures complete successfully</li>
- *   <li><b>Race Conditions:</b> {@code anyOf()} methods for processing the first completed future result</li>
+ *   <li><b>Result Coordination:</b> {@code allOf()} methods for collecting results in input order</li>
+ *   <li><b>Successful Races:</b> {@code anyOf()} methods for processing the first successfully completed future</li>
  *   <li><b>Completion Iteration:</b> Iterator-based access to futures as they complete (first-finished, first-out)</li>
  *   <li><b>Timeout Management:</b> Built-in timeout support for preventing indefinite blocking operations</li>
- *   <li><b>Error Aggregation:</b> Comprehensive exception handling and propagation across multiple operations</li>
+ *   <li><b>Error Handling:</b> Exception propagation, with failure aggregation for {@code anyOf()}</li>
  *   <li><b>Type Safety:</b> Strong generic typing maintained throughout all composition operations</li>
  * </ul>
  *
@@ -69,7 +69,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *   <li><b>Type Safety First:</b> Strong generic typing prevents runtime errors and improves code clarity</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms minimizing overhead in multi-future operations</li>
  *   <li><b>Error Resilience:</b> Robust exception handling with proper propagation and aggregation</li>
- *   <li><b>Memory Efficient:</b> Optimized internal structures for large-scale concurrent operations</li>
+ *   <li><b>Input Snapshots:</b> Collection-based methods capture membership and iteration order when called</li>
  * </ul>
  *
  * <p><b>Primary Use Cases:</b>
@@ -89,14 +89,14 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *       {@code get(timeout, unit)}</li>
  *   <li><b>Combination Methods:</b> {@code combine()} - Combine the <i>completed results</i> of several futures,
  *       either into a {@code Tuple2}..{@code Tuple7} or via a supplied function</li>
- *   <li><b>Coordination Methods:</b> {@code allOf()}, {@code anyOf()} - Standard parallel execution patterns</li>
+ *   <li><b>Coordination Methods:</b> {@code allOf()}, {@code anyOf()} - Coordinate futures without starting their work</li>
  *   <li><b>Iteration Methods:</b> {@code iterate()} - Process futures as they complete with optional timeouts</li>
  *   <li><b>Tuple Methods:</b> Direct combination into Tuple2 through Tuple7 for structured results</li>
  * </ul>
  *
  * <p><b>Common Usage Patterns:</b>
  * <pre>{@code
- * // Basic parallel execution - wait for all results
+ * // Coordinate independently started operations and retrieve all results
  * Future<User> userFuture = userService.fetchUser(userId);
  * Future<List<Order>> ordersFuture = orderService.fetchOrders(userId);
  * Future<Profile> profileFuture = profileService.fetchProfile(userId);
@@ -109,7 +109,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *     Futures.combine(userFuture, ordersFuture, profileFuture, Tuple::of);
  * Tuple3<User, List<Order>, Profile> data = structuredResult.get();
  *
- * // Race condition - process first completed result
+ * // Race condition - process the first successful result
  * Future<String> primaryAPI = callPrimaryService();
  * Future<String> backupAPI = callBackupService();
  * ContinuableFuture<String> firstResponse = Futures.anyOf(primaryAPI, backupAPI);
@@ -208,18 +208,18 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li><b>Combination Overhead:</b> O(1) for tuple combinations, O(n) for collection-based operations</li>
- *   <li><b>Memory Usage:</b> Efficient internal structures with minimal additional allocation</li>
- *   <li><b>Thread Safety:</b> All operations are thread-safe without synchronization overhead</li>
+ *   <li><b>Combination Construction:</b> O(1) for fixed-arity tuple combinations, O(n) for collection-based operations</li>
+ *   <li><b>Memory Usage:</b> O(n) for captured input lists and completion-relay structures</li>
+ *   <li><b>Thread Safety:</b> Static factory calls share no mutable state; input futures retain their own concurrency contracts</li>
  *   <li><b>Completion Detection:</b> Optimized algorithms for detecting future completion states</li>
- *   <li><b>Iterator Efficiency:</b> Lazy evaluation in iteration methods for large future collections</li>
+ *   <li><b>Iterator Behavior:</b> Results are consumed lazily, while all input futures are registered when the iterator is created</li>
  * </ul>
  *
  * <p><b>Thread Safety and Concurrency:</b>
  * <ul>
- *   <li><b>Static Methods:</b> All utility methods are static and inherently thread-safe</li>
- *   <li><b>Immutable Results:</b> Returned ContinuableFuture instances are safely publishable</li>
- *   <li><b>Concurrent Access:</b> Multiple threads can safely call methods simultaneously</li>
+ *   <li><b>Static Methods:</b> Factory calls do not mutate shared class state</li>
+ *   <li><b>Input Contracts:</b> Operations delegate to input futures, whose own thread-safety guarantees still apply</li>
+ *   <li><b>Iterators:</b> Returned iterators have mutable cursor state and should be consumed by one thread</li>
  *   <li><b>No Shared State:</b> No mutable static variables that could cause race conditions</li>
  *   <li><b>Executor Independence:</b> Works with any Executor implementation for flexible threading</li>
  * </ul>
@@ -416,8 +416,9 @@ public final class Futures {
      * @param cf2 the second future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results. Receives both Future objects
      *                         as parameters and returns the composed result. Must not be {@code null}.
-     * @return a ContinuableFuture that completes when both input futures complete, with a result
-     *         computed by the provided zip function.
+     * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
+     *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
+     *         {@code true} only when both input futures are done.
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException,
      *                         or TimeoutException, the exception is wrapped in a RuntimeException and thrown.
      * @see #compose(Future, Future, Throwables.BiFunction, Throwables.Function)
@@ -604,8 +605,9 @@ public final class Futures {
      * @param cf3 the third future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results. Receives all three Future objects
      *                         and returns the composed result. Must not be {@code null}.
-     * @return a ContinuableFuture that completes when all three input futures complete, with a result
-     *         computed by the provided zip function.
+     * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
+     *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
+     *         {@code true} only when all three input futures are done.
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
      * @see #compose(Future, Future, Future, Throwables.TriFunction, Throwables.Function)
      * @see #combine(Future, Future, Future, Throwables.TriFunction)
@@ -830,8 +832,9 @@ public final class Futures {
      * @param cfs the collection of input futures, must not be {@code null} or empty.
      * @param zipFunctionForGet the function that combines the futures' results. Receives the collection
      *                         of Future objects and returns the composed result. Must not be {@code null}.
-     * @return a ContinuableFuture that completes when all input futures complete, with a result
-     *         computed by the provided zip function.
+     * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
+     *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
+     *         {@code true} only when all input futures are done.
      * @throws IllegalArgumentException if the collection is {@code null} or empty, or if {@code zipFunctionForGet} is {@code null}.
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
      * @see #compose(Collection, Throwables.Function, Throwables.Function)
@@ -1064,8 +1067,8 @@ public final class Futures {
 
     /**
      * Combines two futures into a Tuple2 containing both results.
-     * This is a convenience method that waits for both futures to complete and packages their results
-     * into a tuple for easy access. The resulting tuple preserves the order of the input futures.
+     * On a successful {@code get()}, both results are packaged into a tuple in input order. If an
+     * earlier input fails, that failure can be reported without waiting for a later input.
      *
      * <p>This method is particularly useful when you need both results but don't want to transform
      * them immediately, or when passing multiple results to another function.
@@ -1089,9 +1092,9 @@ public final class Futures {
      * @param <T2> the result type of the second future.
      * @param cf1 the first future, must not be {@code null}.
      * @param cf2 the second future, must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is a {@code Tuple2} holding both results,
-     *         in input order. Calling {@code get()} on it waits for both input futures and may
-     *         throw {@link InterruptedException} or {@link ExecutionException}.
+     * @return a {@code ContinuableFuture} whose successful result is a {@code Tuple2} holding both
+     *         results in input order. {@code get()} may throw {@link InterruptedException} or
+     *         {@link ExecutionException} before a later input completes if an earlier input fails.
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -1127,9 +1130,8 @@ public final class Futures {
      * @param cf1 the first future, must not be {@code null}.
      * @param cf2 the second future, must not be {@code null}.
      * @param cf3 the third future, must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is a {@code Tuple3} holding all three
-     *         results, in input order. Calling {@code get()} on it waits for all input futures
-     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
+     * @return a {@code ContinuableFuture} whose successful result is a {@code Tuple3} holding all
+     *         three results in input order. {@code get()} may fail before a later input completes.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -1169,9 +1171,8 @@ public final class Futures {
      * @param cf2 the second future, must not be {@code null}.
      * @param cf3 the third future, must not be {@code null}.
      * @param cf4 the fourth future, must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is a {@code Tuple4} holding all four
-     *         results, in input order. Calling {@code get()} on it waits for all input futures
-     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
+     * @return a {@code ContinuableFuture} whose successful result is a {@code Tuple4} holding all
+     *         four results in input order. {@code get()} may fail before a later input completes.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future, Future)
@@ -1215,9 +1216,8 @@ public final class Futures {
      * @param cf3 the third future, must not be {@code null}.
      * @param cf4 the fourth future, must not be {@code null}.
      * @param cf5 the fifth future, must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is a {@code Tuple5} holding all five
-     *         results, in input order. Calling {@code get()} on it waits for all input futures
-     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
+     * @return a {@code ContinuableFuture} whose successful result is a {@code Tuple5} holding all
+     *         five results in input order. {@code get()} may fail before a later input completes.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -1263,9 +1263,8 @@ public final class Futures {
      * @param cf4 the fourth future, must not be {@code null}.
      * @param cf5 the fifth future, must not be {@code null}.
      * @param cf6 the sixth future, must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is a {@code Tuple6} holding all six
-     *         results, in input order. Calling {@code get()} on it waits for all input futures
-     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
+     * @return a {@code ContinuableFuture} whose successful result is a {@code Tuple6} holding all
+     *         six results in input order. {@code get()} may fail before a later input completes.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -1320,9 +1319,8 @@ public final class Futures {
      * @param cf5 the fifth future, must not be {@code null}.
      * @param cf6 the sixth future, must not be {@code null}.
      * @param cf7 the seventh future, must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is a {@code Tuple7} holding all seven
-     *         results, in input order. Calling {@code get()} on it waits for all input futures
-     *         and may throw {@link InterruptedException} or {@link ExecutionException}.
+     * @return a {@code ContinuableFuture} whose successful result is a {@code Tuple7} holding all
+     *         seven results in input order. {@code get()} may fail before a later input completes.
      * @see #combine(Future, Future)
      * @see #combine(Future, Future, Future)
      * @see #combine(Future, Future, Future, Future)
@@ -1338,9 +1336,8 @@ public final class Futures {
 
     /**
      * Combines two futures and applies a bi-function to their results.
-     * This method waits for both futures to complete and then applies the provided function
-     * to transform their results into a single value. It's a convenience method that combines
-     * waiting for completion with result transformation.
+     * A successful {@code get()} retrieves both results in input order and applies the provided
+     * function. If the first input fails, that failure can be reported without waiting for the second.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1363,10 +1360,9 @@ public final class Futures {
      * @param cf2 the second future, must not be {@code null}.
      * @param action the function to apply to both results. Receives the actual values (not the
      *               futures). Must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is the value produced by {@code action}
-     *         applied to both completed results. Calling {@code get()} on it waits for both
-     *         input futures and may throw {@link InterruptedException} or
-     *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
+     * @return a {@code ContinuableFuture} whose successful result is produced by {@code action}
+     *         after both results are retrieved. {@code get()} may fail before a later input completes;
+     *         if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
      */
     public static <T1, T2, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
@@ -1402,10 +1398,9 @@ public final class Futures {
      * @param cf3 the third future, must not be {@code null}.
      * @param action the function to apply to all three results. Receives the actual values (not
      *               the futures). Must not be {@code null}.
-     * @return a {@code ContinuableFuture} whose result is the value produced by {@code action}
-     *         applied to all three completed results. Calling {@code get()} on it waits for all
-     *         input futures and may throw {@link InterruptedException} or
-     *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
+     * @return a {@code ContinuableFuture} whose successful result is produced by {@code action}
+     *         after all three results are retrieved. {@code get()} may fail before a later input
+     *         completes; if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3,
@@ -1415,9 +1410,9 @@ public final class Futures {
 
     /**
      * Combines a collection of futures and applies a function to all their results.
-     * This method waits for all futures in the collection to complete, collects their results
-     * into a list, and applies the provided function. Useful for aggregating results from
-     * a dynamic number of futures.
+     * On a successful {@code get()}, this method retrieves all results in input iteration order
+     * and applies the provided function. A failure is reported when encountered, without necessarily
+     * waiting for later inputs. This is useful for aggregating a dynamic number of futures.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1459,10 +1454,9 @@ public final class Futures {
     //    }
 
     /**
-     * Creates a ContinuableFuture that completes when all of the given futures complete.
-     * If any future completes exceptionally, the returned future also completes exceptionally
-     * with the first exception encountered. The results are collected into a list in the same
-     * order as the input array.
+     * Creates a {@code ContinuableFuture} whose {@code isDone()} reports {@code true} when all of
+     * the given futures are done. {@code get()} retrieves results in input order and stops at the
+     * first failure encountered, so a failure can be reported before later inputs complete.
      *
      * <p>This method is useful when you have multiple independent operations that all need
      * to complete before proceeding, and you need all their results.
@@ -1484,11 +1478,9 @@ public final class Futures {
      *
      * @param <T> the result type of the futures.
      * @param cfs the array of futures to wait for, must not be {@code null} or empty.
-     * @return a {@code ContinuableFuture} whose result is a list of all results, in the same
-     *         order as {@code cfs}. Calling {@code get()} on it waits for every input future
-     *         and may throw {@link InterruptedException} or {@link ExecutionException} (the
-     *         latter propagated from the first failing future); {@code get(timeout, unit)} may
-     *         additionally throw {@link TimeoutException}.
+     * @return a {@code ContinuableFuture} whose successful result lists all results in the same
+     *         order as {@code cfs}. {@code get()} processes inputs in order and stops at the first
+     *         failure; {@code get(timeout, unit)} may additionally throw {@link TimeoutException}.
      * @throws IllegalArgumentException if {@code cfs} is empty.
      * @throws NullPointerException if {@code cfs} is {@code null}.
      */
@@ -1498,9 +1490,9 @@ public final class Futures {
     }
 
     /**
-     * Creates a ContinuableFuture that completes when all futures in the collection complete.
-     * Similar to the array version but accepts any Collection implementation. Results are
-     * collected into a list in iteration order of the input collection.
+     * Creates a {@code ContinuableFuture} whose {@code isDone()} reports {@code true} when all
+     * futures in the collection are done. {@code get()} retrieves results in input iteration order
+     * and stops at the first failure encountered.
      *
      * <p>The returned future's list will have the same size as the input collection, with
      * results in corresponding positions. If any future fails, the returned future fails
@@ -1529,11 +1521,9 @@ public final class Futures {
      *
      * @param <T> the result type of the futures.
      * @param cfs the collection of futures to wait for, must not be {@code null} or empty.
-     * @return a {@code ContinuableFuture} whose result is a list of all results, in iteration
-     *         order of {@code cfs}. Calling {@code get()} on it waits for every input future
-     *         and may throw {@link InterruptedException} or {@link ExecutionException} (the
-     *         latter propagated from the first failing future); {@code get(timeout, unit)} may
-     *         additionally throw {@link TimeoutException}.
+     * @return a {@code ContinuableFuture} whose successful result lists all results in iteration
+     *         order of {@code cfs}. {@code get()} processes inputs in order and stops at the first
+     *         failure; {@code get(timeout, unit)} may additionally throw {@link TimeoutException}.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T> ContinuableFuture<List<T>> allOf(final Collection<? extends Future<? extends T>> cfs) {
@@ -1909,6 +1899,7 @@ public final class Futures {
      *         first-out). Calling {@code next()} on a failed future throws the future's failure
      *         wrapped in a {@link RuntimeException}.
      * @throws IllegalArgumentException if {@code cfs} is empty.
+     * @throws NullPointerException if {@code cfs} is {@code null}.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> iterate(final Future<? extends T>... cfs) {
@@ -1946,6 +1937,8 @@ public final class Futures {
      *         first-out). Calling {@code next()} on a failed future throws the future's failure
      *         wrapped in a {@link RuntimeException}.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
+     * @see #iterate(Collection, long, TimeUnit)
+     * @see #iterate(Collection, Function)
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs);
@@ -1993,6 +1986,8 @@ public final class Futures {
      *         {@link TimeoutException}.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not positive,
      *         or {@code unit} is {@code null}.
+     * @see #iterate(Collection)
+     * @see #iterate(Collection, long, TimeUnit, Function)
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return iterate02(cfs, totalTimeoutForAll, unit);
@@ -2056,8 +2051,10 @@ public final class Futures {
      *                      {@code null}.
      * @return an {@code ObjIterator} that yields transformed results in completion order
      *         (first-finished, first-out).
-     * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, or if
+     *         {@code resultHandler} is {@code null}.
+     * @see #iterate(Collection)
+     * @see #iterate(Collection, long, TimeUnit, Function)
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -2109,9 +2106,11 @@ public final class Futures {
      *         (first-finished, first-out) with timeout enforcement. Once the total timeout
      *         elapses, a final {@code Result} carrying a {@link TimeoutException} is passed to
      *         {@code resultHandler}.
-     * @throws IllegalArgumentException if {@code totalTimeoutForAll} is not positive, or
-     *         {@code unit} or {@code resultHandler} is {@code null}.
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty,
+     *         {@code totalTimeoutForAll} is not positive, or {@code unit} or
+     *         {@code resultHandler} is {@code null}.
+     * @see #iterate(Collection, Function)
+     * @see #iterate(Collection, long, TimeUnit)
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {

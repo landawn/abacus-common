@@ -30,7 +30,7 @@ import com.landawn.abacus.util.cs;
  * @param <R> the type of the result of the function
  */
 @FunctionalInterface
-public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R, RuntimeException> { // NOSONAR //NOSONAR
+public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

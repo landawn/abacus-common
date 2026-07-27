@@ -102,7 +102,7 @@ public class AddrUtilTest extends AbstractTest {
             N.println(add.toString());
         }
 
-        N.println(AddrUtil.getAddressListFromUrls(N.toList(new URL("https://www.google.com:443/"))));
+        N.println(AddrUtil.getAddressListFromUrls(N.toList(new URL("https://127.0.0.1:443/"))));
 
         try {
             AddrUtil.getServerList(Strings.EMPTY);
@@ -149,7 +149,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressList_String_SpaceSeparated() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressList("host1:1111 host2:2222");
+        List<InetSocketAddress> addrs = AddrUtil.getAddressList("192.0.2.1:1111 192.0.2.2:2222");
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(1111, addrs.get(0).getPort());
         Assertions.assertEquals(2222, addrs.get(1).getPort());
@@ -179,7 +179,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressList_String_WithWhitespace() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressList("  host1:1234  ,  host2:5678  ");
+        List<InetSocketAddress> addrs = AddrUtil.getAddressList("  192.0.2.1:1234  ,  192.0.2.2:5678  ");
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(1234, addrs.get(0).getPort());
         Assertions.assertEquals(5678, addrs.get(1).getPort());
@@ -187,7 +187,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressList_Collection_Basic() {
-        List<String> servers = Arrays.asList("server1:8080", "server2:9090");
+        List<String> servers = Arrays.asList("192.0.2.1:8080", "192.0.2.2:9090");
         List<InetSocketAddress> addrs = AddrUtil.getAddressList(servers);
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(8080, addrs.get(0).getPort());
@@ -239,7 +239,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressListWithSpaces() {
-        List<InetSocketAddress> addrs = AddrUtil.getAddressList("host1:1111 host2:2222");
+        List<InetSocketAddress> addrs = AddrUtil.getAddressList("192.0.2.1:1111 192.0.2.2:2222");
         Assertions.assertEquals(2, addrs.size());
     }
 
@@ -406,7 +406,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressListFromURL_Basic() throws Exception {
-        List<URL> urls = Arrays.asList(new URL("http://server1.com:8080"), new URL("http://server2.com:9090"));
+        List<URL> urls = Arrays.asList(new URL("http://127.0.0.1:8080"), new URL("http://127.0.0.2:9090"));
         List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrls(urls);
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(8080, addrs.get(0).getPort());
@@ -415,7 +415,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressListFromURL_SingleURL() throws Exception {
-        List<URL> urls = Arrays.asList(new URL("http://example.com:7070"));
+        List<URL> urls = Arrays.asList(new URL("http://127.0.0.1:7070"));
         List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrls(urls);
         Assertions.assertEquals(1, addrs.size());
         Assertions.assertEquals(7070, addrs.get(0).getPort());
@@ -433,7 +433,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressListFromURL_WithoutPorts() throws Exception {
-        List<URL> urls = Arrays.asList(new URL("http://server1.com"), new URL("http://server2.com"));
+        List<URL> urls = Arrays.asList(new URL("http://localhost"), new URL("http://127.0.0.1"));
         List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrls(urls);
         Assertions.assertEquals(2, addrs.size());
         Assertions.assertEquals(80, addrs.get(0).getPort());
@@ -448,7 +448,7 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressListFromURL_MixedProtocols() throws Exception {
-        List<URL> urls = Arrays.asList(new URL("http://server1.com:8080"), new URL("https://server2.com:443"), new URL("ftp://server3.com:21"));
+        List<URL> urls = Arrays.asList(new URL("http://127.0.0.1:8080"), new URL("https://127.0.0.2:443"), new URL("ftp://127.0.0.3:21"));
         List<InetSocketAddress> addrs = AddrUtil.getAddressListFromUrls(urls);
         Assertions.assertEquals(3, addrs.size());
         Assertions.assertEquals(8080, addrs.get(0).getPort());
@@ -458,25 +458,25 @@ public class AddrUtilTest extends AbstractTest {
 
     @Test
     public void testGetAddressFromURL_Basic() throws Exception {
-        URL url = new URL("http://example.com:8080/path");
+        URL url = new URL("http://127.0.0.1:8080/path");
         InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
-        Assertions.assertEquals("example.com", addr.getHostName());
+        Assertions.assertEquals("127.0.0.1", addr.getHostString());
         Assertions.assertEquals(8080, addr.getPort());
     }
 
     @Test
     public void testGetAddressFromURL_WithoutPort() throws Exception {
-        URL url = new URL("https://example.com/path");
+        URL url = new URL("https://localhost/path");
         InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
-        Assertions.assertEquals("example.com", addr.getHostName());
+        Assertions.assertEquals("localhost", addr.getHostString());
         Assertions.assertEquals(443, addr.getPort());
     }
 
     @Test
     public void testGetAddressFromURL_HTTPS() throws Exception {
-        URL url = new URL("https://secure.example.com:443/api");
+        URL url = new URL("https://127.0.0.1:443/api");
         InetSocketAddress addr = AddrUtil.getAddressFromUrl(url);
-        Assertions.assertEquals("secure.example.com", addr.getHostName());
+        Assertions.assertEquals("127.0.0.1", addr.getHostString());
         Assertions.assertEquals(443, addr.getPort());
     }
 

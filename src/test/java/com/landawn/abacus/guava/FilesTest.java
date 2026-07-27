@@ -1242,16 +1242,6 @@ public class FilesTest extends TestBase {
         assertEquals("Línea 2", lines.get(1));
     }
 
-    // Test for MoreFiles inner class
-
-    @Test
-    @DisplayName("Test MoreFiles class exists")
-    public void testMoreFilesClass() {
-        // MoreFiles is a final class extending Files
-        assertNotNull(Files.MoreFiles.class);
-        assertTrue(Files.class.isAssignableFrom(Files.MoreFiles.class));
-    }
-
     @Test
     public void testMoreFilesClassIsSubclassOfFiles() {
         assertTrue(Files.class.isAssignableFrom(Files.MoreFiles.class));

@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalByte;
-import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
-import com.landawn.abacus.util.stream.BaseStream.Splitor;
+import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
+import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
 
 public class ParallelIteratorByteStreamTest extends TestBase {
 
@@ -33,7 +33,7 @@ public class ParallelIteratorByteStreamTest extends TestBase {
     private static final byte[] TEST_ARRAY = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3 };
 
     private ByteStream createStream(byte... elements) {
-        return ByteStream.of(elements).map(e -> (byte) (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(testMaxThreadNum));
+        return ByteStream.of(elements).map(e -> (byte) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class ParallelIteratorByteStreamTest extends TestBase {
     // ---- Sequential-fallback path: 1-thread iterator stream => canBeSequential(maxThreadNum) == true ----
 
     private ByteStream createSingleThreadStream(byte... elements) {
-        return ByteStream.of(elements).map(e -> (byte) (e + 0)).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1));
+        return ByteStream.of(elements).map(e -> (byte) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test
@@ -507,8 +507,7 @@ public class ParallelIteratorByteStreamTest extends TestBase {
                         (byte) 14, (byte) 15, (byte) 16, (byte) 17, (byte) 18, (byte) 19, (byte) 20)
                 .parallel();
         byte sum = stream.reduce((byte) 0, (a, b) -> (byte) (a + b));
-        // just ensure no exception
-        assertTrue(true);
+        assertEquals((byte) -46, sum);
     }
 
     @Test
@@ -759,7 +758,7 @@ public class ParallelIteratorByteStreamTest extends TestBase {
     public void testZipWithDefaultValues_SequentialFallback() {
         byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3)
                 .map(e -> (byte) (e + 0))
-                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
                 .zipWith(ByteStream.of((byte) 10), (byte) 0, (byte) -1, (a, b) -> (byte) (a + b))
                 .toArray();
 
@@ -789,8 +788,8 @@ public class ParallelIteratorByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testSplitor() {
-        assertEquals(Splitor.ITERATOR, ((ParallelIteratorByteStream) createStream(TEST_ARRAY)).splitor());
+    public void testSplitStrategy() {
+        assertEquals(SplitStrategy.ITERATOR, ((ParallelIteratorByteStream) createStream(TEST_ARRAY)).splitStrategy());
     }
 
     @Test

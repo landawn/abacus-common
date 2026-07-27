@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,19 +38,20 @@ import com.landawn.abacus.util.Strings;
 /**
  * Type handler for Enum types.
  * This class provides serialization, deserialization, and database operations for Java Enum types.
- * It supports name (string), ordinal (numeric), and code (numeric, via a public {@code int code()} method,
- * or a public {@code int intValue()} method when {@code code()} is absent) representations of enums, and
- * handles custom JSON/XML field names through annotations.
+ * It supports name (string), ordinal (numeric), and code (numeric, via an inherited or directly declared
+ * public {@code int code()} method, or a public {@code int intValue()} method when {@code code()} is absent)
+ * representations of enums, and handles custom JSON/XML field names through annotations.
  *
  * <p>EnumType instances are typically obtained through the TypeFactory and support conversion
- * between enum values and their string/numeric representations. The type handler can be configured
- * to use either the enum's ordinal value, its name, or a custom code for serialization.</p>
+ * between enum values and their string/numeric representations. The configured representation controls
+ * JDBC persistence and streaming JSON/XML output; {@link #stringOf(Enum)} itself returns the constant name
+ * unless a JSON value accessor is configured.</p>
  *
  * @param <T> the enum type, must extend {@code Enum<T>}
  */
 @SuppressWarnings("java:S2160")
 public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
-    /** The type name constant for Enum type identification. */
+    /** The type name constant for Enum type identification, equal to {@code "Enum"}. */
     public static final String ENUM = Enum.class.getSimpleName();
 
     private static final String NULL = "null";
@@ -95,13 +95,13 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             // CalendarField/YesNo) expose their numeric code via intValue() rather than code(), yet are exactly
             // the enums CODE representation is meant for. Without this fallback every one of them threw at
             // construction time when configured with EnumType.CODE.
-            Method getCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "code");
+            Method getCodeMethod = getPublicIntMethod(typeClass, "code");
 
-            if (getCodeMethod == null || !Modifier.isPublic(getCodeMethod.getModifiers()) || !int.class.equals(getCodeMethod.getReturnType())) {
-                getCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "intValue");
+            if (getCodeMethod == null) {
+                getCodeMethod = getPublicIntMethod(typeClass, "intValue");
             }
 
-            if (getCodeMethod == null || !Modifier.isPublic(getCodeMethod.getModifiers()) || !int.class.equals(getCodeMethod.getReturnType())) {
+            if (getCodeMethod == null) {
                 throw new RuntimeException(
                         "No method: public int code() (or public int intValue()) found in enum class: " + ClassUtil.getCanonicalClassName(typeClass));
             }
@@ -191,7 +191,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * into the original value.</p>
      *
      * @param x the enum value to convert; may be {@code null}
-     * @return the enum constant name, or {@code null} if input is null
+     * @return the enum constant name (or, when a JSON value accessor is configured, that accessor's
+     *         string form), or {@code null} if {@code x} is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -431,6 +432,15 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             } else {
                 super.serializeTo(writer, x, config);
             }
+        }
+    }
+
+    private static Method getPublicIntMethod(final Class<?> enumClass, final String methodName) {
+        try {
+            final Method method = enumClass.getMethod(methodName);
+            return int.class.equals(method.getReturnType()) ? method : null;
+        } catch (final NoSuchMethodException e) {
+            return null;
         }
     }
 

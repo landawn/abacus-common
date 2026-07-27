@@ -293,6 +293,16 @@ public class EventBusTest extends TestBase {
         eventBus.unregister(subscriber);
     }
 
+    @Test
+    public void testSubscribersTreatsEmptyEventIdAsNoEventId() {
+        TestSubscriber subscriber = new TestSubscriber();
+        eventBus.register(subscriber);
+
+        assertTrue(eventBus.subscribers("", String.class).contains(subscriber));
+
+        eventBus.unregister(subscriber);
+    }
+
     // ---- subscribers(Class) ----
 
     @Test

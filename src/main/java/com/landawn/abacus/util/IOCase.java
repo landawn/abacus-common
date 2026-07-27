@@ -110,9 +110,10 @@ public enum IOCase {
     }
 
     /**
-     * Replaces the deserialized enum with the proper singleton instance.
-     * This ensures that the SYSTEM constant has the correct case sensitivity
-     * for the current operating system after deserialization.
+     * Retained for parity with the Apache Commons IO source this class is copied from.
+     * Note: enum constants serialize by name only, so this method (like {@code serialVersionUID})
+     * is inert — standard enum deserialization already resolves to the local constant, whose
+     * {@code sensitive} flag was computed for the current operating system.
      *
      * @return the resolved enum constant
      */

@@ -75,7 +75,7 @@ import java.lang.annotation.Target;
  *
  * // Equivalent shorthand using @Id + @ReadOnly:
  * @Entity
- * public class User {
+ * public class GeneratedIdUser {
  *     @Id @ReadOnly
  *     private Long id;
  * }

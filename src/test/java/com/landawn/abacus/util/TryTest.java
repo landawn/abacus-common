@@ -661,6 +661,21 @@ public class TryTest extends TestBase {
     }
 
     @Test
+    public void test_run_cmd_restoresInterruptedStatusForNestedCause() {
+        Thread.interrupted();
+
+        try {
+            assertThrows(RuntimeException.class, () -> Try.run(() -> {
+                throw new IOException("outer", new InterruptedException("nested interruption"));
+            }));
+
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
     public void test_run_cmd_null() {
         assertThrows(IllegalArgumentException.class, () -> {
             Try.run((Throwables.Runnable<Exception>) null);
@@ -730,6 +745,54 @@ public class TryTest extends TestBase {
     }
 
     @Test
+    public void test_suppressedCloseInterruptionRestoresInterruptedStatus() {
+        Thread.interrupted();
+
+        try {
+            AutoCloseable closeable = () -> {
+                throw new InterruptedException("close interrupted");
+            };
+            AtomicBoolean handlerSawInterruptedStatus = new AtomicBoolean();
+
+            String result = Try.with(closeable).call(resource -> {
+                throw new IOException("primary failure");
+            }, (java.util.function.Function<Exception, String>) ex -> {
+                assertEquals(1, ex.getSuppressed().length);
+                assertTrue(ex.getSuppressed()[0] instanceof InterruptedException);
+                handlerSawInterruptedStatus.set(Thread.currentThread().isInterrupted());
+                return "fallback";
+            });
+
+            assertEquals("fallback", result);
+            assertTrue(handlerSawInterruptedStatus.get());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void test_suppressedCloseInterruptionOnErrorRestoresInterruptedStatus() {
+        Thread.interrupted();
+
+        try {
+            AutoCloseable closeable = () -> {
+                throw new InterruptedException("close interrupted");
+            };
+
+            AssertionError failure = assertThrows(AssertionError.class, () -> Try.with(closeable).run(resource -> {
+                throw new AssertionError("primary failure");
+            }));
+
+            assertEquals(1, failure.getSuppressed().length);
+            assertTrue(failure.getSuppressed()[0] instanceof InterruptedException);
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
     public void test_run_cmd_actionOnError_null_cmd() {
         assertThrows(IllegalArgumentException.class, () -> {
             Try.run((Throwables.Runnable<Exception>) null, ex -> {
@@ -771,6 +834,24 @@ public class TryTest extends TestBase {
                 throw new IOException("Test exception");
             });
         });
+    }
+
+    @Test
+    public void test_call_cmd_restoresInterruptedStatusForSuppressedFailure() {
+        Thread.interrupted();
+
+        try {
+            final IOException failure = new IOException("outer");
+            failure.addSuppressed(new InterruptedException("suppressed interruption"));
+
+            assertThrows(RuntimeException.class, () -> Try.call(() -> {
+                throw failure;
+            }));
+
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
     }
 
     @Test

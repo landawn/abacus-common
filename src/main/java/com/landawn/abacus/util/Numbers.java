@@ -175,10 +175,10 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *
  * <p><b>Thread Safety:</b>
  * <ul>
- *   <li><b>Stateless Design:</b> All static methods are stateless and thread-safe</li>
+ *   <li><b>Thread-Safe API:</b> Public static methods are safe for concurrent use</li>
  *   <li><b>Immutable Operations:</b> Methods return new values rather than modifying inputs</li>
- *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
+ *   <li><b>Safely Isolated Formatting:</b> Cached {@link DecimalFormat} instances are kept per thread,
+ *       and caller-supplied formatters are cloned before use</li>
  * </ul>
  *
  * <p><b>Precision and Accuracy:</b>
@@ -227,7 +227,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  * <p><b>Common Patterns:</b>
  * <ul>
  *   <li><b>Safe Rounding:</b> {@code double result = Numbers.round(value, 2, RoundingMode.HALF_UP);}</li>
- *   <li><b>Fuzzy Equality:</b> {@code if (Numbers.fuzzyEquals(a, b, 0.001)) { ... }}</li>
+ *   <li><b>Fuzzy Equality:</b> {@code boolean approximatelyEqual = Numbers.fuzzyEquals(1.0, 1.0005, 0.001);}</li>
  *   <li><b>Statistical Analysis:</b> {@code double average = Numbers.mean(dataArray);}</li>
  *   <li><b>Mathematical Operations:</b> {@code long fact   = Numbers.factorialToLong(n);}</li>
  * </ul>
@@ -314,7 +314,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  * ({@code NumberUtils}), and Guava ({@code com.google.common.math.IntMath}/{@code LongMath}/{@code DoubleMath} and the
  * primitive {@code Ints}/{@code Longs}/{@code Doubles}/... helpers) &mdash; usually to add range/overflow checking,
  * ASCII-strict parsing, or {@code null}-safety. The table below summarizes the notable cases; each point where a
- * library diverges from {@code Numbers} is flagged with {@code &#9888;&#65039;}.</p>
+ * library diverges from {@code Numbers} is flagged with &#9888;&#65039;.</p>
  * <table border="1">
  *   <caption>How selected {@code Numbers} methods differ from JDK / Apache Commons Lang / Guava</caption>
  *   <thead>
@@ -422,16 +422,20 @@ public final class Numbers {
     /**  The biggest half-power of two that fits into an unsigned long. */
     static final long MAX_POWER_OF_SQRT2_UNSIGNED = 0xB504F333F9DE6484L;
 
+    /** The largest power of two representable as a signed {@code long}, i.e. 2^62. */
     static final long MAX_SIGNED_POWER_OF_TWO = 1L << (Long.SIZE - 2);
 
+    /** {@code floor(sqrt(Long.MAX_VALUE))}: the largest {@code long} whose square still fits in a {@code long}. */
     static final long FLOOR_SQRT_MAX_LONG = 3037000499L;
 
+    /** {@code floor(sqrt(Integer.MAX_VALUE))}: the largest {@code int} whose square still fits in an {@code int}. */
     static final int FLOOR_SQRT_MAX_INT = 46340;
 
     // The mask for the significand, according to the {@link
     // Double#doubleToRawLongBits(double)} spec.
     static final long SIGNIFICAND_MASK = 0x000fffffffffffffL;
 
+    /** The number of explicitly stored significand bits in an IEEE-754 {@code double}. */
     static final int SIGNIFICAND_BITS = 52;
 
     // The mask for the exponent, according to the {@link
@@ -442,6 +446,7 @@ public final class Numbers {
     // Double#doubleToRawLongBits(double)} spec.
     static final long SIGN_MASK = 0x8000000000000000L;
 
+    /** The exponent bias of an IEEE-754 {@code double}: a stored exponent {@code e} means 2^(e - 1023). */
     static final int EXPONENT_BIAS = 1023;
 
     /**
@@ -1270,8 +1275,8 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the int value to be formatted
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
@@ -1304,12 +1309,12 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the Integer value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
-     * @return
+     * @return a string representation of the Integer value formatted according to the provided decimal format,
      *         or {@code null} if {@code x} is {@code null}
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(int, String)
@@ -1341,8 +1346,8 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the long value to be formatted
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
@@ -1375,12 +1380,12 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the Long value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
-     * @return
+     * @return a string representation of the Long value formatted according to the provided decimal format,
      *         or {@code null} if {@code x} is {@code null}
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(long, String)
@@ -1413,8 +1418,8 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the float value to be formatted.
      * @param decimalFormat the decimal format pattern to be used for formatting.
@@ -1448,12 +1453,12 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the Float value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
-     * @return
+     * @return a string representation of the Float value formatted according to the provided decimal format,
      *         or {@code null} if {@code x} is {@code null}.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(float, String)
@@ -1488,8 +1493,8 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the double value to be formatted.
      * @param decimalFormat the decimal format pattern to be used for formatting.
@@ -1524,12 +1529,12 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
-     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
-     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     * separator symbols follow the default {@link java.util.Locale}. The examples assume US-style
+     * symbols. For fixed symbols, configure and use a {@code DecimalFormat} directly.</p>
      *
      * @param x the Double value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
-     * @return
+     * @return a string representation of the Double value formatted according to the provided decimal format,
      *         or {@code null} if {@code x} is {@code null}.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(double, String)
@@ -1551,6 +1556,9 @@ public final class Numbers {
     /**
      * Extracts the first integer value found in the given string.
      *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
+     *
      * <p>This method searches through the provided string to find the first occurrence of an integer value.
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
      * If no integer is found in the string, an empty OptionalInt is returned.</p>
@@ -1569,9 +1577,9 @@ public final class Numbers {
      * @return the extracted int value wrapped in an OptionalInt, or an empty OptionalInt if no int value is found or if the input string is null/empty.
      * @throws NumberFormatException if the first matched digit run represents a value outside the {@code int} range;
      *         the underlying pattern matches digit runs of any length, so for example {@code extractFirstInt("id=99999999999")} throws rather than returning empty
-     * @see #extractFirstInt(String, int)
+     * @see #extractFirstIntOrElse(String, int)
      * @see #extractFirstLong(String)
-     * @see Strings#extractFirstInteger(String)
+     * @see Strings#findFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
@@ -1593,33 +1601,36 @@ public final class Numbers {
     /**
      * Extracts the first integer value found in the given string, or returns a default value if no integer is found.
      *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
+     *
      * <p>This method searches through the provided string to find the first occurrence of an integer value.
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
      * If no integer is found in the string, the specified default value is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.extractFirstInt("abc123def", 0);       // returns 123
-     * Numbers.extractFirstInt("price: $45.99", 0);   // returns 45
-     * Numbers.extractFirstInt("total: -10", 0);      // returns -10
-     * Numbers.extractFirstInt("no numbers", 0);      // returns 0
-     * Numbers.extractFirstInt("", 0);                // returns 0
-     * Numbers.extractFirstInt(null, 0);              // returns 0
+     * Numbers.extractFirstIntOrElse("abc123def", 0);       // returns 123
+     * Numbers.extractFirstIntOrElse("price: $45.99", 0);   // returns 45
+     * Numbers.extractFirstIntOrElse("total: -10", 0);      // returns -10
+     * Numbers.extractFirstIntOrElse("no numbers", 0);      // returns 0
+     * Numbers.extractFirstIntOrElse("", 0);                // returns 0
+     * Numbers.extractFirstIntOrElse(null, 0);              // returns 0
      * }</pre>
      *
      * @param str the string to extract the int value from (may be {@code null} or empty).
      * @param defaultValue the value to return if no integer is found in the string
      * @return the first integer found in the string, or the specified default value if no integer is found or if the input string is null/empty
      * @throws NumberFormatException if the first matched digit run represents a value outside the {@code int} range;
-     *         the underlying pattern matches digit runs of any length, so for example {@code extractFirstInt("id=99999999999", 0)} throws rather than returning the default value
+     *         the underlying pattern matches digit runs of any length, so for example {@code extractFirstIntOrElse("id=99999999999", 0)} throws rather than returning the default value
      * @see #extractFirstInt(String)
-     * @see #extractFirstLong(String, long)
-     * @see Strings#extractFirstInteger(String)
+     * @see #extractFirstLongOrElse(String, long)
+     * @see Strings#findFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
      */
-    public static int extractFirstInt(final String str, final int defaultValue) {
+    public static int extractFirstIntOrElse(final String str, final int defaultValue) {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
@@ -1635,6 +1646,9 @@ public final class Numbers {
 
     /**
      * Extracts the first long value from the given string.
+     *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
      *
      * <p>This method searches through the provided string to find the first occurrence of a long value.
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
@@ -1654,9 +1668,9 @@ public final class Numbers {
      * @return the extracted long value wrapped in an OptionalLong, or an empty OptionalLong if no long value is found or if the input string is null/empty.
      * @throws NumberFormatException if the first matched digit run represents a value outside the {@code long} range;
      *         the underlying pattern matches digit runs of any length, so for example a 20-digit run throws rather than returning empty
-     * @see #extractFirstLong(String, long)
+     * @see #extractFirstLongOrElse(String, long)
      * @see #extractFirstInt(String)
-     * @see Strings#extractFirstInteger(String)
+     * @see Strings#findFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
@@ -1678,18 +1692,21 @@ public final class Numbers {
     /**
      * Extracts the first long value from the given string, or returns a default value if no long value is found.
      *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
+     *
      * <p>This method searches through the provided string to find the first occurrence of a long value.
      * It uses a regular expression pattern to identify integer patterns, including negative numbers.
      * If no long value is found in the string, the specified default value is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.extractFirstLong("abc123def", 0L);             // returns 123L
-     * Numbers.extractFirstLong("price: $4500000000", 0L);    // returns 4500000000L
-     * Numbers.extractFirstLong("total: -10000000000", 0L);   // returns -10000000000L
-     * Numbers.extractFirstLong("no numbers", 0L);            // returns 0L
-     * Numbers.extractFirstLong("", 0L);                      // returns 0L
-     * Numbers.extractFirstLong(null, 0L);                    // returns 0L
+     * Numbers.extractFirstLongOrElse("abc123def", 0L);             // returns 123L
+     * Numbers.extractFirstLongOrElse("price: $4500000000", 0L);    // returns 4500000000L
+     * Numbers.extractFirstLongOrElse("total: -10000000000", 0L);   // returns -10000000000L
+     * Numbers.extractFirstLongOrElse("no numbers", 0L);            // returns 0L
+     * Numbers.extractFirstLongOrElse("", 0L);                      // returns 0L
+     * Numbers.extractFirstLongOrElse(null, 0L);                    // returns 0L
      * }</pre>
      *
      * @param str the string to extract the long value from.
@@ -1698,13 +1715,13 @@ public final class Numbers {
      * @throws NumberFormatException if the first matched digit run represents a value outside the {@code long} range;
      *         the underlying pattern matches digit runs of any length, so for example a 20-digit run throws rather than returning the default value
      * @see #extractFirstLong(String)
-     * @see #extractFirstInt(String, int)
-     * @see Strings#extractFirstInteger(String)
+     * @see #extractFirstIntOrElse(String, int)
+     * @see Strings#findFirstInteger(String)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#INTEGER_FINDER
      */
-    public static long extractFirstLong(final String str, final long defaultValue) {
+    public static long extractFirstLongOrElse(final String str, final long defaultValue) {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
@@ -1719,6 +1736,9 @@ public final class Numbers {
 
     /**
      * Extracts the first double value from the given string.
+     *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstDouble(String)} to obtain the matched text instead.</p>
      *
      * <p>This method searches through the provided string to find the first occurrence of a double value.
      * It uses a regular expression pattern to identify decimal number patterns. If no double value is found
@@ -1741,9 +1761,9 @@ public final class Numbers {
      * @param str the string to extract the double value from.
      * @return the extracted double value wrapped in an OptionalDouble, or an empty OptionalDouble if no double value is found or if the input string is null/empty.
      * @see #extractFirstDouble(String, boolean)
-     * @see #extractFirstDouble(String, double)
-     * @see #extractFirstDouble(String, double, boolean)
-     * @see Strings#extractFirstDouble(String)
+     * @see #extractFirstDoubleOrElse(String, double)
+     * @see #extractFirstDoubleOrElse(String, double, boolean)
+     * @see Strings#findFirstDouble(String)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
@@ -1756,8 +1776,11 @@ public final class Numbers {
     /**
      * Extracts the first double value from the given string.
      *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstDouble(String, boolean)} to obtain the matched text instead.</p>
+     *
      * <p>This method searches through the provided string to find the first occurrence of a double value.
-     * It uses a regular expression pattern to identify decimal number patterns. If {@code includingScientificNumber}
+     * It uses a regular expression pattern to identify decimal number patterns. If {@code allowScientificNotation}
      * is set to {@code true}, it will also consider scientific notation (e.g., 1.23e10) as valid double values.
      * If no double value is found in the string, an empty OptionalDouble is returned.</p>
      *
@@ -1777,24 +1800,25 @@ public final class Numbers {
      * {@code Double.POSITIVE_INFINITY} or {@code Double.NEGATIVE_INFINITY} rather than throwing.</p>
      *
      * @param str the string to extract the double value from.
-     * @param includingScientificNumber whether to include scientific notation in the search for double values.
+     * @param allowScientificNotation if {@code true}, a match may also carry an exponent (for example
+     *        {@code 1.23e4}); plain decimals are matched either way.
      * @return the extracted double value wrapped in an OptionalDouble, or an empty OptionalDouble if no double value is found or if the input string is null/empty.
      * @see #extractFirstDouble(String)
-     * @see #extractFirstDouble(String, double)
-     * @see #extractFirstDouble(String, double, boolean)
-     * @see Strings#extractFirstDouble(String)
-     * @see Strings#extractFirstDouble(String, boolean)
+     * @see #extractFirstDoubleOrElse(String, double)
+     * @see #extractFirstDoubleOrElse(String, double, boolean)
+     * @see Strings#findFirstDouble(String)
+     * @see Strings#findFirstDouble(String, boolean)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
-    public static u.OptionalDouble extractFirstDouble(final String str, final boolean includingScientificNumber) {
+    public static u.OptionalDouble extractFirstDouble(final String str, final boolean allowScientificNotation) {
         if (Strings.isEmpty(str)) {
             return u.OptionalDouble.empty();
         }
 
-        final Matcher matcher = (includingScientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
+        final Matcher matcher = (allowScientificNotation ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
 
         if (matcher.find()) {
             return u.OptionalDouble.of(Double.parseDouble(matcher.group(1)));
@@ -1806,18 +1830,21 @@ public final class Numbers {
     /**
      * Extracts the first double value from the given string. If no double value is found, it returns the specified default value.
      *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstDouble(String)} to obtain the matched text instead.</p>
+     *
      * <p>This method searches through the provided string to find the first occurrence of a double value.
      * It uses a regular expression pattern to identify decimal number patterns. If no double value is found
      * in the string, the specified default value is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.extractFirstDouble("abc123.45def", 0.0);          // returns 123.45
-     * Numbers.extractFirstDouble("value: -0.00123", 0.0);       // returns -0.00123
-     * Numbers.extractFirstDouble("scientific: 1.23e10", 0.0);   // returns 1.23 (only mantissa extracted)
-     * Numbers.extractFirstDouble("no numbers", 0.0);            // returns 0.0
-     * Numbers.extractFirstDouble("", 0.0);                      // returns 0.0
-     * Numbers.extractFirstDouble(null, 0.0);                    // returns 0.0
+     * Numbers.extractFirstDoubleOrElse("abc123.45def", 0.0);          // returns 123.45
+     * Numbers.extractFirstDoubleOrElse("value: -0.00123", 0.0);       // returns -0.00123
+     * Numbers.extractFirstDoubleOrElse("scientific: 1.23e10", 0.0);   // returns 1.23 (only mantissa extracted)
+     * Numbers.extractFirstDoubleOrElse("no numbers", 0.0);            // returns 0.0
+     * Numbers.extractFirstDoubleOrElse("", 0.0);                      // returns 0.0
+     * Numbers.extractFirstDoubleOrElse(null, 0.0);                    // returns 0.0
      * }</pre>
      *
      * <p><b>Note:</b> Unlike {@link #extractFirstInt(String)} and {@link #extractFirstLong(String)},
@@ -1829,34 +1856,37 @@ public final class Numbers {
      * @return the extracted double value, or the specified default value if no double value is found or if the input string is null/empty.
      * @see #extractFirstDouble(String)
      * @see #extractFirstDouble(String, boolean)
-     * @see #extractFirstDouble(String, double, boolean)
-     * @see Strings#extractFirstDouble(String)
+     * @see #extractFirstDoubleOrElse(String, double, boolean)
+     * @see Strings#findFirstDouble(String)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
-    public static double extractFirstDouble(final String str, final double defaultValue) {
-        return extractFirstDouble(str, defaultValue, false);
+    public static double extractFirstDoubleOrElse(final String str, final double defaultValue) {
+        return extractFirstDoubleOrElse(str, defaultValue, false);
     }
 
     /**
      * Extracts the first double value from the given string. If no double value is found, it returns the specified default value.
      *
+     * <p>The result is the parsed <i>value</i>, not the matched text. Use
+     * {@link Strings#findFirstDouble(String, boolean)} to obtain the matched text instead.</p>
+     *
      * <p>This method searches through the provided string to find the first occurrence of a double value.
-     * It uses a regular expression pattern to identify decimal number patterns. If {@code includingScientificNumber}
+     * It uses a regular expression pattern to identify decimal number patterns. If {@code allowScientificNotation}
      * is set to {@code true}, it will also consider scientific notation (e.g., 1.23e10) as valid double values.
      * If no double value is found in the string, the specified default value is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.extractFirstDouble("abc123.45def", 0.0, false);          // returns 123.45
-     * Numbers.extractFirstDouble("value: -0.00123", 0.0, false);       // returns -0.00123
-     * Numbers.extractFirstDouble("scientific: 1.23e10", 0.0, false);   // returns 1.23 (only mantissa extracted)
-     * Numbers.extractFirstDouble("scientific: 1.23e10", 0.0, true);    // returns 1.23e10
-     * Numbers.extractFirstDouble("no numbers", 0.0, false);            // returns 0.0
-     * Numbers.extractFirstDouble("", 0.0, false);                      // returns 0.0
-     * Numbers.extractFirstDouble(null, 0.0, false);                    // returns 0.0
+     * Numbers.extractFirstDoubleOrElse("abc123.45def", 0.0, false);          // returns 123.45
+     * Numbers.extractFirstDoubleOrElse("value: -0.00123", 0.0, false);       // returns -0.00123
+     * Numbers.extractFirstDoubleOrElse("scientific: 1.23e10", 0.0, false);   // returns 1.23 (only mantissa extracted)
+     * Numbers.extractFirstDoubleOrElse("scientific: 1.23e10", 0.0, true);    // returns 1.23e10
+     * Numbers.extractFirstDoubleOrElse("no numbers", 0.0, false);            // returns 0.0
+     * Numbers.extractFirstDoubleOrElse("", 0.0, false);                      // returns 0.0
+     * Numbers.extractFirstDoubleOrElse(null, 0.0, false);                    // returns 0.0
      * }</pre>
      *
      * <p><b>Note:</b> Unlike {@link #extractFirstInt(String)} and {@link #extractFirstLong(String)},
@@ -1865,24 +1895,25 @@ public final class Numbers {
      *
      * @param str the string to extract the double value from.
      * @param defaultValue the default value to return if no double value is found.
-     * @param includingScientificNumber whether to include scientific notation in the search for double values.
+     * @param allowScientificNotation if {@code true}, a match may also carry an exponent (for example
+     *        {@code 1.23e4}); plain decimals are matched either way.
      * @return the extracted double value, or the specified default value if no double value is found or if the input string is null/empty.
      * @see #extractFirstDouble(String)
      * @see #extractFirstDouble(String, boolean)
-     * @see #extractFirstDouble(String, double)
-     * @see Strings#extractFirstDouble(String)
-     * @see Strings#extractFirstDouble(String, boolean)
+     * @see #extractFirstDoubleOrElse(String, double)
+     * @see Strings#findFirstDouble(String)
+     * @see Strings#findFirstDouble(String, boolean)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
-    public static double extractFirstDouble(final String str, final double defaultValue, final boolean includingScientificNumber) {
+    public static double extractFirstDoubleOrElse(final String str, final double defaultValue, final boolean allowScientificNotation) {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
 
-        final Matcher matcher = (includingScientificNumber ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
+        final Matcher matcher = (allowScientificNotation ? RegExUtil.SCIENTIFIC_NUMBER_FINDER : RegExUtil.NUMBER_FINDER).matcher(str);
 
         if (matcher.find()) {
             return Double.parseDouble(matcher.group(1));
@@ -2007,7 +2038,9 @@ public final class Numbers {
     }
 
     /**
-     * Parses {@code str} as a base-10 integer and returns its value if it lies within {@code [min, max]}.
+     * Parses {@code str} as an integer and returns its value if it lies within {@code [min, max]}.
+     * Decimal input is parsed directly; supported prefixed integer forms (for example {@code 0xFF})
+     * are handled through {@link #createBigInteger(String)}.
      * A string that is a valid integer but out of the {@code [min, max]} range (or beyond the {@code long}
      * range) throws {@code ArithmeticException} ("&lt;typeName&gt; overflow: ..."); a string that is not a
      * valid integer throws {@code NumberFormatException}. This lets the integer {@code toByte/toShort/toInt/
@@ -3160,6 +3193,7 @@ public final class Numbers {
      *
      * @param value the {@code Float} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
+     * @throws NumberFormatException if {@code value} is {@code NaN} or infinite.
      */
     public static BigDecimal toScaledBigDecimal(final Float value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -3188,6 +3222,7 @@ public final class Numbers {
      * @param roundingMode the rounding mode to use; must not be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
+     * @throws NumberFormatException if {@code value} is {@code NaN} or infinite.
      */
     public static BigDecimal toScaledBigDecimal(final Float value, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
@@ -3225,6 +3260,7 @@ public final class Numbers {
      *
      * @param value the {@code Double} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
+     * @throws NumberFormatException if {@code value} is {@code NaN} or infinite.
      */
     public static BigDecimal toScaledBigDecimal(final Double value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -3251,6 +3287,7 @@ public final class Numbers {
      * @param roundingMode the rounding mode to use; must not be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
+     * @throws NumberFormatException if {@code value} is {@code NaN} or infinite.
      */
     public static BigDecimal toScaledBigDecimal(final Double value, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
@@ -3372,11 +3409,14 @@ public final class Numbers {
      * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
      * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
      * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
-     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
-     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
-     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
-     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
-     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}. Java hexadecimal
+     * floating-point syntax (for example {@code 0x1.0p3}) is accepted, while integer-style hexadecimal such as
+     * {@code 0xFF} is rejected, and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses
+     * arbitrary-precision decimal/exponent forms (no hexadecimal). {@code createNumber} selects
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} for integral forms and
+     * {@code Double}&rarr;{@code BigDecimal} for unsuffixed decimal/exponent forms; an explicit {@code f}/{@code F}
+     * suffix may select {@code Float}. It honours {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes.
+     * For every method {@code null} returns
      * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
      *
      * <table border="1">
@@ -3444,11 +3484,14 @@ public final class Numbers {
      * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
      * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
      * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
-     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
-     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
-     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
-     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
-     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}. Java hexadecimal
+     * floating-point syntax (for example {@code 0x1.0p3}) is accepted, while integer-style hexadecimal such as
+     * {@code 0xFF} is rejected, and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses
+     * arbitrary-precision decimal/exponent forms (no hexadecimal). {@code createNumber} selects
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} for integral forms and
+     * {@code Double}&rarr;{@code BigDecimal} for unsuffixed decimal/exponent forms; an explicit {@code f}/{@code F}
+     * suffix may select {@code Float}. It honours {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes.
+     * For every method {@code null} returns
      * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
      *
      * <table border="1">
@@ -3517,11 +3560,14 @@ public final class Numbers {
      * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
      * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
      * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
-     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
-     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
-     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
-     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
-     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}. Java hexadecimal
+     * floating-point syntax (for example {@code 0x1.0p3}) is accepted, while integer-style hexadecimal such as
+     * {@code 0xFF} is rejected, and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses
+     * arbitrary-precision decimal/exponent forms (no hexadecimal). {@code createNumber} selects
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} for integral forms and
+     * {@code Double}&rarr;{@code BigDecimal} for unsuffixed decimal/exponent forms; an explicit {@code f}/{@code F}
+     * suffix may select {@code Float}. It honours {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes.
+     * For every method {@code null} returns
      * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
      *
      * <table border="1">
@@ -3580,11 +3626,14 @@ public final class Numbers {
      * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
      * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
      * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
-     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
-     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
-     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
-     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
-     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}. Java hexadecimal
+     * floating-point syntax (for example {@code 0x1.0p3}) is accepted, while integer-style hexadecimal such as
+     * {@code 0xFF} is rejected, and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses
+     * arbitrary-precision decimal/exponent forms (no hexadecimal). {@code createNumber} selects
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} for integral forms and
+     * {@code Double}&rarr;{@code BigDecimal} for unsuffixed decimal/exponent forms; an explicit {@code f}/{@code F}
+     * suffix may select {@code Float}. It honours {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes.
+     * For every method {@code null} returns
      * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
      *
      * <table border="1">
@@ -3650,11 +3699,14 @@ public final class Numbers {
      * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
      * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
      * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
-     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
-     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
-     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
-     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
-     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}. Java hexadecimal
+     * floating-point syntax (for example {@code 0x1.0p3}) is accepted, while integer-style hexadecimal such as
+     * {@code 0xFF} is rejected, and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses
+     * arbitrary-precision decimal/exponent forms (no hexadecimal). {@code createNumber} selects
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} for integral forms and
+     * {@code Double}&rarr;{@code BigDecimal} for unsuffixed decimal/exponent forms; an explicit {@code f}/{@code F}
+     * suffix may select {@code Float}. It honours {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes.
+     * For every method {@code null} returns
      * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
      *
      * <table border="1">
@@ -3753,11 +3805,14 @@ public final class Numbers {
      * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
      * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
      * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
-     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
-     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
-     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
-     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
-     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}. Java hexadecimal
+     * floating-point syntax (for example {@code 0x1.0p3}) is accepted, while integer-style hexadecimal such as
+     * {@code 0xFF} is rejected, and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses
+     * arbitrary-precision decimal/exponent forms (no hexadecimal). {@code createNumber} selects
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} for integral forms and
+     * {@code Double}&rarr;{@code BigDecimal} for unsuffixed decimal/exponent forms; an explicit {@code f}/{@code F}
+     * suffix may select {@code Float}. It honours {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes.
+     * For every method {@code null} returns
      * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
      *
      * <table border="1">
@@ -3861,11 +3916,14 @@ public final class Numbers {
      * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
      * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
      * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
-     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
-     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
-     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
-     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
-     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}. Java hexadecimal
+     * floating-point syntax (for example {@code 0x1.0p3}) is accepted, while integer-style hexadecimal such as
+     * {@code 0xFF} is rejected, and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses
+     * arbitrary-precision decimal/exponent forms (no hexadecimal). {@code createNumber} selects
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} for integral forms and
+     * {@code Double}&rarr;{@code BigDecimal} for unsuffixed decimal/exponent forms; an explicit {@code f}/{@code F}
+     * suffix may select {@code Float}. It honours {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes.
+     * For every method {@code null} returns
      * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
      *
      * <table border="1">
@@ -4107,16 +4165,18 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Comparison of {@code isCreatable}, {@code isParsable} and {@code isDigits}:</b> the three predicates accept
-     * progressively different forms of numeric string:</p>
+     * different forms of numeric string:</p>
      * <ul>
      *   <li>{@code isDigits} &mdash; <i>digit characters only</i>: every character must be a Unicode digit; no sign,
      *       decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix (but non-ASCII digits ARE accepted).</li>
-     *   <li>{@code isParsable} &mdash; what {@code Integer}/{@code Long}/{@code Float}/{@code Double.parseXxx} accept:
-     *       ASCII digits with an optional leading sign and a single decimal point (a leading {@code "."} is allowed, a
-     *       trailing one is not); no hexadecimal, scientific notation, type suffix or non-ASCII digit.</li>
-     *   <li>{@code isCreatable} &mdash; any string {@link #createNumber(String)} can parse: like {@code isParsable} but
-     *       also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a trailing decimal point and
-     *       type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). It is <i>not</i> a strict superset of {@code isParsable}:
+     *   <li>{@code isParsable} &mdash; a deliberately limited decimal grammar: ASCII digits with an optional leading
+     *       sign and a single decimal point (a leading {@code "."} is allowed, a trailing one is not); no hexadecimal,
+     *       scientific notation, type suffix or non-ASCII digit.</li>
+     *   <li>{@code isCreatable} &mdash; a conservative predictor for {@link #createNumber(String)}: like
+     *       {@code isParsable} but also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a
+     *       trailing decimal point and type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). A {@code true} result
+     *       guarantees that {@code createNumber} succeeds, but some parseable strings produce a conservative
+     *       {@code false}. It is <i>not</i> a strict superset of {@code isParsable}:
      *       a leading-zero decimal whose digits include {@code 8} or {@code 9} (e.g. {@code "08"}, {@code "09"}) is accepted
      *       by {@code isParsable} but rejected by {@code isCreatable}, which reads a leading {@code 0} as octal.</li>
      * </ul>
@@ -4141,7 +4201,7 @@ public final class Numbers {
      * @see #isCreatable(String)
      * @see #isParsable(String)
      * @see Strings#isNumeric(CharSequence)
-     * @deprecated Use {@code Strings#isNumeric(CharSequence)} instead
+     * @deprecated replaced by {@link Strings#isNumeric(CharSequence)}
      */
     @Deprecated
     public static boolean isDigits(final String str) {
@@ -4285,6 +4345,17 @@ public final class Numbers {
         alphanumerics['L'] = true;
     }
 
+    /**
+     * Cheap pre-filter shared by {@link #isCreatable(String)}, {@link #createNumber(String)},
+     * {@link #createBigInteger(String)} and {@link #createBigDecimal(String)}: rejects a {@code null}/empty
+     * string, and any string whose first, last or middle character is not one of the ASCII characters that can
+     * appear in a numeric literal (digits, {@code + - . #}, the hexadecimal letters and the {@code x}/{@code l}
+     * type markers). A {@code true} result does not mean the string is numeric; it only means the cheap check
+     * found no disqualifying character.
+     *
+     * @param str the string to pre-check; may be {@code null}
+     * @return {@code false} if {@code str} is definitely not numeric, {@code true} if full parsing is needed
+     */
     static boolean quickCheckForisCreatable(final String str) {
         if (Strings.isEmpty(str)) {
             return false;
@@ -4298,7 +4369,7 @@ public final class Numbers {
     }
 
     /**
-     * <p>Checks whether the String a valid Java number.</p>
+     * <p>Checks whether the String is a valid Java number.</p>
      *
      * <p>Valid numbers include hexadecimal marked with the {@code 0x} or
      * {@code 0X} qualifier, octal numbers, scientific notation and
@@ -4347,16 +4418,18 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Comparison of {@code isCreatable}, {@code isParsable} and {@code isDigits}:</b> the three predicates accept
-     * progressively different forms of numeric string:</p>
+     * different forms of numeric string:</p>
      * <ul>
      *   <li>{@code isDigits} &mdash; <i>digit characters only</i>: every character must be a Unicode digit; no sign,
      *       decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix (but non-ASCII digits ARE accepted).</li>
-     *   <li>{@code isParsable} &mdash; what {@code Integer}/{@code Long}/{@code Float}/{@code Double.parseXxx} accept:
-     *       ASCII digits with an optional leading sign and a single decimal point (a leading {@code "."} is allowed, a
-     *       trailing one is not); no hexadecimal, scientific notation, type suffix or non-ASCII digit.</li>
-     *   <li>{@code isCreatable} &mdash; any string {@link #createNumber(String)} can parse: like {@code isParsable} but
-     *       also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a trailing decimal point and
-     *       type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). It is <i>not</i> a strict superset of {@code isParsable}:
+     *   <li>{@code isParsable} &mdash; a deliberately limited decimal grammar: ASCII digits with an optional leading
+     *       sign and a single decimal point (a leading {@code "."} is allowed, a trailing one is not); no hexadecimal,
+     *       scientific notation, type suffix or non-ASCII digit.</li>
+     *   <li>{@code isCreatable} &mdash; a conservative predictor for {@link #createNumber(String)}: like
+     *       {@code isParsable} but also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a
+     *       trailing decimal point and type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). A {@code true} result
+     *       guarantees that {@code createNumber} succeeds, but some parseable strings produce a conservative
+     *       {@code false}. It is <i>not</i> a strict superset of {@code isParsable}:
      *       a leading-zero decimal whose digits include {@code 8} or {@code 9} (e.g. {@code "08"}, {@code "09"}) is accepted
      *       by {@code isParsable} but rejected by {@code isCreatable}, which reads a leading {@code 0} as octal.</li>
      * </ul>
@@ -4445,7 +4518,7 @@ public final class Numbers {
             }
         }
 
-        len--; // don't want to loop to the last char, check it afterwords
+        len--; // don't want to loop to the last char, check it afterwards
         // for type qualifiers
         int i = start;
         // loop to the next to last char or to the last char if we need another digit to
@@ -4566,16 +4639,18 @@ public final class Numbers {
      * }</pre>
      *
      * <p><b>Comparison of {@code isCreatable}, {@code isParsable} and {@code isDigits}:</b> the three predicates accept
-     * progressively different forms of numeric string:</p>
+     * different forms of numeric string:</p>
      * <ul>
      *   <li>{@code isDigits} &mdash; <i>digit characters only</i>: every character must be a Unicode digit; no sign,
      *       decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix (but non-ASCII digits ARE accepted).</li>
-     *   <li>{@code isParsable} &mdash; what {@code Integer}/{@code Long}/{@code Float}/{@code Double.parseXxx} accept:
-     *       ASCII digits with an optional leading sign and a single decimal point (a leading {@code "."} is allowed, a
-     *       trailing one is not); no hexadecimal, scientific notation, type suffix or non-ASCII digit.</li>
-     *   <li>{@code isCreatable} &mdash; any string {@link #createNumber(String)} can parse: like {@code isParsable} but
-     *       also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a trailing decimal point and
-     *       type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). It is <i>not</i> a strict superset of {@code isParsable}:
+     *   <li>{@code isParsable} &mdash; a deliberately limited decimal grammar: ASCII digits with an optional leading
+     *       sign and a single decimal point (a leading {@code "."} is allowed, a trailing one is not); no hexadecimal,
+     *       scientific notation, type suffix or non-ASCII digit.</li>
+     *   <li>{@code isCreatable} &mdash; a conservative predictor for {@link #createNumber(String)}: like
+     *       {@code isParsable} but also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a
+     *       trailing decimal point and type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). A {@code true} result
+     *       guarantees that {@code createNumber} succeeds, but some parseable strings produce a conservative
+     *       {@code false}. It is <i>not</i> a strict superset of {@code isParsable}:
      *       a leading-zero decimal whose digits include {@code 8} or {@code 9} (e.g. {@code "08"}, {@code "09"}) is accepted
      *       by {@code isParsable} but rejected by {@code isCreatable}, which reads a leading {@code 0} as octal.</li>
      * </ul>
@@ -5044,7 +5119,6 @@ public final class Numbers {
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final long x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
-        // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
         switch (mode) {
             case UNNECESSARY:
@@ -5200,10 +5274,10 @@ public final class Numbers {
      * Numbers.log2(large, RoundingMode.DOWN);      // returns 100  (exact power of 2)
      * }</pre>
      *
-     * @param x the value to compute the logarithm of, must be positive
+     * @param x the value to compute the logarithm of, must be {@code non-null} and positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x} is {@code null} or {@code <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(int, RoundingMode)
@@ -5216,7 +5290,6 @@ public final class Numbers {
     @SuppressWarnings("fallthrough")
     public static int log2(final BigInteger x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
-        // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", N.checkArgNotNull(x));
         final int logFloor = x.bitLength() - 1;
         switch (mode) {
@@ -5344,7 +5417,6 @@ public final class Numbers {
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final long x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
-        // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
 
         final int logFloor = log10Floor(x);
@@ -5411,6 +5483,7 @@ public final class Numbers {
      */
     static final int SQRT2_PRECOMPUTE_THRESHOLD = 256;
 
+    /** The leading {@code SQRT2_PRECOMPUTE_THRESHOLD} bits of {@code sqrt(2)}, used by {@link #log2(BigInteger, RoundingMode)}. */
     static final BigInteger SQRT2_PRECOMPUTED_BITS = new BigInteger("16a09e667f3bcc908b2fb1366ea957d3e3adec17512775099da2f590b0667322a", 16);
 
     /**
@@ -5431,10 +5504,10 @@ public final class Numbers {
      * Numbers.log10(large, RoundingMode.DOWN);     // returns 100  (exact power of 10)
      * }</pre>
      *
-     * @param x the value to compute the logarithm of, must be positive
+     * @param x the value to compute the logarithm of, must be {@code non-null} and positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x} is {@code null} or {@code <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      * @see #log10(int, RoundingMode)
@@ -5510,6 +5583,13 @@ public final class Numbers {
         }
     }
 
+    /**
+     * Returns {@code true} if {@code x} is exactly representable as a {@code long}, i.e. if
+     * {@code x.longValue()} loses no information.
+     *
+     * @param x the value to test; must not be {@code null}
+     * @return {@code true} if {@code x} fits in a {@code long}, {@code false} otherwise
+     */
     static boolean fitsInLong(final BigInteger x) {
         return x.bitLength() <= Long.SIZE - 1;
     }
@@ -6565,7 +6645,7 @@ public final class Numbers {
      * <p>Special cases:
      * <ul>
      * <li>The invocations {@code Numbers.lcm(Integer.MIN_VALUE, n)} and {@code Numbers.lcm(n, Integer.MIN_VALUE)} throw
-     * an {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^31} the {@code true} LCM
+     * an {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^31} the true LCM
      * is at least 2^31, which is too large for an int value (the smallest such case is when {@code Math.abs(n)} is a
      * power of 2, where the result would be exactly 2^31).</li>
      * <li>The result of {@code Numbers.lcm(0, x)} and {@code Numbers.lcm(x, 0)} is {@code 0} for any {@code x}.</li>
@@ -6616,7 +6696,7 @@ public final class Numbers {
      * <p>Special cases:
      * <ul>
      * <li>The invocations {@code Numbers.lcm(Long.MIN_VALUE, n)} and {@code Numbers.lcm(n, Long.MIN_VALUE)} throw an
-     * {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^63} the {@code true} LCM is
+     * {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^63} the true LCM is
      * at least 2^63, which is too large for a long value (the smallest such case is when {@code Math.abs(n)} is a power
      * of 2, where the result would be exactly 2^63).</li>
      * <li>The result of {@code Numbers.lcm(0L, x)} and {@code Numbers.lcm(x, 0L)} is {@code 0L} for any {@code x}.</li>
@@ -7201,7 +7281,7 @@ public final class Numbers {
      * @see #multiplyExact(long, long)
      */
     public static long saturatedMultiply(final long a, final long b) {
-        // see checkedMultiply for explanation
+        // see multiplyExact for explanation
         final int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a) + Long.numberOfLeadingZeros(b) + Long.numberOfLeadingZeros(~b);
         if (leadingZeros > Long.SIZE + 1) {
             return a * b;
@@ -7429,6 +7509,7 @@ public final class Numbers {
      * @return {@code value} constrained to {@code [min, max]}
      * @throws IllegalArgumentException if {@code min > max}
      * @see #clamp(long, long, long)
+     * @see #clamp(float, float, float)
      * @see #clamp(double, double, double)
      */
     public static int clamp(final int value, final int min, final int max) throws IllegalArgumentException {
@@ -7456,6 +7537,7 @@ public final class Numbers {
      * @return {@code value} constrained to {@code [min, max]}
      * @throws IllegalArgumentException if {@code min > max}
      * @see #clamp(int, int, int)
+     * @see #clamp(float, float, float)
      * @see #clamp(double, double, double)
      */
     public static long clamp(final long value, final long min, final long max) throws IllegalArgumentException {
@@ -7522,6 +7604,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code min > max} or either bound is {@code NaN}
      * @see #clamp(int, int, int)
      * @see #clamp(long, long, long)
+     * @see #clamp(float, float, float)
      */
     public static double clamp(final double value, final double min, final double max) throws IllegalArgumentException {
         N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
@@ -7720,10 +7803,26 @@ public final class Numbers {
         return listProduct(bignums).shiftLeft(shift);
     }
 
+    /**
+     * Returns the product of all elements of {@code nums}, or {@link BigInteger#ONE} if the list is empty.
+     *
+     * @param nums the values to multiply; must not be {@code null}
+     * @return the product of every element of {@code nums}
+     */
     static BigInteger listProduct(final List<BigInteger> nums) {
         return listProduct(nums, 0, nums.size());
     }
 
+    /**
+     * Returns the product of {@code nums[start..end)}, or {@link BigInteger#ONE} if the range is empty.
+     * The range is multiplied by recursive halving (balanced multiplies), which is substantially faster than
+     * a left-to-right fold once the intermediate values grow large.
+     *
+     * @param nums the values to multiply; must not be {@code null}
+     * @param start the index of the first element to include (inclusive)
+     * @param end the index after the last element to include (exclusive)
+     * @return the product of the elements in {@code [start, end)}
+     */
     static BigInteger listProduct(final List<BigInteger> nums, final int start, final int end) {
         switch (end - start) {
             case 0:
@@ -7883,7 +7982,7 @@ public final class Numbers {
      *
      * <p>The binomial coefficient represents the number of ways to choose {@code k} items from {@code n} items
      * without regard to order. It is computed exactly (via {@link #binomialToBigInteger(int, int)}) and then
-     * converted to the nearest {@code double}; if the {@code true} result exceeds {@code Double.MAX_VALUE} this method
+     * converted to the nearest {@code double}; if the true result exceeds {@code Double.MAX_VALUE} this method
      * returns {@code Double.POSITIVE_INFINITY}. This is the {@code double}-valued rung of the binomial family,
      * mirroring {@link #factorialToDouble(int)}.</p>
      *
@@ -7898,7 +7997,7 @@ public final class Numbers {
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
      * @return the binomial coefficient C(n, k) as a {@code double}, or {@code Double.POSITIVE_INFINITY}
-     *         if the {@code true} value exceeds {@code Double.MAX_VALUE}
+     *         if the true value exceeds {@code Double.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomial(int, int)
      * @see #binomialToLong(int, int)
@@ -8102,6 +8201,19 @@ public final class Numbers {
         return argument;
     }
 
+    /**
+     * Rounds {@code x} to a mathematical integer, still returned as a {@code double}, using the given mode.
+     * This is the shared first step of {@link #roundToInt(double, RoundingMode)},
+     * {@link #roundToLong(double, RoundingMode)} and {@link #roundToBigInteger(double, RoundingMode)}; those
+     * methods add the range check for their own target type.
+     *
+     * @param x the value to round
+     * @param mode the rounding mode to apply
+     * @return {@code x} rounded to a mathematical integer
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws ArithmeticException if {@code x} is infinite or {@code NaN}, or if {@code mode} is
+     *         {@link RoundingMode#UNNECESSARY} and {@code x} is not already a mathematical integer
+     */
     static double roundIntermediate(final double x, final RoundingMode mode) {
         N.checkArgNotNull(mode);
 
@@ -8322,6 +8434,11 @@ public final class Numbers {
         return N.equals(rounded, DOUBLE_POSITIVE_ZERO) ? DOUBLE_POSITIVE_ZERO * x : rounded;
     }
 
+    /**
+     * Prototype {@link DecimalFormat} instances for the most common patterns. They are never used directly:
+     * {@link #getThreadLocalDecimalFormat(String)} clones one into the calling thread's cache, since
+     * {@code DecimalFormat} is not thread-safe.
+     */
     static final Map<String, DecimalFormat> decimalFormatPool = ImmutableMap.<String, DecimalFormat> builder()
             .put("#", new DecimalFormat("#"))
             .put("#.#", new DecimalFormat("#.#"))
@@ -8482,7 +8599,8 @@ public final class Numbers {
      * @param x the float value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
      * @return the rounded float value; {@code NaN} and infinite values are returned unchanged
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}, or if the text it produces
+     *         for {@code x} cannot be parsed back by the same formatter
      * @see java.text.DecimalFormat#format(double)
      * @see #round(float, String)
      * @see #round(float, int)
@@ -8531,7 +8649,8 @@ public final class Numbers {
      * @param x the double value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
      * @return the rounded double value; {@code NaN} and infinite values are returned unchanged
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}, or if the text it produces
+     *         for {@code x} cannot be parsed back by the same formatter
      * @see java.text.DecimalFormat#format(double)
      * @see #round(double, String)
      * @see #round(double, int)
@@ -8667,13 +8786,15 @@ public final class Numbers {
         return (x < 0) ? result.negate() : result;
     }
 
+    /** The largest {@code n} for which {@code n!} is finite as a {@code double}; {@code 171!} overflows to infinity. */
     static final int MAX_FACTORIAL = 170;
 
+    /** {@code everySixteenthFactorial[i] == (16 * i)!} as a {@code double}, used by {@link #factorialToDouble(int)}. */
     static final double[] everySixteenthFactorial = { 0x1.0p0, 0x1.30777758p44, 0x1.956ad0aae33a4p117, 0x1.ee69a78d72cb6p202, 0x1.fe478ee34844ap295,
             0x1.c619094edabffp394, 0x1.3638dd7bd6347p498, 0x1.7cac197cfe503p605, 0x1.1e5dfc140e1e5p716, 0x1.8ce85fadb707ep829, 0x1.95d5f3d928edep945 };
 
     /**
-     * Compares two float values for approximate equality within a specified tolerance.
+     * Returns {@code true} if {@code a} and {@code b} are within {@code tolerance} of each other.
      *
      * <p>Technically speaking, this is equivalent to
      * {@code Math.abs(a - b) <= tolerance || Float.valueOf(a).equals(Float.valueOf(b))}.
@@ -8690,10 +8811,16 @@ public final class Numbers {
      *     Float.NEGATIVE_INFINITY} are fuzzily equal only to themselves.
      * </ul>
      *
+     * <p>This is reflexive and symmetric, but <em>not</em> transitive, so it is <em>not</em> an
+     * equivalence relation and <em>not</em> suitable for use in {@link Object#equals}
+     * implementations.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.fuzzyEquals(1.0001f, 1.0002f, 0.001f);   // returns true  (within tolerance)
-     * Numbers.fuzzyEquals(1.0f, 1.1f, 0.01f);          // returns false (exceeds tolerance)
+     * Numbers.fuzzyEquals(1.0001f, 1.0002f, 0.001f);    // returns true  (within tolerance)
+     * Numbers.fuzzyEquals(1.0f, 1.1f, 0.01f);           // returns false (exceeds tolerance)
+     * Numbers.fuzzyEquals(0.0f, -0.0f, 0.0f);           // returns true  (positive and negative zero are equal)
+     * Numbers.fuzzyEquals(Float.NaN, Float.NaN, 0.1f);  // returns true  (all NaNs are fuzzily equal)
      * }</pre>
      *
      * @param a the first float value to compare
@@ -8756,6 +8883,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      * @see #fuzzyEquals(float, float, float)
      * @see #fuzzyCompare(double, double, double)
+     * @see Double#compare(double, double)
      */
     public static boolean fuzzyEquals(final double a, final double b, final double tolerance) {
         // Check that tolerance is valid (non-negative and not NaN)
@@ -8888,6 +9016,13 @@ public final class Numbers {
         return (int) ((x - y) >>> (Long.SIZE - 1));
     }
 
+    /**
+     * Returns {@code floor(log10(x))} for a positive {@code x}. The caller is responsible for checking that
+     * {@code x > 0}; the result is unspecified otherwise.
+     *
+     * @param x the value to take the base-10 logarithm of; must be positive
+     * @return the largest {@code n} such that {@code 10^n <= x}
+     */
     static int log10Floor(final long x) {
         /*
          * Based on Hacker's Delight Fig. 11-5, the two-table-lookup, branch-free implementation.
@@ -8924,10 +9059,24 @@ public final class Numbers {
         return x * (numerator / denominator); //NOSONAR
     }
 
+    /**
+     * Returns the {@code double} value adjacent to {@code d} in the direction of negative infinity.
+     *
+     * @param d the starting value
+     * @return the largest {@code double} strictly less than {@code d}
+     */
     static double nextDown(final double d) {
         return -Math.nextUp(-d);
     }
 
+    /**
+     * Returns the significand (mantissa) of {@code d} as a {@code long}, with the implicit leading bit
+     * restored for a normal value and the bits shifted left by one for a subnormal value.
+     *
+     * @param d the value to take the significand of; must be finite
+     * @return the significand of {@code d}
+     * @throws IllegalArgumentException if {@code d} is infinite or {@code NaN}
+     */
     static long getSignificand(final double d) {
         N.checkArgument(isFinite(d), "not a normal value");
         final int exponent = getExponent(d);
@@ -8936,26 +9085,46 @@ public final class Numbers {
         return (exponent == MIN_EXPONENT - 1) ? bits << 1 : bits | IMPLICIT_BIT;
     }
 
-    // These values were generated by using checkedMultiply to see when the simple multiply/divide
-    // algorithm would lead to an overflow.
-
+    /**
+     * Returns {@code true} if {@code d} is neither infinite nor {@code NaN}.
+     *
+     * @param d the value to test
+     * @return {@code true} if {@code d} is a finite value
+     */
     static boolean isFinite(final double d) {
         return getExponent(d) <= MAX_EXPONENT;
     }
 
+    /**
+     * Returns {@code true} if {@code d} is a normal (i.e. non-zero, non-subnormal, finite) value.
+     *
+     * @param d the value to test
+     * @return {@code true} if {@code d} is normal
+     */
     static boolean isNormal(final double d) {
         return getExponent(d) >= MIN_EXPONENT;
     }
 
-    /*
-     * Returns x scaled by a power of 2 such that it is in the range [1, 2). Assumes x is positive,
-     * normal, and finite.
+    /**
+     * Returns {@code x} scaled by a power of two so that the result lies in {@code [1, 2)}. Assumes
+     * {@code x} is positive, normal and finite; the result is unspecified otherwise.
+     *
+     * @param x the value to scale
+     * @return {@code x} scaled into {@code [1, 2)}
      */
     static double scaleNormalize(final double x) {
         final long significand = doubleToRawLongBits(x) & SIGNIFICAND_MASK;
         return longBitsToDouble(significand | ONE_BITS);
     }
 
+    /**
+     * Returns {@code x} as a {@code double}, rounded half-even, saturating to {@code ±Infinity} when the
+     * magnitude exceeds {@code Double.MAX_VALUE}. Equivalent in result to {@link BigInteger#doubleValue()},
+     * but faster.
+     *
+     * @param x the value to convert; must not be {@code null}
+     * @return {@code x} as the nearest {@code double}
+     */
     static double bigToDouble(final BigInteger x) {
         // This is an extremely fast implementation of BigInteger.doubleValue(). JDK patch pending.
         final BigInteger absX = x.abs();
@@ -9010,18 +9179,38 @@ public final class Numbers {
         return Math.max(value, 0.0);
     }
 
+    /**
+     * Returns 1 if {@code x < y} as signed ints, and 0 otherwise. Assumes that {@code x - y} does not
+     * overflow. The implementation is branch-free.
+     *
+     * @param x the first value
+     * @param y the second value
+     * @return 1 if {@code x} is less than {@code y}, 0 otherwise
+     */
     static int lessThanBranchFree(final int x, final int y) {
         // Returns the sign bit of x - y.
         return (x - y) >>> (Integer.SIZE - 1);
     }
 
-    // These values were generated by using checkedMultiply to see when the simple multiply/divide
-    // algorithm would lead to an overflow.
-
+    /**
+     * Returns {@code true} if {@code x} is exactly representable as an {@code int}, i.e. if casting it to
+     * {@code int} loses no information.
+     *
+     * @param x the value to test
+     * @return {@code true} if {@code x} fits in an {@code int}, {@code false} otherwise
+     */
     static boolean fitsInInt(final long x) {
         return (int) x == x;
     }
 
+    /**
+     * Returns {@code x} if it is positive; otherwise throws.
+     *
+     * @param role the parameter name to report in the exception message
+     * @param x the value to check
+     * @return {@code x}
+     * @throws IllegalArgumentException if {@code x <= 0}
+     */
     static int checkPositive(final String role, final int x) {
         if (x <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
@@ -9029,6 +9218,14 @@ public final class Numbers {
         return x;
     }
 
+    /**
+     * Returns {@code x} if it is positive; otherwise throws.
+     *
+     * @param role the parameter name to report in the exception message
+     * @param x the value to check
+     * @return {@code x}
+     * @throws IllegalArgumentException if {@code x <= 0}
+     */
     static long checkPositive(final String role, final long x) {
         if (x <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
@@ -9036,6 +9233,14 @@ public final class Numbers {
         return x;
     }
 
+    /**
+     * Returns {@code x} if it is positive; otherwise throws.
+     *
+     * @param role the parameter name to report in the exception message
+     * @param x the value to check; must not be {@code null}
+     * @return {@code x}
+     * @throws IllegalArgumentException if {@code x <= 0}
+     */
     static BigInteger checkPositive(final String role, final BigInteger x) {
         if (x.signum() <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
@@ -9043,6 +9248,14 @@ public final class Numbers {
         return x;
     }
 
+    /**
+     * Returns {@code x} if it is non-negative; otherwise throws.
+     *
+     * @param role the parameter name to report in the exception message
+     * @param x the value to check
+     * @return {@code x}
+     * @throws IllegalArgumentException if {@code x < 0}
+     */
     static int checkNonNegative(final String role, final int x) {
         if (x < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -9050,6 +9263,14 @@ public final class Numbers {
         return x;
     }
 
+    /**
+     * Returns {@code x} if it is non-negative; otherwise throws.
+     *
+     * @param role the parameter name to report in the exception message
+     * @param x the value to check
+     * @return {@code x}
+     * @throws IllegalArgumentException if {@code x < 0}
+     */
     static long checkNonNegative(final String role, final long x) {
         if (x < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -9057,6 +9278,14 @@ public final class Numbers {
         return x;
     }
 
+    /**
+     * Returns {@code x} if it is non-negative; otherwise throws.
+     *
+     * @param role the parameter name to report in the exception message
+     * @param x the value to check; must not be {@code null}
+     * @return {@code x}
+     * @throws IllegalArgumentException if {@code x < 0}
+     */
     static BigInteger checkNonNegative(final String role, final BigInteger x) {
         if (x.signum() < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -9064,6 +9293,14 @@ public final class Numbers {
         return x;
     }
 
+    /**
+     * Returns {@code x} if it is non-negative; otherwise throws. {@code NaN} is rejected as well.
+     *
+     * @param role the parameter name to report in the exception message
+     * @param x the value to check
+     * @return {@code x}
+     * @throws IllegalArgumentException if {@code x < 0} or {@code x} is {@code NaN}
+     */
     static double checkNonNegative(final String role, final double x) {
         if (!(x >= 0)) { // not x < 0, to work with NaN. //NOSONAR
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -9071,18 +9308,37 @@ public final class Numbers {
         return x;
     }
 
+    /**
+     * Throws if {@code condition} is {@code false}, reporting that {@link RoundingMode#UNNECESSARY} was
+     * requested for a value that cannot be represented exactly.
+     *
+     * @param condition {@code true} if no rounding is needed
+     * @throws ArithmeticException if {@code condition} is {@code false}
+     */
     static void checkRoundingUnnecessary(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("mode was UNNECESSARY, but rounding was necessary");
         }
     }
 
+    /**
+     * Throws if {@code condition} is {@code false}, reporting that a value falls outside the target range.
+     *
+     * @param condition {@code true} if the value is in range
+     * @throws ArithmeticException if {@code condition} is {@code false}
+     */
     static void checkInRange(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("not in range");
         }
     }
 
+    /**
+     * Throws if {@code condition} is {@code false}, reporting an arithmetic overflow.
+     *
+     * @param condition {@code true} if no overflow occurred
+     * @throws ArithmeticException if {@code condition} is {@code false}
+     */
     static void checkNoOverflow(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("overflow");
@@ -9256,14 +9512,15 @@ public final class Numbers {
     }
 
     /**
-     * The Class UnsignedLongs.
+     * Helpers that reinterpret a {@code long} as an unsigned 64-bit quantity, used by the Miller-Rabin
+     * primality test in {@link Numbers#isPrime(long)}.
      */
     static final class UnsignedLongs {
 
         private UnsignedLongs() {
         }
 
-        /** The Constant MAX_VALUE. */
+        /** The largest unsigned 64-bit value, {@code 2^64 - 1}, held in the bit pattern of {@code -1L}. */
         public static final long MAX_VALUE = -1L; // Equivalent to 2^64 - 1
 
         /**

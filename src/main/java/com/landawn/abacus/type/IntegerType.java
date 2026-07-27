@@ -34,7 +34,7 @@ import com.landawn.abacus.util.Numbers;
 public final class IntegerType extends AbstractIntegerType {
 
     /**
-     * The type name constant for Integer type identification.
+     * The type name constant for Integer type identification, equal to {@code "Integer"}.
      */
     public static final String INTEGER = Integer.class.getSimpleName();
 
